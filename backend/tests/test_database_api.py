@@ -564,3 +564,107 @@ def test_change_webhook_fires_when_configured(client, monkeypatch):
         time.sleep(0.05)
     assert hits and hits[0]["event"] == "database_change"
     assert hits[0]["action"] == "add" and "ISL->TUV" in hits[0]["route"]
+
+
+def test_operator_edit_patches_one_visa_product_in_place(client, tmp_path,
+                                                         monkeypatch):
+    """Editing the row the operator sees: a product patch names the product
+    and merges into the served product list, leaving its siblings alone."""
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES",
+                       str(tmp_path / "operator_overrides.json"))
+    from app.visa_snapshot import verified_overrides
+    verified_overrides.reload()
+    _provide(dict(ANSWER, visa_products=[
+        {"type": "Tourist single", "entry": "single", "validity": None,
+         "max_stay_days": 30, "fee": {"amount": 25, "currency": "USD"}},
+        {"type": "Tourist multiple", "entry": "multiple", "validity": "1 year",
+         "max_stay_days": 30, "fee": {"amount": 60, "currency": "USD"}},
+    ]))
+    client.post("/database/lookup", headers=READER,
+                json={"nationality": "ISL", "destination": "NIU"})
+    edit = {"nationality": "ISL", "destination": "NIU",
+            "travel_purpose": "tourism", "fields": {},
+            "product_patch": {"visa_type_name": "Tourist single",
+                              "validity": "3 months", "fee_amount": 30},
+            "source_url": "https://www.mofa.go.jp/fee-page",
+            "note": "validity and fee per the official schedule"}
+    ok = client.post("/database/records/edit", headers=OTHER_ORG_ADMIN,
+                     json=edit).json()
+    assert ok["ok"] and "visa_products" in ok["fields"]
+    again = client.post("/database/lookup", headers=READER,
+                        json={"nationality": "ISL", "destination": "NIU"}).json()
+    prods = {p["type"]: p for p in again["guidance"]["visa_products"]}
+    assert prods["Tourist single"]["validity"] == "3 months"
+    assert prods["Tourist single"]["fee"]["amount"] == 30
+    assert prods["Tourist multiple"]["fee"]["amount"] == 60   # untouched
+    # A patch naming a product that does not exist is refused loudly.
+    bad = dict(edit, product_patch={"visa_type_name": "No such visa",
+                                    "validity": "1 year"})
+    assert client.post("/database/records/edit", headers=OTHER_ORG_ADMIN,
+                       json=bad).status_code == 422
+    verified_overrides.reload()
+
+
+def test_clarify_turns_are_conversational_but_never_numeric(client):
+    """A turn with no readable route still gets a composed, on-topic reply
+    (the tester who wrote "i dont have a passport" saw the same canned line
+    twice). A composed clarify carrying an invented number is discarded for
+    the deterministic line, exactly like the answer composer."""
+    def model(system, user):
+        if "route is not fully known" in system:
+            return {"reply": "You will need a valid passport before any visa "
+                             "can be issued. Tell me which country would "
+                             "issue it and where you want to go."}
+        return {"understood": False}
+    kimi_primary.set_provider(model)
+    out = client.post("/database/ask", headers=READER,
+                      json={"question": "i dont have a passport",
+                            "history": [{"role": "user",
+                                         "text": "do i need a visa"}]}).json()
+    assert out["understood"] is False
+    assert "valid passport before" in out["clarify"]
+    def numeric_model(system, user):
+        if "route is not fully known" in system:
+            return {"reply": "A passport costs 145 dollars and takes 6 weeks."}
+        return {"understood": False}
+    kimi_primary.set_provider(numeric_model)
+    out2 = client.post("/database/ask", headers=READER,
+                       json={"question": "i dont have a passport"}).json()
+    assert out2["understood"] is False
+    assert "145" not in out2["clarify"]
+    assert out2["clarify"]                     # the deterministic line stands
+
+
+def test_the_passport_never_changes_mid_conversation(client):
+    """"Can i go to japan from china" then "what if i wanna go from japan to
+    france afterwards": the second "from japan" is a departure point, not a
+    new passport. Only explicit passport words switch the nationality."""
+    def model(system, user):
+        if "route is not fully known" in system:
+            return {"reply": "ok"}
+        u = str(user)
+        if "france" in u.lower():
+            return {"understood": True, "nationality": "JPN",
+                    "destination": "FRA", "travel_purpose": "tourism",
+                    "travel_document_type": "ordinary_passport",
+                    "transit_countries": [], "focus": None}
+        return {"understood": True, "nationality": "CHN",
+                "destination": "JPN", "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport",
+                "transit_countries": [], "focus": None}
+    kimi_primary.set_provider(model)
+    out = client.post("/database/ask", headers=READER,
+                      json={"question": "what if i wanna go from japan to "
+                                        "france afterwards",
+                            "context": {"nationality": "CHN",
+                                        "destination": "JPN",
+                                        "travel_purpose": "tourism"}}).json()
+    assert (out["route"]["nationality"],
+            out["route"]["destination"]) == ("CHN", "FRA")
+    # Saying the passport out loud DOES switch it.
+    out2 = client.post("/database/ask", headers=READER,
+                       json={"question": "with a japanese passport from "
+                                         "japan to france",
+                             "context": {"nationality": "CHN",
+                                         "destination": "JPN"}}).json()
+    assert out2["route"]["nationality"] == "JPN"

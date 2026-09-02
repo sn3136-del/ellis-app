@@ -221,7 +221,7 @@ def compose_reply(question: str, history: list | None, out: dict) -> str | None:
     try:
         raw = kimi_primary._call(_SYSTEM,
                                  json.dumps(payload, ensure_ascii=False),
-                                 timeout=18.0, max_tokens=1200)
+                                 timeout=10.0, max_tokens=1200)
     except Exception:  # noqa: BLE001 - the fallback summary always exists
         return None
     reply = raw.get("reply") if isinstance(raw, dict) else None
@@ -240,6 +240,64 @@ def compose_reply(question: str, history: list | None, out: dict) -> str | None:
     if not used.issubset(allowed):
         return None
     # House style and identity discipline, enforced after the fact too.
+    reply = reply.replace("—", ". ").replace(";", ".")
+    if re.search(r"\b(kimi|moonshot|gpt|claude|llm|language model)\b",
+                 reply, re.I):
+        return None
+    return reply or None
+
+
+_CLARIFY_SYSTEM = """You are Ellis, the visa assistant on a travel site.
+The traveller's route is not fully known yet. Write ONE short, warm reply
+(1 to 3 short sentences) that responds to what the traveller just said and
+asks for exactly what is still missing.
+Hard rules:
+- KNOWN lists what is already known, MISSING what you still need (the
+  passport country, the destination, or both). Ask only for what is
+  missing, and never re-ask what KNOWN already answers.
+- You may answer a general immigration point briefly and truthfully, but
+  NEVER state a number: no fees, no day counts, no dates. The exact rules
+  come once the route is known.
+- If the question is not about immigration, entry rules or travel, reply
+  exactly: Sorry, I can only help with immigration matters.
+  For a Chinese question: 抱歉，我只能协助出入境相关事务。
+- If asked your name or what you are, you are Ellis. Never mention AI,
+  models, providers or internal systems.
+- Reply in the language of the question. No em dashes. No semicolons.
+Return JSON: {"reply": "..."}"""
+
+
+def compose_clarify(question: str, history: list | None, known: dict,
+                    missing: list[str]) -> str | None:
+    """A conversational ask for the missing route facts, or None to keep
+    the deterministic clarify line. Same guards as the answer composer: a
+    reply may not carry a single digit of its own, so nothing numeric can
+    be invented on a turn that has no verified facts at all."""
+    from . import kimi_primary
+    turns = []
+    for h in (history or [])[-8:]:
+        role = "traveller" if (h.get("role") == "user") else "ellis"
+        text = str(h.get("text") or "")[:300]
+        if text:
+            turns.append(f"{role}: {text}")
+    payload = {"question": str(question or "")[:500], "conversation": turns,
+               "known": {k: v for k, v in (known or {}).items() if v},
+               "missing": missing}
+    try:
+        raw = kimi_primary._call(_CLARIFY_SYSTEM,
+                                 json.dumps(payload, ensure_ascii=False),
+                                 timeout=10.0, max_tokens=700)
+    except Exception:  # noqa: BLE001 - the deterministic line always exists
+        return None
+    reply = raw.get("reply") if isinstance(raw, dict) else None
+    if not reply or not isinstance(reply, str):
+        return None
+    reply = reply.strip()[:500]
+    if len(reply) < 8:
+        return None
+    allowed = set(re.findall(r"\d+", json.dumps(payload, ensure_ascii=False)))
+    if not set(re.findall(r"\d+", reply)).issubset(allowed):
+        return None
     reply = reply.replace("—", ". ").replace(";", ".")
     if re.search(r"\b(kimi|moonshot|gpt|claude|llm|language model)\b",
                  reply, re.I):

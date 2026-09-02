@@ -79,10 +79,13 @@
 <p class="en">The flag form at the bottom of the card files a field-level issue straight into the correction queue.</p>
 
 <h2>2b. 新增线路与编辑字段 <span class="en">Adding routes and editing fields</span></h2>
-<p>Records 页的「新增线路」卡片让运营自行加入任意国家组合：选择护照、目的地、出行目的与证件类型，点一次按钮。已有线路即时返回，全新线路约一分钟内作答并进入记录列表，列表自动筛选到该线路。低置信度的新答案会先拦截，经核对官方来源后展示。</p>
-<p class="en">The Add a route card on the Records tab lets operations add any country pair themselves: pick the passport, destination, purpose and document, and press once. Known routes return instantly, brand new ones answer within about a minute and join the record list, already filtered into view. A low-confidence new answer is held until checked against the official source.</p>
-<p>展开任意记录，点「编辑字段」可直接修改该线路：只填想改的字段（停留、费用、办理时长、材料、注意事项等），并必须附上支持本次修改的官方页面网址与说明。保存即生效，下一位读者立刻看到修改后的值，修改人、日期与来源随记录展示，变更记录同步留痕。非官方域名的来源会被拒绝。</p>
-<p class="en">Expand any record and press Edit fields to change the route directly: fill only the fields to change, and attach the official page URL that backs the edit plus a note. Saving takes effect immediately for the next reader, with the editor, date and source shown on the record and an entry written to the change log. A non-government source URL is refused.</p>
+<p>Records 页的「新增线路」卡片提供三种方式，携程运营可自行选择：</p>
+<p class="en">The Add a route card on the Records tab offers three ways in, and Trip.com operations choose per case:</p>
+<div class="step"><b>1</b><span>引擎作答。选护照、目的地、目的与证件，点一次按钮。已有线路即时返回，全新线路约一分钟内作答并进入记录列表。低置信度新答案先拦截，核对官方来源后展示。<br>Engine answer. Pick the route and press once. Known routes return instantly, new ones answer within about a minute. A low-confidence answer is held until checked.</span></div>
+<div class="step"><b>2</b><span>AI 官方来源研究。由 Kimi K3 驱动，对照该线路的官方页面重新核验，返回一致或需修正的字段清单，修正自动写入并留痕。<br>AI research. Kimi K3 rechecks the route against its official pages and reports consistent or corrected fields; corrections are written and logged automatically.</span></div>
+<div class="step"><b>3</b><span>人工录入。切换「手动填写」，运营自己逐项输入费用、停留、办理时长、材料等字段，必须附官方来源网址与说明。保存后立即对读者生效，来源标注为携程运营。<br>Manual entry. Switch to manual and type the fields yourself: fee, stay, processing, documents. An official source URL and a note are required. It serves immediately, with Trip.com operations shown as the provenance.</span></div>
+<p>展开任意记录，点「编辑字段」可直接修改该线路。表单按「费用 / 停留与效期 / 办理」分组，预填当前值，改动的输入框以蓝色标出，按钮实时显示「保存 N 处修改」，可一键撤销。仍必须附上支持本次修改的官方页面网址与说明；保存即生效，修改人、日期与来源随记录展示，变更记录同步留痕。非官方域名的来源会被拒绝。</p>
+<p class="en">Expand any record and press Edit fields to change the route directly. The form is grouped into money, stay and validity, and application; every input is prefilled with the current value, changed inputs turn blue, the button counts "Save N changes", and one click undoes. An official page URL and a note are still required. Saving takes effect immediately, with editor, date and source shown on the record and an entry in the change log. A non-government source URL is refused.</p>
 
 <h2>3. Correction queue 纠错队列 <span class="en">The five-stage loop</span></h2>
 <p>每条问题沿验收标准4.1.2的五个阶段推进，每个阶段一个按钮，顺序不可跳过：</p>

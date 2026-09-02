@@ -181,3 +181,111 @@ def test_discretionary_validity_maps_to_the_stay_bound():
     rows = tstation.records_for_route(route, g)
     assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (90, "Day")
     assert rows[1]["validity_duration"] is None      # no bound, no guess
+
+
+def test_parenthesized_and_on_arrival_validities_read_definitionally():
+    """"Six (6) months" and "One (1) to three (3) months" state their own
+    figures with parentheses between digit and unit; a range reads at the
+    number written beside the unit word. A visa-on-arrival product with no
+    validity text starts when granted, so its validity is the granted stay."""
+    route = {"passport_nationality": "HKG", "destination_country": "GAB",
+             "travel_purpose": "tourism"}
+    g = {"disposition": "VISA_REQUIRED", "confidence": "high",
+         "visa_products": [
+             {"type": "e-Visa, short stay", "entry": "single",
+              "validity": "One (1) to three (3) months", "max_stay_days": 90,
+              "fee": {"amount": 70, "currency": "EUR"}},
+             {"type": "e-Visa, long stay", "entry": "multiple",
+              "validity": "Six (6) months", "max_stay_days": 90,
+              "fee": {"amount": 185, "currency": "EUR"}},
+             {"type": "Tourist visa on arrival (T)", "entry": "single",
+              "validity": None, "max_stay_days": 30, "fee": None},
+         ]}
+    rows = tstation.records_for_route(route, g)
+    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (3, "Month")
+    assert (rows[1]["validity_duration"], rows[1]["validity_unit"]) == (6, "Month")
+    assert (rows[2]["validity_duration"], rows[2]["validity_unit"]) == (30, "Day")
+
+
+def test_spelled_out_validities_read_definitionally():
+    """"Three months from issue" and "not exceeding five years" state their
+    figures in words. Reading a written-out number is reading, not guessing."""
+    route = {"passport_nationality": "USA", "destination_country": "GIN",
+             "travel_purpose": "tourism"}
+    g = {"disposition": "VISA_REQUIRED", "confidence": "high",
+         "visa_products": [
+             {"type": "Tourist / Entry e-Visa", "entry": "multiple",
+              "validity": "not exceeding five years", "max_stay_days": 90,
+              "fee": None},
+             {"type": "Tourist visa", "entry": "single",
+              "validity": "Three months from issue", "max_stay_days": 30,
+              "fee": None},
+         ]}
+    rows = tstation.records_for_route(route, g)
+    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (5, "Year")
+    assert (rows[1]["validity_duration"], rows[1]["validity_unit"]) == (3, "Month")
+
+
+def test_records_listing_serves_one_answer_per_route(client, db):
+    """A route cached again per transit itinerary or arrival month changes
+    the advice, not the product table. A stale variant with its own product
+    names must not stand beside the fresh answer as phantom twins."""
+    from datetime import datetime, timedelta, timezone
+    from app.visa_snapshot.models import KimiRouteGuidanceCache
+    for row in db.query(KimiRouteGuidanceCache).all():
+        db.delete(row)
+    db.commit()
+    _warm(client, "NZL", "BLZ")
+    fresh = db.query(KimiRouteGuidanceCache).one()
+    stale_guidance = dict(fresh.guidance)
+    stale_guidance["visa_products"] = [
+        {"type": "Old-name visitor visa", "entry": "single",
+         "validity": None, "max_stay_days": None, "fee": None}]
+    db.add(KimiRouteGuidanceCache(
+        cache_key=fresh.cache_key + "|via:JPN", route=dict(fresh.route),
+        status="KIMI_PRIMARY", guidance=stale_guidance,
+        generated_at=datetime.now(timezone.utc) - timedelta(days=3)))
+    db.commit()
+    out = client.get("/database/records?nationality=NZL&destination=BLZ",
+                     headers=ADMIN).json()
+    names = {r["visa_type_name"] for r in out["records"]}
+    assert "Old-name visitor visa" not in names
+    assert out["summary"]["total"] == 2
+
+
+def test_proven_free_visas_keep_their_zero_and_get_a_currency():
+    """"Exempt", "Nil" and "gratis" are how official pages say free. A zero
+    backed by any of those words survives, and a surviving zero carries USD
+    like the visa-exempt branch, so the currency cell never reads missing."""
+    route = {"passport_nationality": "CHN", "destination_country": "NPL",
+             "travel_purpose": "tourism"}
+    g = {"disposition": "VISA_ON_ARRIVAL", "confidence": "high",
+         "visa_products": [
+             {"type": "30-day tourist visa", "entry": "multiple",
+              "validity": "30 days", "max_stay_days": 30,
+              "fee": {"amount": 0},
+              "notes": "Gratis for Chinese nationals"},
+             {"type": "Child visa", "entry": "single", "validity": "30 days",
+              "max_stay_days": 30, "fee": {"amount": 0, "currency": "EUR"},
+              "notes": "Children are exempt from the visa fee"},
+             {"type": "Suspicious free visa", "entry": "single",
+              "validity": "30 days", "max_stay_days": 30,
+              "fee": {"amount": 0}, "notes": "No explanation given"},
+         ]}
+    rows = tstation.records_for_route(route, g)
+    assert (rows[0]["visa_fee_amount"], rows[0]["visa_fee_currency"]) == (0, "USD")
+    assert (rows[1]["visa_fee_amount"], rows[1]["visa_fee_currency"]) == (0, "EUR")
+    assert rows[2]["visa_fee_amount"] is None     # an unexplained zero stays out
+
+
+def test_productless_visa_routes_show_a_validity_bound():
+    """A Senegalese tourist bound for France saw an empty validity cell: a
+    product-less VISA_REQUIRED answer never set the column. The granted stay
+    is the honest bound, same as product rows and the visa-free branch."""
+    route = {"passport_nationality": "SEN", "destination_country": "FRA",
+             "travel_purpose": "tourism"}
+    g = {"disposition": "VISA_REQUIRED", "confidence": "high",
+         "visa_category": "Short-stay Schengen C",
+         "permitted_stay": "90 days in any 180-day period"}
+    rows = tstation.records_for_route(route, g)
+    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (90, "Day")

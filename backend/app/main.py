@@ -937,7 +937,16 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
     from .visa_snapshot import kimi_primary, verified_overrides, tstation
     from .visa_snapshot.models import KimiRouteGuidanceCache
     verified_overrides.reload()
-    out = []
+    # One cached answer per canonical route decides the dataset. A route is
+    # also cached per transit itinerary (via:) and per arrival month, because
+    # those change the ADVICE, but the 25-field view is the route's current
+    # product table: mixing vintages let a stale variant's half-empty
+    # products stand beside the fresh row's complete ones as phantom twins
+    # (CHN→JPN listed a fee-less August answer next to September's full one).
+    # The freshest primary, non-transit answer for each (nationality,
+    # destination, purpose, document) wins; transit-only routes fall back to
+    # what they have.
+    candidates: dict[tuple, tuple] = {}
     for r in db.execute(_select(KimiRouteGuidanceCache)).scalars():
         if f"|{kimi_primary.CACHE_VERSION}" not in (r.cache_key or ""):
             continue
@@ -958,6 +967,21 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
         route["travel_document_type"] = doc
         if document and doc != document:
             continue
+        gkey = (str(route.get("passport_nationality") or "").upper(),
+                str(route.get("destination_country") or "").upper(),
+                str(route.get("travel_purpose") or "tourism").lower(), doc)
+        # Canonicality outranks answer status: a transit (via:) variant is
+        # contextual advice and must never displace the route's own row,
+        # however confident it is. Among canonical rows the freshest wins.
+        score = ("|via:" not in (r.cache_key or ""), r.status == "KIMI_PRIMARY",
+                 r.generated_at.isoformat() if r.generated_at else "")
+        prev = candidates.get(gkey)
+        if prev is None or score > prev[0]:
+            candidates[gkey] = (score, r, route)
+
+    out = []
+    for _score, r, route in candidates.values():
+        doc = route["travel_document_type"]
         g, prov = verified_overrides.apply(dict(r.guidance or {}), route)
         g = kimi_primary.apply_portal_fallback({"guidance": g}, route)["guidance"]
         collected = (r.generated_at.isoformat() if r.generated_at else "")
@@ -1352,6 +1376,11 @@ class DatabaseRecordEditIn(BaseModel):
     fields: dict
     source_url: str
     note: str
+    # Editing ONE visa product's own columns (its validity, entries, fee)
+    # from the row the operator is looking at. The client cannot safely
+    # rebuild the whole product list, so it names the product and the server
+    # merges the change into the products currently served.
+    product_patch: dict | None = None
 
 
 @app.post("/database/records/edit")
@@ -1399,6 +1428,38 @@ def travel_database_record_edit(body: DatabaseRecordEditIn,
     if cached is not None:
         before, _ = verified_overrides.apply(dict(cached.guidance or {}),
                                              full_route)
+    if body.product_patch:
+        # The operator edited one visa product's own columns. Merge the
+        # change into the products the reader currently sees, so the rest of
+        # the product table survives untouched.
+        if not before:
+            raise HTTPException(422, "this route has no served answer yet, "
+                                     "so its visa products cannot be edited")
+        want = str(body.product_patch.get("visa_type_name") or "").strip()
+        prods = [dict(pp) for pp in (before.get("visa_products") or [])
+                 if isinstance(pp, dict)]
+        hit = next((pp for pp in prods
+                    if str(pp.get("type") or "").strip() == want), None)
+        if hit is None:
+            raise HTTPException(422, f"no visa product named {want!r} on "
+                                     "this route")
+        pf = body.product_patch
+        if str(pf.get("validity") or "").strip():
+            hit["validity"] = str(pf["validity"]).strip()
+        if str(pf.get("entry") or "").strip():
+            hit["entry"] = str(pf["entry"]).strip()
+        if pf.get("max_stay_days") not in (None, ""):
+            hit["max_stay_days"] = int(pf["max_stay_days"])
+        amt = pf.get("fee_amount")
+        cur = str(pf.get("fee_currency") or "").strip()
+        if amt not in (None, "") or cur:
+            old_fee = hit.get("fee") or {}
+            hit["fee"] = {"amount": (float(amt) if amt not in (None, "")
+                                     else old_fee.get("amount")),
+                          "currency": cur.upper() or old_fee.get("currency")}
+        if str(pf.get("notes") or "").strip():
+            hit["notes"] = str(pf["notes"]).strip()[:340]
+        entry["fields"]["visa_products"] = prods
     try:
         verified_overrides.append_operator_entry(entry)
     except ValueError as e:
@@ -1674,6 +1735,24 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     except kimi_primary.GuidanceUnavailable as e:
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": str(e)})
+    # A passport does not change mid-conversation. In "can i go to japan
+    # from china" then "what if i wanna go from japan to france afterwards",
+    # the second "from japan" is where the traveller departs, not who they
+    # are, yet the parser read it as a Japanese passport and told a Chinese
+    # traveller France is visa-free (a tester hit this, 2026-09-01). Once a
+    # conversation has established the nationality, only explicit passport
+    # words can change it; a differing "from X" keeps the passport and moves
+    # the route.
+    _ctx_nat = str((body.context or {}).get("nationality") or "").upper()
+    _q_low = str(body.question or "").lower()
+    _PASSPORT_WORDS = ("passport", "citizen", "national of", "nationality",
+                       "护照", "護照", "公民", "国籍", "國籍", "持")
+    if (_ctx_nat and parsed.get("understood") and parsed.get("nationality")
+            and parsed["nationality"] != _ctx_nat
+            and not any(w in _q_low or w in str(body.question or "")
+                        for w in _PASSPORT_WORDS)):
+        if parsed.get("destination") and parsed["destination"] != _ctx_nat:
+            parsed = dict(parsed, nationality=_ctx_nat)
     # A region name is a destination, never a passport: "hainan" answers as
     # China with the regional policy note, and a bare region reply to a
     # clarify keeps the conversation moving instead of minting a guessed
@@ -1735,6 +1814,20 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
         else:
             clarify = "请说明您的国籍（护照签发国）和目的地。" if cjk else \
                 "Please name your passport country and your destination."
+        # A clarify turn is still a conversation. The composer answers what
+        # the traveller actually said (a statement, a worry, a side
+        # question) and asks for the missing facts naturally; the
+        # deterministic line above stays as the fallback, so a slow or
+        # refused model can only make this less charming, never wrong. A
+        # tester who typed "i dont have a passport" got the same canned
+        # sentence twice in a row, which is the exact failure this closes.
+        _missing = ([] if nat else ["passport country"]) \
+            + ([] if dest else ["destination"])
+        _smart = assistant.compose_clarify(
+            body.question, body.history,
+            {"passport_country": nat, "destination": dest}, _missing)
+        if _smart:
+            clarify = _smart
         from .visa_snapshot import special_policies
         # Even an unclear route can name a policy Ellis knows: the note
         # answers what it can while the clarify asks for the rest.

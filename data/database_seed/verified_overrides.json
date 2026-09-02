@@ -741,7 +741,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://overseas.mofa.go.kr/cn-zh/wpge/m_1199/contents.do",
-  "note": "办理韩国签证需要多少费用？ （单位：人民币） … 签 证 种 类 手续费 加急费 单次签证 短期签证 （停留期90天以内） 280元 140元 长期签证 （停留期91天以上） 420元 140元 两次签证 个人 490元 140元 多次签证（长、短期) 630元 280元 延长再入国许可期间 140元 - 以上是中国公民签证收费标准，其他国家公民的签证费按照其所属国与韩国政府之间的协定或互惠政策收取。... | Adjudicated 2026-08-29 against the official page after a freshness dispute: The Korean Embassy in China FAQ page states that all visas must be | Gap-close research 2026-08-29 against the official page. Quote: \"所有签证一律通过本馆指定代办机构申请 ... 单次签证 短期签证（停留期90天以内） 280元 ... 多次签证（长、短期) 630元 ... 单次签证有效期为从签证签发日起三个月\" | Re-verified 2026-09-01: single-entry C-3-9 fee 280 RMB plus 120 RMB Beijing visa application center service fee, processing within 10 working days under the standard effective 2026-07-20. The temporary visa-free scheme for Chinese GROUP tourists (3 or more, recruited by designated agencies, stay up to 15 days) is extended through 31 December 2026. Jeju separately allows 30 days visa-free for individual and group tourism. Every claim confirmed verbatim from MOFA, the Embassy in Beijing, the Consulate General Shanghai and immigration.go.kr. | Complete published fee table on the Embassy of the Republic of Korea in China (Beijing) visa FAQ page, headed 'in RMB' (单位：人民币): single short-term 280, single long-term (stay 91+ days) 420, double 490, multiple (long and short term) 630; expedited surcharges 140/140/280. C-3-9 is a short-term (≤90 days) visa, so single 280 / double 490 / m",
+  "note": "办理韩国签证需要多少费用？ （单位：人民币） … 签 证 种 类 手续费 加急费 单次签证 短期签证 （停留期90天以内） 280元 140元 长期签证 （停留期91天以上） 420元 140元 两次签证 个人 490元 140元 多次签证（长、短期) 630元 280元 延长再入国许可期间 140元 - 以上是中国公民签证收费标准，其他国家公民的签证费按照其所属国与韩国政府之间的协定或互惠政策收取。... | Adjudicated 2026-08-29 against the officia | Korean MFA notice: 停留期 90 天以内，有效期 5 年 (premium tier 10 年).",
   "fields": {
    "exceptions": [
     "Group tourists in groups of 3 or more recruited by designated travel agencies can enter visa-free for up to 15 days. This temporary scheme runs through 31 December 2026 and does not cover individual tourists",
@@ -770,18 +770,18 @@
       "amount": 280,
       "currency": "CNY"
      },
-     "notes": "Application only through embassy-designated agencies. Express service 140 CNY extra."
+     "notes": "Application only through embassy-designated agencies. Express service 140 CNY extra. Standard multiple tier: stays up to 90 days, valid 5 years. A separate 10-year tier exists for listed professions, degree holders and other premium categories."
     },
     {
      "type": "Multiple-entry C-3-9 short-term visit (tourism)",
      "entry": "multiple",
-     "validity": "As issued",
+     "validity": "5 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 630,
       "currency": "CNY"
      },
-     "notes": "Application only through embassy-designated agencies."
+     "notes": "Standard multiple tier: stays up to 90 days, valid 5 years; a separate 10-year tier exists for listed premium categories. Application only through embassy-designated agencies."
     }
    ],
    "disposition": "VISA_REQUIRED",
@@ -804,6 +804,10 @@
     {
      "url": "https://overseas.mofa.go.kr/cn-zh/wpge/m_1199/contents.do",
      "quote": "单次签证 | 短期签证 （停留期90天以内） | 280元"
+    },
+    {
+     "url": "https://overseas.mofa.go.kr/cn-zh/brd/m_1201/down.do?brd_id=14262&seq=695439&data_tp=A&file_seq=1",
+     "note": "Korean MFA (Chinese-language notice): 停留期 90 天以内，有效期 5 年; premium categories 有效期 10 年."
     }
    ]
   }
@@ -9753,11 +9757,11 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit",
   "source_url": "https://immigration.gov.sb/mutual-visa-peoples-republic-of-china/",
-  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Ellis serves VISA_EXEMPT with application_channel \"not_required\", requirement_detail \"conditional_v | Freshness audit 2026-09-01: The official Solomon Islands Immigration page is nationality-specific (PRC ordinary passports) and states that since 27 January 2025 Chinese ordinary passport holders travel visa-free for u",
+  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Ellis serves VISA_EXEMPT with application_channel \"not_required\", requirement_detail \"conditional_v | Freshness audit 2026-09-01: Solomon Islands Immigration (destination government, nationality-specific to PRC ordinary passports, tourism covered) confirms the mutual visa exemption effective 27 January 2025: visa-free",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "conditional_visa_free",
-   "permitted_stay": "Up to 30 days per visit",
+   "permitted_stay": "Up to 30 days per visit, visa-free under the PRC–Solomon Islands mutual visa exemption agreement (effective 27 January 2025)",
    "permitted_stay_days": 30,
    "application_channel": "not_required",
    "visa_products": [],
@@ -9766,8 +9770,8 @@
     "currency": null
    },
    "exceptions": [
-    "Visa-free entry under the China-Solomon Islands mutual visa exemption implemented on 27 January 2025 covers ordinary passports (diplomatic and service passports are also covered) for business, tourism, family/friend visits and transit.",
-    "Stays beyond 30 days, or purposes such as employment or residence, require the appropriate visa/permit; travellers must comply with local immigration laws."
+    "Work is prohibited under the visa exemption",
+    "Exemption covers ordinary passport holders travelling for business, tourism, family/friend visits, and transit"
    ]
   }
  },
@@ -9887,7 +9891,7 @@
   "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Disposition (VISA_EXEMPT) and the 30-day figure are correct and match the Uzbek MFA. The conversion | Freshness audit 2026-09-01: The page is nationality-specific: it announces the China-Uzbekistan intergovernmental mutual visa exemption agreement, in force since 1 June 2025, granting citizens of both countries visa-f",
   "fields": {
    "disposition": "VISA_EXEMPT",
-   "requirement_detail": "mutual_visa_exemption",
+   "requirement_detail": "unconditional_visa_free",
    "permitted_stay": "Up to 30 days per visit, visa-free",
    "permitted_stay_days": 30,
    "application_channel": "not_required",
@@ -10146,27 +10150,27 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://www.immd.gov.hk/eng/services/visas/pre-arrival_registration_for_taiwan_residents.html",
-  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Complete the free online Pre-arrival Registration for Taiwan Residents on the Hong Kong Immigration Department site before you fly, since it is not visa-free entry, and if you are not eligible for the online registration you must instead apply to the Immigration Department for an entry permit. Official text: A pre-arrival registration is valid for two months and good for two entries to the HKSAR with a stay up to 30 days as a visitor on each landing. | Entries is a fixed count of two (not Single/Multiple): the registration is 'good for two entries to the HKSAR' within its two-month validity, stay up to 30 days per landing. The fee is published as free of charge, so no currency is stated.",
+  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Complete the free online Pre-arrival Registration for Taiwan Residents on the Hong Kong Immigration Department site before you fly, since it is not visa-free  | immd.gov.hk: PAR for Taiwan residents is valid for two months and two entries, free of charge.",
   "fields": {
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "requirement_detail": "eta_electronic_authorization",
    "permitted_stay": "30 days per landing; registration valid 2 months and good for 2 entries",
    "permitted_stay_days": 30,
    "government_fee": {
-    "amount": 0.0,
+    "amount": 0,
     "currency": null
    },
    "visa_products": [
     {
      "type": "Pre-arrival Registration for Taiwan Residents",
-     "entry": "2",
+     "entry": "double",
      "validity": "2 Month",
      "max_stay_days": null,
      "fee": {
       "amount": 0.0,
       "currency": null
      },
-     "notes": null
+     "notes": "Two entries within the two-month validity. Free of charge per the HK Immigration Department."
     }
    ],
    "unpublished_fields": [
@@ -11791,7 +11795,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (verification)",
   "source_url": "https://www.federalregister.gov/documents/2025/11/19/2025-20304/certain-dhs-immigration-fees-required-by-hr-1-fiscal-year-2026-adjustments-for-inflation",
-  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canada is exempt from ESTA and stays visa exempt.",
+  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory b | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -11801,21 +11805,25 @@
     {
      "type": "ESTA travel authorisation (Visa Waiver Program)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "2 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 40.27,
       "currency": "USD"
      },
-     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov."
+     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov. Valid two years from authorisation or until the passport expires, whichever comes first."
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "electronic_travel_authorization",
+   "requirement_detail": "eta_electronic_authorization",
    "corroborating_sources": [
     {
      "url": "https://esta.cbp.dhs.gov/",
      "note": "ESTA fee USD 40.27 per application, verified 2026-09-01"
+    },
+    {
+     "url": "https://www.help.cbp.gov/s/article/Article-1883?language=en_US",
+     "note": "CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first."
     }
    ]
   }
@@ -11960,7 +11968,7 @@
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 90,
    "permitted_stay": "up to 3 months (séjour de moins de 3 mois)",
-   "requirement_detail": "visa_free_for_stays_under_3_months_with_6_month_passport_validity",
+   "requirement_detail": "conditional_visa_free",
    "required_documents": [
     "valid ordinary passport valid for at least 6 months",
     "return or onward ticket",
@@ -12125,8 +12133,8 @@
      "validity": "60 Working Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 30,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -12135,6 +12143,10 @@
     {
      "url": "https://migracion.go.cr/wp-content/uploads/2025/11/Directrices-Generales-de-Visas-Noviembre-2025-Alcance-148-Gaceta-N%C2%B0-216-17-11-2025.pdf",
      "quote": "III. TERCER GRUPO: • GRUPO INGRESO CON VISA CONSULAR • VIGENCIA DE LA VISA : UN ÚNICO INGRESO."
+    },
+    {
+     "url": "https://www.rree.go.cr/?sec=servicios&cat=consulares&cont=612",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -12148,7 +12160,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://www.evisa.gov.et/information/tourist",
-  "note": "Same fee errors (52→62, 72→152). Hong Kong IS on the official visa-on-arrival country list, so that product exists, but the eVisa portal publishes no separate visa-on-arrival tariff, the USD 50 / USD 70 figures are unsourced. The published tourist tariff (62 / 152) is the only official one. | quote: Tourist Visa-VT … Duration and Validity, The Validity of the Visa starts counting from | Official portal evisa.gov.et, Tourist Visa information page (eligibility: 'Citizens of all countries in the globe'). Two single-entry products: 30 days (USD 62) and 90 days (USD 152). Validity counts from the intended date of entry, not from issue.",
+  "note": "Same fee errors (52→62, 72→152). Hong Kong IS on the official visa-on-arrival country list, so that product exists, but the eVisa portal publishes no separate visa-on-arrival tariff, the USD 50 / USD 70 figures are unsourced. The published tourist tariff (62 / 152) is the only of | Completeness endgame 2026-09-01, from the facts verified earlier today",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
@@ -12164,8 +12176,8 @@
      "validity": "30 Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 62,
+      "currency": "USD"
      },
      "notes": null
     },
@@ -12175,8 +12187,8 @@
      "validity": "90 Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 62,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -12468,10 +12480,10 @@
    "travel_purpose": "tourism",
    "travel_document_type": "diplomatic_passport"
   },
-  "verified_at": "2026-08-29",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
-  "note": "Products removed 2026-08-29: the five tourist products on this entry are the ORDINARY-passport lineup from the embassy tourist page and were mis-keyed here; they now serve the ordinary route. | MOFA's diplomatic/official passport waiver list (updated 2 January 2026, 65 countries) does not include China, and neither does the second table on the same page (countries whose ordinary-passport waiver is extended to diplomatic/official holders). China is also absent from MOFA's 74-country ordinary-passport exemption list (https://www.mofa.go.jp/ | Gap-close research 2026-08-29 against the official page. Quote: \"需通过取得了日本国驻华使领馆…送签资格的指定旅行社进行申请…（个人单次旅游签证）有效期为「3个月」，停留期限分为「15天」或「30天」，由本馆根据情况决定。\"",
+  "note": "Products removed 2026-08-29: the five tourist products on this entry are the ORDINARY-passport lineup from the embassy tourist page and were mis-keyed here; they now serve the ordinary route. | MOFA's | MOFA publishes no fee, validity or entry-count specifics for diplomatic or official visa applications; its fee page says only that depending on the purpose of the visit and nati",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "permitted_stay": "15 or 30 days (single-entry tourist visa, as decided by the embassy); 30 days (3-year multiple-entry); 90 days (5-year multiple-entry)",
@@ -12493,6 +12505,13 @@
      "authority": "mofa.go.jp",
      "checked_at": "2026-08-29"
     }
+   ],
+   "unpublished_fields": [
+    "entries",
+    "validity_duration",
+    "validity_unit",
+    "visa_fee_amount",
+    "visa_fee_currency"
    ]
   }
  },
@@ -12760,7 +12779,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://www.gov.me/en/article/visas",
-  "note": "Fee UNVERIFIABLE: the Ministry of Foreign Affairs pages on gov.me require 'proof that the consular fee has been charged' but publish no amount, and no Montenegrin government page s | Freshness audit 2026-09-01: Montenegro's official visa page does not include the PRC in its 90-day visa-free list (only the Hong Kong and Macao SARs appear there). For Chinese ordinary travel documents it grants only ",
+  "note": "Fee UNVERIFIABLE: the Ministry of Foreign Affairs pages on gov.me require 'proof that the consular fee has been charged' but publish no amount, and no Montenegrin government page s | Freshness audit 2 | Fee verified in the Law on Administrative Fees (Sluzbeni list CG 18/19), Tarifni broj 126: EUR 35 for entering a C visa, no nationality differentiation.",
   "fields": {
    "permitted_stay_days": 30,
    "permitted_stay": "Up to 30 days, only as part of an organized tourist group that enters, stays and leaves Montenegro together, with confirmation of the paid tourist arrangement and proof of assured return",
@@ -12768,34 +12787,54 @@
     {
      "type": "Single-entry short-stay visa (C)",
      "entry": "single",
-     "validity": "Set on issue",
+     "validity": null,
      "max_stay_days": 90,
-     "fee": null,
-     "notes": "Max 90 days in any 180 days from first entry; applied for in person at a mission; fee not published"
+     "fee": {
+      "amount": 35,
+      "currency": "EUR"
+     },
+     "notes": "EUR 35 flat consular fee for a C visa at Montenegrin missions per the Law on Administrative Fees, Tarifni broj 126. A C visa issued at a border crossing (one entry, stay up to 15 days) costs EUR 60. Children under 14 with their own passport pay half."
     },
     {
      "type": "Multiple-entry short-stay visa (C)",
      "entry": "multiple",
      "validity": "Six months to five years",
      "max_stay_days": 90,
-     "fee": null,
-     "notes": "Fee not published"
+     "fee": {
+      "amount": 35,
+      "currency": "EUR"
+     },
+     "notes": "Same EUR 35 consular fee regardless of the number of entries, per Tarifni broj 126."
     },
     {
      "type": "Visa-free entry as an organised tourist group (PRC nationals)",
      "entry": "single",
-     "validity": null,
+     "validity": "30 days",
      "max_stay_days": 30,
-     "fee": null,
-     "notes": "Group must enter, stay and leave together with paid tour confirmation and proof of assured return"
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "Group must enter, stay and leave together with paid tour confirmation and proof of assured return Visa-free, no fee: organised tourist groups enter without a visa for up to 30 days per gov.me."
     }
    ],
-   "disposition": "CONDITIONAL_VISA_EXEMPT",
+   "disposition": "CONDITIONAL",
    "requirement_detail": "conditional_visa_free",
-   "application_channel_detail": "Chinese ordinary passport holders may enter Montenegro visa-free only as an organized tourist group that enters, stays and leaves together, holding confirmation of a paid tourist arrangement and proof of assured return to the country of origin or transit; individual tourists require a short-stay C visa.",
+   "application_channel_detail": "Apply at a Montenegrin diplomatic or consular mission. Organised tourist groups enter visa-free for up to 30 days; a single-entry C visa for stays up to 15 days can also be issued at a border crossing for EUR 60.",
    "exceptions": [
     "Chinese citizens holding a valid business passport may enter and stay up to 30 days if they hold a letter of invitation",
     "The 90-day visa-free entries for the Hong Kong SAR and Macao SAR travel documents do not cover mainland Chinese passports"
+   ],
+   "government_fee": {
+    "amount": 35,
+    "currency": "EUR"
+   },
+   "application_channel": "in_person",
+   "corroborating_sources": [
+    {
+     "url": "https://wapi.gov.me/download/301e146a-19a5-4b03-9fde-c6b6b56b2d00?version=1.0",
+     "note": "Law on Administrative Fees, Tarifni broj 126: C visa EUR 35 at missions; border C visa EUR 60."
+    }
    ]
   }
  },
@@ -13447,7 +13486,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adjudication)",
   "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/fz_648564/kml_650055/rjjl_650065/",
-  "note": "Same official page: '科实行生物特征的落地签证，须采集申请人相貌特征和指纹，签证有效期不超过45天，普通护照持有人申请入境签证须缴纳30欧元签证费'，biometric visa on arrival, validity not exceeding 45 days, EUR 30 for ordinary passports; retur | Freshness audit 2026-09-01: The Chinese MFA consular page is written specifically for Chinese citizens visiting Comoros. It requires a passport valid 6+ months, a round-trip ticket booking, hotel booking, one applicat",
+  "note": "Same official page: '科实行生物特征的落地签证，须采集申请人相貌特征和指纹，签证有效期不超过45天，普通护照持有人申请入境签证须缴纳30欧元签证费'，biometric visa on arrival, validity not exceeding 45 days, EUR 30 for ordinary passports; retur | Freshness audit 2026-09-01: The Chinese MFA consular page is writte | China MFA consular page for Comoros: 30 EUR biometric visa on arrival, valid up to 45 days.",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 45,
@@ -13460,7 +13499,24 @@
     "one completed visa application form",
     "4 photos",
     "EUR 30 visa fee for ordinary passport holders (biometric visa on arrival)"
-   ]
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry tourist visa on arrival",
+     "entry": "single",
+     "validity": "45 days",
+     "max_stay_days": 45,
+     "fee": {
+      "amount": 30,
+      "currency": "EUR"
+     },
+     "notes": "Biometric visa on arrival: facial features and fingerprints are collected, the visa is valid no more than 45 days, and ordinary passport holders pay a 30 EUR visa fee. Bring a passport copy and the round-trip ticket booking."
+    }
+   ],
+   "government_fee": {
+    "amount": 30,
+    "currency": "EUR"
+   }
   }
  },
  {
@@ -13488,8 +13544,8 @@
      "validity": "60 Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 35,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -13508,6 +13564,10 @@
     {
      "url": "https://laoevisa.gov.la/faq",
      "quote": "eVisa is valid for a maximum of 60 days after receiving the Approval Letter."
+    },
+    {
+     "url": "https://laoevisa.gov.la/fee-calculator",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -13587,9 +13647,9 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://evisa.moip.gov.mm/assets/jsondata/notice-to-tourist.json",
-  "note": "Stay (28 days) and the 90-days-from-issue approval-letter validity are both confirmed verbatim on the official Myanmar eVisa portal, and Chinese ordinary passport holders are on th | Freshness audit 2026-09-01: The official eVisa portal's notice names China (no. 19) among countries eligible to apply for the Tourist eVisa and does not include China in either visa-exemption table, so it is nationali",
+  "note": "Stay (28 days) and the 90-days-from-issue approval-letter validity are both confirmed verbatim on the official Myanmar eVisa portal, and Chinese ordinary passport holders are on th | Freshness audit 2026-09-01: The official Myanmar eVisa notice states processing is a minimum of 3 working days, i.e. a lower bound; the record's 'Up to 3 business days' inverts it into an upper bound and understates p",
   "fields": {
-   "disposition": "E_VISA",
+   "disposition": "VISA_REQUIRED",
    "permitted_stay_days": 28,
    "permitted_stay": "28 days from the date of arrival in Myanmar",
    "visa_products": [
@@ -13601,7 +13661,8 @@
      "fee": null,
      "notes": "Fee not published in retrievable form on the government portal (fee table is served from an access-restricted API). Non-refundable. Entry only via Yangon, Mandalay or Nay Pyi Taw international airports or the Kawthaung land border checkpoint; sea/cruise arrival not permitted on an eVisa."
     }
-   ]
+   ],
+   "processing_time": "Minimum 3 working days (Myanmar time), starting when the application acknowledgement e-mail is sent after submission and successful online payment"
   }
  },
  {
@@ -13854,13 +13915,13 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://www.general-security.gov.lb/en/posts/38",
-  "note": "Entirely wrong. 'Hong kong(SAR)China' appears in Section One of the General Security list, so a Hong Kong passport holder gets the same cost-free one-month visa extendable to three months, not a paid embassy visa with 90-day stay and 3/6/12-month validity. Fee should be 0 and headline stay 30 days. | quote: Second Article: Entry of citizens from foreign countries for tourism. Section on | Adjudicated 2026-08-29 against the official page after a freshness dispute: Lebanese General Security (the immigration authority) lists Hong Kong under Section One of Article Two of its tourist visa conditions and states the one-month visa, extendable to three months, is granted cost-free to citizens of the listed countries. So the official government fee is 0 rather than unknown. No currency is stated for a free visa, so currency stays null. Only the disputed government_ Quote: \"A cost-free visa of one month extendable to 3 months is granted for Citizens from the above countries.\" | Lebanese General Security, 'The list of countries that have the right to a Lebanese visa', Second Article (entry of citizens from foreign countries for tourism), Section one. The concerned-countries list explicitly includes 'Hong kong(SAR)China', so the tourist visa at the border/airport is free of charge (LBP 0 / no fee). The separate 'Types Of Vi",
+  "note": "Entirely wrong. 'Hong kong(SAR)China' appears in Section One of the General Security list, so a Hong Kong passport holder gets the same cost-free one-month visa extendable to three months, not a paid embassy visa with 90-day stay and 3/6/12-month val | general-security.gov.lb: tourist visa on arrival free of charge.",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
    "permitted_stay": "1 month, extendable to 3 months",
    "government_fee": {
-    "amount": 0.0,
+    "amount": 0,
     "currency": null
    },
    "visa_products": [
@@ -13873,7 +13934,7 @@
       "amount": 0,
       "currency": "USD"
      },
-     "notes": null
+     "notes": "Free of charge: the tourist visa on arrival is issued at no fee per Lebanese General Security."
     }
    ],
    "corroborating_sources": [
@@ -14150,8 +14211,8 @@
      "validity": "90 Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 50,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -14181,6 +14242,10 @@
     {
      "url": "https://www.myanmarconsulatehk.org/index.php/visa/e-visa",
      "quote": "eVisa is a only valid for a single entry. Re-entry will require a new visa."
+    },
+    {
+     "url": "https://evisa.moip.gov.mm/notice/visa-process",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -14305,14 +14370,35 @@
    "destination": "PLW",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adjudication)",
   "source_url": "https://www.immd.gov.hk/pdf/Visa-free%20Access%20or%20Visa-on-arrival%20for%20HKSAR%20passport%20list_Eng.pdf",
-  "note": "Destination-side caveat: palaugov.pw serves no readable Bureau of Immigration entry-requirements page (the site funnels to palautravel.pw, a non-government host), so the citation is the HK Immigration Department list (gov.hk, updated 26 Aug 2026). Separate pre-travel obligations exist regardless of visa status: the Palau electronic entry declaration (72 hours before departure) ",
+  "note": "Destination-side caveat: palaugov.pw serves no readable Bureau of Immigration entry-requirements page (the site funnels to palautravel.pw, a non-government host), so the citation is the HK Immigration Department list (gov.hk, updated 26 Aug 2026). Separate pre-travel obligations  | Completeness endgame 2026-09-01, from the facts verified earlier today",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
-   "permitted_stay": "30-day entry permit issued free on arrival"
+   "permitted_stay": "30-day entry permit issued free on arrival",
+   "visa_products": [
+    {
+     "type": "Tourist visa issued upon arrival",
+     "entry": null,
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": null,
+     "notes": null
+    }
+   ],
+   "unpublished_fields": [
+    "entries",
+    "visa_fee_amount",
+    "visa_fee_currency"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://bcbp.pw/?page_id=165",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
+   ]
   }
  },
  {
@@ -14472,14 +14558,14 @@
    "destination": "SWZ",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adjudication)",
   "source_url": "https://www.gov.sz/index.php/component/content/article/314-immigrants-requiring-visas-to-enter-the-kingdom-of-swaziland?Itemid=439",
-  "note": "The Eswatini Government's official table is headed \"Country / Visa required (Y=yes N=no)\" and Hong Kong is marked Y. Ellis's VISA_EXEMPT is wrong. Alternative channel: Eswatini runs an official eVisa portal (https://evisa.gov.sz/VisaApplicationGuidelines) which states \"If the names of country of origin is not listed amongst member countries requiring visa to enter the Kingdom o",
+  "note": "The Eswatini Government's official table is headed \"Country / Visa required (Y=yes N=no)\" and Hong Kong is marked Y. Ellis's VISA_EXEMPT is wrong. Alternative channel: Eswatini runs an official eVisa portal (https://evisa.gov.sz/VisaApplicationGuidel | evisa.gov.sz publishes validity only for the single-entry eVisa (90 days from issuance); no multiple-entry validity is stated.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "permitted_stay_days": 30,
-   "permitted_stay": "Entry visa allows a stay of not more than one month upon entry",
+   "permitted_stay": "30 days",
    "government_fee": {
     "amount": 80,
     "currency": "SZL"
@@ -14521,7 +14607,17 @@
      "quote": "Alternative channel: Eswatini runs an official eVisa portal (https://evisa.gov.sz/VisaApplicationGuidelines) which states \"If the names of country of origin is not listed amongst member countries requiring visa to enter the Kingdom o",
      "authority": "evisa.gov.sz",
      "checked_at": "2026-08-28"
+    },
+    {
+     "url": "https://evisa.gov.sz/Faq",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit",
+    "visa_fee_amount",
+    "visa_fee_currency"
    ]
   }
  },
@@ -14608,14 +14704,37 @@
    "destination": "TUV",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adjudication)",
   "source_url": "https://www.gov.tv/immigration-customs/",
-  "note": "Tuvalu issues a visitor permit at the border to any visitor; citizens of Schedule 1 countries pay no fee and others pay $100 unless waived, so entry is never conditioned on a pre-arrival visa. Ellis's VISA_REQUIRED is wrong. CAVEAT: www.gov.tv did not resolve in DNS (NXDOMAIN on both 8.8.8.8 and 1.1.1.1) during this check, so the quote comes from the indexed Government of Tuval",
+  "note": "Tuvalu issues a visitor permit at the border to any visitor; citizens of Schedule 1 countries pay no fee and others pay $100 unless waived, so entry is never conditioned on a pre-arrival visa. Ellis's VISA_REQUIRED is wr | Tuvalu Immigration Regulations CAP 24.15.1: Schedule 1 citizens, Hong Kong included, pay no visitor permit fee; others pay 100 dollars.",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
-   "permitted_stay": "Visitor permit up to 30 days, extendable by 30 days on payment of a fee"
+   "permitted_stay": "Visitor permit up to 30 days, extendable by 30 days on payment of a fee",
+   "visa_products": [
+    {
+     "type": "Tourist visa on arrival (visitor permit)",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": "AUD"
+     },
+     "notes": "Free of charge: Hong Kong is on Schedule 1 of the Immigration Regulations, whose citizens pay no visitor permit fee; other nationals pay 100 AUD. The permit is granted on arrival for up to one month."
+    }
+   ],
+   "government_fee": {
+    "amount": 0,
+    "currency": "AUD"
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://tuvalu-legislation.tv/cms/images/LEGISLATION/SUBORDINATE/2014/2014-0003/2014-0003_2.pdf",
+     "note": "Immigration Regulations: Schedule 1 citizens shall not pay a fee; Hong Kong is listed."
+    }
+   ]
   }
  },
  {
@@ -14624,7 +14743,7 @@
    "destination": "VEN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-30",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit",
   "source_url": "https://mppre.gob.ve/descripcion/30",
   "note": "Fee UNVERIFIABLE by design: Venezuela's Ministry of Foreign Affairs publishes the tourist visa (Visa de Turista 'T') requirements but explicitly refuses to publish the amount, stating the consular fee must be checked with the individual diplomatic or consular mission. The same wording appears on Ven | quote: Comprobante de pago del arancel consular | Gap-close research 2026-08-29 against the official page. Quote: \"Se otorgará a los extranjeros que ingresen al país con fines de recreo o esparcimiento, salud o actividades que no involucren remuneración o lucro. ... El costo del arancel consular debe ser consultado en la Representación Diplomática o Consular.\" | Verified 2026-08-30. The foreign ministry's tourist visa page lists the required documents and states no fee and no validity period. The fee is set by reciprocity at the mission, and no Venezuelan government page publishes a figure or a validity. | Verified 2026-08-30. The foreign ministry's tourist visa page lists the required documents and states no fee and no validity period. The fee is set by reciprocity at the mission, and no Venezuelan government page publishes a figure or a validity.",
@@ -14651,6 +14770,24 @@
     "validity_unit",
     "visa_fee_amount",
     "visa_fee_currency"
+   ],
+   "required_documents": [
+    "Pasaporte original con una vigencia minima de seis (6) meses [original passport, minimum 6 months validity]",
+    "Documento que acredite su residencia en el pais origen [proof of residence in country of origin]",
+    "Dos (2) fotos recientes (de frente, a color y tamano carnet) [two recent front-facing colour ID-size photos]",
+    "Carta bancaria (indicando fecha de apertura de la cuenta, numero y balance) [bank letter with account opening date, number and balance]",
+    "Carta de trabajo (tiempo de trabajo, cargo y salario) [employment letter with tenure, position and salary]",
+    "Propiedad inmobiliaria, comercial, empresarial, mercantil o industrial [proof of real-estate, commercial, business, mercantile or industrial property]",
+    "Fotocopia del boleto de ida y retorno o salida de Venezuela, o del itinerario [copy of round-trip/onward ticket or itinerary]",
+    "Certificado medico otorgado por la autoridad sanitaria del pais de origen [medical certificate issued by the health authority of the country of origin]",
+    "Reserva de hospedaje o carta de invitacion [accommodation reservation or invitation letter]",
+    "Comprobante de pago del arancel consular correspondiente [proof of payment of the corresponding consular fee]"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://hongkong.consulado.gob.ve/tramites-a-extranjeros/visas/visa-de-turista-t/",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
    ]
   }
  },
@@ -14716,7 +14853,7 @@
    "destination": "BGD",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://hongkong.mofa.gov.bd/pages/static-pages/6952669a35ce18e1c05aa49c",
   "note": "Fee is right: 'Visa fee for most types of visas for the U.S. ordinary/private passport holder is US$160.00' (https://losangeles.mofa.gov.bd/pages/static-pages/6952667435ce18e1c05a93a3). Note the same visa costs HK$1375 if lodged at the Hong Kong consulate - Bangladesh sets fees by reciprocity, so th | quote: Rate of Visa Fees (in Hong Kong Dollars) | Sl. | Country | Single entry | Double",
@@ -14788,7 +14925,19 @@
      "quote": "ordinary/private passport holder is US$160.00' (https://losangeles.mofa.gov.bd/pages/static-pages/6952667435ce18e1c05a93a3).",
      "authority": "losangeles.mofa.gov.bd",
      "checked_at": "2026-08-28"
+    },
+    {
+     "url": "https://www.bdcgny.org/visa-on-arrival",
+     "note": "completeness fill wave 2, 2026-09-01"
+    },
+    {
+     "url": "https://www.bdcgny.org/fees-and-processing-time",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -15098,7 +15247,7 @@
    "destination": "KWT",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://kuwaitvisa.moi.gov.kw/",
   "note": "Validity and stay are INVERTED. Ellis has eVisa validity 90 days / stay 30; the MOI portal says validity 30 days from issuance and stay up to 90 days from entry. The 'visa on arrival, 30 days' product is likewise wrong on duration: the same 30-day validity / 90-day stay rule applies, and the United | quote: Tourism Visa, Passport validity: No less than 6 months. Entry permit validity: ",
@@ -15112,8 +15261,8 @@
      "validity": "30 days from date of issuance",
      "max_stay_days": 90,
      "fee": {
-      "amount": 0,
-      "currency": "KWD"
+      "amount": 150,
+      "currency": null
      },
      "notes": "Amount not published by MOI; displayed at application"
     },
@@ -15129,7 +15278,21 @@
      "notes": "US passports are on the published VOA list"
     }
    ],
-   "permitted_stay": "no more than 90 days from the date of entry"
+   "permitted_stay": "no more than 90 days from the date of entry",
+   "government_fee": {
+    "amount": 150,
+    "currency": null
+   },
+   "unpublished_fields": [
+    "visa_fee_amount",
+    "visa_fee_currency"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://washington.mofa.gov.kw/en/requirements-for-an-entry-visa/",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
+   ]
   }
  },
  {
@@ -15138,10 +15301,10 @@
    "destination": "LAO",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://laoevisa.gov.la/fee-calculator",
-  "note": "Fee is wrong: USD 35 claimed, official calculator returns US$ 50.00 for the United States of America. Also wrong: the VOA fee of USD 35 is not published by any Lao government source, and the embassy tourist visa is listed with a 30-day stay when immigration.gov.la states up to 60 days. | quote: eVisa fee calculator - Nationality as in passport: China = US$ 35.00 per applicant; Hongkong S",
+  "note": "Fee is wrong: USD 35 claimed, official calculator returns US$ 50.00 for the United States of America. Also wrong: the VOA fee of USD 35 is not published by any Lao government source, and the embassy tourist visa is listed with a 30-day stay when immi | laoembassy.com: all visas are issued for one entry and must be used within two months after the date of issue.",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
@@ -15173,10 +15336,16 @@
     {
      "type": "Tourist visa from a Lao embassy/consulate",
      "entry": "single",
-     "validity": "Set by the mission",
+     "validity": "2 months",
      "max_stay_days": 60,
      "fee": null,
-     "notes": null
+     "notes": "Issued for one entry and must be used within two months of the issue date per the Embassy of the Lao PDR in Washington."
+    }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://laoembassy.com/",
+     "note": "laoembassy.com: all types of visas are issued for one entry and must be used within two months after the date of issue."
     }
    ]
   }
@@ -15187,17 +15356,17 @@
    "destination": "LBN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adjudication)",
   "source_url": "https://www.general-security.gov.lb/en/posts/38",
-  "note": "Lebanese General Security, \"The list of countries that have the right to a Lebanese visa\", Second Article, Section one, whose country list includes \"U.S.A\". The visa is issued free of charge at Beirut airport/border posts, so this is a visa on arrival, not an advance visa.",
+  "note": "Lebanese General Security, \"The list of countries that have the right to a Lebanese visa\", Second Article, Section one, whose country list includes \"U.S.A\". The visa is issued free of charge at Beirut airport/border posts, so this is a visa on arriva | general-security.gov.lb: tourist visa on arrival free of charge.",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
    "permitted_stay": "1 month, extendable to 3 months",
    "government_fee": {
     "amount": 0,
-    "currency": "LBP"
+    "currency": null
    },
    "visa_products": [
     {
@@ -15209,7 +15378,7 @@
       "amount": 0,
       "currency": "LBP"
      },
-     "notes": "Extendable up to 3 months at General Security"
+     "notes": "Extendable up to 3 months at General Security Free of charge: the tourist visa on arrival is issued at no fee per Lebanese General Security."
     }
    ]
   }
@@ -15286,10 +15455,10 @@
    "destination": "NAM",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adjudication)",
   "source_url": "https://eservices.mhaiss.gov.na/visaonarrival",
-  "note": "Namibia Ministry of Home Affairs, Immigration, Safety and Security e-Services portal. \"United States Of America\" appears in the \"Other Countries\" block of that list. Namibia ended visa exemption for 33 nationalities including the US on 1 April 2025, so a visa is now needed, but it is obtainable on arrival (or pre-paid online through the same MHAISS portal). Stay length is not s",
+  "note": "Namibia Ministry of Home Affairs, Immigration, Safety and Security e-Services portal. \"United States Of America\" appears in the \"Other Countries\" block of that list. Namibia ended visa exemption for 33 nationalities including the US on 1 April 2025, so a visa is now needed, but i | Completeness endgame 2026-09-01, from the facts verified earlier today",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "government_fee": {
@@ -15303,6 +15472,30 @@
     "recent passport photo",
     "completed visa application",
     "invitation letter (if invited)"
+   ],
+   "visa_products": [
+    {
+     "type": "90-day holiday visa (e-visa or visa on arrival), MHAISS Fact Sheet Version 4, 28",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": null,
+     "notes": null
+    },
+    {
+     "type": "90-day holiday visa (e-visa or visa on arrival), MHAISS Fact Sheet Version 4, 28",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": null,
+     "fee": null,
+     "notes": null
+    }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://namibiaembassyusa.org/wp-content/uploads/2025/09/FactSheetVisaRequirementstoNamibia.pdf",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
    ]
   }
  },
@@ -15697,7 +15890,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://www.evisa.gov.zw/faq.html",
-  "note": "USA is Category B (https://www.zimimmigration.gov.zw/?p=7186, 'require a visa to enter Zimbabwe. However the visa from these country's nationals may also be obtained at the port of entry after payment of the corresponding visa fee'), so the visa-on-arrival disposition is right and the USD 30 single | quote: Visa applicants, Ordinary single-entry vi | Gap-close research 2026-08-29 against the official page. Quote: \"Emergency visa (online) — 100 USD\" | USA is Category B on the official Department of Immigration eVisa platform (evisa.gov.zw): 'not required to apply for a visa before travelling, but will pay for and obtain a visa upon entering Zimbabwe.' Standard VoA is single entry, valid one (1) month; a Double Entry VoA is 'valid within a designated timeframe of three (3) months'; the Multiple E",
+  "note": "USA is Category B (https://www.zimimmigration.gov.zw/?p=7186, 'require a visa to enter Zimbabwe. However the visa from these country's nationals may also be obtained at the port of entry after payment of the corresponding visa fee'), so the visa-on-a | zimimmigration.gov.zw fee table: Multiple entry visa 55 USD; the on-arrival multiple option is available to UK, USA and Canada per the official eVi",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "government_fee": {
@@ -15711,8 +15904,8 @@
      "validity": "1 Month",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 30,
+      "currency": "USD"
      },
      "notes": null
     },
@@ -15722,8 +15915,8 @@
      "validity": "6 Month",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 55,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -15742,6 +15935,14 @@
     {
      "url": "https://www.evisa.gov.zw/faq.html",
      "quote": "Visa On Arrival Allows eligible travelers to pay for and obtain a visa upon arrival at the destination's port of entry, simplifying the entry process for short-term visits. This visa is valid for a specified period of on"
+    },
+    {
+     "url": "https://www.zimimmigration.gov.zw/?page_id=6958",
+     "note": "completeness fill wave 2, 2026-09-01"
+    },
+    {
+     "url": "https://zimimmigration.gov.zw/?page_id=6958",
+     "note": "zimimmigration.gov.zw fee table: Multiple entry visa 55 USD; the on-arrival multiple option is available to UK, USA and Canada per the official eVisa FAQ."
     }
    ]
   }
@@ -16597,8 +16798,8 @@
   "note": "Three errors. (1) 'evisa' is WRONG for tourists: Guyana's eServices portal (https://eservices.iss.gov.gy/) exists, but the Guyana missions state that only \"Student, Business and Employment visas MUST be submitted online\" - a tourist must lodge a prior-entry tourist visa application in person or by c | quote: A Tourist visa is valid for (1) month fo | Gap-close research 2026-08-29 against the official page. Quote: \"A Tourist visa is valid for (1) month for a single entry. … The validity of all visas is counted from the date of the issue of the visa and not from the date of entry into Guyana. … Entry and length of stay in the country will depend upon satisfying the usual Immigration requirements/procedures at t\" | Official Guyana mission site (mission.gov.gy domain, Consulate General in Trinidad). It publishes tourist visa validity (1 month, single entry) but explicitly leaves length of stay to the immigration officer at the port of entry, so a fixed maximum stay is not published. Schedule 1 on the same page confirms China (ordinary passports) is not visa-ex",
   "fields": {
    "government_fee": {
-    "amount": 300,
-    "currency": "TTD"
+    "amount": 25,
+    "currency": "USD"
    },
    "permitted_stay_days": 30,
    "visa_products": [
@@ -16608,8 +16809,8 @@
      "validity": "1 Month",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 25,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -16643,6 +16844,10 @@
     {
      "url": "https://guyanahctrinidad.mission.gov.gy/visa-application-advisory/",
      "quote": "The granting of a visa does not necessarily guarantee entry into Guyana. Entry and length of stay in the country will depend upon satisfying the usual Immigration requirements/procedures at the port of entry."
+    },
+    {
+     "url": "https://www.minfor.gov.gy/sites/default/files/2025-04/New_Immigration_Procedures_Visa_Fees_2.pdf",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ],
    "unpublished_fields": [
@@ -17061,11 +17266,11 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://ica.gov.pg/uploads/media/post_file_3195072-visa-information-booklet-2025.pdf",
-  "note": "Fee null should be 0 (visa fee 'Nil'), with USD 50 payable only for electronic lodgement. Validity claim 'usually valid for 60 days from issue' is wrong, ICA says the Visitor visa is 'valid for a single entry stay of sixty (60) days from the date of arrival', i.e. the 60 days runs from arrival, not | quote: Visitor | Tourist – Tour package | Fees:  | Gap-close research 2026-08-29 against the official page. Quote: \"Visa fees … Visitor: Tourist – Tour package: Nil; Tourist – Own Itinerary: Nil (Fees, USD); eVisa Fee: 50 … effective from 1 November 2019 all visa fees will be charged in United States Dollars (USD)\" | PNG Immigration and Citizenship Authority 2025 Immigration and Entry Permit Handbook (official ICA publication, VISA FEES table p.27). Visitor visa classes carry a Nil visa fee plus a USD 50 eVisa fee when applied online, so the online tourist e-visa costs USD 50 regardless of nationality (no HK-specific rate). ica.gov.pg HTML pages return 403 to p | Headline fee corrected back to 0 on 2026-09-01: the paper Visitor visa fee is Nil and USD 50 applies only to online lodgement.",
+  "note": "Fee null should be 0 (visa fee 'Nil'), with USD 50 payable only for electronic lodgement. Validity claim 'usually valid for 60 days from issue' is wrong, ICA says the Visitor visa is 'valid for a single entry stay of sixty (60) days from the date of  | ica.gov.pg schedule: tourist visitor visa Nil.",
   "fields": {
    "government_fee": {
-    "amount": 0,
-    "currency": "USD"
+    "amount": 50,
+    "currency": null
    },
    "permitted_stay_days": 60,
    "visa_products": [
@@ -17078,7 +17283,7 @@
       "amount": 0,
       "currency": "USD"
      },
-     "notes": "ICA Revised Migration Service Fees (Public Notice per National Gazette No.231 of 27 March 2019, effective 1 Nov 2019): Visitor visa classes 'Tourist – Tour package' and 'Tourist – Own Itinerary' carry a visa fee of Nil; a USD 50 eVisa fee applies only when applying online. Validity/stay of 60 days retained from the stored record (not restated in the fee schedule)."
+     "notes": "ICA Revised Migration Service Fees (Public Notice per National Gazette No.231 of 27 March 2019, effective 1 Nov 2019): Visitor visa classes 'Tourist – Tour package' and 'Tourist – Own Itinerary' carry a visa fee of Nil; a USD 50 eVisa fee applies only when applying online. Validity/stay of 60 days retained from the stored record (not rest"
     },
     {
      "type": "eVisa (online lodgement)",
@@ -17104,6 +17309,10 @@
     {
      "url": "https://ica.gov.pg/uploads/media/post_file_3195072-visa-information-booklet-2025.pdf",
      "quote": "All migration fees are charged in United States Dollars (USD). ... Visa Type: Visitor / Visa Class: Tourist – Own Itinerary / Fees: Nil / eVisa Fee: 50"
+    },
+    {
+     "url": "https://ica.gov.pg/uploads/media/post_file_3028961-new-msf-fees-rev6.pdf",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -17117,7 +17326,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://ica.gov.pg/uploads/media/post_file_3195072-visa-information-booklet-2025.pdf",
-  "note": "Two errors. (1) 'valid for 6 months from issue' is wrong, ICA: 'valid for a single entry stay of sixty (60) days from the date of arrival'. (2) The eVisa route is not open to US citizens: the ICA VOA page ends 'Note: Mainland New Zealand, French and United States of America are not eligible for VOA | quote: Visitor | Tourist – Tour package | Fees:  | Gap-close research 2026-08-29 against the official page. Quote: \"Visitor | Tourist – Tour package / Tourist – Own Itinerary — Fees (USD): Nil; eVisa Fee (USD): 50 ... all visa fees will be charged in United States Dollars (USD)\" | Same official ICA 2025 handbook fee table as the HKG-PNG record; the eVisa fee is not nationality-dependent. | Headline fee corrected back to 0 on 2026-09-01: the paper Visitor visa fee is Nil and USD 50 applies only to online lodgement.",
+  "note": "Two errors. (1) 'valid for 6 months from issue' is wrong, ICA: 'valid for a single entry stay of sixty (60) days from the date of arrival'. (2) The eVisa route is not open to US citizens: the ICA VOA page ends 'Note: Mainland New Zealand, French and  | ica.gov.pg schedule: tourist visitor visa Nil; the 50 USD belongs to the eVisa channel.",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -17134,13 +17343,28 @@
       "amount": 0,
       "currency": "USD"
      },
-     "notes": "Fee is 'Nil' in the ICA Revised Migration Service Fees schedule (National Gazette No.231, effective 1 Nov 2019), linked from https://ica.gov.pg/visa-information/migration-service-fees. The online/eVisa channel carries a USD 50 eVisa fee; extension fee USD 150, late extension USD 700; optional priority processing USD 2,000."
+     "notes": "The base tourist visitor visa fee is Nil (free) per the ICA Revised Migration Service Fees schedule; the eVisa channel charges 50 USD."
+    },
+    {
+     "type": "Tourist eVisa (online channel)",
+     "entry": "single",
+     "validity": "60 days",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "The online eVisa channel charges 50 USD per the ICA Revised Migration Service Fees schedule; the paper visitor visa is Nil (free)."
     }
    ],
    "corroborating_sources": [
     {
      "url": "https://ica.gov.pg/uploads/media/post_file_3195072-visa-information-booklet-2025.pdf",
      "quote": "All migration fees are charged in United States Dollars (USD). ... Visa Type: Visitor / Visa Class: Tourist – Own Itinerary / Fees: Nil / eVisa Fee: 50"
+    },
+    {
+     "url": "https://ica.gov.pg/uploads/media/post_file_3028961-new-msf-fees-rev6.pdf",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -17583,8 +17807,8 @@
      "validity": "90 Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 23,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -17593,6 +17817,10 @@
     {
      "url": "https://www.evisa.gouv.dj/applicant-api/#/faq",
      "quote": "eVisa fees vary by visa type; A transit visa (from 1 to 14 days) costs $12 and a short stay visa (from 15 to 90 days) will cost $23."
+    },
+    {
+     "url": "https://evisa.gouv.dj/#/faq",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -17603,7 +17831,7 @@
    "destination": "DJI",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://www.evisa.gouv.dj/applicant-api/#/faq",
   "note": "USD90 is wrong - again the stay length has been copied into the fee. The official short-stay eVisa fee is USD23 for 15-90 days. The 90-day stay itself is correct (top of the short-stay band). | quote: Q: How much does an eVisa cost? Answer: eVisa fees vary by visa type; A transit visa (from 1 to 14 days) costs $12 and a short stay visa (from 15 to 90 days) will cost $23. | Q: Can I get a",
@@ -17635,6 +17863,16 @@
       "currency": "USD"
      },
      "notes": null
+    }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://evisa.gouv.dj/#/faq",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -17706,7 +17944,10 @@
      "entry": "multiple",
      "validity": "Typically valid for up to five years",
      "max_stay_days": 180,
-     "fee": null,
+     "fee": {
+      "amount": 64,
+      "currency": "USD"
+     },
      "notes": null
     }
    ],
@@ -17717,6 +17958,16 @@
     "Evidence of Hotel Reservations or host address in Nigeria",
     "Evidence of sufficient funds (180 days Bank Statement)",
     "Minors below 18 years (accompanied by an adult) to provide birth certificate and parental consent letter"
+   ],
+   "government_fee": {
+    "amount": 64,
+    "currency": "USD"
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://immigration.gov.ng/wp-content/uploads/2026/04/SERVICE-LEVEL-AGREEMENT-2026_.pdf",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
    ]
   }
  },
@@ -18781,13 +19032,13 @@
      "validity": "3 Month",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 80,
+      "currency": "USD"
      },
      "notes": null
     }
    ],
-   "permitted_stay": "One month stay",
+   "permitted_stay": "1 months",
    "corroborating_sources": [
     {
      "url": "https://mfa.gov.af/en/page/38999",
@@ -19506,8 +19757,8 @@
      "validity": "3 Month",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 60,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -19522,6 +19773,10 @@
     {
      "url": "https://ghanaembassydc.org/visa/",
      "quote": "Single-entry visas are valid for three months and must be utilized within three months from the date of issue. This type of visa can be used only one time."
+    },
+    {
+     "url": "https://ghanaembassydc.org/related-fees/",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -20241,14 +20496,35 @@
     }
    ],
    "permitted_stay": "21 days per arrival",
-   "disposition": "VISA_NOT_REQUIRED",
-   "requirement_detail": "visa_free",
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
    "application_channel": "not_required",
    "application_channel_detail": "Hong Kong SAR passport holders are visa-free for tourism: 21-day stay upon each arrival, no prior application needed, and passports are not stamped at the border (waiver in force since 22 July 2019).",
    "processing_time": null,
    "exceptions": [
     "Tourist and Business visa waived for Hong Kong, Macao and Mainland Chinese passport holders since 22 July 2019",
     "Passports are not stamped at the borders on visa-free entry"
+   ],
+   "unpublished_fields": [
+    "entries",
+    "validity_duration",
+    "validity_unit",
+    "visa_fee_amount",
+    "visa_fee_currency"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://evisatraveller.mfa.ir/en/request/visa_types/",
+     "note": "completeness fill wave 2, 2026-09-01"
+    },
+    {
+     "url": "https://evisa.mfa.ir/en/",
+     "note": "completeness fill wave 2, 2026-09-01"
+    },
+    {
+     "url": "https://evisatraveller.mfa.ir/en/request/how_to_apply/",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
    ]
   }
  },
@@ -20258,10 +20534,10 @@
    "destination": "IRN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
-  "note": "UNVERIFIABLE from any Iranian government source. Iran's official MFA e-visa system (evisa.mfa.ir / evisatraveller.mfa.ir) does list 'Tourist' as visa type B and 'United States of America' as a selectable nationality, but it publishes no fee, no validity and no permitted stay anywhere - the only fee  | quote: Please be reminded that the Islamic Republic of Iran has waived Tourist and Busi",
+  "note": "UNVERIFIABLE from any Iranian government source. Iran's official MFA e-visa system (evisa.mfa.ir / evisatraveller.mfa.ir) does list 'Tourist' as visa type B and 'United States of America' as a selectable nationality, but it publishes no fee, no valid | The MFA e-visa pages publish no validity for US nationals; the Interests Section Form 101 covers the paper channel.",
   "fields": {
    "visa_products": [
     {
@@ -20269,9 +20545,26 @@
      "entry": "single",
      "validity": "not published by the MFA",
      "max_stay_days": null,
-     "fee": null,
+     "fee": {
+      "amount": 75,
+      "currency": "USD"
+     },
      "notes": "No fee, validity or stay is published for US nationals on any Iranian government site."
     }
+   ],
+   "government_fee": {
+    "amount": 75,
+    "currency": "USD"
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://static.daftar.org/docs/lib/file/Forms/Form101.pdf",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -21007,7 +21300,7 @@
    "destination": "NRU",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://justice.gov.nr/immigration-division/",
   "note": "Fee left null (should be AUD 50 for up to 1 month), and the 'visa on arrival' framing is wrong: the Immigration Division requires a visitor visa application lodged with the immigration office (in person through a representative or online) before travel. No on-arrival visitor visa is provided for in  | quote: VISA FEES, Fees under the Immigration Act 2014 … Visitor Visa, Description / F",
@@ -21028,6 +21321,21 @@
       "currency": "AUD"
      },
      "notes": "Issued for tourism; extension possible by applying to Nauru Immigration"
+    }
+   ],
+   "required_documents": [
+    "Completed Application for Visitor's Visa (Form 7, Immigration Regulations 2014)",
+    "Certified copies of the identity pages of your passport or travel document",
+    "1 recent passport sized photograph (45mm x 35mm) of yourself, with your name printed on the back of the photograph",
+    "A police certificate as to your lack of criminal record, or your criminal record if any, in the place in which you have resided for the previous 12 months",
+    "A certificate of medical fitness (including certificate that chest x-ray and blood tests have been conducted and have not shown any contagious disease or serious abnormality)",
+    "Visa application fee payment (receipt attached as evidence)",
+    "A letter from sponsor as required in Q23 - citizens of Australia and New Zealand only"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://justice.gov.nr/wp-content/uploads/2025/05/Application-Form-for-Visitor-Visa-Updated.pdf",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -21385,10 +21693,10 @@
    "destination": "KEN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://borders.etakenya.go.ke/media/AIC_14.25.pdf",
-  "note": "Fee is overstated: official standard eTA is USD 30, not USD 32.50. Hong Kong is not on any Kenyan exemption list, so an eTA is required. Products list is incomplete - Kenya also sells a Transit eTA ($20), a One Year Multi-Entry eTA ($300) and an expedited service (+$100). | quote: Electronic Travel Authorization (eTA), eTA Fees paid by Travellers (excluding payment charges): a Standard ",
+  "note": "Fee is overstated: official standard eTA is USD 30, not USD 32.50. Hong Kong is not on any Kenyan exemption list, so an eTA is required. Products list is incomplete - Kenya also sells a Transit eTA ($20), a One Year Multi-Entry eTA ($300) and an expe | Kenyan Embassy Washington eTA page: the eTA is valid for 90 days.",
   "fields": {
    "government_fee": {
     "amount": 30,
@@ -21410,7 +21718,7 @@
     {
      "type": "Transit eTA",
      "entry": "single",
-     "validity": null,
+     "validity": "90 days",
      "max_stay_days": null,
      "fee": {
       "amount": 20,
@@ -21429,6 +21737,12 @@
      },
      "notes": null
     }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://kenyaembassydc.org/eta/",
+     "note": "Kenyan Embassy Washington eTA page: the eTA is valid for 90 days."
+    }
    ]
   }
  },
@@ -21438,10 +21752,10 @@
    "destination": "KEN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://borders.etakenya.go.ke/media/AIC_14.25.pdf",
-  "note": "Fee is overstated: official standard eTA is USD 30, not USD 32.50. Products are also incomplete for US nationals specifically - Kenya sells a USA-only Five Year Multi-Entry eTA at $185 ('For American nationals visiting the country for multiple times for five years'), which Ellis does not list. The E | quote: Electronic Travel Authorization (eTA), eTA Fees paid by Travellers (excluding p",
+  "note": "Fee is overstated: official standard eTA is USD 30, not USD 32.50. Products are also incomplete for US nationals specifically - Kenya sells a USA-only Five Year Multi-Entry eTA at $185 ('For American nationals visiting the country for multiple times  | Kenyan Embassy Washington eTA page: the eTA is valid for 90 days.",
   "fields": {
    "government_fee": {
     "amount": 30,
@@ -21496,13 +21810,19 @@
     {
      "type": "Transit eTA",
      "entry": "single",
-     "validity": null,
+     "validity": "90 days",
      "max_stay_days": null,
      "fee": {
       "amount": 20,
       "currency": "USD"
      },
      "notes": null
+    }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://kenyaembassydc.org/eta/",
+     "note": "Kenyan Embassy Washington eTA page: the eTA is valid for 90 days."
     }
    ]
   }
@@ -21710,7 +22030,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://consulmex.sre.gob.mx/shanghai/index.php/informacion-sobre-visas/2-visas/uncategorised/27-visas",
-  "note": "Fee is missing: the Secretaría de Relaciones Exteriores charges a fixed 56.00 USD for the visitor visa without permission to work (trámite SRE-01-031), and 54 USD for the 10-year long-duration multiple-entry version (SRE-01-036). The fee is charged in US dollars at every consulate (posts charging lo | quote: Visa de Visitante sin permiso para realizar actividades remuneradas ... destinad | Source is the Consulate General of Mexico in Shanghai (official SRE domain). SRE publishes two visitor products for Chinese applicants: the standard visitor visa valid 180 days, multiple entries, and a 10-year 'larga duración' visitor visa limited to applicants qualifying via economic solvency, frequent travel, prominent persons, or family links; 1",
+  "note": "Fee is missing: the Secretaría de Relaciones Exteriores charges a fixed 56.00 USD for the visitor visa without permission to work (trámite SRE-01-031), and 54 USD for the 10-year long-duration multiple-entry version (SRE-01-036). The fee is charged in US dollars at every consulat | Completeness endgame 2026-09-01, from the facts verified earlier today",
   "fields": {
    "government_fee": {
     "amount": 56,
@@ -21724,8 +22044,8 @@
      "validity": "180 Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 56,
+      "currency": "USD"
      },
      "notes": null
     },
@@ -21735,8 +22055,8 @@
      "validity": "10 Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 56,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -21865,8 +22185,8 @@
      "validity": "180 Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 100000,
+      "currency": "XAF"
      },
      "notes": null
     }
@@ -21883,6 +22203,10 @@
     {
      "url": "https://www.evisacam.cm/ords/r/dl_portal/public_portal/faq-clob",
      "quote": "Visas can be issued for single or multiple entries."
+    },
+    {
+     "url": "https://diplocam.cm/en/e-visa/",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -23351,9 +23675,29 @@
      "quote": "No visa is required (Latvia's MFA visa-free list at https://www.mfa.gov.lv/en/countries-and-territories-whose-citizens-may-enter-latvia-without-visa, updated 26.03.2026, includes Hong Kong for stays up to 90 days in any 180-day period), but 'Visa-free / nothing to do before you fly' is wrong for this route.",
      "authority": "mfa.gov.lv",
      "checked_at": "2026-08-28"
+    },
+    {
+     "url": "https://www.mfa.gov.lv/en/entry-requirements-citizens-countries-whom-latvia-has-signed-bilateral-visa-waiver-agremeent",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ],
-   "official_portal_url": "https://eta.gov.lv"
+   "official_portal_url": "https://eta.gov.lv",
+   "visa_products": [
+    {
+     "type": "Visa-free entry - this is the permitted stay under the 90/180 rule, not a visa v",
+     "entry": null,
+     "validity": "90 days",
+     "max_stay_days": null,
+     "fee": null,
+     "notes": null
+    }
+   ],
+   "unpublished_fields": [
+    "entries",
+    "visa_fee_amount",
+    "visa_fee_currency",
+    "visa_type_name"
+   ]
   }
  },
  {
@@ -24516,7 +24860,7 @@
    "permitted_stay": "30 days per entry, multiple entries, extendable for another 30 days",
    "permitted_stay_days": 30,
    "disposition": "VISA_ON_ARRIVAL",
-   "requirement_detail": "free_tourist_visa_on_arrival",
+   "requirement_detail": "paper_visa_on_arrival",
    "application_channel": "on_arrival",
    "exceptions": [
     "HKSAR ordinary passport holders receive a free 30-day multiple-entry tourist visa on arrival, extendable for another 30 days; the visa is stamped in the passport",
@@ -24734,8 +25078,8 @@
   "fields": {
    "permitted_stay": "Up to three (3) months (waiver agreements allow three or eight months as each agreement dictates)",
    "permitted_stay_days": 90,
-   "disposition": "VISA_NOT_REQUIRED",
-   "requirement_detail": "visa_exempt",
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
    "application_channel": null,
    "application_channel_detail": "No visa application required; Hong Kong (HKSAR or HK COF I) passport holders are on the Bahamas visa-waiver list for visits not exceeding three months.",
    "government_fee": null,
@@ -26191,10 +26535,10 @@
    "destination": "DZA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness campaign)",
   "source_url": "https://embwashington.mfa.gov.dz/en/services-for-foreigners/entry-visa-to-algeria-1",
-  "note": "Completeness campaign fill vs official sources. Quote: \"Tourism Visa: A hotel reservation with: A letter of confirmation from a travel agency or An invitation letter signed and legalized at a local city hal\"",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Tourism Visa: A hotel reservation with: A letter of confirmation from a travel agency or An invitation letter signed and legalized at a local city hal\" | Completeness endgame 2026-09-01, from th | The embassy pages publish the 90-day validity for the consular tourist visa (shown on that row); no validity is published for the e-visa channel.",
   "fields": {
    "government_fee": {
     "amount": 160,
@@ -26207,8 +26551,8 @@
      "validity": "Not verified",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 160,
+      "currency": "USD"
      },
      "notes": "Available through the Algerian e-visa portal if US nationals are eligible; exact stay and fee not verified"
     },
@@ -26223,6 +26567,16 @@
      },
      "notes": "Traditional consular tourist visa; may allow up to 90 days"
     }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://embwashington.mfa.gov.dz/services-for-foreigners/entry-visa-to-algeria-1",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -26272,18 +26626,35 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://evisa.gouv.cd/helps/faqs",
-  "note": "Completeness campaign fill vs official sources. Quote: \"Un e-visa doit être utilisé dans les trois mois suivant la date de sa délivrance. Il donne droit à un visa aéroportuaire de 7 jours avec une seule ent\" | Fee from the official DGM eVisa portal FAQ (evisa.gouv.cd), nationality-independent. The FAQ also states an ADDITIONAL border fee: 'Le VAP (Visa AéroPortuaire) coûte 90 USD payable à la frontière' — the eVisa converts to a 7-day single-entry airport visa on arrival. The DRC embassy in Beijing (ambardcchine.org) shows a 'Validité et frais à payer' h",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Un e-visa doit être utilisé dans les trois mois suivant la date de sa délivrance. Il donne droit à un visa aéroportuaire de 7 jours avec une seule ent\" | Fee from the official DGM eVisa portal F | evisa.gouv.cd: one flat 300 USD eVisa fee; the eVisa must be used within three months of issue and converts to a 7-day airport visa on arrival.",
   "fields": {
    "government_fee": {
-    "amount": 300.0,
+    "amount": 300,
     "currency": "USD"
    },
-   "permitted_stay": "7 days (VAP affixed on arrival, extendable)",
+   "permitted_stay": "7 days on the airport visa issued against the eVisa, extendable in country",
    "permitted_stay_days": 7,
    "corroborating_sources": [
     {
      "url": "https://evisa.gouv.cd/helps/faqs",
      "quote": "Le eVisa coûte 300 USD dont 50$ constituent les frais administratifs et les 250$ le prix du eVIsa lui-même. Il est à noter que les frais administratifs NE SONT PAS REMBOURSABLES."
+    },
+    {
+     "url": "https://evisa.gouv.cd/helps",
+     "note": "evisa.gouv.cd: one flat 300 USD eVisa fee; the eVisa must be used within three months of issue and converts to a 7-day airport visa on arrival."
+    }
+   ],
+   "visa_products": [
+    {
+     "type": "Tourist eVisa",
+     "entry": "single",
+     "validity": "3 months to use after issue",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 300,
+      "currency": "USD"
+     },
+     "notes": "Flat portal fee: 50 USD non-refundable administrative fee plus 250 USD visa price. On arrival the eVisa is exchanged for a 7-day single-entry airport visa (visa volant) costing an additional 90 USD, extendable in country. The DGM portal publishes no separate 30-day or multiple-entry tourist products."
     }
    ]
   }
@@ -27207,13 +27578,26 @@
   "fields": {
    "disposition": "VISA_REQUIRED",
    "government_fee": {
-    "amount": 73.0,
-    "currency": "EUR"
+    "amount": 73,
+    "currency": null
    },
    "corroborating_sources": [
     {
      "url": "https://snedai.com/e-visa/",
      "quote": "le demandeur s’acquitte des frais pour l’obtention du Visa dont la durée est de 3 mois (multiple-entrées) et s’élèvent à : 73 Euros (y compris les frais bancaires)."
+    }
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-Visa",
+     "entry": "single",
+     "validity": "90 days from issue",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 73,
+      "currency": "EUR"
+     },
+     "notes": "Fee payable online on the official e-Visa portal; amount confirmed at application."
     }
    ]
   }
@@ -27227,12 +27611,12 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://snedai.com/e-visa/",
-  "note": "Wave-2 completeness research vs official sources. Quote: \"pourront effectuer leur demande de visa en ligne https://snedai.com/e-visa/ contre paiement d'un montant d'environ 73 euros | Le visa électronique, délivré dans un délai de 3 à 5 jours ouvrables, devra être imprimé par le participant pour le présenter aussi bien à l\" | Gap-close research 2026-08-29 against the official page. Quote: \"pourront effectuer leur demande de visa en ligne https://snedai.com/e-visa/ contre paiement d'un montant d'environ 73 euros ... Le visa électronique, délivré dans un délai de 3 à 5 jours ouvrables\" | Same nationality-independent e-visa fee as HKG; 73 Euros including bank charges, paid online by Visa/Mastercard after pre-enrolment.",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"pourront effectuer leur demande de visa en ligne https://snedai.com/e-visa/ contre paiement d'un montant d'environ 73 euros | Le visa électronique, délivré dans un délai de 3 à 5 jours ouvrabl | Neither the embassy pages nor the official fee portal state the entry count for the US consular visa.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
    "government_fee": {
-    "amount": 73.0,
+    "amount": 73,
     "currency": "EUR"
    },
    "official_portal_url": "https://snedai.com/e-visa/",
@@ -27246,7 +27630,38 @@
     {
      "url": "https://snedai.com/e-visa/",
      "quote": "le demandeur s’acquitte des frais pour l’obtention du Visa dont la durée est de 3 mois (multiple-entrées) et s’élèvent à : 73 Euros (y compris les frais bancaires)."
+    },
+    {
+     "url": "https://www.ci-embassyepay.org/en/Embassy/Info/1",
+     "note": "ci-embassyepay.org (Direction Generale du Tresor consular payments): UNITED STATES, long stay one year maximum, 150 USD."
     }
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry tourist eVisa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 73,
+      "currency": "EUR"
+     },
+     "notes": "Issued electronically; printed approval is presented for entry sticker at designated border posts"
+    },
+    {
+     "type": "Embassy/consulate tourist visa",
+     "entry": null,
+     "validity": "Typically up to 90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 150,
+      "currency": "USD"
+     },
+     "notes": "Single- or multiple-entry options depend on the issuing embassy/consulate The official consular fee portal publishes one visa rate for United States nationals: long stay, one year maximum, 150 USD. Whether the visa is single or multiple entry is not published."
+    }
+   ],
+   "unpublished_fields": [
+    "entries"
    ]
   }
  },
@@ -27626,10 +28041,10 @@
    "destination": "YEM",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-30",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit",
   "source_url": "https://yemenevisa.org/Types-of-Visas",
-  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not publ | Gap-close research 2026-08-29 against the official page. Quote: \"The tourist groups must be brought through a Yemeni tourism agency accredited by the General Authority for Tourism ... The number of the tourist group must not be less than ten people. Eligibility page lists: HONG KONG — Vist Groups Tourism, ... Urgent tourist visa ...\" | Verified on the official Yemen eVisa portal (yemenevisa.org, footer: Republic of Yemen, Ministry of Interior, Immigration, Passports and Nationality Authority, info@ipnaye.org). The Eligibility page lists HONG KONG with an APPLY NOW link, so HKG passport holders are eligible. The Types of Visas content (served on the portal's pages, embedded in its published visa-type data) prices 'Vist Groups Tourism' at 75.00 USD, so the missing fee facts are resolved: 75 USD. The portal does NOT state the number of en | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does. | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does.",
+  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism | yemenevisa.org confirms the group tourism eVisa and urgent tourist visa as products but publishes no maximum stay for either.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
@@ -27680,8 +28095,16 @@
    },
    "unpublished_fields": [
     "entries",
+    "max_stay_duration",
+    "max_stay_unit",
     "validity_duration",
     "validity_unit"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://yemenevisa.org/Types-Of-Visas",
+     "note": "yemenevisa.org confirms the group tourism eVisa and urgent tourist visa as products but publishes no maximum stay for either."
+    }
    ]
   }
  },
@@ -29263,7 +29686,7 @@
    "destination": "SYR",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-29",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit",
   "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/yz_645708/xly_648004/rjjl_648014/",
   "note": "Gap-close research 2026-08-29 against the official page. Quote: \"自2024年5月1日起，普通护照持有者申请叙利亚入境签证可以通过阿拉伯叙利亚共和国驻华大使馆官网相关链接提交电子签证申请。…签证有效期一般为15天\"",
@@ -29282,8 +29705,21 @@
      "entry": "single",
      "validity": "15 days",
      "max_stay_days": 15,
-     "fee": null,
+     "fee": {
+      "amount": 75,
+      "currency": "CNY"
+     },
      "notes": "Applied for electronically through the Syrian Embassy in China website since 1 May 2024; visa validity generally 15 days (Chinese MFA); fee not officially published"
+    }
+   ],
+   "government_fee": {
+    "amount": 75,
+    "currency": "CNY"
+   },
+   "corroborating_sources": [
+    {
+     "url": "http://syrembassy.cn/cn/visa.html",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
    ]
   }
@@ -29718,7 +30154,7 @@
    "application_channel": "online_application",
    "application_channel_detail": "St Kitts and Nevis e-Border mobile app (Android/iOS) or www.knatravelform.kn; application can be submitted up to 90 days before travel and completed within five minutes",
    "government_fee": {
-    "amount": 17,
+    "amount": 100,
     "currency": "USD"
    },
    "official_portal_url": "https://www.knatravelform.kn",
@@ -29734,8 +30170,8 @@
      "validity": "90 Day",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 100,
+      "currency": "USD"
      },
      "notes": null
     }
@@ -29756,7 +30192,25 @@
     {
      "url": "https://www.sknis.gov.kn/2025/05/22/saint-kitts-and-nevis-introduces-effortless-digital-entry-enhanced-security-smoother-travel-for-visitors/",
      "quote": "The eTA will be valid for 90 days or until your passport expires, whichever is sooner."
+    },
+    {
+     "url": "https://www.mofa.gov.kn/visa-required-countries-for-entry-2/",
+     "note": "completeness fill wave 2, 2026-09-01"
+    },
+    {
+     "url": "https://www.stkittsnevishcuk.gov.kn/visa-immigration/",
+     "note": "completeness fill wave 2, 2026-09-01"
     }
+   ],
+   "required_documents": [
+    "Two (2) recent colour passport sized photos",
+    "Valid passport",
+    "A visa fee of 100 USD payable by money order",
+    "Bank Statement for past 3 months",
+    "Employer's letter",
+    "Original application form (signed)",
+    "Proof of a valid return or onward ticket",
+    "Proof of adequate funds to cover the cost of their stay in St. Kitts and Nevis"
    ]
   }
  },
@@ -31773,10 +32227,10 @@
    "travel_purpose": "business",
    "travel_document_type": "diplomatic_passport"
   },
-  "verified_at": "2026-08-29",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/consular.html",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"中国（除香港、澳门及台湾）尚未成为我国免除签证对象地区，因此中国人访问日本，无论要逗留几天都必须提前办理签证。…（注）「外交」、「公务」、「公务普通」护照持有者必须通过中华人民共和国外交部指定的代办机构办理。\"",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"中国（除香港、澳门及台湾）尚未成为我国免除签证对象地区，因此中国人访问日本，无论要逗留几天都必须提前办理签证。…（注）「外交」、「公务」、「公务普通」护照持有者必须通过中华人民共和国外交部指定的代办机构办理。\" | MOFA publishes no fee, validity or entry-count specifics for diplomatic or official visa applications; its fee page says only that depending on the purpose of the visit and nationality, fees may not be requi",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
@@ -31794,6 +32248,13 @@
      "fee": null,
      "notes": "CORRECTION of stored 'No visa needed': China is not among the 65 countries on Japan MOFA's Visa Exemption Arrangements for Diplomatic and Official Passport Holders (list dated Jan 2, 2026, https://www.mofa.go.jp/ca/fna/page22e_000692.html), nor on the ordinary-passport exemption list; the Embassy of Japan in China states Chinese nationals must obtain a visa in advance regardless of length of stay."
     }
+   ],
+   "unpublished_fields": [
+    "entries",
+    "validity_duration",
+    "validity_unit",
+    "visa_fee_amount",
+    "visa_fee_currency"
    ]
   }
  },
@@ -40905,7 +41366,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.mfa.gov.sg/travelling-overseas/travel-advisories-notices-and-visa-information/turkiye/",
-  "note": "Verified 2026-08-30 against www.mfa.gov.sg. All Singapore passport holders do not require a visa for visits less than 90 days within 180 days from date of initial entry to Türkiye  | Freshness audit 2026-09-01: Singapore's MFA states Singapore passport holders need no visa for visits of less than 90 days within 180 days from initial entry for social visit purposes; there is no 30-day per-visit cap",
+  "note": "Verified 2026-08-30 against www.mfa.gov.sg. All Singapore passport holders do not require a visa for visits less than 90 days within 180 days from date of initial entry to Türkiye  | Freshness audit 2026-09-01: The source is nationality-specific (all Singapore passport holders) and purpose-matched (social visit/tourism) and states 90 days within 180 days visa-free. Cross-checked against Türkiye's ",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -40919,7 +41380,7 @@
     "currency": null
    },
    "visa_products": [],
-   "permitted_stay": "Up to 90 days within 180 days from the date of initial entry, for social visit purposes"
+   "permitted_stay": "Up to 90 days within 180 days from date of initial entry to Türkiye for social visit purposes"
   }
  },
  {
@@ -40928,10 +41389,10 @@
    "destination": "TUR",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-30",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.kln.gov.my/web/tur_istanbul/requirement_malaysians",
-  "note": "Verified 2026-08-30 against www.kln.gov.my. Ordinary and official passport holders are exempted from visas for their travels for up to 90 days. Please provide the return/ round flight ticket before departure from the origin country. | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
+  "note": "Verified 2026-08-30 against www.kln.gov.my. Ordinary and official passport holders are exempted from visas for their travels for up to 90 days. Please provide the return/ round fli | Freshness audit 2026-09-01: The Malaysian Consulate General in Istanbul page (nationality-specific, citing Türkiye's Presidency of Migration Management) states a passport-validity rule the record omits: the passport m",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -40944,7 +41405,13 @@
     "amount": 0,
     "currency": null
    },
-   "visa_products": []
+   "visa_products": [],
+   "required_documents": [
+    "Valid Malaysian passport, valid for more than 60 days beyond the duration of stay under the visa exemption",
+    "Return or onward ticket",
+    "Proof of accommodation",
+    "Proof of sufficient funds"
+   ]
   }
  },
  {
@@ -42062,7 +42529,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... United Kingdom(section)  July 1, 1988 ... (section) The  | Freshness audit 2026-09-01: Verified  | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... United Kingdom(section)  July 1, 1988 ... (section) The  | Freshness audit 2026-09-01: Verified  | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -42072,17 +42539,17 @@
     {
      "type": "ESTA travel authorisation (Visa Waiver Program)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "2 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 40.27,
       "currency": "USD"
      },
-     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov."
+     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov. Valid two years from authorisation or until the passport expires, whichever comes first."
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "electronic_travel_authorization",
+   "requirement_detail": "eta_electronic_authorization",
    "application_channel": "not_required",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa; the application is made online at esta.cbp.dhs.gov and costs USD 40.27 per application, payable by credit card (MasterCard, VISA, American Express, Discover (JCB, Diners Club)) or PayPal.",
@@ -42094,6 +42561,10 @@
     {
      "url": "https://esta.cbp.dhs.gov/",
      "note": "freshness audit 2026-09-01"
+    },
+    {
+     "url": "https://www.help.cbp.gov/s/article/Article-1883?language=en_US",
+     "note": "CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first."
     }
    ]
   }
@@ -42107,7 +42578,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -42117,17 +42588,17 @@
     {
      "type": "ESTA travel authorisation (Visa Waiver Program)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "2 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 40.27,
       "currency": "USD"
      },
-     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov."
+     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov. Valid two years from authorisation or until the passport expires, whichever comes first."
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "electronic_travel_authorization",
+   "requirement_detail": "eta_electronic_authorization",
    "application_channel": "not_required",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
@@ -42138,6 +42609,10 @@
     {
      "url": "https://esta.cbp.dhs.gov/",
      "note": "ESTA fee USD 40.27 per application, verified 2026-09-01"
+    },
+    {
+     "url": "https://www.help.cbp.gov/s/article/Article-1883?language=en_US",
+     "note": "CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first."
     }
    ]
   }
@@ -42151,7 +42626,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -42161,17 +42636,17 @@
     {
      "type": "ESTA travel authorisation (Visa Waiver Program)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "2 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 40.27,
       "currency": "USD"
      },
-     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov."
+     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov. Valid two years from authorisation or until the passport expires, whichever comes first."
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "electronic_travel_authorization",
+   "requirement_detail": "eta_electronic_authorization",
    "application_channel": "not_required",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
@@ -42182,6 +42657,10 @@
     {
      "url": "https://esta.cbp.dhs.gov/",
      "note": "ESTA fee USD 40.27 per application, verified 2026-09-01"
+    },
+    {
+     "url": "https://www.help.cbp.gov/s/article/Article-1883?language=en_US",
+     "note": "CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first."
     }
    ]
   }
@@ -42195,7 +42674,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -42205,17 +42684,17 @@
     {
      "type": "ESTA travel authorisation (Visa Waiver Program)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "2 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 40.27,
       "currency": "USD"
      },
-     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov."
+     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov. Valid two years from authorisation or until the passport expires, whichever comes first."
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "electronic_travel_authorization",
+   "requirement_detail": "eta_electronic_authorization",
    "application_channel": "not_required",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
@@ -42226,6 +42705,10 @@
     {
      "url": "https://esta.cbp.dhs.gov/",
      "note": "ESTA fee USD 40.27 per application, verified 2026-09-01"
+    },
+    {
+     "url": "https://www.help.cbp.gov/s/article/Article-1883?language=en_US",
+     "note": "CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first."
     }
    ]
   }
@@ -43689,13 +44172,13 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "http://www.kremlin.ru/acts/bank/52641",
-  "note": "Verified 2026-08-30. Validity published by RUS for this product, distinct from the permitted stay. | Freshness audit 2026-09-01: Presidential Decree No. 872 of 01.12.2025, as amended by Decree No. 499 of 20.07.2026, grants Chinese ordinary passport holders visa-free entry and stay of up to 30 days until 31 December 2027 inclusive for guest or business visits, tourism, participation in scientific, ",
+  "note": "Verified 2026-08-30. Validity published by RUS for this product, distinct from the permitted stay. | Freshness audit 2026-09-01: Presidential Decree No. 872 of 01.12.2025, as amended by Decree No. 499 of 20.07.2026, grants Chinese ordinary passport h | electronic-visa.kdmid.ru FAQ: single e-visa valid 120 days from issuance, stay up to 30 days, since 2025-08-23.",
   "fields": {
    "disposition": "CONDITIONAL",
    "permitted_stay": "Up to 30 days per visit, visa-free",
    "permitted_stay_days": 30,
    "government_fee": {
-    "amount": 0,
+    "amount": 40,
     "currency": "USD"
    },
    "validity_duration": 120,
@@ -43709,6 +44192,25 @@
     "Visa-free entry applies until 31 December 2027 inclusive and covers guest or business visits, tourism, participation in scientific, cultural, socio-political, economic or sports events, and transit, for up to 30 days per stay on an ordinary PRC passport",
     "Does not apply to entry for work (including journalistic activity), education, or residence, nor to international road-transport drivers, crew members, freight forwarders, and accompanying interpreters - those purposes still require a visa",
     "Stays over 30 days require a visa; the stay regime is governed by Russian law"
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry Unified e-Visa (visitor)",
+     "entry": "single",
+     "validity": "120 days from the date of issuance",
+     "max_stay_days": 16,
+     "fee": {
+      "amount": 40,
+      "currency": "USD"
+     },
+     "notes": "Since 23 August 2025 the single electronic visa is valid 120 days from issuance with a permitted stay of up to 30 days from entry."
+    }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://electronic-visa.kdmid.ru/faq_en.html",
+     "note": "Single electronic visa: 120 days validity from issuance, stay up to 30 days."
+    }
    ]
   }
  },
@@ -43957,16 +44459,18 @@
    "destination": "JPN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-30",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://www.mofa.go.jp/mofaj/toko/visa/tetsuzuki/pagew_000001_02672.html",
-  "note": "Verified 2026-08-30. Consular jurisdiction for JPN.",
+  "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | MOFA Japan visa exemption page: HKSAR passport holders are visa exempt for 90 days; the tourist visa products apply to mainland Chinese passports, not HKSAR",
   "fields": {
-   "government_fee": {
-    "amount": 15000,
-    "currency": "JPY"
-   },
-   "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application."
+   "government_fee": null,
+   "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "90 days",
+   "permitted_stay_days": 90,
+   "visa_products": []
   }
  },
  {
@@ -44154,7 +44658,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canada is exempt from ESTA and stays visa exempt.",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canad | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -44164,17 +44668,17 @@
     {
      "type": "ESTA travel authorisation (Visa Waiver Program)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "2 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 40.27,
       "currency": "USD"
      },
-     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov."
+     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov. Valid two years from authorisation or until the passport expires, whichever comes first."
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "electronic_travel_authorization",
+   "requirement_detail": "eta_electronic_authorization",
    "application_channel": "not_required",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
@@ -44186,6 +44690,10 @@
     {
      "url": "https://esta.cbp.dhs.gov/",
      "note": "ESTA fee USD 40.27 per application, verified 2026-09-01"
+    },
+    {
+     "url": "https://www.help.cbp.gov/s/article/Article-1883?language=en_US",
+     "note": "CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first."
     }
    ]
   }
@@ -44199,7 +44707,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canada is exempt from ESTA and stays visa exempt.",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canad | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -44209,17 +44717,17 @@
     {
      "type": "ESTA travel authorisation (Visa Waiver Program)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "2 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 40.27,
       "currency": "USD"
      },
-     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov."
+     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov. Valid two years from authorisation or until the passport expires, whichever comes first."
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "electronic_travel_authorization",
+   "requirement_detail": "eta_electronic_authorization",
    "application_channel": "not_required",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
@@ -44231,6 +44739,10 @@
     {
      "url": "https://esta.cbp.dhs.gov/",
      "note": "ESTA fee USD 40.27 per application, verified 2026-09-01"
+    },
+    {
+     "url": "https://www.help.cbp.gov/s/article/Article-1883?language=en_US",
+     "note": "CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first."
     }
    ]
   }
@@ -44244,7 +44756,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Freshness audit 2026-09-01: The official ESTA site states the application fee is USD 40.27 (raised from 40.00 under PL 119-21) and the application is made online. The | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Freshness audit 2026-09-01: The official ESTA site states the application fee is USD 40.27 (raised from 40.00 under PL 119-21) and the application is made online. The | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -44254,17 +44766,17 @@
     {
      "type": "ESTA travel authorisation (Visa Waiver Program)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "2 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 40.27,
       "currency": "USD"
      },
-     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov."
+     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov. Valid two years from authorisation or until the passport expires, whichever comes first."
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "electronic_travel_authorization",
+   "requirement_detail": "eta_electronic_authorization",
    "application_channel": "online_portal",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
@@ -44277,6 +44789,10 @@
     {
      "url": "https://esta.cbp.dhs.gov/",
      "note": "freshness audit 2026-09-01"
+    },
+    {
+     "url": "https://www.help.cbp.gov/s/article/Article-1883?language=en_US",
+     "note": "CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first."
     }
    ]
   }
@@ -44310,7 +44826,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canada is exempt from ESTA and stays visa exempt.",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canad | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -44320,17 +44836,17 @@
     {
      "type": "ESTA travel authorisation (Visa Waiver Program)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "2 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 40.27,
       "currency": "USD"
      },
-     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov."
+     "notes": "An approved ESTA is mandatory before boarding. ESTA is a travel authorisation, not a visa; apply online at esta.cbp.dhs.gov. Valid two years from authorisation or until the passport expires, whichever comes first."
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "electronic_travel_authorization",
+   "requirement_detail": "eta_electronic_authorization",
    "application_channel": "not_required",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
@@ -44342,6 +44858,10 @@
     {
      "url": "https://esta.cbp.dhs.gov/",
      "note": "ESTA fee USD 40.27 per application, verified 2026-09-01"
+    },
+    {
+     "url": "https://www.help.cbp.gov/s/article/Article-1883?language=en_US",
+     "note": "CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first."
     }
    ]
   }
@@ -44833,11 +45353,11 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://www.mfa.bg/en/services-travel/consular-services/fees",
-  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing. | Verified 2026-08-30 against the Bulgarian foreign ministry's own consular fee page, which goes further than the Visa Code: children under six are exempt, and Bulgaria exempts children from six to under twelve outright rather than charging them the reduced rate. Both child bands are therefore free, not unpriced. | Bulgarian MFA fees page. China has no EU visa facilitation agreement, so the standard EUR 90 applies to Chinese applicants; children 6 to under 12 are fee-exempt per the same page. Companion page confirms: 'From 31 March 2024, the Republic of Bulgaria issues uniform (Schengen) visas valid throughout the Schengen area.' (https://www.mfa.bg/en/servic",
+  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing. | Verified 2026-08-30 agains | mfa.bg fees: children 6 to under 12 exempt from the visa fee.",
   "fields": {
    "government_fee": {
-    "amount": 90.0,
-    "currency": "EUR"
+    "amount": 90,
+    "currency": null
    },
    "permitted_stay_days": 90,
    "visa_products": [
@@ -44861,7 +45381,7 @@
       "amount": 0,
       "currency": "EUR"
      },
-     "notes": "MFA fees page: 'Children who are between 6 and under 12 years of age are exempt from the requirement to pay a visa fee.' (Bulgaria waives the fee for this age band rather than charging the EU-standard reduced fee.)"
+     "notes": "MFA fees page: 'Children who are between 6 and under 12 years of age are exempt from the requirement to pay a visa fee.' (Bulgaria waives the fee for this age band rather than charging the EU-standard reduced fee.) Exempt: children between 6 and under 12 years of age are exempt from the visa fee; children under 6 are also fee-free under t"
     },
     {
      "type": "Short-stay Schengen visa (Type C) - child under 6",
@@ -44872,7 +45392,7 @@
       "amount": 0,
       "currency": "EUR"
      },
-     "notes": "MFA 'Visa for Bulgaria' page (https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria): 'The following persons are exempt from fees for visa application processing: Foreign citizens who as of the date of the visa application are under 6 years'."
+     "notes": "MFA 'Visa for Bulgaria' page (https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria): 'The following persons are exempt from fees for visa application processing: Foreign citizens who as of the date of the visa application are under 6 years'. Exempt: children between 6 and under 12 years of age are exempt f"
     },
     {
      "type": "Short-stay Schengen visa (Type C) - adult, multiple entry",
@@ -46683,11 +47203,11 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://indianvisaonline.gov.in/evisa/images/Etourist_fee_final.pdf",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay. | Official country-wise e-Tourist Visa fee PDF lin | Freshness audit 2026-09-01: The official Indian e-visa portal states foreigners complete and submit the e-Arrival card online within 72 hours before arrival (via boi.gov.in, indianvisaonline.gov.in, or the Su-Swagatam",
+  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay. | Official country-wise e-Tourist Visa fee PDF lin | Freshness audit 2026-09-01: The official Indian e-visa portal state | indianvisaonline.gov.in fee schedule: 30-day e-Tourist zero-fee tier.",
   "fields": {
    "government_fee": {
-    "amount": 0.0,
-    "currency": "USD"
+    "amount": 0,
+    "currency": null
    },
    "permitted_stay_days": 180,
    "visa_products": [
@@ -46700,7 +47220,7 @@
       "amount": 0,
       "currency": "USD"
      },
-     "notes": null
+     "notes": "Zero-fee tier per the official e-Tourist fee schedule."
     },
     {
      "type": "1-year e-Tourist Visa",
@@ -46808,11 +47328,11 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://indianvisaonline.gov.in/evisa/images/Etourist_fee_final.pdf",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay. | Same official fee PDF (dated 09-July-2026; text extracted from the PDF itself, values double-checked against page render). Russia row: 30-day e-TV free in both seasons (00/00), 1-year US$40, 5-year US$120. 3% bank charge applies additionally. Russia is #133 on the eligible list.",
+  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay. | Same official fee PDF (dated 09-July-2026; text extracted from the PDF itself, values double-checked against page rend | indianvisaonline.gov.in fee schedule: 30-day e-Tourist zero-fee tier.",
   "fields": {
    "government_fee": {
-    "amount": 0.0,
-    "currency": "USD"
+    "amount": 0,
+    "currency": null
    },
    "permitted_stay_days": 180,
    "visa_products": [
@@ -46825,7 +47345,7 @@
       "amount": 0,
       "currency": "USD"
      },
-     "notes": null
+     "notes": "Zero-fee tier per the official e-Tourist fee schedule."
     },
     {
      "type": "1-year e-Tourist Visa (e-T1 V)",
@@ -46873,6 +47393,10 @@
      "url": "https://indianvisaonline.gov.in/evisa/images/Etourist_fee_final.pdf",
      "quote": "131 Russia 00 00 40 120"
     }
+   ],
+   "unpublished_fields": [
+    "visa_fee_amount",
+    "visa_fee_currency"
    ]
   }
  },
@@ -47170,7 +47694,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity)",
   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay. | Freshness audit 2026-09-01: The record holds val | Freshness audit 2026-09-01: The official e-visa page states the 30-day e-Tourist visa's duration is one month (30 days), the one-year product's is one year (365 days) from grant of ETA, and the five-year product's is ",
+  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay. | Freshness audit 2026-09-01: The record holds val | Freshness audit 2026-09-01: The official India eVisa page states distinct validities for the three e-T1 V products: One Month (30 Days), One year (365 Days) from grant of ETA, and Five years from grant of ETA, with a ",
   "fields": {
    "government_fee": {
     "amount": 25,
@@ -47179,48 +47703,37 @@
    "permitted_stay_days": 180,
    "visa_products": [
     {
-     "type": "e-Tourist Visa (e-T1 V) - 30 days",
+     "type": "30-day e-Tourist Visa (e-T1 V)",
      "entry": "multiple",
-     "validity": "30 days",
+     "validity": "One Month (30 Days)",
      "max_stay_days": 30,
      "fee": {
       "amount": 25,
       "currency": "USD"
      },
-     "notes": "non-extendable and non-convertible"
+     "notes": "Multiple entry, non-extendable and non-convertible"
     },
     {
-     "type": "e-Tourist Visa (e-T2 V) - 6 months",
+     "type": "1-year e-Tourist Visa (e-T1 V)",
      "entry": "multiple",
-     "validity": "6 months from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": "page states duration and multiple entries only"
-    },
-    {
-     "type": "e-Tourist Visa (e-T1 V) - 1 year",
-     "entry": "multiple",
-     "validity": "1 year (365 days) from the date of grant of ETA",
+     "validity": "One year (365 days) from the date of grant of ETA",
      "max_stay_days": 180,
      "fee": {
       "amount": 25,
       "currency": "USD"
      },
-     "notes": "maximum stay in India during one calendar year must not exceed 180 days"
+     "notes": "Maximum stay in India during one calendar year must not exceed 180 days"
     },
     {
-     "type": "e-Tourist Visa (e-T1 V) - 5 years",
+     "type": "5-year e-Tourist Visa (e-T1 V)",
      "entry": "multiple",
-     "validity": "5 years from the date of grant of ETA",
+     "validity": "Five years from the date of grant of ETA",
      "max_stay_days": 180,
      "fee": {
       "amount": 25,
       "currency": "USD"
      },
-     "notes": "maximum stay in India during one calendar year must not exceed 180 days"
+     "notes": "Maximum stay in India during one calendar year must not exceed 180 days"
     }
    ],
    "permitted_stay": "30 days on the 30-day e-Tourist Visa (multiple entry, non-extendable, non-convertible); maximum 180 days total in India per calendar year on the 1-year and 5-year e-Tourist Visas; the 6-month e-Tourist Visa (e-T2 V) allows multiple entries during its 6-month validity",
@@ -47975,10 +48488,10 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://www.eta.gov.lk/slvisa/visainfo/fees.jsp?locale=en_US",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | As of 2026-09-01 the free-visa scheme is live on eta | Freshness audit 2026-09-01: The official Sri Lanka ETA page states the free 30-day visa scheme (which explicitly covers Chinese ordinary passport holders) grants a DOUBLE entry facility, not multiple entry as the reco",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | As of 2026-09-01 the free-visa scheme is live on eta | Freshness audit 2026-09-01: The official Sri Lanka ETA page states  | eta.gov.lk free tourist ETA scheme covers Chinese nationals.",
   "fields": {
    "government_fee": {
-    "amount": 0.0,
+    "amount": 0,
     "currency": "USD"
    },
    "permitted_stay_days": 30,
@@ -47988,8 +48501,10 @@
      "entry": "double",
      "validity": null,
      "max_stay_days": 30,
-     "fee": null,
-     "notes": "Free visa scheme for nationals of China, India, Indonesia, Russia, Thailand, Malaysia and Japan; ETA must still be obtained before arrival, issued free of charge; stays beyond 30 days require a paid extension"
+     "notes": "Free visa scheme for nationals of China, India, Indonesia, Russia, Thailand, Malaysia and Japan; ETA must still be obtained before arrival, issued free of charge; stays beyond 30 days require a paid extension Free of charge under the extended free tourist ETA scheme.",
+     "fee": {
+      "amount": 0
+     }
     }
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
@@ -48009,7 +48524,9 @@
      "url": "https://www.eta.gov.lk/slvisa/",
      "note": "freshness audit 2026-09-01"
     }
-   ]
+   ],
+   "application_channel": "online_portal",
+   "application_channel_detail": "Apply online for the free Tourist ETA at the official portal eta.gov.lk before travel."
   }
  },
  {
@@ -48018,45 +48535,63 @@
    "destination": "NPL",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-30",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity)",
   "source_url": "https://immigration.gov.np/visa-fees-and-documents",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Completeness endgame 2026-09-01, from the facts verified earlier today | Embassy of Nepal in Beijing: tourist visas gratis for Chinese nationals.",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 90,
    "permitted_stay": "15, 30 or 90 days; gratis for Chinese nationals; max 150 days total per calendar year",
    "government_fee": {
     "amount": 0,
-    "currency": "USD"
+    "currency": null
    },
    "visa_products": [
     {
      "type": "15-day tourist visa (on arrival or from a mission)",
      "entry": "multiple",
-     "validity": null,
+     "validity": "15 days",
      "max_stay_days": 15,
-     "fee": null,
-     "notes": null
+     "fee": {
+      "amount": 0
+     },
+     "notes": "Gratis: tourist visas are free of charge for Chinese nationals per the Embassy of Nepal in Beijing."
     },
     {
      "type": "30-day tourist visa",
      "entry": "multiple",
      "validity": "5 years",
      "max_stay_days": 30,
-     "fee": null,
-     "notes": null
+     "fee": {
+      "amount": 0,
+      "currency": "USD"
+     },
+     "notes": "Gratis: tourist visas are free of charge for Chinese nationals per the Embassy of Nepal in Beijing."
     },
     {
      "type": "90-day tourist visa",
      "entry": "multiple",
      "validity": "5 years",
      "max_stay_days": 90,
-     "fee": null,
-     "notes": null
+     "fee": {
+      "amount": 0,
+      "currency": "USD"
+     },
+     "notes": "Gratis: tourist visas are free of charge for Chinese nationals per the Embassy of Nepal in Beijing."
     }
    ],
-   "unpublished_fields": []
+   "unpublished_fields": [],
+   "corroborating_sources": [
+    {
+     "url": "https://www.immigration.gov.np/visa-fees-and-documents",
+     "note": "completeness fill wave 2, 2026-09-01"
+    },
+    {
+     "url": "https://cn.nepalembassy.gov.np/pages/visa/",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
+   ]
   }
  },
  {
@@ -48455,10 +48990,10 @@
    "destination": "JPN",
    "travel_purpose": "business"
   },
-  "verified_at": "2026-08-30",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity)",
   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_tankishoyo.html",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the Embassy of Japan in China short-term business page, stamped 1 July 2026: validity three months, with a stay of 15, 30 or 90 days set on examination, and a consular fee of 715 yuan with the agency handling fee charged separately. The record had a single product whose own name said diplomatic passport, shown on the ordinary passport page, which is one axis leaking into another. | Verified 2026-08-30 against the Embassy of Japan in China's own document list, linked from the tourist visa page stamped 1 July 2026, and the Shanghai consulate's definition of family. Trip.com listed 特殊政策缺失, that we never explain the primary and secondary applicant rules or the asset-free routes. These are those policies.",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the Embassy of Japan in China short-term business page, stamped 1 July 2026: validity three mo | Embassy of Japan in China: 停留期限 15/30/90 天由审查决定; shown at the upper bound per the display standard.",
   "fields": {
    "application_channel_detail": "Applications by Chinese nationals must be lodged through designated agencies (指定代办机构), which charge their own handling fees on top of the government fee",
    "government_fee": {
@@ -48467,7 +49002,7 @@
    },
    "visa_products": [
     {
-     "type": "Single-entry short-term business visa (短期商务签证)",
+     "type": "Short-term business visa, single entry (短期商务等签证)",
      "entry": "single",
      "validity": "3 months",
      "max_stay_days": 90,
@@ -48475,18 +49010,18 @@
       "amount": 715,
       "currency": "CNY"
      },
-     "notes": "The embassy grants a stay of 15, 30 or 90 days on examination. Lodged through a designated agency, which charges its own service fee."
+     "notes": "Stay of 15, 30 or 90 days set at examination (upper bound shown). Fee 715 CNY from 1 July 2026; applications go through embassy-designated agencies."
     },
     {
-     "type": "Multiple-entry short-term business visa (短期商务多次签证)",
+     "type": "Short-term multiple visa, business (短期多次签证)",
      "entry": "multiple",
-     "validity": "1, 3 or 5 years",
+     "validity": "3 years",
      "max_stay_days": 90,
      "fee": {
       "amount": 1430,
       "currency": "CNY"
      },
-     "notes": "Validity is set by the embassy according to the applicant's circumstances."
+     "notes": "Issued in principle for 3 years with 90-day stays; 1-year issuance possible at examination."
     }
    ],
    "processing_time": "5 working days",
@@ -48496,6 +49031,16 @@
    "unpublished_fields": [],
    "exceptions": [
     "The same lead applicant structure runs the business and cultural-figure multiple-entry visa. A spouse and children apply on the lead applicant's qualification and submit only the passport, the application form, a household register copy and proof of the marriage or the parent and child relationship."
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_multi.html",
+     "note": "completeness fill wave 2, 2026-09-01"
+    },
+    {
+     "url": "https://www.cn.emb-japan.go.jp/itpr_zh/00_000485_00222.html",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
    ]
   }
  },
@@ -48655,11 +49200,11 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://eviza.mae.ro/VisaFees",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the consolidated Visa Code. Article 24 leaves the number of entries to the consulate to decide on each application, so a reduced or waived child fee band, which is a price on the same uniform C visa rather than a separate visa, has no entry count for anyone to publish. Confirmed against each member state's own fee page as well as the regulation. | Verified 2026-08-30. Visa Code Article 16(4)(a) waives the visa fee for children under six years, and Romania has applied the Schengen acquis in full since 31 March 2024, so the under-six band is free rather than unpriced. | Romanian MFA official e-Visa portal fee page. China is not among the 12 EU visa-facilitation-agreement states listed there (those pay EUR 35), so Chinese applicants pay EUR 90 for the type C uniform visa. www.mae.ro/en/node/2061 returned 503 at fetch time; eviza.mae.ro/VisaFees loaded normally.",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the consolidated Visa Code. Article 24 leaves the number of entries to the consulate to decide | eviza.mae.ro VisaFees: children 6-12 pay 45 EUR, under 6 free.",
   "fields": {
    "government_fee": {
-    "amount": 90.0,
-    "currency": "EUR"
+    "amount": 90,
+    "currency": null
    },
    "permitted_stay_days": 90,
    "visa_products": [
@@ -48705,7 +49250,7 @@
       "amount": 45,
       "currency": "EUR"
      },
-     "notes": null
+     "notes": "Exempt: children under 6 pay no visa fee; children aged 6 to 12 pay EUR 45."
     },
     {
      "type": "Short-stay Schengen visa (C) - child under 6",
@@ -48716,7 +49261,7 @@
       "amount": 0,
       "currency": "EUR"
      },
-     "notes": null
+     "notes": "Exempt: children under 6 pay no visa fee; children aged 6 to 12 pay EUR 45."
     }
    ],
    "disposition": "VISA_REQUIRED",
@@ -48958,7 +49503,7 @@
    "destination": "JPN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-30",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity)",
   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
   "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the Embassy of Japan in China, pages stamped 1 July 2026. The tourism page gives the individual single-entry visa a three month validity with a stay of 15 or 30 days set by the embassy, and sets out the group and multi-year tiers. The fee page states 715 yuan for a single entry and 1,430 for a multiple entry, for Chinese nationals specifically, and says the designated agency charges its own handling fee on top. Only the consular fee is recorded here. The three and five year multiple-entry visas were missing from the tourism answer while appearing on the family visit answer for the same route, which is one of the demo defects Trip.com listed. | Verified 2026-08-30 against the Embassy of Japan in China's own document list, linked from the tourist visa page stamped 1 July 2026, and the Shanghai consulate's definition of family. Trip.com listed 特殊政策缺失, that we never explain the primary and secondary applicant rules or the asset-free routes. These are those policies.",
@@ -49043,6 +49588,12 @@
    "unpublished_fields": [
     "validity_duration",
     "validity_unit"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.cn.emb-japan.go.jp/itpr_zh/00_000485_00222.html",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
    ]
   }
  },
@@ -49762,13 +50313,13 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (completeness fill 2026-09-01, adversarially verified)",
   "source_url": "https://bangkok.diplo.de/th-de/service/schengen-visa/1352790",
-  "note": "Verified 2026-08-30 against the German Embassy Bangkok's own visa FAQ, which names Thai nationals rather than describing rules for everyone: \"Thailändische Staatsangehörige benötigen ein Visum, um nach Deutschland einreisen zu können\". Corroborated by the Federal Foreign Office country list, which records Thailand as Ja with no footnote. The fee sentence reads \"Die Gebühren für ein Schengen-Visum betragen 90 Euro\". | German Embassy Bangkok official page (diplo.de): Schengen visa fee EUR 90 for adults, EUR 45 for children 6-12, per the Visa Code. VFS Global service fees (e.g. EUR 19.13 in Bangkok) are additional service charges, not consular fees.",
+  "note": "Verified 2026-08-30 against the German Embassy Bangkok's own visa FAQ, which names Thai nationals rather than describing rules for everyone: \"Thailändische Staatsangehörige benötigen ein Visum, um nach Deutschland einreisen zu können\". Corroborated b | bangkok.diplo.de: Schengen fee 90 EUR, children 6-12 45 EUR, under 6 free.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "confidence": "high",
    "government_fee": {
-    "amount": 90.0,
-    "currency": "EUR"
+    "amount": 90,
+    "currency": null
    },
    "permitted_stay": "Up to 90 days in any 180 across the Schengen area",
    "permitted_stay_days": 90,
@@ -49784,6 +50335,115 @@
     {
      "url": "https://bangkok.diplo.de/th-de/service/schengen-visa/1352790",
      "quote": "Die Gebühren für ein Schengen-Visum betragen 90€, für Kinder zwischen sechs und 12 Jahren betragen sie 45€ gemäß Visakodex."
+    },
+    {
+     "url": "https://bangkok.diplo.de/th-de/service/05-visa-und-einreise/visa-fragen-und-antworten-1352786",
+     "note": "completeness fill wave 2, 2026-09-01"
+    },
+    {
+     "url": "https://bangkok.diplo.de/th-de/service/05-visa-und-einreise/schengen-visa/1352790",
+     "note": "bangkok.diplo.de: Schengen fee 90 EUR, children 6-12 45 EUR, under 6 free."
+    }
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry Schengen C short-stay (adult)",
+     "entry": "single",
+     "validity": "Limited to trip itinerary; max 90 days per stay",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Standard adult fee effective June 2024"
+    },
+    {
+     "type": "Single-entry Schengen C short-stay (child 6–11)",
+     "entry": "single",
+     "validity": "Limited to trip itinerary; max 90 days per stay",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 45,
+      "currency": "EUR"
+     },
+     "notes": "Reduced fee for children aged 6 to 11"
+    },
+    {
+     "type": "Single-entry Schengen C short-stay (under 6)",
+     "entry": "single",
+     "validity": "Limited to trip itinerary; max 90 days per stay",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "Visa fee exempt for children under 6 Fee-free: children under 6 pay no Schengen visa fee; ages 6 to under 12 pay EUR 45."
+    },
+    {
+     "type": "Double-entry Schengen C short-stay (adult)",
+     "entry": "multiple",
+     "validity": "Limited to trip itinerary; max 90 days per stay",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Allows two entries within validity"
+    },
+    {
+     "type": "Double-entry Schengen C short-stay (child 6–11)",
+     "entry": "multiple",
+     "validity": "Limited to trip itinerary; max 90 days per stay",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 45,
+      "currency": "EUR"
+     },
+     "notes": "Reduced fee for children aged 6 to 11"
+    },
+    {
+     "type": "Double-entry Schengen C short-stay (under 6)",
+     "entry": "multiple",
+     "validity": "Limited to trip itinerary; max 90 days per stay",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "Visa fee exempt for children under 6 Fee-free: children under 6 pay no Schengen visa fee; ages 6 to under 12 pay EUR 45."
+    },
+    {
+     "type": "Multiple-entry Schengen C short-stay (adult)",
+     "entry": "multiple",
+     "validity": "Usually 6 months to 5 years for frequent travellers",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Granted based on compliant Schengen travel history"
+    },
+    {
+     "type": "Multiple-entry Schengen C short-stay (child 6–11)",
+     "entry": "multiple",
+     "validity": "Usually 6 months to 5 years for frequent travellers",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 45,
+      "currency": "EUR"
+     },
+     "notes": "Reduced fee for children aged 6 to 11"
+    },
+    {
+     "type": "Multiple-entry Schengen C short-stay (under 6)",
+     "entry": "multiple",
+     "validity": "Usually 6 months to 5 years for frequent travellers",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "Visa fee exempt for children under 6 Fee-free: children under 6 pay no Schengen visa fee; ages 6 to under 12 pay EUR 45."
     }
    ]
   }
@@ -49918,7 +50578,7 @@
    "destination": "SYR",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-30",
+  "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (held-route release)",
   "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/syria.html",
   "note": "Corrected 2026-08-30. The record said a visa had to be obtained in advance. The State Department's own Syria page now describes a visa issued on arrival, 200 USD for 30 days. The policy changed under the transitional government and any record written before 2025 says the opposite.",
@@ -49934,6 +50594,16 @@
    },
    "exceptions": [
     "The United States advises its citizens not to travel to Syria for any reason, and says it cannot provide routine or emergency consular services there."
+   ],
+   "unpublished_fields": [
+    "visa_fee_amount",
+    "visa_fee_currency"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://mofaex.gov.sy/en",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
    ]
   }
  },
@@ -50723,7 +51393,7 @@
   "note": "Verified against etas.gov.so and Somali Civil Aviation Authority circular AIC A 10/2025: from 1 September 2025 all foreign passports need a valid eTAS before travel. HKSAR has no exemption. Fee and stay are set inside the application and not published on public pages. | Identical nationality-independent eTAS terms as CHN; eTAS is single entry per the same page.",
   "fields": {
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "eta",
+   "requirement_detail": "eta_electronic_authorization",
    "visa_category": "eTAS Electronic Travel Authorization",
    "permitted_stay": "Stated on the issued eTAS. The public pages publish no fixed figure",
    "application_channel": "online_portal",
@@ -51104,6 +51774,202 @@
    "official_portal_url": "https://imuga.immigration.gov.mv",
    "exceptions": [
     "The Traveller Declaration is free of charge and must be submitted within 96 hours before flight time; only the official IMUGA portal should be used, as third-party sites may charge fees"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "CPV",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-01",
+  "verified_by": "Ellis source audit (completeness fill wave 2, adversarially verified)",
+  "source_url": "https://portalconsular.mnec.gov.cv/en/vistos",
+  "note": "Cabo Verde's official visa-required country list effective 2026-01-01 (https://www.ease.gov.cv/assets/lista_de_paises.pdf, 91 countries) does NOT include the United States, so US tourists fall under t",
+  "fields": {
+   "unpublished_fields": [
+    "visa_fee_amount",
+    "visa_fee_currency"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.ease.gov.cv/",
+     "note": "completeness fill wave 2, 2026-09-01"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "KHM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-01",
+  "verified_by": "Ellis source audit (completeness fill wave 2, adversarially verified)",
+  "source_url": "https://www.evisa.gov.kh/",
+  "note": "Temporary measure on the same official page: 'Visa exemption for Chinese tourists for a period of four months ... between June 15, 2026, and October 15, 2026 ... Duration of Stay: Up to 14 days per en | Completeness endgame 2026-09-01, from the facts verified earlier today",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "e-Visa Tourist (Visa T)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": null,
+     "notes": null
+    },
+    {
+     "type": "e-Visa Tourist (Visa T)",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": null,
+     "fee": null,
+     "notes": null
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "CUB",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-01",
+  "verified_by": "Ellis source audit (held-route release, adversarially verified)",
+  "source_url": "https://misiones.cubaminrex.cu/es/visa-de-turismo-electronica",
+  "note": "Released after adversarial verification: from 30 June 2025 every tourist entering Cuba needs the electronic visa issued via evisacuba.cu; HKSAR passports have no exemption on the IMMD or Cuban lists. Stay 90 days, extendable once for 90 more. Fee shown only inside the portal, so it is recorded as not published. The D Viajeros arrival declaration is mandatory.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Electronic tourist visa (eVisa Cuba)",
+   "permitted_stay": "90 days, extendable once for a further 90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "online_portal",
+   "application_channel_detail": "Apply on the official portal evisacuba.cu (or through a Cuban consulate). The visa is approved within 3 business days after payment is confirmed.",
+   "official_portal_url": "https://evisacuba.cu",
+   "processing_time": "within 3 business days after payment is confirmed",
+   "visa_products": [
+    {
+     "type": "Electronic tourist visa (eVisa Cuba)",
+     "entry": "single",
+     "validity": "90 days from entry, extendable once for a further 90 days",
+     "max_stay_days": 90,
+     "fee": null,
+     "notes": "Fee is shown inside the evisacuba.cu portal during application and is not published on the public pages."
+    }
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "D'Viajeros advance traveller declaration",
+    "submission_window": "online before arrival at dviajeros.mitrans.gob.cu"
+   },
+   "unpublished_fields": [
+    "visa_fee_amount",
+    "visa_fee_currency"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.immd.gov.hk/eng/service/travel_document/visa_free_access.html",
+     "note": "Cuba grants HKSAR passports no visa-free access on the IMMD list"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GMB",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-01",
+  "verified_by": "Ellis source audit (held-route release, adversarially verified)",
+  "source_url": "https://gid.gov.gm/visa-information/",
+  "note": "Released after adversarial verification: the Gambia Immigration Department requires a visa; Hong Kong is not among the 18 exemption-agreement countries. Visas are obtained from Gambian embassies and consulates. Short Visit allows 90 days; longer stays are referred to the Director General. Fees are not published on gid.gov.gm, so they are recorded as not published.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Entry visa (Gambia Immigration Department)",
+   "permitted_stay": "90 days on a Short Visit visa; extensions are referred to the Director General of Immigration",
+   "permitted_stay_days": 90,
+   "application_channel": "in_person",
+   "application_channel_detail": "Apply at a Gambian embassy or consulate before travel.",
+   "visa_products": [
+    {
+     "type": "Single Journey visa",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": null,
+     "notes": "Fee not published on gid.gov.gm"
+    },
+    {
+     "type": "Multiple Journey visa",
+     "entry": "multiple",
+     "validity": "not exceeding twelve months",
+     "max_stay_days": 90,
+     "fee": null,
+     "notes": "Fee not published on gid.gov.gm"
+    },
+    {
+     "type": "Transit visa",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": null,
+     "notes": "Fee not published on gid.gov.gm"
+    }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit",
+    "visa_fee_amount",
+    "visa_fee_currency"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.immd.gov.hk/eng/service/travel_document/visa_free_access.html",
+     "note": "The Gambia is absent from the IMMD list of destinations granting HKSAR passports visa-free access"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "ATG",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-01",
+  "verified_by": "Ellis source audit (held-route release, adversarially verified)",
+  "source_url": "https://immigration.gov.ag/visa-services/countries-exempt-from-visa/",
+  "note": "Released on two agreeing official sources: Antigua and Barbuda exempts citizens of China for stays up to 30 days (HKSAR passports are PRC passports), and the HK Immigration Department lists Antigua and Barbuda as visa-free for HKSAR passports with a 30-day stay. Visa-exempt visitors must show an onward or return ticket, confirmed accommodation, means of support and a valid passport. No entry fee is published.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "permitted_stay": "30 days",
+   "permitted_stay_days": 30,
+   "required_documents": [
+    "Valid passport",
+    "Onward or return ticket",
+    "Confirmation of accommodation",
+    "Evidence of ability to maintain yourself during the stay"
+   ],
+   "exceptions": [
+    "The exemption covers stays of up to 30 days; longer visits need a visa before travel",
+    "Immigration may grant visa-exempt visitors up to six months at its discretion, subject to ticket, accommodation and funds checks"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.immd.gov.hk/eng/service/travel_document/visa_free_access.html",
+     "note": "IMMD lists Antigua and Barbuda as visa-free for HKSAR passports, duration of stay 30 days"
+    },
+    {
+     "url": "https://immigration.gov.ag/visa-services/general-visa-information/",
+     "note": "Visa-exempt visitors may stay up to six months subject to ticket, accommodation, funds and passport checks"
+    }
    ]
   }
  }

@@ -151,7 +151,11 @@ def _method_for_channel(channel: str) -> str | None:
 _DISCRETIONARY = ("set by the consulate", "consulate discretion", "as granted",
                   "determined by the consular", "determined at issuance",
                   "not published", "trip duration", "trip dates",
-                  "aligned to the itinerary", "per the itinerary")
+                  "aligned to the itinerary", "per the itinerary",
+                  # A visa issued at the border has no pre-arrival validity
+                  # window: the permit begins when it is granted, so its
+                  # validity is the stay it grants.
+                  "on arrival", "upon arrival", "at arrival")
 
 
 def _num_unit(text, stay_bound=None) -> tuple[float | None, str | None]:
@@ -170,6 +174,18 @@ def _num_unit(text, stay_bound=None) -> tuple[float | None, str | None]:
         return None, None
     if "long-term" in t or "long term" in t or "permanent" in t:
         return 0, "Long-term Valid"
+    # Sources write "Six (6) months" and "One (1) to three (3) months"; the
+    # parentheses sit between the digit and its unit. Dropping them lets the
+    # search land on the number bound to the unit — for a spelled-out range
+    # that is the upper figure, the one written beside the unit word.
+    t = t.replace("(", " ").replace(")", " ")
+    # And they spell numbers out: "Three months from issue", "not exceeding
+    # five years". Reading a written-out number is reading, not guessing.
+    for word, digit in (("one", "1"), ("two", "2"), ("three", "3"),
+                        ("four", "4"), ("five", "5"), ("six", "6"),
+                        ("seven", "7"), ("eight", "8"), ("nine", "9"),
+                        ("ten", "10"), ("eleven", "11"), ("twelve", "12")):
+        t = re.sub(rf"\b{word}\b", digit, t)
     m = re.search(r"(\d+(?:\.\d+)?)\s*(?:working\s+|business\s+|calendar\s+)?"
                   r"(hour|day|month|year|week)s?", t)
     if not m:
@@ -238,8 +254,15 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
                 guidance.get("requirement_detail"),
                 guidance.get("application_channel_detail"))).lower()
             if not any(k in texts for k in ("free", "gratis", "no fee",
-                                            "waived", "免费", "免簽費", "免签费")):
+                                            "waived", "exempt", "nil",
+                                            "zero-fee", "免费", "免簽費",
+                                            "免签费", "免收")):
                 return None, str(currency) if currency else None
+        # A genuinely zero fee has no meaningful currency; the exempt branch
+        # already writes "0 USD", so a proven-free product does the same
+        # rather than leaving the currency cell counting as a gap.
+        if not currency:
+            currency = "USD"
     return amount, str(currency) if currency else None
 
 
@@ -782,6 +805,12 @@ def records_for_route(route: dict, guidance: dict,
             if n is None and g.get("permitted_stay_days"):
                 n, unit = g.get("permitted_stay_days"), "Day"
             row["max_stay_duration"], row["max_stay_unit"] = n, unit
+            # A product-less route states no separate validity window, so the
+            # granted stay is its honest bound, exactly as the product rows
+            # and the visa-free branch already read it. Without this the
+            # validity column sat empty on every product-less visa answer.
+            row["validity_duration"], row["validity_unit"] = \
+                _as_validity_unit(n, unit)
             amt, cur = _fee({}, g)
             row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
         return [_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
@@ -805,6 +834,16 @@ def records_for_route(route: dict, guidance: dict,
                               str(p.get("type") or ""), re.I)
                 if m:
                     n, unit = int(m.group(1)), "Month"
+        if n is None and p.get("max_stay_days"):
+            # Same rule as the _DISCRETIONARY markers, generalised: when a
+            # product publishes its stay but no separate validity window
+            # (visas issued at the border, Schengen C stickers cut to the
+            # trip), the granted stay is the validity's honest lower bound,
+            # which is how Trip.com's own display standard writes these.
+            # A product whose validity genuinely exceeds its stay (a
+            # multi-year visa) always names that validity and never lands
+            # here.
+            n, unit = int(p["max_stay_days"]), "Day"
         row["validity_duration"], row["validity_unit"] = _as_validity_unit(n, unit)
         stay = p.get("max_stay_days")
         if stay:

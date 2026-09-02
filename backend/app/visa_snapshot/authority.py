@@ -148,6 +148,20 @@ GOV_SUFFIXES = (
     # the gated mofaex.gov.sy.
     "myanmarconsulatehk.org", "seychelles.govtas.com", "knatravelform.kn",
     "evisa.sy",
+    # Official diplomatic-mission sites verified live in a browser
+    # 2026-09-01, each the competent mission for the routes it grounds:
+    # the Embassy of Namibia in Washington, the Syrian Embassy in Beijing
+    # (its Chinese visa page states the 75/200 CNY fees itself), the
+    # Bangladesh Consulate General in New York (visa-on-arrival page), the
+    # Iranian Interests Section in Washington (daftar.org, with forms on
+    # static.daftar.org), and the Kenyan Embassy in Washington (eTA page).
+    "namibiaembassyusa.org", "syrembassy.cn", "bdcgny.org", "daftar.org",
+    "kenyaembassydc.org",
+    # Verified live in a browser 2026-09-01: the Embassy of the Lao PDR in
+    # Washington, and Cote d'Ivoire's consular-fee payment portal run by the
+    # Direction Generale du Tresor ("REPUBLIQUE DE COTE D'IVOIRE, Consular
+    # Services online payment" on its own masthead).
+    "laoembassy.com", "ci-embassyepay.org",
     # State-run systems verified 2026-08-22: Mongolia's e-visa, Lithuania's
     # MIGRIS (Migration Department), the Russian MFA consular department, and
     # France's state public-administration portal.
