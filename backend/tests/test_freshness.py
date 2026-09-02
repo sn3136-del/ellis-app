@@ -394,3 +394,73 @@ def test_dead_links_are_stripped_and_bot_walls_are_kept():
         assert g["source_url"] == "https://example.com/alive"
     finally:
         url_health.set_checker(None)
+
+
+def test_due_rows_selects_the_48_hour_backlog_oldest_first(db):
+    """The automatic sweep's worklist: never-checked rows first, then rows
+    whose last grounded check is older than the cycle; freshly checked rows
+    and transit variants stay out; the cap holds."""
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone.utc)
+    def seed(key_suffix, checked_at):
+        row = KimiRouteGuidanceCache(
+            cache_key=f"AAA|AAA|BB{key_suffix}|tourism|default|unknown|v6"
+                      + ("" if "via" not in key_suffix else ""),
+            route={"passport_nationality": "AAA"}, status="KIMI_PRIMARY",
+            guidance=dict(STALE_JPN))
+        if checked_at is not None:
+            row.verification = {"grounded_check": {"at": checked_at,
+                                                   "outcome": "checked"}}
+        db.add(row)
+        return row
+    seed("1", None)                                             # never checked
+    seed("2", (now - timedelta(hours=72)).isoformat())          # overdue
+    seed("3", (now - timedelta(hours=3)).isoformat())           # fresh
+    via = KimiRouteGuidanceCache(
+        cache_key="AAA|AAA|BB4|tourism|default|unknown|v6|via:JPN",
+        route={}, status="KIMI_PRIMARY", guidance=dict(STALE_JPN))
+    db.add(via)
+    db.commit()
+    got = [r.cache_key for r in freshness.due_rows(db, older_than_hours=48)]
+    assert "AAA|AAA|BB1|tourism|default|unknown|v6" == got[0]   # never first
+    assert "AAA|AAA|BB2|tourism|default|unknown|v6" in got
+    assert all("BB3" not in k and "via:" not in k for k in got)
+    capped = freshness.due_rows(db, older_than_hours=48, limit=1)
+    assert len(capped) == 1
+
+
+def test_the_48_hour_drill_plants_catches_and_never_leaves_a_trace(db):
+    """Their §VI.4 simulation as a product feature: plant a fake policy
+    change, let the automatic recheck read the official page and put the
+    record right, and read the elapsed time off the response. When the
+    recheck misses, the drill restores the original itself."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    ADMIN = {"authorization": "Bearer admin-token", "x-org-id": "org-b",
+             "x-user-id": "op-1"}
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": False,
+        "corrected_fields": {"government_fee": {"amount": 200,
+                                                "currency": "CNY"}},
+        "evidence": {"government_fee": "single entry 200 CNY"},
+        "note": "drill corrected"})
+    out = client.post("/database/freshness/drill", headers=ADMIN,
+                      json={"nationality": "CHN", "destination": "JPN"}).json()
+    assert out["ok"] and out["field"] == "government_fee"
+    assert out["caught"] is True and out["seconds"] >= 0
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.guidance["government_fee"]["amount"] == 200
+    # Miss path: a recheck that calls the planted value consistent.
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": True, "corrected_fields": {}, "evidence": {}})
+    out2 = client.post("/database/freshness/drill", headers=ADMIN,
+                       json={"nationality": "CHN", "destination": "JPN"}).json()
+    assert out2["caught"] is False and out2["restored"] is True
+    db.expire_all()
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.guidance["government_fee"]["amount"] == 200       # no trace

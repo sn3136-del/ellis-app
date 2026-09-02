@@ -905,7 +905,7 @@ export default function TravelDatabase({ onBack }) {
         nationality: nat, destination: dest, travel_purpose: shown.purpose,
         travel_document_type: shown.doc,
       } : askCtx, hist)
-      if (out.identity || out.off_topic) {
+      if (out.identity || out.off_topic || out.greeting) {
         // Ellis answered for itself: no route changes, no card repaint.
         pushChat({ role: 'ellis', kind: 'info', text: out.reply })
         clearTimeout(slowTimer); setAskSlow(false); setAskBusy(false)

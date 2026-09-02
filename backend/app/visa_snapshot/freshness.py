@@ -332,3 +332,26 @@ def recheck_route(db, route: dict) -> dict | None:
 def has_been_grounded(row) -> bool:
     gc = (row.verification or {}).get("grounded_check") or {}
     return gc.get("outcome") == "checked"
+
+
+def due_rows(db, *, older_than_hours: int = 48, limit: int = 400) -> list:
+    """The cached answers whose last grounded check is older than the cycle,
+    oldest first — the worklist for the automatic 48-hour sweep. A row never
+    checked sorts first of all. Transit (via:) variants are skipped: the
+    canonical row carries the route's facts and the variants inherit its
+    corrections at read time through the same guidance fields."""
+    from datetime import datetime, timedelta, timezone
+    from . import kimi_primary
+    cutoff = (datetime.now(timezone.utc)
+              - timedelta(hours=older_than_hours)).isoformat()
+    out = []
+    for row in db.execute(select(KimiRouteGuidanceCache)).scalars():
+        key = row.cache_key or ""
+        if f"|{kimi_primary.CACHE_VERSION}" not in key or "|via:" in key:
+            continue
+        gc = (row.verification or {}).get("grounded_check") or {}
+        at = str(gc.get("at") or "")
+        if not at or at < cutoff:
+            out.append((at, row))
+    out.sort(key=lambda pair: pair[0])
+    return [row for _at, row in out[:limit]]

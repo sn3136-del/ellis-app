@@ -668,3 +668,22 @@ def test_the_passport_never_changes_mid_conversation(client):
                              "context": {"nationality": "CHN",
                                          "destination": "JPN"}}).json()
     assert out2["route"]["nationality"] == "JPN"
+
+
+def test_greetings_are_greeted_not_refused(client):
+    """"hello" was answered with the immigration-only refusal. A pleasantry
+    gets a welcome; a greeting carrying a real question still flows through."""
+    out = client.post("/database/ask", headers=READER,
+                      json={"question": "hello"}).json()
+    assert out.get("greeting") and "Ellis" in out["reply"]
+    zh = client.post("/database/ask", headers=READER,
+                     json={"question": "你好"}).json()
+    assert zh.get("greeting") and "Ellis" in zh["reply"]
+    thanks = client.post("/database/ask", headers=READER,
+                         json={"question": "thanks!"}).json()
+    assert thanks.get("greeting")
+    kimi_primary.set_provider(lambda system, user: {"understood": False})
+    real = client.post("/database/ask", headers=READER,
+                       json={"question": "hello, do i need a visa for japan "
+                                         "with a chinese passport"}).json()
+    assert not real.get("greeting")

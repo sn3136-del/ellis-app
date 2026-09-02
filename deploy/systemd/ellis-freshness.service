@@ -1,0 +1,11 @@
+[Unit]
+Description=Ellis 48-hour freshness sweep (re-verify answers against official pages)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/ellis/backend
+EnvironmentFile=/opt/ellis/backend/.env
+ExecStart=/opt/ellis/backend/.venv/bin/python /opt/ellis/backend/scripts/freshness_sweep.py
+TimeoutStartSec=3600
+Nice=10

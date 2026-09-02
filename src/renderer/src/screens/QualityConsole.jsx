@@ -1274,7 +1274,122 @@ function EditForm({ rec, onEdit, t }) {
   )
 }
 
-function RecordsTable({ records, total, onFlag, onRelease, onEdit, t, flagOf, typeNames = {}, tvv = (x) => x }) {
+
+function RefreshButton({ rec, onRefresh, t }) {
+  // One click: Ellis re-reads this route's official pages and updates the
+  // record when the page says something different now.
+  const [state, setState] = useState(null)
+  async function run() {
+    setState('busy')
+    try {
+      const r = await onRefresh(rec)
+      const research = r && r.research
+      if (research && (research.changed || []).length > 0)
+        setState({ ok: t('ops.refresh.corrected').replace(
+          '{fields}', research.changed.join(', ')) })
+      else if (research && (research.disputed_fields || []).length > 0)
+        setState({ ok: t('ops.refresh.disputed') })
+      else if (research && research.outcome === 'checked')
+        setState({ ok: t('ops.refresh.ok') })
+      else
+        setState({ ok: t('ops.refresh.noRead') })
+    } catch (e) {
+      setState({ err: String(e?.detail || e?.message || e) })
+    }
+  }
+  return (
+    <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center',
+                   flexWrap: 'wrap' }}>
+      <button onClick={run} disabled={state === 'busy'}
+              data-testid="ops-refresh-btn"
+              style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                       border: `1px solid ${GREEN}`, cursor: 'pointer',
+                       padding: '9px 18px', background: '#fff', color: GREEN,
+                       marginTop: 10, opacity: state === 'busy' ? 0.6 : 1 }}>
+        {state === 'busy' ? t('ops.refresh.busy') : t('ops.refresh.btn')}
+      </button>
+      {state && state.ok && (
+        <span style={{ fontSize: 12.5, fontWeight: 600, color: GREEN }}>
+          {state.ok}
+        </span>
+      )}
+      {state && state.err && (
+        <span style={{ fontSize: 12.5, fontWeight: 600, color: RED }}>
+          {String(state.err)}
+        </span>
+      )}
+    </span>
+  )
+}
+
+function DrillCard({ countries, onDrill, t }) {
+  // Their acceptance question VI.4, one click: plant a fake policy change,
+  // watch the automatic recheck read the official page and put the record
+  // right, and read the elapsed seconds off the screen.
+  const [nat, setNat] = useState('CHN')
+  const [dest, setDest] = useState('JPN')
+  const [state, setState] = useState(null)
+  async function run() {
+    setState('busy')
+    try {
+      const r = await onDrill(nat, dest)
+      setState({ done: r })
+    } catch (e) {
+      setState({ err: String(e?.detail || e?.message || e) })
+    }
+  }
+  const d = state && state.done
+  return (
+    <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14,
+                  background: '#fff', padding: '16px 18px' }}>
+      <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
+                    color: GRAY, textTransform: 'uppercase' }}>
+        {t('ops.drill.title')}
+      </div>
+      <div style={{ fontSize: 12.5, color: GRAY, margin: '6px 0 10px' }}>
+        {t('ops.drill.hint')}
+      </div>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap',
+                    alignItems: 'center' }}>
+        <CountryFilter value={nat} placeholder={t('ops.add.natPh')}
+                       onCommit={setNat} countries={countries} />
+        <CountryFilter value={dest} placeholder={t('ops.add.destPh')}
+                       onCommit={setDest} countries={countries} />
+        <button onClick={run} disabled={state === 'busy' || !nat || !dest}
+                data-testid="ops-drill-run"
+                style={{ borderRadius: 999, fontSize: 13, fontWeight: 700,
+                         border: 'none', cursor: 'pointer',
+                         padding: '11px 22px', background: NAVY,
+                         color: '#fff',
+                         opacity: state === 'busy' ? 0.6 : 1 }}>
+          {state === 'busy' ? t('ops.drill.running') : t('ops.drill.run')}
+        </button>
+      </div>
+      {d && (
+        <div style={{ marginTop: 12, display: 'grid', gap: 6,
+                      fontSize: 13, color: NAVY }}>
+          <div>1. {t('ops.drill.step1').replace('{field}', String(d.field))}</div>
+          <div>2. {t('ops.drill.step2')}</div>
+          <div style={{ fontWeight: 700,
+                        color: d.caught ? GREEN : '#b3261e' }}>
+            3. {(d.caught ? t('ops.drill.caught') : t('ops.drill.missed'))
+                  .replace('{seconds}', String(d.seconds))}
+          </div>
+          {d.source_url && (
+            <a href={d.source_url} target="_blank" rel="noreferrer"
+               style={{ fontSize: 12.5, color: BLUE }}>{d.source_url}</a>
+          )}
+        </div>
+      )}
+      {state && state.err && (
+        <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 600,
+                      color: RED }}>{String(state.err)}</div>
+      )}
+    </div>
+  )
+}
+
+function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t, flagOf, typeNames = {}, tvv = (x) => x }) {
   const [sort, setSort] = useState({ key: 'route', dir: 1 })
   const [open, setOpen] = useState(null)
   const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
@@ -1508,6 +1623,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, t, flagOf, ty
                         )}
                         <FlagForm rec={rec} onFlag={onFlag} t={t} />
                         <EditForm rec={rec} onEdit={onEdit} t={t} />
+                        <RefreshButton rec={rec} onRefresh={onRefresh} t={t} />
                       </div>
                     </td>
                   </tr>
@@ -2102,6 +2218,21 @@ export default function QualityConsole() {
     await load()
   }
 
+  async function refreshRecord(rec) {
+    const r = await client.post('/database/routes/research', {
+      nationality: rec.travel_document_country,
+      destination: rec.destination_country,
+      travel_purpose: rec.travel_purpose,
+      travel_document_type: rec.travel_document_type || 'ordinary_passport' })
+    await load()
+    return r
+  }
+
+  async function runDrill(nat, dest) {
+    return client.post('/database/freshness/drill', {
+      nationality: nat, destination: dest, travel_purpose: 'tourism' })
+  }
+
   async function reviewAsk(id, verdict, note) {
     try {
       await client.post(`/database/asks/${id}/review`, { verdict, note })
@@ -2567,7 +2698,7 @@ export default function QualityConsole() {
             <AddRouteCard countries={countries} t={t} onAdd={addRoute}
                           onManualAdd={manualAddRoute}
                           adding={adding} addMsg={addMsg} />
-            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} onEdit={editRecord} t={t} flagOf={flagOf} typeNames={typeNames} tvv={tv} />
+            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} onEdit={editRecord} onRefresh={refreshRecord} t={t} flagOf={flagOf} typeNames={typeNames} tvv={tv} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}
@@ -3248,6 +3379,7 @@ export default function QualityConsole() {
           ]
           return (
             <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
+              <DrillCard countries={countries} onDrill={runDrill} t={t} />
               <div className="ops-tiles">
                 {[
                   // Every tile states its own unit. An answer is one cached

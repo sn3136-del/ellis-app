@@ -247,6 +247,45 @@ def compose_reply(question: str, history: list | None, out: dict) -> str | None:
     return reply or None
 
 
+# Conversational pleasantries are conversation, not off-topic questions.
+# A tester typed "hello" and was told Ellis only helps with immigration.
+_GREETINGS = ("hello", "hi", "hey", "good morning", "good afternoon",
+              "good evening", "hi there", "hiya", "howdy", "yo",
+              "你好", "您好", "嗨", "哈喽", "早上好", "下午好", "晚上好")
+_THANKS = ("thank", "thx", "thanks", "谢谢", "謝謝", "多谢", "多謝", "感谢",
+           "感謝")
+_FAREWELLS = ("bye", "goodbye", "see you", "再见", "再見", "拜拜")
+
+_GREETING_REPLY_EN = ("Hi, I'm Ellis. Tell me where you want to go and "
+                      "which passport you hold, and I'll pull the exact "
+                      "visa rules for you.")
+_GREETING_REPLY_ZH = "你好，我是 Ellis。告诉我您想去哪里、持哪国护照，我马上为您查签证规定。"
+_THANKS_REPLY_EN = ("You're welcome. Ask me about any other route whenever "
+                    "you like.")
+_THANKS_REPLY_ZH = "不客气。随时可以再问我任何线路。"
+_FAREWELL_REPLY_EN = "Safe travels. I'm here whenever you need entry rules."
+_FAREWELL_REPLY_ZH = "一路平安。需要查出入境规定随时找我。"
+
+
+def pleasantry_reply(question: str) -> str | None:
+    """Greetings, thanks and goodbyes get a human answer, instantly and
+    deterministically. Only a SHORT message counts: "hello, do I need a
+    visa for japan" must flow through to the real pipeline."""
+    q = str(question or "").strip()
+    low = q.lower().rstrip("!.?,~ ")
+    if not q or len(q) > 24:
+        return None
+    zh = _is_chinese(q)
+    if any(low == g or low.startswith(g + " ") and len(low) <= len(g) + 6
+           for g in _GREETINGS) or q.rstrip("！。？，~ ") in _GREETINGS:
+        return _GREETING_REPLY_ZH if zh else _GREETING_REPLY_EN
+    if any(w in low or w in q for w in _THANKS):
+        return _THANKS_REPLY_ZH if zh else _THANKS_REPLY_EN
+    if any(low == w or w in q for w in _FAREWELLS):
+        return _FAREWELL_REPLY_ZH if zh else _FAREWELL_REPLY_EN
+    return None
+
+
 _CLARIFY_SYSTEM = """You are Ellis, the visa assistant on a travel site.
 The traveller's route is not fully known yet. Write ONE short, warm reply
 (1 to 3 short sentences) that responds to what the traveller just said and
