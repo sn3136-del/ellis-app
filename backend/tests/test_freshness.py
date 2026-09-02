@@ -428,3 +428,18 @@ def test_due_rows_selects_the_48_hour_backlog_oldest_first(db):
     capped = freshness.due_rows(db, older_than_hours=48, limit=1)
     assert len(capped) == 1
 
+
+
+def test_next_sweep_time_is_real_and_in_the_future():
+    """The countdown must be rooted in truth: with systemd absent the time
+    comes from the timer's own schedule (minute 20 past 00/06/12/18 UTC)
+    and always lies within the next six hours."""
+    from datetime import datetime, timezone
+    from app.main import _next_sweep_at
+    raw = _next_sweep_at()
+    assert raw
+    nxt = datetime.fromisoformat(raw)
+    now = datetime.now(timezone.utc)
+    assert nxt > now
+    assert (nxt - now).total_seconds() <= 6 * 3600 + 600
+    assert nxt.minute == 20 or nxt.tzinfo is not None

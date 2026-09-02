@@ -868,7 +868,39 @@ def travel_database_freshness(db=Depends(get_session),
                                 if x["grounded"] and not x["human_override"]),
                 "human_verified": sum(1 for x in rows if x["human_override"]),
                 "disputed": sum(1 for x in rows if x["disputed_fields"]),
+                "next_sweep_at": _next_sweep_at(),
             }}
+
+
+def _next_sweep_at() -> str | None:
+    """When the next automatic re-verification sweep fires, as truth: read
+    from the systemd timer that actually runs it, falling back to the
+    timer's own schedule (minute 20 past 00/06/12/18 UTC) where systemd is
+    not available, so a dev machine still shows the real cadence."""
+    import subprocess
+    from datetime import datetime, timedelta, timezone
+    try:
+        p = subprocess.run(
+            ["systemctl", "show", "ellis-freshness.timer",
+             "--property=NextElapseUSecRealtime", "--value"],
+            capture_output=True, text=True, timeout=2)
+        raw = (p.stdout or "").strip()
+        # "Wed 2026-09-02 06:25:45 UTC" — locale-stable under systemd.
+        if raw and raw not in ("", "n/a", "0"):
+            parts = raw.split()
+            if len(parts) >= 3:
+                dt = datetime.strptime(parts[1] + " " + parts[2],
+                                       "%Y-%m-%d %H:%M:%S")
+                return dt.replace(tzinfo=timezone.utc).isoformat()
+    except Exception:  # noqa: BLE001 - fall through to the schedule
+        pass
+    now = datetime.now(timezone.utc)
+    for hour in (0, 6, 12, 18, 24):
+        candidate = (now.replace(hour=0, minute=20, second=0, microsecond=0)
+                     + timedelta(hours=hour))
+        if candidate > now:
+            return candidate.isoformat()
+    return None
 
 
 @app.get("/database/issues")

@@ -1325,6 +1325,49 @@ function RefreshButton({ rec, onRefresh, t }) {
 
 
 
+
+function NextSweepCountdown({ at, t }) {
+  // The clock is the sweep timer itself: the backend reads the next firing
+  // from systemd, so this counts down to the run that will actually happen.
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  if (!at) return null
+  const target = new Date(at).getTime()
+  const left = Math.max(0, Math.floor((target - now) / 1000))
+  const hh = String(Math.floor(left / 3600)).padStart(2, '0')
+  const mm = String(Math.floor((left % 3600) / 60)).padStart(2, '0')
+  const ss = String(left % 60).padStart(2, '0')
+  const local = new Date(at).toLocaleString(undefined,
+    { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
+  return (
+    <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14,
+                  background: '#fff', padding: '16px 18px',
+                  display: 'flex', gap: 18, alignItems: 'center',
+                  flexWrap: 'wrap' }}>
+      <div>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
+                      color: GRAY, textTransform: 'uppercase' }}>
+          {t('ops.fresh.nextTitle')}
+        </div>
+        <div style={{ fontSize: 30, fontWeight: 800, color: NAVY,
+                      fontVariantNumeric: 'tabular-nums', marginTop: 2 }}>
+          {hh}:{mm}:{ss}
+        </div>
+        <div style={{ fontSize: 12, color: GRAY }}>
+          {t('ops.fresh.nextAt').replace('{time}', local)}
+        </div>
+      </div>
+      <div style={{ fontSize: 12.5, color: GRAY, maxWidth: 460,
+                    lineHeight: 1.5 }}>
+        {t('ops.fresh.nextHint')}
+      </div>
+    </div>
+  )
+}
+
 const _DISPOSITION_WORDS = {
   VISA_EXEMPT: 'Visa-free', VISA_REQUIRED: 'Visa required in advance',
   VISA_ON_ARRIVAL: 'Visa on arrival',
@@ -3411,6 +3454,7 @@ export default function QualityConsole() {
           ]
           return (
             <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
+              <NextSweepCountdown at={f.next_sweep_at} t={t} />
               <div className="ops-tiles">
                 {[
                   // Every tile states its own unit. An answer is one cached
