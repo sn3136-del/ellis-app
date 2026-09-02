@@ -1738,7 +1738,14 @@ function ProposalBlock({ issue, onAccept, onResolve, t }) {
         </div>
       )
     }
-    return null
+    // Ellis tried and could not complete the check (page unreachable, page
+    // not about this route, or the provider refused). Saying so beats
+    // silence: the operator knows to handle the flag by hand.
+    return (
+      <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8 }}>
+        {t('ops.prop.failed')}
+      </div>
+    )
   }
   if (keys.length === 0) {
     return (
