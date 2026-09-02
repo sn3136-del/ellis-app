@@ -2921,20 +2921,44 @@ export default function QualityConsole() {
             }
             return { url: m[1].replace(/[:;,]$/, ''), segs: [...segMap.values()] }
           }
-          const fmtSays = (field, says, note) => {
+          const fmtSays = (field, says, note, quote) => {
             let v = String(says || '').trim().replace(/^"|"$/g, '')
+            // "No value" must never sit above a quote that plainly states
+            // one (a tester saw exactly that): when the page's own sentence
+            // is on file, point at it instead of denying it.
+            const noValue = () => (String(quote || '').trim()
+              ? t('ops.pageSeeQuote') : t('ops.pageNoValue'))
             // The monitor writes literal "null"/"None" when the page proposes
             // clearing a value; show a plain sentence, not the token.
             if (/^(null|none|undefined)\b/i.test(v) || v === '' || v === '·') {
-              return t('ops.pageNoValue')
+              return noValue()
             }
-            if (/^[\[{]/.test(v)) {
-              // A product-table proposal: name the visa types instead of
-              // printing JSON (the note is capped, so parse may not work).
-              // Outside the visa-products row it is extractor spillover, not
-              // a value for THIS field.
+            if (/^\{/.test(v)) {
+              // A structured value ({"amount": 25, "currency": "USD"}) reads
+              // as its parts, not as JSON and not as a refusal.
+              const pairs = [...v.matchAll(/"([a-z_]+)":\s*("[^"]*"|[\d.]+|null)/gi)]
+                .filter((m) => m[2] !== 'null')
+                .map((m) => `${m[1].replace(/_/g, ' ')}: ${m[2].replace(/^"|"$/g, '')}`)
+              if (pairs.length) return pairs.slice(0, 4).join(' · ')
+              return noValue()
+            }
+            if (/^\[/.test(v)) {
+              // Lists are real values for list fields: exceptions and
+              // required documents read as their items. The product table
+              // reads as its visa-type names. Anything else that arrives as
+              // an array is extractor spillover, not a value for THIS field.
+              if (/exceptions|required_documents/.test(String(field || ''))) {
+                const items = [...v.matchAll(/"((?:[^"\\]|\\.)+)"/g)]
+                  .map((m) => m[1])
+                if (items.length) {
+                  const shown = items.slice(0, 3).join(' · ')
+                  return items.length > 3
+                    ? `${shown} (+${items.length - 3})` : shown
+                }
+                return noValue()
+              }
               if (!String(field || '').includes('visa_products')) {
-                return t('ops.pageNoValue')
+                return noValue()
               }
               const types = [...v.matchAll(/"type":\s*"([^"]+)"/g)]
                 .map((m) => typeNames?.[m[1]] || m[1])
@@ -3055,7 +3079,7 @@ export default function QualityConsole() {
                   {parsed.segs.map((g, i) => {
                     const cur = currentOf(rec, g.field)
                     const page = (() => {
-                      const v = fmtSays(g.field, g.says, note)
+                      const v = fmtSays(g.field, g.says, note, g.quote)
                       return v.length > 320 ? v.slice(0, 320) + '…' : v
                     })()
                     const same = cur != null &&
