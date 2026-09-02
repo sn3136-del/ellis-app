@@ -1324,6 +1324,27 @@ function RefreshButton({ rec, onRefresh, t }) {
 
 
 
+
+const _DISPOSITION_WORDS = {
+  VISA_EXEMPT: 'Visa-free', VISA_REQUIRED: 'Visa required in advance',
+  VISA_ON_ARRIVAL: 'Visa on arrival',
+  ELECTRONIC_AUTHORIZATION_REQUIRED: 'Electronic authorization required',
+  CONDITIONAL: 'Conditional',
+}
+
+function askAnswerLine(answer) {
+  // The log stores the served verdict as structured fields; the reviewer
+  // reads it as one plain sentence, never as a serialized object.
+  if (typeof answer === 'string') return answer.slice(0, 400)
+  if (!answer || typeof answer !== 'object') return null
+  const parts = []
+  const d = _DISPOSITION_WORDS[answer.disposition] || answer.disposition
+  if (d) parts.push(d)
+  if (answer.visa_category) parts.push(answer.visa_category)
+  if (answer.permitted_stay) parts.push(answer.permitted_stay)
+  return parts.join(' \u00b7 ').slice(0, 400) || null
+}
+
 function AskCard({ ask, onReview, t }) {
   // One logged Q&A exchange: the question, what Ellis answered, and two
   // buttons. "Wrong" needs a written reason and files an issue on the route.
@@ -1359,7 +1380,7 @@ function AskCard({ ask, onReview, t }) {
       </div>
       {ask.answer && (
         <div style={{ fontSize: 13, color: NAVY, lineHeight: 1.5 }}>
-          {String(ask.answer).slice(0, 400)}
+          {askAnswerLine(ask.answer)}
         </div>
       )}
       {ask.source_url && (
