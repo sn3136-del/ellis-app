@@ -428,39 +428,3 @@ def test_due_rows_selects_the_48_hour_backlog_oldest_first(db):
     capped = freshness.due_rows(db, older_than_hours=48, limit=1)
     assert len(capped) == 1
 
-
-def test_the_48_hour_drill_plants_catches_and_never_leaves_a_trace(db):
-    """Their §VI.4 simulation as a product feature: plant a fake policy
-    change, let the automatic recheck read the official page and put the
-    record right, and read the elapsed time off the response. When the
-    recheck misses, the drill restores the original itself."""
-    from fastapi.testclient import TestClient
-    from app.main import app
-    client = TestClient(app)
-    ADMIN = {"authorization": "Bearer admin-token", "x-org-id": "org-b",
-             "x-user-id": "op-1"}
-    _seed(db)
-    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
-    freshness.set_provider(lambda system, user: {
-        "page_relevant": True, "page_is_nationality_specific": True,
-        "consistent": False,
-        "corrected_fields": {"government_fee": {"amount": 200,
-                                                "currency": "CNY"}},
-        "evidence": {"government_fee": "single entry 200 CNY"},
-        "note": "drill corrected"})
-    out = client.post("/database/freshness/drill", headers=ADMIN,
-                      json={"nationality": "CHN", "destination": "JPN"}).json()
-    assert out["ok"] and out["field"] == "government_fee"
-    assert out["caught"] is True and out["seconds"] >= 0
-    row = db.query(KimiRouteGuidanceCache).one()
-    assert row.guidance["government_fee"]["amount"] == 200
-    # Miss path: a recheck that calls the planted value consistent.
-    freshness.set_provider(lambda system, user: {
-        "page_relevant": True, "page_is_nationality_specific": True,
-        "consistent": True, "corrected_fields": {}, "evidence": {}})
-    out2 = client.post("/database/freshness/drill", headers=ADMIN,
-                       json={"nationality": "CHN", "destination": "JPN"}).json()
-    assert out2["caught"] is False and out2["restored"] is True
-    db.expire_all()
-    row = db.query(KimiRouteGuidanceCache).one()
-    assert row.guidance["government_fee"]["amount"] == 200       # no trace

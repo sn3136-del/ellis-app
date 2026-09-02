@@ -1322,68 +1322,84 @@ function RefreshButton({ rec, onRefresh, t }) {
   )
 }
 
-function DrillCard({ countries, onDrill, t }) {
-  // Their acceptance question VI.4, one click: plant a fake policy change,
-  // watch the automatic recheck read the official page and put the record
-  // right, and read the elapsed seconds off the screen.
-  const [nat, setNat] = useState('CHN')
-  const [dest, setDest] = useState('JPN')
-  const [state, setState] = useState(null)
-  async function run() {
-    setState('busy')
-    try {
-      const r = await onDrill(nat, dest)
-      setState({ done: r })
-    } catch (e) {
-      setState({ err: String(e?.detail || e?.message || e) })
-    }
+
+
+function AskCard({ ask, onReview, t }) {
+  // One logged Q&A exchange: the question, what Ellis answered, and two
+  // buttons. "Wrong" needs a written reason and files an issue on the route.
+  const [note, setNote] = useState('')
+  const [noting, setNoting] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const rt = ask.route || {}
+  const routeLabel = rt.nationality && rt.destination
+    ? `${rt.nationality} \u2192 ${rt.destination}` : null
+  async function review(verdict) {
+    setBusy(true)
+    try { await onReview(ask.id, verdict, note.trim()) } finally { setBusy(false) }
   }
-  const d = state && state.done
   return (
-    <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14,
-                  background: '#fff', padding: '16px 18px' }}>
-      <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
-                    color: GRAY, textTransform: 'uppercase' }}>
-        {t('ops.drill.title')}
+    <div style={{ border: `1px solid ${BORDER}`, borderRadius: 12,
+                  background: '#fff', padding: '12px 16px',
+                  display: 'grid', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center',
+                    flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 13.5, fontWeight: 700, color: NAVY }}>
+          {ask.question}
+        </span>
+        {routeLabel && <Chip color={BLUE}>{routeLabel}</Chip>}
+        {ask.held && <Chip color={'#b26a00'}>{t('ops.conf.low')}</Chip>}
+        {ask.verdict && (
+          <Chip color={ask.verdict === 'correct' ? GREEN : RED}>
+            {ask.verdict === 'correct' ? t('ops.askCorrect') : t('ops.askWrong')}
+          </Chip>
+        )}
+        <span style={{ fontSize: 11.5, color: GRAY, marginLeft: 'auto' }}>
+          {String(ask.at || '').slice(0, 16).replace('T', ' ')}
+        </span>
       </div>
-      <div style={{ fontSize: 12.5, color: GRAY, margin: '6px 0 10px' }}>
-        {t('ops.drill.hint')}
-      </div>
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap',
-                    alignItems: 'center' }}>
-        <CountryFilter value={nat} placeholder={t('ops.add.natPh')}
-                       onCommit={setNat} countries={countries} />
-        <CountryFilter value={dest} placeholder={t('ops.add.destPh')}
-                       onCommit={setDest} countries={countries} />
-        <button onClick={run} disabled={state === 'busy' || !nat || !dest}
-                data-testid="ops-drill-run"
-                style={{ borderRadius: 999, fontSize: 13, fontWeight: 700,
-                         border: 'none', cursor: 'pointer',
-                         padding: '11px 22px', background: NAVY,
-                         color: '#fff',
-                         opacity: state === 'busy' ? 0.6 : 1 }}>
-          {state === 'busy' ? t('ops.drill.running') : t('ops.drill.run')}
-        </button>
-      </div>
-      {d && (
-        <div style={{ marginTop: 12, display: 'grid', gap: 6,
-                      fontSize: 13, color: NAVY }}>
-          <div>1. {t('ops.drill.step1').replace('{field}', String(d.field))}</div>
-          <div>2. {t('ops.drill.step2')}</div>
-          <div style={{ fontWeight: 700,
-                        color: d.caught ? GREEN : '#b3261e' }}>
-            3. {(d.caught ? t('ops.drill.caught') : t('ops.drill.missed'))
-                  .replace('{seconds}', String(d.seconds))}
-          </div>
-          {d.source_url && (
-            <a href={d.source_url} target="_blank" rel="noreferrer"
-               style={{ fontSize: 12.5, color: BLUE }}>{d.source_url}</a>
-          )}
+      {ask.answer && (
+        <div style={{ fontSize: 13, color: NAVY, lineHeight: 1.5 }}>
+          {String(ask.answer).slice(0, 400)}
         </div>
       )}
-      {state && state.err && (
-        <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 600,
-                      color: RED }}>{String(state.err)}</div>
+      {ask.source_url && (
+        <a href={ask.source_url} target="_blank" rel="noreferrer"
+           style={{ fontSize: 12, color: BLUE }}>{ask.source_url}</a>
+      )}
+      {!ask.verdict && (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center',
+                      flexWrap: 'wrap' }}>
+          <button disabled={busy} onClick={() => review('correct')}
+                  style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                           border: 'none', cursor: 'pointer',
+                           padding: '8px 16px', background: GREEN,
+                           color: '#fff', opacity: busy ? 0.6 : 1 }}>
+            {t('ops.askCorrect')}
+          </button>
+          {!noting && (
+            <button disabled={busy} onClick={() => setNoting(true)}
+                    style={{ borderRadius: 999, fontSize: 12.5,
+                             fontWeight: 700, border: `1px solid ${RED}`,
+                             cursor: 'pointer', padding: '7px 16px',
+                             background: '#fff', color: RED }}>
+              {t('ops.askWrong')}
+            </button>
+          )}
+          {noting && (<>
+            <input value={note} onChange={(e) => setNote(e.target.value)}
+                   placeholder={t('ops.askWrongNote')} className="ops-in"
+                   style={{ ...input, minWidth: 220 }} />
+            <button disabled={busy || !note.trim()}
+                    onClick={() => review('wrong')}
+                    style={{ borderRadius: 999, fontSize: 12.5,
+                             fontWeight: 700, border: 'none',
+                             cursor: 'pointer', padding: '8px 16px',
+                             background: RED, color: '#fff',
+                             opacity: busy || !note.trim() ? 0.6 : 1 }}>
+              {t('ops.askWrong')}
+            </button>
+          </>)}
+        </div>
       )}
     </div>
   )
@@ -2226,11 +2242,6 @@ export default function QualityConsole() {
       travel_document_type: rec.travel_document_type || 'ordinary_passport' })
     await load()
     return r
-  }
-
-  async function runDrill(nat, dest) {
-    return client.post('/database/freshness/drill', {
-      nationality: nat, destination: dest, travel_purpose: 'tourism' })
   }
 
   async function reviewAsk(id, verdict, note) {
@@ -3379,7 +3390,6 @@ export default function QualityConsole() {
           ]
           return (
             <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
-              <DrillCard countries={countries} onDrill={runDrill} t={t} />
               <div className="ops-tiles">
                 {[
                   // Every tile states its own unit. An answer is one cached
