@@ -817,7 +817,85 @@ def travel_database_report_issue(body: DatabaseIssueIn, db=Depends(get_session),
                  action="database_issue_reported",
                  detail={"nationality": nat, "destination": dest,
                          "field": row.field}, actor=p.user_id)
+    # A human flagged this, so Ellis goes and reads the official page in the
+    # background and attaches what it finds to the issue as a proposal the
+    # correction queue can accept or decline. Only human flags get this:
+    # the monitor's own disputes already carry their evidence.
+    import os as _os
+    if _os.getenv("ELLIS_BACKGROUND_RENEWAL", "1").strip() == "1":
+        import threading
+
+        def _research(issue_id: str) -> None:
+            from .db import SessionLocal as _SL
+            from .visa_snapshot import freshness as _fresh
+            s = _SL()
+            try:
+                _fresh.propose_for_issue(s, issue_id)
+            except Exception:  # noqa: BLE001 - a failed proposal stays absent
+                pass
+            finally:
+                s.close()
+
+        threading.Thread(target=_research, args=(row.id,),
+                         name="flag-research", daemon=True).start()
     return {"ok": True, "id": row.id, "status": row.status}
+
+
+@app.post("/database/issues/{issue_id}/accept-proposal")
+def travel_database_issue_accept_proposal(issue_id: str,
+                                          db=Depends(get_session),
+                                          p: Principal = Depends(get_principal)):
+    """An operator accepts what Ellis found on the official page after a
+    human flag. The page values become a sourced override (same gates as
+    every verified fact), the reader sees them immediately, and the issue
+    moves to corrected for the usual second-person review."""
+    from datetime import datetime, timezone
+    from .visa_snapshot import verified_overrides
+    from .visa_snapshot.models import DatabaseIssueReport
+    require_admin(p)
+    row = db.get(DatabaseIssueReport, issue_id)
+    if row is None:
+        raise HTTPException(404, "no such issue")
+    prop = row.proposal or {}
+    fields = {k: v.get("page_says") for k, v in (prop.get("fields") or {}).items()
+              if isinstance(v, dict)}
+    if not fields or not prop.get("source_url"):
+        raise HTTPException(422, "this issue carries no acceptable proposal")
+    if row.reported_by == "freshness_monitor":
+        raise HTTPException(422, "monitor disputes are ruled through the "
+                                 "normal stages, not accepted wholesale")
+    rt = dict(row.route or {})
+    quotes = "; ".join(f"{k}: {str(v.get('quote') or '')[:120]}"
+                       for k, v in (prop.get("fields") or {}).items()
+                       if isinstance(v, dict) and v.get("quote"))
+    entry = {"route": {"nationality": rt.get("passport_nationality"),
+                       "destination": rt.get("destination_country"),
+                       "travel_purpose": rt.get("travel_purpose", "tourism")},
+             "verified_at": datetime.now(timezone.utc).date().isoformat(),
+             "verified_by": f"Ellis AI research, accepted by {p.user_id}",
+             "source_url": str(prop.get("source_url") or ""),
+             "note": (f"Flag by {row.reported_by}: {row.note or row.field}. "
+                      f"Ellis read the official page; quotes: {quotes}")[:400],
+             "fields": fields}
+    doc = str(rt.get("travel_document_type") or "").strip().lower()
+    if doc and doc != "ordinary_passport":
+        entry["route"]["travel_document_type"] = doc
+    try:
+        verified_overrides.append_operator_entry(entry)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    row.status = "corrected"
+    row.resolution = (f"Accepted Ellis's page reading "
+                      f"({', '.join(sorted(fields))}) from "
+                      f"{prop.get('source_url')}")[:1000]
+    row.resolved_by = p.user_id
+    row.resolved_at = datetime.now(timezone.utc)
+    db.commit()
+    audit.record(db, org_id=p.org_id, application_id="database",
+                 action="database_issue_proposal_accepted",
+                 detail={"issue": issue_id, "fields": sorted(fields)},
+                 actor=p.user_id)
+    return {"ok": True, "status": row.status, "fields": sorted(fields)}
 
 
 @app.get("/database/freshness")
@@ -1371,6 +1449,9 @@ class DatabaseAskIn(BaseModel):
     # The visible conversation, newest last, so the composer keeps the
     # thread ("and for my wife?" knows what came before). Capped server-side.
     history: list | None = None
+    # The site language the customer chose (en / zh / zh-TW). Replies follow
+    # it; without it the question's own script decides.
+    lang: str | None = None
 
 
 @app.get("/database/asks")
@@ -1683,17 +1764,17 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     # The two deterministic conversation rules run before anything else:
     # Ellis answers for its name without a model, and questions with no
     # immigration content are declined in one sentence.
-    ident = assistant.identity_reply(body.question)
+    ident = assistant.identity_reply(body.question, body.lang)
     if ident:
         return {"understood": True, "identity": True, "reply": ident,
                 "guidance": None, "held": False}
     # A greeting is a conversation opener, not an off-topic question: "hello"
     # was being refused with the immigration-only line.
-    nicety = assistant.pleasantry_reply(body.question)
+    nicety = assistant.pleasantry_reply(body.question, body.lang)
     if nicety:
         return {"understood": True, "greeting": True, "reply": nicety,
                 "guidance": None, "held": False}
-    refusal = assistant.off_topic_reply(body.question)
+    refusal = assistant.off_topic_reply(body.question, body.lang)
     if refusal:
         return {"understood": True, "off_topic": True, "reply": refusal,
                 "guidance": None, "held": False}
@@ -1744,7 +1825,7 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
             {"guidance": None, "route": {"nationality": _comp_nat},
              "comparison": sides})
         if not reply:
-            cjk2 = any("一" <= c <= "鿿" for c in body.question or "")
+            cjk2 = assistant.wants_chinese(body.question, body.lang)
             words = {"VISA_REQUIRED": ("visa required", "需要签证"),
                      "VISA_EXEMPT": ("no visa needed", "免签"),
                      "VISA_ON_ARRIVAL": ("visa on arrival", "落地签"),
@@ -1777,21 +1858,27 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     except kimi_primary.GuidanceUnavailable as e:
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": str(e)})
-    # A passport does not change mid-conversation. In "can i go to japan
-    # from china" then "what if i wanna go from japan to france afterwards",
-    # the second "from japan" is where the traveller departs, not who they
-    # are, yet the parser read it as a Japanese passport and told a Chinese
-    # traveller France is visa-free (a tester hit this, 2026-09-01). Once a
-    # conversation has established the nationality, only explicit passport
-    # words can change it; a differing "from X" keeps the passport and moves
-    # the route.
+    # A passport does not change mid-TRIP. "Can i go to japan from china"
+    # then "what if i wanna go from japan to france AFTERWARDS" continues
+    # the same journey: "from japan" is where the traveller departs, and
+    # answering as a Japanese passport told a Chinese traveller France is
+    # visa-free. But a bare "from france to japan" with no continuation
+    # phrasing states a fresh route, and there the from-country IS the
+    # passport (a tester hit both readings, 2026-09-01/02). So the
+    # established nationality survives only a question that reads as a
+    # continuation of the same trip; explicit passport words always win.
     _ctx_nat = str((body.context or {}).get("nationality") or "").upper()
     _q_low = str(body.question or "").lower()
+    _q_raw = str(body.question or "")
     _PASSPORT_WORDS = ("passport", "citizen", "national of", "nationality",
                        "护照", "護照", "公民", "国籍", "國籍", "持")
+    _TRIP_CONTINUATION = ("afterwards", "afterward", "after that", "then ",
+                          " later", "on the way", "next stop", "from there",
+                          "之后", "然后", "接着", "再去", "顺路", "顺便")
     if (_ctx_nat and parsed.get("understood") and parsed.get("nationality")
             and parsed["nationality"] != _ctx_nat
-            and not any(w in _q_low or w in str(body.question or "")
+            and any(w in _q_low or w in _q_raw for w in _TRIP_CONTINUATION)
+            and not any(w in _q_low or w in _q_raw
                         for w in _PASSPORT_WORDS)):
         if parsed.get("destination") and parsed["destination"] != _ctx_nat:
             parsed = dict(parsed, nationality=_ctx_nat)
@@ -1846,7 +1933,7 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
                     _lone.append(_iso2)
             if len(_lone) == 1:
                 nat = _lone[0]
-        cjk = any("一" <= c <= "鿿" for c in body.question or "")
+        cjk = assistant.wants_chinese(body.question, body.lang)
         if not nat and dest:
             clarify = "请告诉我您持哪国护照（国籍）？" if cjk else \
                 "Which country issued your passport?"
@@ -1867,7 +1954,8 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
             + ([] if dest else ["destination"])
         _smart = assistant.compose_clarify(
             body.question, body.history,
-            {"passport_country": nat, "destination": dest}, _missing)
+            {"passport_country": nat, "destination": dest}, _missing,
+            body.lang)
         if _smart:
             clarify = _smart
         from .visa_snapshot import special_policies
@@ -1929,7 +2017,7 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     out = special_policies.attach(out, question=body.question, route=route)
     # The composer phrases the answer from the served facts. Any failure
     # leaves the page's own deterministic summary in charge.
-    reply = assistant.compose_reply(body.question, body.history, out)
+    reply = assistant.compose_reply(body.question, body.history, out, body.lang)
     if reply:
         out["reply"] = reply
     return out

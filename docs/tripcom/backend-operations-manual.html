@@ -79,13 +79,12 @@
 <p class="en">The flag form at the bottom of the card files a field-level issue straight into the correction queue.</p>
 
 <h2>2b. 新增线路与编辑字段 <span class="en">Adding routes and editing fields</span></h2>
-<p>Records 页的「新增线路」卡片提供三种方式，携程运营可自行选择：</p>
-<p class="en">The Add a route card on the Records tab offers three ways in, and Trip.com operations choose per case:</p>
-<div class="step"><b>1</b><span>引擎作答。选护照、目的地、目的与证件，点一次按钮。已有线路即时返回，全新线路约一分钟内作答并进入记录列表。低置信度新答案先拦截，核对官方来源后展示。<br>Engine answer. Pick the route and press once. Known routes return instantly, new ones answer within about a minute. A low-confidence answer is held until checked.</span></div>
-<div class="step"><b>2</b><span>AI 官方来源研究。由 Kimi K3 驱动，对照该线路的官方页面重新核验，返回一致或需修正的字段清单，修正自动写入并留痕。<br>AI research. Kimi K3 rechecks the route against its official pages and reports consistent or corrected fields; corrections are written and logged automatically.</span></div>
-<div class="step"><b>3</b><span>人工录入。切换「手动填写」，运营自己逐项输入费用、停留、办理时长、材料等字段，必须附官方来源网址与说明。保存后立即对读者生效，来源标注为携程运营。<br>Manual entry. Switch to manual and type the fields yourself: fee, stay, processing, documents. An official source URL and a note are required. It serves immediately, with Trip.com operations shown as the provenance.</span></div>
-<p>展开任意记录，点「编辑字段」可直接修改该线路。表单按「费用 / 停留与效期 / 办理」分组，预填当前值，改动的输入框以蓝色标出，按钮实时显示「保存 N 处修改」，可一键撤销。仍必须附上支持本次修改的官方页面网址与说明；保存即生效，修改人、日期与来源随记录展示，变更记录同步留痕。非官方域名的来源会被拒绝。</p>
-<p class="en">Expand any record and press Edit fields to change the route directly. The form is grouped into money, stay and validity, and application; every input is prefilled with the current value, changed inputs turn blue, the button counts "Save N changes", and one click undoes. An official page URL and a note are still required. Saving takes effect immediately, with editor, date and source shown on the record and an entry in the change log. A non-government source URL is refused.</p>
+<p>Records 页的「新增线路」卡片提供两种方式：</p>
+<p class="en">The Add a route card on the Records tab offers two ways in:</p>
+<div class="step"><b>1</b><span>用 Ellis AI 添加。选护照、目的地、目的与证件，点一次按钮。Ellis 即时作答并对照该线路的官方页面核验，结果直接进入记录列表；低置信度答案先拦截，核对后展示。<br>Add with Ellis AI. Pick the route and press once: Ellis answers it and checks the official pages in the same move. A low-confidence answer is held until checked.</span></div>
+<div class="step"><b>2</b><span>人工录入。切换「手动填写」，运营逐项输入费用、停留、办理时长、材料等字段，必须附官方来源网址与说明。保存后立即对读者生效，来源标注为携程运营。<br>Manual entry. Switch to manual and type the fields yourself. An official source URL and a note are required; it serves immediately with Trip.com operations as the provenance.</span></div>
+<p>展开任意记录可用三个按钮：「编辑字段」打开覆盖全部可编辑字段的表单（判定下拉、当前签证行的效期/次数/费用、费用与停留、申请方式、入境卡、官方未公布勾选），预填当前值，只写入改动项；「从官方来源刷新」让 Ellis 当场重读官方页面，信息一致时明确告知「仍是最新，无需刷新」，有差异时按页面修正并留痕；「标记」提交人工质疑后，Ellis 会自动去读官方页面，并把核对结果作为修正建议放入纠错队列，运营可一键接受（写入带来源的修正，读者立即看到）或拒绝。</p>
+<p class="en">Every expanded record has three buttons. Edit fields opens a form covering every editable field (verdict dropdowns, this visa row's validity, entries and fee, money and stay, how to apply, arrival card, and not-published checkboxes), prefilled with current values and writing only what changed. Refresh from source has Ellis re-read the official page on the spot: when nothing changed it says so plainly, and differences are corrected from the page with the change logged. Flag files a human report, after which Ellis reads the official page itself and places what it found in the Correction queue as a proposal the operator can accept in one click (a sourced correction the next reader sees immediately) or decline.</p>
 
 <h2>3. Correction queue 纠错队列 <span class="en">The five-stage loop</span></h2>
 <p>每条问题沿验收标准4.1.2的五个阶段推进，每个阶段一个按钮，顺序不可跳过：</p>
@@ -113,6 +112,8 @@
 <p>系统定期重读官方页面。与记录一致则重新盖章。与人工核验事实不一致时不会自动改写，而是生成一条争议，附页面原文、当前记录值与引文，等待人工裁定。裁定后走纠错队列发布。页面上方的可用性卡片展示当月按分钟计的在线率。</p>
 <p class="en">Official pages are re-read on a schedule. Agreement restamps the record. Disagreement with a human-verified fact files a dispute with the page quote for a human ruling instead of overwriting. The availability tile shows the month's per-minute uptime.</p>
 
+<p>Ellis 每 48 小时内自动将每条已提供的答案与其官方页面重新核对一次（系统定时任务，最久未核对优先）。Freshness 页顶部显示「下一次全量数据刷新」倒计时，读取的是定时任务本身的下次运行时间，不是估算。</p>
+<p class="en">Ellis automatically re-reads every served answer against its official page at least every 48 hours (a scheduled sweep, oldest first). The Freshness tab opens with a countdown to the next full refresh, read from the sweep timer itself rather than estimated.</p>
 <h2>7. 批量导出 <span class="en">Batch export</span></h2>
 <p>Records 页的「导出 Excel」按当前筛选条件导出 .xlsx。文件含两张工作表：数据表（25字段+来源+置信度）与字段说明表。字段说明表首行标注快照时间（UTC）。导出无行数上限，工作簿构建在12,000行实测1.2秒。</p>
 <p class="en">Export Excel follows the active filters. Two sheets: data (25 fields plus sources plus confidence) and field descriptions, stamped with the UTC snapshot time. No row cap exists in code. Workbook build measured 1.2 seconds at 12,000 rows.</p>

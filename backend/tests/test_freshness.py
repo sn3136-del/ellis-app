@@ -443,3 +443,43 @@ def test_next_sweep_time_is_real_and_in_the_future():
     assert nxt > now
     assert (nxt - now).total_seconds() <= 6 * 3600 + 600
     assert nxt.minute == 20 or nxt.tzinfo is not None
+
+
+def test_human_flags_get_an_ai_proposal_operators_accept_or_decline(db):
+    """A human flag sends Ellis to the official page; what it finds waits in
+    the queue as a proposal. Accepting writes a sourced override the next
+    reader sees and moves the issue to corrected; the monitor's own disputes
+    are refused by the accept path."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.visa_snapshot import verified_overrides as vo
+    client = TestClient(app)
+    ADMIN = {"authorization": "Bearer admin-token", "x-org-id": "org-b",
+             "x-user-id": "op-1"}
+    _seed(db)
+    flagged = client.post("/database/report-issue", headers=ADMIN,
+                          json={"nationality": "CHN", "destination": "JPN",
+                                "travel_purpose": "tourism",
+                                "field": "visa_fee_amount",
+                                "note": "fee looks outdated"}).json()
+    assert flagged["ok"]
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": False,
+        "corrected_fields": {"government_fee": {"amount": 715,
+                                                "currency": "CNY"}},
+        "evidence": {"government_fee": "single entry 715 CNY"},
+        "note": "fee revised on the page"})
+    prop = freshness.propose_for_issue(db, flagged["id"])
+    assert prop["outcome"] == "checked"
+    assert prop["fields"]["government_fee"]["page_says"]["amount"] == 715
+    assert prop["fields"]["government_fee"]["quote"]
+    ok = client.post(f"/database/issues/{flagged['id']}/accept-proposal",
+                     headers=ADMIN).json()
+    assert ok["ok"] and ok["status"] == "corrected"
+    row = db.query(KimiRouteGuidanceCache).one()
+    served, prov = vo.apply(dict(row.guidance), dict(row.route))
+    assert served["government_fee"]["amount"] == 715
+    assert "accepted by op-1" in (prov or {}).get("verified_by", "")
+    vo.reload()

@@ -668,6 +668,23 @@ def test_the_passport_never_changes_mid_conversation(client):
                              "context": {"nationality": "CHN",
                                          "destination": "JPN"}}).json()
     assert out2["route"]["nationality"] == "JPN"
+    # And a bare fresh route with no continuation phrasing switches too:
+    # "from france to japan" after a China conversation is a new question
+    # about a French passport, not the same trip continuing.
+    def model2(system, user):
+        if "route is not fully known" in system:
+            return {"reply": "ok"}
+        return {"understood": True, "nationality": "FRA",
+                "destination": "JPN", "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport",
+                "transit_countries": [], "focus": None}
+    kimi_primary.set_provider(model2)
+    out3 = client.post("/database/ask", headers=READER,
+                       json={"question": "from france to japan",
+                             "context": {"nationality": "CHN",
+                                         "destination": "MYS"}}).json()
+    assert (out3["route"]["nationality"],
+            out3["route"]["destination"]) == ("FRA", "JPN")
 
 
 def test_greetings_are_greeted_not_refused(client):
@@ -687,3 +704,25 @@ def test_greetings_are_greeted_not_refused(client):
                        json={"question": "hello, do i need a visa for japan "
                                          "with a chinese passport"}).json()
     assert not real.get("greeting")
+
+
+def test_the_site_language_setting_decides_the_reply_language(client):
+    """A customer on the Chinese site gets Chinese replies even when they
+    type English, deterministic layers included. The question's script
+    stays the fallback for callers that send no language."""
+    hello = client.post("/database/ask", headers=READER,
+                        json={"question": "hello", "lang": "zh"}).json()
+    assert "Ellis" in hello["reply"] and "你好" in hello["reply"]
+    ident = client.post("/database/ask", headers=READER,
+                        json={"question": "who are you", "lang": "zh"}).json()
+    assert "我是 Ellis" in ident["reply"]
+    off = client.post("/database/ask", headers=READER,
+                      json={"question": "tell me a joke", "lang": "zh"}).json()
+    assert off["reply"] == "抱歉，我只能协助出入境相关事务。"
+    kimi_primary.set_provider(lambda system, user: {"understood": False})
+    clar = client.post("/database/ask", headers=READER,
+                       json={"question": "visa please", "lang": "zh"}).json()
+    assert "护照" in clar["clarify"]
+    en = client.post("/database/ask", headers=READER,
+                     json={"question": "你好", "lang": "en"}).json()
+    assert "Hi, I'm Ellis" in en["reply"]

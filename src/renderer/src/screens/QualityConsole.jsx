@@ -1299,7 +1299,7 @@ function RefreshButton({ rec, onRefresh, t }) {
   }
   return (
     <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center',
-                   flexWrap: 'wrap' }}>
+                   flexWrap: 'wrap', marginLeft: 10 }}>
       <button onClick={run} disabled={state === 'busy'}
               data-testid="ops-refresh-btn"
               style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
@@ -1717,6 +1717,93 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
   )
 }
 
+
+
+function ProposalBlock({ issue, onAccept, onResolve, t }) {
+  // A human flagged this record and Ellis went and read the official page.
+  // What it found waits here as a proposal: accept writes it as a sourced
+  // override the next reader sees, decline dismisses with the reason kept.
+  const [busy, setBusy] = useState(false)
+  const prop = issue.proposal || {}
+  const fields = prop.fields || {}
+  const keys = Object.keys(fields)
+  if (issue.reported_by === 'freshness_monitor') return null
+  if (!['open', 'acknowledged'].includes(issue.status || 'open')) return null
+  if (prop.outcome !== 'checked') {
+    if (['open', 'acknowledged'].includes(issue.status || 'open')
+        && !prop.outcome) {
+      return (
+        <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8 }}>
+          {t('ops.prop.pending')}
+        </div>
+      )
+    }
+    return null
+  }
+  if (keys.length === 0) {
+    return (
+      <div style={{ fontSize: 12.5, color: GREEN, marginTop: 8 }}>
+        {t('ops.prop.consistent')}
+        {prop.source_url && (
+          <a href={prop.source_url} target="_blank" rel="noreferrer"
+             style={{ marginLeft: 6, color: BLUE }}>{t('ops.source')}</a>
+        )}
+      </div>
+    )
+  }
+  const show = (v) => {
+    if (v === null || v === undefined) return t('ops.edit.nowEmpty')
+    if (typeof v === 'object') return JSON.stringify(v)
+    return String(v)
+  }
+  return (
+    <div style={{ marginTop: 10, border: `1px solid ${BLUE}33`,
+                  background: '#f5f9ff', borderRadius: 10,
+                  padding: '10px 14px', display: 'grid', gap: 8 }}
+         data-testid="ops-proposal">
+      <div style={{ fontSize: 12, fontWeight: 800, color: NAVY }}>
+        {t('ops.prop.title')}
+      </div>
+      {keys.map((k) => (
+        <div key={k} style={{ fontSize: 12.5, color: NAVY }}>
+          <b>{k}</b>: {show(fields[k].record_holds)}
+          {' \u2192 '}{show(fields[k].page_says)}
+          {fields[k].quote && (
+            <div style={{ fontSize: 11.5, color: GRAY, marginTop: 2 }}>
+              \u201c{fields[k].quote}\u201d
+            </div>
+          )}
+        </div>
+      ))}
+      {prop.source_url && (
+        <a href={prop.source_url} target="_blank" rel="noreferrer"
+           style={{ fontSize: 12, color: BLUE }}>{prop.source_url}</a>
+      )}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button disabled={busy} data-testid="ops-prop-accept"
+                onClick={async () => {
+                  setBusy(true)
+                  try { await onAccept(issue.id) } finally { setBusy(false) }
+                }}
+                style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                         border: 'none', cursor: 'pointer',
+                         padding: '9px 18px', background: GREEN,
+                         color: '#fff', opacity: busy ? 0.6 : 1 }}>
+          {t('ops.prop.accept')}
+        </button>
+        <button disabled={busy} data-testid="ops-prop-decline"
+                onClick={() => onResolve(issue.id, 'dismissed',
+                                         t('ops.prop.declineReason'))}
+                style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                         border: `1px solid ${RED}`, cursor: 'pointer',
+                         padding: '8px 18px', background: '#fff',
+                         color: RED, opacity: busy ? 0.6 : 1 }}>
+          {t('ops.prop.decline')}
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function IssueActions({ issue, onResolve, t }) {
   // The loop their standard names has five stages: flag, notify the
@@ -2306,6 +2393,13 @@ export default function QualityConsole() {
       travel_document_type: rec.travel_document_type || 'ordinary_passport' })
     await load()
     return r
+  }
+
+  async function acceptProposal(id) {
+    try {
+      await client.post(`/database/issues/${id}/accept-proposal`, {})
+      load()
+    } catch (e) { setError(String(e?.detail || e?.message || e)) }
   }
 
   async function reviewAsk(id, verdict, note) {
@@ -3062,12 +3156,14 @@ export default function QualityConsole() {
                   ✓ {tv(it.resolution)}
                 </div>
               )}
-              {active && (
+              {active && (<>
+                <ProposalBlock issue={it} t={t} onAccept={acceptProposal}
+                  onResolve={resolveIssue} />
                 <IssueActions issue={it} t={t}
                   onResolve={group
                     ? (_, st, res) => resolveGroup(group.ids, st, res)
                     : resolveIssue} />
-              )}
+              </>)}
             </div>
           )
           return (

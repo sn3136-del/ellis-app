@@ -355,3 +355,75 @@ def due_rows(db, *, older_than_hours: int = 48, limit: int = 400) -> list:
             out.append((at, row))
     out.sort(key=lambda pair: pair[0])
     return [row for _at, row in out[:limit]]
+
+
+def propose_for_issue(db, issue_id: str) -> dict | None:
+    """A human flagged a record, so Ellis checks the official page and
+    attaches what it found as a PROPOSAL on the issue: page value, stored
+    value and verbatim quote per field, for an operator to accept or
+    decline in the correction queue. Nothing is changed here — a flag plus
+    a page reading is still a proposal until a person accepts it."""
+    from . import kimi_primary, verified_overrides
+    from .models import DatabaseIssueReport
+    issue = db.get(DatabaseIssueReport, issue_id)
+    if issue is None or issue.reported_by == "freshness_monitor":
+        return None
+    route = dict(issue.route or {})
+    row = db.execute(select(KimiRouteGuidanceCache).where(
+        KimiRouteGuidanceCache.cache_key ==
+        (issue.cache_key or kimi_primary.cache_key(route)))).scalars().first()
+    if row is None:
+        return None
+    guidance = dict(row.guidance or {})
+    override = verified_overrides.find(route)
+    if override:
+        guidance, _ = verified_overrides.apply(guidance, route)
+    when = _now().isoformat()
+    outcome = "page_unreachable"
+    proposal = None
+    for url in candidate_sources(guidance, override):
+        fr = fetch(url, timeout_seconds=FETCH_TIMEOUT_SECONDS)
+        if not (fr.ok and fr.content_text and not fr.challenge
+                and is_government_host(fr.final_hostname)):
+            continue
+        payload = {
+            "route": {k: route.get(k) for k in
+                      ("passport_nationality", "destination_country",
+                       "travel_purpose", "travel_document_type")},
+            "flag_from_reader": {"field": issue.field, "note": issue.note},
+            "stored_answer": {k: guidance.get(k) for k in OVERRIDABLE
+                              if k in guidance},
+            "official_page_url": fr.final_url,
+            "official_page_text": fr.content_text[:MAX_PAGE_CHARS],
+        }
+        try:
+            raw = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False))
+        except Exception as e:  # noqa: BLE001 - an outcome, not a crash
+            outcome = "provider_error"
+            issue.proposal = {"outcome": outcome, "checked_at": when,
+                              "error": str(e)[:160]}
+            db.commit()
+            return issue.proposal
+        if not (isinstance(raw, dict) and raw.get("page_relevant")):
+            outcome = "page_not_relevant"
+            continue
+        evidence = raw.get("evidence") or {}
+        fields = {}
+        for k, v in (raw.get("corrected_fields") or {}).items():
+            if k not in OVERRIDABLE or not str(evidence.get(k) or "").strip():
+                continue
+            if not raw.get("page_is_nationality_specific") \
+                    and k in NATIONALITY_SPECIFIC:
+                continue
+            fields[k] = {"page_says": v,
+                         "record_holds": guidance.get(k),
+                         "quote": str(evidence.get(k) or "")[:300]}
+        proposal = {"outcome": "checked", "source_url": fr.final_url,
+                    "checked_at": when, "consistent": not fields,
+                    "fields": fields,
+                    "note": str(raw.get("note") or "")[:200],
+                    "proposed_by": "ellis-ai"}
+        break
+    issue.proposal = proposal or {"outcome": outcome, "checked_at": when}
+    db.commit()
+    return issue.proposal

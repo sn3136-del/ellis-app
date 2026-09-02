@@ -229,8 +229,9 @@ export function createVisaClient(session) {
     // its cache instantly on repeat lookups.
     databaseLookup: (body) => call('POST', '/database/lookup', session, body),
     // AI Q&A: a plain-language question, answered by the same decision engine.
-    databaseAsk: (question, context = null, history = null) =>
-      call('POST', '/database/ask', session, { question, context, history }),
+    databaseAsk: (question, context = null, history = null, lang = null) =>
+      call('POST', '/database/ask', session,
+           { question, context, history, lang }),
     // Information-quality feedback: a reader flags a field that looks wrong.
     databaseReportIssue: (body) =>
       call('POST', '/database/report-issue', session, body),

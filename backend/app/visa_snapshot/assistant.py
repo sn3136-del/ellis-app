@@ -61,13 +61,23 @@ def _is_chinese(q: str) -> bool:
     return any("一" <= c <= "鿿" for c in q or "")
 
 
-def identity_reply(question: str) -> str | None:
+def wants_chinese(question: str, lang: str | None = None) -> bool:
+    """Which language the reply belongs in. The site's language setting is
+    the customer's explicit choice and wins; the question's own script is
+    the fallback for callers that do not say."""
+    if lang:
+        return str(lang).lower().startswith("zh")
+    return _is_chinese(question)
+
+
+def identity_reply(question: str, lang: str | None = None) -> str | None:
     """The deterministic answer to "what are you": Ellis, nothing else."""
     q = str(question or "").strip().lower()
     if not q:
         return None
     if any(p in q for p in _IDENTITY):
-        return _IDENTITY_REPLY_ZH if _is_chinese(question) else _IDENTITY_REPLY_EN
+        return _IDENTITY_REPLY_ZH if wants_chinese(question, lang) \
+            else _IDENTITY_REPLY_EN
     return None
 
 
@@ -83,7 +93,7 @@ _OFFTOPIC_MARKERS = (
 )
 
 
-def off_topic_reply(question: str) -> str | None:
+def off_topic_reply(question: str, lang: str | None = None) -> str | None:
     """One sentence for questions that are not about immigration at all.
 
     Two rules, in order. A clear off-topic subject (weather, jokes, hotels)
@@ -97,7 +107,7 @@ def off_topic_reply(question: str) -> str | None:
     low = q.lower()
     on_topic = any(w in low or w in q for w in _TOPIC_WORDS)
     if any(m in low or m in q for m in _OFFTOPIC_MARKERS) and not on_topic:
-        return REFUSAL_ZH if _is_chinese(q) else REFUSAL_EN
+        return REFUSAL_ZH if wants_chinese(q, lang) else REFUSAL_EN
     if on_topic:
         return None
     from . import kimi_primary
@@ -105,7 +115,7 @@ def off_topic_reply(question: str) -> str | None:
         return None
     if region_destination(q):
         return None          # "hainan" or "jeju" is a place, not off topic
-    return REFUSAL_ZH if _is_chinese(q) else REFUSAL_EN
+    return REFUSAL_ZH if wants_chinese(q, lang) else REFUSAL_EN
 
 
 def region_destination(question: str) -> str | None:
@@ -170,8 +180,9 @@ JSON. Hard rules:
 - Never state a number that is not in the FACTS, even one you believe you
   know. A missing figure is described as not shown here, with the source
   page as the place to check.
-- Reply in the language of the question. A Chinese question gets a Chinese
-  reply.
+- Reply in the language named by FACTS "reply_language" when present (the
+  customer chose it in the site header); otherwise reply in the language of
+  the question. A Chinese question gets a Chinese reply.
 - 2 to 5 short sentences. State fees, stays and dates exactly as given in
   the FACTS. Plain, warm, professional.
 - If the question is not about immigration, visas, entry rules or travel,
@@ -194,7 +205,19 @@ _FACT_FIELDS = ("disposition", "requirement_detail", "visa_category",
                 "arrival_card")
 
 
-def compose_reply(question: str, history: list | None, out: dict) -> str | None:
+def _reply_language(question: str, lang: str | None) -> str | None:
+    """The explicit reply language for the composer, from the site setting."""
+    low = str(lang or "").lower()
+    if low.startswith("zh"):
+        return "Traditional Chinese" if "tw" in low or "hant" in low \
+            else "Simplified Chinese"
+    if low.startswith("en"):
+        return "English"
+    return None
+
+
+def compose_reply(question: str, history: list | None, out: dict,
+                  lang: str | None = None) -> str | None:
     """A grounded reply from the composer model, or None to let the page
     fall back to its deterministic summary."""
     from . import kimi_primary
@@ -218,10 +241,13 @@ def compose_reply(question: str, history: list | None, out: dict) -> str | None:
             turns.append(f"{role}: {text}")
     payload = {"question": str(question or "")[:500],
                "conversation": turns, "facts": facts}
+    rl = _reply_language(question, lang)
+    if rl:
+        payload["facts"]["reply_language"] = rl
     try:
         raw = kimi_primary._call(_SYSTEM,
                                  json.dumps(payload, ensure_ascii=False),
-                                 timeout=10.0, max_tokens=1200)
+                                 timeout=14.0, max_tokens=1200)
     except Exception:  # noqa: BLE001 - the fallback summary always exists
         return None
     reply = raw.get("reply") if isinstance(raw, dict) else None
@@ -267,7 +293,7 @@ _FAREWELL_REPLY_EN = "Safe travels. I'm here whenever you need entry rules."
 _FAREWELL_REPLY_ZH = "一路平安。需要查出入境规定随时找我。"
 
 
-def pleasantry_reply(question: str) -> str | None:
+def pleasantry_reply(question: str, lang: str | None = None) -> str | None:
     """Greetings, thanks and goodbyes get a human answer, instantly and
     deterministically. Only a SHORT message counts: "hello, do I need a
     visa for japan" must flow through to the real pipeline."""
@@ -275,7 +301,7 @@ def pleasantry_reply(question: str) -> str | None:
     low = q.lower().rstrip("!.?,~ ")
     if not q or len(q) > 24:
         return None
-    zh = _is_chinese(q)
+    zh = wants_chinese(q, lang)
     if any(low == g or low.startswith(g + " ") and len(low) <= len(g) + 6
            for g in _GREETINGS) or q.rstrip("！。？，~ ") in _GREETINGS:
         return _GREETING_REPLY_ZH if zh else _GREETING_REPLY_EN
@@ -302,12 +328,14 @@ Hard rules:
   For a Chinese question: 抱歉，我只能协助出入境相关事务。
 - If asked your name or what you are, you are Ellis. Never mention AI,
   models, providers or internal systems.
-- Reply in the language of the question. No em dashes. No semicolons.
+- Reply in the language named by KNOWN "reply_language" when present (the
+  customer chose it in the site header); otherwise in the language of the
+  question. No em dashes. No semicolons.
 Return JSON: {"reply": "..."}"""
 
 
 def compose_clarify(question: str, history: list | None, known: dict,
-                    missing: list[str]) -> str | None:
+                    missing: list[str], lang: str | None = None) -> str | None:
     """A conversational ask for the missing route facts, or None to keep
     the deterministic clarify line. Same guards as the answer composer: a
     reply may not carry a single digit of its own, so nothing numeric can
@@ -322,6 +350,9 @@ def compose_clarify(question: str, history: list | None, known: dict,
     payload = {"question": str(question or "")[:500], "conversation": turns,
                "known": {k: v for k, v in (known or {}).items() if v},
                "missing": missing}
+    rl = _reply_language(question, lang)
+    if rl:
+        payload["known"]["reply_language"] = rl
     try:
         raw = kimi_primary._call(_CLARIFY_SYSTEM,
                                  json.dumps(payload, ensure_ascii=False),

@@ -904,7 +904,7 @@ export default function TravelDatabase({ onBack }) {
       const out = await client.databaseAsk(sendText, result && g ? {
         nationality: nat, destination: dest, travel_purpose: shown.purpose,
         travel_document_type: shown.doc,
-      } : askCtx, hist)
+      } : askCtx, hist, lang)
       if (out.identity || out.off_topic || out.greeting) {
         // Ellis answered for itself: no route changes, no card repaint.
         pushChat({ role: 'ellis', kind: 'info', text: out.reply })
