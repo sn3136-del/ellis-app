@@ -1035,6 +1035,8 @@ class FreshnessDrillIn(BaseModel):
 
 
 _DRILL_FIELDS = ("government_fee", "processing_time", "permitted_stay")
+import threading as _threading
+_DRILL_LOCKS: dict = {}
 
 
 @app.post("/database/freshness/drill")
@@ -1090,36 +1092,61 @@ def travel_database_freshness_drill(body: FreshnessDrillIn,
         planted = "up to 7 days (superseded figure planted by the drill)"
     else:
         planted = "45 working days (superseded figure planted by the drill)"
+    # One drill per route at a time: two admins planting into the same row
+    # would restore each other's fake value as "the original".
+    lock = _DRILL_LOCKS.setdefault(row.cache_key, _threading.Lock())
+    if not lock.acquire(blocking=False):
+        raise HTTPException(409, "a drill is already running on this route")
     t0 = _time.monotonic()
     planted_at = datetime.now(timezone.utc).isoformat()
     before = dict(guidance)
     guidance[field] = planted
-    change_log.record(db, row.cache_key, full_route, before, dict(guidance),
-                      origin="drill-plant",
-                      note=f"48-hour drill by {p.user_id}: planted a fake "
-                           f"policy change in {field}")
-    row.guidance = guidance
-    db.commit()
+    token = change_log.DRILL.set(True)
     report = None
+    caught = False
     try:
-        report = freshness.recheck_row(db, row)
-    except Exception:  # noqa: BLE001 — the restore below must always run
-        report = None
-    db.refresh(row)
-    now_val = (row.guidance or {}).get(field)
-    caught = now_val != planted
-    if not caught:
-        # The drill never leaves planted data behind.
-        after = dict(row.guidance or {})
-        restored = dict(after)
-        restored[field] = original
-        change_log.record(db, row.cache_key, full_route, after, restored,
-                          origin="drill-restore",
-                          note="48-hour drill: the recheck did not correct "
-                               "the planted value, so the original was "
-                               "restored")
-        row.guidance = restored
+        change_log.record(db, row.cache_key, full_route, before, dict(guidance),
+                          origin="drill-plant",
+                          note=f"48-hour drill by {p.user_id}: planted a fake "
+                               f"policy change in {field}")
+        # Readers keep the real answer for the whole recheck window: the
+        # pre-plant guidance rides beside the planted row and the cached
+        # serve path prefers it.
+        ver = dict(row.verification or {})
+        ver["drill_shadow"] = before
+        row.verification = ver
+        row.guidance = guidance
         db.commit()
+        try:
+            report = freshness.recheck_row(db, row)
+        except Exception:  # noqa: BLE001 — the restore below must always run
+            report = None
+            db.rollback()
+        try:
+            db.refresh(row)
+        except Exception:  # noqa: BLE001
+            db.rollback()
+            db.refresh(row)
+        now_val = (row.guidance or {}).get(field)
+        caught = now_val != planted
+        if not caught:
+            # The drill never leaves planted data behind.
+            after = dict(row.guidance or {})
+            restored = dict(after)
+            restored[field] = original
+            change_log.record(db, row.cache_key, full_route, after, restored,
+                              origin="drill-restore",
+                              note="48-hour drill: the recheck did not correct "
+                                   "the planted value, so the original was "
+                                   "restored")
+            row.guidance = restored
+        ver = dict(row.verification or {})
+        ver.pop("drill_shadow", None)
+        row.verification = ver
+        db.commit()
+    finally:
+        change_log.DRILL.reset(token)
+        lock.release()
     elapsed = round(_time.monotonic() - t0, 1)
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_freshness_drill",

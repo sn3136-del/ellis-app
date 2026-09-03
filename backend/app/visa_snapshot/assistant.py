@@ -162,6 +162,8 @@ def region_destination(question: str) -> str | None:
     q = str(question or "").lower().replace("-", " ")
     if not q.strip():
         return None
+    # "Jeju Air to Bangkok", 海南航空: a carrier name is not a region.
+    q = re.sub(r"\b(jeju|hainan)\s+air(?:lines?|ways)?\b|海南航空|海航|济州航空|濟州航空", " ", q)
     for e in special_policies._load():
         if e.get("destination"):
             # A policy without a region ("240 hour transit") still names its
@@ -187,7 +189,9 @@ def split_nationality(question: str, isos: list[str]) -> tuple[str, list[str]]:
     q = str(question or "")
     low = q.lower()
     from . import kimi_primary
-    for pos, iso, _dem in kimi_primary._country_mentions(q):
+    # A demonym ("Indian citizens") outranks a destination that only borrows
+    # a holder word through the phrase after it ("Thailand for Indian").
+    for pos, iso, _dem in sorted(kimi_primary._country_mentions(q), key=lambda m: not m[2]):
         if kimi_primary._marks_nationality(q, low, pos, _dem):
             if iso in isos:
                 return iso, [d for d in isos if d != iso]
@@ -255,7 +259,10 @@ def _reply_language(question: str, lang: str | None) -> str | None:
     return None
 
 
-_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+|(?<=[。！？])")
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9\"“(])|(?<=[。！？])")
+_ABBREV_END = re.compile(
+    r"(?:\b[A-Za-z]|\b(?:approx|etc|e\.g|i\.e|vs|incl|excl|min|max|no|st|mr|mrs|ms|dr"
+    r"|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec))\.$", re.I)
 
 
 def _ground_sentences(reply: str, allowed: set) -> str | None:
@@ -263,7 +270,15 @@ def _ground_sentences(reply: str, allowed: set) -> str | None:
     rest. The old guard threw the whole reply away for one stray figure
     ("a passport valid for 6 months"), so a correct four-sentence answer
     vanished and the reader got the bare summary instead."""
-    sentences = [x.strip() for x in _SENTENCE_SPLIT.split(reply or "") if x and x.strip()]
+    pieces = [x.strip() for x in _SENTENCE_SPLIT.split(reply or "") if x and x.strip()]
+    sentences = []
+    for piece in pieces:
+        # "approx. 90 USD", "U.S. passport": an abbreviation is not the end
+        # of a sentence, so glue the piece back onto its predecessor.
+        if sentences and _ABBREV_END.search(sentences[-1]):
+            sentences[-1] = sentences[-1] + " " + piece
+        else:
+            sentences.append(piece)
     kept = [x for x in sentences if set(re.findall(r"\d+", x)) <= allowed]
     if not kept:
         return None
@@ -340,9 +355,18 @@ def fallback_reply(out: dict, question: str, lang: str | None = None) -> str | N
     fee = g.get("government_fee") or {}
     lines = {}
     if isinstance(fee, dict) and fee.get("amount") is not None:
-        amt, cur = fee.get("amount"), fee.get("currency") or ""
-        lines["fee"] = (f"政府费用为 {amt} {cur}。" if zh and not tw else f"政府費用為 {amt} {cur}。" if tw
-                        else f"The government fee is {amt} {cur}.".replace("  ", " "))
+        amt, cur = fee.get("amount"), (fee.get("currency") or "").strip()
+        try:
+            zero = float(amt) == 0
+        except (TypeError, ValueError):
+            zero = False
+        if zero:
+            lines["fee"] = ("无需缴纳政府费用。" if zh and not tw else "無需繳納政府費用。" if tw
+                            else "There is no government fee.")
+        else:
+            money = f"{amt} {cur}".strip()
+            lines["fee"] = (f"政府费用为 {money}。" if zh and not tw else f"政府費用為 {money}。" if tw
+                            else f"The government fee is {money}.")
     if g.get("permitted_stay"):
         st = _zh_figures(str(g["permitted_stay"]), tw) if zh else g["permitted_stay"]
         lines["stay"] = (f"允许停留：{st}。" if zh and not tw else f"允許停留：{st}。" if tw
@@ -361,10 +385,29 @@ def fallback_reply(out: dict, question: str, lang: str | None = None) -> str | N
         if k in lines and lines[k] not in parts:
             parts.append(lines[k])
     parts = parts[:5]
+    if out.get("approximate") and parts:
+        # A stand-in answer (the nearest cached variant) is said to be one.
+        parts.insert(0, ("以下是我们为同一护照和目的地保存的最接近答案，此次出行的确切答案仍在核实。"
+                         if zh and not tw else
+                         "以下是我們為同一護照和目的地保存的最接近答案，此次出行的確切答案仍在核實。"
+                         if tw else
+                         "The exact answer for this trip is still being checked. The closest "
+                         "record held for this passport and destination says:"))
     for pol in (out.get("special_policies") or [])[:1]:
-        line = pol.get("applies_line") or pol.get("summary_line")
-        if line:
-            parts.append(str(line))
+        title = ((pol.get("title_zh") if zh else None) or pol.get("title") or "").strip()
+        summ = ((pol.get("summary_zh") if zh else None) or pol.get("summary") or "").strip()
+        cov = pol.get("applies_to_you")
+        if title:
+            if cov is True:
+                head = (f"{title}适用于您的护照。" if zh and not tw else f"{title}適用於您的護照。" if tw
+                        else f"{title} applies to your passport.")
+            elif cov is False:
+                head = (f"{title}不适用于您的护照。" if zh and not tw else f"{title}不適用於您的護照。" if tw
+                        else f"{title} does not cover your passport.")
+            else:
+                head = f"{title}。" if zh else f"{title}."
+            first = summ.split("。")[0] if zh else summ.split(". ")[0]
+            parts.append(head + ((first + ("。" if zh and first and not first.endswith("。") else ("." if first and not zh and not first.endswith(".") else ""))) if first else ""))
     if not parts:
         return None
     tail = ("详情见下方完整记录。" if zh and not tw else "詳情見下方完整記錄。" if tw

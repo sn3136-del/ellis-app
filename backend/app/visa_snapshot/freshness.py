@@ -282,7 +282,17 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
             applied[k] = v
 
     if applied:
-        merged = dict(guidance)
+        # Merge onto the row as it is now, not the snapshot taken before the
+        # page read: a reader-triggered refresh or another sweep may have
+        # written in the meantime, and the last writer must not undo it.
+        try:
+            db.refresh(row)
+            base = dict(row.guidance or {})
+            if override:
+                base, _ = verified_overrides.apply(base, route)
+        except Exception:  # noqa: BLE001
+            base = dict(guidance)
+        merged = dict(base)
         merged.update(applied)
         clean, missing, contradictions = kimi_primary.validate_answer(merged)
         if contradictions or missing:
@@ -303,21 +313,35 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
                          f" (quote: {str(evidence.get(k) or '')[:160]})"
                          for k in sorted(disputed))
         held = (override or {}).get("fields") or {}
-        db.add(DatabaseIssueReport(
-            org_id="platform", cache_key=row.cache_key, route=route,
-            field=",".join(sorted(disputed))[:64],
-            note=(f"Automatic source check against {page.final_url}: " + note)[:1000],
-            reported_by="freshness_monitor", status="open",
-            proposal={
-                "source_url": page.final_url,
-                "checked_at": when,
-                "fields": {
-                    k: {"page_says": disputed[k],
-                        "record_holds": held.get(k, guidance.get(k)),
-                        "quote": str(evidence.get(k) or "")}
-                    for k in sorted(disputed)
-                },
-            }))
+        field_key = ",".join(sorted(disputed))[:64]
+        proposal = {
+            "source_url": page.final_url,
+            "checked_at": when,
+            "fields": {
+                k: {"page_says": disputed[k],
+                    "record_holds": held.get(k, guidance.get(k)),
+                    "quote": str(evidence.get(k) or "")}
+                for k in sorted(disputed)
+            },
+        }
+        from sqlalchemy import select as _sel
+        existing = db.execute(_sel(DatabaseIssueReport).where(
+            DatabaseIssueReport.cache_key == row.cache_key,
+            DatabaseIssueReport.reported_by == "freshness_monitor",
+            DatabaseIssueReport.field == field_key,
+            DatabaseIssueReport.status.in_(("open", "acknowledged")))).scalars().first()
+        if existing is not None:
+            # The same dispute is refreshed, never filed twice: a drill or
+            # a repeated sweep must not stack identical open issues.
+            existing.note = (f"Automatic source check against {page.final_url}: " + note)[:1000]
+            existing.proposal = proposal
+        else:
+            db.add(DatabaseIssueReport(
+                org_id="platform", cache_key=row.cache_key, route=route,
+                field=field_key,
+                note=(f"Automatic source check against {page.final_url}: " + note)[:1000],
+                reported_by="freshness_monitor", status="open",
+                proposal=proposal))
 
     consistent = bool(raw.get("consistent")) and not proposed
     _stamp(row, {

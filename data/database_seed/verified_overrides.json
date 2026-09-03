@@ -14666,7 +14666,7 @@
   "source_url": "https://visa.immigration.go.tz/guidelines",
   "note": "Headline fee and stay are right, but both multiple-entry products are invented. Tanzania publishes a single Multiple Entry Visa at USD 100 with up to 12 months validity. There is no 6-month tier at USD 100 and no 12-month tier at USD 150. Separately, Hong Kong SAR does not appear on either the visa- | quote: The fee for Ordinary Visa is 50 USD and has a validity of up to 90 days; The fee | 2026-09-03: both products are eVisas lodged on the same portal, channel set to online.",
   "fields": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "disposition": "VISA_REQUIRED",
    "government_fee": {
     "amount": 50,
     "currency": "USD"
@@ -14697,7 +14697,8 @@
     }
    ],
    "application_channel": "online_portal",
-   "application_channel_detail": "Hong Kong SAR passport holders are not on Tanzania's visa on arrival list. Apply online on the Immigration Department eVisa portal before travel."
+   "application_channel_detail": "Hong Kong SAR passport holders are not on Tanzania's visa on arrival list. Apply online on the Immigration Department eVisa portal before travel.",
+   "requirement_detail": "evisa"
   }
  },
  {

@@ -53,6 +53,14 @@ def diff(old: dict | None, new: dict | None) -> dict:
     return out
 
 
+import contextvars as _contextvars
+
+# Set for the duration of a 48-hour drill: every change written while it is
+# on is labelled as drill history and never pushed to the change webhook,
+# so the audited log cannot mistake a planted value for a real correction.
+DRILL = _contextvars.ContextVar("ellis_drill", default=False)
+
+
 def record(db, cache_key: str, route: dict, old: dict | None, new: dict | None,
            *, origin: str, note: str = "") -> None:
     """Append one change event; commits with the caller's transaction."""
@@ -61,13 +69,18 @@ def record(db, cache_key: str, route: dict, old: dict | None, new: dict | None,
         changes = diff(old, new)
         if action == "modify" and not changes:
             return          # nothing a reader can see changed
+        drill = bool(DRILL.get())
+        if drill and not str(origin).startswith("drill"):
+            origin = f"drill-{origin}"
+            note = "48-hour drill: " + (note or "")
         db.add(DatabaseChangeLog(
             cache_key=cache_key or "",
             route={k: (route or {}).get(k) for k in (
                 "passport_nationality", "destination_country",
                 "travel_purpose", "travel_document_type")},
             action=action, origin=origin, changes=changes, note=note[:900]))
-        _notify(action, origin, route, changes, note)
+        if not drill:
+            _notify(action, origin, route, changes, note)
     except Exception:  # noqa: BLE001 — the log must never break the answer
         pass
 

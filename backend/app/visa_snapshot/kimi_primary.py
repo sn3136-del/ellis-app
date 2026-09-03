@@ -1350,7 +1350,7 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
         # the last successful read of the official page.
         gc = _freshness.effective_check(row.verification)
         out = apply_portal_fallback(apply_verified_overrides(_result(
-            row.status, row.guidance, cached=True, stale=_is_stale(row),
+            row.status, served_guidance(row), cached=True, stale=_is_stale(row),
             released=released,
             missing=row.missing_fields, contradictions=row.contradictions,
             model=row.model,
@@ -1760,6 +1760,14 @@ _AIRPORTS = {
     "VTE": "LAO", "RGN": "MMR", "CAI": "EGY", "SVO": "RUS", "DME": "RUS",
     "GRU": "BRA", "MCT": "OMN", "RUH": "SAU", "JED": "SAU", "TLV": "ISR",
 }
+_AIRLINE_RE = _re.compile(
+    r"\b(?:jeju|hainan|china|korean|japan|singapore|thai|vietnam|malaysia|air asia"
+    r"|airasia|cathay|eva|philippine|garuda|qatar|emirates|etihad|turkish|egypt"
+    r"|air india|air china|air canada|air france|british|american|united|delta"
+    r"|scoot|jetstar|peach|hk express|hong kong)\s+(?:air(?:lines?|ways)?|express)\b"
+    r"|\bair\s+(?:china|india|canada|france|asia|macau|japan|busan|seoul|new zealand)\b"
+    r"|海南航空|海航|济州航空|濟州航空|中国国航|国航|東航|东航|南航|国泰|國泰|港龙|港龍"
+    r"|长荣|長榮|华航|華航|新航|泰航|越航|亚航|亞航|大韩航空|大韓航空|日航|全日空|春秋航空|吉祥航空")
 _LOWER_STOPWORDS = frozenset({
     "to", "in", "on", "at", "by", "for", "my", "me", "is", "it", "do", "we", "an",
     "or", "of", "no", "so", "if", "up", "as", "be", "am", "are", "can", "the",
@@ -1818,6 +1826,10 @@ def _country_spans(text: str) -> list:
     enough that nothing ordinary looks like it ("thialand", not "woman").
     """
     low = text.lower()
+    # "Korean Air", "Hainan Airlines", 海南航空: a carrier, not a place.
+    # Blanked in place so every position stays aligned with the text.
+    for m in _AIRLINE_RE.finditer(low):
+        low = low[:m.start()] + " " * (m.end() - m.start()) + low[m.end():]
     found = []
     taken = [False] * len(low)
     try:
@@ -1926,6 +1938,14 @@ def _country_mentions(text: str) -> list:
     return [(i, iso, dem) for i, _j, iso, dem in _country_spans(text)]
 
 
+def served_guidance(row) -> dict:
+    """What readers get from a cached row: the answer itself, or, while a
+    48-hour drill has a planted value in it, the pre-plant answer stashed
+    beside it. A drill must never show a reader a fake fee."""
+    shadow = (row.verification or {}).get("drill_shadow") if row.verification else None
+    return shadow if isinstance(shadow, dict) and shadow else (row.guidance or {})
+
+
 def country_name(iso: str, script: str = "en") -> str:
     """The display name for an ISO3 code in the reply's script, or the code
     itself when the registry does not know it."""
@@ -2009,12 +2029,21 @@ _ZH_HINT_SUFFIX = ("签证", "簽證", "领事馆", "領事館", "使馆", "使�
 # 在意大利办, 喺香港領事館申請: where the paperwork is lodged, not a leg of the trip.
 _ZH_PLACE_PREFIX = ("在", "喺", "係")
 _HOLDER_BEFORE = ("have a ", "have an ", "has a ", "hold a ", "holds a ",
-                  "holding a ", "holding an ", "with a ", "with an ", "on a ",
-                  "on an ", "using a ", "using an ", "i am ", "i'm ", "we are ")
+                  "holding a ", "holding an ", "using a ", "using an ",
+                  "i am ", "i'm ", "we are ")
+# "with a X passport", "on a X passport": these prepositions mark the
+# passport only when a document noun follows; "on a Thailand holiday" is a
+# trip.
+_HOLDER_BEFORE_NOUN = ("with a ", "with an ", "on a ", "on an ")
 _PASSPORT_AFTER_RE = _re.compile(
-    r"(?:[a-z.'-]+\s+){1,3}(?:sar\s+)?"
+    r"(?:(?!(?:for|to|as|and|or|via|in|into|at|from|with|on|by|of|vs|versus)\s)[a-z.'-]+\s+){1,3}(?:sar\s+)?"
     r"(?:passports?|citizens?|citizenship|nationals?|nationality|applicants?"
     r"|travell?ers?|tourists?|residents?|visitors?|holders?)\b")
+_PASSPORT_NOUN_RE = _re.compile(
+    r"(?:[a-z.'-]+\s+){1,2}(?:sar\s+)?(?:passports?|travel documents?|documents? of identity|permits?)\b")
+_TRIP_HINT_RE = _re.compile(
+    r"^[a-z]+\s+(?:holidays?|trips?|tours?|vacations?|visits?|cruises?|flights?"
+    r"|itinerary|stopovers?|layovers?|getaway|honeymoon|break|package|adventure|run)\b")
 
 
 _ZH_NATIONAL_SUFFIX = ("人", "公民", "护照", "護照", "居民", "国籍", "國籍", "籍",
@@ -2057,12 +2086,16 @@ def _marks_nationality(q: str, low: str, pos: int, demonym: bool,
     if k < 0:
         k = seg.find("護照")
     passport_after = k > 0 and not any(ch in seg[:k] for ch in "，,。.、;； ")
+    if _TRIP_HINT_RE.match(after):
+        return False          # "on a Thailand holiday": the trip, not the passport
     return ("from " in before or before.rstrip().endswith("from")
             or "issued by" in before
             or "持" in q[max(0, pos - 3):pos]
             or passport_after
             or bool(_PASSPORT_AFTER_RE.match(after))
-            or any(before.endswith(m) for m in _HOLDER_BEFORE))
+            or any(before.endswith(m) for m in _HOLDER_BEFORE)
+            or (any(before.endswith(m) for m in _HOLDER_BEFORE_NOUN)
+                and bool(_PASSPORT_NOUN_RE.match(after))))
 
 
 def _doc_from_text(q: str, low: str) -> str | None:
@@ -2437,9 +2470,12 @@ def parse_question_with_context(question: str, context: dict | None,
                         transit = transit + [one]
                     if purpose == "transit":
                         purpose = None
-                elif _marks_nationality(q, low, pos, mentions[0][2]):
+                elif _marks_nationality(q, low, pos, mentions[0][2]) and (
+                        mentions[0][2] or not _re.search(
+                            r"\b(?:for|to)\s+(?:tourists?|visitors?|travell?ers?)\b", low)):
                     # "what about my wife, she has an Indian passport": the
                     # passport changes, the destination on screen stays.
+                    # "what about Japan for tourists?" changes the trip.
                     nat = one
                 elif one != nat:
                     dest = one

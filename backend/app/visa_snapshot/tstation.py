@@ -136,7 +136,7 @@ _NO_CHANNEL = frozenset({
     "no_application_required", "none_or_port_of_entry",
 })
 _AGENCY_RE = re.compile(
-    r"china travel service|authori[sz]ed agent|appointed agent|designated agent"
+    r"china travel service|authori[sz]ed (?:visa |travel )?agent|appointed agent|designated agent"
     r"|accredited agent|travel agency|visa application cent(?:re|er)|visa cent(?:re|er)"
     r"|\bvfs\b|bls international|tls ?contact|through an agent", re.I)
 _GOVERNMENT_OFFICE_RE = re.compile(
@@ -183,6 +183,7 @@ _IN_PERSON_METHODS = frozenset({
     "Embassy Submission", "Agency Service", "Government Office Submission",
 })
 _NAME_AGENCY_RE = re.compile(r"agenc|agent|china travel service|\bvfs\b", re.I)
+_NAME_VISA_RE = re.compile(r"(?<!no )\bvisa\b(?![- ]free)", re.I)
 _NAME_MISSION_RE = re.compile(r"embassy|consulate|consular", re.I)
 _NAME_BORDER_RE = re.compile(r"on[- ]arrival", re.I)
 _NAME_ONLINE_RE = re.compile(
@@ -201,7 +202,13 @@ def _method_for_detail(detail: str | None, route_method: str | None,
     "Other" is never an answer: it told a traveller nothing and it is not
     what any official page says."""
     d = str(detail or "")
+    name = str(row.get("visa_type_name") or "")
     if d in _VISA_FREE_DETAILS:
+        if from_channel and route_method in _IN_PERSON_METHODS and _NAME_VISA_RE.search(name):
+            # A product-less conditional route whose row itself names a
+            # visa ("Schengen short-stay (C) visa through the French or
+            # Spanish visa centre") keeps the channel its source stated.
+            return route_method
         return ("Online Application"
                 if route_method == "Online Application"
                 and _names_something_to_file(row) else None)
@@ -851,6 +858,11 @@ def records_for_route(route: dict, guidance: dict,
     method_from_channel = method is not None
     if method is None:
         method = _method_from_detail(g)
+        # A lodging place read from the route's own sentence (an agency, a
+        # mission, a government office) is a stated channel too: an eVisa
+        # "lodged only through designated agencies" is an agency filing.
+        # A stale "online" or "at the border" phrase stays advisory.
+        method_from_channel = method in _IN_PERSON_METHODS
     if method is None and disposition != "VISA_EXEMPT":
         # The engine left the channel blank but the product names it: a thing
         # called an e-Visa is applied for online, a consular sticker at a

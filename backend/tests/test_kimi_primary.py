@@ -1791,3 +1791,55 @@ def test_round_three_authorisations_documents_and_terse_purposes():
     r = read("Indian passport holder, what's the visa for a 6 month work assignment in the US")
     assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("IND", "USA", "work")
     assert read("schengen visa 中國護照可唔可以喺香港領事館申請?") is None
+
+
+def test_review_findings_of_2026_09_03_are_closed():
+    from app.visa_snapshot import assistant, tstation
+    from app.visa_snapshot.kimi_primary import _deterministic_route as read, parse_question_with_context
+    # A product-less conditional route keeps its sourced channel when the row names a visa.
+    g = {"disposition": "CONDITIONAL", "requirement_detail": "conditional_visa_free",
+         "application_channel": "visa_center", "visa_category": "Schengen short-stay (C) visa",
+         "application_channel_detail": "Must obtain a Schengen short-stay visa through the French or Spanish visa centre."}
+    row = tstation.records_for_route({"passport_nationality": "CHN", "destination_country": "AND",
+                                      "travel_purpose": "tourism", "travel_document_type": "ordinary_passport"}, g)[0]
+    assert row["application_method"] == "Agency Service"
+    # "authorised visa agent" is an agency, and a sentence-read agency outranks a product name.
+    g = {"disposition": "VISA_REQUIRED", "application_channel": "in_person",
+         "application_channel_detail": "Applications must be lodged through a designated travel agency; individuals cannot apply directly.",
+         "visa_products": [{"type": "e-Visa (single entry)"}]}
+    assert tstation.records_for_route({"passport_nationality": "PHL", "destination_country": "JPN",
+                                       "travel_purpose": "tourism"}, g)[0]["application_method"] == "Agency Service"
+    g = {"disposition": "VISA_REQUIRED", "application_channel": "not_required",
+         "application_channel_detail": "Individuals must apply through a Singapore-authorised visa agent.",
+         "visa_products": [{"type": "Visit visa"}]}
+    assert tstation.records_for_route({"passport_nationality": "CHN", "destination_country": "SGP",
+                                       "travel_purpose": "family_visit"}, g)[0]["application_method"] == "Agency Service"
+    # Parser over-matches are gone.
+    r = read("Japan requires Chinese travellers to have a visa, is that true?")
+    assert (r["nationality"], r["destination"]) == ("CHN", "JPN")
+    r = read("Is Japan open to tourists from China?")
+    assert (r["nationality"], r["destination"]) == ("CHN", "JPN")
+    r = read("Going on a Thailand holiday with my Indian passport, need a visa?")
+    assert (r["nationality"], r["destination"]) == ("IND", "THA")
+    r = read("on a Hong Kong SAR passport, visiting Thailand")
+    assert (r["nationality"], r["destination"]) == ("HKG", "THA")
+    ctx = {"nationality": "CHN", "destination": "KOR", "travel_purpose": "tourism"}
+    r = parse_question_with_context("what about Japan for tourists?", ctx)
+    assert (r["nationality"], r["destination"]) == ("CHN", "JPN")
+    assert assistant.split_nationality("Japan vs Thailand for Indian citizens, which is easier?", ["JPN", "THA", "IND"]) == ("IND", ["JPN", "THA"])
+    # Airlines are carriers, not places.
+    r = read("Chinese passport, flying Jeju Air to Bangkok")
+    assert (r["nationality"], r["destination"]) == ("CHN", "THA")
+    assert assistant.region_destination("Indian passport, Hainan Airlines to Bangkok") is None
+    # Composer helpers.
+    assert assistant._ground_sentences("The fee is approx. 90 USD. No visa is needed for stays up to 30 days.", {"30"}) == "No visa is needed for stays up to 30 days."
+    assert assistant._ground_sentences("For U.S. passport holders the fee is 185 USD. Stay is 30 days.", {"30"}) == "Stay is 30 days."
+    fb = assistant.fallback_reply({"guidance": {"disposition": "VISA_REQUIRED", "government_fee": {"amount": 0, "currency": ""}}, "route": {}}, "x", "en")
+    assert "There is no government fee." in fb and " 0 ." not in fb
+    out = {"guidance": {"disposition": "VISA_REQUIRED", "permitted_stay": "30 days"}, "route": {"nationality": "IND", "destination": "CHN"},
+           "special_policies": [{"id": "china-hainan-visa-free", "title": "Hainan 30 day visa-free entry", "summary": "Nationals of 61 countries can enter Hainan without a visa for up to 30 days. Work is excluded.", "applies_to_you": False}]}
+    fb = assistant.fallback_reply(out, "hainan for indians", "en")
+    assert "does not cover your passport" in fb and "61 countries" in fb
+    fb = assistant.fallback_reply({"guidance": {"disposition": "VISA_EXEMPT", "permitted_stay": "up to 15 days"}, "approximate": True,
+                                   "route": {"nationality": "CHN", "destination": "JPN", "travel_purpose": "work"}}, "chinese passport working in japan", "en")
+    assert fb.startswith("The exact answer for this trip is still being checked.")
