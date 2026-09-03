@@ -483,3 +483,51 @@ def test_human_flags_get_an_ai_proposal_operators_accept_or_decline(db):
     assert served["government_fee"]["amount"] == 715
     assert "accepted by op-1" in (prov or {}).get("verified_by", "")
     vo.reload()
+
+
+def test_a_failed_attempt_never_erases_a_good_check(db):
+    """The eight-record regression of 2026-09-02: a grounded answer whose
+    page later blocks robots (or whose provider errors) must STAY grounded.
+    The failed attempt is recorded beside the last good read, never over it,
+    so the 48-hour sweep can never demote a verified route to Low and hold
+    it from readers."""
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": True, "corrected_fields": {}, "evidence": {}, "note": ""})
+    assert freshness.recheck_route(db, ROUTE)["outcome"] == "checked"
+    good_at = db.query(KimiRouteGuidanceCache).one() \
+                .verification["grounded_check"]["at"]
+
+    for failure in ("blocked", "provider"):
+        if failure == "blocked":
+            fetching.set_fetcher(lambda url, timeout_seconds=0: FetchResult(
+                requested_url=url, ok=True, final_url=url,
+                final_hostname="www.mofa.go.jp",
+                content_text="checking your browser", challenge=True))
+            expected = "fetch_failed"
+        else:
+            fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+            freshness.set_provider(lambda system, user: (_ for _ in ()).throw(
+                RuntimeError("content_filter")))
+            expected = "provider_error"
+        assert freshness.recheck_route(db, ROUTE)["outcome"] == expected
+        db.expire_all()
+        row = db.query(KimiRouteGuidanceCache).one()
+        # The attempt is on the record, honestly.
+        assert row.verification["grounded_check"]["outcome"] == expected
+        # And the good read still counts.
+        eff = freshness.effective_check(row.verification)
+        assert eff["outcome"] == "checked" and eff["consistent"] is True
+        assert eff["at"] == good_at
+        assert freshness.has_been_grounded(row)
+
+
+def test_never_read_rows_have_no_effective_check(db):
+    row = _seed(db)
+    assert freshness.effective_check(row.verification) == {}
+    fetching.set_fetcher(lambda url, timeout_seconds=0: FetchResult(
+        requested_url=url, ok=False, error="timeout"))
+    assert freshness.recheck_route(db, ROUTE)["outcome"] == "fetch_failed"
+    assert not freshness.has_been_grounded(db.query(KimiRouteGuidanceCache).one())

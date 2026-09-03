@@ -726,3 +726,50 @@ def test_the_site_language_setting_decides_the_reply_language(client):
     en = client.post("/database/ask", headers=READER,
                      json={"question": "你好", "lang": "en"}).json()
     assert "Hi, I'm Ellis" in en["reply"]
+
+
+def test_a_blocked_page_never_demotes_a_grounded_record_to_low(client):
+    """2026-09-02 regression: eight grounded engine answers fell to Low and
+    were held from readers after the 48-hour sweep hit pages that block
+    robots. A failed re-check attempt must leave the record's grade and its
+    serving exactly as the last successful read left them."""
+    from app.db import SessionLocal
+    from app.visa_snapshot import fetching, freshness
+    from app.visa_snapshot.fetching import FetchResult
+    from app.visa_snapshot.models import KimiRouteGuidanceCache
+    _provide(dict(ANSWER, confidence="medium"))
+    body = client.post("/database/lookup", headers=READER,
+                       json={"nationality": "ISL", "destination": "TON"}).json()
+    key = body["cache_key"]
+
+    def grade():
+        recs = client.get("/database/records", headers=OTHER_ORG_ADMIN,
+                          params={"nationality": "ISL", "destination": "TON"}
+                          ).json()["records"]
+        return {r["confidence_level"] for r in recs}
+
+    db = SessionLocal()
+    try:
+        row = db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one()
+        good = {"at": "2026-09-01T00:00:00+00:00", "outcome": "checked",
+                "consistent": True, "source_url": ANSWER["source_url"],
+                "changed_fields": [], "disputed_fields": []}
+        row.verification = dict(row.verification or {},
+                                grounded_check=good, last_good_check=dict(good))
+        db.commit()
+        assert grade() == {"Medium"}
+        # The page now blocks robots.
+        fetching.set_fetcher(lambda url, timeout_seconds=0: FetchResult(
+            requested_url=url, ok=True, final_url=url,
+            final_hostname="www.mofa.go.jp",
+            content_text="checking your browser", challenge=True))
+        db.expire_all()
+        row = db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one()
+        assert freshness.recheck_row(db, row)["outcome"] == "fetch_failed"
+    finally:
+        fetching.set_fetcher(None)
+        db.close()
+    assert grade() == {"Medium"}, "a blocked page must not demote a grounded record"
+    after = client.post("/database/lookup", headers=READER,
+                        json={"nationality": "ISL", "destination": "TON"}).json()
+    assert after["held"] is False and after["guidance"]["disposition"] == "VISA_REQUIRED"

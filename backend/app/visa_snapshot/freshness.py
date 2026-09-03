@@ -151,9 +151,31 @@ def candidate_sources(guidance: dict, override: dict | None) -> list[str]:
 
 
 def _stamp(row, entry: dict) -> None:
+    """Record the latest grounding attempt. A successful read is ALSO kept as
+    the row's last good check, so a later failed attempt (a site that blocks
+    robots today, a provider outage, a landing page that states nothing)
+    records itself honestly without erasing the fact that the official page
+    was read and agreed with. A failed attempt used to overwrite the stamp
+    wholesale: eight grounded answers silently fell to Low and were held
+    from readers, which made the 48-hour sweep the thing that took verified
+    routes offline."""
     ver = dict(row.verification or {})
     ver["grounded_check"] = entry
+    if entry.get("outcome") == "checked":
+        ver["last_good_check"] = dict(entry)
     row.verification = ver
+
+
+def effective_check(verification: dict | None) -> dict:
+    """The grounding that counts for confidence and provenance: the latest
+    attempt when it actually read the page, otherwise the last successful
+    read. Empty when the page has never been read."""
+    ver = verification or {}
+    gc = ver.get("grounded_check") or {}
+    if gc.get("outcome") == "checked":
+        return gc
+    good = ver.get("last_good_check") or {}
+    return good if good.get("outcome") == "checked" else {}
 
 
 def recheck_row(db, row, *, today: str | None = None) -> dict:
@@ -330,8 +352,7 @@ def recheck_route(db, route: dict) -> dict | None:
 
 
 def has_been_grounded(row) -> bool:
-    gc = (row.verification or {}).get("grounded_check") or {}
-    return gc.get("outcome") == "checked"
+    return bool(effective_check(row.verification))
 
 
 def due_rows(db, *, older_than_hours: int = 48, limit: int = 400) -> list:

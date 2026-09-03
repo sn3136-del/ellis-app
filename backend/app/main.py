@@ -915,7 +915,11 @@ def travel_database_freshness(db=Depends(get_session),
     rows = []
     for r in db.execute(_select(KimiRouteGuidanceCache).order_by(
             KimiRouteGuidanceCache.fresh_until)).scalars():
+        from .visa_snapshot import freshness as _fresh
+        # The latest attempt, for the sweep's own bookkeeping, and the
+        # grounding that counts: a failed attempt never erases a good read.
         gc = (r.verification or {}).get("grounded_check") or {}
+        eff = _fresh.effective_check(r.verification)
         fresh_until = r.fresh_until
         rows.append({
             "cache_key": r.cache_key,
@@ -927,12 +931,14 @@ def travel_database_freshness(db=Depends(get_session),
             "stale": bool(fresh_until and
                           fresh_until.replace(tzinfo=fresh_until.tzinfo or timezone.utc)
                           < now),
-            "grounded": gc.get("outcome") == "checked",
+            "grounded": bool(eff),
             "grounded_at": gc.get("at"),
-            "grounded_source": gc.get("source_url"),
-            "grounded_consistent": gc.get("consistent"),
-            "changed_fields": gc.get("changed_fields") or [],
-            "disputed_fields": gc.get("disputed_fields") or [],
+            "last_attempt_outcome": gc.get("outcome"),
+            "read_at": eff.get("at"),
+            "grounded_source": eff.get("source_url"),
+            "grounded_consistent": eff.get("consistent"),
+            "changed_fields": eff.get("changed_fields") or [],
+            "disputed_fields": eff.get("disputed_fields") or [],
             "human_override": verified_overrides.find(r.route or {}) is not None,
         })
     return {"answers": rows,
@@ -972,10 +978,17 @@ def _recheck_coverage(rows: list, now) -> dict:
     h48 = now - timedelta(hours=48)
     h24 = now - timedelta(hours=24)
     stamped = [a for a, _ in ats if a is not None]
+    # Attempts are the promise ("every record at least every 48 hours");
+    # successful reads are the truth behind it. A site that blocks robots
+    # counts as attempted, never as read, so both numbers are shown.
+    reads = [_at(dict(x, grounded_at=x.get("read_at"))) for x in canonical]
+    reads = [a for a in reads if a is not None]
     return {
         "canonical_total": len(canonical),
         "checked_48h": sum(1 for a in stamped if a >= h48),
         "checked_24h": sum(1 for a in stamped if a >= h24),
+        "read_48h": sum(1 for a in reads if a >= h48),
+        "never_read": len(canonical) - len(reads),
         "never_checked": len(canonical) - len(stamped),
         "oldest_check_at": min(stamped).isoformat() if stamped else None,
     }
@@ -1129,10 +1142,10 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
         until = (r.fresh_until.isoformat() if r.fresh_until else "")
         # Whether the official page has actually been read and agreed with:
         # the difference between a source and a link nobody opened.
-        _gc = ((r.verification or {}).get("grounded_check") or {})
-        _grounded = _gc.get("outcome") == "checked" and bool(_gc.get("consistent"))
-        _disputed_now = list(((r.verification or {}).get("grounded_check")
-                              or {}).get("disputed_fields") or [])
+        from .visa_snapshot import freshness as _fresh
+        _gc = _fresh.effective_check(r.verification)
+        _grounded = bool(_gc) and bool(_gc.get("consistent"))
+        _disputed_now = list(_gc.get("disputed_fields") or [])
         for rec in tstation.records_for_route(route, g, prov, collected, until,
                                               grounded_ok=_grounded,
                                               disputed_fields=_disputed_now):
@@ -1164,7 +1177,7 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
             #                      found the stored answer consistent with it
             #   reference          an official page is linked but has not yet
             #                      been machine-compared to this answer
-            gc = ((r.verification or {}).get("grounded_check") or {})
+            gc = _gc
             # Fields the page disputed that no human has ruled on yet: the
             # spec's third checklist state, 未过审 (not approved).
             rec["_disputed"] = list(gc.get("disputed_fields") or [])
@@ -2170,12 +2183,16 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     # Low still reach customers unheld.
     if out.get("guidance") and not out.get("operator_released"):
         from .visa_snapshot import tstation as _ts
+        # A served grounded_check exists only when the page was actually
+        # read (the engine attaches it from the effective check), so its
+        # presence plus `consistent` is the whole test. Keying on an
+        # "outcome" field the served dict did not carry held every
+        # machine-grounded answer from readers (found 2026-09-03).
         _gc2 = out.get("grounded_check") or {}
         _rows = _ts.records_for_route(
             route, out.get("guidance") or {},
             (out.get("source_verified") or None),
-            grounded_ok=(_gc2.get("outcome") == "checked"
-                         and bool(_gc2.get("consistent"))))
+            grounded_ok=bool(_gc2) and bool(_gc2.get("consistent")))
         if _rows and _rows[0].get("confidence_level") == "Low":
             out["review_required"] = True
             out["held"] = kimi_primary.hold_enabled()

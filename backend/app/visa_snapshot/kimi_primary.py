@@ -1345,7 +1345,10 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
     row = _cached(db, key)
     if row is not None and not force_refresh:
         released = bool((row.verification or {}).get("operator_released"))
-        gc = (row.verification or {}).get("grounded_check")
+        from . import freshness as _freshness
+        # The grounding that counts: a failed later attempt never erases
+        # the last successful read of the official page.
+        gc = _freshness.effective_check(row.verification)
         out = apply_portal_fallback(apply_verified_overrides(_result(
             row.status, row.guidance, cached=True, stale=_is_stale(row),
             released=released,
@@ -1359,9 +1362,14 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
             # "a person verified this". `consistent` is passed through so the
             # UI can only claim a match when there actually was one — a check
             # that found a disagreement is not a clean bill of health.
+            # "outcome" rides along: the reader-page hold gate keys on it,
+            # and without it every machine-grounded answer read as never
+            # grounded and was held from readers while the console graded
+            # it Medium (found 2026-09-03).
             out["grounded_check"] = {k: gc.get(k) for k in
-                                     ("at", "source_url", "consistent",
-                                      "changed_fields", "disputed_fields")}
+                                     ("at", "outcome", "source_url",
+                                      "consistent", "changed_fields",
+                                      "disputed_fields")}
         return out
 
     if not is_available():

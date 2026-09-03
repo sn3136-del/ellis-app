@@ -1380,6 +1380,13 @@ function NextSweepCountdown({ at, summary, t }) {
                   {' · '}{t('ops.fresh.oldest').replace('{h}', oldestH)}
                 </span>
               )}
+              {typeof summary.read_48h === 'number' && (
+                <div style={{ color: GRAY, fontWeight: 500 }}>
+                  {t('ops.fresh.read48')
+                    .replace('{r}', summary.read_48h)
+                    .replace('{total}', summary.canonical_total)}
+                </div>
+              )}
             </div>
           )
         })()}
