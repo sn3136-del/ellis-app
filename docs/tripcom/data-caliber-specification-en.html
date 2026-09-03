@@ -1,0 +1,114 @@
+<title>Ellis Data Caliber Specification</title>
+<style>
+  :root{
+    --paper:#FBFBF8; --ink:#1C2B4A; --muted:#5B6478; --line:#E5E4DC;
+    --card:#FFFFFF; --accent:#175CD3; --soft:#F0F4FA; --good:#0A8A4A;
+    --warn:#B26A00; --bad:#C62828;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
+      --card:#171F33; --soft:#1C2740;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
+    --card:#171F33; --soft:#1C2740;
+  }
+  @media print{ :root{ --paper:#FFFFFF; } }
+  body{background:var(--paper); color:var(--ink); margin:0;
+       font-family:-apple-system,"Helvetica Neue",system-ui,sans-serif; line-height:1.6;}
+  main{max-width:920px; margin:0 auto; padding:44px 22px 80px;}
+  h1{font-size:1.9rem; margin:0 0 6px; text-wrap:balance;}
+  .sub{color:var(--muted); margin:0 0 30px; font-size:.95rem;}
+  h2{font-size:1.22rem; margin:34px 0 4px; padding-top:16px; border-top:1px solid var(--line); break-after:avoid;}
+  p{margin:8px 0; max-width:76ch;}
+  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:.86rem;}
+  th,td{border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top;}
+  th{background:var(--soft); font-weight:700;}
+  tr{break-inside:avoid;}
+  .tablewrap{overflow-x:auto;}
+  code{background:var(--soft); border-radius:6px; padding:1px 6px;
+       font-family:ui-monospace,Menlo,monospace; font-size:.85em;}
+  .req{color:var(--good); font-weight:700;}
+  .opt{color:var(--warn); font-weight:700;}
+  .note{background:var(--soft); border-left:3px solid var(--accent); border-radius:8px;
+        padding:10px 14px; margin:12px 0; font-size:.92rem; break-inside:avoid;}
+  footer{margin-top:44px; color:var(--muted); font-size:.8rem; border-top:1px solid var(--line); padding-top:14px;}
+</style>
+<main>
+<h1>Ellis Data Caliber Specification</h1>
+<p class="sub">Version 3 September 2026 · Deliverable No. 10 · The same calibers govern the live pages and the Excel export</p>
+
+<h2>1. The 25-field dictionary</h2>
+<p>One record is one visa product for one combination of passport, destination, travel purpose and travel document type. A route with several products yields several records. The export and the online display use the same field set, plus one extra column that refines the top-level requirement class. Twenty fields are required and five are provided if available, matching the requirements specification.</p>
+<div class="tablewrap"><table>
+<tr><th>#</th><th>Field</th><th>Required</th><th>Caliber</th></tr>
+<tr><td>1</td><td><code>travel_document_type</code></td><td class="req">Required</td><td>The document held, one of 13 types: ordinary passport, diplomatic passport, service passport, official ordinary passport, PRC travel document, temporary passport, emergency passport, child passport, alien's passport, stateless travel document, laissez-passer, identity certificate, refugee travel document.</td></tr>
+<tr><td>2</td><td><code>travel_document_country</code></td><td class="req">Required</td><td>Issuing country, ISO alpha-3.</td></tr>
+<tr><td>3</td><td><code>destination_country</code></td><td class="req">Required</td><td>Destination country or territory, ISO alpha-3.</td></tr>
+<tr><td>4</td><td><code>travel_purpose</code></td><td class="req">Required</td><td>Tourism, business, family visit, study, work, transit, other.</td></tr>
+<tr><td>5</td><td><code>visa_requirement</code></td><td class="req">Required</td><td>Top-level class: visa-free, visa on arrival, visa required in advance. About 146 records use a fourth value, Conditional. See section 5.</td></tr>
+<tr><td>—</td><td><code>visa_requirement_detail</code></td><td class="opt">Extra</td><td>Refinement nested under the top-level class. Visa-free: unconditional, conditional, transit. On arrival: electronic on arrival, paper on arrival. In advance: eVisa, paper visa, electronic travel authorization. A test guarantees that every detail belongs to its parent class.</td></tr>
+<tr><td>6</td><td><code>visa_type_name</code></td><td class="req">Required</td><td>The destination's product name for this purpose, in official naming.</td></tr>
+<tr><td>7</td><td><code>validity_duration</code></td><td class="req">Required</td><td>How long the visa is valid once granted, as a number. Where the government only says "at the mission's discretion", the record says so.</td></tr>
+<tr><td>8</td><td><code>validity_unit</code></td><td class="req">Required</td><td>Days, months, years, or indefinite.</td></tr>
+<tr><td>9</td><td><code>max_stay_duration</code></td><td class="req">Required</td><td>Longest stay per entry, as a number.</td></tr>
+<tr><td>10</td><td><code>max_stay_unit</code></td><td class="req">Required</td><td>Hours or days.</td></tr>
+<tr><td>11</td><td><code>entries</code></td><td class="req">Required</td><td>Single, multiple, or unlimited. Where the issuing authority decides case by case, the record says so.</td></tr>
+<tr><td>12</td><td><code>processing_min_days</code></td><td class="opt">If available</td><td>Shortest time from submission to decision, as a number.</td></tr>
+<tr><td>13</td><td><code>processing_unit</code></td><td class="opt">If available</td><td>Working days or calendar days.</td></tr>
+<tr><td>14</td><td><code>visa_fee_amount</code></td><td class="req">Required</td><td>The official visa fee only, charged by the mission. Agency service fees are excluded and disclosed separately in the application channel note.</td></tr>
+<tr><td>15</td><td><code>visa_fee_currency</code></td><td class="req">Required</td><td>ISO 4217 currency code.</td></tr>
+<tr><td>16</td><td><code>application_method</code></td><td class="req">Required</td><td>Embassy or consulate, online, through an appointed agent, or on arrival. "Other" is never used. An appointed agent is named only where the destination mandates one, for example Chinese citizens applying for Japan.</td></tr>
+<tr><td>17</td><td><code>required_documents</code></td><td class="req">Required</td><td>The core document categories, comma separated.</td></tr>
+<tr><td>18</td><td><code>consulate_district</code></td><td class="opt">If available</td><td>The consular district mapping, where the destination divides applicants by residence.</td></tr>
+<tr><td>19</td><td><code>entry_requirements</code></td><td class="opt">If available</td><td>Entry conditions beyond the visa, for example a return ticket or an arrival card.</td></tr>
+<tr><td>20</td><td><code>special_conditions</code></td><td class="opt">If available</td><td>Special policies or limits, for example regional exemptions, transit exemptions, or exemption for holders of a third-country visa.</td></tr>
+<tr><td>21</td><td><code>data_source</code></td><td class="req">Required</td><td>Name of the issuing institution.</td></tr>
+<tr><td>22</td><td><code>source_url</code></td><td class="req">Required</td><td>The specific official page. The code enforces a government domain; a non-official link cannot be written. Where several sources are cross-checked, each carries its own URL and all are shown on the record.</td></tr>
+<tr><td>23</td><td><code>collected_at</code></td><td class="req">Required</td><td>The date the answer was produced or last refreshed.</td></tr>
+<tr><td>24</td><td><code>info_validity</code></td><td class="req">Required</td><td>See section 5. Current caliber: the date until which Ellis guarantees the answer. Where a policy carries its own end date, that date governs.</td></tr>
+<tr><td>25</td><td><code>confidence_level</code></td><td class="req">Required</td><td>High, medium, or low. See section 4.</td></tr>
+</table></div>
+
+<h2>2. The three kinds of blank</h2>
+<p>A blank cell is never ambiguous. Every unfilled cell belongs to exactly one of three kinds, and its reason is stated on screen and in the export:</p>
+<div class="tablewrap"><table>
+<tr><th>Kind</th><th>Display</th><th>Counted in the completeness denominator</th></tr>
+<tr><td>Not published</td><td>"Not publicly available". The official page was checked and publishes no value for this item.</td><td>Excluded from the fillable caliber</td></tr>
+<tr><td>Does not apply</td><td>"Does not apply to this route". For example, a visa-free route has no visa validity.</td><td>Excluded from the fillable caliber</td></tr>
+<tr><td>Missing</td><td>"missing". Research not yet complete. This is open work.</td><td>Counted, and lowers completeness</td></tr>
+</table></div>
+
+<h2>3. Completeness calibers</h2>
+<p>The acceptance documents state completeness in two ways. Both are computed and shown side by side on the console's completeness tile.</p>
+<p>First, the cell caliber of section 6.1: filled cells divided by required cells. The console shows the fillable reading as the headline (the denominator excludes not-published and does-not-apply cells, and the number excluded is shown so it can be audited) alongside the literal reading.</p>
+<p>Second, the record caliber of section 4.2.2: records with all 25 fields filled divided by all records.</p>
+<p>The gap between the two is structural. A perfectly correct visa-free record can never fill all 25 fields, because fee and validity do not apply to it, and section 4.2.1 prohibits inventing what no government publishes. Which caliber governs acceptance is a decision for the joint meeting.</p>
+
+<h2>4. The confidence ladder</h2>
+<div class="tablewrap"><table>
+<tr><th>Grade</th><th>Rule (per 4.2.3)</th><th>Handling</th></tr>
+<tr><td>High</td><td>A person verified the record against a named official page; the record is complete with no conflicts.</td><td>Shown</td></tr>
+<tr><td>Medium</td><td>Backed by an official source, with a few fields still to fill, or fields the government does not publish.</td><td>Shown, with the source attached</td></tr>
+<tr><td>Low</td><td>Sources conflict, or only non-official sources exist, or a specific product and fee is claimed without a read of the official page.</td><td>Held. Readers see "We are checking this route" until an operator confirms it</td></tr>
+</table></div>
+<p>Grading is automatic. The only ways out of a hold are writing a fact verified against an official source, or an audited operator release. Both leave a record.</p>
+
+<h2>5. Calibers awaiting a joint ruling</h2>
+<p>Three calibers are declared honestly in the data and need the joint meeting's ruling:</p>
+<p>First, <code>info_validity</code>. The dictionary defines it as "the date the policy itself is valid until", but most governments publish no end date. Current caliber: where a policy publishes an end date, that date is used (for example the Korea group exemption to 31 December 2026); otherwise the value is the date until which Ellis guarantees the answer, which is the date the freshness monitor requires a re-check. The export declares this.</p>
+<p>Second, the fourth value of <code>visa_requirement</code>, Conditional. About 146 records genuinely depend on the traveler's own circumstances, for example visa-free for holders of a valid third-country visa. They can be folded into the "visa-free, conditional" detail; the migration script is ready and runs on confirmation.</p>
+<p>Third, the completeness caliber, see section 3.</p>
+
+<h2>6. Special policy notes</h2>
+<p>Regional and transit exemptions are not single-route verdicts, so they live as standalone notes: the Hainan 30-day exemption for 61 nationalities, China's 240-hour transit exemption, and the Korea group-tour exemption together with the Jeju policy. Each note is bound to an official source URL and cross-checked. Notes appear beside relevant routes in the query tool, on the display pages and in the AI Q&amp;A, with a decisive covered-or-not line whenever the nationality is known.</p>
+
+<h2>7. Export caliber</h2>
+<p>The export is an .xlsx workbook with two sheets. The data sheet has field names in the first row. The field description sheet states each field's caliber and the snapshot time in UTC. The export is the online data produced through the same code path; there is no separate offline database. A single export has no row cap.</p>
+
+<div class="note">This specification is maintained alongside the code. Any caliber change updates this document and the export's field description sheet before it takes effect.</div>
+
+<footer>Ellis Intelligence, Inc. · Data Caliber Specification · 3 September 2026</footer>
+</main>

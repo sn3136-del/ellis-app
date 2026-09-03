@@ -1,0 +1,112 @@
+<title>Ellis Backend Operations Manual</title>
+<style>
+  :root{
+    --paper:#FBFBF8; --ink:#1C2B4A; --muted:#5B6478; --line:#E5E4DC;
+    --card:#FFFFFF; --accent:#175CD3; --soft:#F0F4FA; --good:#0A8A4A;
+    --warn:#B26A00; --bad:#C62828;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
+      --card:#171F33; --soft:#1C2740;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
+    --card:#171F33; --soft:#1C2740;
+  }
+  @media print{ :root{ --paper:#FFFFFF; } }
+  body{background:var(--paper); color:var(--ink); margin:0;
+       font-family:-apple-system,"Helvetica Neue",system-ui,sans-serif; line-height:1.6;}
+  main{max-width:880px; margin:0 auto; padding:44px 22px 80px;}
+  h1{font-size:1.9rem; margin:0 0 6px; text-wrap:balance;}
+  .sub{color:var(--muted); margin:0 0 30px; font-size:.95rem;}
+  h2{font-size:1.22rem; margin:34px 0 4px; padding-top:16px; border-top:1px solid var(--line); break-after:avoid;}
+  p{margin:8px 0; max-width:74ch;}
+  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:.9rem;}
+  th,td{border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top;}
+  th{background:var(--soft); font-weight:700;}
+  tr{break-inside:avoid;}
+  .tablewrap{overflow-x:auto;}
+  code{background:var(--soft); border-radius:6px; padding:1px 6px;
+       font-family:ui-monospace,Menlo,monospace; font-size:.85em;}
+  .step{display:flex; gap:10px; margin:6px 0; max-width:74ch;}
+  .step b{color:var(--accent); flex-shrink:0;}
+  .tag{display:inline-block; border-radius:999px; padding:1px 10px; font-size:.78rem; font-weight:700; margin-right:6px;}
+  .tag.g{background:#e7f5ec; color:var(--good);}
+  .tag.a{background:#fbf1e2; color:var(--warn);}
+  .tag.r{background:#fdecec; color:var(--bad);}
+  .note{background:var(--soft); border-left:3px solid var(--accent); border-radius:8px;
+        padding:10px 14px; margin:12px 0; font-size:.92rem; break-inside:avoid;}
+  footer{margin-top:44px; color:var(--muted); font-size:.8rem; border-top:1px solid var(--line); padding-top:14px;}
+</style>
+<main>
+<h1>Ellis Information Quality Control Backend: Operations Manual</h1>
+<p class="sub">Version 3 September 2026 · Deliverable No. 10 · Maintained in step with the live system at ellis-visa.com</p>
+
+<h2>1. Access</h2>
+<p>Open <code>https://ellis-visa.com</code> in a browser and press "Quality console" in the header. No install, no setup, no account application. Test access is preconfigured.</p>
+<p>The globe icon in the header switches the language between English, Simplified Chinese and Traditional Chinese. The interface and the data descriptions switch together.</p>
+
+<h2>2. Records: the multi-dimensional spot check</h2>
+<p>The Records tab carries the full spot check. Filters combine freely:</p>
+<div class="tablewrap"><table>
+<tr><th>Filter</th><th>What it does</th></tr>
+<tr><td>Passport</td><td>The station dimension. Type a country name in either script or a code, for example China, 中国, CHN or CN.</td></tr>
+<tr><td>Destination</td><td>Same input rules. Typing KOR or South Korea returns only South Korea records.</td></tr>
+<tr><td>Purpose</td><td>Tourism, business, family visit, study, work, transit, other.</td></tr>
+<tr><td>Visa requirement</td><td>The top-level class: visa-free, on arrival, required in advance, conditional.</td></tr>
+<tr><td>Confidence</td><td>High, medium, low.</td></tr>
+<tr><td>Visa type</td><td>Substring match on the product name, for example "tourist".</td></tr>
+<tr><td>Passport type</td><td>The 13 travel document types, from ordinary to diplomatic passports.</td></tr>
+<tr><td>Missing field</td><td>Shows only records where a given field is still missing. Used for gap-filling work.</td></tr>
+</table></div>
+<p>Four tiles follow the current filter: record count, completeness, source coverage and the confidence split. The completeness tile shows both calibers: the fillable reading, whose denominator excludes cells marked "does not apply" and "not published", and the literal count over all required cells.</p>
+<p>Click any row to expand the full 25-field record. Every field carries a status:</p>
+<p><span class="tag g">filled</span><span class="tag a">not published</span><span class="tag a">does not apply</span><span class="tag r">missing</span></p>
+<p>The flag form at the bottom of the card files a field-level issue straight into the correction queue.</p>
+
+<h2>3. Adding routes and editing fields</h2>
+<p>The "Add a route" card on the Records tab offers two ways in:</p>
+<div class="step"><b>1</b><span><b>Add with Ellis AI.</b> Pick the passport, destination, purpose and document type and press once. Ellis answers the route and checks it against the official pages in the same move. The result lands in the records list. A low-confidence answer is held until it has been checked.</span></div>
+<div class="step"><b>2</b><span><b>Manual entry.</b> Switch to manual and type the fields yourself: fee, stay, processing time, documents and the rest. An official source URL and a short note are required. The record serves immediately, with "Trip.com operations" recorded as its provenance.</span></div>
+<p>Every expanded record has three buttons:</p>
+<div class="step"><b>Edit fields</b><span>opens a form covering every editable field: the verdict dropdowns, this visa row's validity, entries and fee, money and stay, how to apply, the arrival card, and the "not published" checkboxes. It is prefilled with the current values and writes only what changed.</span></div>
+<div class="step"><b>Refresh from source</b><span>has Ellis re-read the official page on the spot. When nothing changed it says so plainly: "still current, no refresh needed". When the page differs, the record is corrected from the page and the change is logged with the quote.</span></div>
+<div class="step"><b>Flag</b><span>files a human report. Ellis then reads the official page itself and places what it found in the correction queue as a proposal. An operator accepts it in one click, which writes a sourced correction the next reader sees immediately, or declines it.</span></div>
+
+<h2>4. Correction queue: the five-stage loop</h2>
+<p>Every issue walks the five stages of standard 4.1.2, one button per stage, in order, with no skipping:</p>
+<div class="step"><b>1</b><span>Open. A reader or an operator flags a field on a record.</span></div>
+<div class="step"><b>2</b><span>Acknowledged. The information provider has been told.</span></div>
+<div class="step"><b>3</b><span>Corrected. The fix is written and the old answer is withdrawn from service at once.</span></div>
+<div class="step"><b>4</b><span>Reviewed. A second operator reviews. The system enforces that the reviewer is not the corrector.</span></div>
+<div class="step"><b>5</b><span>Published. The corrected answer goes live for readers.</span></div>
+<p>An issue can be dismissed at any stage, but only with a written reason. The end-to-end target is 48 hours. Every stage is timestamped, and the timestamps export for verification.</p>
+
+<h2>5. Change log: add, modify, delete</h2>
+<p>Every update that changes what readers see writes a change entry, classed as add, modify or delete. Modifications carry field-level before and after values. Withdrawing an answer through the correction loop writes a delete entry. Search runs over the full history.</p>
+
+<h2>6. AI Q&amp;A: sampling the assistant</h2>
+<p>The AI Q&amp;A tab lists every exchange the assistant actually served: the question as asked, the route it was read as, the answer given and the source cited. Each exchange takes a ruling:</p>
+<p><span class="tag g">correct</span> records the reviewer and the time.<br>
+<span class="tag r">wrong</span> requires a written reason and automatically files a tracked issue on the answered route, which then walks the full correction loop.</p>
+
+<h2>7. Freshness: the automatic re-check</h2>
+<p>Ellis re-reads every served answer against its official page at least every 48 hours. A scheduled sweep runs several times a day and takes the oldest records first, so the whole database is re-read well inside 48 hours without hammering any government site.</p>
+<p>When the page agrees with the record, the record is restamped. When the page differs from a value the machine holds, the record is corrected from the page with the quote saved. When the page differs from a human-verified fact, nothing is overwritten: a dispute is filed with the page quote, the current record value and the source, and a person rules on it through the correction queue.</p>
+<p>The Freshness tab opens with a countdown to the next automatic re-check run, read from the scheduler itself rather than estimated, and shows how much of the database was re-read in the last 48 hours. The availability tile shows the month's uptime measured by the minute.</p>
+
+<h2>8. Batch export</h2>
+<p>"Export Excel" on the Records tab exports an .xlsx file following the active filters. The workbook has two sheets: the data sheet (25 fields plus sources plus confidence) and a field description sheet whose first row carries the snapshot time in UTC. There is no row cap in the code. Building a 12,000-row workbook measured 1.2 seconds.</p>
+
+<h2>9. Holds and release</h2>
+<p>An answer graded Low under standard 4.2.3 is never shown to readers. They see "We are checking this route" instead. There are two ways to release it: write a fact verified against an official source (preferred), or release it manually after checking the official page. Both leave an auditable record.</p>
+
+<h2>10. Deep links</h2>
+<p>Every route has a stable link of the form <code>#database/CHN/JPN/tourism</code>. The link can be shared directly and opens the record page.</p>
+
+<div class="note">If anything disagrees with an official page, flag it on the record. That is the fastest correction channel, fully tracked, with a 48-hour closure target.</div>
+
+<footer>Ellis Intelligence, Inc. · Backend Operations Manual · 3 September 2026 · Maintained in step with the live system</footer>
+</main>
