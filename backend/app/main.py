@@ -947,7 +947,38 @@ def travel_database_freshness(db=Depends(get_session),
                 "human_verified": sum(1 for x in rows if x["human_override"]),
                 "disputed": sum(1 for x in rows if x["disputed_fields"]),
                 "next_sweep_at": _next_sweep_at(),
+                # The truth behind "every record at least every 48 hours":
+                # how many canonical answers carry a grounded check inside
+                # the window right now, and how old the oldest check is.
+                # Transit variants inherit their route's corrections, so
+                # they are not counted as separate promises.
+                **_recheck_coverage(rows, now),
             }}
+
+
+def _recheck_coverage(rows: list, now) -> dict:
+    from datetime import datetime, timedelta
+    canonical = [x for x in rows if "|via:" not in (x.get("cache_key") or "")]
+    def _at(x):
+        raw = x.get("grounded_at")
+        if not raw:
+            return None
+        try:
+            dt = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        return dt if dt.tzinfo else dt.replace(tzinfo=now.tzinfo)
+    ats = [(_at(x), x) for x in canonical]
+    h48 = now - timedelta(hours=48)
+    h24 = now - timedelta(hours=24)
+    stamped = [a for a, _ in ats if a is not None]
+    return {
+        "canonical_total": len(canonical),
+        "checked_48h": sum(1 for a in stamped if a >= h48),
+        "checked_24h": sum(1 for a in stamped if a >= h24),
+        "never_checked": len(canonical) - len(stamped),
+        "oldest_check_at": min(stamped).isoformat() if stamped else None,
+    }
 
 
 def _next_sweep_at() -> str | None:

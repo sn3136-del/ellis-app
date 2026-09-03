@@ -1326,7 +1326,7 @@ function RefreshButton({ rec, onRefresh, t }) {
 
 
 
-function NextSweepCountdown({ at, t }) {
+function NextSweepCountdown({ at, summary, t }) {
   // The clock is the sweep timer itself: the backend reads the next firing
   // from systemd, so this counts down to the run that will actually happen.
   const [now, setNow] = useState(() => Date.now())
@@ -1360,9 +1360,29 @@ function NextSweepCountdown({ at, t }) {
           {t('ops.fresh.nextAt').replace('{time}', local)}
         </div>
       </div>
-      <div style={{ fontSize: 12.5, color: GRAY, maxWidth: 460,
-                    lineHeight: 1.5 }}>
-        {t('ops.fresh.nextHint')}
+      <div style={{ fontSize: 12.5, color: GRAY, maxWidth: 520,
+                    lineHeight: 1.5, display: 'grid', gap: 4 }}>
+        <div>{t('ops.fresh.nextHint')}</div>
+        {summary && summary.canonical_total > 0 && (() => {
+          const pct = Math.round(100 * summary.checked_48h / summary.canonical_total)
+          const oldestH = summary.oldest_check_at
+            ? Math.round((now - new Date(summary.oldest_check_at).getTime()) / 3600000)
+            : null
+          return (
+            <div style={{ color: pct === 100 ? GREEN : '#b26a00',
+                          fontWeight: 700 }}>
+              {t('ops.fresh.coverage48')
+                .replace('{n}', summary.checked_48h)
+                .replace('{total}', summary.canonical_total)
+                .replace('{pct}', pct)}
+              {oldestH !== null && (
+                <span style={{ color: GRAY, fontWeight: 500 }}>
+                  {' · '}{t('ops.fresh.oldest').replace('{h}', oldestH)}
+                </span>
+              )}
+            </div>
+          )
+        })()}
       </div>
     </div>
   )
@@ -3581,7 +3601,7 @@ export default function QualityConsole() {
           ]
           return (
             <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
-              <NextSweepCountdown at={f.next_sweep_at} t={t} />
+              <NextSweepCountdown at={f.next_sweep_at} summary={f} t={t} />
               <div className="ops-tiles">
                 {[
                   // Every tile states its own unit. An answer is one cached
