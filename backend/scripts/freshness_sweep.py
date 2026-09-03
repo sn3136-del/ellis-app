@@ -19,8 +19,15 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 log = logging.getLogger("freshness-sweep")
 
 MAX_ROWS = 400            # 4 runs a day x 400 rows covers the fleet twice over
-MAX_SECONDS = 50 * 60     # never collide with the next timer firing
-SPACING_SECONDS = 3.0     # politeness between page reads
+MAX_SECONDS = 100 * 60    # the timer fires every 6 hours and the unit allows 2
+SPACING_SECONDS = 2.0     # politeness between page reads
+# The promise is "every record at least every 48 hours". The timer fires
+# every 6 hours, so a record picked up only once it is 48 hours old could
+# wait for the NEXT run and reach 54 hours: on 3 September 2026 a run found
+# nothing due while 29 records were two minutes short of the cutoff. Rows
+# become due at 40 hours (48 minus the 6-hour cadence minus run time), so
+# no record passes 48 hours without an attempt.
+DUE_AFTER_HOURS = 40
 
 
 def main() -> int:
@@ -31,8 +38,9 @@ def main() -> int:
     checked = corrected = disputed = unreadable = 0
     db = SessionLocal()
     try:
-        rows = freshness.due_rows(db, older_than_hours=48, limit=MAX_ROWS)
-        log.info("48-hour sweep: %d rows due", len(rows))
+        rows = freshness.due_rows(db, older_than_hours=DUE_AFTER_HOURS, limit=MAX_ROWS)
+        log.info("48-hour sweep: %d rows due (last attempt older than %dh, or never)",
+                 len(rows), DUE_AFTER_HOURS)
         for row in rows:
             if time.monotonic() - started > MAX_SECONDS:
                 log.info("time budget reached, the next run continues")

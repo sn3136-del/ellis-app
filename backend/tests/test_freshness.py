@@ -567,3 +567,27 @@ def test_the_48_hour_drill_plants_catches_and_never_leaves_a_trace(db):
     db.expire_all()
     row = db.query(KimiRouteGuidanceCache).one()
     assert row.guidance["government_fee"]["amount"] == 200       # no trace
+
+
+def test_due_rows_takes_never_checked_first_and_respects_the_threshold(db):
+    """The sweep's worklist: never-checked rows first, then the oldest, and
+    nothing younger than the threshold. The threshold the sweep script uses
+    is 40 hours so the 48-hour promise survives a 6-hour cadence."""
+    from datetime import datetime, timedelta, timezone
+    import importlib.util, pathlib
+    now = datetime.now(timezone.utc)
+    for i, hours in enumerate([None, 50, 30, 45]):
+        row = KimiRouteGuidanceCache(
+            cache_key=f"CHN|CHN|X{i}|tourism|default|unknown|{kimi_primary.CACHE_VERSION}",
+            route={"passport_nationality": "CHN", "destination_country": f"X{i}", "travel_purpose": "tourism"},
+            guidance={"disposition": "VISA_REQUIRED"}, status=kimi_primary.STATUS_PRIMARY,
+            verification={} if hours is None else {"grounded_check": {"at": (now - timedelta(hours=hours)).isoformat(), "outcome": "checked"}})
+        db.add(row)
+    db.commit()
+    due = freshness.due_rows(db, older_than_hours=40, limit=10)
+    keys = [r.cache_key.split("|")[2] for r in due]
+    assert keys == ["X0", "X1", "X3"]          # never, 50h, 45h; the 30h row waits
+    spec = importlib.util.spec_from_file_location(
+        "sweep", pathlib.Path(__file__).resolve().parents[1] / "scripts" / "freshness_sweep.py")
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    assert mod.DUE_AFTER_HOURS == 40 and mod.MAX_SECONDS <= 2 * 3600

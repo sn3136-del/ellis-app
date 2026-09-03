@@ -3446,7 +3446,7 @@ export const STRINGS = {
     'ops.fresh.coverage48': '最近48小時內已發起複核：{n} / {total}（{pct}%）',
     'ops.fresh.read48': '其中成功讀取官方頁面：{r} / {total}。其餘保留最近一次成功核對結果，封鎖自動讀取的網站會列出交由人工處理。',
     'ops.fresh.oldest': '最久一次核對在 {h} 小時前',
-    'ops.fresh.nextAt': '将于 {time} 執行',
+    'ops.fresh.nextAt': '將於 {time} 執行 · 每6小時一次',
     'ops.fresh.nextHint': '每次執行按最久未核對優先，在時間預算內重新對照官方頁面核驗答案，整庫以滾動方式至少每48小時複核一遍。此倒數計時讀取的是定時器本身，不是估算；下方覆蓋率按記錄實測。',
     'ops.refresh.btn': '从官方來源刷新',
     'ops.refresh.busy': '正在讀取官方頁面',
