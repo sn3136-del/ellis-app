@@ -86,6 +86,7 @@
 
 <h2>5. Change log: add, modify, delete</h2>
 <p>Every update that changes what readers see writes a change entry, classed as add, modify or delete. Modifications carry field-level before and after values. Withdrawing an answer through the correction loop writes a delete entry. Search runs over the full history.</p>
+<p>Each entry is also pushed as compact JSON to a webhook URL when one is configured, so an operations channel in Slack, Teams or Feishu, or an email bridge, hears about every change the moment it is written. Rows written by the 48-hour drill are labelled as drill history and are never pushed.</p>
 
 <h2>6. AI Q&amp;A: sampling the assistant</h2>
 <p>The AI Q&amp;A tab lists every exchange the assistant actually served: the question as asked, the route it was read as, the answer given and the source cited. Each exchange takes a ruling:</p>
