@@ -148,12 +148,16 @@ def region_destination(question: str) -> str | None:
     store, so a new regional policy automatically teaches the parser its
     region words."""
     from . import special_policies
-    q = str(question or "").lower()
+    q = str(question or "").lower().replace("-", " ")
     if not q.strip():
         return None
     for e in special_policies._load():
-        if e.get("region") and e.get("destination"):
-            if any(t in q for t in e.get("triggers") or []):
+        if e.get("destination"):
+            # A policy without a region ("240 hour transit") still names its
+            # country: the question is about China even when China is not
+            # written.
+            triggers = [str(t).lower().replace("-", " ") for t in (e.get("triggers") or [])]
+            if any(t and t in q for t in triggers):
                 return str(e["destination"]).upper()
     return None
 

@@ -2008,9 +2008,20 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
                                 ("尚未收录，请单独提问" if cjk2
                                  else "not answered yet, ask it on its own"))
                 else:
-                    dsp = (sd.get("facts") or {}).get("disposition", "")
+                    fc = sd.get("facts") or {}
+                    dsp = fc.get("disposition", "")
                     w = words.get(dsp, (dsp.lower().replace("_", " "), dsp))
-                    bits.append(f"{sd['destination']}: {w[1] if cjk2 else w[0]}")
+                    extra = []
+                    fee = fc.get("government_fee") or {}
+                    if isinstance(fee, dict) and fee.get("amount") is not None:
+                        extra.append(("费用 " if cjk2 else "fee ")
+                                     + f"{fee.get('amount')} {fee.get('currency') or ''}".strip())
+                    if fc.get("permitted_stay"):
+                        extra.append(("停留 " if cjk2 else "stay ") + str(fc["permitted_stay"]))
+                    if fc.get("processing_time") and str(fc["processing_time"]).lower() not in ("not applicable", "n/a"):
+                        extra.append(("办理 " if cjk2 else "processing ") + str(fc["processing_time"]))
+                    bits.append(f"{sd['destination']}: {w[1] if cjk2 else w[0]}"
+                                + (("，" if cjk2 else ", ") + (", ".join(extra)) if extra else ""))
             reply = ("各线路结论：" if cjk2 else "Route by route: ") + \
                 ". ".join(bits) + "."
         return {"understood": True, "comparison": True, "reply": reply,
@@ -2087,10 +2098,28 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
             else:
                 parsed = dict(parsed, understood=False, nationality="",
                               destination=_rh)
-    # A route whose two ends are the same country is a failed read, not an
-    # answer. Ask for the missing fact instead.
+    # A route whose two ends are the same country: when the words plainly
+    # say so ("Chinese passport going to China"), the answer is that a
+    # citizen needs no visa to enter their own country. Otherwise it is a
+    # failed read, and the missing fact is asked for.
     if parsed.get("understood") and \
             parsed.get("nationality") == parsed.get("destination"):
+        _same = parsed.get("nationality")
+        if parsed.get("read_by") == "deterministic" and parsed.get("confident"):
+            _cjk_same = assistant.wants_chinese(body.question, body.lang)
+            _tw_same = str(body.lang or "").lower() in ("zh-tw", "zh-hant")
+            _name = kimi_primary.country_name(
+                _same, "zh-TW" if _tw_same else ("zh" if _cjk_same else "en"))
+            return {"understood": True, "same_country": True,
+                    "route": {"nationality": _same, "destination": _same,
+                              "travel_purpose": parsed.get("travel_purpose") or "tourism",
+                              "travel_document_type": parsed.get("travel_document_type") or "ordinary_passport",
+                              "transit_countries": [], "arrival_date": None},
+                    "reply": (f"持{_name}护照进入{_name}无需签证，这是回国，不适用签证规定。"
+                              if _cjk_same else
+                              f"A {_name} passport holder does not need a visa to enter {_name}. "
+                              "Entering your own country is not a visa question."),
+                    "guidance": None, "held": False}
         parsed = {"understood": False, "nationality": "",
                   "destination": parsed.get("destination") or "",
                   "travel_purpose": parsed.get("travel_purpose") or "",

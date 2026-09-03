@@ -1865,6 +1865,23 @@ def _country_mentions(text: str) -> list:
     return [(i, iso, dem) for i, _j, iso, dem in _country_spans(text)]
 
 
+def country_name(iso: str, script: str = "en") -> str:
+    """The display name for an ISO3 code in the reply's script, or the code
+    itself when the registry does not know it."""
+    try:
+        from .registry import load_registry
+        for e in load_registry("countries")["entries"]:
+            if e.get("alpha_3") == str(iso or "").upper():
+                if script == "zh-TW":
+                    return e.get("name_hant") or e.get("name_zh") or e.get("name") or iso
+                if script == "zh":
+                    return e.get("name_zh") or e.get("name") or iso
+                return e.get("common_name") or e.get("name") or iso
+    except Exception:  # noqa: BLE001
+        pass
+    return str(iso or "")
+
+
 _RESIDENCE_RE = _re.compile(
     r"(?:live|living|based|resident|residing|residents|settled|working|work)"
     r"\s+(?:in|of|at)\s+(?:the\s+)?$")

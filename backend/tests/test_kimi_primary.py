@@ -1712,3 +1712,16 @@ def test_codes_typos_cities_residence_and_chinese_suffixes_read():
     assert assistant.names_schengen("visa for Japan") is False
     assert assistant._zh_figures("Up to 90 days in any 180-day period", False) == "最多90天任意180天内"
     assert assistant._zh_figures("5 working days", True) == "5個工作日"
+
+
+def test_region_policies_and_country_names():
+    from app.visa_snapshot import assistant
+    from app.visa_snapshot.kimi_primary import country_name
+    # A policy without a region still names its country.
+    assert assistant.region_destination("240 hour transit brazil") == "CHN"
+    assert assistant.region_destination("Can I use the 240-hour visa-free transit?") == "CHN"
+    assert assistant.region_destination("hainan for indians") == "CHN"
+    assert assistant.region_destination("jeju for chinese") == "KOR"
+    assert assistant.region_destination("visa for japan") is None
+    assert country_name("CHN") == "China" and country_name("CHN", "zh") == "中国"
+    assert country_name("CHN", "zh-TW") == "中國" and country_name("XXX") == "XXX"

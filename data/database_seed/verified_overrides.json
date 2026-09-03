@@ -52282,5 +52282,42 @@
     "https://france-visas.gouv.fr/en/tunisie"
    ]
   }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SGP",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+  "note": "Same mutual 30-day visa exemption as tourism: the China-Singapore arrangement in force since 9 February 2024 covers short visits for tourism, family visits, business and other private affairs, and China does not appear on ICA's visa-required list. Verified 2026-09-03 against the ICA visa requirements page. A short business visit is covered; taking up employment is not.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free entry (Short-Term Visit Pass on arrival)",
+   "permitted_stay": "Up to 30 days, granted as a Short-Term Visit Pass on arrival",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is applied for. A Short-Term Visit Pass is granted at the checkpoint; an SG Arrival Card is submitted before arrival.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "multiple",
+     "validity": "on arrival",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Mutual 30-day visa exemption in force since 9 February 2024."
+    }
+   ]
+  }
  }
 ]
