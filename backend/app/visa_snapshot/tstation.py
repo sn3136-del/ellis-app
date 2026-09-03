@@ -654,10 +654,10 @@ def _subcategory_for(product: dict, route_default: str | None,
         # an embassy to apply at.
         return SUBCATEGORY["conditional_visa_free"]
     if any(k in name for k in ("visa", "visitor", "permit", "endorsement")):
-        if (method == "Online Application" and "evisa" in allowed
-                and not any(k in name for k in ("sticker", "paper", "consul",
-                                                "embassy"))):
-            return SUBCATEGORY["evisa"]
+        # A product whose name says nothing electronic stays a paper visa
+        # even on a route whose channel is online: a UK visitor visa is
+        # applied for online and issued as a vignette. Only the product's
+        # own words, or an override, make it an eVisa.
         return SUBCATEGORY["paper_visa"] if "paper_visa" in allowed \
             else SUBCATEGORY[allowed[0]]
     key = _key_of(route_default)
