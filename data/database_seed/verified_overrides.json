@@ -51972,5 +51972,311 @@
     }
    ]
   }
+ },
+ {
+  "route": {
+   "nationality": "DEU",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit, two independent refutation passes",
+  "source_url": "https://image.mfa.go.th/mfa/0/YLjhuT4Hho/PR_2024/Visa_Exemption_and_VOA_July_2024.pdf",
+  "note": "The Thai MFA announcement (15 July 2024) and the Department of Consular Affairs list both name Germany among 93 countries whose nationals are visa exempt for tourism for up to 60 days, extendable by 30 days at Immigration. On 19 May 2026 the Cabinet approved revoking the 60-day scheme for all 93 countries. the Department of Consular Affairs published on 1 September 2026 a summary (status as of 31 August 2026) stating the revised schemes take effect 15 September 2026, and its infographic lists Germany under the new 30-day visa exemption for 60 countries/territories. Travellers entering before 15 September 2026 keep their 60-day stay. The Royal Thai Embassy in Berlin already states German citizens may stay up to 30 days per entry visa-free, with land-border use limited to twice per calendar year. This rule is warranted through 14 September 2026 and Ellis re-checks it on 15 September 2026. Quote: \"Nationals of the following 93 countries and territoriesare entitled to visa exemption for the purpose of tourism ... Travelers, who wish to travel to Thailand for leisure, can stay up to 60 days and could extend for another 30 days at the Thai Immigration. ... 28. Germany\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa exemption (tourism), ordinary passport",
+   "permitted_stay": "Up to 60 days per entry until 14 September 2026. From 15 September 2026 Thailand's new scheme allows 30 days per entry",
+   "permitted_stay_days": 60,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa needed. German ordinary passport holders enter under the visa exemption scheme. Extension of 30 days may be requested at Thai Immigration at the officer's discretion. Longer stays require a visa via the official Thailand e-Visa portal (thaievisa.go.th).",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa exemption (tourism)",
+     "entry": "single (per entry)",
+     "validity": "per entry; 60-day scheme in force until 14 September 2026, replaced by 30-day scheme from 15 September 2026",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Extension of a further 30 days possible at Thai Immigration at the officer's discretion (MFA announcement, July 2024)."
+    }
+   ],
+   "exceptions": [
+    "From 15 September 2026 the 60-day visa exemption scheme is revoked for all 93 countries/territories including Germany. Germany is listed under the new 30-day visa exemption (60 countries/territories) per the Department of Consular Affairs summary dated 31 August 2026 (Royal Gazette Ministry of Interior announcements published 31 August 2026, effective 15 days later).",
+    "Travellers who enter before the effective date keep the 60-day stay until it expires (consular.mfa.go.th, 20 May 2026 notice).",
+    "Royal Thai Embassy Berlin states that for entry by land the visa exemption may be used no more than twice per calendar year.",
+    "Holders of German blue/grey travel documents (Reiseausweis for refugees/stateless) must obtain a visa before departure."
+   ],
+   "required_documents": [
+    "Ordinary German passport valid at least 6 months on the day of arrival (Royal Thai Embassy Berlin)",
+    "Thailand Digital Arrival Card (TDAC) submitted before arrival (Royal Thai Embassy Berlin)"
+   ],
+   "corroborating_sources": [
+    "https://image.mfa.go.th/mfa/0/YLjhuT4Hho/Consular_Service/Tourist_Visa_Exempt_60_days.pdf",
+    "https://consular.mfa.go.th/th/content/20-5-69-0000?cate=5ddbe42115e39c4768007e1d",
+    "https://consular.mfa.go.th/th/content/1-9-69-00?cate=5ddbe42115e39c4768007e1d",
+    "https://image.mfa.go.th/mfa/0/zE6021nSnu/สลก__0301/2_4.png",
+    "https://mfa.go.th/en/content/summary-press-briefing-190526?cate=674059168d902f116b4a9a52"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit, two independent refutation passes",
+  "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+  "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/03/2025) confirms the 45-day temporary stay for the 12 countries including the Russian Federation regardless of passport type or entry purpose, and that Resolutions 32/NQ-CP and 128/NQ-CP expired on 15/3/2025. The Immigration Department e-visa portal page states the e-visa fee is $25 single-entry and $50 multiple-entry, processed in 3 working days, with e-visas valid for a maximum of 90 days. Stored answer confirmed. Quote: \"Công dân các nước liệt kê tại danh sách dưới đây được miễn thị thực khi nhập cảnh Việt Nam với thời hạn cư trú không quá 45 ngày ... Nga - Nghị quyết số 44/NQ-CP ngày 07/3/2025 của Chính phủ về miễn thị thực đơn phương cho công dân 12 nước. Thời hạn áp dụng từ 15/3/2025 đến hết ngày 14/3/2028\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Unilateral visa exemption (Resolution 44/NQ-CP of 7 March 2025)",
+   "permitted_stay": "45 days from the date of entry, any passport type and any purpose of entry (unilateral exemption under Resolution 44/NQ-CP, in force 15 March 2025 through 14 March 2028)",
+   "permitted_stay_days": 45,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa or pre-registration needed for stays up to 45 days. For longer stays or multiple entries, an e-visa (up to 90 days, single or multiple entry) can be applied for online on the official portal evisa.gov.vn / thithucdientu.gov.vn (Vietnam Immigration Department), processed in 3 working days.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa exemption (unilateral, Resolution 44/NQ-CP)",
+     "entry": "single",
+     "validity": "Per entry; policy in force 15 March 2025 to 14 March 2028",
+     "max_stay_days": 45,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Any passport type, any purpose of entry. passport valid at least 6 months from date of entry."
+    },
+    {
+     "type": "E-visa single entry",
+     "entry": "single",
+     "validity": "Up to 90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": "Official portal evisa.gov.vn / thithucdientu.gov.vn (Vietnam Immigration Department). processed in 3 working days. fee not refunded if refused."
+    },
+    {
+     "type": "E-visa multiple entry",
+     "entry": "multiple",
+     "validity": "Up to 90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Official portal evisa.gov.vn / thithucdientu.gov.vn (Vietnam Immigration Department). processed in 3 working days. fee not refunded if refused."
+    }
+   ],
+   "exceptions": [
+    "The unilateral 45-day exemption applies from 15 March 2025 to the end of 14 March 2028 (Resolution 44/NQ-CP). the MFA/Consular Department states it will be considered for extension under Vietnamese law. Resolutions 32/NQ-CP (2022) and 128/NQ-CP (2023) expired on 15 March 2025.",
+    "Stays longer than 45 days require an e-visa (max 90 days) or another visa type.",
+    "Separate 30-day visa-free entry applies to foreigners entering Phu Quoc island directly from abroad (all nationalities)."
+   ],
+   "required_documents": [
+    "Passport valid at least 6 months from the date of entry (hộ chiếu còn giá trị ít nhất 06 tháng kể từ ngày nhập cảnh)",
+    "Not falling under the cases of refusal of entry under Vietnamese law"
+   ],
+   "corroborating_sources": [
+    "https://lanhsuvietnam.gov.vn/Lists/BaiViet/B%C3%A0i%20vi%E1%BA%BFt/DispForm.aspx?List=dc7c7d75-6a32-4215-afeb-47d4bee70eee&ID=1183",
+    "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/khai-thi-thuc-dien-tu/cap-thi-thuc-dien-tu",
+    "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/trang-chu-ttdt"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MYS",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit, two independent refutation passes",
+  "source_url": "https://www.kln.gov.my/web/chn_beijing/requirement_foreigner",
+  "note": "The Embassy of Malaysia in Beijing (kln.gov.my, notice dated 11 August 2025) states the Malaysia-China Mutual Visa Exemption Agreement came into force on 17 July 2025: PRC ordinary and public affairs passport holders may enter without a visa for up to 30 days per visit, cumulative 90 days in any 180 days, for tourism, visiting family and friends, business, cultural exchange and bilateral cooperation, private matters, medical treatment and international transit. employment, study, media activities, residence or stays beyond 30 days require a visa in advance. The page also lists the entry documents and makes the MDAC mandatory at least 3 days before arrival. The Immigration Department FAQ PDF corroborates all of this, adds that the stay is not extendable and the agreement runs an initial 5 years from 17 July 2025. The Nanning consulate separately confirms the unilateral tourist exemption is extended to 31 December 2026, but that date does not bound the bilateral agreement. Quote: \"the maximum duration of each visit shall not exceed 30 days. the cumulative period of stay shall not exceed 90 days within any 180 days period. and the visa exemption facility applies to visits for the purposes of tourism/vacation, visiting family and friends, business, cultural exchange and bilateral cooperation, private matters, medical treatment, and international transit (including air crew me\"",
+  "fields": {
+   "disposition": "CONDITIONAL",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "Mutual Visa Exemption (Malaysia-China agreement, in force 17 July 2025)",
+   "permitted_stay": "30 days per visit, cumulative 90 days in any 180-day period, not extendable",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application. Mandatory Malaysia Digital Arrival Card (MDAC) submitted online at https://imigresen-online.imi.gov.my/mdac/main at least 3 days before arrival. Purposes outside the agreement's list (employment, study, media activities, residence, or anything needing prior approval) require an appropriate visa before travel via the eVisa portal https://malaysiavisa.imi.gov.my or a Malaysian visa section.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa-free entry under Malaysia-China Mutual Visa Exemption Agreement",
+     "entry": "multiple",
+     "validity": "Agreement in force from 17 July 2025 for an initial 5 years, auto-extended; visa-free stays capped at 90 days in any 180-day period",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Holders of PRC ordinary and public affairs passports valid at least 6 months. Purposes: tourism/vacation, visiting family and friends, business, cultural exchange and bilateral cooperation, private matters, medical treatment, international transit (incl. air crew). Not extendable. MDAC mandatory 3 days before arrival."
+    }
+   ],
+   "exceptions": [
+    "Purpose 'other' is visa-free only if it falls within the agreement's listed purposes (private matters, medical treatment, cultural exchange/bilateral cooperation, transit). employment, study, media activities, residence, stays over 30 days, or any activity requiring prior approval from Malaysian authorities require a visa (Visa With Reference / eVisa) obtained before entry.",
+    "Separate unilateral visa exemption for PRC passport holders (tourist purposes, 30 days) runs until 31 December 2026 per Consulate General of Malaysia Nanning notice dated 11 December 2024. the bilateral agreement has no such end date (initial 5 years from 17 July 2025).",
+    "Cumulative visa-free stay capped at 90 days within any 180-day period. stays before 17 July 2025 do not count."
+   ],
+   "required_documents": [
+    "Passport valid for at least six (6) months",
+    "Confirmed return flight tickets",
+    "Proof of hotel booking or other accommodation arrangements",
+    "Evidence of sufficient funds to support the visit",
+    "Malaysia Digital Arrival Card (MDAC) submitted online at least three (3) days before arrival",
+    "Supporting documents for purpose of visit (e.g. invitation letter) may be requested by border officers"
+   ],
+   "corroborating_sources": [
+    "https://www.imi.gov.my/wp-content/uploads/2022/01/21OKT_FAQs-MYS-CHINA_LULUS.pdf (Immigration Department FAQ embedded at https://www.imi.gov.my/index.php/en/https-www-imi-gov-my-index-php-f-a-q-malaysia-china-visa-exemption-agreement/)",
+    "https://www.kln.gov.my/web/chn_nanning/requirement_foreigner",
+    "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit, two independent refutation passes",
+  "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+  "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March 2025 through 14 March 2028. The official e-visa portal evisa.gov.vn publishes the fee as 25 USD single entry and 50 USD multiple entry, valid for a maximum of 90 days. Stored answer (visa-free 45 days, e-visa USD 25/50) is confirmed. only the cited resolution numbers need correcting. Quote: \"Việt Nam đơn phương miễn thị thực cho công dân 12 nước là Liên bang Nga, Nhật Bản, Hàn Quốc, Na Uy, Phần Lan, Đan Mạch, Thuỵ Điển, Anh, Pháp, Đức, Tây Ban Nha, I-ta-li-a. Chính sách áp dụng từ ngày 15/3/2025 đến hết ngày 14/3/2028. ... Công dân các nước liệt kê tại danh sách dưới đây được miễn thị thực khi nhập cảnh Việt Nam với thời hạn cư trú không quá 45 ngày\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Unilateral visa exemption (miễn thị thực đơn phương), 12-country list",
+   "permitted_stay": "45 days from the date of entry, regardless of passport type or purpose of entry",
+   "permitted_stay_days": 45,
+   "application_channel": "not_required",
+   "application_channel_detail": "No application. Unilateral visa exemption under Resolution 44/NQ-CP of 7 March 2025. present a valid passport at the border. For stays longer than 45 days apply for an e-visa online at evisa.gov.vn (Vietnam Immigration Department).",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa exemption (unilateral, Resolution 44/NQ-CP)",
+     "entry": "single",
+     "validity": "Each entry, 15 March 2025 to 14 March 2028 policy window",
+     "max_stay_days": 45,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Passport must be valid at least 6 months from the date of entry. no application required"
+    },
+    {
+     "type": "E-visa single entry",
+     "entry": "single",
+     "validity": "up to 90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": "Applied online at evisa.gov.vn. fee paid via e-payment gateway and non-refundable if refused"
+    },
+    {
+     "type": "E-visa multiple entry",
+     "entry": "multiple",
+     "validity": "up to 90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Applied online at evisa.gov.vn. fee paid via e-payment gateway and non-refundable if refused"
+    }
+   ],
+   "exceptions": [
+    "Exemption is time-limited: applies from 15 March 2025 through 14 March 2028 (Resolution 44/NQ-CP of 7 March 2025). extension to be considered under Vietnamese law",
+    "Stays beyond 45 days require a visa. the official e-visa (max 90 days, single or multiple entry) can be applied for online at evisa.gov.vn",
+    "Poland, Czech Republic and Switzerland citizens are on a separate, conditional tour-programme exemption. this does not apply to Spain"
+   ],
+   "required_documents": [
+    "Valid passport issued by the competent authority of Spain, valid for at least 6 months from the date of entry",
+    "Not falling within the cases of suspension from entry under Vietnamese law"
+   ],
+   "corroborating_sources": [
+    "https://evisa.gov.vn/ (Vietnam National Electronic Visa system; rendered strings: 'E-visa fee: Visa is valid once 25 USD / Visa is valid multiple times 50 USD' and 'Vietnam e-Visa is valid for maximum of 90 days, single or multiple entry.')",
+    "https://evisa.xuatnhapcanh.gov.vn/web/guest/trang-chu-ttdt (Vietnam Immigration Department: 'Vietnam E-visa is valid for maximum of 90 days, single or multiple entry.')"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "TUN",
+   "destination": "FRA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit, two independent refutation passes",
+  "source_url": "https://france-visas.gouv.fr/en/faq",
+  "note": "France-Visas FAQ (\"How much does a visa cost?\") states the short-stay visa fee is EUR 90 (long-stay EUR 99), non-refundable, with exemptions for children under 6, children 6 to 12, spouses of French nationals and some students. The stored EUR 80 figure is outdated and should be updated to EUR 90 for single, double and multiple-entry products. The France-Visas short-stay page confirms the uniform Schengen visa is limited to 90 days over any 180 consecutive days and may be valid for one or more entries. The France-Visas Tunisie page confirms applications from Tunisia go through TLScontact Tunis or Sfax with a EUR 28 service fee, decided by the Consulat general de France a Tunis. Quote: \"Visa applicants must pay an application fee (fees related to the administrative processing of the application) of €90 for short-stay visas and €99 for long-stay visas. ... Visa fees are not refunded, even in case of refusal or withdrawal of the application.\"",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Uniform Schengen short-stay visa (type C)",
+   "permitted_stay": "90 days in any 180-day period",
+   "permitted_stay_days": 90,
+   "application_channel": "authorised_agent",
+   "application_channel_detail": "Application completed online on France-Visas, then appointment booked exclusively online with TLScontact and file lodged at the TLScontact centre in Tunis or Sfax. decision taken by the Consulat general de France a Tunis. Fees paid in cash in TND at the centre (state fee converted at the chancellery rate, plus a non-refundable TLScontact service fee of EUR 28 per file).",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "visa_products": [
+    {
+     "type": "Uniform Schengen short-stay visa (type C)",
+     "entry": "single or multiple (page states the visa may be valid for one or more entries)",
+     "validity": "not stated on the pages read; stay limited to 90 days in any 180 consecutive days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Same EUR 90 state fee for all short-stay visas. reduced/free rates exist for children under 6, children 6 to 12, spouses of French nationals and some other categories (amounts in the fee PDF, which could not be text-extracted)."
+    }
+   ],
+   "exceptions": [
+    "Free or partial fee exemption for certain categories: children under 6, children 6 to 12, spouses of French nationals, students whose file was examined by Campus France, etc. (FAQ page).",
+    "Visa fee is not refunded even if the application is refused or withdrawn.",
+    "TLScontact charges a separate non-refundable service fee of EUR 28 per file, payable in TND (France-Visas Tunisie page)."
+   ],
+   "required_documents": [
+    "Passport",
+    "Online France-Visas application form",
+    "Appointment confirmation from TLScontact (Tunis or Sfax)",
+    "Travel medical insurance (FAQ references insurance requirement; details not read)"
+   ],
+   "corroborating_sources": [
+    "https://www.france-visas.gouv.fr/en/short-stay-visa",
+    "https://france-visas.gouv.fr/en/tunisie"
+   ]
+  }
  }
 ]
