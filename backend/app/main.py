@@ -2115,10 +2115,12 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
                               "travel_purpose": parsed.get("travel_purpose") or "tourism",
                               "travel_document_type": parsed.get("travel_document_type") or "ordinary_passport",
                               "transit_countries": [], "arrival_date": None},
-                    "reply": (f"持{_name}护照进入{_name}无需签证，这是回国，不适用签证规定。"
+                    "reply": (f"持{_name}護照進入{_name}無需簽證，這是回家，不適用簽證規定。"
+                              if _tw_same else
+                              f"持{_name}护照进入{_name}无需签证，这是回家，不适用签证规定。"
                               if _cjk_same else
-                              f"A {_name} passport holder does not need a visa to enter {_name}. "
-                              "Entering your own country is not a visa question."),
+                              f"With a passport issued by {_name} you do not need a visa to enter {_name}. "
+                              "Going home is not a visa question."),
                     "guidance": None, "held": False}
         parsed = {"understood": False, "nationality": "",
                   "destination": parsed.get("destination") or "",

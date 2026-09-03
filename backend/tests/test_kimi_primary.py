@@ -1725,3 +1725,14 @@ def test_region_policies_and_country_names():
     assert assistant.region_destination("visa for japan") is None
     assert country_name("CHN") == "China" and country_name("CHN", "zh") == "中国"
     assert country_name("CHN", "zh-TW") == "中國" and country_name("XXX") == "XXX"
+
+
+def test_the_same_country_named_as_passport_and_trip_is_a_whole_route():
+    from app.visa_snapshot.kimi_primary import _deterministic_route as read
+    r = read("Chinese passport going to China")
+    assert (r["nationality"], r["destination"], r["confident"]) == ("CHN", "CHN", True)
+    r = read("台灣護照回台灣要簽證嗎")
+    assert (r["nationality"], r["destination"]) == ("TWN", "TWN")
+    # One mention alone is still not a route.
+    assert read("China") is None
+    assert read("going to China") is None

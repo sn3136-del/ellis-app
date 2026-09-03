@@ -1953,7 +1953,7 @@ _ZH_NATIONAL_SUFFIX = ("人", "公民", "护照", "護照", "居民", "国籍", 
 
 
 def _marks_nationality(q: str, low: str, pos: int, demonym: bool,
-                       end: int | None = None) -> bool:
+                       end: int | None = None, strict: bool = False) -> bool:
     """Whether the country mentioned at pos is the traveller's own.
 
     English says it several ways: a demonym ("Chinese", "Indians"), "from
@@ -2095,6 +2095,25 @@ def _deterministic_route(question: str) -> dict | None:
     for _pos, iso, _d in mentions:
         if iso not in isos:
             isos.append(iso)
+    if len(isos) == 1 and len(spans) >= 2:
+        # "Chinese passport going to China", 台灣護照回台灣: the one country
+        # is named twice, once as the passport and once as the trip. That
+        # is a whole route, not a missing fact.
+        one = isos[0]
+        as_nat = any(_marks_nationality(q, low, i, dem, j) for i, j, _iso, dem in spans)
+        as_dest = any(
+            not _marks_nationality(q, low, i, dem, j) and (
+                any(w in low[max(0, i - 10):i] for w in (" to ", "to ", "visit", "going", "travel", "back to"))
+                or q[max(0, i - 1):i] in ("去", "到", "赴", "往", "回", "飞", "飛")
+                or q[max(0, i - 2):i] in ("前往", "飞往", "飛往", "回到"))
+            for i, j, _iso, dem in spans)
+        if as_nat and as_dest:
+            return {"understood": True, "nationality": one, "destination": one,
+                    "travel_purpose": "tourism",
+                    "travel_document_type": _doc_from_text(q, low) or "ordinary_passport",
+                    "transit_countries": [], "confident": True,
+                    "arrival_date": _extract_arrival(q), "residence": None,
+                    "focus": _question_focus(q), "read_by": "deterministic"}
     if len(isos) < 2:
         return None
     doc_named = _doc_from_text(q, low)
@@ -2104,9 +2123,14 @@ def _deterministic_route(question: str) -> dict | None:
     # country standing right before a named non-passport document
     # (香港签证身份书). A demonym on the destination's paperwork
     # ("Australian visa for Chinese applicants") is not the traveller.
-    for pos, end, iso, demonym in spans:
-        if _marks_nationality(q, low, pos, demonym, end):
-            nat = iso
+    # A demonym or "from X" outranks a bare country followed by a holder
+    # word ("Vietnam visitors from India": India is the traveller).
+    for strict in (True, False):
+        for pos, end, iso, demonym in spans:
+            if _marks_nationality(q, low, pos, demonym, end, strict):
+                nat = iso
+                break
+        if nat is not None:
             break
     if nat is None and doc_named and doc_named != "ordinary_passport":
         # 香港签证身份书 / "refugee travel document issued by Germany":
