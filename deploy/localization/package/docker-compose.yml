@@ -1,0 +1,30 @@
+# Ellis local installation for acceptance. Run from this folder:
+#   docker compose up --build
+# Then open http://localhost:8080
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      # The database snapshot and operator overrides live here. Edits made in
+      # the console are written back to this folder, so it survives restarts.
+      - ./snapshot:/var/lib/ellis
+    environment:
+      # Real-only evaluation mode: no simulated portal, no demo banner.
+      - ELLIS_RUNTIME_MODE=tripcom_evaluation
+      # Optional. Without a key the app serves every already answered route
+      # and the full quality console from the snapshot. With a key it can
+      # also answer routes nobody asked before and re-read official pages.
+      - MOONSHOT_API_KEY=${MOONSHOT_API_KEY:-}
+  web:
+    image: caddy:2
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./dist:/srv/dist:ro
+    depends_on:
+      - backend
