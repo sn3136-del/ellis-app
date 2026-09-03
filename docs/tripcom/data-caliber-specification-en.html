@@ -1,5 +1,6 @@
 <title>Ellis Data Caliber Specification</title>
 <style>
+@page{size:A4;margin:11mm 13mm 9mm 13mm}
   :root{
     --paper:#FBFBF8; --ink:#1C2B4A; --muted:#5B6478; --line:#E5E4DC;
     --card:#FFFFFF; --accent:#175CD3; --soft:#F0F4FA; --good:#0A8A4A;
@@ -60,7 +61,7 @@
 <tr><td>13</td><td><code>processing_unit</code></td><td class="opt">If available</td><td>Working days or calendar days.</td></tr>
 <tr><td>14</td><td><code>visa_fee_amount</code></td><td class="req">Required</td><td>The official visa fee only, charged by the mission. Agency service fees are excluded and disclosed separately in the application channel note.</td></tr>
 <tr><td>15</td><td><code>visa_fee_currency</code></td><td class="req">Required</td><td>ISO 4217 currency code.</td></tr>
-<tr><td>16</td><td><code>application_method</code></td><td class="req">Required</td><td>Embassy or consulate, online, through an appointed agent, on arrival, or in person at the issuing government office for a domestic travel permit such as the mainland Exit-Entry Permit for Hong Kong. "Other" is never used. Each value is read from the official page the record cites, and a product's own kind decides its channel: an eVisa or travel authorisation is online, a sticker visa is in person, an exemption has nothing to apply for. An appointed agent is named only where the destination mandates one, for example Chinese citizens applying for Japan.</td></tr>
+<tr><td>16</td><td><code>application_method</code></td><td class="req">Required</td><td>Embassy or consulate, online, through an appointed agent, on arrival, or in person at the issuing government office for a domestic permit such as the mainland Exit-Entry Permit for Hong Kong. "Other" is never used. An appointed agent is named only where the destination mandates one, for example Chinese citizens applying for Japan.</td></tr>
 <tr><td>17</td><td><code>required_documents</code></td><td class="req">Required</td><td>The core document categories, comma separated.</td></tr>
 <tr><td>18</td><td><code>consulate_district</code></td><td class="opt">If available</td><td>The consular district mapping, where the destination divides applicants by residence.</td></tr>
 <tr><td>19</td><td><code>entry_requirements</code></td><td class="opt">If available</td><td>Entry conditions beyond the visa, for example a return ticket or an arrival card.</td></tr>
