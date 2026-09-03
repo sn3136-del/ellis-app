@@ -682,14 +682,14 @@
    "destination": "IDN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-03",
   "verified_by": "Ellis source audit (adjudication)",
-  "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
-  "note": "Duplicate of the ordinary_passport|CHN->IDN row - same answer. Tiongkok is on the VoA subject list; B1 VoA is IDR 500,000 for 30 days, extendable once. Worth de-duplicating 'ordinary' and 'ordinary_passport' in the document-type vocabulary so the two rows cannot drift apart.",
+  "source_url": "https://www.imigrasi.go.id/wna/daftar-visa-indonesia/B1?lang=en-US",
+  "note": "Duplicate of the ordinary_passport|CHN->IDN row - same answer. Tiongkok is on the VoA subject list; B1 VoA is IDR 500,000 for 30 days, extendable once. Worth de-duplicating 'ordinary' and 'ordinary_passport' in the document-type vocabulary so the two rows cannot drift apart. | Official page read and adversarially verified 2026-09-03: Chinese ordinary passport holders visiting Indonesia for tourism need a Visa on Arrival (B1), obtainable as an e-VoA online at evisa.imigrasi.go.id or at the border, costing IDR 500,000 for a 30-day stay extendable once by 30 days. This is stated on the Directorate General of Immigration's B1 visa p | quote: The B1 visa is a visa on arrival for single entry to Indonesia. ... You can stay in Indonesia for up to 30 days, starting from the arrival date. You can extend this stay permit one time for another 30 days. ... Visa B1 cost IDR 500,000 (for 30 days)",
   "fields": {
    "requirement_detail": "evisa_on_arrival",
    "government_fee": {
-    "amount": 500000,
+    "amount": 500000.0,
     "currency": "IDR"
    },
    "visa_products": [
@@ -729,7 +729,42 @@
    ],
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
-   "permitted_stay": "30 days on arrival, extendable once to a total of 60 days"
+   "permitted_stay": "up to 30 days, starting from the arrival date, extendable once for another 30 days",
+   "visa_category": "B1 Visa Kunjungan Saat Kedatangan (Visa on Arrival) / electronic Visa on Arrival (e-VoA)",
+   "application_channel": "on_arrival",
+   "application_channel_detail": "Apply online for an e-VoA at evisa.imigrasi.go.id (or indonesiavoa.vfsevisa.id) before travel and pay IDR 500,000 by debit/credit card, or pay IDR 500,000 at the designated bank counter in the immigration area on arrival at an Indonesian international airport, seaport or land border and collect the VoA sticker.",
+   "required_documents": [
+    "Passport biodata page valid for at least 6 months at the date of application",
+    "Recent colour photograph (for online e-VoA application)",
+    "Return ticket or onward ticket to another country (except crew members joining their ship)",
+    "Debit/credit card for e-VoA payment, or cash/bank counter payment on arrival"
+   ],
+   "exceptions": [
+    "China (Tiongkok) is on the official VoA subject list and the e-VOA list (imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa and FAQ item 87)",
+    "B1 VoA covers tourism, family/friend visits, MICE events and transit only",
+    "Single entry only, first stay 30 days, one extension of 30 days (total max 60 days)",
+    "Stateless persons and holders of non-national travel documents (temporary passports, emergency passports, titre de voyage, certificate of identity, laissez passer) are not allowed to apply for a VoA, the page also states",
+    "B1 holders may not sell goods or services or receive salary, wages or compensation in Indonesia",
+    "Non-electronic VoA can only be obtained at designated immigration checkpoints (TPI)",
+    "Passport valid for at least 6 months",
+    "Return or onward ticket",
+    "Visa valid for 90 days from date of issuance, if unused it lapses",
+    "All travellers must submit an arrival card within 3 days prior to arrival in Indonesia (evisa.imigrasi.go.id)"
+   ],
+   "unpublished_fields": [
+    "valid_until",
+    "funds requirement",
+    "processing time for VoA obtained at the border (stated only for e-VoA: within 1x24 hours)",
+    "arrival card requirement (not on either cited page)"
+   ],
+   "processing_time": "Apply for the e-VoA up to 14 days before travel, the official portal advises submitting at least 48 hours before departu",
+   "corroborating_sources": [
+    {
+     "url": "https://www.imigrasi.go.id/faq/visa?lang=en-US",
+     "quote": "85. Thailand; 86. Timor Leste; 87. China; 88. Tunisia; 89. Türkiye; ... VOA applications are submitted by Foreigners at certain Immigration Checkpoints (TPI), with the following requirements: 1. A valid passport of the nationality and valid for at least six months, 2. Return ticket or return ticket ",
+     "authority": ""
+    }
+   ]
   }
  },
  {
@@ -22572,13 +22607,13 @@
    "destination": "CHE",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-03",
   "verified_by": "Ellis source audit (fee/validity verification)",
-  "source_url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html",
-  "note": "Wrong currency and amount. Switzerland charges the fixed Schengen fee of EUR 90 for adults, not CHF 100 - the State Secretariat for Migration states the charge in euros. All three listed products carry the wrong CHF 100 figure. The single/double/multiple-entry structure, the 'up to five years' multi | quote: The cost of submitting an application is EUR 90 for adults and EUR 45 for childr",
+  "source_url": "https://www.sem.admin.ch/dam/sem/en/data/rechtsgrundlagen/weisungen/visa/bfm/bfm-anh01-liste1-e.pdf.download.pdf/bfm-anh01-liste1-e.pdf",
+  "note": "Wrong currency and amount. Switzerland charges the fixed Schengen fee of EUR 90 for adults, not CHF 100 - the State Secretariat for Migration states the charge in euros. All three listed products carry the wrong CHF 100 figure. The single/double/multiple-entry structure, the 'up to five years' multi | Official page read and adversarially verified 2026-09-03: The Swiss State Secretariat for Migration's official \"Overview of ID and visa provisions according to nationality\" (Annex CH-1, List 1, version of 3 April 2026) lists China with \"Yes / V\" for stays of up to 90 days, so Chinese ordinary passport holders need a Schengen category C visa for tourism in  | quote: China (People's Republic of China) also see Hong Kong and Macao | see A) | Visa required for stays of up to 90 days: Yes V, M: D | Visa required for stays of more than 90 days: Yes V, F: D. [Legend] M: D Holders of a diplomatic passport are exempt from visa requirements if they wish to enter into Switzerland: on an official mission or for other travel purposes without exercising a gainful occupati",
   "fields": {
    "government_fee": {
-    "amount": 90,
+    "amount": 90.0,
     "currency": "EUR"
    },
    "permitted_stay_days": 90,
@@ -22636,7 +22671,7 @@
       "amount": 0,
       "currency": "EUR"
      },
-     "notes": null
+     "notes": " Children under six are exempt from the visa fee."
     },
     {
      "type": "Schengen C - family member of an EU/EFTA citizen",
@@ -22650,7 +22685,42 @@
      "notes": "Issued free of charge."
     }
    ],
-   "permitted_stay": "maximum 90 days in any 180-day period"
+   "permitted_stay": "up to 90 days within a 180-day period",
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Schengen visa (category C) for stays of up to 90 days",
+   "application_channel": "visa_center",
+   "application_channel_detail": "Submit the Schengen visa application through the VFS Global visa application centre of the consular district where you live in China (Beijing embassy district, Shanghai and Guangzhou consular districts, Hong Kong residents via VFS Global for the Consulate General in Hong Kong), complete the application form online before booking the appointment. Official passport holders may lodge applications dir",
+   "required_documents": [
+    "Schengen visa application form (category C)",
+    "A recognized travel document issued less than ten years ago and valid for the required duration",
+    "Evidence of the purpose and circumstances of the stay (tourism checklist available from the Swiss representation)",
+    "Proof of sufficient financial resources for the stay and the return",
+    "Biometric data (fingerprints) collected every 59 months from the age of 12"
+   ],
+   "exceptions": [
+    "Holders of a Chinese diplomatic passport are exempt from the visa requirement when entering on an official mission or for other travel purposes without gainful occupation (M: D)",
+    "Third-country nationals holding both a valid residence permit or type D visa issued by a Schengen member state and a recognized valid travel document are exempt (code V)",
+    "Hong Kong SAR passport (V16) and Macao SAR passport (V17) holders are visa-exempt, this does not cover Documents of Identity or MSAR Travel Permits showing nationality 'Chinese', which are treated as Chinese passports (V",
+    "Supporting documents from Mainland China are not accepted at the Hong Kong consulate, such applicants are referred to a Swiss representation in Mainland China",
+    "Visa fee is EUR 45 for children aged 6 to 12, external service provider charges apply in addition",
+    "Maximum stay of 90 days within any 180-day period, days of entry and departure count",
+    "Recognized travel document issued less than ten years ago and valid for the required duration",
+    "Evidence of purpose and circumstances of stay",
+    "Proof of sufficient financial resources for the stay and return"
+   ],
+   "unpublished_fields": [
+    "valid_until",
+    "earliest application date (6 months) not stated on the cited embassy pages"
+   ],
+   "processing_time": "As a general rule a decision is taken within 15 days, in exceptional cases up to 30 or 60 days, and consultation of othe",
+   "corroborating_sources": [
+    {
+     "url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html",
+     "quote": "The cost of submitting an application is EUR 90 for adults and EUR 45 for children between 6 and 12 years old. ... Third-country nationals can enter the Schengen area for a maximum of 90 days within a 180-day period. ... generally taken within 15 days. In exceptional circumstances, the period for pr",
+     "authority": ""
+    }
+   ]
   }
  },
  {
@@ -52445,6 +52515,1252 @@
    ],
    "required_documents": "China Citizen Exit-Entry Document Application Form (中国公民出入境证件申请表); recent photo meeting the official exit-entry photo guidelines; PRC resident ID card in original (household register accepted for under-16s, military ID for service members); fingerprints collected at the counter; valid Exit-Entry Permit (EEP) when applying for an endorsement only. No purpose-related materials are required for individual (G) or group (L) tourism endorsements; participants in a Hengqin-Macao tour show the tour enrollment materials.",
    "processing_time": "EEP and endorsement applications are issued within 7 working days of acceptance (extendable to 20 working days in exceptional cases; 20 days for applications lodged outside the place of household registration)"
+  }
+ },
+ {
+  "route": {
+   "nationality": "KOR",
+   "destination": "SGP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://seoul.mfa.gov.sg/consular-services/visa-information/",
+  "note": "Official page read and adversarially verified 2026-09-03: The Embassy of Singapore in Seoul (seoul.mfa.gov.sg) states that Korean passport holders do not require a visa for social visits including tourism for up to 90 days, and the ICA visa-requirements page corroborates this by omitting the Republic of Korea from its visa-required list. ICA's Entering Sin | quote: Korean Passport Holders do not require a visa to enter Singapore for business visit (attending business negotiation / discussion / meetings) or for social visit (visiting friends, relatives and for tourism) purposes for up to 90 days.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free social visit (tourism, visiting friends and relatives)",
+   "permitted_stay": "up to 90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, submit the free SG Arrival Card online via the SGAC e-Service or MyICA Mobile app within three days before arriving in Singapore.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "SGD"
+   },
+   "required_documents": [
+    "Korean passport with minimum 6 months validity",
+    "SG Arrival Card submission",
+    "Proof of onward travel and sufficient cash"
+   ],
+   "exceptions": [
+    "Exemption covers business visits (negotiations, discussions, meetings) and social visits (visiting friends, relatives, tourism) only",
+    "Possession of a valid visa alone does not guarantee entry into Singapore, the immigration pass is granted at the discretion of ICA officers at the point of entry",
+    "Democratic People's Republic of Korea (North Korea) passport holders are visa-required and are not covered by this rule",
+    "SG Arrival Card must be submitted within three (3) days (including the day of arrival) before arriving in Singapore, submission is free (ICA)",
+    "Passport must have a minimum validity of 6 months (ICA)",
+    "Short-term visitors should have sufficient cash and proof of onward travel (tickets, visas) (ICA)",
+    "Do not stay beyond the Visit Pass validity endorsed on the e-Pass/passport, overstaying is punishable (ICA)"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "valid_until",
+    "specific funds amount"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+     "quote": "The ICA visa requirements page lists the visa-required countries (Afghanistan, Algeria, ... Democratic People's Republic of Korea, ... Yemen); the Republic of Korea does not appear on the list.",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "KOR",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Official page read and adversarially verified 2026-09-03: The Philippine Department of Foreign Affairs eVisa portal (evisa.gov.ph, official .gov.ph) lists \"Republic of Korea\" among nationals allowed to enter the Philippines without a visa for an initial stay of thirty (30) days under Executive Order No. 408, subject to a passport valid at least six months  | quote: the Department of Foreign Affairs maintains a list of eligible countries whose nationals may avail of visa-free entry to the Philippines provided that they are holders of passports valid for at least six (6) months beyond the contemplated period of stay. They must also possess return tickets to their country of origin or outward-bound tickets to their next country of destination. Nationals from th",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "Visa-free entry under Executive Order No. 408 (initial stay of thirty (30) days)",
+   "permitted_stay": "an initial stay of thirty (30) days",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, present your passport and return or onward ticket to the immigration officer at the Philippine port of entry.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "PHP"
+   },
+   "required_documents": [
+    "Passport valid for at least six (6) months beyond the contemplated period of stay",
+    "Return ticket to country of origin or outward-bound ticket to next country of destination"
+   ],
+   "exceptions": [
+    "The 30-day stay is described as an initial stay, extension beyond it must be applied for with the Bureau of Immigration (BI Temporary Visitor (9A) Visa Waiver page: non-visa required tourists admitted initially for thirt",
+    "The page lists the rule for nationals (national passport holders), it does not address other travel document types for Korea",
+    "Different visa-free periods apply to Brazil and Israel (59 days), Indian nationals (14 days), Chinese nationals (14 days), Hong Kong SAR and Macau SAR passports (14 days)",
+    "Passport valid for at least six (6) months beyond the contemplated period of stay",
+    "Return ticket to country of origin or outward-bound ticket to next country of destination"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "valid_until",
+    "funds requirement",
+    "arrival card / eTravel registration (not stated on the cited rule page)"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "IDN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.mfa.gov.sg/travelling-overseas/travel-advisories-notices-and-visa-information/indonesia/",
+  "note": "Official page read and adversarially verified 2026-09-03: Singapore's Ministry of Foreign Affairs Indonesia page (last updated 3 September 2026) states Singapore passport holders visiting as tourists enter Indonesia visa-free for up to 30 days under the A1 Visa Exemption Tourism, with no advance application and no extension. Indonesia's Directorate General | quote: Singapore passport holders visiting Indonesia as tourists may enter Indonesia for up to 30 days under a visa exemption (A1 Visa Exemption Tourism) without the need to apply for a visa in advance. This visa-free stay cannot be extended.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa Exemption (A1 Visa Exemption Tourism) / Bebas Visa Kunjungan",
+   "permitted_stay": "up to 30 days, cannot be extended",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "Singapore passport holders visiting as tourists enter Indonesia under the visa exemption without applying for a visa in advance.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "IDR"
+   },
+   "required_documents": [
+    "Singapore passport"
+   ],
+   "exceptions": [
+    "Exemption is stated for tourists, the MFA page tells travellers doing other activities to check with the Indonesian Directorate General of Immigration for the appropriate visa",
+    "The visa-free stay cannot be extended",
+    "Indonesian immigration's Bebas Visa Kunjungan subject list names Singapura, and separately lists foreign nationals holding Singapore permanent residence only via specific immigration checkpoints",
+    "Tourism purpose only under the A1 Visa Exemption Tourism",
+    "The 30-day visa-free stay cannot be extended",
+    "Non-compliance with visa conditions may be treated as misuse of visa (fines, deportation, other legal charges)",
+    "Overstaying can be fined up to IDR 1 million per day, with detention and/or an entry ban"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "passport_validity",
+    "return_or_onward_ticket",
+    "proof_of_funds",
+    "arrival_card",
+    "fee (page states no advance visa application; no fee figure is printed)"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-bebas-visa-kunjungan",
+     "quote": "Daftar Subjek Bebas Visa Kunjungan ... Brunei Darussalam Malaysia Tailan Vietnam Philipina Kamboja Singapura Myanmar Laos Timor Leste Suriname Kolombia Hong Kong Turki Brazil Peru Kazakhstan Makau Belarus Warga Negara Asing pemegang permanent resident Singapura yang melalui Tempat Pemeriksaan Imigra",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Official page read and adversarially verified 2026-09-03: The Philippine Department of Foreign Affairs eVisa portal (evisa.gov.ph, \"Free to enter the Philippines without Visa\") lists Singapore among the E.O. 408 countries whose nationals may enter without a visa for an initial stay of thirty (30) days, provided the passport is valid at least six months bey | quote: As governed by Executive Order No. 408 and the subsequent executive issuances amending it, the Department of Foreign Affairs maintains a list of eligible countries whose nationals may avail of visa-free entry to the Philippines provided that they are holders of passports valid for at least six (6) months beyond the contemplated period of stay. They must also possess return tickets to their country",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "Visa-free entry under Executive Order No. 408 (initial stay of thirty (30) days)",
+   "permitted_stay": "an initial stay of thirty (30) days",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, Singapore passport holders present a passport valid for at least six months beyond the stay and a return or onward ticket at the Philippine port of entry.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "PHP"
+   },
+   "required_documents": [
+    "Passport valid for at least six (6) months beyond the contemplated period of stay",
+    "Return ticket to country of origin or outward-bound ticket to the next country of destination"
+   ],
+   "exceptions": [
+    "The 30-day period is described as an initial stay, the page publishes no extension procedure or fee for E.O. 408 nationals",
+    "Brazil and Israel nationals get 59 days instead of 30 (not applicable to Singapore)",
+    "Indian and Chinese nationals are covered by separate visa-free policies with different conditions and ports of entry (not applicable to Singapore)",
+    "The page does not state whether non-ordinary travel documents (e.g. certificates of identity) are covered",
+    "Passport valid for at least six (6) months beyond the contemplated period of stay",
+    "Return ticket to country of origin or outward-bound ticket to next country of destination",
+    "Admission at the port of entry is at the discretion of Philippine immigration authorities"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "extension procedure and fee for E.O. 408 nationals",
+    "proof of funds requirement",
+    "eTravel registration requirement",
+    "valid_until"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "MYS",
+   "destination": "SGP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+  "note": "Official page read and adversarially verified 2026-09-03: Malaysian ordinary passport holders are visa-exempt for Singapore: the ICA \"Check if You Need an Entry Visa\" page lists the countries whose travel-document holders require a visa and Malaysia is not on it, while the Malaysian High Commission in Singapore (kln.gov.my) states \"Visa Not Required, Lengt | quote: If you hold a travel document issued by one of the countries or places listed below, you will require a valid Singapore entry visa to travel to, and seek entry, into Singapore. [Malaysia does not appear on the list.] SG Arrival Card is not a visa. The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit Pass issued to y",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa Not Required (visa-exempt short-term visit)",
+   "permitted_stay": "30 days (Length of Stay Without Visa, per Malaysian High Commission Singapore, ICA states the period of stay is determin",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, submit the free SG Arrival Card online within three days (including the day of arrival) before arriving in Singapore.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "SGD"
+   },
+   "required_documents": [
+    "Passport with minimum validity of 6 months",
+    "SG Arrival Card with Electronic Health Declaration submitted within three (3) days (including the day of arrival) before arrival (free of charge)",
+    "Sufficient cash and proof of onward travel (tickets, visas)"
+   ],
+   "exceptions": [
+    "Visitors are not permitted to engage in any business, professional or paid employment activities when in Singapore",
+    "Overstaying beyond the Visit Pass validity is a punishable offence",
+    "SG Arrival Card exemption applies only to transit passengers not clearing immigration and to Singapore citizens/PRs/Long-Term Pass holders entering via Woodlands and Tuas land checkpoints (not to Malaysian visitors)",
+    "Rule stated for a Malaysian passport/travel document, other travel document types are not addressed on the cited pages",
+    "All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months",
+    "All travellers are required to submit the SG Arrival Card within three (3) days (including the day of arrival) before arriving in Singapore, submission is free",
+    "Sufficient cash and proof of onward travel (tickets, visas)",
+    "Visit Pass (e-Pass) is issued digitally by email on arrival and indicates the period of stay granted and last day of stay allowed"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "valid_until",
+    "explicit per-entry stay figure on the ICA page (ICA says stay is set by the Visit Pass; the 30 days figure comes from the Malaysian High Commission Singapore page)"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.kln.gov.my/web/sgp_singapore/requirement_malaysians",
+     "quote": "Visa Requirement for Malaysian SINGAPORE Entry Requirements : Visa Not Required Length of Stay Without Visa : 30 days Enquiries for Application : High Commission of Singapore, Kuala Lumpur",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "AUS",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+  "note": "Official page read and adversarially verified 2026-09-03: The Immigration Department of Malaysia's Visa Requirement by Country page lists Australia among the countries which do not require a visa for any purpose of entry, and the High Commission of Malaysia in Canberra confirms Australian passport holders do not need to apply for a visa before travelling;  | quote: This visa facility application is open to all foreign nationals who require a visa to enter Malaysia for the purpose of studying, working, or other purposes, subject to the approval of a Visa With Reference (VDR/eVDR) or Visa Approval Letter (eVAL), EXCEPT for the following countries which do not require a visa for any purpose of entry: ... ANTIGUA & BARBUDA, AUSTRALIA, BAHAMAS ...",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa not required (Australia listed among countries which do not require a visa for any purpose of entry)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, complete the free Malaysia Digital Arrival Card at https://imigresen-online.imi.gov.my/mdac/main within 3 days before entering Malaysia and receive a short term social visit pass on arrival.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "MYR"
+   },
+   "required_documents": [
+    "Valid passport (Consulate General of Malaysia, Perth page: ensure your passport has at least 6 months validity before traveling)",
+    "Malaysia Digital Arrival Card (MDAC) submitted online before arrival (no payment, beware of third party websites that ask for payment)"
+   ],
+   "exceptions": [
+    "Ordinary passport holders only, the page does not address other travel documents (e.g. Certificate of Identity)",
+    "Working or studying in Malaysia is not covered by the visa-free short term social visit pass, a Visa With Reference / pass is required (Perth consulate page: Visa with Reference only for those working or studying in Mala",
+    "Australia-Malaysia Work and Holiday programme is a separate special visa product, not the tourist route",
+    "Extension of the short term social visit pass is only considered on evidence of special circumstances (illness, accident) with a confirmed return ticket",
+    "Malaysia Digital Arrival Card: all foreigners traveling to Malaysia must complete and submit the MDAC within 3 days before entering Malaysia (kln.gov.my/web/aus_perth/requirement_foreigner), Consulate General Melbourne a",
+    "Passport validity: at least 6 months before traveling (kln.gov.my/web/aus_perth/requirement_foreigner)",
+    "Short term social visit pass is given to foreign visitors upon arrival for purposes including tourism, social visit, visiting relatives and business discussion (imi.gov.my short-term-social-visit-pass page)",
+    "Yellow Fever Vaccination Certificate required upon arrival if arriving from countries at risk of yellow fever infection (imi.gov.my visa-requirement-by-country page)"
+   ],
+   "unpublished_fields": [
+    "permitted_stay (the imi.gov.my visa-requirement-by-country page and the High Commission Canberra page do not state the days of stay granted to Australians; the widely cited 90-day figure was not found on any official page that could be read, and smartraveller.gov.au timed out on every fetch attempt)",
+    "processing_time",
+    "valid_until",
+    "government_fee (not applicable, visa-free)"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.kln.gov.my/web/aus_canberra/requirement_foreigner",
+     "quote": "Australian passport holders do not need to apply for VISA before travelling to Malaysia. For other nationals, please visit https://malaysiavisa.imi.gov.my/evisa/evisa.jsp to apply for eVISA.",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "HKG",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+  "note": "Official page read and adversarially verified 2026-09-03: The Hong Kong Immigration Department's Visit Visa / Entry Permit Requirements page lists Canada in its visa-free visit table with a 90-day stay, with no visa or entry permit required for tourism; visitors must have adequate funds and an onward or return ticket and may not work, do business, or study | quote: \"Canada | 90 Days\" (visa-free visit table). \"If you want to stay longer than the visa free period allowed, you must apply for a visa or entry permit before travelling to the HKSAR.\" \"Visitors are required to have adequate funds to cover the duration of their stay without working and, unless in transit to Chinese Mainland or the Macao Special Administrative Region, to hold onward or return tickets.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free visit (no visa / entry permit required)",
+   "permitted_stay": "90 Days",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "application_channel_detail": "Canadian passport holders do not need to apply for anything before travelling, a visa or entry permit is only needed if you want to stay longer than 90 days, and that must be applied for before travelling to Hong Kong.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "HKD"
+   },
+   "required_documents": [
+    "Valid Canadian ordinary passport",
+    "Onward or return ticket",
+    "Proof of adequate funds"
+   ],
+   "exceptions": [
+    "Visitors may not take up employment (paid or unpaid), establish or join any business, or enter school as a student",
+    "Stays longer than the 90-day visa-free period require a visa or entry permit applied for before travelling",
+    "Adequate funds to cover the duration of the stay without working",
+    "Onward or return tickets (unless in transit to Chinese Mainland or the Macao SAR)",
+    "Entry is not automatic, HKSAR immigration authorities may refuse any person permission to land",
+    "Passport valid at least 1 month beyond the expected departure date (stated on the Government of Canada travel page, not the IMMD page)"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "valid_until",
+    "passport_validity (not stated on the IMMD page; only on travel.gc.ca)",
+    "government_fee (none stated; visa-free)"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://travel.gc.ca/destinations/hong-kong",
+     "quote": "\"Tourist visa: not required for stays of up to 90 days\" ... \"Your passport must be valid at least 1 month beyond the date you expect to leave Hong Kong.\"",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.kln.gov.my/web/ind_new-delhi/requirement_foreigner",
+  "note": "Official page read and adversarially verified 2026-09-03: Indian ordinary passport holders are visa exempt for Malaysia for up to 30 days for business, tourism, social or transit purposes, valid until 31 December 2026, subject to a 6-month-valid passport, confirmed return ticket, confirmed hotel booking and compulsory MDAC submission three days before arri | quote: The Malaysian government has announced the extension of visa waiver for Indian nationals travelling to Malaysia until 31 December 2026, for up to 30 days, for business, tourism, social or transit purposes. In this regard, Indian passport holders are required to ensure the fulfillment of the criteria and provide supporting documents during the security and immigration screenings",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "Visa waiver for Indian nationals (visa exemption)",
+   "permitted_stay": "up to 30 days, for business, tourism, social or transit purposes",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, submit the Malaysia Digital Arrival Card online at https://imigresen-online.imi.gov.my/mdac/main three days before arrival and carry your supporting documents for immigration screening.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "MYR"
+   },
+   "required_documents": [
+    "Passport valid for at least six (6) months",
+    "Confirmed return flight tickets",
+    "Confirmed hotel booking",
+    "Malaysia Digital Arrival Card (MDAC) submitted online three (3) days before the arrival date"
+   ],
+   "exceptions": [
+    "Exemption covers business, tourism, social or transit purposes only, other purposes (e.g. work, study) require a visa, which can be applied online at https://malaysiavisa.imi.gov.my/",
+    "Exemption is time-limited: valid until 31 December 2026, India otherwise appears on the Immigration Department's list of countries required to apply for a visa",
+    "Supporting documents may be checked during security and immigration screening, entry is at the discretion of immigration",
+    "The passport validity must be at least six (6) months",
+    "Confirmed Return Flight Tickets",
+    "Confirmed Hotel Booking",
+    "Compulsory online submission of the Malaysia Digital Arrival Card (MDAC) three (3) days before the arrival date",
+    "Policy published as valid until 2026-12-31."
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "funds requirement (no amount published)",
+    "number of entries / cumulative stay limit",
+    "whether the 30-day stay can be extended in Malaysia"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+     "quote": "India** citizen: visa exempts until 31st December 2026.",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "PHL",
+   "destination": "IDN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-bebas-visa-kunjungan",
+  "note": "Official page read and adversarially verified 2026-09-03: Philippine ordinary passport holders are on Indonesia's Bebas Visa Kunjungan (visa-free visit) subject list published by the Directorate General of Immigration at imigrasi.go.id, granting a stay of up to 30 days that cannot be extended or converted, at no charge, under Presidential Regulation 95/202 | quote: Daftar Subjek Bebas Visa Kunjungan ... Daftar Negara, Pemerintah Dari Daerah Administrasi Khusus Suatu Negara, dan Entitas Tertentu: Brunei Darussalam, Malaysia, Tailan, Vietnam, Philipina, Kamboja, Singapura, Myanmar, Laos, Timor Leste, Suriname, Kolombia, Hong Kong, Turki, Brazil, Peru, Kazakhstan, Makau, Belarus",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Bebas Visa Kunjungan (BVK) / Visa-Free Visit",
+   "permitted_stay": "paling lama 30 (tiga puluh) hari dan tidak dapat diperpanjang (up to 30 days, not extendable)",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, present your passport at the Indonesian immigration checkpoint and the visa-free stamp is placed in the passport on arrival.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "IDR"
+   },
+   "required_documents": [
+    "Ordinary passport valid for at least 6 months (Paspor yang masih berlaku minimal 6 bulan)",
+    "Return ticket or onward ticket to another country (Tiket pulang atau tiket lanjutan ke negara lain)"
+   ],
+   "exceptions": [
+    "Visa-free visit cannot be used for work, trade, or journalistic activities (tidak bisa digunakan untuk bekerja, berdagang, atau kegiatan jurnalistik)",
+    "Stay cannot be extended or converted to another type of stay permit",
+    "The BVK subject list (Perpres 95/2024, ASEAN members including the Philippines effective 12 August 2025) was most recently expanded by Peraturan Menteri Imigrasi dan Pemasyarakatan Nomor 10 Tahun 2026 (9 July 2026), whic",
+    "Passport validity of at least 6 months",
+    "Return or onward ticket",
+    "Not listed on the immigration blacklist / penangkalan list",
+    "Stay of 30 days cannot be extended or converted to another stay permit (tidak dapat diperpanjang atau dialihstatuskan)"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "valid_until",
+    "proof of funds"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://manado.imigrasi.go.id/pages/bebas-visa-kunjungan.html",
+     "quote": "Pemegang BVK diberikan izin tinggal di Wilayah Indonesia paling lama 30 (tiga puluh) hari dan tidak dapat diperpanjang. Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan): Brunei Darussalam Filipina Kamboja Laos Mal",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "VNM",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+  "note": "Official page read and adversarially verified 2026-09-03: Malaysia's Immigration Department visa-requirement page states that ASEAN nationals other than Myanmar need no visa for stays under one month, which covers Vietnamese ordinary passport holders visiting for tourism; the Vietnamese embassy's page on the 2001 bilateral agreement corroborates 30 days vi | quote: Visa is not required for a stay of less than one (1) month for ASEAN nationals except Myanmar.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa not required (ASEAN nationals, social visit)",
+   "permitted_stay": "a stay of less than one (1) month",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, submit the free Malaysia Digital Arrival Card online at imigresen-online.imi.gov.my/mdac within 3 days before arrival and present your ordinary passport at the border.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "MYR"
+   },
+   "required_documents": [
+    "Valid Vietnamese ordinary passport",
+    "Malaysia Digital Arrival Card (MDAC) submitted online within 3 days before arrival"
+   ],
+   "exceptions": [
+    "ASEAN visa exemption excludes Myanmar nationals (not relevant to Vietnamese passport holders)",
+    "Exemption is for stays of less than one month, longer stays need a visa",
+    "The bilateral agreement covers diplomatic, official and ordinary passports for 30 days or less",
+    "Malaysia Digital Arrival Card (MDAC) must be submitted online within 3 days before arrival, no fee (payment channel listed as \"Not Applied\")"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "passport_validity",
+    "onward_ticket",
+    "proof_of_funds",
+    "valid_until"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "HKG",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+  "note": "Official page read and adversarially verified 2026-09-03: The Hong Kong Immigration Department's Visit Visa / Entry Permit page (last updated 26-08-2026) lists the Russian Federation in its visa-free table with a visa-free period for visits not exceeding 14 days, with no special remarks, subject to the general conditions of adequate funds and an onward or  | quote: \"RUSSIAN FEDERATION | 14 Days | -\" (table column headers: \"National of foreign country (territory)/Type of travel document\" and \"Visa free period for visit not exceeding\"). \"Visitors are required to have adequate funds to cover the duration of their stay without working and, unless in transit to Chinese Mainland or the Macao Special Administrative Region, to hold onward or return tickets.\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free visit (Visit Visa / Entry Permit not required)",
+   "permitted_stay": "Visa free period for visit not exceeding 14 Days",
+   "permitted_stay_days": 14,
+   "application_channel": "not_required",
+   "application_channel_detail": "Russian passport holders visiting Hong Kong for up to 14 days do not need to apply for a visa or entry permit before travel, they present their passport to Immigration on arrival.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "HKD"
+   },
+   "required_documents": [
+    "Valid Russian Federation national passport",
+    "Onward or return ticket (unless in transit to Chinese Mainland or Macao SAR)",
+    "Proof of adequate funds to cover the duration of stay"
+   ],
+   "exceptions": [
+    "Visa-free entry covers visits only, employment, business and study are not permitted and immigration status generally cannot be changed after arrival",
+    "The table row applies to nationals of the Russian Federation holding a national passport, other travel document types are not covered by this row",
+    "Stays beyond 14 days require a visa or entry permit applied for in advance",
+    "Visitors are required to have adequate funds to cover the duration of their stay without working",
+    "Unless in transit to Chinese Mainland or the Macao Special Administrative Region, visitors must hold onward or return tickets",
+    "Visitors are not allowed by law to take up employment (paid or unpaid), to establish or join in any business, or to enter school as a student"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "passport_validity",
+    "arrival_card",
+    "visa_run_rules"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://vladivostok.china-consulate.gov.cn/rus/lswf_1/qz/201705/t20170531_4078243.htm",
+     "quote": "\"с 1 июля 2009г граждане РФ могут вьезжать в Гонконг без виз на туристическую поездку сроком не свыше 14 дней\"",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "CUB",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/bmz_655327/gb_656197/rjjl_656207/",
+  "note": "Official page read and adversarially verified 2026-09-03: The Chinese Ministry of Foreign Affairs consular service page for Cuba (签证入境 - 古巴) states that since 17 May 2024 PRC ordinary passport holders enter, transit or stay in Cuba visa-free for up to 90 days from entry, with a passport validity of over 6 months and a pre-arrival D'Viajeros electronic decl | quote: 自2024年5月17日起，持普通护照的中国公民进入古巴国境、在古转机或停留，时间不超过90天（自入境之日起）享受免签政策。持普通护照在古境内停留超过90天、持外交、公务和公务普通护照在古境内停留超过60天、持香港或澳门特区护照的中国公民，须在入境古巴前办理相应签证。来古工作、学习、居住、进行新闻报道等的中国公民，须在入境古巴前办理相应签证。",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "免签 (visa exemption for Chinese ordinary passport holders, in force since 17 May 2024)",
+   "permitted_stay": "不超过90天（自入境之日起） - no more than 90 days counted from the date of entry",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed for a tourist stay of up to 90 days, before departure complete the D'Viajeros electronic customs declaration at https://www.dviajeros.mitrans.gob.cu and carry the QR code it generates.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "CUP"
+   },
+   "required_documents": [
+    "Valid PRC ordinary passport with more than 6 months remaining validity (护照剩余有效期须在6个月以上)",
+    "D'Viajeros electronic customs declaration QR code, completed online before arrival (fillable up to 72 hours prior)"
+   ],
+   "exceptions": [
+    "Stays over 90 days on an ordinary passport require a visa obtained before entering Cuba",
+    "Holders of Hong Kong SAR or Macao SAR passports are not covered and must obtain a visa before entering Cuba",
+    "Diplomatic, service and service-ordinary passport holders are covered by a separate 60-day exemption",
+    "Chinese citizens coming to Cuba to work, study, reside, or carry out news reporting must obtain the corresponding visa before entering Cuba",
+    "Passport remaining validity must be over 6 months",
+    "All arriving passengers must complete the online electronic customs declaration at https://www.dviajeros.mitrans.gob.cu before arrival, a QR code is generated on completion",
+    "Travellers continuing to a third country (e.g. the Bahamas) should be ready to show itinerary, hotel bookings, round-trip tickets and other supporting documents"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "valid_until",
+    "government_fee_amount (page states no fee figure; exemption implies none)",
+    "tourist card requirement",
+    "travel insurance requirement",
+    "onward ticket or proof of funds for stays ending in Cuba"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://cu.china-embassy.gov.cn/sgtz/202405/t20240518_11306770.htm",
+     "quote": "持有效普通护照的中国公民出入古巴国境、在古转机或停留，时间不超过90天（自入境之日起）享受免签政策。来古工作、学习、居住、进行新闻报道等的中国公民，须在入境古巴前申请相应签证。",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "DOM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://consulatedrwest.gob.do/en/listado-de-paises-y-condiciones-de-visado",
+  "note": "Official page read and adversarially verified 2026-09-03: US ordinary passport holders do not need a visa for tourism in the Dominican Republic: the Dominican Consulate General for the US West Coast (consulatedrwest.gob.do) lists the United States of America in Section C of nationals who can enter with only a Tourist Card for tourism purposes, citing Decre | quote: Nationals of countries that can legally enter the European Union, the United States of America, Canada, and Great Britain can enter the Dominican Republic with the presentation of the Tourist Card (Decree 691-07 dated December 18, 2007). Who CAN ENTER the Dominican Republic WITH ONLY A TOURIST CARD, for tourism purposes only? ... United States of America",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "Tarjeta de Turista (Tourist Card)",
+   "permitted_stay": "up to 30 days (tourist card authorizes a maximum stay of 30 days, extension available from the Dirección General de Migr",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, the US$10 tourist card tax is included in airline tickets issued outside the Dominican Republic (or bought at the airport / land and sea entry points), so just arrive with a valid passport.",
+   "government_fee": {
+    "amount": 10.0,
+    "currency": "USD"
+   },
+   "required_documents": [
+    "Valid ordinary passport, valid for the whole stay and on departure from Dominican territory (normally 6 months minimum validity, exceptional measure 1 Dec 2024 ",
+    "Tourist Card (US$10 tax, included in air tickets issued outside the Dominican Republic since 25 April 2018, purchasable at the airport or at land/sea entry poin",
+    "Free electronic entry and exit form (e-ticket, eticket.migracion.gob.do) completed before travel, mandatory for all foreign and Dominican passengers on commerci"
+   ],
+   "exceptions": [
+    "Tourist Card is valid for tourism purposes only, foreigners entering for business purposes must apply for a single or multiple Business Visa at a Dominican consulate abroad",
+    "Legal basis is Decree 691-07 (18 Dec 2007) and Law 199-67, nationals of countries on the DGII visa-required list (e.g. Haiti, China, Cuba, India, Philippines, Venezuela) must obtain a visa instead, the United States is n",
+    "Passport normally with minimum validity of six months, from 1 Dec 2024 to 31 Dec 2026 US nationals entering exclusively for tourism may enter with a valid, in-force passport without the six-month rule (godominicanrepubli",
+    "Tourist Card tax of US$10.00 (DGII page), included in air tickets issued outside the Dominican Republic",
+    "Mandatory free e-ticket digital entry and exit form for all commercial-flight passengers",
+    "Maximum stay 30 days, staying beyond 30 days incurs an additional fee on departure, extension available from the Direccion General de Migracion"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "onward ticket requirement",
+    "proof of funds"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://dgii.gov.do/sobreTarjetaTurista/Paginas/default.aspx",
+     "quote": "La Tarjeta de Turista es una tasa impositiva que cobra la República Dominicana a sus visitantes... Actualmente su costo es de US$10.00. La Tarjeta de Turista autoriza a los visitantes a permanecer en el país por un período máximo de 30 días. Desde el 25 de abril de 2018, la Tarjeta de Turista se inc",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "VUT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://immigration.gov.vu/visa-exempted-countries/",
+  "note": "Official page read and adversarially verified 2026-09-03: Vanuatu's Department of Immigration and Passport Services lists USA among the countries not requiring a visitor visa to enter Vanuatu, and its Tourist Visa page states that travellers from exempted countries obtain the tourist visa upon arrival for a stay of 120 days without extension, with the 5,15 | quote: COUNTRIES NOT REQUIRING A VISITOR VISA TO ENTER VANUATU (EXEMPTED COUNTRIES) ... Americas and Caribbean ... St Vincent & Grenadines, USA",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "Tourist visa granted upon arrival for exempted countries (no visitor visa required)",
+   "permitted_stay": "120 days without the possibility of extension",
+   "permitted_stay_days": 120,
+   "application_channel": "on_arrival",
+   "application_channel_detail": "US passport holders do not apply in advance, the tourist visa is granted on arrival in Vanuatu provided you meet the grant criteria, with no visa application charge for exempted countries.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "VUV"
+   },
+   "required_documents": [
+    "Passport or other valid travel document with validity of more than 6 months upon arrival",
+    "Return airline ticket upon arrival",
+    "Confirmation of accommodation or a local address",
+    "Arrival form (downloadable from the immigration site)",
+    "Evidence of financial means to support oneself and dependents in Vanuatu",
+    "Written consent from parents or legal guardians if under 18"
+   ],
+   "exceptions": [
+    "Stay of 120 days cannot be extended and the holder must exit before the 120-day period expires",
+    "No change of status under a tourist visa",
+    "Holder is not permitted to engage in any commercial, employment, or business activities in Vanuatu",
+    "Exemption applies to visitor/tourist purposes, the page does not say it covers non-ordinary travel documents",
+    "Nationals of non-exempted countries must apply in advance and pay 5,150 VT for a tourist visa",
+    "Passport validity must exceed 6 months upon arrival",
+    "A return ticket or satisfactory means of traveling from Vanuatu to a destination outside Vanuatu that allows entry",
+    "Confirmation of accommodation or a local address",
+    "Have the financial means to support oneself and dependents (if any) in Vanuatu"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "valid_until"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://immigration.gov.vu/tourist-visa/",
+     "quote": "The period of stay allowed is 120 days without the possibility of extension. ... Tourist visas can be obtained upon arrival for travelers from exempted countries (see list of exempted countries) who meet the following grant criteria ... Visa application charge paid for non-exempted countries, which ",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "IDN",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://manado.imigrasi.go.id/pages/bebas-visa-kunjungan.html",
+  "note": "Official page read and adversarially verified 2026-09-03: Hong Kong SAR passport holders are visa-exempt (Bebas Visa Kunjungan) for Indonesia: the Manado immigration office page (imigrasi.go.id domain) states the stay is at most 30 days and not extendable under Presidential Regulation 95/2024, and lists Hong Kong as subject 13; the central imigrasi.go.id B | quote: Bebas Visa Kunjungan ... paling lama 30 (tiga puluh) hari dan tidak dapat diperpanjang. Dasar hukum: Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan. Daftar negara subjek BVK: ... 13. Hong Kong",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Bebas Visa Kunjungan (BVK) / visa-free visit",
+   "permitted_stay": "up to 30 days, not extendable",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, HKSAR passport holders enter Indonesia visa-free at the border for up to 30 days.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "IDR"
+   },
+   "required_documents": [
+    "Hong Kong SAR passport"
+   ],
+   "exceptions": [
+    "Visa-free stay cannot be extended or converted to another status",
+    "Listing is for Hong Kong SAR passport, other Hong Kong travel documents (e.g. BN(O)) are not covered by this entry",
+    "Stay is limited to 30 days and cannot be extended (manado.imigrasi.go.id)",
+    "All Indonesia digital arrival declaration must be completed within three days before arrival at Indonesian international airports (per immd.gov.hk Remark 14, citing allindonesia.imigrasi.go.id)"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "passport_validity",
+    "onward_ticket",
+    "funds",
+    "valid_until"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-bebas-visa-kunjungan",
+     "quote": "Daftar Negara, Pemerintah Dari Daerah Administrasi Khusus Suatu Negara, dan Entitas Tertentu (Bebas Visa Kunjungan): 13. Hong Kong",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "JPN",
+   "travel_purpose": "tourism",
+   "travel_document_type": "identity_certificate"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+  "note": "Official page read and adversarially verified 2026-09-03: Japan's MOFA visa exemption page (dated September 1, 2025) limits Hong Kong's visa waiver to HKSAR and BNO passport holders, so a Hong Kong Document of Identity for Visa Purposes holder needs a visa; the Consulate-General of Japan in Hong Kon | Official page read and adversarially verified 2026-09-03: Japan's MOFA visa-exemption page (updated September 1, 2025) limits Hong Kong's 90-day exemption to HKSAR passports and BNO passports with right of residence, so a Hong Kong Document of Identity holder needs a visa; the Consulate-General of Japan in Hong Kong publishes a dedicated procedure (DI/ENG_ | quote: (Note 5) For citizens of Hong Kong, visas are not required only for holders of Special Administrative Region (SAR) passport issued by the Hong Kong SAR of the People's Republic of China or British National Overseas (BNO) passports who have the right of residence in Hong Kong.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Single Entry Temporary Visitor Visa (Applicants with a HKDI/Macau Travel Permit)",
+   "permitted_stay": "temporary visits of up to 90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "visa_center",
+   "application_channel_detail": "Hong Kong residents holding a HKSAR Document of Identity must apply before travel, in person by appointment at the Japan Visa Application Centre in Hong Kong (helpline +852 3167-7033), through an accredited agency, or, for a single-entry tourism trip by air, as an eVISA via the Japan Visa Application Centre website submitted 2 weeks to 3 months before arrival.",
+   "government_fee": {
+    "amount": 15000.0,
+    "currency": "JPY"
+   },
+   "required_documents": [
+    "Visa Application Form to Enter Japan (specific format), all items completed, signed by the applicant with the same signature as on the HKDI",
+    "One passport-size colour photo taken within 6 months (45mm x 35mm, front-facing, no hat, no background)",
+    "HKDI (original and copy) with at least 6 months validity, signed, including copies of bio-data page, signature page, previous Japanese temporary visitor visas a",
+    "Hong Kong identity card (original and copy)",
+    "Documents showing the ability to support travel expenses (original and copy): past 1 month (30 days) bank book/bank statements in the applicant's name, or past ",
+    "Travel Itinerary (original, specific format) with flight numbers for the round trip from Hong Kong and hotel name, address and phone number",
+    "Dependents (students or minors): parents' proof of funds and birth certificate showing the relationship (original and copy)"
+   ],
+   "exceptions": [
+    "Visa exemption for Hong Kong covers only HKSAR passports and BNO passports with right of residence in Hong Kong, the Hong Kong Document of Identity is not covered",
+    "The temporary visitor purposes (sightseeing, visiting relatives or friends, short-term business) exclude any activity involving the management of business or remuneration",
+    "eVISA is not available to applicants who have been convicted or deported from any country, who are dual nationals of Japan, who want a multiple-entry visa, who travel by ship (except scheduled ferries from Busan or Shang",
+    "eVISA applications with an intended arrival less than 2 weeks from submission, or more than 3 months ahead, are not accepted",
+    "A reapplication for the same purpose within six months of a refusal is not accepted",
+    "Multiple-entry temporary visitor visas for HKDI holders follow a separate procedure",
+    "HKDI must have at least 6 months validity at the time of submitting the visa application",
+    "Applicant must be a Hong Kong or Macau resident currently residing in Hong Kong or Macau, temporary visitors cannot apply at the Hong Kong consulate",
+    "Documents must be issued within 3 months of submission and the application is not accepted unless all required documents are presented",
+    "The HKDI is in principle kept by the consulate during processing, submitted documents other than the HKDI are not returned"
+   ],
+   "unpublished_fields": [
+    "government_fee_amount in HKD (the consulate says the fee is subject to the Japan Visa Application Centre arrangement, may vary by passport type and should be reconfirmed on application; MOFA publishes only the approximate yen figure of 15,000 yen for a single-entry visa for applications accepted on or after July 1, 2026, payable in local currency)",
+    "valid_until"
+   ],
+   "processing_time": "Paper application: a minimum of one week from the date of submission, excluding Saturdays, Sundays and consulate holiday",
+   "corroborating_sources": [
+    {
+     "url": "https://www.hk.emb-japan.go.jp/files/100424456.pdf",
+     "quote": "The following is the visa application procedure for temporary visits of up to 90 days for purposes such as sightseeing; visits to relatives, friends or acquaintances; and short-term business affairs from applicants with a HKSAR Document of Identity for Visa Purposes, (hereinafter referred to as a \"H",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "ESP",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.exteriores.gob.es/Consulados/pekin/en/ServiciosConsulares/Paginas/Consular/Visado-de-transito-aeroportuario.aspx",
+  "note": "Official page read and adversarially verified 2026-09-03: The Spanish Consulate General in Beijing (exteriores.gob.es) states that PRC citizens need a visa to enter Spain and that the Schengen short-stay visa (90 EUR, up to 90 days in any 180, 15-day legal decision period, filed at BLS International | Official page read and adversarially verified 2026-09-03: The Spanish Consulate General in Beijing's airport transit visa page lists the Schengen-wide nationalities (Afghanistan, Bangladesh, DR Congo, Eritrea, Ethiopia, Ghana, Iran, Iraq, Nigeria, Pakistan, Somalia, Sri Lanka) and Spain's additional list (Cameroon, Côte d'Ivoire, Cuba, Djibouti, Gambia, Gu | quote: Nationals of the following countries require a visa to transit through the international area of any airport located in the territory of the Schengen States in order to take a connecting flight to a country outside the Schengen area: Afghanistan, Bangladesh, Democratic Republic of the Congo, Eritrea, Ethiopia, Ghana, Iran, Iraq, Nigeria, Pakistan, Somalia and Sri Lanka.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "transit_visa_free",
+   "visa_category": "Airport transit without a visa (international transit area only)",
+   "permitted_stay": "Airside transit only in the international area of the airport, no stay in Spain permitted without a Schengen visa",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "application_channel_detail": "No airport transit visa is needed while you stay in the international transit area of the Spanish airport. To pass through passport control you need a Schengen short-stay visa applied for in advance.",
+   "government_fee": {
+    "amount": 0,
+    "currency": "EUR"
+   },
+   "required_documents": [
+    "Valid passport (for airside transit, no visa documents needed)",
+    "If leaving the transit zone: Schengen visa application form, photograph, passport valid at least 3 months beyond departure with 2 blank pages, travel medical in"
+   ],
+   "exceptions": [
+    "Exemption applies only to transit within the international area of the airport, entering Spain or changing terminals through border control requires a Schengen visa",
+    "Nationals of the listed countries (not China) need an airport transit visa unless they hold a Schengen visa, EU long-term visa or residence card, a residence permit from Andorra, San Marino, Canada, Japan or the USA, a d",
+    "Schengen visa fee: 90 euros for those over 12, 45 euros for children 6 to 11, free under 6 (paid in CNY cash at BLS)",
+    "Schengen visa processing: 15 calendar days, extendable to 45 calendar days if an interview or additional documents are requested"
+   ],
+   "unpublished_fields": [
+    "processing_time"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.exteriores.gob.es/Consulados/pekin/es/ServiciosConsulares/Paginas/index.aspx?scca=Visados&scco=China&scd=225&scs=Visado+de+estancia+%28visado+Schengen%29",
+     "quote": "Tanto los ciudadanos de la R.P. China como los de Mongolia necesitan visado para su entrada en España. ... También permite el tránsito territorial y aeroportuario.",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "IND",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.eoibeijing.gov.in/page/business-visa-sports-visa/",
+  "note": "Official page read and adversarially verified 2026-09-03: Chinese ordinary passport holders need a regular (sticker) Business Visa for India, applied for online at indianvisaonline.gov.in and lodged in person with biometrics at the BLS India Visa Application Centre; the Embassy of India Beijing busi | Official page read and adversarially verified 2026-09-03: Chinese ordinary passport holders need a visa for business travel to India: the Embassy of India, Beijing's Business Visa page sets out a paper Business Visa applied for in person or via an agent at the Indian Visa Application Centre or Embassy with company dispatch letter, business licence, Indian  | quote: Business Visa is granted to a Chinese/Foreign National for the following purposes: 1. Chinese/Foreign National who wish to visit India to establish an industrial/business venture or to explore possibilities to set up industrial/business venture in India. ... 1.1 Passport to be valid for a minimum period of six months. 1.2 Duly filled in and signed application form to be submitted in person or thro",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Business Visa (regular/paper visa, Production Investment Business Visa e-B-4 for specified production and investment act",
+   "application_channel": "visa_center",
+   "application_channel_detail": "Fill the form on indianvisaonline.gov.in, then submit it in person or through an agent with the checklist documents at the Indian Visa Application Centre or the Embassy of India in Beijing, if the trip is for installation, commissioning, quality check, production, training, supply chain or plant set-up work, apply instead fully online for the e-B-4 visa at indianvisaonline.gov.in with a sponsorshi",
+   "required_documents": [
+    "Passport valid for a minimum period of six months",
+    "Duly filled in and signed application form submitted in person or through an agent",
+    "One copy of the passport (personal data page and signature page)",
+    "Original or fax invitation letter from a recognised Indian company (per the embassy's Checklist for Business Visa applications)",
+    "Original (or copy) of the dispatch letter from the applicant's company",
+    "Business license of the applicant's company with authenticated English translation, or CCPIT Registration Certificate of Incorporation",
+    "Letter of request from FAOs, SASAC or MFA (or other duly authorised Chinese organisation) for applicants working with a State Owned Enterprise",
+    "Business Visa Proforma obtained from the Indian Visa Application Centre"
+   ],
+   "exceptions": [
+    "Business Visa cannot be converted to any other kind of visa during the stay in India except conversion to X (Entry) visa on marriage to an Indian national or to a Medical visa on falling ill, with prior approval of the M",
+    "Family members/dependents of a Business Visa holder must also apply for a Business Visa (accompanying family member option)",
+    "From 1 January 2026 no paper visa is issued by the Embassy of India, Beijing for the production-investment activities covered by the e-B-4 visa, those applicants must apply online",
+    "China does not appear in the e-Visa portal's list of countries/regions eligible for the general e-Business Visa (e-B1), so general business travel uses the regular paper visa",
+    "e-Visa is non-extendable, non-convertible and not valid for visiting Protected/Restricted and Cantonment Areas",
+    "Passport to be valid for a minimum period of six months",
+    "e-B-4 visa holders must register electronically with the concerned FRRO within 14 days of arrival irrespective of the duration of visa"
+   ],
+   "unpublished_fields": [
+    "government_fee_amount",
+    "permitted_stay",
+    "permitted_stay_days",
+    "processing_time",
+    "valid_until"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.eoibeijing.gov.in/docs/1783405632advisory_for_B4_Visa.pdf",
+     "quote": "Chinese Nationals intending to visit India for the following activities shall apply online for Production Investment Business Visa (e-B-4 Visa): (i) Installation and commissioning; (ii) Quality check and essential maintenance; (iii) Production, (iv) IT and ERP Ramp-up; (v) Training; ... It may be no",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "DEU",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://india.diplo.de/in-en/service/2341254-2341254",
+  "note": "Official page read and adversarially verified 2026-09-03: The German Embassy New Delhi (india.diplo.de, Federal Foreign Office) states that Indian citizens require a visa and that anyone wishing to work in Germany must apply for a German National (D) visa before travel, with a fee of 75 EUR / 8,400 INR for adults, applied for via the Consular Service Porta | quote: Indian citizens require a visa. Or would you like to stay longer than 90 days, e.g. to work in Germany, reunite with a spouse or attend university? In that case, you would apply for a German National visa, also refered to a 'long-term visa' or 'D visa'.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "German National visa (D visa) for employment",
+   "permitted_stay": "National visa usually issued with validity ranging from 90 days up to a year, after arrival a residence permit must be o",
+   "application_channel": "embassy",
+   "application_channel_detail": "Apply for the German National visa before travel through the Consular Service Portal at https://digital.diplo.de/visa, selecting the German mission (Embassy New Delhi or the consulate) responsible for your Indian state of residence, then attend the in-person appointment, visa types not on the portal are booked through VFS Global.",
+   "government_fee": {
+    "amount": 75.0,
+    "currency": "EUR"
+   },
+   "required_documents": [
+    "Valid passport issued within the last 10 years with at least 2 empty pages",
+    "University degree with mark sheets (academic route) or proof of completed vocational training / at least two years of relevant work experience within the last f",
+    "Recognition of the degree via Anabin or ZAB, or recognition of the vocational qualification for Germany",
+    "Declaration regarding a contract of employment completed by the German employer",
+    "CV (one page, tabular)",
+    "Health insurance certificate from the German employer"
+   ],
+   "exceptions": [
+    "Schengen (C) visa covers only short visits up to 90 days for business, visit or holiday, not employment",
+    "Visa fee is non-refundable if the application is rejected",
+    "Submission of the listed documents does not guarantee that a visa is granted",
+    "Fee is 37.50 EUR (4,200 INR) for applicants under 18",
+    "Fee is payable in Indian Rupees at the exchange rate on the appointment day",
+    "Visa must be obtained before travel, Indian citizens require a visa for Germany",
+    "Employment requires a National (D) visa, not a Schengen visa",
+    "After arrival, apply for a residence permit at the local Foreigners Authority",
+    "EU Blue Card salary threshold from 1 January 2026: 45,934.20 EUR/year for MINT and shortage professions, 50,700 EUR/year for other professions"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "permitted_stay_days",
+    "valid_until"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://india.diplo.de/in-en/service/2755482-2755482",
+     "quote": "If you wish to stay in Germany for more than 90 days, please apply for a German National visa. The visa fee is 8400 inr / 75,-- EUR for applicants over 18 years of age and 4200 inr / 37,50 EUR for applicants under the age of 18 years. The visa is usually issued with visa validities ranging from 90 d",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "KOR",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://overseas.mofa.go.kr/in-mumbai-en/brd/m_1978/view.do?seq=759211&page=1",
+  "note": "Official page read and adversarially verified 2026-09-03: Indian ordinary passport holders need a visa before travelling to Korea for business; the Consulate General of the Republic of Korea in Mumbai (overseas.mofa.go.kr) states that India is not eligible for K-ETA and all Indian nationals must obtain a visa through a Korean diplomatic mission, and the Ch | quote: India is not eligible for K-ETA. All Indian nationals must obtain a visa through the Korean diplomatic mission.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "C-3-4 Short-term Business visa (single-entry visa, up to 90 days)",
+   "permitted_stay": "Single-entry visa (up to 90 days)",
+   "permitted_stay_days": 90,
+   "application_channel": "visa_center",
+   "application_channel_detail": "Complete the electronic visa application form on the Korea Visa Portal, print and sign it, and submit it with the checklist documents to the Korean Visa Application Centre (VFS Global in New Delhi and Kolkata) or the Korean Embassy in New Delhi or Consulate General in Mumbai or Chennai that covers your state of residence.",
+   "government_fee": {
+    "amount": 3600.0,
+    "currency": "INR"
+   },
+   "required_documents": [
+    "Current original passport valid for at least six months with at least two blank pages",
+    "Copy of the first and last pages of the passport",
+    "One recent photograph (3.5 x 4.5 cm) with white background",
+    "Completed online visa application form, printed, with name and signature on the last page and Aadhaar number in the National Identity No. field",
+    "Copy of PAN card (if applicable)",
+    "Copy of Aadhaar card (for Indian nationals)",
+    "Covering letter on the applicant's company letterhead with original signature and company seal",
+    "Invitation letter on the Korean company's letterhead (original not required)"
+   ],
+   "exceptions": [
+    "Indian diplomatic and official passport holders are covered by the Korea-India visa exemption agreement, ordinary passports are not (Chennai consulate visa issuance page)",
+    "India is not eligible for K-ETA, so the K-ETA route cannot be used",
+    "Do not apply for a tourist visa (C-3-9) if the purpose of the visit is business, misrepresentation may result in visa denial",
+    "Express (urgent) processing only via the express visa procedure if eligible, regular applications cannot be expedited later",
+    "Visa fees shown are the Mumbai consulate's revised schedule effective August 3, 2026, the Chennai page still lists the basic rate of US$40 for a single entry visa of no more than 90 days",
+    "Passport valid for at least six months with at least two blank pages (Mumbai consulate C-3-4 checklist w.e.f. 24.08.2026)",
+    "Visa must be obtained from a Korean diplomatic mission before travel, India is not eligible for K-ETA"
+   ],
+   "unpublished_fields": [
+    "currency symbol on the fee notice (the Mumbai consulate table prints 3,600 without a currency label; the consulate is in India and other sources state INR)",
+    "maximum stay actually granted per entry for the C-3-4 visa (pages describe the product as a single-entry visa up to 90 days)"
+   ],
+   "processing_time": "Visas are generally issued within 10 days of application, apply at least one month before travel (Consulate General in M",
+   "corroborating_sources": [
+    {
+     "url": "https://overseas.mofa.go.kr/in-chennai-en/wpge/m_2782/contents.do",
+     "quote": "Nationals of those countries or regions with which Korea has signed a visa waiver agreement can enter without a visa... Diplomatic & Official (35 countries) Algeria, Argentina, Azerbaijan (30 days), Bangladesh, Belarus, Belize, Benin, Cambodia (60 days), China (30 days), Cyprus, Croatia, Ecuador ...",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "SGP",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
+  "note": "Official page read and adversarially verified 2026-09-03: ICA's India visa detail page states that ordinary Indian passport holders need a Singapore entry visa before travel, applied for via the e-Service through a strategic partner or local contact, or via a Singapore Overseas Mission or its authorised visa agent, with a S$30 processing fee and three work | quote: You will need a visa to enter Singapore if you are holding a travel document issued by this country. Holders of diplomatic, official and service passports do not need a visa for entry. A S$30 non-refundable processing fee is payable online using a Visa or MasterCard. Your visa application will be processed within three working days (excluding the day of submission).",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Singapore entry visa (business or social visit)",
+   "permitted_stay": "Not published as a fixed number, the period of stay is shown on the visit pass endorsement and is determined by ICA offi",
+   "application_channel": "authorised_agent",
+   "application_channel_detail": "Apply before travel, within 30 days of arrival, either online via the ICA e-Service through a strategic partner or a local contact in Singapore, or through the Singapore High Commission or Consulates-General in India, which in practice only accept e-Visa submissions made by their authorised visa agents.",
+   "government_fee": {
+    "amount": 30.0,
+    "currency": "SGD"
+   },
+   "required_documents": [
+    "Duly completed Form 14A signed by the applicant",
+    "Recent passport-sized colour photograph taken within the last three months (Mumbai consulate asks for 2)",
+    "Photocopy of passport biodata page, passport valid for at least six months from the date of entry into Singapore",
+    "Form V39A Letter of Introduction for Visa Application from a Singapore citizen or permanent resident aged 21 or above, or an LOI from the applicant's Embassy/Hi"
+   ],
+   "exceptions": [
+    "Holders of Indian diplomatic, official and service passports do not need a visa for entry",
+    "Indian nationals in transit to or from a third country by air may be eligible for the 96-hour Visa Free Transit Facility (VFTF), subject to its conditions",
+    "The visa is for business or social visits only, it is not a work pass",
+    "ICA does not accept visa applications over the immigration counters",
+    "Passport valid for at least six months from the date of entry into Singapore",
+    "Apply for the entry visa within 30 days prior to arrival in Singapore",
+    "Possession of a valid visa does not guarantee entry, the grant of an immigration pass and the duration of stay are determined by ICA officers at the checkpoint",
+    "All foreign visitors are notified digitally of their Visit Pass (e-Pass) by email on arrival"
+   ],
+   "unpublished_fields": [
+    "permitted_stay_days",
+    "visa_validity",
+    "valid_until"
+   ],
+   "processing_time": "Within three working days excluding the day of submission (ICA), 3 to 5 working days excluding day of submission, weeken",
+   "corroborating_sources": [
+    {
+     "url": "https://mumbai.mfa.gov.sg/consular-services/visa-information/",
+     "quote": "Visa applications are required for Indian citizens / passport holders. Visitors holding official and diplomatic Indian passports are exempted from this entry requirement. With effect from 01 January 2026, a visa fee of INR2,100 will be levied for each application submitted.",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "GBR",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://www.gov.uk/check-uk-visa/y/china/no/transit/somewhere_else/no",
+  "note": "Official page read and adversarially verified 2026-09-03: GOV.UK's official visa checker states that a Chinese national transiting the UK needs a visa: a Direct Airside Transit visa (£41.50) when changing flights without passing border control, or a Visitor in Transit visa (£74.50, leave within 48 hours) when passing through border control, with exemptions | quote: You'll need a visa to pass through the UK in transit. You normally need a Direct Airside Transit visa if you arrive in the UK on a flight and leave again without passing through immigration control.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Direct Airside Transit visa (airside) / Visitor in Transit visa (landside)",
+   "permitted_stay": "Direct Airside Transit visa confers no entry to the UK (airside only), Visitor in Transit visa allows passing through bo",
+   "permitted_stay_days": 2,
+   "application_channel": "online_portal",
+   "application_channel_detail": "Apply online on GOV.UK for a Direct Airside Transit visa (£41.50) or a Visitor in Transit visa (£74.50), then attend a visa application centre appointment to give biometrics and your passport, a decision usually comes within 3 weeks.",
+   "government_fee": {
+    "amount": 41.5,
+    "currency": "GBP"
+   },
+   "required_documents": [
+    "Current passport or valid travel document",
+    "Proof of permission to enter the destination country (visa, residence permit or green card)",
+    "Evidence of onward travel such as a flight booking confirmation, ticket, boarding pass or travel agent documentation",
+    "Biometrics given at a visa application centre appointment"
+   ],
+   "exceptions": [
+    "No transit visa needed if you hold a UK ETA, an EU Settlement Scheme family permit, a Home Office travel document, a Standard Visitor visa or a Marriage Visitor visa",
+    "Airside transit without a visa if holding a valid visa for Australia, Canada, New Zealand or the USA (or an expired one used to enter that country within the last 6 months), an Australian/NZ permanent resident visa, a Ca",
+    "Holders of Chinese diplomatic or service passports may transit airside without a visa (rule applies to ordinary passports)",
+    "Hong Kong SAR and Macao SAR passport holders are not visa nationals and are not covered by this rule",
+    "Stays longer than 48 hours require a Standard Visitor visa instead of a Visitor in Transit visa",
+    "Electronic visas or permits must be verifiable by the airline to count as an exemption",
+    "Visitor in Transit visa holders must leave the UK within 48 hours and must not work or study",
+    "Transit Without Visa (landside) only if you arrive and depart by air, hold a confirmed onward flight departing before 23:59 the following day, and hold the correct documents for the destination, a Border Force officer ca",
+    "Airside transit without a DATV requires arrival and departure by air, a confirmed same-day onward flight from the same airport and correct documents for the destination"
+   ],
+   "unpublished_fields": [
+    "valid_until"
+   ],
+   "processing_time": "You'll usually get a decision on your visa within 3 weeks",
+   "corroborating_sources": [
+    {
+     "url": "https://www.gov.uk/government/publications/uk-visa-requirements-list-for-carriers/uk-visa-requirements-for-international-carriers",
+     "quote": "Nationals of countries and territories who need a visa to enter or transit the UK: ... China (People's Republic of) [1] ... [1] Diplomatic or Service passport holders may transit airside without a visa.",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "KOR",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://overseas.mofa.go.kr/cn-shanghai-ko/brd/m_535/view.do?seq=1290604",
+  "note": "Official page read and adversarially verified 2026-09-03: Chinese ordinary passport holders travelling to Korea for business need a visa: the Consulate General of the Republic of Korea in Shanghai's visa guidance (PDF dated 2026-09-02, attached at overseas.mofa.go.kr/cn-shanghai-ko/brd/m_535/view.do?seq=1290604) lists the 단기상용 C-3-4 single-entry visa (stay | quote: (5) 단기상용 (C-3-4) 【체류기간 90일 이하, 유효기간 3개월의 단수사증】 ... 국내 공·사 기관의 초청으로 입국하여 국내업체와 구매계약, 시장조사, 상담 등의 활동을 하려는 사람 ... 4. 사증심사 수수료 (단위: 인민폐) 단기사증 (체류기간 90일 이내) 280 140 120 ◦ 위 기준은 2017.7.1부터 중국인에 대한 사증심사 수수료이며 ... 5일 이내 초청(C-3-1), 의료관광(C-3-3), 상용(C-3-4), 유학 및 어학연수(D-2, D-4)",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "단기상용 (C-3-4) 단수사증 (Short-term Business single-entry visa)",
+   "permitted_stay": "체류기간 90일 이하, 유효기간 3개월의 단수사증 (stay up to 90 days, single entry valid 3 months), a double-entry option allows 30 days per ",
+   "permitted_stay_days": 90,
+   "application_channel": "visa_center",
+   "application_channel_detail": "Holders of Chinese ordinary passports lodge the C-3-4 application at the Korea Visa Application Center (Shanghai Center, 99 Xianxia Road, Changning District, tel 400-8133-666, www.visaforkorea-sh.com) or through a consulate-designated agency/travel agency, at the Korean mission whose jurisdiction covers the applicant's company location (not hukou), the 280 CNY consular fee plus 120 CNY center serv",
+   "government_fee": {
+    "amount": 280.0,
+    "currency": "CNY"
+   },
+   "required_documents": [
+    "Visa application form with one photo attached (사증발급신청서, 사진 1매 부착)",
+    "Original passport and copy (여권 원본 및 사본)",
+    "Original national ID card (신분증 원본)",
+    "Original certificate of employment or business-trip certificate stating position, tenure, salary, trip period and purpose, issuer contact, with company seal (재직",
+    "Proof of employment: last 3 months social insurance record, or last 3 months salary deposit record plus explanation if social insurance unavailable (재직입증서류)",
+    "Copy of the Chinese company business licence (영업집조 사본)",
+    "From the Korean inviter: invitation letter on the consulate's designated form (초청장 당관지정양식)",
+    "From the Korean inviter: business registration certificate / tax ID copy (사업자등록증명 등 택1)"
+   ],
+   "exceptions": [
+    "Business travellers are NOT covered by the temporary visa-free scheme: it applies only to Chinese group tourists of 3 or more recruited by designated travel agencies (전담여행사가 모객한 3인 이상의 단체관광객), for tourism within 15 days,",
+    "Jeju Special Self-Governing Province separately admits Chinese nationals visa-free for 30 days for both individual and group tourism (제주특별자치도 무사증 30일)",
+    "Installation/maintenance of imported machinery or supervision of shipbuilding/industrial equipment is outside C-3 scope and requires a C-4 short-term employment or D-9 trade visa",
+    "Repeated entries exceeding 60 days for training even under 90 days require D-3/D-4 training visas, not C-3-4",
+    "Government or public-institution inviters may omit inviter documents 3 and 4, applicants previously issued 2 or more business visas from the same inviter may omit inviter document 4 and applicant document 5",
+    "Chinese group tourists (C-3-2) must apply by group e-visa through designated agencies, the fee waiver for that product is extended to 2026-12-31 (separate from this business route)",
+    "All supporting documents are valid for 3 months from issue unless otherwise stated",
+    "Additional documents may be requested for visa examination",
+    "False statements on the application (education, occupation, contact, purpose) lead to refusal, entry ban and possible prosecution",
+    "Fee is non-refundable even if the visa is refused, and no refund of the difference if a single-entry visa is issued instead of multiple-entry"
+   ],
+   "unpublished_fields": [
+    "valid_until for the C-3-4 visa rule (no end date; only the group-tourist visa-free pilot has a published end date of 2026-06-30, and the reported extension to 2026-12-31 was not confirmed on any official page read)",
+    "passport validity requirement",
+    "onward ticket / funds requirement for C-3-4",
+    "arrival card"
+   ],
+   "processing_time": "5 working days excluding the receipt date for 상용(C-3-4), longer if supplementary documents or verification are needed, e",
+   "corroborating_sources": [
+    {
+     "url": "https://www.immigration.go.kr/bbs/immigration/214/484963/download.do",
+     "quote": "중국 단체관광객 한시 무사증 적용 대상은 전담여행사가 모객한 3인 이상의 단체관광객입니다. ... 해당 제도를 통해 입국하는 단체관광객은 15일 범위 내에서 무사증으로 국내 관광이 가능하며, 대한민국 전역을 여행할 수 있도록 허용됩니다. ※ 제주특별자치도는, 중국 국민에 대해서는 기존과 동일하게 무사증으로 30일간 개별관광과 단체관광이 모두 허용됩니다.",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "CHN",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://en.nia.gov.cn/n147418/n147463/c181470/content.html",
+  "note": "Official page read and adversarially verified 2026-09-03: China's National Immigration Administration list of mutual visa exemption agreements (dated 2025-04-14) shows Singapore ordinary passport holders exempt from visas for 30 days, effective 2024.02.09; China's MFA consular list (published 2026-05-29) corroborates the ordinary-passport exemption and sta | quote: Citizens of these countries, who hold the appropriate passports, do not need to apply for visas in advance when traveling to China for short terms. ... 69 | Singapore | Diplomatic passports, service (official) passports, passports for public affairs | 2011.04.17 | 30 days | Ordinary passports | 2024.02.09 | 30 days",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Mutual visa exemption agreement (ordinary passports)",
+   "permitted_stay": "30 days",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, present a valid Singapore ordinary passport at the Chinese port of entry for a short-term stay of up to 30 days.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "CNY"
+   },
+   "required_documents": [
+    "Valid Singapore ordinary passport"
+   ],
+   "exceptions": [
+    "Applies only to holders of ordinary passports (diplomatic, service and public affairs passports fall under the separate 2011 arrangement), other travel documents are not named as covered",
+    "The NIA page frames the exemption as short-term travel, it does not itself enumerate permitted purposes such as business, and long-term residence or work is not covered",
+    "Stay limited to 30 days per entry under the mutual visa exemption agreement",
+    "Stays beyond 30 days require going through residence formalities with local authorities (per the MFA consular list note)"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "permitted purposes (business, tourism etc. not enumerated on the NIA page)",
+    "required_documents beyond the passport itself",
+    "passport validity period",
+    "onward ticket",
+    "funds"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://cs.mfa.gov.cn/wgrlh/lhqz/lhqzjjs/202510/t20251023_11739051.shtml",
+     "quote": "Singapore ... Ordinary passports ... 2024.02.09. Exemption of visa requirements does not mean permission to stay and reside in the other contracting country for an indefinite period of time. Holders of qualifying passports are permitted to stay for less than 30 days upon entry into the other contrac",
+     "authority": ""
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit (official page, adversarially verified)",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Official page read and adversarially verified 2026-09-03 for the same Executive Order 408 list: the DFA eVisa policy page names Canada among nationals admitted visa-free for an initial stay of thirty (30) days with a passport valid six months beyond the stay and a return or onward ticket. | quote: nationals of the following countries may enter the Philippines without a visa for a stay not exceeding thirty (30) days",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "Visa-free entry under Executive Order No. 408 (initial stay of thirty (30) days)",
+   "permitted_stay": "an initial stay of thirty (30) days",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa application is needed, present your passport and return or onward ticket to the immigration officer at the Philippine port of entry.",
+   "government_fee": {
+    "amount": 0.0,
+    "currency": "PHP"
+   },
+   "required_documents": [
+    "Canadian passport valid for at least six (6) months beyond the contemplated period of stay",
+    "Return ticket to country of origin or outward-bound ticket to next country of destination"
+   ],
+   "exceptions": [
+    "The 30-day stay is described as an initial stay, extension beyond it must be applied for with the Bureau of Immigration (BI Temporary Visitor (9A) Visa Waiver page: non-visa required tourists admitted initially for thirt",
+    "The page lists the rule for nationals (national passport holders), it does not address other travel document types for Korea",
+    "Different visa-free periods apply to Brazil and Israel (59 days), Indian nationals (14 days), Chinese nationals (14 days), Hong Kong SAR and Macau SAR passports (14 days)",
+    "Passport valid for at least six (6) months beyond the contemplated period of stay",
+    "Return ticket to country of origin or outward-bound ticket to next country of destination"
+   ],
+   "unpublished_fields": [
+    "processing_time",
+    "valid_until",
+    "funds requirement",
+    "arrival card / eTravel registration (not stated on the cited rule page)"
+   ]
   }
  }
 ]
