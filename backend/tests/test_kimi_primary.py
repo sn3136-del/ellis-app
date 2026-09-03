@@ -1683,3 +1683,32 @@ def test_battery_of_2026_09_03_parses_the_traveller_and_the_trip_apart():
     assert assistant.off_topic_reply("what documents do I need", "en") is None
     assert assistant.off_topic_reply("what's the weather there", "en", ctx) is not None
     assert assistant.off_topic_reply("tell me a joke", "en") is not None
+
+
+def test_codes_typos_cities_residence_and_chinese_suffixes_read():
+    from app.visa_snapshot import assistant
+    from app.visa_snapshot.kimi_primary import _deterministic_route as read, _country_mentions
+    r = read("CN to JP")
+    assert (r["nationality"], r["destination"]) == ("CHN", "JPN")
+    r = read("USA→VNM tourism")
+    assert (r["nationality"], r["destination"]) == ("USA", "VNM")
+    r = read("Do I need a visa for Thialand with a Singapor passport")
+    assert (r["nationality"], r["destination"]) == ("SGP", "THA")
+    r = read("Chinese passport, flying to Bangkok next week")
+    assert (r["nationality"], r["destination"]) == ("CHN", "THA")
+    r = read("I have an Indian passport, based in Dubai, going to Singapore for a conference")
+    assert (r["nationality"], r["destination"], r["residence"], r["travel_purpose"]) == \
+        ("IND", "SGP", "ARE", "business")
+    r = read("日本人去中国要签证吗")
+    assert (r["nationality"], r["destination"]) == ("JPN", "CHN")
+    r = read("内地居民去香港要办什么")
+    assert (r["nationality"], r["destination"]) == ("CHN", "HKG")
+    r = read("持中国护照前往新加坡参展")
+    assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("CHN", "SGP", "business")
+    # Ordinary words are never countries.
+    assert _country_mentions("my sister said the woman in the photo is 5th") == []
+    assert _country_mentions("the SAR passport and the ETA fee in AUD") == []
+    assert assistant.names_schengen("台湾护照去欧洲要ETIAS吗") is True
+    assert assistant.names_schengen("visa for Japan") is False
+    assert assistant._zh_figures("Up to 90 days in any 180-day period", False) == "最多90天任意180天内"
+    assert assistant._zh_figures("5 working days", True) == "5個工作日"

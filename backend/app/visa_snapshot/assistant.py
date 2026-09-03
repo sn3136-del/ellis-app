@@ -132,6 +132,16 @@ def off_topic_reply(question: str, lang: str | None = None,
     return REFUSAL_ZH if wants_chinese(q, lang) else REFUSAL_EN
 
 
+_SCHENGEN_WORDS = ("schengen", "europe", "european union", " eu ", "eu?",
+                   "申根", "欧洲", "歐洲", "欧盟", "歐盟")
+
+
+def names_schengen(question: str) -> bool:
+    """Whether the question names Europe or the Schengen area as a whole."""
+    low = " " + str(question or "").lower() + " "
+    return any(w in low for w in _SCHENGEN_WORDS)
+
+
 def region_destination(question: str) -> str | None:
     """A sub-national region named in the question steers the DESTINATION:
     "hainan" means China, "jeju" means Korea. The map lives in the policy
@@ -269,6 +279,31 @@ _VERDICT_TW = {
 }
 
 
+def _zh_figures(text: str, tw: bool) -> str:
+    """"Up to 90 days in any 180-day period" rendered in Chinese for the
+    facts-only reply, so a Chinese answer does not carry English phrases."""
+    t = text
+    rules = [
+        (r"\bup to (\d+) days?\b", r"最多\1天"),
+        (r"\bin any (\d+)[- ]day period\b", r"任意\1天内"),
+        (r"\b(\d+) working days?\b", r"\1个工作日"),
+        (r"\b(\d+) calendar days?\b", r"\1个自然日"),
+        (r"\b(\d+) business days?\b", r"\1个工作日"),
+        (r"\b(\d+) days?\b", r"\1天"),
+        (r"\b(\d+) months?\b", r"\1个月"),
+        (r"\b(\d+) weeks?\b", r"\1周"),
+        (r"\b(\d+) years?\b", r"\1年"),
+        (r"\bper entry\b", "每次入境"),
+        (r"\bper visit\b", "每次入境"),
+    ]
+    for pat, rep in rules:
+        t = re.sub(pat, rep, t, flags=re.I)
+    t = re.sub(r"(?<=[\u4e00-\u9fff])\s+|\s+(?=[\u4e00-\u9fff])", "", t)
+    if tw:
+        t = t.replace("个", "個").replace("内", "內").replace("周", "週")
+    return t
+
+
 def fallback_reply(out: dict, question: str, lang: str | None = None) -> str | None:
     """A plain reply written from the served facts alone, for the turns the
     composer cannot serve in time. The page always had this summary, the API
@@ -294,11 +329,11 @@ def fallback_reply(out: dict, question: str, lang: str | None = None) -> str | N
         lines["fee"] = (f"政府费用为 {amt} {cur}。" if zh and not tw else f"政府費用為 {amt} {cur}。" if tw
                         else f"The government fee is {amt} {cur}.".replace("  ", " "))
     if g.get("permitted_stay"):
-        st = g["permitted_stay"]
+        st = _zh_figures(str(g["permitted_stay"]), tw) if zh else g["permitted_stay"]
         lines["stay"] = (f"允许停留：{st}。" if zh and not tw else f"允許停留：{st}。" if tw
                          else f"Permitted stay: {st}.")
     if g.get("processing_time") and str(g["processing_time"]).lower() not in ("not applicable", "n/a"):
-        pt = g["processing_time"]
+        pt = _zh_figures(str(g["processing_time"]), tw) if zh else g["processing_time"]
         lines["processing"] = (f"办理时间：{pt}。" if zh and not tw else f"辦理時間：{pt}。" if tw
                                else f"Processing time: {pt}.")
     if g.get("application_channel_detail") and dispo != "VISA_EXEMPT":

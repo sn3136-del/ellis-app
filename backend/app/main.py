@@ -1959,8 +1959,21 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
                    "travel_document_type": "ordinary_passport",
                    "destination_country": dch, "travel_purpose": "tourism",
                    "visa_category": kimi_primary.category_for_purpose("tourism")}
-            row = db.execute(_sel(_KC).where(
-                _KC.cache_key == kimi_primary.cache_key(rte))).scalars().first()
+            # Any cached answer for the pair serves the comparison: the
+            # exact key carries a policy month or a document slot that a
+            # comparative question never states, and an exact miss called
+            # a fully answered route "not answered yet".
+            _cands = db.execute(_sel(_KC).where(_KC.cache_key.like(
+                f"{_comp_nat}|%|{dch}|%"))).scalars().all()
+            _cands = [r for r in _cands if r.guidance
+                      and f"|{kimi_primary.CACHE_VERSION}" in (r.cache_key or "")]
+
+            def _side_rank(r):
+                parts = r.cache_key.split("|")
+                return (len(parts) <= 3 or parts[3] != "tourism",
+                        "doc:" in r.cache_key, "via:" in r.cache_key,
+                        r.status != kimi_primary.STATUS_PRIMARY)
+            row = sorted(_cands, key=_side_rank)[0] if _cands else None
             side = {"nationality": _comp_nat, "destination": dch}
             if row is None:
                 side["unverified"] = ("Ellis has not answered this route "
@@ -2101,9 +2114,18 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
             if len(_lone) == 1:
                 nat = _lone[0]
         cjk = assistant.wants_chinese(body.question, body.lang)
+        _schengen = assistant.names_schengen(body.question)
         if not nat and dest:
             clarify = "请告诉我您持哪国护照（国籍）？" if cjk else \
                 "Which country issued your passport?"
+        elif nat and not dest and _schengen:
+            # "去欧洲要签证吗": one Schengen visa covers the whole area, so
+            # the first country entered is the only fact still needed.
+            clarify = ("您要先入境哪个申根国家？一张申根签证覆盖全部申根成员国，"
+                       "告诉我第一个入境国，我就按它回答。") if cjk else \
+                ("Which Schengen country will you enter first? One Schengen "
+                 "visa covers the whole area, so name the first country and "
+                 "I will answer for it.")
         elif nat and not dest:
             clarify = "请告诉我您要去哪个国家？" if cjk else \
                 "Which country are you travelling to?"
@@ -2150,6 +2172,10 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     }
     if parsed.get("transit_countries"):
         route["transit_countries"] = parsed["transit_countries"]
+    if parsed.get("residence"):
+        # "Indian passport, based in Dubai": the consular district follows
+        # where the traveller lives, the rules follow the passport.
+        route["lawful_country_of_residence"] = parsed["residence"]
     if parsed.get("arrival_date"):
         route["arrival_date"] = parsed["arrival_date"]
     try:

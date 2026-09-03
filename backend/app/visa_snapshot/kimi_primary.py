@@ -1597,8 +1597,9 @@ Null anything not stated. NEVER invent a country. No prose, JSON only.""")
 _ALIASES = {
     "USA": ("usa", "us", "u.s.", "america", "united states", "the states", "美国", "美國", "american"),
     "GBR": ("uk", "u.k.", "britain", "great britain", "england", "united kingdom", "英国", "英國", "british", "english"),
-    "CHN": ("china", "mainland china", "prc", "中国", "中國", "中国大陆",
-            "中华人民共和国", "中華人民共和國", "chinese"),
+    "CHN": ("china", "mainland china", "prc", "mainland", "中国", "中國", "中国大陆",
+            "中华人民共和国", "中華人民共和國", "内地", "內地", "大陆", "大陸",
+            "chinese"),
     "HKG": ("hong kong", "hongkong", "hk", "香港", "hong konger"),
     "TWN": ("taiwan", "台湾", "台灣", "taiwanese"),
     "JPN": ("japan", "日本", "japanese"),
@@ -1699,19 +1700,79 @@ _CITIES = {
 }
 
 _PURPOSE_WORDS = (
-    ("business", ("business", "商务", "商務", "出差", "conference", "meeting")),
+    ("business", ("business", "商务", "商務", "出差", "conference", "meeting",
+                  "exhibition", "trade fair", "展会", "展會", "参展", "參展",
+                  "开会", "開會", "会议", "會議", "公务", "公務")),
     ("study", ("study", "student", "留学", "留學", "读书", "讀書", "上学",
                "上學", "念书", "唸書", "university", "school")),
     ("work", ("work", "job", "工作", "employment")),
-    ("family_visit", ("family", "relatives", "探亲", "探親", "visit my", "親友", "亲友")),
-    ("transit", ("transit", "layover", "stopover", "过境", "過境", "转机", "轉機")),
+    ("family_visit", ("family", "relatives", "探亲", "探親", "visit my", "親友", "亲友",
+                      "visit friends", "visiting friends", "亲戚", "親戚", "看望")),
+    ("transit", ("transit", "layover", "stopover", "过境", "過境", "转机", "轉機",
+                 "中转", "中轉")),
 )
 
 
-def _country_mentions(text: str) -> list:
-    """[(position, ISO3, is_demonym)] for every country named in the text,
-    longest alias first so "south korea" beats "korea" and "new zealand"
-    is not read as two words."""
+# Uppercase codes a tester or an agent types: "CN to JP", "USA→VNM". Only
+# uppercase tokens count, so "in", "my" and "5th" stay ordinary words.
+_ISO2 = {
+    "CN": "CHN", "JP": "JPN", "KR": "KOR", "SG": "SGP", "MY": "MYS", "TH": "THA",
+    "VN": "VNM", "ID": "IDN", "PH": "PHL", "TW": "TWN", "HK": "HKG", "MO": "MAC",
+    "IN": "IND", "AU": "AUS", "CA": "CAN", "GB": "GBR", "UK": "GBR", "US": "USA",
+    "FR": "FRA", "DE": "DEU", "ES": "ESP", "IT": "ITA", "RU": "RUS", "AE": "ARE",
+    "TR": "TUR", "EG": "EGY", "NZ": "NZL", "BR": "BRA", "MX": "MEX", "KH": "KHM",
+    "LA": "LAO", "MM": "MMR", "NP": "NPL", "LK": "LKA", "PK": "PAK", "BD": "BGD",
+    "SA": "SAU", "QA": "QAT", "CH": "CHE", "AT": "AUT", "NL": "NLD", "BE": "BEL",
+    "PT": "PRT", "GR": "GRC", "SE": "SWE", "NO": "NOR", "DK": "DNK", "FI": "FIN",
+    "IE": "IRL", "PL": "POL", "CZ": "CZE", "HU": "HUN", "MA": "MAR", "ZA": "ZAF",
+    "KE": "KEN", "AR": "ARG", "CL": "CHL", "PE": "PER", "CO": "COL", "IL": "ISR",
+    "JO": "JOR", "OM": "OMN", "KZ": "KAZ", "UZ": "UZB", "MN": "MNG", "BN": "BRN",
+}
+# Uppercase three-letter tokens that are not countries but look like codes.
+_NOT_A_CODE = frozenset({
+    "SAR", "ETA", "VFS", "MRV", "CBP", "ICA", "NIA", "BNO", "OCI", "EEP", "ADS",
+    "AUD", "CNY", "USD", "EUR", "JPY", "SGD", "THB", "VND", "IDR", "PHP", "MYR",
+    "INR", "GBP", "CAD", "CHF", "HKD", "TWD", "KRW", "RUB", "AED", "TRY", "EGP",
+    "NZD", "BRL", "MXN", "RMB", "NTD", "MOP", "IDs", "PDF", "URL", "FAQ", "VIP",
+    "GPS", "SIM", "ATM", "TDAC", "MDAC", "ESTA", "ETIAS", "EVOA",
+})
+# Misspellings people really type, mapped straight to the country.
+_TYPOS = {
+    "japn": "JPN", "japam": "JPN", "jappan": "JPN", "thialand": "THA",
+    "tailand": "THA", "thailnd": "THA", "veitnam": "VNM", "vietnamn": "VNM",
+    "veitnamn": "VNM", "singapor": "SGP", "singapure": "SGP", "singpore": "SGP",
+    "phillipines": "PHL", "philipines": "PHL", "phillippines": "PHL",
+    "malasia": "MYS", "malaysa": "MYS", "indonisia": "IDN", "indonezia": "IDN",
+    "koria": "KOR", "corea": "KOR", "austrailia": "AUS", "austrlia": "AUS",
+    "candada": "CAN", "cananda": "CAN", "amercia": "USA", "amerika": "USA",
+    "brittain": "GBR", "britian": "GBR", "germeny": "DEU", "germny": "DEU",
+    "swizerland": "CHE", "switzerland": "CHE", "swtizerland": "CHE",
+    "turkiye": "TUR", "türkiye": "TUR", "cambodja": "KHM", "cambodgia": "KHM",
+    "dubai": "ARE", "abu dhabi": "ARE", "bangkok": "THA", "phuket": "THA",
+    "hanoi": "VNM", "saigon": "VNM", "ho chi minh": "VNM", "kuala lumpur": "MYS",
+    "manila": "PHL", "cebu": "PHL", "jakarta": "IDN", "london": "GBR",
+    "paris": "FRA", "berlin": "DEU", "munich": "DEU", "rome": "ITA",
+    "milan": "ITA", "madrid": "ESP", "barcelona": "ESP", "sydney": "AUS",
+    "melbourne": "AUS", "toronto": "CAN", "vancouver": "CAN", "new york": "USA",
+    "los angeles": "USA", "san francisco": "USA", "moscow": "RUS",
+    "istanbul": "TUR", "cairo": "EGY", "delhi": "IND", "new delhi": "IND",
+    "mumbai": "IND", "bangalore": "IND", "chennai": "IND", "kathmandu": "NPL",
+    "colombo": "LKA", "phnom penh": "KHM", "siem reap": "KHM",
+    "vientiane": "LAO", "luang prabang": "LAO", "yangon": "MMR",
+    "zurich": "CHE", "geneva": "CHE", "vienna": "AUT", "amsterdam": "NLD",
+    "brussels": "BEL", "lisbon": "PRT", "athens": "GRC", "prague": "CZE",
+    "doha": "QAT", "riyadh": "SAU", "jeddah": "SAU", "muscat": "OMN",
+    "tel aviv": "ISR", "auckland": "NZL", "queenstown": "NZL",
+}
+
+
+def _country_spans(text: str) -> list:
+    """[(start, end, ISO3, is_demonym)] for every country named in the text:
+    names and aliases longest first (so "south korea" beats "korea"), city
+    and region words, common misspellings, and uppercase codes ("CN", "JPN").
+    A word within an edit or two of a country name counts when it is long
+    enough that nothing ordinary looks like it ("thialand", not "woman").
+    """
     low = text.lower()
     found = []
     taken = [False] * len(low)
@@ -1747,9 +1808,77 @@ def _country_mentions(text: str) -> list:
             if boundary_ok and not any(taken[i:j]):
                 for k in range(i, j):
                     taken[k] = True
-                found.append((i, iso, demonym))
+                found.append((i, j, iso, demonym))
             start = j
+    # Cities and misspellings, same boundary rule.
+    for word, iso in sorted(_TYPOS.items(), key=lambda x: -len(x[0])):
+        start = 0
+        while True:
+            i = low.find(word, start)
+            if i < 0:
+                break
+            j = i + len(word)
+            ok = (i == 0 or not low[i - 1].isalpha()) and (j >= len(low) or not low[j].isalpha())
+            if ok and not any(taken[i:j]):
+                for k in range(i, j):
+                    taken[k] = True
+                found.append((i, j, iso, False))
+            start = j
+    # Uppercase codes in the original text.
+    try:
+        from .registry import load_registry
+        alpha3 = {e["alpha_3"] for e in load_registry("countries")["entries"]}
+    except Exception:  # noqa: BLE001
+        alpha3 = set()
+    for m in _re.finditer(r"(?<![A-Za-z])([A-Z]{2,3})(?![A-Za-z])", text):
+        tok = m.group(1)
+        i, j = m.start(1), m.end(1)
+        if any(taken[i:j]) or tok in _NOT_A_CODE:
+            continue
+        iso = _ISO2.get(tok) if len(tok) == 2 else (tok if tok in alpha3 else None)
+        if iso:
+            for k in range(i, j):
+                taken[k] = True
+            found.append((i, j, iso, False))
+    # A long word one edit away from a country name.
+    if len(found) < 2:
+        import difflib
+        names = {}
+        for iso, al in _ALIASES.items():
+            for a in al:
+                if a.isascii() and len(a) >= 6 and " " not in a:
+                    names[a] = iso
+        for m in _re.finditer(r"[a-z]{6,}", low):
+            i, j = m.start(), m.end()
+            if any(taken[i:j]):
+                continue
+            close = difflib.get_close_matches(m.group(0), list(names), n=1, cutoff=0.88)
+            if close:
+                for k in range(i, j):
+                    taken[k] = True
+                found.append((i, j, names[close[0]], False))
     return sorted(found)
+
+
+def _country_mentions(text: str) -> list:
+    """[(position, ISO3, is_demonym)], the span list without its end."""
+    return [(i, iso, dem) for i, _j, iso, dem in _country_spans(text)]
+
+
+_RESIDENCE_RE = _re.compile(
+    r"(?:live|living|based|resident|residing|residents|settled|working|work)"
+    r"\s+(?:in|of|at)\s+(?:the\s+)?$")
+_RESIDENCE_ZH = ("住在", "居住在", "定居", "常住", "在")
+
+
+def _residence_at(q: str, low: str, pos: int) -> bool:
+    """"I live in Dubai", "based in Singapore", 住在新加坡: where the
+    traveller lives, which is neither the passport nor the trip."""
+    before = low[max(0, pos - 24):pos]
+    if _RESIDENCE_RE.search(before):
+        return True
+    zb = q[max(0, pos - 3):pos]
+    return any(zb.endswith(m) for m in ("住在", "居住在", "定居", "常住"))
 
 
 # What single fact is the question really after? Detected from plain words so
@@ -1802,17 +1931,31 @@ _PASSPORT_AFTER_RE = _re.compile(
     r"|travell?ers?|tourists?|residents?|visitors?|holders?)\b")
 
 
-def _marks_nationality(q: str, low: str, pos: int, demonym: bool) -> bool:
+_ZH_NATIONAL_SUFFIX = ("人", "公民", "护照", "護照", "居民", "国籍", "國籍", "籍",
+                       "同胞", "游客", "遊客", "旅客")
+
+
+def _marks_nationality(q: str, low: str, pos: int, demonym: bool,
+                       end: int | None = None) -> bool:
     """Whether the country mentioned at pos is the traveller's own.
 
     English says it several ways: a demonym ("Chinese", "Indians"), "from
     X", "issued by X", "with a / hold a / for X passport", "X citizens",
-    "X applicants". Chinese says X护照 or 持X. A demonym that names the
-    destination's paperwork ("Australian visa") is not the traveller."""
+    "X applicants". Chinese says X护照, 持X, X人, X公民, 内地居民. A demonym
+    that names the destination's paperwork ("Australian visa") is not the
+    traveller."""
     before = low[max(0, pos - 12):pos]
     after = low[pos:pos + 48]
     if _DESTINATION_HINT_RE.match(after):
         return False
+    if end is not None:
+        tail = q[end:end + 3]
+        if any(tail.startswith(sfx) for sfx in _ZH_NATIONAL_SUFFIX):
+            # 日本人去中国: the suffix makes the country the traveller,
+            # unless a destination marker sits right before it (去日本人多吗
+            # is not a nationality, but nobody writes that).
+            if q[max(0, pos - 1):pos] not in ("去", "到", "赴", "往", "飞", "飛"):
+                return True
     if demonym:
         return True
     seg = q[pos:pos + 8]
@@ -1920,7 +2063,17 @@ def _deterministic_route(question: str) -> dict | None:
     name two places. Instant; no model call."""
     q = str(question or "").strip()
     low = q.lower()
-    mentions = _country_mentions(q)
+    spans = _country_spans(q)
+    # Where the traveller lives is neither the passport nor the trip.
+    residence = None
+    kept = []
+    for i, j, iso, dem in spans:
+        if _residence_at(q, low, i) and not dem:
+            residence = residence or iso
+        else:
+            kept.append((i, j, iso, dem))
+    spans = kept
+    mentions = [(i, iso, dem) for i, _j, iso, dem in spans]
     isos = []
     for _pos, iso, _d in mentions:
         if iso not in isos:
@@ -1930,12 +2083,12 @@ def _deterministic_route(question: str) -> dict | None:
     doc_named = _doc_from_text(q, low)
     nat = dest = None
     # Nationality: a demonym ("Chinese passport", "Indians"), "with a X
-    # passport", "from X", "for X citizens", X护照 ("中国护照"), or the
+    # passport", "from X", "for X citizens", X护照 ("中国护照"), X人, or the
     # country standing right before a named non-passport document
     # (香港签证身份书). A demonym on the destination's paperwork
     # ("Australian visa for Chinese applicants") is not the traveller.
-    for pos, iso, demonym in mentions:
-        if _marks_nationality(q, low, pos, demonym):
+    for pos, end, iso, demonym in spans:
+        if _marks_nationality(q, low, pos, demonym, end):
             nat = iso
             break
     if nat is None and doc_named and doc_named != "ordinary_passport":
@@ -1970,8 +2123,10 @@ def _deterministic_route(question: str) -> dict | None:
         if iso == nat or iso in transit:
             continue
         before = low[max(0, pos - 10):pos]
-        if any(w in before for w in (" to ", "to ", "visit", " in ", "going", "travel")) \
-                or q[max(0, pos - 1):pos] in ("去", "到", "赴", "往"):
+        if any(w in before for w in (" to ", "to ", "visit", " in ", "going", "travel",
+                                     "fly", "→", "->", "trip")) \
+                or q[max(0, pos - 1):pos] in ("去", "到", "赴", "往", "飞", "飛", "回") \
+                or q[max(0, pos - 2):pos] in ("前往", "飞往", "飛往", "到达", "抵达"):
             dest = iso
             break
     nat_marked, dest_marked = nat is not None, dest is not None
@@ -2016,6 +2171,7 @@ def _deterministic_route(question: str) -> dict | None:
             "travel_purpose": purpose, "travel_document_type": doc,
             "transit_countries": transit[:5], "confident": confident,
             "arrival_date": _extract_arrival(q),
+            "residence": residence if residence not in (nat, dest) else None,
             "focus": _question_focus(q), "read_by": "deterministic"}
 
 
