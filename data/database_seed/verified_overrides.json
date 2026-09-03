@@ -685,7 +685,7 @@
   "verified_at": "2026-09-03",
   "verified_by": "Ellis source audit (adjudication)",
   "source_url": "https://www.imigrasi.go.id/wna/daftar-visa-indonesia/B1?lang=en-US",
-  "note": "Duplicate of the ordinary_passport|CHN->IDN row - same answer. Tiongkok is on the VoA subject list; B1 VoA is IDR 500,000 for 30 days, extendable once. Worth de-duplicating 'ordinary' and 'ordinary_passport' in the document-type vocabulary so the two rows cannot drift apart. | Official page read and adversarially verified 2026-09-03: Chinese ordinary passport holders visiting Indonesia for tourism need a Visa on Arrival (B1), obtainable as an e-VoA online at evisa.imigrasi.go.id or at the border, costing IDR 500,000 for a 30-day stay extendable once by 30 days. This is stated on the Directorate General of Immigration's B1 visa p | quote: The B1 visa is a visa on arrival for single entry to Indonesia. ... You can stay in Indonesia for up to 30 days, starting from the arrival date. You can extend this stay permit one time for another 30 days. ... Visa B1 cost IDR 500,000 (for 30 days)",
+  "note": "Duplicate of the ordinary_passport|CHN->IDN row - same answer. Tiongkok is on the VoA subject list; B1 VoA is IDR 500,000 for 30 days, extendable once. Worth de-duplicating 'ordinary' and 'ordinary_passport' in the document-type vocabulary so the two rows cannot drift apart. | Official page read and adversarially verified 2026-09-03: Chinese ordinary passport holders visiting Indonesia for tourism | 2026-09-03: the advance visit visas are priced from the C1 and D1 pages of imigrasi.go.id.",
   "fields": {
    "requirement_detail": "evisa_on_arrival",
    "government_fee": {
@@ -716,15 +716,26 @@
      "notes": "Extendable once for a further 30 days, 60 total."
     },
     {
-     "type": "Advance visit visa (C1 single / D1 multiple)",
-     "entry": "single or multiple",
-     "validity": "as granted",
+     "type": "C1 visit visa applied in advance (single entry, up to 60 days)",
+     "entry": "single",
+     "validity": "Up to 90 days from issue to enter",
      "max_stay_days": 60,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 1000000,
+      "currency": "IDR"
      },
-     "notes": "The advance-application alternative to the visa on arrival."
+     "notes": "Applied for online through a sponsor at evisa.imigrasi.go.id. Extendable in Indonesia up to 180 days in total."
+    },
+    {
+     "type": "D1 multiple-entry visitor visa (1 year)",
+     "entry": "multiple",
+     "validity": "1 year",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": 3000000,
+      "currency": "IDR"
+     },
+     "notes": "Also issued for 2 years (IDR 5,000,000) and 5 years (IDR 10,000,000). Each stay up to 60 days, extendable up to 180 days."
     }
    ],
    "disposition": "VISA_ON_ARRIVAL",
@@ -763,6 +774,16 @@
      "url": "https://www.imigrasi.go.id/faq/visa?lang=en-US",
      "quote": "85. Thailand; 86. Timor Leste; 87. China; 88. Tunisia; 89. Türkiye; ... VOA applications are submitted by Foreigners at certain Immigration Checkpoints (TPI), with the following requirements: 1. A valid passport of the nationality and valid for at least six months, 2. Return ticket or return ticket ",
      "authority": ""
+    },
+    {
+     "url": "https://www.imigrasi.go.id/wna/daftar-visa-indonesia/C1?lang=en-US",
+     "quote": "Visa C1 cost IDR 1,000,000",
+     "authority": "Directorate General of Immigration"
+    },
+    {
+     "url": "https://www.imigrasi.go.id/wna/daftar-visa-indonesia/D1?lang=en-US",
+     "quote": "1 year visa cost IDR 3,000,000 2 years visa cost IDR 5,000,000 5 years visa cost IDR 10,000,000. You can stay in Indonesia for up to 60 days, starting from the arrival date.",
+     "authority": "Directorate General of Immigration"
     }
    ]
   }
@@ -53117,7 +53138,7 @@
    "application_channel": "not_required",
    "application_channel_detail": "No visa application is needed, the US$10 tourist card tax is included in airline tickets issued outside the Dominican Republic (or bought at the airport / land and sea entry points), so just arrive with a valid passport.",
    "government_fee": {
-    "amount": 10.0,
+    "amount": 0,
     "currency": "USD"
    },
    "required_documents": [
@@ -53126,10 +53147,9 @@
     "Free electronic entry and exit form (e-ticket, eticket.migracion.gob.do) completed before travel, mandatory for all foreign and Dominican passengers on commerci"
    ],
    "exceptions": [
-    "Tourist Card is valid for tourism purposes only, foreigners entering for business purposes must apply for a single or multiple Business Visa at a Dominican consulate abroad",
+    "Entry is with a tourist card (USD 10), which is included in the price of air tickets, so arrivals by air pay nothing extra. Arrivals by sea or land pay it at the port of entry.",
     "Legal basis is Decree 691-07 (18 Dec 2007) and Law 199-67, nationals of countries on the DGII visa-required list (e.g. Haiti, China, Cuba, India, Philippines, Venezuela) must obtain a visa instead, the United States is n",
     "Passport normally with minimum validity of six months, from 1 Dec 2024 to 31 Dec 2026 US nationals entering exclusively for tourism may enter with a valid, in-force passport without the six-month rule (godominicanrepubli",
-    "Tourist Card tax of US$10.00 (DGII page), included in air tickets issued outside the Dominican Republic",
     "Mandatory free e-ticket digital entry and exit form for all commercial-flight passengers",
     "Maximum stay 30 days, staying beyond 30 days incurs an additional fee on departure, extension available from the Direccion General de Migracion"
    ],
@@ -53623,7 +53643,7 @@
   "verified_at": "2026-09-03",
   "verified_by": "Ellis source audit (official page, adversarially verified)",
   "source_url": "https://overseas.mofa.go.kr/cn-shanghai-ko/brd/m_535/view.do?seq=1290604",
-  "note": "Official page read and adversarially verified 2026-09-03: Chinese ordinary passport holders travelling to Korea for business need a visa: the Consulate General of the Republic of Korea in Shanghai's visa guidance (PDF dated 2026-09-02, attached at overseas.mofa.go.kr/cn-shanghai-ko/brd/m_535/view.do?seq=1290604) lists the 단기상용 C-3-4 single-entry visa (stay | quote: (5) 단기상용 (C-3-4) 【체류기간 90일 이하, 유효기간 3개월의 단수사증】 ... 국내 공·사 기관의 초청으로 입국하여 국내업체와 구매계약, 시장조사, 상담 등의 활동을 하려는 사람 ... 4. 사증심사 수수료 (단위: 인민폐) 단기사증 (체류기간 90일 이내) 280 140 120 ◦ 위 기준은 2017.7.1부터 중국인에 대한 사증심사 수수료이며 ... 5일 이내 초청(C-3-1), 의료관광(C-3-3), 상용(C-3-4), 유학 및 어학연수(D-2, D-4)",
+  "note": "Official page read and adversarially verified 2026-09-03: Chinese ordinary passport holders travelling to Korea for business need a visa: the Consulate General of the Republic of Korea in Shanghai's visa guidance (PDF dated 2026-09-02, attached at overseas.mofa.go.kr/cn-shanghai-ko/brd/m_535/view.do?seq=1290604) lists the 단기상용 C-3-4 single-entry visa (stay | quote: (5) 단기상용 (C-3-4) 【체류기간 90일 이하, 유효기간 3개월의 단수사증】 ... 국내 공·사 기관의 초청으로 입국하여 국내업체와 구매계약, 시장조사, 상담 등의 활동을 하려는 사람 ... 4. 사증심사 수수료 (단위: 인민폐) | 2026-09-03: product fees from the consulate's visa fee table (PDF of 2 September 2026): single 280, double 490, multiple 630 CNY.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
@@ -53633,7 +53653,7 @@
    "application_channel": "visa_center",
    "application_channel_detail": "Holders of Chinese ordinary passports lodge the C-3-4 application at the Korea Visa Application Center (Shanghai Center, 99 Xianxia Road, Changning District, tel 400-8133-666, www.visaforkorea-sh.com) or through a consulate-designated agency/travel agency, at the Korean mission whose jurisdiction covers the applicant's company location (not hukou), the 280 CNY consular fee plus 120 CNY center serv",
    "government_fee": {
-    "amount": 280.0,
+    "amount": 280,
     "currency": "CNY"
    },
    "required_documents": [
@@ -53664,12 +53684,74 @@
     "onward ticket / funds requirement for C-3-4",
     "arrival card"
    ],
-   "processing_time": "5 working days excluding the receipt date for 상용(C-3-4), longer if supplementary documents or verification are needed, e",
+   "processing_time": "5 working days for the C-3-4 business visa, excluding the receipt date. Express within 2 working days for an extra 140 CNY.",
    "corroborating_sources": [
     {
      "url": "https://www.immigration.go.kr/bbs/immigration/214/484963/download.do",
      "quote": "중국 단체관광객 한시 무사증 적용 대상은 전담여행사가 모객한 3인 이상의 단체관광객입니다. ... 해당 제도를 통해 입국하는 단체관광객은 15일 범위 내에서 무사증으로 국내 관광이 가능하며, 대한민국 전역을 여행할 수 있도록 허용됩니다. ※ 제주특별자치도는, 중국 국민에 대해서는 기존과 동일하게 무사증으로 30일간 개별관광과 단체관광이 모두 허용됩니다.",
      "authority": ""
+    },
+    {
+     "url": "https://overseas.mofa.go.kr/cn-shanghai-ko/brd/m_535/down.do?brd_id=14559&seq=1290604&data_tp=A&file_seq=1",
+     "quote": "단수사증 단기사증 (체류기간 90일 이내) 280 140 120 장기사증 (체류기간 91일 이상) 420 140 120 더블사증(2회 사용) 490 140 120 복수사증(2회 이상 사용) 630 280 120 (단위: 인민폐)",
+     "authority": "Consulate General of the Republic of Korea in Shanghai, visa guide dated 2026-09-02"
+    }
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry business C-2 (C-3-4)",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 280,
+      "currency": "CNY"
+     },
+     "notes": "Short-term visa for stays of up to 90 days. Express issue within 2 working days for an extra 140 CNY."
+    },
+    {
+     "type": "Double-entry business C-2 (C-3-4)",
+     "entry": "double",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 490,
+      "currency": "CNY"
+     },
+     "notes": "Two entries. The visa centre adds a handling fee of 120 CNY."
+    },
+    {
+     "type": "1-year multiple-entry business C-2 (C-3-4)",
+     "entry": "multiple",
+     "validity": "1 year",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 630,
+      "currency": "CNY"
+     },
+     "notes": "Multiple-entry fee is 630 CNY regardless of validity."
+    },
+    {
+     "type": "3-year multiple-entry business C-2 (C-3-4)",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 630,
+      "currency": "CNY"
+     },
+     "notes": "Multiple-entry fee is 630 CNY regardless of validity."
+    },
+    {
+     "type": "5-year multiple-entry business C-2 (C-3-4)",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 630,
+      "currency": "CNY"
+     },
+     "notes": "Multiple-entry fee is 630 CNY regardless of validity."
     }
    ]
   }
