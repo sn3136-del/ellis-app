@@ -1772,3 +1772,22 @@ def test_generated_battery_round_two_reads_paperwork_slang_codes_and_places():
     assert assistant.off_topic_reply("book me a flight shanghai to seoul tomorrow", "en") is not None
     assert assistant.off_topic_reply("帮我订机票去东京", "zh") is not None
     assert assistant.off_topic_reply("flight from shanghai to seoul, do I need a visa", "en") is None
+
+
+def test_round_three_authorisations_documents_and_terse_purposes():
+    from app.visa_snapshot.kimi_primary import _deterministic_route as read
+    r = read("esta singapore")
+    assert (r["nationality"], r["destination"]) == ("SGP", "USA")
+    r = read("CN PH work")
+    assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("CHN", "PHL", "work")
+    r = read("因公普通护照去越南免签吗")
+    assert (r["nationality"], r["destination"], r["travel_document_type"]) == ("CHN", "VNM", "official_ordinary_passport")
+    r = read("DI holder can go Thailand without visa?")
+    assert (r["nationality"], r["destination"], r["travel_document_type"]) == ("HKG", "THA", "identity_certificate")
+    r = read("german passport, brunei for 3 days")
+    assert (r["nationality"], r["destination"]) == ("DEU", "BRN")
+    r = read("which passport should I use for Canada, BNO or HKSAR? both eTA?")
+    assert (r["nationality"], r["destination"]) == ("HKG", "CAN")
+    r = read("Indian passport holder, what's the visa for a 6 month work assignment in the US")
+    assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("IND", "USA", "work")
+    assert read("schengen visa 中國護照可唔可以喺香港領事館申請?") is None

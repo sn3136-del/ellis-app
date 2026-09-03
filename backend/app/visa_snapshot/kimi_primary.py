@@ -1655,6 +1655,7 @@ _ALIASES = {
     "NPL": ("nepal", "尼泊尔", "尼泊爾", "nepali", "nepalese"),
     "MDV": ("maldives", "马尔代夫", "馬爾地夫", "maldivian"),
     "PAK": ("pakistan", "巴基斯坦", "pakistani"),
+    "BRN": ("brunei", "文莱", "汶萊", "bruneian"),
     "BGD": ("bangladesh", "孟加拉", "bangladeshi"),
     "MNG": ("mongolia", "蒙古", "mongolian"),
     "KAZ": ("kazakhstan", "哈萨克斯坦", "哈薩克", "kazakh"),
@@ -1718,7 +1719,8 @@ _PURPOSE_WORDS = (
     ("study", ("study", "student", "留学", "留學", "读书", "讀書", "上学",
                "上學", "念书", "唸書", "university", "school")),
     ("work", ("work visa", "work permit", "for work", "to work", "working", "job",
-              "employment", "employed", "工作", "打工", "就业", "就業", "上班")),
+              "employment", "employed", "work assignment", "assignment", "subclass 482",
+              "工作", "打工", "就业", "就業", "上班", "做嘢", "返工")),
     ("family_visit", ("visit my family", "visiting my family", "visit family",
                       "visiting family", "see my family", "family visit",
                       "relatives", "探亲", "探親", "visit my", "親友", "亲友",
@@ -2068,7 +2070,8 @@ def _doc_from_text(q: str, low: str) -> str | None:
     parse and the follow-up path so the vocabulary can never drift. Order
     matters: 公务普通护照 must win before 公务护照, and 旅行证 must not fire on
     the generic word 旅行证件."""
-    if "公务普通护照" in q or "公務普通護照" in q or "official ordinary passport" in low:
+    if "公务普通护照" in q or "公務普通護照" in q or "official ordinary passport" in low \
+            or "因公普通护照" in q or "因公普通護照" in q:
         return "official_ordinary_passport"
     if "diplomatic" in low or "外交护照" in q or "外交護照" in q:
         return "diplomatic_passport"
@@ -2081,7 +2084,8 @@ def _doc_from_text(q: str, low: str) -> str | None:
         return "temporary_passport"
     if "emergency passport" in low or "紧急护照" in q or "緊急護照" in q:
         return "emergency_passport"
-    if "签证身份书" in q or "簽證身份書" in q or "document of identity" in low:
+    if "签证身份书" in q or "簽證身份書" in q or "document of identity" in low \
+            or _re.search(r"\bd\.?i\.? holders?\b", low):
         return "identity_certificate"
     if "身份证明书" in q or "身份證明書" in q:
         return "identity_certificate"
@@ -2170,6 +2174,24 @@ def _deterministic_route(question: str) -> dict | None:
     for _pos, iso, _d in mentions:
         if iso not in isos:
             isos.append(iso)
+    implied_dest = None
+    if len(isos) == 1:
+        # "esta singapore", "k-eta for chinese", "evisitor": the authorisation
+        # names the destination that issues it.
+        implied = None
+        if _re.search(r"\besta\b", low):
+            implied = "USA"
+        elif _re.search(r"\bk-?eta\b", low):
+            implied = "KOR"
+        elif "evisitor" in low:
+            implied = "AUS"
+        elif "visit japan web" in low:
+            implied = "JPN"
+        if implied and implied != isos[0]:
+            spans = spans + [(len(q), len(q), implied, False)]
+            mentions = mentions + [(len(q), implied, False)]
+            isos = isos + [implied]
+            implied_dest = implied
     if len(isos) == 1 and len(spans) >= 2:
         # "Chinese passport going to China", 台灣護照回台灣: the one country
         # is named twice, once as the passport and once as the trip. That
@@ -2189,10 +2211,22 @@ def _deterministic_route(question: str) -> dict | None:
                     "transit_countries": [], "confident": True,
                     "arrival_date": _extract_arrival(q), "residence": None,
                     "focus": _question_focus(q), "read_by": "deterministic"}
+    doc_named = _doc_from_text(q, low)
+    nat = None
+    dest = implied_dest
+    implied_nat = None
+    if doc_named == "identity_certificate":
+        implied_nat = "HKG"      # a Hong Kong Document of Identity
+    elif doc_named in ("official_ordinary_passport", "prc_travel_document"):
+        implied_nat = "CHN"      # 因公普通护照, 旅行证: PRC documents
+    if implied_nat and implied_nat not in isos:
+        # The document names its issuer even when the country is not written.
+        isos = [implied_nat] + isos
+        spans = [(0, 0, implied_nat, False)] + spans
+        mentions = [(0, implied_nat, False)] + mentions
+        nat = implied_nat
     if len(isos) < 2:
         return None
-    doc_named = _doc_from_text(q, low)
-    nat = dest = None
     # Nationality: a demonym ("Chinese passport", "Indians"), "with a X
     # passport", "from X", "for X citizens", X护照 ("中国护照"), X人, or the
     # country standing right before a named non-passport document
@@ -2254,9 +2288,11 @@ def _deterministic_route(question: str) -> dict | None:
     for pos, iso, _d in mentions:
         if iso == nat or iso in transit:
             continue
+        if (pos, iso) in placed:
+            continue
         before = low[max(0, pos - 10):pos]
         if any(w in before for w in (" to ", "to ", "visit", " in ", "going", "travel",
-                                     "fly", "→", "->", "trip")) \
+                                     "fly", "→", "->", "trip", " for ")) \
                 or q[max(0, pos - 1):pos] in ("去", "到", "赴", "往", "飞", "飛", "回") \
                 or q[max(0, pos - 2):pos] in ("前往", "飞往", "飛往", "到达", "抵达"):
             dest = iso
@@ -2273,18 +2309,21 @@ def _deterministic_route(question: str) -> dict | None:
         if nat is None:
             return None
     if dest is None:
-        dest = next((i for i in isos if i != nat and i not in transit), None)
+        dest = next((i for i in isos if i != nat and i not in transit and any(
+            (p, ii) not in placed for p, _e, ii, _d in spans if ii == i)), None)
     if dest is None and transit:
         # A pure airside question ("只在新加坡转机不出机场"): the stopover IS
         # the place being asked about.
         dest = transit[0]
     if dest is None:
-        dest = next(i for i in isos if i != nat)
+        return None          # every other place is an office or paperwork
     purpose = "tourism"
     for name, words in _PURPOSE_WORDS:
         if any(w in low or w in q for w in words):
             purpose = name
             break
+    if purpose == "tourism" and len(low.split()) <= 4 and _re.search(r"\bwork\b", low):
+        purpose = "work"          # "CN PH work": a terse query says the purpose in one word
     if purpose == "transit" and transit and dest not in transit:
         # "经迪拜转机去法国" asks about the whole trip: the stopover rides in
         # transit_countries and is answered by the transit rule; the
