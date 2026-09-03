@@ -52319,5 +52319,131 @@
     }
    ]
   }
+ },
+ {
+  "route": {
+   "nationality": "MAC",
+   "destination": "JPN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+  "note": "MOFA Japan, Exemption of Visa (Short-Term Stay), page dated 1 September 2025, lists Macao among the 74 countries and regions with reciprocal visa exemption | quote: (Note 6) For citizens of Macao, visas are not required only for holders of SAR passport issued by the Macao SAR of the People's Republic of China. | quote: The period of stay granted upon landing permission will be 90 days for other countries and regions.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free short-term stay (Macao SAR passport)",
+   "permitted_stay": "90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is applied for. Landing permission for a short-term stay is granted at the port of entry to holders of a Macao SAR passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": "JPY"
+   },
+   "exceptions": [
+    "The exemption applies only to holders of the SAR passport issued by the Macao SAR. Holders of other Macao travel documents need a visa in advance.",
+    "Short-term stays only: tourism, visiting relatives, business meetings. Paid work or long-term study needs the relevant visa."
+   ],
+   "required_documents": [
+    "Macao SAR passport",
+    "Return or onward ticket"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+     "quote": "Macao (Note 6)",
+     "authority": "Ministry of Foreign Affairs of Japan"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MAC",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-03",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://s.nia.gov.cn/mps/bszy/wlgaot/sqgowl/201903/t20190313_1002.html",
+  "note": "Mainland residents do not get a Macao visa; they use the Exit-Entry Permit for Travelling to and from Hong Kong and Macao (EEP) plus a Macao endorsement, priced by China's National Immigration Administration service guide for the permit and its endorsements (the same guide covers Hong Kong and Macao endorsements). Single-entry endorsements listed; double and multiple-entry Macao endorsements are not listed here pending a read of the Macao-specific schedule. Verified 2026-09-03.",
+  "fields": {
+   "disposition": "CONDITIONAL",
+   "visa_category": "Exit-Entry Permit endorsement to Macao (not a passport route)",
+   "application_channel": "in_person",
+   "application_channel_detail": "Apply in person at a public security exit-entry administration office (公安机关出入境管理部门); fingerprints are submitted or verified. Endorsement-only renewals on a valid EEP may be delegated or done at self-service kiosks; online application is limited to renewal/replacement of a previously held document for eligible residents of 20 pilot cities.",
+   "official_portal_url": "https://s.nia.gov.cn/",
+   "confidence": "medium",
+   "government_fee": {
+    "amount": 15,
+    "currency": "CNY"
+   },
+   "permitted_stay_days": 7,
+   "visa_products": [
+    {
+     "type": "Exit-Entry Permit for Travelling to and from Hong Kong and Macao (EEP booklet/card)",
+     "entry": "multiple",
+     "validity": "10 years (5 years for applicants under 16)",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 60,
+      "currency": "CNY"
+     },
+     "notes": "Carrier document; the permitted stay is set by the endorsement held. Issued within 7 working days (up to 20 in exceptional or non-resident cases)."
+    },
+    {
+     "type": "Individual visit (G) endorsement to Macao - 3-month single",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 7,
+     "fee": {
+      "amount": 15,
+      "currency": "CNY"
+     },
+     "notes": null
+    },
+    {
+     "type": "Individual visit (G) endorsement to Macao - 1-year single",
+     "entry": "single",
+     "validity": "1 year",
+     "max_stay_days": 7,
+     "fee": {
+      "amount": 15,
+      "currency": "CNY"
+     },
+     "notes": null
+    },
+    {
+     "type": "Group tour (L) endorsement to Macao - 3-month single",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 7,
+     "fee": {
+      "amount": 15,
+      "currency": "CNY"
+     },
+     "notes": "In NIA-specified special cases a 3-month single endorsement with a 3-day maximum stay is issued instead"
+    },
+    {
+     "type": "Group tour (L) endorsement to Macao - 1-year single",
+     "entry": "single",
+     "validity": "1 year",
+     "max_stay_days": 7,
+     "fee": {
+      "amount": 15,
+      "currency": "CNY"
+     },
+     "notes": null
+    }
+   ],
+   "exceptions": [
+    "Applications must be lodged in person with the exit-entry administration of a public security organ at or above county level; minors under 16 apply accompanied by a guardian, and a holder of a valid EEP may delegate an endorsement-only application at the office that handled the original application.",
+    "Individual visit (G) tourism endorsements are available only to residents of the 59 cities in 31 provinces opened for individual travel (or non-resident applicants meeting NIA conditions); residents of other cities use group tour (L) endorsements."
+   ],
+   "required_documents": "China Citizen Exit-Entry Document Application Form (中国公民出入境证件申请表); recent photo meeting the official exit-entry photo guidelines; PRC resident ID card in original (household register accepted for under-16s, military ID for service members); fingerprints collected at the counter; valid Exit-Entry Permit (EEP) when applying for an endorsement only. No purpose-related materials are required for individual (G) or group (L) tourism endorsements; participants in a Hengqin-Macao tour show the tour enrollment materials.",
+   "processing_time": "EEP and endorsement applications are issued within 7 working days of acceptance (extendable to 20 working days in exceptional cases; 20 days for applications lodged outside the place of household registration)"
+  }
  }
 ]
