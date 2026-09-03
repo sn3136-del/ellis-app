@@ -1669,9 +1669,9 @@ _ALIASES = {
 # country rule still reads it).
 _CITIES = {
     "JPN": ("tokyo", "osaka", "kyoto", "东京", "東京", "大阪", "京都"),
-    "CHN": ("beijing", "shanghai", "guangzhou", "shenzhen", "chengdu", "hangzhou", "北京", "上海", "广州", "深圳", "成都"),
+    "CHN": ("beijing", "shanghai", "guangzhou", "shenzhen", "chengdu", "hangzhou", "hainan", "sanya", "haikou", "北京", "上海", "广州", "深圳", "成都", "海南", "三亚", "三亞", "海口"),
     "HKG": (), "TWN": ("taipei", "台北"),
-    "KOR": ("seoul", "busan", "首尔", "首爾", "釜山"),
+    "KOR": ("seoul", "busan", "jeju", "首尔", "首爾", "釜山", "济州", "濟州"),
     "THA": ("bangkok", "phuket", "chiang mai", "曼谷", "普吉"),
     "SGP": (), "MYS": ("kuala lumpur", "吉隆坡"),
     "VNM": ("hanoi", "ho chi minh", "saigon", "da nang", "河内", "胡志明", "岘港"),
@@ -1722,8 +1722,14 @@ def _country_mentions(text: str) -> list:
                  for n in (e.get("name"), e.get("common_name")) if n and len(n) > 2]
     except Exception:  # noqa: BLE001 - aliases alone still work
         names = []
-    aliases = [(iso, a, (i == len(al) - 1 and a.isascii()))
-               for iso, al in _ALIASES.items() for i, a in enumerate(al)]
+    # Demonyms are the ascii aliases listed after the Chinese names
+    # ("british", "english"; "chinese"). Marking only the last one left
+    # "British passport" with no nationality, and the route inverted.
+    aliases = []
+    for iso, al in _ALIASES.items():
+        last_cjk = max((i for i, a in enumerate(al) if not a.isascii()), default=-1)
+        for i, a in enumerate(al):
+            aliases.append((iso, a, a.isascii() and i > last_cjk))
     cities = [(iso, c, False) for iso, cs in _CITIES.items() for c in cs]
     for iso, alias, demonym in sorted(names + aliases + cities, key=lambda x: -len(x[1])):
         start = 0
@@ -1894,10 +1900,25 @@ def _deterministic_route(question: str) -> dict | None:
                 k = seg.find("護照")
             passport_after = k > 0 and not any(
                 ch in seg[:k] for ch in "，,。.、;； ")
+            # "UK passport", "Indian citizens", "Hong Kong SAR passport",
+            # "have a / hold a / with a Chinese passport": the passport word
+            # within three words after the country, or a holding verb right
+            # before it. Only the Chinese 护照 form was read before, so
+            # "144-hour transit for China, I have a UK passport" answered
+            # for a Chinese traveller going to Britain.
+            after = low[pos:pos + 48]
+            en_passport_after = bool(_re.match(
+                r"(?:[a-z.'-]+\s+){1,3}(?:sar\s+)?"
+                r"(?:passports?|citizens?|citizenship|nationals?|nationality)\b",
+                after))
+            holder_before = any(m in before for m in (
+                "have a ", "have an ", "has a ", "hold a ", "holds a ",
+                "holding a ", "holding an ", "with a ", "with an ", "on a ",
+                "on an ", "using a ", "using an ", "i am ", "i'm ", "we are "))
             if "from " in before or before.rstrip().endswith("from") \
                     or "issued by" in before \
                     or "持" in q[max(0, pos - 3):pos] \
-                    or passport_after:
+                    or passport_after or en_passport_after or holder_before:
                 nat = iso
                 break
     if nat is None and doc_named and doc_named != "ordinary_passport":

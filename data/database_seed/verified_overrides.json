@@ -14661,10 +14661,10 @@
    "destination": "TZA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-03",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://visa.immigration.go.tz/guidelines",
-  "note": "Headline fee and stay are right, but both multiple-entry products are invented. Tanzania publishes a single Multiple Entry Visa at USD 100 with up to 12 months validity. There is no 6-month tier at USD 100 and no 12-month tier at USD 150. Separately, Hong Kong SAR does not appear on either the visa- | quote: The fee for Ordinary Visa is 50 USD and has a validity of up to 90 days; The fee",
+  "note": "Headline fee and stay are right, but both multiple-entry products are invented. Tanzania publishes a single Multiple Entry Visa at USD 100 with up to 12 months validity. There is no 6-month tier at USD 100 and no 12-month tier at USD 150. Separately, Hong Kong SAR does not appear on either the visa- | quote: The fee for Ordinary Visa is 50 USD and has a validity of up to 90 days; The fee | 2026-09-03: both products are eVisas lodged on the same portal, channel set to online.",
   "fields": {
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "government_fee": {
@@ -14674,7 +14674,7 @@
    "permitted_stay_days": 90,
    "visa_products": [
     {
-     "type": "Ordinary Visa (single entry, tourism)",
+     "type": "Ordinary Visa (single entry, tourism), applied online as an eVisa",
      "entry": "single",
      "validity": "Up to 90 days",
      "max_stay_days": 90,
@@ -14685,7 +14685,7 @@
      "notes": "Hong Kong SAR is not named on the visa-on-arrival list; apply online"
     },
     {
-     "type": "Multiple Entry Visa",
+     "type": "Multiple Entry Visa, applied online as an eVisa",
      "entry": "multiple",
      "validity": "Up to 12 months",
      "max_stay_days": 90,
@@ -14695,7 +14695,9 @@
      },
      "notes": "Maximum 3 consecutive months per visit; restricted categories only"
     }
-   ]
+   ],
+   "application_channel": "online_portal",
+   "application_channel_detail": "Hong Kong SAR passport holders are not on Tanzania's visa on arrival list. Apply online on the Immigration Department eVisa portal before travel."
   }
  },
  {
@@ -20971,10 +20973,10 @@
    "destination": "OMN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-09-03",
   "verified_by": "Ellis source audit (fee/validity verification)",
   "source_url": "https://evisa.rop.gov.om/types-of-visa",
-  "note": "All correct, and now fully source-backed. US nationals appear on Royal Oman Police 'List No. (1): Countries that can be entered without a tourist visa', and the eVisa portal implements that as visa subtype 26O 'Free Entry for 14 Days (Person from G1 Special Countries)' with a 14-day length of stay - | quote: [26A] Visa Name: Tourist Visit Visa 10D. Length of Stay 10 days. Use by Period 1",
+  "note": "All correct, and now fully source-backed. US nationals appear on Royal Oman Police 'List No. (1): Countries that can be entered without a tourist visa', and the eVisa portal implements that as visa subtype 26O 'Free Entry for 14 Days (Person from G1 Special Countries)' with a 14-day length of stay - | quote: [26A] Visa Name: Tourist Visit Visa 10D. Length of Stay 10 days. Use by Period 1 | 2026-09-03: the three paid products are eVisas on evisa.rop.gov.om, channel set to online.",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -20983,7 +20985,7 @@
    "permitted_stay_days": 14,
    "visa_products": [
     {
-     "type": "Tourist Visit Visa 10D (26A)",
+     "type": "Tourist Visit Visa 10D (26A) eVisa",
      "entry": "single",
      "validity": "Use by period 1 month from issue",
      "max_stay_days": 10,
@@ -20994,7 +20996,7 @@
      "notes": "Passport valid 6 months; overstay fine OMR 10 per day"
     },
     {
-     "type": "Tourist Visit Visa 30D (26B)",
+     "type": "Tourist Visit Visa 30D (26B) eVisa",
      "entry": "single",
      "validity": "Use by period 1 month from issue",
      "max_stay_days": 30,
@@ -21005,7 +21007,7 @@
      "notes": "Requires valid hotel booking and return ticket; cannot be converted to a work visa inside Oman"
     },
     {
-     "type": "Tourist Visit Visa 1YR ME (36B)",
+     "type": "Tourist Visit Visa 1YR ME (36B) eVisa",
      "entry": "multiple",
      "validity": "1 year",
      "max_stay_days": 30,
@@ -21026,7 +21028,9 @@
      },
      "notes": "For nationals of G1 Special countries, which includes the USA per ROP List No. (1)"
     }
-   ]
+   ],
+   "application_channel": "online_portal",
+   "application_channel_detail": "Tourist visas are applied for on the Royal Oman Police eVisa portal. Stays of up to 14 days need no application under List No. (1)."
   }
  },
  {

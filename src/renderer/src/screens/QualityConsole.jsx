@@ -504,6 +504,7 @@ function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
                    'Embassy Submission': t('ops.ch.embassy'),
                    'On-arrival Processing': t('ops.ch.arrival'),
                    'Agency Service': t('ops.m.agency'),
+                   'Government Office Submission': t('ops.ch.office'),
                    Other: t('ops.m.other') }
   const REQV = { 'Visa-free': t('ops.req.free'),
                  'Visa on Arrival': t('ops.req.voa'),
@@ -778,7 +779,7 @@ function AddRouteCard({ countries, t, onAdd, onManualAdd, adding, addMsg }) {
                   className="ops-in" style={sel}>
             {['tourism', 'business', 'family_visit', 'study', 'work',
               'transit', 'other'].map((v) => (
-              <option key={v} value={v}>{t('purpose.' + v)}</option>
+              <option key={v} value={v}>{t(PURPOSE_KEY[v] || 'purpose.' + v)}</option>
             ))}
           </select>
         </FieldLabel>
@@ -3041,6 +3042,7 @@ export default function QualityConsole() {
             'Embassy Submission': t('ops.ch.embassy'),
             'On-arrival Processing': t('ops.ch.arrival'),
             'Agency Service': t('ops.m.agency'),
+            'Government Office Submission': t('ops.ch.office'),
             Other: t('ops.m.other'),
           }[v] || v)
           const currentOf = (rec, field) => {

@@ -1540,3 +1540,106 @@ def test_cross_validation_binds_each_source_to_its_own_url():
     assert "corroborating_sources" not in tstation.FIELD_ORDER
     assert "corroborating_sources" not in tstation.REQUIRED_FIELDS
     assert set(tstation.field_status(row)) == set(tstation.FIELD_ORDER)
+
+
+def test_application_method_is_never_other_and_names_where_to_apply():
+    """Thirty-nine live records read "Other" on 2026-09-03: overrides wrote
+    "in_person" or "not_required" as the channel and the classifier gave up.
+    The channel sentence and the product's own kind decide instead, and a
+    conditional exemption has nothing to apply for."""
+    route = {"passport_nationality": "CHN", "destination_country": "HKG",
+             "travel_purpose": "tourism", "travel_document_type": "ordinary_passport"}
+
+    from app.visa_snapshot import tstation
+
+    def rows(g):
+        return tstation.records_for_route(route, g)
+
+    # An exit-entry office is a government counter, not an embassy.
+    g = {"disposition": "CONDITIONAL", "application_channel": "in_person",
+         "application_channel_detail": "Apply in person at a public security "
+                                       "exit-entry administration office.",
+         "visa_products": [{"type": "Exit-Entry Permit for Travelling to and from Hong Kong and Macao"},
+                           {"type": "Individual visit (G) endorsement to Hong Kong"}]}
+    out = rows(g)
+    assert [r["application_method"] for r in out] == ["Government Office Submission"] * 2
+    assert out[1]["visa_requirement_detail"] == "Paper Visa"
+
+    # China Travel Service is an appointed agent.
+    g = {"disposition": "CONDITIONAL", "application_channel": "in_person",
+         "application_channel_detail": "Applications are accepted in person by "
+                                       "China Travel Service (Hong Kong) Ltd.",
+         "visa_products": [{"type": "Mainland Travel Permit, 10-year"}]}
+    assert rows(g)[0]["application_method"] == "Agency Service"
+
+    # ESTA under a conditional verdict, channel "not_required", is filed online.
+    g = {"disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+         "application_channel": "not_required",
+         "application_channel_detail": "Apply yourself on the official CBP ESTA website.",
+         "visa_products": [{"type": "ESTA travel authorisation (Visa Waiver Program)"}]}
+    assert rows(g)[0]["application_method"] == "Online Application"
+
+    # A consular visa whose stale engine sentence still says "at the border".
+    g = {"disposition": "VISA_REQUIRED", "application_channel": "not_required",
+         "application_channel_detail": "No advance visa application is required, "
+                                       "admitted at the border.",
+         "visa_products": [{"type": "Visa consular (tercer grupo de ingreso)"}]}
+    assert rows(g)[0]["application_method"] == "Embassy Submission"
+
+    # A conditional exemption product is filed nowhere, and the checklist says so.
+    g = {"disposition": "CONDITIONAL", "application_channel": "in_person",
+         "application_channel_detail": "Apply at a Montenegrin diplomatic or consular mission.",
+         "visa_products": [{"type": "Single-entry short-stay visa (C)"},
+                           {"type": "Visa-free entry as an organised tourist group (PRC nationals)"}]}
+    sticker, group = rows(g)
+    assert sticker["application_method"] == "Embassy Submission"
+    assert group["visa_requirement_detail"] == "Conditional Visa-free"
+    assert group["application_method"] is None
+    assert tstation.field_status(group)["application_method"] == "not-applicable"
+    assert tstation.field_status(group)["visa_requirement_detail"] == "filled"
+
+    # An eVisa on arrival is applied for online, a paper one at the border.
+    g = {"disposition": "VISA_ON_ARRIVAL", "application_channel": "not_required",
+         "visa_products": [{"type": "Tourist eVisa"}, {"type": "Visa on arrival"}]}
+    e, paper = rows(g)
+    assert e["application_method"] == "Online Application"
+    assert paper["application_method"] == "On-arrival Processing"
+
+    # A recognised channel still governs a paper visa.
+    g = {"disposition": "VISA_REQUIRED", "application_channel": "visa_center",
+         "visa_products": [{"type": "Schengen short-stay visa (C)"}]}
+    assert rows(g)[0]["application_method"] == "Agency Service"
+
+    # Nothing, on any path, says Other.
+    for g in ({"disposition": "VISA_EXEMPT", "application_channel": "not_required"},
+              {"disposition": "CONDITIONAL", "application_channel": "something_new"},
+              {"disposition": "VISA_REQUIRED", "application_channel": "in_person"},
+              {"disposition": "VISA_REQUIRED", "application_channel": "in_person",
+               "visa_products": [{"type": "Tourist visa"}]}):
+        for r in rows(g):
+            assert r["application_method"] != "Other", g
+
+
+def test_the_evaluation_report_questions_read_as_the_right_route():
+    """Trip.com's 2026-08-31 report asked these in its own words. "Indian
+    citizens" and "I have a UK passport" carry the nationality in English,
+    and Hainan is a place in China, so none of them may ask for the passport
+    or invert the route."""
+    from app.visa_snapshot.kimi_primary import _deterministic_route as read
+    r = read("Is visa-free entry to Hainan applicable for Indian citizens?")
+    assert (r["nationality"], r["destination"], r["confident"]) == ("IND", "CHN", True)
+    r = read("144-hour transit visa-free policy for China, I have a UK passport")
+    assert (r["nationality"], r["destination"]) == ("GBR", "CHN")
+    r = read("British passport holder going to Japan for a week")
+    assert (r["nationality"], r["destination"]) == ("GBR", "JPN")
+    r = read("Do Chinese nationals need a visa for Jeju?")
+    assert (r["nationality"], r["destination"]) == ("CHN", "KOR")
+    r = read("I hold a Hong Kong SAR passport, visiting Thailand")
+    assert (r["nationality"], r["destination"]) == ("HKG", "THA")
+    # A single country still reads as nothing, so the clarify path asks.
+    assert read("How to apply for an Australia ETA") is None
+    # The existing readings are untouched.
+    r = read("Can I go to Japan from China")
+    assert (r["nationality"], r["destination"]) == ("CHN", "JPN")
+    r = read("去希腊，中国护照")
+    assert (r["nationality"], r["destination"]) == ("CHN", "GRC")

@@ -61,7 +61,8 @@ FIELD_DESCRIPTIONS = {
     "visa_fee_amount": "Official visa fee amount (consular fee only)",
     "visa_fee_currency": "ISO 4217 currency code",
     "application_method": "Embassy Submission / Online Application / Agency "
-                          "Service / On-arrival Processing / Other",
+                          "Service / On-arrival Processing / Government "
+                          "Office Submission",
     "required_documents": "Core document checklist, comma separated",
     "consulate_district": "Consulate district divisions, if any",
     "entry_requirements": "Other entry requirements besides the visa",
@@ -118,7 +119,8 @@ def _method_from_product(g: dict) -> str | None:
     if not names.strip():
         return None
     if any(k in names for k in ("e-visa", "evisa", "electronic travel",
-                                "eta-", "e-ta", "online")):
+                                "eta-", "e-ta", "esta", "travel authoris",
+                                "travel authoriz", "online")):
         return "Online Application"
     if any(k in names for k in ("on arrival", "on-arrival", "voa")):
         return "On-arrival Processing"
@@ -127,13 +129,114 @@ def _method_from_product(g: dict) -> str | None:
     return None
 
 
+# Channel values that state there is nothing to apply for. They are not a
+# place, so they never become a method.
+_NO_CHANNEL = frozenset({
+    "not_required", "none", "n/a", "na", "not_applicable",
+    "no_application_required", "none_or_port_of_entry",
+})
+_AGENCY_RE = re.compile(
+    r"china travel service|authori[sz]ed agent|appointed agent|designated agent"
+    r"|accredited agent|travel agency|visa application cent(?:re|er)|visa cent(?:re|er)"
+    r"|\bvfs\b|bls international|tls ?contact|through an agent", re.I)
+_GOVERNMENT_OFFICE_RE = re.compile(
+    r"exit[- ]entry|exit and entry|public security|immigration (?:office|department"
+    r"|bureau)\b|service hall|police station", re.I)
+_MISSION_RE = re.compile(
+    r"embassy|consulate|consular|diplomatic (?:mission|or consular)"
+    r"|at (?:the|a) mission", re.I)
+_ONLINE_RE = re.compile(
+    r"online|portal|web ?site|\besta\b|e-?visa|electronic", re.I)
+_BORDER_RE = re.compile(
+    r"on arrival|upon arrival|at the border|port of entry|at the airport", re.I)
+
+
+def _method_from_detail(g: dict) -> str | None:
+    """Where to apply, read off the route's own description of its channel.
+
+    Overrides write "in_person" and "not_required" as the channel, which say
+    whether the traveller goes somewhere but not where. The sentence beside
+    it does: a public security exit-entry office, China Travel Service, a
+    Montenegrin mission, the CBP ESTA site. Thirty-nine live records read
+    "Other" because only the token was consulted."""
+    text = " ".join(str(g.get(k) or "") for k in (
+        "application_channel_detail", "submission_process"))
+    if not text.strip():
+        return None
+    if _AGENCY_RE.search(text):
+        return "Agency Service"
+    if _GOVERNMENT_OFFICE_RE.search(text):
+        return "Government Office Submission"
+    if _MISSION_RE.search(text):
+        return "Embassy Submission"
+    if _ONLINE_RE.search(text):
+        return "Online Application"
+    if _BORDER_RE.search(text):
+        return "On-arrival Processing"
+    return None
+
+
+_VISA_FREE_DETAILS = frozenset({
+    "Unconditional Visa-free", "Conditional Visa-free", "Transit Visa-free",
+})
+_IN_PERSON_METHODS = frozenset({
+    "Embassy Submission", "Agency Service", "Government Office Submission",
+})
+_NAME_AGENCY_RE = re.compile(r"agenc|agent|china travel service|\bvfs\b", re.I)
+_NAME_MISSION_RE = re.compile(r"embassy|consulate|consular", re.I)
+_NAME_BORDER_RE = re.compile(r"on[- ]arrival", re.I)
+_NAME_ONLINE_RE = re.compile(
+    r"e-?visa|online|electronic|\besta\b|\be-?ta\b|travel authori[sz]", re.I)
+
+
+def _method_for_detail(detail: str | None, route_method: str | None,
+                       row: dict, from_channel: bool) -> str | None:
+    """The channel this row's own kind of permission implies.
+
+    A route can offer an ETA and a consular sticker side by side, and one
+    route-level method labels one of them wrongly. Precedence: the product's
+    stated channel when the source gave one, then the product's own words
+    ("consular sticker", "visa on arrival", "e-Visa") when they say one
+    thing, then the kind the subcategory implies. A conditional exemption has nothing to apply for.
+    "Other" is never an answer: it told a traveller nothing and it is not
+    what any official page says."""
+    d = str(detail or "")
+    if d in _VISA_FREE_DETAILS:
+        return ("Online Application"
+                if route_method == "Online Application"
+                and _names_something_to_file(row) else None)
+    if from_channel and route_method:
+        # A channel the source stated outright outranks every reading below:
+        # Japan's eVisa is lodged by a designated agency, and a consular
+        # sticker for Israel goes through a visa centre. The product's name
+        # describes the permission, not always where it is lodged.
+        return route_method
+    name = str(row.get("visa_type_name") or "")
+    said = [m for m, rx in (("Agency Service", _NAME_AGENCY_RE),
+                            ("Embassy Submission", _NAME_MISSION_RE),
+                            ("On-arrival Processing", _NAME_BORDER_RE),
+                            ("Online Application", _NAME_ONLINE_RE))
+            if rx.search(name)]
+    if len(said) == 1:
+        return said[0]
+    if d in ("eVisa", "ETA Electronic Authorization", "eVisa on Arrival"):
+        return "Online Application"
+    if d == "Paper Visa on Arrival":
+        return "On-arrival Processing"
+    if d == "Paper Visa":
+        if route_method in _IN_PERSON_METHODS:
+            return route_method
+        return "Embassy Submission"
+    return route_method
+
+
 def _method_for_channel(channel: str) -> str | None:
     """The engine's channel vocabulary (lowercase, many variants) mapped to
     their five application_method values. Substring rules, because a live
     audit found 96% of records collapsing to "Other" when this was an exact
     uppercase table."""
-    c = str(channel or "").lower()
-    if not c:
+    c = str(channel or "").lower().strip()
+    if not c or c in _NO_CHANNEL:
         return None
     if "arrival" in c:
         return "On-arrival Processing"
@@ -145,7 +248,12 @@ def _method_for_channel(channel: str) -> str | None:
         return "Agency Service"
     if any(k in c for k in ("embassy", "consulate", "consular", "mission")):
         return "Embassy Submission"
-    return "Other"
+    if any(k in c for k in ("office", "bureau", "public_security",
+                            "exit_entry", "exit-entry")):
+        return "Government Office Submission"
+    # "in_person" and any value outside the vocabulary say nothing about
+    # WHERE. The channel sentence and the product decide, never "Other".
+    return None
 
 
 _DISCRETIONARY = ("set by the consulate", "consulate discretion", "as granted",
@@ -471,7 +579,8 @@ _NESTED_UNDER = {
 
 
 def _subcategory_for(product: dict, route_default: str | None,
-                     requirement: str | None) -> str | None:
+                     requirement: str | None,
+                     method: str | None = None) -> str | None:
     """Field 5's subcategory for THIS product, inside the primary it sits under.
 
     A route can offer several kinds of permission at once. A Japanese traveller
@@ -494,6 +603,8 @@ def _subcategory_for(product: dict, route_default: str | None,
         "eta", "esta", "electronic travel", "travel authoris",
         "travel authoriz", "authorisation", "authorization"))
     at_border = "on arrival" in name or "on-arrival" in name
+    exempt_name = not authorisation and any(k in name for k in (
+        "visa-free", "visa free", "free entry", "exempt", "waiver", "no visa"))
 
     if allowed is None:
         # An unknown or absent primary: fall back to the old name-only reading
@@ -505,7 +616,7 @@ def _subcategory_for(product: dict, route_default: str | None,
                                else "paper_visa_on_arrival"]
         if electronic:
             return SUBCATEGORY["evisa"]
-        if "visa" in name or "visitor" in name or "permit" in name:
+        if any(k in name for k in ("visa", "visitor", "permit", "endorsement")):
             return SUBCATEGORY["paper_visa"]
         return route_default
 
@@ -529,12 +640,26 @@ def _subcategory_for(product: dict, route_default: str | None,
         # advance action is an eVisa: the applying happens before travel and
         # only the sticker is handed over at the border.
         return SUBCATEGORY["evisa"]
-    if "visa" in name or "visitor" in name or "permit" in name:
+    if exempt_name and "conditional_visa_free" in allowed:
+        # "Visa-free entry as an organised tourist group", "Free Entry for
+        # 14 Days": the product itself says no visa is issued. Reading the
+        # word "visa" in it and filing it as a paper visa gave an exemption
+        # an embassy to apply at.
+        return SUBCATEGORY["conditional_visa_free"]
+    if any(k in name for k in ("visa", "visitor", "permit", "endorsement")):
         return SUBCATEGORY["paper_visa"] if "paper_visa" in allowed \
             else SUBCATEGORY[allowed[0]]
     key = _key_of(route_default)
     if key in allowed:
         return SUBCATEGORY[key]
+    # A name that says nothing ("Single-entry tourist") takes the kind its
+    # channel implies: lodged in person it is a sticker, filed online an
+    # eVisa. Defaulting every such product to eVisa printed "eVisa" beside
+    # "Embassy Submission" on the same row.
+    if method in _IN_PERSON_METHODS and "paper_visa" in allowed:
+        return SUBCATEGORY["paper_visa"]
+    if method == "Online Application" and "evisa" in allowed:
+        return SUBCATEGORY["evisa"]
     return SUBCATEGORY[allowed[0]]
 
 
@@ -683,6 +808,9 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     disputes, was still being shown as High.
     """
     row = _strip_visa_only_fields(dict(row))
+    if row.get("application_method") == "Other":
+        # No path emits this any more. Kept so a stale row can never say it.
+        row["application_method"] = None
     prov, grounded = row.pop("_prov", False), row.pop("_grounded", False)
     st = field_status(row, unpublished)
     complete = not any(v == "missing" for v in st.values())
@@ -716,6 +844,9 @@ def records_for_route(route: dict, guidance: dict,
     docs = ", ".join(str(d) for d in docs if d) if isinstance(docs, list) else (
         str(docs) if docs else None)
     method = _method_for_channel(g.get("application_channel"))
+    method_from_channel = method is not None
+    if method is None:
+        method = _method_from_detail(g)
     if method is None and disposition != "VISA_EXEMPT":
         # The engine left the channel blank but the product names it: a thing
         # called an e-Visa is applied for online, a consular sticker at a
@@ -726,9 +857,10 @@ def records_for_route(route: dict, guidance: dict,
         # A visa-free traveller often still files something before boarding:
         # an arrival card, an ESTA, an eTA. Collapsing all of them to "Other"
         # buried the one instruction that decides whether they are let on the
-        # plane. Only a route with genuinely nothing to file falls through to
-        # "Other", which is their enum's own value for no channel applying.
-        method = "Online Application" if _files_something_online(g) else "Other"
+        # plane. A route with genuinely nothing to file has no method, and
+        # the checklist marks the cell not applicable.
+        method = "Online Application" if _files_something_online(g) else None
+        method_from_channel = False
     entry_req = g.get("entry_requirements")
     if isinstance(entry_req, list):
         entry_req = ". ".join(str(x) for x in entry_req if x) or None
@@ -813,13 +945,15 @@ def records_for_route(route: dict, guidance: dict,
                 _as_validity_unit(n, unit)
             amt, cur = _fee({}, g)
             row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
+        row["application_method"] = _method_for_detail(
+            row.get("visa_requirement_detail"), method, row, method_from_channel)
         return [_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
     rows = []
     for p in products:
         row = dict(base)
         row["visa_type_name"] = str(p.get("type"))
         row["visa_requirement_detail"] = _subcategory_for(
-            p, base.get("visa_requirement_detail"), requirement)
+            p, base.get("visa_requirement_detail"), requirement, method)
         n, unit = _num_unit(p.get("validity"),
                             stay_bound=p.get("max_stay_days"))
         if n is None:
@@ -860,6 +994,8 @@ def records_for_route(route: dict, guidance: dict,
         if note:
             row["special_conditions"] = (str(note) if not row["special_conditions"]
                                          else f"{row['special_conditions']}. {note}")
+        row["application_method"] = _method_for_detail(
+            row["visa_requirement_detail"], method, row, method_from_channel)
         rows.append(_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub))
     return rows
 
@@ -899,12 +1035,18 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
     unpublished = set(unpublished or ()) | set(row.get("_unpublished") or ())
     out = {}
     exempt = str(row.get("visa_requirement") or "") == "Visa-free"
+    # A conditional exemption product ("Free Entry for 14 Days") is filed
+    # nowhere, exactly like a visa-free route.
+    no_application = exempt or str(
+        row.get("visa_requirement_detail") or "") in _VISA_FREE_DETAILS
     for f in FIELD_ORDER:
         v = row.get(f)
         if v not in (None, "", []):
             out[f] = "filled"
         elif f in unpublished:
             out[f] = "not-published"
+        elif f == "application_method" and no_application:
+            out[f] = "not-applicable"
         elif exempt and f in _NOT_APPLICABLE_WHEN_EXEMPT:
             out[f] = "not-applicable"
         elif f in REQUIRED_FIELDS:

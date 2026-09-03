@@ -23,7 +23,7 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 <div class="q"><b>① Who are the "humans" in the Human-verified segment: Ellis's team, outsourced labelers, or Ctrip's operations?</b>
 <p>Ellis's own reviewers. One person writes a fix, a different person must approve it, and the system blocks anyone approving their own work. No outsourced labelers. Trip.com operations has the same console, and your edits are stamped "Trip.com operations" on the record.</p></div>
 <div class="q"><b>② For Source-checked, which fields are compared, how long is the freshness window, and is re-verification automatic?</b>
-<p>Ellis reopens the official page each record cites and compares the core fields: requirement, fee, currency, stay, validity, entries, documents, processing time, application channel, and the product list. Every record is rechecked automatically at least every 48 hours, and again whenever someone opens an expired one. Nothing waits for a person to remember. A government site that blocks automated reading does not cost the record its last successful check; the Freshness tab shows both numbers, attempted and read, and lists the blocked pages for a person.</p></div>
+<p>Ellis reopens the official page each record cites and compares the core fields: requirement, fee, currency, stay, validity, entries, documents, processing time, application channel, and the product list. Every record is rechecked automatically at least every 48 hours, and again whenever someone opens an expired one. Nothing waits for a person to remember. A government site that blocks automated reading does not cost the record its last successful check. The Freshness tab shows both numbers, attempted and read, and lists the blocked pages for a person.</p></div>
 <div class="q"><b>③ How is confidence calculated? How are multi-source conflicts handled? How is a person notified when a low-confidence answer is intercepted?</b>
 <p>High: a person verified the full record against a named official page. Medium: an official source with a few blanks. Low: never shown to customers, who see "we are checking this route" instead. When sources disagree, the destination government's page for that exact nationality wins, and each source keeps its own link. Anything the machine cannot settle lands in the correction queue at once, where operators see it and rule on it.</p></div>
 <div class="q"><b>④ How is the 48-hour commitment for policy changes guaranteed at the system level?</b>
@@ -31,7 +31,7 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 
 <h2>Question 2 · Supplementing missing information</h2>
 <div class="q"><b>① What is the mechanism for filling gaps like the South Korea zero and the incomplete Australia visa types?</b>
-<p>Every blank cell is one of three things: missing, not published by the government, or not applicable. Missing ones are researched against official pages until they close. The South Korea zero was a display filter bug, the data existed; it is fixed with regression tests. Australia's multi-year visas are live. Completeness today is 100%.</p></div>
+<p>Every blank cell is one of three things: missing, not published by the government, or not applicable. Missing ones are researched against official pages until they close. The South Korea zero was a display filter bug and the data existed. It is fixed with regression tests. Australia's multi-year visas are live. Completeness today is 100%.</p></div>
 <div class="q"><b>② Can Ctrip's operations team edit or add fields on their own, or does it depend on Ellis?</b>
 <p>Fully self serve. Add a route two ways: Ellis AI answers it from official pages, or you type the fields yourself. Any field can be edited later. Every record has a "Refresh from source" button that re-reads the official page and says plainly when nothing needs updating. Every change needs an official source link and a short note.</p></div>
 
@@ -40,7 +40,7 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 
 <h2>Question 4 · Verifying policy update timeliness in practice</h2>
 <div class="q"><b>① How do we simulate a policy change and measure the whole process from detection to correction to confirmation to launch?</b>
-<p>Pick any route and flag a field in the console: that is T0. Ellis corrects it, a second person reviews, and it publishes. Every stage stamps its own time, so the total reads off the screen. The Freshness tab also shows the next automatic re-check and how much of the database was re-read in the last 48 hours; today that is all of it.</p></div>
+<p>Pick any route and flag a field in the console: that is T0. Ellis corrects it, a second person reviews, and it publishes. Every stage stamps its own time, so the total reads off the screen. The Freshness tab also shows the next automatic re-check and how much of the database was re-read in the last 48 hours. Today that is all of it.</p></div>
 <div class="q"><b>② Is there a change notification mechanism (email or system reminder) for the operations team?</b>
 <p>The change log lists every change with before and after values, and open browser tabs show a refresh banner when a new version lands. Email or webhook push is the one item not live yet: tell us the channel and Ellis ships it within one week.</p></div>
 
@@ -53,8 +53,8 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 <li><b style="display:inline">Edit any field</b> of any record, with the source link and note stored on the record.</li>
 <li><b style="display:inline">Refresh from source</b> on every record: re-reads the official page on demand and says plainly when nothing needs updating.</li>
 <li><b style="display:inline">Automatic 48-hour re-check</b> of every record, with a live countdown to the next run and 48-hour coverage shown on the Freshness tab.</li>
-<li><b style="display:inline">Flag, AI check, accept or decline.</b> Flag a field and Ellis AI checks it against the official page and proposes the fix; an operator accepts or declines in one click.</li>
-<li><b style="display:inline">AI Q&amp;A review tab.</b> Every exchange is logged; mark it correct or wrong, and wrong opens a correction issue on that route.</li>
+<li><b style="display:inline">Flag, AI check, accept or decline.</b> Flag a field and Ellis AI checks it against the official page and proposes the fix. An operator accepts or declines in one click.</li>
+<li><b style="display:inline">AI Q&amp;A review tab.</b> Every exchange is logged. Mark it correct or wrong, and wrong opens a correction issue on that route.</li>
 <li><b style="display:inline">Multi-turn bilingual Q&amp;A</b> that follows the site language, remembers the passport across the conversation, and offers follow-up chips.</li>
 <li><b style="display:inline">Special policy notes</b> with a clear covered-or-not line per nationality: Hainan, 240-hour transit, Korea group scheme.</li>
 <li><b style="display:inline">Validity shown on every record</b>, and exact country filtering (the Korea and India filter bug is fixed with regression tests).</li>
@@ -63,5 +63,5 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 <h2>Support</h2>
 <div class="q"><p>Ellis is hiring a dedicated maintenance engineer so the website is covered 24/7, on top of the automatic monitoring, daily backups and the 48-hour re-check already running.</p></div>
 
-<div class="status">Status on 3 September 2026: 1,314 records, 100% complete, 100% citing an official source, zero low-confidence records, every record re-read within the last 48 hours.</div>
+<div class="status">Status on 3 September 2026: 1,316 records, 100% complete, 100% citing an official source, zero low-confidence records, every record re-checked within the last 48 hours.</div>
 <div class="foot"><span>Ellis Intelligence, Inc. · ellis-visa.com</span><span>Confirmed answers · 3 September 2026</span></div>

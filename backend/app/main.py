@@ -1938,6 +1938,17 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
         elif not parsed.get("understood"):
             _nat0 = str(parsed.get("nationality")
                         or (body.context or {}).get("nationality") or "").upper()
+            if not _nat0:
+                # "Is Hainan visa-free for Indian citizens?" names one
+                # country beside the region: that country is the passport.
+                _lone0 = []
+                for _p0, _i0, _d0 in kimi_primary._country_mentions(
+                        body.question):
+                    if _i0 not in _lone0:
+                        _lone0.append(_i0)
+                _lone0 = [i for i in _lone0 if i != _rh]
+                if len(_lone0) == 1:
+                    _nat0 = _lone0[0]
             if _nat0 and _nat0 != _rh:
                 parsed = {"understood": True, "nationality": _nat0,
                           "destination": _rh,

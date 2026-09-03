@@ -46,7 +46,7 @@ The AI Q&A, first-time routes, "Refresh from source" and "Add with Ellis AI" nee
 ## 质控台登录 Console access
 
 质控台使用请求头认证，页面已内置验收用的运营账号（ellis-ops-a 与 ellis-ops-b，复核人须与修正人不同）。
-The console authenticates by request header. The page ships with the two acceptance operator accounts, ellis-ops-a and ellis-ops-b; the reviewer must differ from the corrector.
+The console authenticates by request header. The page ships with the two acceptance operator accounts, ellis-ops-a and ellis-ops-b. The reviewer must differ from the corrector.
 
 ## 数据在哪里 Where the data lives
 
