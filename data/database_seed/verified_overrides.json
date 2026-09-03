@@ -53591,7 +53591,7 @@
   "verified_at": "2026-09-03",
   "verified_by": "Ellis source audit (official page, adversarially verified)",
   "source_url": "https://www.gov.uk/check-uk-visa/y/china/no/transit/somewhere_else/no",
-  "note": "Official page read and adversarially verified 2026-09-03: GOV.UK's official visa checker states that a Chinese national transiting the UK needs a visa: a Direct Airside Transit visa (£41.50) when changing flights without passing border control, or a Visitor in Transit visa (£74.50, leave within 48 hours) when passing through border control, with exemptions | quote: You'll need a visa to pass through the UK in transit. You normally need a Direct Airside Transit visa if you arrive in the UK on a flight and leave again without passing through immigration control.",
+  "note": "Official page read and adversarially verified 2026-09-03: GOV.UK's official visa checker states that a Chinese national transiting the UK needs a visa: a Direct Airside Transit visa (£41.50) when changing flights without passing border control, or a Visitor in Transit visa (£74.50, leave within 48 hours) when passing through border control, with exemptions | quote: You'll need a visa to pass throu | 2026-09-03: product fees from the GOV.UK transit visa pages.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
@@ -53630,6 +53630,40 @@
      "url": "https://www.gov.uk/government/publications/uk-visa-requirements-list-for-carriers/uk-visa-requirements-for-international-carriers",
      "quote": "Nationals of countries and territories who need a visa to enter or transit the UK: ... China (People's Republic of) [1] ... [1] Diplomatic or Service passport holders may transit airside without a visa.",
      "authority": ""
+    },
+    {
+     "url": "https://www.gov.uk/transit-visa/direct-airside-transit-visa",
+     "quote": "A Direct Airside Transit visa costs £41.50.",
+     "authority": "GOV.UK"
+    },
+    {
+     "url": "https://www.gov.uk/transit-visa/visitor-in-transit-visa",
+     "quote": "A Visitor in Transit visa costs £74.50.",
+     "authority": "GOV.UK"
+    }
+   ],
+   "visa_products": [
+    {
+     "type": "Direct Airside Transit Visa (DATV)",
+     "entry": "single",
+     "validity": "Single transit",
+     "max_stay_days": 1,
+     "fee": {
+      "amount": 41.5,
+      "currency": "GBP"
+     },
+     "notes": "Airside only; no UK border control. Fee is UKVI-set; verify current amount at checkout."
+    },
+    {
+     "type": "Visitor in Transit visa",
+     "entry": "single",
+     "validity": "Single transit",
+     "max_stay_days": 2,
+     "fee": {
+      "amount": 74.5,
+      "currency": "GBP"
+     },
+     "notes": "Allows passing through UK border control; must leave the UK within 48 hours. Fee is UKVI-set; verify current amount at checkout."
     }
    ]
   }

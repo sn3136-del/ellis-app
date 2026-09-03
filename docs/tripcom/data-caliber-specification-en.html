@@ -49,7 +49,7 @@
 <tr><td>2</td><td><code>travel_document_country</code></td><td class="req">Required</td><td>Issuing country, ISO alpha-3.</td></tr>
 <tr><td>3</td><td><code>destination_country</code></td><td class="req">Required</td><td>Destination country or territory, ISO alpha-3.</td></tr>
 <tr><td>4</td><td><code>travel_purpose</code></td><td class="req">Required</td><td>Tourism, business, family visit, study, work, transit, other.</td></tr>
-<tr><td>5</td><td><code>visa_requirement</code></td><td class="req">Required</td><td>Top-level class: visa-free, visa on arrival, visa required in advance. About 178 records use a fourth value, Conditional. See section 5.</td></tr>
+<tr><td>5</td><td><code>visa_requirement</code></td><td class="req">Required</td><td>Top-level class: visa-free, visa on arrival, visa required in advance. About 181 records use a fourth value, Conditional. See section 5.</td></tr>
 <tr><td>5a</td><td><code>visa_requirement_detail</code></td><td class="opt">Extra</td><td>Refinement nested under the top-level class. Visa-free: unconditional, conditional, transit. On arrival: electronic on arrival, paper on arrival. In advance: eVisa, paper visa, electronic travel authorization. A test guarantees that every detail belongs to its parent class.</td></tr>
 <tr><td>6</td><td><code>visa_type_name</code></td><td class="req">Required</td><td>The destination's product name for this purpose, in official naming.</td></tr>
 <tr><td>7</td><td><code>validity_duration</code></td><td class="req">Required</td><td>How long the visa is valid once granted, as a number. Where the government only says "at the mission's discretion", the record says so.</td></tr>
@@ -100,7 +100,7 @@
 <h2>5. Calibers awaiting a joint ruling</h2>
 <p>Three calibers are declared honestly in the data and need the joint meeting's ruling:</p>
 <p>First, <code>info_validity</code>. The dictionary defines it as "the date the policy itself is valid until", but most governments publish no end date. Current caliber: where a policy publishes an end date, that date is used (for example the Korea group exemption to 31 December 2026). Otherwise the value is the date until which Ellis guarantees the answer, which is the date the freshness monitor requires a re-check. The export declares this.</p>
-<p>Second, the fourth value of <code>visa_requirement</code>, Conditional. About 178 records genuinely depend on the traveler's own circumstances, for example visa-free for holders of a valid third-country visa. They can be folded into the "visa-free, conditional" detail. The migration script is ready and runs on confirmation.</p>
+<p>Second, the fourth value of <code>visa_requirement</code>, Conditional. About 181 records genuinely depend on the traveler's own circumstances, for example visa-free for holders of a valid third-country visa. They can be folded into the "visa-free, conditional" detail. The migration script is ready and runs on confirmation.</p>
 <p>Third, the completeness caliber, see section 3.</p>
 
 <h2>6. Special policy notes</h2>
