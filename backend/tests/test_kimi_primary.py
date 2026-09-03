@@ -1843,3 +1843,26 @@ def test_review_findings_of_2026_09_03_are_closed():
     fb = assistant.fallback_reply({"guidance": {"disposition": "VISA_EXEMPT", "permitted_stay": "up to 15 days"}, "approximate": True,
                                    "route": {"nationality": "CHN", "destination": "JPN", "travel_purpose": "work"}}, "chinese passport working in japan", "en")
     assert fb.startswith("The exact answer for this trip is still being checked.")
+
+
+def test_a_content_filter_rejection_is_retried_with_neutral_wording(monkeypatch):
+    from app.visa_snapshot import kimi_primary as kp
+    from app.providers import kimi as kimi_mod
+    calls = []
+
+    class FakeProvider:
+        def __init__(self, *a, **k):
+            pass
+
+        def _chat(self, system, user, **kw):
+            calls.append(user)
+            if "Taiwan" in user or "台灣" in user:
+                raise kimi_mod.KimiHttpError(400)
+            return {"reply": "ok"}
+
+    monkeypatch.setattr(kimi_mod, "LiveKimiProvider", FakeProvider)
+    monkeypatch.setattr(kp, "settings", lambda: type("S", (), {"moonshot_api_key": "x", "kimi_enabled": True})())
+    out = kp._live_call("system", '{"question": "台灣護照去日本", "facts": {"name": "Taiwan passport"}}', timeout=5.0, max_tokens=100)
+    assert out == {"reply": "ok"}
+    assert len(calls) == 2 and "Taiwan" not in calls[1] and "台灣" not in calls[1] and "TWN" in calls[1]
+    assert kp._neutralized("Taiwanese passport holders") == "TWN passport holders"

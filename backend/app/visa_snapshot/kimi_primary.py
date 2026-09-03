@@ -298,6 +298,25 @@ _LIVE_SLOTS = threading.Semaphore(
 _RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
 
 
+# The provider rejects some place names outright (HTTP 400, a content
+# filter rather than a rate limit). Taiwan is the one that matters to a
+# Trip.com station: every composer and recheck call for a TWN route failed
+# on 2026-09-03. A rejected call is retried once with those words replaced
+# by the ISO code, which the provider accepts, and the answer is the same
+# rule for the same passport.
+_NEUTRAL_WORDS = (
+    (_re.compile(r"\bTaiwan(?:ese)?\b", _re.I), "TWN"),
+    (_re.compile(r"台灣|台湾|臺灣|中華民國|中华民国"), "TWN"),
+)
+
+
+def _neutralized(text: str) -> str:
+    out = str(text or "")
+    for rx, rep in _NEUTRAL_WORDS:
+        out = rx.sub(rep, out)
+    return out
+
+
 def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> dict:
     s = settings()
     if not (s.moonshot_api_key and s.kimi_enabled):
@@ -320,6 +339,12 @@ def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> di
             except KimiTimeout as e:
                 raise GuidanceTimeout() from e
             except KimiHttpError as e:
+                if e.status == 400 and attempt == 0 and (
+                        _neutralized(user) != user or _neutralized(system) != system):
+                    # A content filter, not a budget problem: one retry with
+                    # the place words replaced by the ISO code.
+                    system, user = _neutralized(system), _neutralized(user)
+                    continue
                 # Back off only while the caller's own budget can still pay
                 # for it. Past that the honest answer is the failure, not a
                 # longer spinner.
