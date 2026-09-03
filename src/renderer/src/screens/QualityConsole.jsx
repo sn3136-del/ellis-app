@@ -1327,6 +1327,73 @@ function RefreshButton({ rec, onRefresh, t }) {
 
 
 
+function DrillCard({ countries, onDrill, t }) {
+  // Their acceptance question VI.4, one click: plant a fake policy change,
+  // watch the automatic recheck read the official page and put the record
+  // right, and read the elapsed seconds off the screen.
+  const [nat, setNat] = useState('CHN')
+  const [dest, setDest] = useState('JPN')
+  const [state, setState] = useState(null)
+  async function run() {
+    setState('busy')
+    try {
+      const r = await onDrill(nat, dest)
+      setState({ done: r })
+    } catch (e) {
+      setState({ err: String(e?.detail || e?.message || e) })
+    }
+  }
+  const d = state && state.done
+  return (
+    <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14,
+                  background: '#fff', padding: '16px 18px' }}>
+      <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
+                    color: GRAY, textTransform: 'uppercase' }}>
+        {t('ops.drill.title')}
+      </div>
+      <div style={{ fontSize: 12.5, color: GRAY, margin: '6px 0 10px' }}>
+        {t('ops.drill.hint')}
+      </div>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap',
+                    alignItems: 'center' }}>
+        <CountryFilter value={nat} placeholder={t('ops.add.natPh')}
+                       onCommit={setNat} countries={countries} />
+        <CountryFilter value={dest} placeholder={t('ops.add.destPh')}
+                       onCommit={setDest} countries={countries} />
+        <button onClick={run} disabled={state === 'busy' || !nat || !dest}
+                data-testid="ops-drill-run"
+                style={{ borderRadius: 999, fontSize: 13, fontWeight: 700,
+                         border: 'none', cursor: 'pointer',
+                         padding: '11px 22px', background: NAVY,
+                         color: '#fff',
+                         opacity: state === 'busy' ? 0.6 : 1 }}>
+          {state === 'busy' ? t('ops.drill.running') : t('ops.drill.run')}
+        </button>
+      </div>
+      {d && (
+        <div style={{ marginTop: 12, display: 'grid', gap: 6,
+                      fontSize: 13, color: NAVY }}>
+          <div>1. {t('ops.drill.step1').replace('{field}', String(d.field))}</div>
+          <div>2. {t('ops.drill.step2')}</div>
+          <div style={{ fontWeight: 700,
+                        color: d.caught ? GREEN : '#b3261e' }}>
+            3. {(d.caught ? t('ops.drill.caught') : t('ops.drill.missed'))
+                  .replace('{seconds}', String(d.seconds))}
+          </div>
+          {d.source_url && (
+            <a href={d.source_url} target="_blank" rel="noreferrer"
+               style={{ fontSize: 12.5, color: BLUE }}>{d.source_url}</a>
+          )}
+        </div>
+      )}
+      {state && state.err && (
+        <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 600,
+                      color: RED }}>{String(state.err)}</div>
+      )}
+    </div>
+  )
+}
+
 function NextSweepCountdown({ at, summary, t }) {
   // The clock is the sweep timer itself: the backend reads the next firing
   // from systemd, so this counts down to the run that will actually happen.
@@ -2172,6 +2239,11 @@ const EMPTY_FILTERS = { nationality: '', destination: '', purpose: '',
 
 export default function QualityConsole() {
   const client = useOpsClient()
+
+  async function runDrill(nat, dest) {
+    return client.post('/database/freshness/drill', {
+      nationality: nat, destination: dest, travel_purpose: 'tourism' })
+  }
   const { t, lang } = useLocale()
   const tv = useValueTranslations(client, lang)
   const [tab, setTab] = useState('records')
@@ -3611,6 +3683,7 @@ export default function QualityConsole() {
           return (
             <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
               <NextSweepCountdown at={f.next_sweep_at} summary={f} t={t} />
+              <DrillCard countries={countries} onDrill={runDrill} t={t} />
               <div className="ops-tiles">
                 {[
                   // Every tile states its own unit. An answer is one cached

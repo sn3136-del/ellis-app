@@ -216,6 +216,99 @@ def _reply_language(question: str, lang: str | None) -> str | None:
     return None
 
 
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+|(?<=[。！？])")
+
+
+def _ground_sentences(reply: str, allowed: set) -> str | None:
+    """Keep every sentence whose numbers all exist in the facts, drop the
+    rest. The old guard threw the whole reply away for one stray figure
+    ("a passport valid for 6 months"), so a correct four-sentence answer
+    vanished and the reader got the bare summary instead."""
+    sentences = [x.strip() for x in _SENTENCE_SPLIT.split(reply or "") if x and x.strip()]
+    kept = [x for x in sentences if set(re.findall(r"\d+", x)) <= allowed]
+    if not kept:
+        return None
+    joined = " ".join(kept) if any(x.isascii() for x in kept) else "".join(kept)
+    return joined if len(joined) >= 8 else None
+
+
+_VERDICT_EN = {
+    "VISA_EXEMPT": "No visa is needed for this trip.",
+    "VISA_REQUIRED": "A visa is required before you travel.",
+    "VISA_ON_ARRIVAL": "A visa is issued on arrival.",
+    "ELECTRONIC_AUTHORIZATION_REQUIRED": "An electronic travel authorisation is required before you travel.",
+    "CONDITIONAL": "Entry depends on conditions that are set out in the record below.",
+}
+_VERDICT_ZH = {
+    "VISA_EXEMPT": "此行程无需签证。",
+    "VISA_REQUIRED": "出行前需要办理签证。",
+    "VISA_ON_ARRIVAL": "可在抵达时办理落地签证。",
+    "ELECTRONIC_AUTHORIZATION_REQUIRED": "出行前需要办理电子旅行许可。",
+    "CONDITIONAL": "能否入境取决于下方记录中列出的条件。",
+}
+_VERDICT_TW = {
+    "VISA_EXEMPT": "此行程無需簽證。",
+    "VISA_REQUIRED": "出行前需要辦理簽證。",
+    "VISA_ON_ARRIVAL": "可在抵達時辦理落地簽證。",
+    "ELECTRONIC_AUTHORIZATION_REQUIRED": "出行前需要辦理電子旅行許可。",
+    "CONDITIONAL": "能否入境取決於下方記錄中列出的條件。",
+}
+
+
+def fallback_reply(out: dict, question: str, lang: str | None = None) -> str | None:
+    """A plain reply written from the served facts alone, for the turns the
+    composer cannot serve in time. The page always had this summary, the API
+    did not, so an integrator reading the answer feed got a blank sentence
+    on every cold route."""
+    rl = _reply_language(question, lang) or ("Simplified Chinese" if _is_chinese(question) else "English")
+    tw = rl == "Traditional Chinese"
+    zh = rl != "English"
+    if out.get("held"):
+        return ("我们正在对照官方来源核对这条线路，请稍后再来查看。" if zh and not tw
+                else "我們正在對照官方來源核對這條線路，請稍後再來查看。" if tw
+                else "We are checking this route against the official source. Please check back shortly.")
+    g = out.get("guidance") or {}
+    dispo = str(g.get("disposition") or "").upper()
+    table = _VERDICT_TW if tw else (_VERDICT_ZH if zh else _VERDICT_EN)
+    parts = []
+    if dispo in table:
+        parts.append(table[dispo])
+    fee = g.get("government_fee") or {}
+    lines = {}
+    if isinstance(fee, dict) and fee.get("amount") is not None:
+        amt, cur = fee.get("amount"), fee.get("currency") or ""
+        lines["fee"] = (f"政府费用为 {amt} {cur}。" if zh and not tw else f"政府費用為 {amt} {cur}。" if tw
+                        else f"The government fee is {amt} {cur}.".replace("  ", " "))
+    if g.get("permitted_stay"):
+        st = g["permitted_stay"]
+        lines["stay"] = (f"允许停留：{st}。" if zh and not tw else f"允許停留：{st}。" if tw
+                         else f"Permitted stay: {st}.")
+    if g.get("processing_time") and str(g["processing_time"]).lower() not in ("not applicable", "n/a"):
+        pt = g["processing_time"]
+        lines["processing"] = (f"办理时间：{pt}。" if zh and not tw else f"辦理時間：{pt}。" if tw
+                               else f"Processing time: {pt}.")
+    if g.get("application_channel_detail") and dispo != "VISA_EXEMPT":
+        ch = str(g["application_channel_detail"]).strip()
+        if ch and len(ch) <= 220:
+            lines["channel"] = ch if ch.endswith((".", "。")) else ch + "."
+    focus = out.get("focus")
+    order = ([focus] if focus in lines else []) + [k for k in ("stay", "fee", "processing", "channel") if k != focus]
+    for k in order:
+        if k in lines and lines[k] not in parts:
+            parts.append(lines[k])
+    parts = parts[:5]
+    for pol in (out.get("special_policies") or [])[:1]:
+        line = pol.get("applies_line") or pol.get("summary_line")
+        if line:
+            parts.append(str(line))
+    if not parts:
+        return None
+    tail = ("详情见下方完整记录。" if zh and not tw else "詳情見下方完整記錄。" if tw
+            else "The full record is shown below.")
+    parts.append(tail)
+    return ("".join(parts) if zh else " ".join(parts)).replace("—", ". ").replace(";", ".")
+
+
 def compose_reply(question: str, history: list | None, out: dict,
                   lang: str | None = None) -> str | None:
     """A grounded reply from the composer model, or None to let the page
@@ -262,8 +355,8 @@ def compose_reply(question: str, history: list | None, out: dict,
     # standard prohibits. A reply that fails this is discarded for the
     # deterministic summary.
     allowed = set(re.findall(r"\d+", json.dumps(payload, ensure_ascii=False)))
-    used = set(re.findall(r"\d+", reply))
-    if not used.issubset(allowed):
+    reply = _ground_sentences(reply, allowed)
+    if not reply:
         return None
     # House style and identity discipline, enforced after the fact too.
     reply = reply.replace("—", ". ").replace(";", ".")
@@ -366,7 +459,8 @@ def compose_clarify(question: str, history: list | None, known: dict,
     if len(reply) < 8:
         return None
     allowed = set(re.findall(r"\d+", json.dumps(payload, ensure_ascii=False)))
-    if not set(re.findall(r"\d+", reply)).issubset(allowed):
+    reply = _ground_sentences(reply, allowed)
+    if not reply:
         return None
     reply = reply.replace("—", ". ").replace(";", ".")
     if re.search(r"\b(kimi|moonshot|gpt|claude|llm|language model)\b",
