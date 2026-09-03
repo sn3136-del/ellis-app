@@ -100,6 +100,13 @@ _OFFTOPIC_MARKERS = (
 )
 
 
+_BOOKING_MARKERS = ("book me", "book a flight", "book flights", "book a hotel",
+                    "book a room", "cheapest flight", "flight price", "flight prices",
+                    "ticket price", "ticket prices", "订机票", "訂機票", "买机票",
+                    "買機票", "订酒店", "訂酒店", "机票价格", "機票價格", "帮我订",
+                    "幫我訂", "帮我买", "幫我買")
+
+
 def off_topic_reply(question: str, lang: str | None = None,
                     context: dict | None = None) -> str | None:
     """One sentence for questions that are not about immigration at all.
@@ -116,6 +123,10 @@ def off_topic_reply(question: str, lang: str | None = None,
     if not q:
         return None
     low = q.lower()
+    if any(m in low or m in q for m in _BOOKING_MARKERS):
+        # "book me a flight to Japan" names a place and a flight and is
+        # still a booking request, which Ellis does not take.
+        return REFUSAL_ZH if wants_chinese(q, lang) else REFUSAL_EN
     on_topic = any(w in low or w in q for w in _TOPIC_WORDS)
     if any(m in low or m in q for m in _OFFTOPIC_MARKERS) and not on_topic:
         return REFUSAL_ZH if wants_chinese(q, lang) else REFUSAL_EN

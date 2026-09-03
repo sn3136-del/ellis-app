@@ -1595,12 +1595,13 @@ Null anything not stated. NEVER invent a country. No prose, JSON only.""")
 # passport — the sensible reading for a visa tool — and the form below keeps
 # the nationality visible so the reader can change it.
 _ALIASES = {
-    "USA": ("usa", "us", "u.s.", "america", "united states", "the states", "美国", "美國", "american"),
-    "GBR": ("uk", "u.k.", "britain", "great britain", "england", "united kingdom", "英国", "英國", "british", "english"),
+    "USA": ("usa", "us", "u.s.", "america", "united states", "the states", "美国", "美國", "american", "yank", "yankee"),
+    "GBR": ("uk", "u.k.", "britain", "great britain", "england", "united kingdom", "英国", "英國", "british", "english", "brit", "briton"),
     "CHN": ("china", "mainland china", "prc", "mainland", "中国", "中國", "中国大陆",
             "中华人民共和国", "中華人民共和國", "内地", "內地", "大陆", "大陸",
             "chinese"),
-    "HKG": ("hong kong", "hongkong", "hk", "香港", "hong konger"),
+    "HKG": ("hong kong", "hongkong", "hk", "hksar", "香港", "特区护照", "特區護照",
+            "港人", "hong konger", "hongkonger"),
     "TWN": ("taiwan", "台湾", "台灣", "taiwanese"),
     "JPN": ("japan", "日本", "japanese"),
     "KOR": ("korea", "south korea", "韩国", "韓國", "korean"),
@@ -1612,9 +1613,9 @@ _ALIASES = {
     "PHL": ("philippines", "菲律宾", "菲律賓", "filipino"),
     "IND": ("india", "印度", "indian"),
     "RUS": ("russia", "俄罗斯", "俄羅斯", "russian"),
-    "AUS": ("australia", "澳大利亚", "澳洲", "australian"),
+    "AUS": ("australia", "澳大利亚", "澳洲", "australian", "aussie"),
     "NZL": ("new zealand", "新西兰", "紐西蘭", "new zealander"),
-    "CAN": ("canada", "加拿大", "canadian"),
+    "CAN": ("canada", "加拿大", "canadian", "canuck"),
     "FRA": ("france", "法国", "法國", "french"),
     "DEU": ("germany", "德国", "德國", "german"),
     "ITA": ("italy", "意大利", "義大利", "italian"),
@@ -1670,7 +1671,18 @@ _ALIASES = {
 # country rule still reads it).
 _CITIES = {
     "JPN": ("tokyo", "osaka", "kyoto", "东京", "東京", "大阪", "京都"),
-    "CHN": ("beijing", "shanghai", "guangzhou", "shenzhen", "chengdu", "hangzhou", "hainan", "sanya", "haikou", "北京", "上海", "广州", "深圳", "成都", "海南", "三亚", "三亞", "海口"),
+    "CHN": ("beijing", "shanghai", "guangzhou", "shenzhen", "chengdu", "hangzhou", "hainan", "sanya", "haikou", "北京", "上海", "广州", "深圳", "成都", "海南", "三亚", "三亞", "海口", "杭州", "厦门", "西安", "重庆", "南京", "武汉"),
+    "KOR_extra": ("仁川", "济州岛", "濟州島"),
+    "ARE": ("dubai", "abu dhabi", "迪拜", "阿布扎比"), "THA": ("bangkok", "phuket", "chiang mai", "曼谷", "普吉", "清迈", "清邁", "芭提雅"),
+    "MYS": ("kuala lumpur", "penang", "吉隆坡", "槟城", "檳城"), "IDN": ("jakarta", "巴厘岛", "巴厘島", "雅加达", "雅加達"),
+    "GBR": ("london", "伦敦", "倫敦"), "FRA": ("paris", "巴黎"), "USA": ("new york", "los angeles", "san francisco", "纽约", "紐約", "洛杉矶", "洛杉磯", "旧金山", "舊金山", "夏威夷"),
+    "AUS": ("sydney", "melbourne", "悉尼", "雪梨", "墨尔本", "墨爾本"), "CAN": ("toronto", "vancouver", "多伦多", "多倫多", "温哥华", "溫哥華"),
+    "DEU": ("frankfurt", "munich", "法兰克福", "法蘭克福", "慕尼黑", "柏林"), "ITA": ("rome", "milan", "罗马", "羅馬", "米兰", "米蘭"),
+    "ESP": ("madrid", "barcelona", "马德里", "馬德里", "巴塞罗那", "巴塞隆納"), "NLD": ("amsterdam", "阿姆斯特丹"), "CHE": ("zurich", "苏黎世", "蘇黎世"),
+    "TUR": ("istanbul", "伊斯坦布尔", "伊斯坦堡"), "EGY": ("cairo", "开罗", "開羅"), "VNM": ("hanoi", "ho chi minh", "da nang", "nha trang", "河内", "河內", "胡志明", "岘港", "峴港", "芽庄", "芽莊"),
+    "PHL": ("manila", "cebu", "马尼拉", "馬尼拉", "宿务", "宿霧", "长滩岛", "長灘島"), "KHM": ("phnom penh", "siem reap", "金边", "金邊", "暹粒"), "NPL": ("kathmandu", "加德满都", "加德滿都"),
+    "QAT": ("doha", "多哈"), "RUS": ("moscow", "莫斯科", "圣彼得堡", "聖彼得堡"), "MAC": ("澳门", "澳門"), "TWN": ("台北", "高雄"),
+    "JPN_extra": ("冲绳", "沖繩", "北海道", "名古屋", "福冈", "福岡", "札幌"),
     "HKG": (), "TWN": ("taipei", "台北"),
     "KOR": ("seoul", "busan", "jeju", "首尔", "首爾", "釜山", "济州", "濟州"),
     "THA": ("bangkok", "phuket", "chiang mai", "曼谷", "普吉"),
@@ -1705,8 +1717,11 @@ _PURPOSE_WORDS = (
                   "开会", "開會", "会议", "會議", "公务", "公務")),
     ("study", ("study", "student", "留学", "留學", "读书", "讀書", "上学",
                "上學", "念书", "唸書", "university", "school")),
-    ("work", ("work", "job", "工作", "employment")),
-    ("family_visit", ("family", "relatives", "探亲", "探親", "visit my", "親友", "亲友",
+    ("work", ("work visa", "work permit", "for work", "to work", "working", "job",
+              "employment", "employed", "工作", "打工", "就业", "就業", "上班")),
+    ("family_visit", ("visit my family", "visiting my family", "visit family",
+                      "visiting family", "see my family", "family visit",
+                      "relatives", "探亲", "探親", "visit my", "親友", "亲友",
                       "visit friends", "visiting friends", "亲戚", "親戚", "看望")),
     ("transit", ("transit", "layover", "stopover", "过境", "過境", "转机", "轉機",
                  "中转", "中轉")),
@@ -1721,13 +1736,40 @@ _ISO2 = {
     "IN": "IND", "AU": "AUS", "CA": "CAN", "GB": "GBR", "UK": "GBR", "US": "USA",
     "FR": "FRA", "DE": "DEU", "ES": "ESP", "IT": "ITA", "RU": "RUS", "AE": "ARE",
     "TR": "TUR", "EG": "EGY", "NZ": "NZL", "BR": "BRA", "MX": "MEX", "KH": "KHM",
-    "LA": "LAO", "MM": "MMR", "NP": "NPL", "LK": "LKA", "PK": "PAK", "BD": "BGD",
+    "MM": "MMR", "NP": "NPL", "LK": "LKA", "PK": "PAK", "BD": "BGD",
     "SA": "SAU", "QA": "QAT", "CH": "CHE", "AT": "AUT", "NL": "NLD", "BE": "BEL",
     "PT": "PRT", "GR": "GRC", "SE": "SWE", "NO": "NOR", "DK": "DNK", "FI": "FIN",
     "IE": "IRL", "PL": "POL", "CZ": "CZE", "HU": "HUN", "MA": "MAR", "ZA": "ZAF",
     "KE": "KEN", "AR": "ARG", "CL": "CHL", "PE": "PER", "CO": "COL", "IL": "ISR",
     "JO": "JOR", "OM": "OMN", "KZ": "KAZ", "UZ": "UZB", "MN": "MNG", "BN": "BRN",
 }
+# Airport codes people use for the city ("LAX", "layover in DXB").
+_AIRPORTS = {
+    "LAX": "USA", "JFK": "USA", "SFO": "USA", "ORD": "USA", "EWR": "USA", "SEA": "USA",
+    "LHR": "GBR", "LGW": "GBR", "CDG": "FRA", "AMS": "NLD", "FRA": "DEU", "MUC": "DEU",
+    "FCO": "ITA", "MAD": "ESP", "ZRH": "CHE", "VIE": "AUT", "IST": "TUR", "DXB": "ARE",
+    "AUH": "ARE", "DOH": "QAT", "NRT": "JPN", "HND": "JPN", "KIX": "JPN", "ICN": "KOR",
+    "GMP": "KOR", "SIN": "SGP", "KUL": "MYS", "BKK": "THA", "DMK": "THA", "HKT": "THA",
+    "CGK": "IDN", "DPS": "IDN", "MNL": "PHL", "CEB": "PHL", "SGN": "VNM", "HAN": "VNM",
+    "PVG": "CHN", "SHA": "CHN", "PEK": "CHN", "PKX": "CHN", "CAN": "CHN", "SZX": "CHN",
+    "CTU": "CHN", "TPE": "TWN", "SYD": "AUS", "MEL": "AUS", "BNE": "AUS", "PER": "AUS",
+    "AKL": "NZL", "YVR": "CAN", "YYZ": "CAN", "YUL": "CAN", "DEL": "IND", "BOM": "IND",
+    "MAA": "IND", "BLR": "IND", "CMB": "LKA", "KTM": "NPL", "PNH": "KHM", "REP": "KHM",
+    "VTE": "LAO", "RGN": "MMR", "CAI": "EGY", "SVO": "RUS", "DME": "RUS",
+    "GRU": "BRA", "MCT": "OMN", "RUH": "SAU", "JED": "SAU", "TLV": "ISR",
+}
+_LOWER_STOPWORDS = frozenset({
+    "to", "in", "on", "at", "by", "for", "my", "me", "is", "it", "do", "we", "an",
+    "or", "of", "no", "so", "if", "up", "as", "be", "am", "are", "can", "the",
+    "and", "via", "any", "get", "not", "now", "new", "old", "one", "two", "how",
+    "who", "why", "all", "out", "off", "per", "pre", "id", "pm", "ok", "yes",
+    "vs", "eta", "sar", "day", "fee", "usd", "cny", "eur", "hkd", "sgd", "aud",
+    "cad", "gbp", "jpy", "krw", "thb", "vnd", "idr", "php", "myr", "inr", "sat",
+    "sun", "mon", "tue", "wed", "thu", "fri", "jan", "feb", "mar", "apr", "may",
+    "jun", "jul", "aug", "sep", "oct", "nov", "dec", "min", "max", "hrs", "hr",
+    "im", "ive", "ill", "its", "let", "see", "say", "use", "got", "did", "has",
+    "had", "was", "hi", "hey", "yo", "ur", "pls", "plz", "thx", "tho", "per",
+})
 # Uppercase three-letter tokens that are not countries but look like codes.
 _NOT_A_CODE = frozenset({
     "SAR", "ETA", "VFS", "MRV", "CBP", "ICA", "NIA", "BNO", "OCI", "EEP", "ADS",
@@ -1791,7 +1833,7 @@ def _country_spans(text: str) -> list:
         last_cjk = max((i for i, a in enumerate(al) if not a.isascii()), default=-1)
         for i, a in enumerate(al):
             aliases.append((iso, a, a.isascii() and i > last_cjk))
-    cities = [(iso, c, False) for iso, cs in _CITIES.items() for c in cs]
+    cities = [(iso.split("_")[0], c, False) for iso, cs in _CITIES.items() for c in cs]
     for iso, alias, demonym in sorted(names + aliases + cities, key=lambda x: -len(x[1])):
         start = 0
         while True:
@@ -1835,11 +1877,28 @@ def _country_spans(text: str) -> list:
         i, j = m.start(1), m.end(1)
         if any(taken[i:j]) or tok in _NOT_A_CODE:
             continue
-        iso = _ISO2.get(tok) if len(tok) == 2 else (tok if tok in alpha3 else None)
+        iso = _ISO2.get(tok) if len(tok) == 2 else (
+            tok if tok in alpha3 else _AIRPORTS.get(tok))
         if iso:
             for k in range(i, j):
                 taken[k] = True
             found.append((i, j, iso, False))
+    # A terse query ("cn->us via tokyo", "sg→cn business", "kr visa for cn")
+    # writes codes in lowercase. Only short queries qualify, and only tokens
+    # that are not ordinary words.
+    if len(low.split()) <= 8:
+        for m in _re.finditer(r"(?<![a-z0-9])([a-z]{2,3})(?![a-z])", low):
+            tok = m.group(1)
+            i, j = m.start(1), m.end(1)
+            if any(taken[i:j]) or tok in _LOWER_STOPWORDS:
+                continue
+            up = tok.upper()
+            iso = _ISO2.get(up) if len(tok) == 2 else (
+                up if up in alpha3 else _AIRPORTS.get(up))
+            if iso and up not in _NOT_A_CODE:
+                for k in range(i, j):
+                    taken[k] = True
+                found.append((i, j, iso, False))
     # A long word one edit away from a country name.
     if len(found) < 2:
         import difflib
@@ -1936,9 +1995,17 @@ _TRANSIT_RE = _re.compile(
 # A demonym right before one of these describes the destination's own
 # paperwork ("Australian visa", "Korean group tour"), not the traveller.
 _DESTINATION_HINT_RE = _re.compile(
-    r"^[a-z]+\s+(?:sar\s+)?(?:visas?|e-?visas?|eta\b|esta\b|embassy|consulate"
-    r"|immigration|border|entry|group tour|tourist visa|policy|scheme|exemption"
-    r"|waiver|arrival card|transit|government|authorities|side)")
+    r"^[a-z]+\s+(?:sar\s+)?(?:(?:standard|visitor|tourist|business|work|student"
+    r"|residence|resident|transit|entry|visit|e|short[- ]stay|long[- ]stay|multiple[- ]entry)\s+){0,2}"
+    r"(?:visas?|e-?visas?|eta\b|esta\b|embassy|consulate|immigration|border|entry"
+    r"|group tour|policy|scheme|exemption|waiver|arrival card|transit|government"
+    r"|authorities|side|permit|pass\b)")
+# 韩国签证, 中国领事馆, 香港入境处: the country's own paperwork or office.
+_ZH_HINT_SUFFIX = ("签证", "簽證", "领事馆", "領事館", "使馆", "使館", "大使馆", "大使館",
+                   "签证中心", "簽證中心", "移民局", "海关", "海關", "入境处", "入境處",
+                   "过境签", "過境簽", "落地签", "落地簽", "对", "對")
+# 在意大利办, 喺香港領事館申請: where the paperwork is lodged, not a leg of the trip.
+_ZH_PLACE_PREFIX = ("在", "喺", "係")
 _HOLDER_BEFORE = ("have a ", "have an ", "has a ", "hold a ", "holds a ",
                   "holding a ", "holding an ", "with a ", "with an ", "on a ",
                   "on an ", "using a ", "using an ", "i am ", "i'm ", "we are ")
@@ -1966,13 +2033,21 @@ def _marks_nationality(q: str, low: str, pos: int, demonym: bool,
     if _DESTINATION_HINT_RE.match(after):
         return False
     if end is not None:
-        tail = q[end:end + 3]
+        tail = q[end:end + 4]
+        if any(tail.startswith(sfx) for sfx in _ZH_HINT_SUFFIX):
+            # 韩国签证, 马来西亚对中国免签: the country whose paperwork or
+            # policy this is, not the traveller.
+            return False
         if any(tail.startswith(sfx) for sfx in _ZH_NATIONAL_SUFFIX):
             # 日本人去中国: the suffix makes the country the traveller,
             # unless a destination marker sits right before it (去日本人多吗
             # is not a nationality, but nobody writes that).
             if q[max(0, pos - 1):pos] not in ("去", "到", "赴", "往", "飞", "飛"):
                 return True
+        if q[max(0, pos - 1):pos] in ("对", "對"):
+            return True          # 马来西亚对中国免签: 中国 is the traveller
+    if strict:
+        return demonym or "from " in before or before.rstrip().endswith("from")
     if demonym:
         return True
     seg = q[pos:pos + 8]
@@ -2124,9 +2199,25 @@ def _deterministic_route(question: str) -> dict | None:
     # (香港签证身份书). A demonym on the destination's paperwork
     # ("Australian visa for Chinese applicants") is not the traveller.
     # A demonym or "from X" outranks a bare country followed by a holder
-    # word ("Vietnam visitors from India": India is the traveller).
+    # word ("Vietnam visitors from India": India is the traveller; "UK
+    # visitor visa for an Indian citizen": India again). A country named
+    # only as paperwork ("Korean visa") or as the place a form is lodged
+    # (在意大利办) is never the passport.
+    hinted = set()
+    placed = set()
+    for pos, end, iso, demonym in spans:
+        after = low[pos:pos + 48]
+        tail = q[end:end + 4]
+        if _DESTINATION_HINT_RE.match(after) or any(tail.startswith(s) for s in _ZH_HINT_SUFFIX):
+            hinted.add((pos, iso))
+        if q[max(0, pos - 1):pos] in _ZH_PLACE_PREFIX and any(
+                tail.startswith(s) for s in ("办", "辦", "申请", "申請", "领事", "領事",
+                                             "使馆", "使館", "签证中心", "簽證中心", "递交", "遞交")):
+            placed.add((pos, iso))
     for strict in (True, False):
         for pos, end, iso, demonym in spans:
+            if (pos, iso) in placed:
+                continue
             if _marks_nationality(q, low, pos, demonym, end, strict):
                 nat = iso
                 break
@@ -2172,8 +2263,15 @@ def _deterministic_route(question: str) -> dict | None:
             break
     nat_marked, dest_marked = nat is not None, dest is not None
     if nat is None:
-        nat = next((i for i in isos if i != dest and i not in transit), None) \
-            or next(i for i in isos if i != dest)
+        # Only a country named as a plain place can be the passport by
+        # default. If every remaining mention is paperwork or an office, the
+        # passport is genuinely unstated.
+        plain = [i for i in isos if i != dest and i not in transit and any(
+            (p, ii) not in hinted and (p, ii) not in placed
+            for p, _e, ii, _d in spans if ii == i)]
+        nat = next(iter(plain), None)
+        if nat is None:
+            return None
     if dest is None:
         dest = next((i for i in isos if i != nat and i not in transit), None)
     if dest is None and transit:

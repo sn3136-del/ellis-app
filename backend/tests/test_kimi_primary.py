@@ -1736,3 +1736,39 @@ def test_the_same_country_named_as_passport_and_trip_is_a_whole_route():
     # One mention alone is still not a route.
     assert read("China") is None
     assert read("going to China") is None
+
+
+def test_generated_battery_round_two_reads_paperwork_slang_codes_and_places():
+    from app.visa_snapshot import assistant
+    from app.visa_snapshot.kimi_primary import _deterministic_route as read
+    r = read("UK standard visitor visa for an Indian citizen attending a conference")
+    assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("IND", "GBR", "business")
+    r = read("Is the Australia visitor visa for Indians online now? Going for a business meeting")
+    assert (r["nationality"], r["destination"]) == ("IND", "AUS")
+    r = read("malaysia chinese kid passport")
+    assert (r["nationality"], r["destination"]) == ("CHN", "MYS")
+    r = read("aussie going to london for 2 weeks, when does the UK ETA thing kick in")
+    assert (r["nationality"], r["destination"]) == ("AUS", "GBR")
+    r = read("Canadian, layover in LAX for 5 hrs on the way to mexico city")
+    assert (r["nationality"], r["destination"], r["transit_countries"]) == ("CAN", "MEX", ["USA"])
+    r = read("cn->us via tokyo")
+    assert (r["nationality"], r["destination"], r["transit_countries"]) == ("CHN", "USA", ["JPN"])
+    r = read("sg→cn business")
+    assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("SGP", "CHN", "business")
+    r = read("what if I just transit in Tokyo on the way to LA")
+    assert r is None or r["destination"] != "LAO"
+    r = read("马来西亚对中国免签到什么时候")
+    assert (r["nationality"], r["destination"]) == ("CHN", "MYS")
+    assert read("申根签在意大利办了能去德国吗") is None
+    assert read("在仁川转机去美国要不要韩国签证") is None
+    r = read("特區護照經東京轉機去美國,日本要唔要transit visa?")
+    assert (r["nationality"], r["destination"], r["transit_countries"]) == ("HKG", "USA", ["JPN"])
+    r = read("去澳洲打工度假签证怎么申请 中国人可以吗")
+    assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("CHN", "AUS", "work")
+    r = read("Turkey for a family holiday with two kids on Indian passports")
+    assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("IND", "TUR", "tourism")
+    r = read("can I go cambodia to vietnam by boat with the evisa, or does it only work at airports? british passport")
+    assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("GBR", "VNM", "tourism")
+    assert assistant.off_topic_reply("book me a flight shanghai to seoul tomorrow", "en") is not None
+    assert assistant.off_topic_reply("帮我订机票去东京", "zh") is not None
+    assert assistant.off_topic_reply("flight from shanghai to seoul, do I need a visa", "en") is None
