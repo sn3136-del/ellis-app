@@ -1643,3 +1643,43 @@ def test_the_evaluation_report_questions_read_as_the_right_route():
     assert (r["nationality"], r["destination"]) == ("CHN", "JPN")
     r = read("去希腊，中国护照")
     assert (r["nationality"], r["destination"]) == ("CHN", "GRC")
+
+
+def test_battery_of_2026_09_03_parses_the_traveller_and_the_trip_apart():
+    """Questions from the live Q&A battery that read the wrong traveller or
+    the wrong kind of trip."""
+    from app.visa_snapshot import assistant
+    from app.visa_snapshot.kimi_primary import (_deterministic_route as read,
+                                                parse_question_with_context)
+    # A demonym on the destination's paperwork is not the traveller.
+    r = read("How long does the Australian visa take for Chinese applicants?")
+    assert (r["nationality"], r["destination"]) == ("CHN", "AUS")
+    r = read("Korean group tour visa free for Chinese, is it still on?")
+    assert (r["nationality"], r["destination"]) == ("CHN", "KOR")
+    # Plural demonyms.
+    r = read("Do Indians need a visa for Hainan?")
+    assert (r["nationality"], r["destination"]) == ("IND", "CHN")
+    nat, dests = assistant.split_nationality(
+        "Is Thailand or Vietnam cheaper visa-wise for Indians?", ["THA", "VNM", "IND"])
+    assert (nat, dests) == ("IND", ["THA", "VNM"])
+    nat, dests = assistant.split_nationality(
+        "Which is easier for a Chinese passport, Japan or Korea?", ["CHN", "JPN", "KOR"])
+    assert (nat, dests) == ("CHN", ["JPN", "KOR"])
+    # "via VFS" is a visa centre, not a stopover.
+    r = read("Chinese citizen, Schengen visa via VFS for Spain")
+    assert (r["nationality"], r["destination"], r["travel_purpose"],
+            r["transit_countries"]) == ("CHN", "ESP", "tourism", [])
+    r = read("Flying from Shanghai to Paris via Dubai, Chinese passport")
+    assert (r["nationality"], r["destination"], r["transit_countries"]) == ("CHN", "FRA", ["ARE"])
+    # A follow-up that names a new passport keeps the trip on screen.
+    ctx = {"nationality": "CHN", "destination": "KOR", "travel_purpose": "business"}
+    r = parse_question_with_context("what about my wife, she has an Indian passport", ctx)
+    assert (r["nationality"], r["destination"], r["travel_purpose"]) == ("IND", "KOR", "business")
+    r = parse_question_with_context("to Japan instead", ctx)
+    assert (r["nationality"], r["destination"]) == ("CHN", "JPN")
+    # Follow-ups inside a conversation are never off topic.
+    assert assistant.off_topic_reply("how much is it", "en", ctx) is None
+    assert assistant.off_topic_reply("费用多少", "zh", ctx) is None
+    assert assistant.off_topic_reply("what documents do I need", "en") is None
+    assert assistant.off_topic_reply("what's the weather there", "en", ctx) is not None
+    assert assistant.off_topic_reply("tell me a joke", "en") is not None

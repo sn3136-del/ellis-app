@@ -1739,6 +1739,9 @@ def _country_mentions(text: str) -> list:
                 break
             j = i + len(alias)
             ascii_word = alias.isascii()
+            if demonym and j < len(low) and low[j] == "s" and \
+                    (j + 1 >= len(low) or not low[j + 1].isalpha()):
+                j += 1          # "Indians", "Australians": the plural demonym
             boundary_ok = (not ascii_word) or (
                 (i == 0 or not low[i - 1].isalpha()) and (j >= len(low) or not low[j].isalpha()))
             if boundary_ok and not any(taken[i:j]):
@@ -1778,6 +1781,51 @@ _FOCUS_WORDS = (
 _TRANSIT_MARKERS = ("via ", "through ", "layover in ", "stopover in ",
                     "transit in ", "transiting ", "transit through ",
                     "connect in ", "connecting in ")
+# The marker has to sit right before the place: "via Dubai" is a stopover,
+# "via VFS for Spain" is a visa centre, and reading the second as transit
+# turned a tourist's Schengen question into an airport-transit answer.
+_TRANSIT_RE = _re.compile(
+    r"(?:\bvia|\bthrough|layover in|stopover in|transit(?:ing)?(?: in| through| at)?"
+    r"|connect(?:ing)? in)\s+(?:the\s+)?$")
+# A demonym right before one of these describes the destination's own
+# paperwork ("Australian visa", "Korean group tour"), not the traveller.
+_DESTINATION_HINT_RE = _re.compile(
+    r"^[a-z]+\s+(?:sar\s+)?(?:visas?|e-?visas?|eta\b|esta\b|embassy|consulate"
+    r"|immigration|border|entry|group tour|tourist visa|policy|scheme|exemption"
+    r"|waiver|arrival card|transit|government|authorities|side)")
+_HOLDER_BEFORE = ("have a ", "have an ", "has a ", "hold a ", "holds a ",
+                  "holding a ", "holding an ", "with a ", "with an ", "on a ",
+                  "on an ", "using a ", "using an ", "i am ", "i'm ", "we are ")
+_PASSPORT_AFTER_RE = _re.compile(
+    r"(?:[a-z.'-]+\s+){1,3}(?:sar\s+)?"
+    r"(?:passports?|citizens?|citizenship|nationals?|nationality|applicants?"
+    r"|travell?ers?|tourists?|residents?|visitors?|holders?)\b")
+
+
+def _marks_nationality(q: str, low: str, pos: int, demonym: bool) -> bool:
+    """Whether the country mentioned at pos is the traveller's own.
+
+    English says it several ways: a demonym ("Chinese", "Indians"), "from
+    X", "issued by X", "with a / hold a / for X passport", "X citizens",
+    "X applicants". Chinese says X护照 or 持X. A demonym that names the
+    destination's paperwork ("Australian visa") is not the traveller."""
+    before = low[max(0, pos - 12):pos]
+    after = low[pos:pos + 48]
+    if _DESTINATION_HINT_RE.match(after):
+        return False
+    if demonym:
+        return True
+    seg = q[pos:pos + 8]
+    k = seg.find("护照")
+    if k < 0:
+        k = seg.find("護照")
+    passport_after = k > 0 and not any(ch in seg[:k] for ch in "，,。.、;； ")
+    return ("from " in before or before.rstrip().endswith("from")
+            or "issued by" in before
+            or "持" in q[max(0, pos - 3):pos]
+            or passport_after
+            or bool(_PASSPORT_AFTER_RE.match(after))
+            or any(before.endswith(m) for m in _HOLDER_BEFORE))
 
 
 def _doc_from_text(q: str, low: str) -> str | None:
@@ -1881,46 +1929,15 @@ def _deterministic_route(question: str) -> dict | None:
         return None
     doc_named = _doc_from_text(q, low)
     nat = dest = None
-    # Nationality: a demonym ("Chinese passport"), "with a X passport",
-    # "from X", "issued by X", X护照 ("中国护照"), or the country standing
-    # right before a named non-passport document (香港签证身份书).
+    # Nationality: a demonym ("Chinese passport", "Indians"), "with a X
+    # passport", "from X", "for X citizens", X护照 ("中国护照"), or the
+    # country standing right before a named non-passport document
+    # (香港签证身份书). A demonym on the destination's paperwork
+    # ("Australian visa for Chinese applicants") is not the traveller.
     for pos, iso, demonym in mentions:
-        if demonym:
+        if _marks_nationality(q, low, pos, demonym):
             nat = iso
             break
-    if nat is None:
-        for pos, iso, _d in mentions:
-            before = low[max(0, pos - 12):pos]
-            # X护照 marks a nationality only when 护照 follows IMMEDIATELY:
-            # a comma between means the passport belongs to the NEXT phrase
-            # ("去希腊，中国护照" must not read 希腊 as the passport).
-            seg = q[pos:pos + 8]
-            k = seg.find("护照")
-            if k < 0:
-                k = seg.find("護照")
-            passport_after = k > 0 and not any(
-                ch in seg[:k] for ch in "，,。.、;； ")
-            # "UK passport", "Indian citizens", "Hong Kong SAR passport",
-            # "have a / hold a / with a Chinese passport": the passport word
-            # within three words after the country, or a holding verb right
-            # before it. Only the Chinese 护照 form was read before, so
-            # "144-hour transit for China, I have a UK passport" answered
-            # for a Chinese traveller going to Britain.
-            after = low[pos:pos + 48]
-            en_passport_after = bool(_re.match(
-                r"(?:[a-z.'-]+\s+){1,3}(?:sar\s+)?"
-                r"(?:passports?|citizens?|citizenship|nationals?|nationality)\b",
-                after))
-            holder_before = any(m in before for m in (
-                "have a ", "have an ", "has a ", "hold a ", "holds a ",
-                "holding a ", "holding an ", "with a ", "with an ", "on a ",
-                "on an ", "using a ", "using an ", "i am ", "i'm ", "we are "))
-            if "from " in before or before.rstrip().endswith("from") \
-                    or "issued by" in before \
-                    or "持" in q[max(0, pos - 3):pos] \
-                    or passport_after or en_passport_after or holder_before:
-                nat = iso
-                break
     if nat is None and doc_named and doc_named != "ordinary_passport":
         # 香港签证身份书 / "refugee travel document issued by Germany":
         # the issuing place right before the document phrase is who holds it.
@@ -1940,10 +1957,10 @@ def _deterministic_route(question: str) -> dict | None:
     for pos, iso, _d in mentions:
         if iso == nat:
             continue
-        before = low[max(0, pos - 16):pos]
+        before = low[max(0, pos - 24):pos]
         zh_before = q[max(0, pos - 3):pos]
         zh_after = q[pos:pos + 8]
-        if any(m in before for m in _TRANSIT_MARKERS) or \
+        if _TRANSIT_RE.search(before) or \
                 any(z in zh_before for z in ("经", "經", "途经", "途經")) or \
                 any(z in zh_after for z in ("转机", "轉機", "中转", "中轉")):
             if iso not in transit:
@@ -2075,9 +2092,9 @@ def parse_question_with_context(question: str, context: dict | None,
             if isos:
                 one = isos[0]
                 pos = mentions[0][0]
-                lead = low[max(0, pos - 16):pos]
+                lead = low[max(0, pos - 24):pos]
                 zh_after = q[pos:pos + 8]
-                if any(m in lead for m in _TRANSIT_MARKERS) or \
+                if _TRANSIT_RE.search(lead) or \
                         any(z in q[max(0, pos - 3):pos] for z in ("经", "經", "途经", "途經")) or \
                         any(z in zh_after for z in ("转机", "轉機", "中转", "中轉")):
                     # "and if we transit through Hong Kong?" adds a stopover;
@@ -2086,8 +2103,9 @@ def parse_question_with_context(question: str, context: dict | None,
                         transit = transit + [one]
                     if purpose == "transit":
                         purpose = None
-                elif "from " in lead or "持" in q[max(0, pos - 3):pos] \
-                        or "护照" in q[pos:pos + 10] or "護照" in q[pos:pos + 10]:
+                elif _marks_nationality(q, low, pos, mentions[0][2]):
+                    # "what about my wife, she has an Indian passport": the
+                    # passport changes, the destination on screen stays.
                     nat = one
                 elif one != nat:
                     dest = one

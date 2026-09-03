@@ -1930,7 +1930,7 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     if nicety:
         return {"understood": True, "greeting": True, "reply": nicety,
                 "guidance": None, "held": False}
-    refusal = assistant.off_topic_reply(body.question, body.lang)
+    refusal = assistant.off_topic_reply(body.question, body.lang, body.context)
     if refusal:
         return {"understood": True, "off_topic": True, "reply": refusal,
                 "guidance": None, "held": False}
@@ -2184,13 +2184,16 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     out = special_policies.attach(out, question=body.question, route=route)
     # The composer phrases the answer from the served facts. Any failure
     # leaves the page's own deterministic summary in charge.
-    reply = assistant.compose_reply(body.question, body.history, out, body.lang)
+    reply, why = assistant.compose_reply_ex(body.question, body.history, out,
+                                            body.lang)
     if reply:
         out["reply"] = reply
         out["reply_source"] = "composer"
     else:
         # The composer missed its budget or could not be grounded. The
-        # facts still make a sentence, so the feed never goes silent.
+        # facts still make a sentence, so the feed never goes silent, and
+        # the reason is kept so operations can see why.
+        out["composer"] = why
         fallback = assistant.fallback_reply(out, body.question, body.lang)
         if fallback:
             out["reply"] = fallback

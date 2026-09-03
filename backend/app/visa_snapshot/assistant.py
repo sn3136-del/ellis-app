@@ -54,6 +54,13 @@ _TOPIC_WORDS = (
     "使馆", "使館", "领事", "領事", "通行证", "通行證", "停留", "机票",
     "機票", "航班", "转机", "轉機", "商务", "商務", "留学", "留學", "探亲",
     "探親", "工作", "海关", "海關",
+    # The follow-up vocabulary of a visa conversation. "how much is it" after
+    # a route answer is a fee question, and refusing it as off-topic broke
+    # every thread at the second turn (battery of 2026-09-03).
+    "how much", "cost", "fee", "price", "document", "how long", "processing",
+    "validity", "valid", "entries", "apply", "application", "extend",
+    "费用", "多少钱", "多少錢", "材料", "多久", "几天", "幾天", "有效期",
+    "怎么办", "怎麼辦", "办理", "辦理", "申请", "申請", "次数", "次數",
 )
 
 
@@ -93,14 +100,18 @@ _OFFTOPIC_MARKERS = (
 )
 
 
-def off_topic_reply(question: str, lang: str | None = None) -> str | None:
+def off_topic_reply(question: str, lang: str | None = None,
+                    context: dict | None = None) -> str | None:
     """One sentence for questions that are not about immigration at all.
 
     Two rules, in order. A clear off-topic subject (weather, jokes, hotels)
     refuses even when a place is named, unless an immigration word is also
     present. Otherwise any country name or immigration word keeps the
     question in scope, so terse route questions ("china to japan") are
-    never refused. The composer carries the same rule as a final net."""
+    never refused. Inside a conversation that already has a route on
+    screen, a short follow-up ("and my wife?", "那呢") belongs to that
+    conversation and is only refused for a clear off-topic subject. The
+    composer carries the same rule as a final net."""
     q = str(question or "").strip()
     if not q:
         return None
@@ -109,6 +120,9 @@ def off_topic_reply(question: str, lang: str | None = None) -> str | None:
     if any(m in low or m in q for m in _OFFTOPIC_MARKERS) and not on_topic:
         return REFUSAL_ZH if wants_chinese(q, lang) else REFUSAL_EN
     if on_topic:
+        return None
+    ctx = context or {}
+    if ctx.get("nationality") or ctx.get("destination"):
         return None
     from . import kimi_primary
     if kimi_primary._country_mentions(q):
@@ -149,9 +163,7 @@ def split_nationality(question: str, isos: list[str]) -> tuple[str, list[str]]:
     low = q.lower()
     from . import kimi_primary
     for pos, iso, _dem in kimi_primary._country_mentions(q):
-        lead = low[max(0, pos - 12):pos]
-        tail = q[pos:pos + 10]
-        if "from " in lead or "持" in q[max(0, pos - 3):pos]                 or "护照" in tail or "護照" in tail:
+        if kimi_primary._marks_nationality(q, low, pos, _dem):
             if iso in isos:
                 return iso, [d for d in isos if d != iso]
     return "", isos
@@ -189,7 +201,9 @@ JSON. Hard rules:
   reply exactly: Sorry, I can only help with immigration matters.
   For a Chinese question: 抱歉，我只能协助出入境相关事务。
 - If asked your name or what you are, you are Ellis. Never mention AI,
-  models, providers or internal systems.
+  models, providers or internal systems. Introduce yourself only when the
+  traveller greets you or asks who you are, never at the start of an
+  ordinary answer.
 - No em dashes. No semicolons. The page shows the full record below your
   reply, so refer the reader to it when detail matters.
 - When FACTS carries a "comparison" list, answer the comparison directly:
@@ -313,6 +327,14 @@ def compose_reply(question: str, history: list | None, out: dict,
                   lang: str | None = None) -> str | None:
     """A grounded reply from the composer model, or None to let the page
     fall back to its deterministic summary."""
+    return compose_reply_ex(question, history, out, lang)[0]
+
+
+def compose_reply_ex(question: str, history: list | None, out: dict,
+                     lang: str | None = None) -> tuple:
+    """(reply, reason): the reply, or None with why the composer produced
+    nothing: "call_failed" (timeout or provider), "empty", "grounding"
+    (every sentence carried an unserved number) or "identity"."""
     from . import kimi_primary
     g = out.get("guidance") or {}
     facts = {k: g.get(k) for k in _FACT_FIELDS if g.get(k) is not None}
@@ -342,13 +364,13 @@ def compose_reply(question: str, history: list | None, out: dict,
                                  json.dumps(payload, ensure_ascii=False),
                                  timeout=14.0, max_tokens=1200)
     except Exception:  # noqa: BLE001 - the fallback summary always exists
-        return None
+        return None, "call_failed"
     reply = raw.get("reply") if isinstance(raw, dict) else None
     if not reply or not isinstance(reply, str):
-        return None
+        return None, "empty"
     reply = reply.strip()[:900]
     if len(reply) < 8:
-        return None          # "..." and friends are not answers
+        return None, "empty"          # "..." and friends are not answers
     # Grounding guard: every number in the reply must exist in the facts
     # payload or the question itself. The composer once added a correct but
     # unserved fee from its own memory, which is exactly the inference the
@@ -357,13 +379,13 @@ def compose_reply(question: str, history: list | None, out: dict,
     allowed = set(re.findall(r"\d+", json.dumps(payload, ensure_ascii=False)))
     reply = _ground_sentences(reply, allowed)
     if not reply:
-        return None
+        return None, "grounding"
     # House style and identity discipline, enforced after the fact too.
     reply = reply.replace("—", ". ").replace(";", ".")
     if re.search(r"\b(kimi|moonshot|gpt|claude|llm|language model)\b",
                  reply, re.I):
-        return None
-    return reply or None
+        return None, "identity"
+    return (reply or None), ("ok" if reply else "empty")
 
 
 # Conversational pleasantries are conversation, not off-topic questions.
