@@ -21,7 +21,7 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 
 <h2>Question 1 · Data accuracy assurance <em>how accuracy is guaranteed in the system</em></h2>
 <div class="q"><b>① Who are the "humans" in the Human-verified segment: Ellis's team, outsourced labelers, or Ctrip's operations?</b>
-<p>Ellis's own reviewers. One person writes a fix, a different person approves it, and nobody can approve their own work. No outsourced labelers. Trip.com operations can use the same console, and its edits are stamped "Trip.com operations".</p></div>
+<p>Ellis's own reviewers. One person writes a fix, a different person approves it. No outsourced labelers. Trip.com operations can use the same console, and its edits are stamped "Trip.com operations".</p></div>
 <div class="q"><b>② For Source-checked, which fields are compared, how long is the freshness window, and is re-verification automatic?</b>
 <p>Ellis reopens the page each record cites and compares requirement, fee, currency, stay, validity, entries, documents, processing time, channel and product list. Every record is rechecked at least every 48 hours.</p></div>
 <div class="q"><b>③ How is confidence calculated? How are multi-source conflicts handled? How is a person notified when a low-confidence answer is intercepted?</b>
@@ -44,21 +44,4 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 <div class="q"><b>② Is there a change notification mechanism (email or system reminder) for the operations team?</b>
 <p>Yes. Every add, modify and delete is pushed as JSON to a webhook you name, which fits Slack, Teams, Feishu or an email bridge. The change log keeps before and after values, and open tabs show a refresh banner. Give us the address and it is on the same day.</p></div>
 
-<h2 style="page-break-before:always;margin-top:0">Built for Trip.com since the evaluation <em>all live on ellis-visa.com</em></h2>
-<div class="q"><ul style="margin:0;padding-left:14px">
-<li><b style="display:inline">Add a route two ways.</b> "Add with Ellis AI" answers it from official pages in one move, or type the fields yourself.</li>
-<li><b style="display:inline">Edit any field</b> of any record, with the source link and note stored on the record.</li>
-<li><b style="display:inline">Refresh from source</b> on every record: re-reads the official page on demand and says plainly when nothing needs updating.</li>
-<li><b style="display:inline">Automatic 48-hour re-check</b> of every record, with a live countdown to the next run and 48-hour coverage shown on the Freshness tab.</li>
-<li><b style="display:inline">Flag, AI check, accept or decline.</b> Flag a field and Ellis AI checks it against the official page and proposes the fix. An operator accepts or declines in one click.</li>
-<li><b style="display:inline">AI Q&amp;A review tab.</b> Every exchange is logged. Mark it correct or wrong, and wrong opens a correction issue on that route.</li>
-<li><b style="display:inline">Multi-turn bilingual Q&amp;A</b> that follows the site language, remembers the passport across the conversation, and offers follow-up chips.</li>
-<li><b style="display:inline">Special policy notes</b> with a clear covered-or-not line per nationality: Hainan, 240-hour transit, Korea group scheme.</li>
-<li><b style="display:inline">Validity shown on every record</b>, and exact country filtering (the Korea and India filter bug is fixed with regression tests).</li>
-</ul></div>
-
-<h2>Support</h2>
-<div class="q"><p>A dedicated maintenance engineer covers the website 24/7, on top of automatic monitoring, daily backups and the 48-hour re-check.</p></div>
-
-<div class="status">Status on 3 September 2026: 1,360 records, 99.9% complete, 100% citing an official source, zero low-confidence records, every record re-checked within 48 hours.</div>
 <div class="foot"><span>Ellis Intelligence, Inc. · ellis-visa.com</span><span>Confirmed answers · 3 September 2026</span></div>
