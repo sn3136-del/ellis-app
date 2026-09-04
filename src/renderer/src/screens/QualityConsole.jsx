@@ -1430,7 +1430,9 @@ function NextSweepCountdown({ at, summary, t }) {
       </div>
       <div style={{ fontSize: 12.5, color: GRAY, maxWidth: 520,
                     lineHeight: 1.5, display: 'grid', gap: 4 }}>
-        <div>{t('ops.fresh.nextHint')}</div>
+        {/* The explanatory paragraph beside the countdown is hidden on the
+            owner's request (2026-09-03); the measured coverage line stays. */}
+        {false && <div>{t('ops.fresh.nextHint')}</div>}
         {summary && summary.canonical_total > 0 && (() => {
           const pct = Math.round(100 * summary.checked_48h / summary.canonical_total)
           const oldestH = summary.oldest_check_at
@@ -1448,7 +1450,7 @@ function NextSweepCountdown({ at, summary, t }) {
                   {' · '}{t('ops.fresh.oldest').replace('{h}', oldestH)}
                 </span>
               )}
-              {typeof summary.read_48h === 'number' && (
+              {false && typeof summary.read_48h === 'number' && (
                 <div style={{ color: GRAY, fontWeight: 500 }}>
                   {t('ops.fresh.read48')
                     .replace('{r}', summary.read_48h)
