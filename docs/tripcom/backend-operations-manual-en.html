@@ -46,8 +46,8 @@
 <p class="sub">Version 3 September 2026 · Deliverable No. 10 · Maintained in step with the live system at ellis-visa.com</p>
 
 <h2>1. Access</h2>
-<p>Open <code>https://ellis-visa.com</code> in a browser and press "Quality console" in the header. No install, no setup, no account application. Test access is preconfigured.</p>
-<p>The globe icon in the header switches the language between English, Simplified Chinese and Traditional Chinese. The interface and the data descriptions switch together.</p>
+<p>Open <a href="https://ellis-visa.com">ellis-visa.com</a> and press "Quality console". No install, no account application. Test access is preconfigured.</p>
+<p>The globe icon switches the interface and the data descriptions between English, Simplified Chinese and Traditional Chinese.</p>
 
 <h2>2. Records: the multi-dimensional spot check</h2>
 <p>The Records tab carries the full spot check. Filters combine freely:</p>
@@ -62,19 +62,19 @@
 <tr><td>Passport type</td><td>The 13 travel document types, from ordinary to diplomatic passports.</td></tr>
 <tr><td>Missing field</td><td>Shows only records where a given field is still missing. Used for gap-filling work.</td></tr>
 </table></div>
-<p>Four tiles follow the current filter: record count, completeness, source coverage and the confidence split. The completeness tile shows both calibers: the fillable reading, whose denominator excludes cells marked "does not apply" and "not published", and the literal count over all required cells.</p>
-<p>Click any row to expand the full 25-field record. Every field carries a status:</p>
+<p>Four tiles follow the filter: record count, completeness (fillable and literal), source coverage and the confidence split.</p>
+<p>Click a row to expand the full 25-field record. Every field carries a status:</p>
 <p><span class="tag g">filled</span><span class="tag a">not published</span><span class="tag a">does not apply</span><span class="tag r">missing</span></p>
-<p>The flag form at the bottom of the card files a field-level issue straight into the correction queue.</p>
+<p>The flag form on the card files a field-level issue into the correction queue.</p>
 
 <h2>3. Adding routes and editing fields</h2>
 <p>The "Add a route" card on the Records tab offers two ways in:</p>
-<div class="step"><b>1</b><span><b>Add with Ellis AI.</b> Pick the passport, destination, purpose and document type and press once. Ellis answers the route and checks it against the official pages in the same move. The result lands in the records list. A low-confidence answer is held until it has been checked.</span></div>
-<div class="step"><b>2</b><span><b>Manual entry.</b> Switch to manual and type the fields yourself: fee, stay, processing time, documents and the rest. An official source URL and a short note are required. The record serves immediately, with "Trip.com operations" recorded as its provenance.</span></div>
+<div class="step"><b>1</b><span><b>Add with Ellis AI.</b> Pick passport, destination, purpose and document type and press once. Ellis answers the route and checks it against official pages. A low-confidence answer is held until checked.</span></div>
+<div class="step"><b>2</b><span><b>Manual entry.</b> Type the fields yourself. An official source URL and a short note are required. The record serves at once, with "Trip.com operations" as its provenance.</span></div>
 <p>Every expanded record has three buttons:</p>
-<div class="step"><b>Edit fields</b><span>opens a form covering every editable field: the verdict dropdowns, this visa row's validity, entries and fee, money and stay, how to apply, the arrival card, and the "not published" checkboxes. It is prefilled with the current values and writes only what changed.</span></div>
-<div class="step"><b>Refresh from source</b><span>has Ellis re-read the official page on the spot. When nothing changed it says so plainly: "still current, no refresh needed". When the page differs, the record is corrected from the page and the change is logged with the quote.</span></div>
-<div class="step"><b>Flag</b><span>files a human report. Ellis then reads the official page itself and places what it found in the correction queue as a proposal. An operator accepts it in one click, which writes a sourced correction the next reader sees immediately, or declines it.</span></div>
+<div class="step"><b>Edit fields</b><span>opens a prefilled form for every editable field and writes only what changed.</span></div>
+<div class="step"><b>Refresh from source</b><span>re-reads the official page now. It says plainly when nothing changed, and otherwise corrects the record and logs the quote.</span></div>
+<div class="step"><b>Flag</b><span>files a report. Ellis reads the page and places a proposal in the queue, which an operator accepts or declines in one click.</span></div>
 
 <h2>4. Correction queue: the five-stage loop</h2>
 <p>Every issue walks the five stages of standard 4.1.2, one button per stage, in order, with no skipping:</p>
@@ -83,32 +83,32 @@
 <div class="step"><b>3</b><span>Corrected. The fix is written and the old answer is withdrawn from service at once.</span></div>
 <div class="step"><b>4</b><span>Reviewed. A second operator reviews. The system enforces that the reviewer is not the corrector.</span></div>
 <div class="step"><b>5</b><span>Published. The corrected answer goes live for readers.</span></div>
-<p>An issue can be dismissed at any stage, but only with a written reason. The end-to-end target is 48 hours. Every stage is timestamped, and the timestamps export for verification.</p>
+<p>Dismissal needs a written reason. The end-to-end target is 48 hours and every stage is timestamped and exportable.</p>
 
 <h2>5. Change log: add, modify, delete</h2>
-<p>Every update that changes what readers see writes a change entry, classed as add, modify or delete. Modifications carry field-level before and after values. Withdrawing an answer through the correction loop writes a delete entry. Search runs over the full history.</p>
-<p>Each entry is also pushed as compact JSON to a webhook URL when one is configured, so an operations channel in Slack, Teams or Feishu, or an email bridge, hears about every change the moment it is written. Rows written by the 48-hour drill are labelled as drill history and are never pushed.</p>
+<p>Every change readers can see writes an entry classed add, modify or delete, with before and after values. Search covers the full history.</p>
+<p>Each entry is also pushed as JSON to a webhook URL when one is configured, so a Slack, Teams or Feishu channel or an email bridge hears about it at once.</p>
 
 <h2>6. AI Q&amp;A: sampling the assistant</h2>
-<p>The AI Q&amp;A tab lists every exchange the assistant actually served: the question as asked, the route it was read as, the answer given and the source cited. Each exchange takes a ruling:</p>
+<p>The AI Q&amp;A tab lists every exchange served: question, route read, answer and source. Each takes a ruling:</p>
 <p><span class="tag g">correct</span> records the reviewer and the time.<br>
 <span class="tag r">wrong</span> requires a written reason and automatically files a tracked issue on the answered route, which then walks the full correction loop.</p>
 
 <h2>7. Freshness: the automatic re-check</h2>
-<p>Ellis re-reads every served answer against its official page at least every 48 hours. The scheduled sweep runs every six hours and takes every record whose last check is more than 40 hours old, oldest first and never-checked routes first of all, so no record passes 48 hours without an attempt and no government site is hammered. A record can also be re-read on demand at any time with the Refresh from source button.</p>
-<p>When the page agrees with the record, the record is restamped. When the page differs from a value the machine holds, the record is corrected from the page with the quote saved. When the page differs from a human-verified fact, nothing is overwritten: a dispute is filed with the page quote, the current record value and the source, and a person rules on it through the correction queue.</p>
-<p>The Freshness tab opens with a countdown to the next automatic re-check run, read from the scheduler itself rather than estimated, and shows two numbers for the last 48 hours: how many records a re-check was attempted for, and how many official pages were actually read. A site that blocks automated reading counts as attempted, never as read. The record keeps its last successful check and the page is listed for a person. The availability tile shows the month's uptime measured by the minute.</p>
+<p>The sweep runs every six hours and re-reads every record whose last check is more than 40 hours old, oldest and never-checked first, so no record passes 48 hours unchecked. Any record can also be re-read on demand with Refresh from source.</p>
+<p>A page that agrees restamps the record. A page that differs from a machine-held value corrects it, with the quote saved. A page that differs from a human-verified fact files a dispute for a person and changes nothing.</p>
+<p>The Freshness tab shows the countdown to the next run, read from the scheduler itself, and the share of records attempted in the last 48 hours. A site that blocks robots counts as attempted, keeps its last good read, and is listed for a person.</p>
 
 <h2>8. Batch export</h2>
-<p>"Export Excel" on the Records tab exports an .xlsx file following the active filters. The workbook has two sheets: the data sheet (25 fields plus sources plus confidence) and a field description sheet whose first row carries the snapshot time in UTC. There is no row cap in the code. Building a 12,000-row workbook measured 1.2 seconds.</p>
+<p>"Export Excel" on the Records tab exports an .xlsx following the active filters: a data sheet (25 fields, sources, confidence) and a field description sheet stamped with the UTC snapshot time. No row cap. A 12,000-row workbook builds in 1.2 seconds.</p>
 
 <h2>9. Holds and release</h2>
-<p>An answer graded Low under standard 4.2.3 is never shown to readers. They see "We are checking this route" instead. There are two ways to release it: write a fact verified against an official source (preferred), or release it manually after checking the official page. Both leave an auditable record.</p>
+<p>A Low answer (standard 4.2.3) is never shown. Readers see "We are checking this route". It is released by writing a fact verified against an official source, or by an audited operator release.</p>
 
 <h2>10. Deep links</h2>
-<p>Every route has a stable link of the form <code>#database/CHN/JPN/tourism</code>. The link can be shared directly and opens the record page.</p>
+<p>Every route has a stable link such as #database/CHN/JPN/tourism that opens the record page.</p>
 
-<div class="note">If anything disagrees with an official page, flag it on the record. That is the fastest correction channel, fully tracked, with a 48-hour closure target.</div>
+<div class="note">If anything disagrees with an official page, flag it on the record. That is the fastest, fully tracked correction channel, closed within 48 hours.</div>
 
 <footer>Ellis Intelligence, Inc. · Backend Operations Manual · 3 September 2026 · Maintained in step with the live system</footer>
 </main>

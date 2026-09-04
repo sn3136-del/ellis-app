@@ -42,7 +42,7 @@
 <p class="sub">Version 3 September 2026 · Deliverable No. 10 · The same calibers govern the live pages and the Excel export</p>
 
 <h2>1. The 25-field dictionary</h2>
-<p>One record is one visa product for one combination of passport, destination, travel purpose and travel document type. A route with several products yields several records. The export and the online display use the same field set, plus one extra column that refines the top-level requirement class. Twenty fields are required and five are provided if available, matching the requirements specification.</p>
+<p>One record is one visa product for one passport, destination, purpose and document type. A route with several products yields several records. The export and the pages share one field set plus one refinement column. Twenty fields are required and five are provided if available, as the requirements specification states.</p>
 <div class="tablewrap"><table>
 <tr><th>#</th><th>Field</th><th>Required</th><th>Caliber</th></tr>
 <tr><td>1</td><td><code>travel_document_type</code></td><td class="req">Required</td><td>The document held, one of 13 types: ordinary passport, diplomatic passport, service passport, official ordinary passport, PRC travel document, temporary passport, emergency passport, child passport, alien's passport, stateless travel document, laissez-passer, identity certificate, refugee travel document.</td></tr>
@@ -74,7 +74,7 @@
 </table></div>
 
 <h2>2. The three kinds of blank</h2>
-<p>A blank cell is never ambiguous. Every unfilled cell belongs to exactly one of three kinds, and its reason is stated on screen and in the export:</p>
+<p>A blank cell is never ambiguous. It is one of three kinds, stated on screen and in the export:</p>
 <div class="tablewrap"><table>
 <tr><th>Kind</th><th>Display</th><th>Counted in the completeness denominator</th></tr>
 <tr><td>Not published</td><td>"Not publicly available". The official page was checked and publishes no value for this item.</td><td>Excluded from the fillable caliber</td></tr>
@@ -83,10 +83,10 @@
 </table></div>
 
 <h2>3. Completeness calibers</h2>
-<p>The acceptance documents state completeness in two ways. Both are computed and shown side by side on the console's completeness tile.</p>
-<p>First, the cell caliber of section 6.1: filled cells divided by required cells. The console shows the fillable reading as the headline (the denominator excludes not-published and does-not-apply cells, and the number excluded is shown so it can be audited) alongside the literal reading.</p>
+<p>Completeness is stated two ways, and both are shown on the completeness tile.</p>
+<p>First, the cell caliber of section 6.1: filled cells over required cells. The fillable reading excludes not-published and does-not-apply cells and shows how many were excluded. The literal reading counts every cell.</p>
 <p>Second, the record caliber of section 4.2.2: records with all 25 fields filled divided by all records.</p>
-<p>The gap between the two is structural. A perfectly correct visa-free record can never fill all 25 fields, because fee and validity do not apply to it, and section 4.2.1 prohibits inventing what no government publishes. Which caliber governs acceptance is a decision for the joint meeting.</p>
+<p>The gap is structural: a correct visa-free record cannot fill fee or validity, and section 4.2.1 forbids inventing what no government publishes. Which caliber governs acceptance is for the joint meeting.</p>
 
 <h2>4. The confidence ladder</h2>
 <div class="tablewrap"><table>
@@ -95,21 +95,21 @@
 <tr><td>Medium</td><td>Backed by an official source, with a few fields still to fill, or fields the government does not publish.</td><td>Shown, with the source attached</td></tr>
 <tr><td>Low</td><td>Sources conflict, or only non-official sources exist, or a specific product and fee is claimed without a read of the official page.</td><td>Held. Readers see "We are checking this route" until an operator confirms it</td></tr>
 </table></div>
-<p>Grading is automatic. The only ways out of a hold are writing a fact verified against an official source, or an audited operator release. Both leave a record.</p>
+<p>Grading is automatic. A hold is released only by a fact verified against an official source or by an audited operator release.</p>
 
 <h2>5. Calibers awaiting a joint ruling</h2>
-<p>Three calibers are declared honestly in the data and need the joint meeting's ruling:</p>
-<p>First, <code>info_validity</code>. The dictionary defines it as "the date the policy itself is valid until", but most governments publish no end date. Current caliber: where a policy publishes an end date, that date is used (for example the Korea group exemption to 31 December 2026). Otherwise the value is the date until which Ellis guarantees the answer, which is the date the freshness monitor requires a re-check. The export declares this.</p>
-<p>Second, the fourth value of <code>visa_requirement</code>, Conditional. About 181 records genuinely depend on the traveler's own circumstances, for example visa-free for holders of a valid third-country visa. They can be folded into the "visa-free, conditional" detail. The migration script is ready and runs on confirmation.</p>
+<p>Three calibers need the joint meeting's ruling:</p>
+<p>First, <code>info_validity</code>. The dictionary reads it as the policy's own end date, which most governments do not publish. Where a policy has an end date it is used (the Korea group exemption to 31 December 2026). Otherwise it is the date by which Ellis must re-check the answer, and the export says so.</p>
+<p>Second, the fourth value of <code>visa_requirement</code>, Conditional. About 181 records depend on the traveler's own circumstances, such as holding a valid third-country visa. They can be folded into the "visa-free, conditional" detail. The migration script is ready.</p>
 <p>Third, the completeness caliber, see section 3.</p>
 
 <h2>6. Special policy notes</h2>
-<p>Regional and transit exemptions are not single-route verdicts, so they live as standalone notes: the Hainan 30-day exemption for 61 nationalities, China's 240-hour transit exemption, and the Korea group-tour exemption together with the Jeju policy. Each note is bound to an official source URL and cross-checked. Notes appear beside relevant routes in the query tool, on the display pages and in the AI Q&amp;A, with a decisive covered-or-not line whenever the nationality is known.</p>
+<p>Regional and transit exemptions live as standalone notes bound to an official URL: Hainan's 30-day exemption for 61 nationalities, China's 240-hour transit exemption, and the Korea group-tour and Jeju policies. Notes appear beside relevant routes, on the display pages and in the AI Q&amp;A, with a covered-or-not line whenever the nationality is known.</p>
 
 <h2>7. Export caliber</h2>
-<p>The export is an .xlsx workbook with two sheets. The data sheet has field names in the first row. The field description sheet states each field's caliber and the snapshot time in UTC. The export is the online data produced through the same code path. There is no separate offline database. A single export has no row cap.</p>
+<p>The export is an .xlsx workbook: a data sheet with field names in the first row and a field description sheet with each caliber and the UTC snapshot time. It is the online data through the same code path, with no row cap.</p>
 
-<div class="note">This specification is maintained alongside the code. Any caliber change updates this document and the export's field description sheet before it takes effect.</div>
+<div class="note">Any caliber change updates this document and the export's description sheet before it takes effect.</div>
 
 <footer>Ellis Intelligence, Inc. · Data Caliber Specification · 3 September 2026</footer>
 </main>
