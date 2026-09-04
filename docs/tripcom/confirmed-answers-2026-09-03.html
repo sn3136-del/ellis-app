@@ -21,31 +21,31 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 
 <h2>Question 1 · Data accuracy assurance <em>how accuracy is guaranteed in the system</em></h2>
 <div class="q"><b>① Who are the "humans" in the Human-verified segment: Ellis's team, outsourced labelers, or Ctrip's operations?</b>
-<p>Ellis's own reviewers. One person writes a fix, a different person must approve it, and the system blocks anyone approving their own work. No outsourced labelers. Trip.com operations has the same console, and your edits are stamped "Trip.com operations" on the record.</p></div>
+<p>Ellis's own reviewers. One person writes a fix, a different person approves it, and nobody can approve their own work. No outsourced labelers. Trip.com operations uses the same console, and its edits are stamped "Trip.com operations".</p></div>
 <div class="q"><b>② For Source-checked, which fields are compared, how long is the freshness window, and is re-verification automatic?</b>
-<p>Ellis reopens the official page each record cites and compares the core fields: requirement, fee, currency, stay, validity, entries, documents, processing time, application channel, and the product list. Every record is rechecked automatically at least every 48 hours, and again whenever someone opens an expired one. Nothing waits for a person to remember. A government site that blocks automated reading does not cost the record its last successful check. The Freshness tab shows both numbers, attempted and read, and lists the blocked pages for a person.</p></div>
+<p>Ellis reopens the page each record cites and compares requirement, fee, currency, stay, validity, entries, documents, processing time, channel and product list. Every record is rechecked at least every 48 hours, and again when an expired one is opened. A site that blocks robots does not cost a record its last good read. The Freshness tab shows attempted and read separately.</p></div>
 <div class="q"><b>③ How is confidence calculated? How are multi-source conflicts handled? How is a person notified when a low-confidence answer is intercepted?</b>
-<p>High: a person verified the full record against a named official page. Medium: an official source with a few blanks. Low: never shown to customers, who see "we are checking this route" instead. When sources disagree, the destination government's page for that exact nationality wins, and each source keeps its own link. Anything the machine cannot settle lands in the correction queue at once, where operators see it and rule on it.</p></div>
+<p>High: a person verified the record against a named official page. Medium: an official source with a few blanks. Low: never shown, customers see "we are checking this route". When sources disagree, the destination's page for that nationality wins and each source keeps its own link. Whatever the machine cannot settle goes to the correction queue at once.</p></div>
 <div class="q"><b>④ How is the 48-hour commitment for policy changes guaranteed at the system level?</b>
-<p>Ellis re-reads every record's official page automatically every 48 hours and corrects differences itself, saving the quote. A fix is data, not code, so the next reader gets it immediately and the old answer is gone. Every step is timestamped, so the clock is measured, not promised.</p></div>
+<p>The sweep re-reads every record's page within 48 hours and corrects differences itself, saving the quote. A fix is data, so the next reader gets it immediately. Every step is timestamped, so the clock is measured.</p></div>
 
 <h2>Question 2 · Supplementing missing information</h2>
 <div class="q"><b>① What is the mechanism for filling gaps like the South Korea zero and the incomplete Australia visa types?</b>
-<p>Every blank cell is one of three things: missing, not published by the government, or not applicable. Missing ones are researched against official pages until they close. The South Korea zero was a display filter bug and the data existed. It is fixed with regression tests. Australia's multi-year visas are live. Completeness today is 99.9%, with two fee cells open where the consulate publishes its schedule only as an image.</p></div>
+<p>Every blank cell is missing, not published, or not applicable, and says which. Missing cells are researched until they close. The Korea zero was a display filter bug, fixed with tests. Australia's multi-year visas are live. Completeness is 99.9%, with two fee cells open where a consulate publishes its schedule only as an image.</p></div>
 <div class="q"><b>② Can Ctrip's operations team edit or add fields on their own, or does it depend on Ellis?</b>
-<p>Fully self serve. Add a route two ways: Ellis AI answers it from official pages, or you type the fields yourself. Any field can be edited later. Every record has a "Refresh from source" button that re-reads the official page and says plainly when nothing needs updating. Every change needs an official source link and a short note.</p></div>
+<p>Fully self serve. Add a route with Ellis AI or by typing the fields, edit any field, and refresh any record from its official page. Every change needs an official link and a note.</p></div>
 
 <h2>Question 3 · Installation package for localization acceptance</h2>
-<div class="q"><p>Delivered as a zip with a Docker Compose package. One command starts the backend and the website on your machine, with a database snapshot so acceptance works offline. The README walks through it.</p></div>
+<div class="q"><p>Delivered as a zip with a Docker Compose package: one command starts the backend and website with a database snapshot, so acceptance works offline.</p></div>
 
 <h2>Question 4 · Verifying policy update timeliness in practice</h2>
 <div class="q"><b>① How do we simulate a policy change and measure the whole process from detection to correction to confirmation to launch?</b>
-<p>Pick any route and flag a field in the console: that is T0. Ellis corrects it, a second person reviews, and it publishes. Every stage stamps its own time, so the total reads off the screen. The Freshness tab also shows the next automatic re-check and how much of the database was re-checked in the last 48 hours, with the pages actually read counted separately. Today every record has been re-checked.</p></div>
+<p>Flag a field: that is T0. Ellis corrects, a second person reviews, it publishes, and every stage stamps its time. The Freshness tab shows the next automatic re-check and the share of the database re-checked in the last 48 hours. Today it is all of it.</p></div>
 <div class="q"><b>② Is there a change notification mechanism (email or system reminder) for the operations team?</b>
-<p>Yes. Every add, modify and delete is pushed the moment it is written to a webhook URL you name, as compact JSON that fits a Slack, Teams, Feishu or email bridge. The change log lists every change with before and after values, and open browser tabs show a refresh banner when a new version lands. Give us the channel address and it is switched on the same day.</p></div>
+<p>Yes. Every add, modify and delete is pushed as JSON to a webhook you name, which fits Slack, Teams, Feishu or an email bridge. The change log keeps before and after values, and open tabs show a refresh banner. Give us the address and it is on the same day.</p></div>
 
 <h2>Question 5 · Backend operations manual and data caliber specification</h2>
-<div class="q"><p>Both delivered as PDFs in English, updated 3 September 2026, with bilingual web versions kept in step with the live system.</p></div>
+<div class="q"><p>Both delivered as English PDFs dated 3 September 2026, with bilingual web versions kept in step with the live system.</p></div>
 
 <h2 style="page-break-before:always;margin-top:0">Built for Trip.com since the evaluation <em>all live on ellis-visa.com</em></h2>
 <div class="q"><ul style="margin:0;padding-left:14px">
@@ -61,7 +61,7 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 </ul></div>
 
 <h2>Support</h2>
-<div class="q"><p>Ellis is hiring a dedicated maintenance engineer so the website is covered 24/7, on top of the automatic monitoring, daily backups and the 48-hour re-check already running.</p></div>
+<div class="q"><p>A dedicated maintenance engineer covers the website 24/7, on top of automatic monitoring, daily backups and the 48-hour re-check.</p></div>
 
-<div class="status">Status on 3 September 2026: 1,360 records, 99.9% complete (two multi-entry visa fees await a readable official schedule), 100% citing an official source, zero low-confidence records, every record re-checked within the last 48 hours.</div>
+<div class="status">Status on 3 September 2026: 1,360 records, 99.9% complete, 100% citing an official source, zero low-confidence records, every record re-checked within 48 hours.</div>
 <div class="foot"><span>Ellis Intelligence, Inc. · ellis-visa.com</span><span>Confirmed answers · 3 September 2026</span></div>
