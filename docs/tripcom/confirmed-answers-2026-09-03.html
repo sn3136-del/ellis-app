@@ -21,19 +21,19 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 
 <h2>Question 1 · Data accuracy assurance <em>how accuracy is guaranteed in the system</em></h2>
 <div class="q"><b>① Who are the "humans" in the Human-verified segment: Ellis's team, outsourced labelers, or Ctrip's operations?</b>
-<p>Ellis's own reviewers. One person writes a fix, a different person approves it, and nobody can approve their own work. No outsourced labelers. Trip.com operations uses the same console, and its edits are stamped "Trip.com operations".</p></div>
+<p>Ellis's own reviewers. One person writes a fix, a different person approves it, and nobody can approve their own work. No outsourced labelers. Trip.com operations can use the same console, and its edits are stamped "Trip.com operations".</p></div>
 <div class="q"><b>② For Source-checked, which fields are compared, how long is the freshness window, and is re-verification automatic?</b>
-<p>Ellis reopens the page each record cites and compares requirement, fee, currency, stay, validity, entries, documents, processing time, channel and product list. Every record is rechecked at least every 48 hours, and again when an expired one is opened. A site that blocks robots does not cost a record its last good read. The Freshness tab shows attempted and read separately.</p></div>
+<p>Ellis reopens the page each record cites and compares requirement, fee, currency, stay, validity, entries, documents, processing time, channel and product list. Every record is rechecked at least every 48 hours.</p></div>
 <div class="q"><b>③ How is confidence calculated? How are multi-source conflicts handled? How is a person notified when a low-confidence answer is intercepted?</b>
-<p>High: a person verified the record against a named official page. Medium: an official source with a few blanks. Low: never shown, customers see "we are checking this route". When sources disagree, the destination's page for that nationality wins and each source keeps its own link. Whatever the machine cannot settle goes to the correction queue at once.</p></div>
+<p>High: both the AI and a person verified the record against a named official page. Medium: an official source was checked but there's some information missing. Low: information is not publicly available. When sources disagree, whatever the machine cannot settle goes to the correction queue at once.</p></div>
 <div class="q"><b>④ How is the 48-hour commitment for policy changes guaranteed at the system level?</b>
-<p>The sweep re-reads every record's page within 48 hours and corrects differences itself, saving the quote. A fix is data, so the next reader gets it immediately. Every step is timestamped, so the clock is measured.</p></div>
+<p>The sweep re-reads every record's page within 48 hours and corrects differences itself, saving the quote from the official website. A fix is data, so the next reader gets it immediately. Every step is timestamped, so the clock is measured.</p></div>
 
 <h2>Question 2 · Supplementing missing information</h2>
 <div class="q"><b>① What is the mechanism for filling gaps like the South Korea zero and the incomplete Australia visa types?</b>
-<p>Every blank cell is missing, not published, or not applicable, and says which. Missing cells are researched until they close. The Korea zero was a display filter bug, fixed with tests. Australia's multi-year visas are live. Completeness is 99.9%, with two fee cells open where a consulate publishes its schedule only as an image.</p></div>
+<p>Missing cells are researched until they close. The Korea zero was a display filter bug, fixed with tests. Australia's multi-year visas are live. Completeness is 99.9%</p></div>
 <div class="q"><b>② Can Ctrip's operations team edit or add fields on their own, or does it depend on Ellis?</b>
-<p>Fully self serve. Add a route with Ellis AI or by typing the fields, edit any field, and refresh any record from its official page. Every change needs an official link and a note.</p></div>
+<p>Fully self serve. Add a route with Ellis AI or by manually typing the fields.</p></div>
 
 <h2>Question 3 · Installation package for localization acceptance</h2>
 <div class="q"><p>Delivered as a zip with a Docker Compose package: one command starts the backend and website with a database snapshot, so acceptance works offline.</p></div>
@@ -43,9 +43,6 @@ h2 em{font-style:normal;color:#7A8798;font-weight:600;letter-spacing:.2px;text-t
 <p>Flag a field: that is T0. Ellis corrects, a second person reviews, it publishes, and every stage stamps its time. The Freshness tab shows the next automatic re-check and the share of the database re-checked in the last 48 hours. Today it is all of it.</p></div>
 <div class="q"><b>② Is there a change notification mechanism (email or system reminder) for the operations team?</b>
 <p>Yes. Every add, modify and delete is pushed as JSON to a webhook you name, which fits Slack, Teams, Feishu or an email bridge. The change log keeps before and after values, and open tabs show a refresh banner. Give us the address and it is on the same day.</p></div>
-
-<h2>Question 5 · Backend operations manual and data caliber specification</h2>
-<div class="q"><p>Both delivered as English PDFs dated 3 September 2026, with bilingual web versions kept in step with the live system.</p></div>
 
 <h2 style="page-break-before:always;margin-top:0">Built for Trip.com since the evaluation <em>all live on ellis-visa.com</em></h2>
 <div class="q"><ul style="margin:0;padding-left:14px">
