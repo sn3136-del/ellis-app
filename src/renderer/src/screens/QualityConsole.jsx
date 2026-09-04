@@ -3683,7 +3683,10 @@ export default function QualityConsole() {
           return (
             <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
               <NextSweepCountdown at={f.next_sweep_at} summary={f} t={t} />
-              <DrillCard countries={countries} onDrill={runDrill} t={t} />
+              {/* The 48-hour drill card is hidden from the tab on the owner's
+                  request (2026-09-03). The component, the endpoint and its
+                  test stay in place; restore by mounting it here again. */}
+              {false && <DrillCard countries={countries} onDrill={runDrill} t={t} />}
               <div className="ops-tiles">
                 {[
                   // Every tile states its own unit. An answer is one cached
