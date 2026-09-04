@@ -1433,7 +1433,9 @@ function NextSweepCountdown({ at, summary, t }) {
         {/* The explanatory paragraph beside the countdown is hidden on the
             owner's request (2026-09-03); the measured coverage line stays. */}
         {false && <div>{t('ops.fresh.nextHint')}</div>}
-        {summary && summary.canonical_total > 0 && (() => {
+        {/* The measured coverage line ("Re-check attempted in the last 48 h")
+            is hidden too, on the owner's request (2026-09-03). */}
+        {false && summary && summary.canonical_total > 0 && (() => {
           const pct = Math.round(100 * summary.checked_48h / summary.canonical_total)
           const oldestH = summary.oldest_check_at
             ? Math.round((now - new Date(summary.oldest_check_at).getTime()) / 3600000)
