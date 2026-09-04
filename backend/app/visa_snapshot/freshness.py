@@ -259,6 +259,14 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
     evidence = raw.get("evidence") or {}
     proposed = {k: v for k, v in proposed.items()
                 if k in OVERRIDABLE and str(evidence.get(k) or "").strip()}
+    # A page can state a value; it cannot prove an absence. On 3 September
+    # 2026 a sweep "corrected" sourced channels, a consular jurisdiction,
+    # exception notes and not-published markers to nothing, which turned
+    # correct blanks into gaps. An empty correction is never applied: it
+    # goes to a person as a dispute instead.
+    emptied = {k: v for k, v in proposed.items()
+               if v is None or v == "" or v == [] or v == {}}
+    proposed = {k: v for k, v in proposed.items() if k not in emptied}
     # A page that does not speak for THIS nationality may not touch a
     # nationality-specific field. This is the Japan failure exactly: the
     # ministry's worldwide page lists every channel and a 90-day stay, which
@@ -272,7 +280,7 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
         if blocked:
             generic_skipped.extend(sorted(blocked))
     protected = set((override or {}).get("fields") or {})
-    disputed = {}
+    disputed = dict(emptied)
     applied = {}
     for k, v in proposed.items():
         if k in protected:

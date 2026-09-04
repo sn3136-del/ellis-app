@@ -591,3 +591,25 @@ def test_due_rows_takes_never_checked_first_and_respects_the_threshold(db):
         "sweep", pathlib.Path(__file__).resolve().parents[1] / "scripts" / "freshness_sweep.py")
     mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     assert mod.DUE_AFTER_HOURS == 40 and mod.MAX_SECONDS <= 2 * 3600
+
+
+def test_a_page_cannot_correct_a_field_to_nothing(db):
+    """The monitor applies values a page states and never an absence: an
+    empty correction is dropped, the sourced value survives."""
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": False,
+        "corrected_fields": {"application_channel": None, "exceptions": [],
+                             "processing_time": "8 working days"},
+        "evidence": {"application_channel": "no channel named",
+                     "exceptions": "none listed",
+                     "processing_time": "processed within 8 working days"}})
+    row = db.query(KimiRouteGuidanceCache).one()
+    before_channel = row.guidance.get("application_channel")
+    freshness.recheck_row(db, row)
+    db.expire_all()
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.guidance.get("application_channel") == before_channel
+    assert row.guidance.get("processing_time") == "8 working days"

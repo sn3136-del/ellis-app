@@ -317,6 +317,24 @@ def _neutralized(text: str) -> str:
     return out
 
 
+_CODE_KEYS = ("nationality", "destination", "passport", "country", "iso",
+              "transit_countries", "applies_to", "route")
+
+
+def _restored(value, key: str = ""):
+    """Put the place name back into text the model wrote after a
+    neutralised retry: "TWN passport holders" reads as "Taiwan passport
+    holders" again. ISO-coded fields keep their codes."""
+    if isinstance(value, dict):
+        return {k: _restored(v, str(k)) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_restored(v, key) for v in value]
+    if isinstance(value, str) and not any(c in key.lower() for c in _CODE_KEYS):
+        return _re.sub(r"\bTWN\b(?=\s+(?:passport|nationals?|citizens?|residents?|travell?ers?|region|authorit))",
+                       "Taiwan", value)
+    return value
+
+
 def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> dict:
     s = settings()
     if not (s.moonshot_api_key and s.kimi_enabled):
@@ -328,22 +346,26 @@ def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> di
     # route decision without touching the rest of the system.
     model = os.getenv("KIMI_GUIDANCE_MODEL", "").strip() or None
     deadline = time.monotonic() + max(0.0, timeout)
+    neutralised = False
     with _LIVE_SLOTS:
         for attempt in range(3):
             left = deadline - time.monotonic()
             if left <= 0:
                 raise GuidanceTimeout()
             try:
-                return provider._chat(system, user, json_mode=True, timeout=left,
-                                      max_tokens=max_tokens, model=model)
+                out = provider._chat(system, user, json_mode=True, timeout=left,
+                                     max_tokens=max_tokens, model=model)
+                return _restored(out) if neutralised else out
             except KimiTimeout as e:
                 raise GuidanceTimeout() from e
             except KimiHttpError as e:
                 if e.status == 400 and attempt == 0 and (
                         _neutralized(user) != user or _neutralized(system) != system):
                     # A content filter, not a budget problem: one retry with
-                    # the place words replaced by the ISO code.
+                    # the place words replaced by the ISO code, and the name
+                    # put back into whatever text comes out.
                     system, user = _neutralized(system), _neutralized(user)
+                    neutralised = True
                     continue
                 # Back off only while the caller's own budget can still pay
                 # for it. Past that the honest answer is the failure, not a

@@ -1866,3 +1866,24 @@ def test_a_content_filter_rejection_is_retried_with_neutral_wording(monkeypatch)
     assert out == {"reply": "ok"}
     assert len(calls) == 2 and "Taiwan" not in calls[1] and "台灣" not in calls[1] and "TWN" in calls[1]
     assert kp._neutralized("Taiwanese passport holders") == "TWN passport holders"
+
+
+def test_a_neutralised_retry_puts_the_place_name_back(monkeypatch):
+    from app.visa_snapshot import kimi_primary as kp
+    from app.providers import kimi as kimi_mod
+
+    class FakeProvider:
+        def __init__(self, *a, **k):
+            pass
+
+        def _chat(self, system, user, **kw):
+            if "Taiwan" in user:
+                raise kimi_mod.KimiHttpError(400)
+            return {"corrected_fields": {"application_channel_detail": "Eligible TWN passport holders apply online.",
+                                         "nationality": "TWN"}}
+
+    monkeypatch.setattr(kimi_mod, "LiveKimiProvider", FakeProvider)
+    monkeypatch.setattr(kp, "settings", lambda: type("S", (), {"moonshot_api_key": "x", "kimi_enabled": True})())
+    out = kp._live_call("s", '{"facts": "Taiwan passport"}', timeout=5.0, max_tokens=50)
+    assert out["corrected_fields"]["application_channel_detail"] == "Eligible Taiwan passport holders apply online."
+    assert out["corrected_fields"]["nationality"] == "TWN"
