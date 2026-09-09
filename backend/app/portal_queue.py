@@ -424,6 +424,23 @@ def execute_run(run_id: str, worker_id: str) -> None:
                 service_mod.record_terminal_execution(db, run.org_id, application_id)
             except Exception:  # noqa: BLE001 — bookkeeping never breaks a run
                 pass
+    except vault.VaultPersistenceError:
+        # One-time credentials must be durably revoked before any portal
+        # action. A failed revocation leaves the credential available for a
+        # retry; expose a safe failure instead of abandoning a running lease.
+        db.rollback()
+        changed = db.execute(update(models.PortalRun).where(
+            models.PortalRun.id == run_id,
+            models.PortalRun.status == "running",
+            models.PortalRun.claimed_by == worker_id,
+        ).values(status="failed", finished_at=_now(), current_step_key="recoverable_failure",
+                 error="Secure credential handling could not be completed. Please retry.")
+          .execution_options(synchronize_session=False)).rowcount
+        if changed == 1:
+            record_event(db, application_id, "recoverable_failure", "failed")
+            db.commit()
+        else:
+            db.rollback()  # A newer claim or cancellation owns the run.
     finally:
         db.close()
 
