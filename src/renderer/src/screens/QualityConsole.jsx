@@ -158,11 +158,13 @@ const input = { padding: '11px 14px', borderRadius: 12, fontSize: 13,
                 border: '1px solid transparent', background: '#f2f6fb',
                 color: NAVY, outline: 'none' }
 
-function Chip({ children, color = GRAY, filled = true }) {
+function Chip({ children, color = GRAY, filled = true, wrap = false }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center',
                    padding: '2px 10px', borderRadius: 999, fontSize: 11,
-                   fontWeight: 700, letterSpacing: 0.2, whiteSpace: 'nowrap',
+                   fontWeight: 700, letterSpacing: 0.2, whiteSpace: wrap ? 'normal' : 'nowrap',
+                   ...(wrap ? { maxWidth: '100%', boxSizing: 'border-box',
+                     lineHeight: 1.35, overflowWrap: 'anywhere' } : {}),
                    color: filled ? '#fff' : color,
                    background: filled ? color : `${color}18`,
                    border: filled ? 'none' : `1px solid ${color}55` }}>
@@ -1706,7 +1708,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                   <td className="ops-cell" data-label={t('ops.col.quality')}
                       style={{ padding: '10px 12px' }}>
                     <span title={checkTip} style={{ cursor: 'help' }}>
-                      <Chip color={checkColor} filled={false}>{checkLabel}</Chip>
+                      <Chip color={checkColor} filled={false} wrap>{checkLabel}</Chip>
                     </span>
                     {/* The sub-line appears only when it says something: a
                         confidence below High, or an incomplete record. A row
