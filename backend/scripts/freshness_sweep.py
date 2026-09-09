@@ -29,7 +29,8 @@ SPACING_SECONDS = 2.0  # global dispatch spacing; never four new requests at onc
 HEARTBEAT_SECONDS = 30.0
 DUE_AFTER_HOURS = 0.25  # exclude only very recent on-demand duplicate reads
 _COUNTS = ("attempted", "read", "verified", "renewed", "partial", "corrected", "disputed",
-           "unreadable", "skipped_pending", "deferred", "errors")
+           "unreadable", "skipped_pending", "deferred", "errors", "insufficient_evidence",
+           "provider_failed", "no_official_source", "source_reads", "source_fetch_failures")
 
 
 def _utc():
@@ -79,13 +80,18 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
         report = freshness.recheck_row(db, row, budget_seconds=min(ROUTE_SECONDS,
             max(0.0, deadline - time.monotonic())), should_stop=stop.is_set) or {}
         outcome = report.get("outcome")
+        # Reading an official page and proving a route are distinct events.
+        # Even an interrupted comparison can have completed real source reads.
+        for counter in ("source_reads", "source_fetch_failures"):
+            value = report.get(counter)
+            delta[counter] = value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else 0
+        delta["read"] = int(delta["source_reads"] > 0 or outcome == "checked")
         if outcome in ("detail_pending", "noncanonical"):
             delta["attempted"] = 0
             delta["skipped_pending"] = 1
         elif outcome in ("cancelled", "budget_exhausted", "concurrent_change"):
             delta["deferred"] = 1
         elif outcome == "checked":
-            delta["read"] = 1
             check = freshness.effective_check(row.verification)
             guidance, _ = verified_overrides.apply(dict(row.guidance or {}), dict(row.route or {}))
             if (grounded_verdict_supported(check) and not kimi_primary.serve_time_invariants(guidance)
@@ -93,16 +99,21 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
                 delta["verified"] = 1
             delta["renewed"] = int(check.get("renewed") is True)
             delta["partial"] = int(bool(check.get("unverified_fields") or check.get("unchecked_sources")))
-        else:
+        elif outcome == "fetch_failed" and not delta["read"]:
             delta["unreadable"] = 1
             freshness.note_unreadable(db, row, report)
+        elif outcome == "page_not_relevant":
+            delta["insufficient_evidence"] = 1
+        elif outcome == "provider_error":
+            delta["provider_failed"] = 1
+        elif outcome == "no_official_source":
+            delta["no_official_source"] = 1
         delta["corrected"] = int(bool(report.get("changed")))
         delta["disputed"] = int(bool(report.get("disputed") or report.get("generic_skipped")))
     except Exception as exc:
         if db is not None:
             db.rollback()
         delta["errors"] = 1
-        delta["unreadable"] = int(not report or report.get("outcome") != "checked")
         delta["last_error"] = {"route_key": key, "message": str(exc)[:300], "at": _utc()}
         log.warning("recheck failed for %s: %s", key, exc)
     finally:

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 
 import {
   confidenceLevel, fieldRows, documentReady, defaultPreferences, formatFee,
-  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession, newAdminSession, resultDisposition,
+  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession, newAdminSession, newQualitySession, resultDisposition,
   isDocumentQuestion, splitQuestions, isValidDateShape, collectAnswers
 } from '../../src/renderer/src/lib/visaSession.js'
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
@@ -30,6 +30,25 @@ test('operator navigation shares the current tab login without a privileged defa
     configurable: true, get() { throw new Error('storage access denied') }
   })
   assert.equal(newAdminSession().token, '')
+})
+
+test('quality control opens without a key and keeps one public browser attribution', (t) => {
+  const prior = Object.getOwnPropertyDescriptor(globalThis, 'sessionStorage')
+  t.after(() => {
+    if (prior) Object.defineProperty(globalThis, 'sessionStorage', prior)
+    else delete globalThis.sessionStorage
+  })
+  const values = new Map()
+  Object.defineProperty(globalThis, 'sessionStorage', { configurable: true,
+    value: { getItem: (k) => values.get(k), setItem: (k, v) => values.set(k, v) } })
+  const first = newQualitySession()
+  assert.equal(first.token, 'public-quality-control')
+  assert.equal(first.orgId, 'platform')
+  assert.equal(first.userId, newQualitySession().userId)
+  assert.equal(values.has('ellis_operator_access'), false)
+  Object.defineProperty(globalThis, 'sessionStorage', { configurable: true,
+    get() { throw new Error('storage denied') } })
+  assert.equal(newQualitySession().token, 'public-quality-control')
 })
 
 test('resultDisposition never presents a MOCK completed case as real', () => {

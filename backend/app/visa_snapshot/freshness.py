@@ -199,6 +199,8 @@ def _stamp(row, entry: dict) -> None:
         ver["superseded_check"] = dict(previous)
         ver.pop("last_good_check", None)
     ver["grounded_check"] = entry
+    if isinstance(entry.get("source_reads"), int) and not isinstance(entry["source_reads"], bool) and entry["source_reads"] > 0:
+        ver["last_source_read_at"] = entry.get("at")
     if entry.get("outcome") == "checked":
         ver["last_good_check"] = dict(entry)
     row.verification = ver
@@ -282,6 +284,15 @@ def effective_check(verification: dict | None) -> dict:
         return gc
     good = ver.get("last_good_check") if isinstance(ver.get("last_good_check"), dict) else {}
     return good if good.get("outcome") == "checked" and good.get("evidence_contract") == EVIDENCE_CONTRACT else {}
+
+
+def last_source_read_at(verification: dict | None):
+    """Transport evidence only; it never supplies a policy verification stamp."""
+    ver = verification if isinstance(verification, dict) else {}
+    check = ver.get("grounded_check") if isinstance(ver.get("grounded_check"), dict) else {}
+    if isinstance(check.get("source_reads"), int) and not isinstance(check["source_reads"], bool) and check["source_reads"] > 0:
+        return check.get("at")
+    return ver.get("last_source_read_at") or effective_check(ver).get("at")
 
 
 def _page_has_visa_topic(text: str) -> bool:
@@ -515,6 +526,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             outcome = "provider_error" if any(s["outcome"] == "provider_error" for s in source_checks) else ("page_not_relevant" if tried else "fetch_failed")
         entry = {"at": when, "outcome": outcome, "sources": sources,
                  "sources_tried": tried, "irrelevant_sources": irrelevant,
+                 "source_reads": len(tried),
+                 "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
                  "unquoted_fields": sorted(unquoted_all), "source_checks": source_checks,
                  "source_cursor": source_cursor, "unchecked_sources": [u for u in all_sources if u not in visited]}
         if not _commit_recheck(db, row, entry, expected_guidance=original, expected_route=route):
@@ -611,6 +624,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                     or unverified_fields or unchecked_sources or failed_sources
                     or active_disputed_fields(db, row.cache_key)) and (consistent or bool(applied)))
     entry = {"at": when, "outcome": "checked", "evidence_contract": EVIDENCE_CONTRACT,
+                 "source_reads": len(tried),
+                 "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
                  "source_url": page.final_url,
                  "content_hash": page.content_hash, "consistent": consistent,
                  "changed_fields": sorted(applied), "disputed_fields": sorted(disputed),
@@ -632,6 +647,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             fresh_until=fresh_until):
         return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], "disputed": []}
     return {"outcome": "checked", "route_key": row.cache_key, "consistent": consistent,
+            "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
             "changed": sorted(applied), "disputed": sorted(disputed),
             "generic_skipped": sorted(fallback[1]) if fallback else [],
             "unquoted_fields": unquoted, "source_url": page.final_url}
@@ -644,6 +660,10 @@ def note_unreadable(db, row, outcome: dict | None) -> None:
     place on every attempt, never stacked."""
     from sqlalchemy import select as _sel
     o = dict(outcome or {})
+    # A fetched page that lacks this route's proof is an evidence gap, not
+    # a transport outage. Never create a misleading source_unreadable issue.
+    if o.get("outcome") != "fetch_failed" or o.get("source_reads", 0):
+        return
     reason = str(o.get("outcome") or "unreadable")
     pages = o.get("sources") or o.get("sources_tried") or []
     note = (f"The official page could not be read ({reason}), so the answer "

@@ -56,3 +56,16 @@ test('execution disclaimer is localized and non-empty in every language', () => 
   }
   assert.equal(DEFAULT_LANG, 'en')
 })
+
+test('freshness labels preserve separate read, evidence, and failure counters in every locale', () => {
+  const expected = {
+    'ops.fresh.runReads': ['insufficient', 'read', 'sources'],
+    'ops.fresh.runFailures': ['fetch', 'missing', 'provider'],
+    'ops.fresh.runEvidence': ['errors', 'partial', 'unreadable', 'verified'],
+  }
+  for (const code of SUPPORTED) {
+    for (const [key, counters] of Object.entries(expected)) {
+      assert.deepEqual([...t(code, key).matchAll(/\{(\w+)\}/g)].map(m => m[1]).sort(), counters)
+    }
+  }
+})

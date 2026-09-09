@@ -46,6 +46,12 @@ async def get_principal(
     # whichever arrives is the token, and the same checks apply to both.
     token = (x_ellis_token.strip()
              or authorization.replace("Bearer ", "").strip())
+    # An explicit public evaluation mode opens only the quality-control role.
+    # The public client marker is not a secret or an authenticated identity.
+    if getattr(s, "public_quality_control", False) and token == "public-quality-control":
+        browser = hashlib.sha256(str(x_user_id or "visitor").encode()).hexdigest()[:16]
+        return Principal(org_id="platform", user_id="public-qc-" + browser,
+                         role="quality_tester")
     if s.clerk_secret_key:
         # Production path — verify a Clerk session token.
         return verify_clerk(token)
@@ -68,6 +74,12 @@ async def get_principal(
 def require_admin(principal: Principal):
     """Administrator-only actions (adapter approval/activation/kill/rollback)."""
     _require(principal.role == "admin", 403, "administrator role required")
+
+
+def require_quality_control(principal: Principal):
+    """Full Quality Control evaluation; other administrative features stay scoped."""
+    _require(principal.role in {"admin", "quality_tester"}, 403,
+             "quality-control access required")
 
 
 def verify_clerk(token: str) -> Principal:  # pragma: no cover - activation stub

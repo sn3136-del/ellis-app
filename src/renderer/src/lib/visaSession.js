@@ -20,6 +20,18 @@ export function newAdminSession({ orgId = 'platform', userId = 'admin-1', token 
   return { token, orgId, userId }
 }
 
+// Public Quality Control evaluation needs no sign-in. This marker identifies
+// the feature; the server enables and scopes the role, and binds its audit label.
+export function newQualitySession() {
+  let userId = 'public-browser'
+  try {
+    userId = globalThis.sessionStorage?.getItem('ellis_quality_browser') ||
+      globalThis.crypto?.randomUUID?.() || `browser-${Date.now()}-${Math.random()}`
+    globalThis.sessionStorage?.setItem('ellis_quality_browser', userId)
+  } catch { /* storage is optional */ }
+  return { token: 'public-quality-control', orgId: 'platform', userId }
+}
+
 // Employer (petitioner) session: SAME org as the beneficiary's cases — org
 // tenancy grants shared case reads — but a distinct userId, so the backend's
 // per-party authorization (_authorize_step_action) can tell the parties apart.

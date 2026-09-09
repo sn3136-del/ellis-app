@@ -21,24 +21,7 @@ import re
 import unicodedata
 
 from .authority import hostname, is_government_host, registrable_domain
-
-# Country ALPHA-3 -> the government TLD suffixes whose sites are that country's
-# official domains. Used for jurisdiction matching (a China disposition must be
-# cited from a Chinese official domain, etc.).
-_DEST_GOV_SUFFIXES = {
-    "BRA": ("gov.br",), "BRN": ("gov.bn",), "BHR": ("gov.bh",), "LAO": ("gov.la",),
-    "HKG": ("gov.hk",), "TWN": ("gov.tw",), "CAN": ("gc.ca", "canada.ca"),
-    "FRA": ("gouv.fr",), "ESP": ("gob.es",), "RUS": ("gov.ru", "mid.ru"),
-    "CHN": ("gov.cn", "org.cn"), "MEX": ("gob.mx",), "USA": ("gov", "mil"),
-    "VNM": ("gov.vn",), "KHM": ("gov.kh",), "IND": ("gov.in",), "GBR": ("gov.uk",),
-    "AUS": ("gov.au",), "JPN": ("go.jp",), "KOR": ("go.kr",), "SGP": ("gov.sg",),
-    "THA": ("go.th",), "MYS": ("gov.my",), "IDN": ("go.id",),
-    # authority.py admits only the independently reviewed MECO website hosts.
-    # It represents the Philippines, despite the website's Taiwanese ccTLD.
-    "PHL": ("gov.ph", "meco.org.tw"),
-    "ARE": ("gov.ae", "uae-embassy.org"), "SAU": ("gov.sa",), "QAT": ("gov.qa",), "EGY": ("gov.eg",),
-    "MAR": ("gov.ma",), "TUR": ("gov.tr",), "NZL": ("govt.nz",),
-}
+from .authority_ownership import government_owner
 
 # Disposition -> (positive support patterns, negative/contradiction patterns).
 # Multilingual (English / Simplified Chinese / Spanish). A page "supports" a
@@ -194,24 +177,9 @@ def source_is_official(url: str) -> bool:
     return is_government_host(hostname(url))
 
 
-# Reverse map: a country-specific gov suffix -> the ALPHA-3 that owns it. Used to
-# reject a source that clearly belongs to a DIFFERENT country than the route.
-_SUFFIX_OWNER = {suf: dest for dest, sufs in _DEST_GOV_SUFFIXES.items()
-                 for suf in sufs if suf not in ("gov", "mil")}
-
-
-def _owning_country(host: str) -> str | None:
-    for suf in sorted(_SUFFIX_OWNER, key=len, reverse=True):
-        if host == suf or host.endswith("." + suf):
-            return _SUFFIX_OWNER[suf]
-    return None
-
-
 def jurisdiction_matches(url: str, destination: str) -> bool:
-    """The cited official source belongs to the destination country's government.
-    A known destination requires one of its official suffixes. An unknown
-    destination is lenient EXCEPT it rejects a host that demonstrably belongs to
-    a different known country (e.g. a .gov.kh source can't ground a Togo route)."""
+    """Require reviewed government ownership, including official missions.
+    Recognition as an official host alone never supplies country ownership."""
     host = hostname(url)
     if not is_government_host(host):
         return False
@@ -220,11 +188,8 @@ def jurisdiction_matches(url: str, destination: str) -> bool:
     # do not extend this exception to unrelated EU websites or nonmembers.
     if host == "eur-lex.europa.eu" and dest in {"FRA", "ESP"}:
         return True
-    sufs = _DEST_GOV_SUFFIXES.get(dest)
-    if sufs:
-        return any(host == s or host.endswith("." + s) for s in sufs)
-    owner = _owning_country(host)
-    return owner is None or owner == dest
+    owner = government_owner(host)
+    return bool(owner) and owner == dest
 
 
 def _supporting_match(text: str, disposition: str, nationality: str = ""):

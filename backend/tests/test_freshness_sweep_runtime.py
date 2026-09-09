@@ -199,3 +199,34 @@ def test_six_hour_cycle_selects_all_917_current_routes(sweep, monkeypatch):
     assert status['target_cycle_hours'] == 6 and status['time_budget_seconds'] <= 5 * 3600
     assert status['selected'] == status['attempted'] == status['completed'] == 917
     assert status['cycle_unattempted'] == 0 and status['workers'] == 4
+
+
+def test_readable_but_insufficient_and_interrupted_checks_are_not_fetch_failures(sweep, monkeypatch):
+    reports = [
+        {'outcome':'page_not_relevant', 'source_reads':3, 'source_fetch_failures':1},
+        {'outcome':'provider_error', 'source_reads':1, 'source_fetch_failures':0},
+        {'outcome':'budget_exhausted', 'source_reads':2, 'source_fetch_failures':1},
+        {'outcome':'fetch_failed', 'source_reads':0, 'source_fetch_failures':2},
+        {'outcome':'no_official_source'},
+    ]
+    rows = [SimpleNamespace(cache_key=str(i)) for i in range(len(reports))]
+    setup(monkeypatch, rows)
+    monkeypatch.setattr(freshness, 'recheck_row', lambda db, row, **_: reports[int(row.cache_key)])
+    outage_rows = []
+    monkeypatch.setattr(freshness, 'note_unreadable', lambda db, row, report: outage_rows.append(row.cache_key))
+    assert sweep.main() == 0
+    status = freshness.read_sweep_status()
+    assert status['attempted'] == 5 and status['read'] == 3
+    assert status['source_reads'] == 6 and status['source_fetch_failures'] == 4
+    assert status['insufficient_evidence'] == status['provider_failed'] == status['no_official_source'] == 1
+    assert status['unreadable'] == status['deferred'] == 1
+    assert status['verified'] == status['renewed'] == 0
+    assert outage_rows == ['3']
+
+
+@pytest.mark.parametrize('outcome', ['page_not_relevant', 'provider_error', 'no_official_source', 'budget_exhausted'])
+def test_non_transport_failure_cannot_file_source_unreadable_issue(outcome):
+    class UnusableDB:
+        def execute(self, *_):
+            raise AssertionError('a readable-but-insufficient page is not an outage')
+    freshness.note_unreadable(UnusableDB(), None, {'outcome':outcome, 'source_reads':1})

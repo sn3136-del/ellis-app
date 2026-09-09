@@ -81,6 +81,8 @@ class Settings:
         self.require_secure_admin = _bool("ELLIS_REQUIRE_SECURE_ADMIN",
             self.runtime_mode in ("tripcom_evaluation", "staging", "production"))
         self.admin_user_id = os.getenv("ELLIS_ADMIN_USER_ID", "").strip()
+        # Explicitly enabled for the open Trip.com Quality Control evaluation.
+        self.public_quality_control = _bool("ELLIS_PUBLIC_QUALITY_CONTROL", False)
         self.clerk_secret_key = os.getenv("CLERK_SECRET_KEY", "")
         self.action_token_secret = os.getenv("ELLIS_ACTION_SECRET", "local-action-secret")
 

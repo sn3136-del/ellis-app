@@ -21,7 +21,7 @@ from .config import capabilities, settings
 from .db import get_session, create_all
 from . import models, audit, service, execution, filing_acts, portal_queue
 from . import progress as progress_vocab
-from .security import (Principal, get_principal, require_owner, require_admin,
+from .security import (Principal, get_principal, require_owner, require_admin, require_quality_control,
                        issue_action_token, verify_action_token)
 from .providers import ocr as ocr_provider
 from .providers import passport_classifier
@@ -464,7 +464,7 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     written resolution, so the queue can never be emptied silently."""
     from datetime import datetime, timezone
     from .visa_snapshot.models import DatabaseIssueReport
-    require_admin(p)
+    require_quality_control(p)
     status = (body.status or "").strip().lower()
     if status not in DATABASE_ISSUE_STATUSES:
         raise HTTPException(422, f"status must be one of {DATABASE_ISSUE_STATUSES}")
@@ -561,7 +561,7 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
     from sqlalchemy import select as _select
     from .visa_snapshot import kimi_primary
     from .visa_snapshot.models import KimiRouteGuidanceCache
-    require_admin(p)
+    require_quality_control(p)
     nat = body.nationality.strip().upper()
     dest = body.destination.strip().upper()
     if not nat or not dest:
@@ -882,7 +882,7 @@ def travel_database_issue_accept_proposal(issue_id: str,
     from .visa_snapshot import verified_overrides, kimi_primary
     from .visa_snapshot.models import DatabaseIssueReport, KimiRouteGuidanceCache
     from sqlalchemy import select as _select
-    require_admin(p)
+    require_quality_control(p)
     row = db.get(DatabaseIssueReport, issue_id)
     if row is None:
         raise HTTPException(404, "no such issue")
@@ -910,7 +910,7 @@ def travel_database_issue_accept_proposal(issue_id: str,
                        "travel_purpose": rt.get("travel_purpose", "tourism")},
              "verified_at": datetime.now(timezone.utc).date().isoformat(),
              "verified_by": f"Ellis AI research, accepted by {p.user_id}",
-             "verifier": "human",
+             "verifier": "public" if p.role == "quality_tester" else "human",
              "source_url": str(prop.get("source_url") or ""),
              "note": (f"Flag by {row.reported_by}: {row.note or row.field}. "
                       f"Ellis read the official page; quotes: {quotes}")[:400],
@@ -951,7 +951,7 @@ def travel_database_freshness(db=Depends(get_session),
     from sqlalchemy import select as _select
     from .visa_snapshot import verified_overrides, tstation
     from .visa_snapshot.models import KimiRouteGuidanceCache
-    require_admin(p)
+    require_quality_control(p)
     now = datetime.now(timezone.utc)
     rows = []
     for r in db.execute(_select(KimiRouteGuidanceCache).order_by(
@@ -984,7 +984,7 @@ def travel_database_freshness(db=Depends(get_session),
             "grounded_at": eff.get("at") if verified else None,
             "last_attempt_at": gc.get("at"),
             "last_attempt_outcome": gc.get("outcome"),
-            "read_at": eff.get("at"),
+            "read_at": _fresh.last_source_read_at(r.verification),
             "grounded_source": eff.get("source_url"),
             "grounded_consistent": eff.get("consistent"),
             "changed_fields": eff.get("changed_fields") or [],
@@ -1116,7 +1116,8 @@ def _last_sweep_status() -> dict | None:
         "errors", "integrity_violations", "backlog_remaining", "completed", "workers",
         "in_flight", "cycle_unattempted", "renewed", "partial", "deferred",
         "last_progress_at", "eligible_now", "scheduled", "target_cycle_hours",
-        "route_budget_seconds", "integrity_resolved")
+        "route_budget_seconds", "integrity_resolved", "insufficient_evidence", "provider_failed",
+        "no_official_source", "source_reads", "source_fetch_failures")
     result = {k: data[k] for k in allowed if k in data}
     result.update(status=data.get("state"), checked=data.get("attempted", 0))
     if data.get("running") is True:
@@ -1182,7 +1183,7 @@ def travel_database_freshness_drill(body: FreshnessDrillIn,
     from .visa_snapshot import change_log, freshness, kimi_primary, verified_overrides
     from .visa_snapshot.models import KimiRouteGuidanceCache
     from .visa_snapshot.registry import iso3
-    require_admin(p)
+    require_quality_control(p)
     nat = iso3(body.nationality.strip(), default=None)
     dest = iso3(body.destination.strip(), default=None)
     if not nat or not dest:
@@ -1296,7 +1297,7 @@ def travel_database_issues(db=Depends(get_session),
     """The operator queue: what readers flagged, oldest first."""
     from sqlalchemy import select as _select
     from .visa_snapshot.models import DatabaseIssueReport
-    require_admin(p)
+    require_quality_control(p)
     # NOT filtered by org. The Database is one shared knowledge base: a report
     # is feedback about a public government fact, carries no applicant data by
     # construction (a route, a field name, and a capped note), and is filed by
@@ -1531,7 +1532,7 @@ def travel_database_records(nationality: str = "", destination: str = "",
     records with combined filtering, per-field fill status, completeness,
     source and confidence — the operator's spot-check surface."""
     from .visa_snapshot import tstation
-    require_admin(p)
+    require_quality_control(p)
     rows = _tstation_rows(db, nationality=nationality, destination=destination,
                           purpose=purpose, document=document,
                           requirement=requirement, confidence=confidence)
@@ -1642,7 +1643,7 @@ def travel_database_changes(q: str = "", limit: int = 200,
     from sqlalchemy import or_ as _or_
     from sqlalchemy import select as _select
     from .visa_snapshot.models import DatabaseChangeLog
-    require_admin(p)
+    require_quality_control(p)
     # Search must run in the database, not over a pre-truncated page. Filtering
     # after a 1,000-row cap meant a term that existed only in older history
     # returned nothing, and the same query found it once the caller happened to
@@ -1730,7 +1731,7 @@ def travel_database_export(nationality: str = "", destination: str = "",
     from openpyxl import Workbook
     from openpyxl.styles import Font
     from .visa_snapshot import tstation
-    require_admin(p)
+    require_quality_control(p)
     rows = _tstation_rows(db, nationality=nationality, destination=destination,
                           purpose=purpose, document=document,
                           requirement=requirement, confidence=confidence)
@@ -1797,7 +1798,7 @@ def travel_database_asks(limit: int = 200, unreviewed: bool = False,
     assistant actually told customers."""
     from sqlalchemy import select as _sel
     from .visa_snapshot.models import DatabaseAskLog
-    require_admin(p)
+    require_quality_control(p)
     stmt = _sel(DatabaseAskLog)
     if unreviewed:
         stmt = stmt.where(DatabaseAskLog.verdict == "")
@@ -1844,7 +1845,7 @@ def travel_database_record_edit(body: DatabaseRecordEditIn,
     from datetime import date
     from .visa_snapshot import change_log, kimi_primary, verified_overrides
     from .visa_snapshot.registry import iso3
-    require_admin(p)
+    require_quality_control(p)
     nat = iso3(body.nationality.strip(), default=None)
     dest = iso3(body.destination.strip(), default=None)
     if not nat or not dest:
@@ -1858,8 +1859,9 @@ def travel_database_record_edit(body: DatabaseRecordEditIn,
         route["travel_document_type"] = doc
     entry = {"route": route,
              "verified_at": date.today().isoformat(),
-             "verified_by": f"Trip.com operations ({p.user_id})",
-             "verifier": "human",
+             "verified_by": (f"Public Quality Control tester ({p.user_id})" if p.role == "quality_tester"
+                             else f"Trip.com operations ({p.user_id})"),
+             "verifier": "public" if p.role == "quality_tester" else "human",
              "source_url": body.source_url.strip(),
              "note": body.note.strip()[:400],
              "fields": body.fields or {}}
@@ -1953,7 +1955,7 @@ def travel_database_route_research(body: DatabaseRouteResearchIn,
     manual half writes the operator's own sourced fields."""
     from .visa_snapshot import freshness, kimi_primary
     from .visa_snapshot.registry import iso3
-    require_admin(p)
+    require_quality_control(p)
     nat = iso3(body.nationality.strip(), default=None)
     dest = iso3(body.destination.strip(), default=None)
     if not nat or not dest:
@@ -2022,7 +2024,7 @@ def travel_database_ask_review(ask_id: str, body: DatabaseAskReviewIn,
     correction walks the same tracked loop every other error walks."""
     from datetime import datetime, timezone
     from .visa_snapshot.models import DatabaseAskLog, DatabaseIssueReport
-    require_admin(p)
+    require_quality_control(p)
     verdict = (body.verdict or "").strip().lower()
     if verdict not in ("correct", "wrong"):
         raise HTTPException(422, "verdict must be correct or wrong")

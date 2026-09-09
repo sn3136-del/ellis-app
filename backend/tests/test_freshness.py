@@ -284,9 +284,12 @@ def test_when_no_source_states_the_rule_nothing_is_changed_or_refreshed(db):
     _seed(db)
     out = freshness.recheck_route(db, ROUTE)
     assert out["outcome"] == "page_not_relevant"
+    assert out["source_reads"] == 1 and out["source_fetch_failures"] == 0
     row = db.query(KimiRouteGuidanceCache).one()
     assert row.guidance["permitted_stay"] == "90 days"
     assert row.fresh_until is None
+    assert freshness.last_source_read_at(row.verification) == out['at']
+    assert not freshness.effective_check(row.verification)
 
 
 def test_a_disagreeing_check_is_not_served_as_a_clean_bill_of_health(db):

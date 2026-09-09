@@ -8,7 +8,7 @@
 // with per-field fill status, confidence level and clickable official
 // source, flag an error into the tracked correction queue, watch the change
 // log (add / modify / delete, field diffs), and export the dataset as the
-// two-sheet Excel their spec defines. Reached via #ops; admin token only —
+// two-sheet Excel their spec defines. Reached via #ops; open Quality Control evaluation —
 // the backend enforces it, this screen just speaks it.
 //
 // The spot-check accepts "China" as readily as "CHN": the country inputs
@@ -126,7 +126,7 @@ function useCountUp(target, ms = 700) {
 // both themes, worst adjacent pair ΔE 28.3.
 const SEQ = { high: '#0b7a44', medium: '#2563eb', low: '#d97706' }
 import { createVisaClient } from '../lib/visaBackend.js'
-import { newSession } from '../lib/visaSession.js'
+import { newQualitySession } from '../lib/visaSession.js'
 import { useLocale } from '../lib/locale.jsx'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { useLocalizedCountries } from '../lib/countryNames.js'
@@ -148,15 +148,6 @@ const PURPOSE_KEY = { tourism: 'db.purpose.tourism', business: 'db.purpose.busin
                       family_visit: 'db.purpose.family', study: 'db.purpose.study',
                       work: 'db.purpose.work', transit: 'db.purpose.transit',
                       other: 'db.purpose.other' }
-
-function useOpsClient(token) {
-  return useMemo(() => {
-    const s = newSession()
-    // The ops surface authenticates as the operator; the backend refuses
-    // reader tokens on every endpoint this screen calls.
-    return createVisaClient({ ...s, token })
-  }, [token])
-}
 
 const card = { background: '#fff', border: `1px solid ${BORDER}`,
                borderRadius: 16, boxShadow: '0 1px 3px rgba(15,41,77,0.05)' }
@@ -1458,6 +1449,12 @@ function NextSweepCountdown({ at, summary, t }) {
               <div>{t('ops.fresh.runEvidence')
                 .replace('{verified}', runCount('verified')).replace('{partial}', runCount('partial'))
                 .replace('{unreadable}', runCount('unreadable')).replace('{errors}', runCount('errors'))}</div>
+              <div>{t('ops.fresh.runReads')
+                .replace('{read}', runCount('read')).replace('{sources}', runCount('source_reads'))
+                .replace('{insufficient}', runCount('insufficient_evidence'))}</div>
+              <div>{t('ops.fresh.runFailures')
+                .replace('{fetch}', runCount('source_fetch_failures')).replace('{provider}', runCount('provider_failed'))
+                .replace('{missing}', runCount('no_official_source'))}</div>
             </>}
           </>
         )}
@@ -2242,48 +2239,13 @@ const EMPTY_FILTERS = { nationality: '', destination: '', purpose: '',
                         fieldMissing: '', document: '' }
 
 export default function QualityConsole() {
-  const { t } = useLocale()
-  const [token, setToken] = useState(() => {
-    try { return sessionStorage.getItem('ellis_operator_access') || '' } catch { return '' }
-  })
-  const [candidate, setCandidate] = useState('')
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-  const signOut = useCallback(() => {
-    try { sessionStorage.removeItem('ellis_operator_access') } catch { /* memory only */ }
-    setToken(''); setCandidate('')
-  }, [])
-  if (token) return <QualityWorkspace token={token} onSignOut={signOut} />
-  return <div style={{ ...card, maxWidth: 420, margin: '60px auto', padding: 28 }}>
-    <h1 style={{ fontSize: 24 }}>{t('ops.title')}</h1>
-    <p>{t('ops.auth.intro')}</p>
-    <form onSubmit={async (event) => {
-      event.preventDefault(); setBusy(true); setError('')
-      try {
-        const key = candidate.trim()
-        if (!key) return
-        const client = createVisaClient({ ...newSession(), token: key })
-        await client.get('/database/freshness')
-        try { sessionStorage.setItem('ellis_operator_access', key) } catch { /* memory only */ }
-        setCandidate(''); setToken(key)
-      } catch { setError(t('ops.auth.failed')) }
-      finally { setBusy(false) }
-    }}>
-      <label style={{ display: 'grid', gap: 8 }}>
-        {t('ops.auth.key')}
-        <input type="password" autoComplete="current-password" required value={candidate}
-          onChange={(e) => setCandidate(e.target.value)} style={input} />
-      </label>
-      {error && <p role="alert" style={{ color: RED }}>{error}</p>}
-      <button className="btn" style={{ marginTop: 16 }} disabled={busy || !candidate.trim()}>
-        {busy ? t('ops.loading') : t('ops.auth.signIn')}
-      </button>
-    </form>
-  </div>
+  return <QualityWorkspace />
 }
 
-function QualityWorkspace({ token, onSignOut }) {
-  const client = useOpsClient(token)
+function QualityWorkspace() {
+  const [session] = useState(() => newQualitySession())
+  const { token, orgId, userId } = session
+  const client = useMemo(() => createVisaClient(session), [session])
 
   async function runDrill(nat, dest) {
     return client.post('/database/freshness/drill', {
@@ -2444,7 +2406,6 @@ function QualityWorkspace({ token, onSignOut }) {
       // once quietly, and only then say what happened in plain words. The
       // last loaded data stays on screen either way.
       const msg = String(e?.message || e)
-      if (e?.status === 401 || e?.status === 403) { onSignOut(); return }
       if (attempt === 0 && /fetch|network|load failed/i.test(msg)) {
         await new Promise((r) => setTimeout(r, 800))
         return load(1)
@@ -2454,7 +2415,7 @@ function QualityWorkspace({ token, onSignOut }) {
     } finally {
       setBusy(false)
     }
-  }, [client, tab, qs, t, onSignOut])
+  }, [client, tab, qs, t])
   useEffect(() => { load() }, [load])
   useEffect(() => {
     if (tab !== 'freshness') return
@@ -2619,7 +2580,7 @@ function QualityWorkspace({ token, onSignOut }) {
     try {
       const res = await fetch(`${client.baseUrl}/database/export.xlsx?${qs()}`, {
         headers: { authorization: `Bearer ${token}`, 'x-ellis-token': token,
-                   'x-org-id': 'ops', 'x-user-id': 'ops' },
+                   'x-org-id': orgId, 'x-user-id': userId },
       })
       if (!res.ok) throw new Error(`export failed (${res.status})`)
       const blob = await res.blob()
@@ -2641,7 +2602,7 @@ function QualityWorkspace({ token, onSignOut }) {
     try {
       const res = await fetch(`${client.baseUrl}/database/changes.csv`, {
         headers: { authorization: `Bearer ${token}`, 'x-ellis-token': token,
-                   'x-org-id': 'ops', 'x-user-id': 'ops' },
+                   'x-org-id': orgId, 'x-user-id': userId },
       })
       if (!res.ok) throw new Error(`export failed (${res.status})`)
       const blob = await res.blob()
@@ -2747,9 +2708,6 @@ function QualityWorkspace({ token, onSignOut }) {
                        letterSpacing: -0.4 }}>
             {t('ops.title')}
           </h1>
-          <button className="btn btn--ghost" onClick={onSignOut} style={{ marginLeft: 'auto' }}>
-            {t('ops.auth.signOut')}
-          </button>
           {/* Subtitle hidden per owner instruction: the title stands alone. */}
         </div>
 

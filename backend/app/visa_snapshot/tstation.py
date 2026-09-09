@@ -443,6 +443,9 @@ def verdict_provenance_supported(provenance: dict | None) -> bool:
     from .authority import hostname, is_government_host
     if not isinstance(provenance, dict):
         return False
+    # Public evaluation edits are attributed, not certified source reviews.
+    if provenance.get("verifier") == "public":
+        return False
     fields = provenance.get("fields")
     if not isinstance(fields, (list, tuple, set, dict)) or "disposition" not in fields:
         return False
@@ -475,6 +478,10 @@ def _confidence(guidance: dict, provenance: dict | None,
     Every verdict needs an actual source check, including a productless
     exemption. A URL attached to an unread claim is not a source."""
     if disputed:
+        return "Low"
+    if isinstance(provenance, dict) and (provenance.get("verifier") == "public" or
+            any(isinstance(proof, dict) and proof.get("verifier") == "public"
+                for proof in (provenance.get("field_provenance") or {}).values())):
         return "Low"
     from .authority import hostname, is_government_host
     fields = set((provenance or {}).get("fields") or [])

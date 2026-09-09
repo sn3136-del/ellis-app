@@ -82,6 +82,8 @@ def test_sweep_summary_preserves_coverage_and_progress_distinctions(monkeypatch)
         'scheduled': 12, 'completed': 10, 'in_flight': 2, 'cycle_unattempted': 7,
         'backlog_remaining': 3, 'eligible_now': 9, 'target_cycle_hours': 6,
         'route_budget_seconds': 75, 'integrity_resolved': 4,
+        'source_reads': 20, 'source_fetch_failures': 3, 'insufficient_evidence': 2,
+        'provider_failed': 1, 'no_official_source': 1,
         'last_progress_at': '2026-09-09T01:00:00+00:00',
         'updated_at': '2026-09-09T01:00:30+00:00'}
     monkeypatch.setattr(freshness, 'read_sweep_status', lambda: {
@@ -93,6 +95,18 @@ def test_sweep_summary_preserves_coverage_and_progress_distinctions(monkeypatch)
     assert result['verified'] == 5 and result['renewed'] == 2
     assert result['last_progress_at'] != result['updated_at']
     assert 'last_error' not in result
+
+
+def test_readable_insufficient_evidence_is_a_read_but_never_verification():
+    from app.visa_snapshot import freshness
+    at = datetime.now(timezone.utc).isoformat()
+    row = SimpleNamespace(verification={})
+    freshness._stamp(row, {'at':at, 'outcome':'page_not_relevant', 'source_reads':2})
+    assert freshness.last_source_read_at(row.verification) == at
+    assert freshness.effective_check(row.verification) == {}
+    freshness._stamp(row, {'at':'2026-09-10T00:00:00Z', 'outcome':'fetch_failed', 'source_reads':0})
+    assert freshness.last_source_read_at(row.verification) == at
+    assert freshness.effective_check(row.verification) == {}
 
 
 def test_api_verdict_only_read_exposes_unverified_details_without_renewal(client, db, monkeypatch):

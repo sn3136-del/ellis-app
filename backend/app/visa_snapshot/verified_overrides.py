@@ -299,8 +299,8 @@ def lint_rows(rows: list) -> list[dict]:
     out = []
     for r in rows:
         errors = _field_errors(r.get("fields") or {})
-        if r.get("verifier", "ai") not in ("human", "ai"):
-            errors.append("verifier must be human or ai")
+        if r.get("verifier", "ai") not in ("human", "ai", "public"):
+            errors.append("verifier must be human, ai or public")
         if errors:
             out.append({"route": r.get("route"), "errors": errors,
                         "source_url": r.get("source_url"), "fields": r.get("fields")})
@@ -337,7 +337,7 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             continue
         if not is_government_host(hostname(url)):
             continue          # an override must cite an official source
-        if r.get("verifier", "ai") not in ("human", "ai"):
+        if r.get("verifier", "ai") not in ("human", "ai", "public"):
             continue
         clean = {k: v for k, v in fields.items() if k in OVERRIDABLE}
         route_key = _key(route["nationality"], route["destination"],
@@ -386,7 +386,7 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             p = (r.get("field_provenance") or {}).get(k)
             if (isinstance(p, dict) and p.get("verified_at") and
                     is_government_host(hostname(str(p.get("source_url") or ""))) and
-                    p.get("verifier", "ai") in ("human", "ai")):
+                    p.get("verifier", "ai") in ("human", "ai", "public")):
                 per_field[k] = _provenance(p)
             else:
                 per_field[k] = dict(provenance)
@@ -425,8 +425,8 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
         raise ValueError("say what was checked and why, in the note")
     if not str(entry.get("verified_at") or "").strip():
         raise ValueError("every edit needs a verification date")
-    if entry.get("verifier", "ai") not in ("human", "ai"):
-        raise ValueError("verifier must be human or ai")
+    if entry.get("verifier", "ai") not in ("human", "ai", "public"):
+        raise ValueError("verifier must be human, ai or public")
     fields = entry.get("fields") or {}
     if not isinstance(fields, dict):
         raise ValueError("fields must be an object")
