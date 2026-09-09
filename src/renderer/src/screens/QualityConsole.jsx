@@ -128,6 +128,7 @@ const SEQ = { high: '#0b7a44', medium: '#2563eb', low: '#d97706' }
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newQualitySession, qualityRecordRoute } from '../lib/visaSession.js'
 import { createLatestLoader, readQualityTab } from '../lib/qualityLoader.js'
+import { indexRecoveredRecords, recoveredForRecord } from '../lib/qualityRecovery.js'
 import { useLocale } from '../lib/locale.jsx'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { useLocalizedCountries } from '../lib/countryNames.js'
@@ -485,6 +486,41 @@ function MissingLine({ missing, t }) {
 
 // Translated label for one of the 25 T-Station field keys; falls back to the
 // humanized key so an unmapped field is still readable, never snake_case.
+let recoveredRecordRequest
+function RecoveredRecord({ rec, t }) {
+  const [history, setHistory] = useState([])
+  useEffect(() => {
+    let active = true
+    if (!recoveredRecordRequest) {
+      recoveredRecordRequest = fetch('/qc-recovered-records.json', { cache: 'no-store' })
+        .then((r) => { if (!r.ok) throw new Error('Recovery unavailable'); return r.json() })
+        .then((data) => indexRecoveredRecords(data.records))
+        .catch((error) => { recoveredRecordRequest = null; throw error })
+    }
+    recoveredRecordRequest.then((index) => {
+      if (active) setHistory(recoveredForRecord(rec, index))
+    }).catch(() => { if (active) setHistory([]) })
+    return () => { active = false }
+  }, [rec])
+  if (!history.length) return null
+  return <section style={{ gridColumn: '1 / -1', padding: 12, background: '#f7f9fc', borderRadius: 10 }}>
+    <strong>{t('ops.recoveredInline')}</strong>
+    <p style={{ fontSize: 12, color: GRAY }}>{t('ops.recoveredPrecedence')}</p>
+    {history.map((row, i) => <details key={i}>
+      <summary style={{ cursor: 'pointer', padding: '8px 0' }}>{row.visa_type_name}</summary>
+      <dl style={{ fontSize: 12, overflowWrap: 'anywhere' }}>
+        {Object.entries(row).filter(([, value]) => value != null && value !== '').map(([field, value]) =>
+          <div key={field} style={{ marginBottom: 8 }}>
+            <dt style={{ color: GRAY }}>{fx(t, field)}</dt>
+            <dd style={{ marginLeft: 0 }}>{/^https?:\/\//.test(String(value))
+              ? <a href={String(value)} target="_blank" rel="noreferrer">{String(value)}</a>
+              : Array.isArray(value) ? value.join(', ') : String(value)}</dd>
+          </div>)}
+      </dl>
+    </details>)}
+  </section>
+}
+
 function fx(t, f) {
   const k = 'ops.fx.' + f
   return t(k) !== k ? t(k) : f.replace(/_/g, ' ')
@@ -621,6 +657,7 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
           </div>
         </div>
       ))}
+      <RecoveredRecord rec={rec} t={t} />
       {/* §4.2.1's cross-validation, one URL per source. Field 22 holds a
           single source_url by their dictionary, so a route checked against
           three ministries could show one of them and the rest were
@@ -2672,7 +2709,6 @@ function QualityWorkspace() {
       <div className="page" style={{ maxWidth: 1160, margin: '0 auto',
                                      padding: '30px 24px 80px' }}
            data-testid="quality-console">
-        <a href="/recovered-sources.html" target="_blank" rel="noreferrer" style={{ color: BLUE, fontSize: 13 }}>{t('ops.recoveredSources')}</a>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14,
                       flexWrap: 'wrap' }}>
