@@ -6,10 +6,9 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --silent
 COPY . .
-# The renderer is an electron-vite sub-build: point vite at its own root
-# and emit a plain web bundle (absolute base, so /assets resolves under
-# the proxy).
-RUN npx vite build src/renderer --base=/ --outDir ../../out/renderer \
+# Use the same React/JSX and browser configuration as the tested web release.
+# A bare vite build skips plugin-react and produces a blank page at runtime.
+RUN ELLIS_PUBLIC=1 npm run build:web -- --outDir ../../out/renderer \
       --emptyOutDir --logLevel error
 
 FROM python:3.12-slim
