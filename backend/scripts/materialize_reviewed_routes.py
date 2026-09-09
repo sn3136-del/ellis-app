@@ -34,7 +34,7 @@ import uuid
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.visa_snapshot import evidence_validator as evidence
-from app.visa_snapshot.structured_evidence import validate_route_evidence
+from app.visa_snapshot.structured_evidence import validate_route_evidence, guidance_conditions_preserved
 from app.visa_snapshot import kimi_primary as kp, registry, tstation
 from app.visa_snapshot import verified_overrides as overrides
 from app.visa_snapshot.change_log import diff
@@ -91,7 +91,7 @@ def _numeric_support(value, quote):
     if isinstance(value, (int, float)):
         if not math.isfinite(value):
             return False
-        if value == 0 and re.search(r'\bfree\b|no (?:visa )?fee|without charge', quote, re.I):
+        if value == 0 and re.search(r'\bfree\b|no (?:visa )?fee|without charge|免費', quote, re.I):
             return True
         value = format(value, 'g')
     # Currency-prefixed grouped amounts only: do not turn an ordinary decimal
@@ -101,7 +101,7 @@ def _numeric_support(value, quote):
     quote = re.sub(r'(?<![\d.,])(\d{1,3}(?:,\d{3})+)(?![\d.,])',
                    lambda m: m[0] + ' ' + m[1].replace(',', ''), quote)
     numbers = re.findall(r'(?<![\w.])\d+(?:\.\d+)?(?![\w.])', str(value))
-    return all(re.search(r'(?<![\d.])' + re.escape(n) + (r'(?:\.0+)?' if '.' not in n else '') + r'(?![\d.])', quote) for n in numbers)
+    return all(re.search(r'(?<![\d.])0*' + re.escape(n) + (r'(?:\.0+)?' if '.' not in n else '') + r'(?![\d.])', quote) for n in numbers)
 
 
 def _referenced_source_ids(provenance, sources):
@@ -141,7 +141,21 @@ def _proof(name, value, proof, sources, route, today):
     if not isinstance(additional, list) or any(not isinstance(part, str) or not part.strip()
             or not evidence.quote_in_text(part, source['text']) for part in additional):
         raise ValueError(name + ' additional quote is absent from the captured source text')
-    quoted_evidence = '\n'.join([quote] + additional)
+    supporting = proof.get('supporting_evidence', [])
+    if not isinstance(supporting, list):
+        raise ValueError(name + ' supporting evidence must be a list')
+    supporting_quotes = []
+    for item in supporting:
+        extra = sources.get(item.get('source_id')) if isinstance(item, dict) else None
+        if not extra or item.get('source_url') != extra['url']:
+            raise ValueError(name + ' supporting evidence needs its exact catalogued source URL')
+        if extra['checked_at'] != proof['verified_at'] or not evidence.jurisdiction_matches(extra['url'], route['destination_country']):
+            raise ValueError(name + ' supporting evidence needs current destination-authority provenance')
+        fragment = item.get('quote')
+        if not isinstance(fragment, str) or not fragment.strip() or not evidence.quote_in_text(fragment, extra['text']):
+            raise ValueError(name + ' supporting quote is absent from its captured source text')
+        supporting_quotes.append(fragment)
+    quoted_evidence = '\n'.join([quote] + additional + supporting_quotes)
     if name == 'disposition':
         result = validate_route_evidence(proof, source, sources, route, value, policy_date=today.isoformat())
         if not result['ok']:
@@ -194,6 +208,12 @@ def _validate_entry(entry, sources, today):
         if value in UNKNOWN or name == 'confidence':
             continue
         _proof(name, value, provenance.get(name), sources, route, today)
+    disposition_proof = provenance['disposition']
+    condition_scope = validate_route_evidence(disposition_proof, sources[disposition_proof['source_id']],
+        sources, route, guidance['disposition'], policy_date=today.isoformat())
+    condition_check = guidance_conditions_preserved(condition_scope, guidance)
+    if not condition_check['ok']:
+        raise ValueError('guidance omits source condition: ' + condition_check['reason'])
     for name in ('policy_valid_from', 'policy_valid_through'):
         if entry.get(name):
             bound = _date(entry[name], name)
@@ -211,13 +231,17 @@ def _validate_entry(entry, sources, today):
         raise ValueError('existing overlay creates contradiction: ' + '; '.join(final_problems))
     checked_fields = set((existing_provenance or {}).get('fields') or [])
     # The common merger canonicalises empty collections to null and the
-    # exemption's not_required channel to null. Neither creates a new fact.
+    # exemption's not_required channel to null, and clears visa-application
+    # appointment/interview flags to False for exempt entry. These are
+    # classification normalizations, not border-inspection promises.
     # Every other explicit value, including null clearing a stay/fee, is exact.
     def equivalent(name, value):
         actual = merged.get(name)
         return (actual == value or value in UNKNOWN and actual in UNKNOWN
                 or name == 'application_channel' and value == 'not_required'
-                and actual is None and guidance.get('disposition') == 'VISA_EXEMPT')
+                and actual is None and guidance.get('disposition') == 'VISA_EXEMPT'
+                or name in {'appointment_required', 'interview_required'} and value is None
+                and actual is False and guidance.get('disposition') == 'VISA_EXEMPT')
     if any(not equivalent(name, value) for name, value in guidance.items()):
         raise ValueError('existing overlay changes a reviewed field; correct the overlay explicitly first')
     records = tstation.records_for_route(route, merged, existing_provenance, grounded_ok=False)

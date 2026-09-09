@@ -509,3 +509,12 @@ def test_russian_passport_section_and_general_visa_baseline(change):
     if change.startswith('valid'):mod._proof('disposition','VISA_REQUIRED' if visa else 'VISA_EXEMPT',proof,sources,route,NOW.date())
     else:
         with pytest.raises(ValueError):mod._proof('disposition','VISA_REQUIRED' if visa else 'VISA_EXEMPT',proof,sources,route,NOW.date())
+
+
+def test_repeated_navigation_title_requires_one_complete_policy_section():
+    proof,sources,route,disp=program_fixture('canada_eta_member')
+    source=sources['main'];rule=proof['source_closed_list']
+    source['text']='Navigation\n'+rule['heading_quote']+'\nOther navigation\n'+source['text']
+    mod._proof('disposition',disp,proof,sources,route,NOW.date())
+    source['text']+='\n'+rule['table_quote']+'\n'+rule['closing_quote']
+    with pytest.raises(ValueError):mod._proof('disposition',disp,proof,sources,route,NOW.date())
