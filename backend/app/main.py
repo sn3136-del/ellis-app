@@ -1671,21 +1671,31 @@ def travel_database_changes(q: str = "", limit: int = 200,
     needle = q.strip().lower()
     stmt = _select(DatabaseChangeLog)
     if needle:
-        like = f"%{needle}%"
+        # Search is literal substring matching, including values inside a
+        # field diff. Escape SQL wildcards so the database is the single
+        # predicate and filtering still happens before the page limit.
+        def literal_pattern(text):
+            escaped = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            return f"%{escaped}%"
+
+        like = literal_pattern(needle)
+        # SQLite JSON may store non-ASCII text and embedded quotes as JSON
+        # escapes. Search that representation too, without requiring users
+        # to know the storage encoding of the old/new value.
+        json_like = literal_pattern(json.dumps(needle, ensure_ascii=True)[1:-1])
+        changes_text = _func.lower(_func.cast(DatabaseChangeLog.changes, _String))
         stmt = stmt.where(_or_(
-            _func.lower(DatabaseChangeLog.cache_key).like(like),
-            _func.lower(DatabaseChangeLog.action).like(like),
-            _func.lower(DatabaseChangeLog.origin).like(like),
-            _func.lower(_func.coalesce(DatabaseChangeLog.note, "")).like(like),
-            _func.lower(_func.cast(DatabaseChangeLog.changes, _String)).like(like),
+            _func.lower(DatabaseChangeLog.cache_key).like(like, escape="\\"),
+            _func.lower(DatabaseChangeLog.action).like(like, escape="\\"),
+            _func.lower(DatabaseChangeLog.origin).like(like, escape="\\"),
+            _func.lower(_func.coalesce(DatabaseChangeLog.note, "")).like(like, escape="\\"),
+            changes_text.like(like, escape="\\"),
+            changes_text.like(json_like, escape="\\"),
         ))
     rows = db.execute(stmt.order_by(DatabaseChangeLog.created_at.desc())
                       .limit(max(1, min(limit, 20000)))).scalars().all()
     out = []
     for r in rows:
-        blob = f"{r.cache_key} {r.action} {r.origin} {r.note} {list((r.changes or {}).keys())}".lower()
-        if needle and needle not in blob:
-            continue
         out.append({"id": r.id, "cache_key": r.cache_key, "route": r.route,
                     "action": r.action, "origin": r.origin,
                     "changes": r.changes, "note": r.note,
@@ -1703,31 +1713,59 @@ def travel_database_changes_export(q: str = "", limit: int = 1000,
     Excel opens directly."""
     import csv
     import io
+    import json
     from fastapi.responses import Response
+
+    def value_text(value):
+        if value is None:
+            return ""
+        if isinstance(value, (dict, list)):
+            return json.dumps(value, ensure_ascii=False, sort_keys=True)
+        return str(value)
+
     data = travel_database_changes(q=q, limit=limit, db=db, p=p)
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(["time_utc", "action", "origin", "nationality", "destination",
                 "purpose", "field", "from", "to", "note",
-                "source_url", "source_host", "official_domain"])
+                "source_url", "source_host", "official_domain", "raw_change"])
     for c in data["changes"]:
         rt = c.get("route") or {}
         base = [c.get("at") or "", c.get("action") or "", c.get("origin") or "",
                 rt.get("passport_nationality") or "",
                 rt.get("destination_country") or "",
                 rt.get("travel_purpose") or ""]
-        changes = c.get("changes") or {}
+        changes = c.get("changes")
         # Every exported row carries the same proof the screen shows, so a
         # reviewer working in Excel can open the official page too.
         proof = [c.get("source_url") or "", c.get("source_host") or "",
                  "yes" if c.get("source_official") else "no"]
+        if not isinstance(changes, dict):
+            # Legacy/non-contract payloads are evidence to preserve, not
+            # fabricated old/new values. Keep the existing columns stable
+            # and retain their JSON in an explicit trailing column.
+            raw = json.dumps(changes, ensure_ascii=False, sort_keys=True) if changes is not None else ""
+            w.writerow(base + ["", "", "", c.get("note") or ""] + proof + [raw])
+            continue
         if not changes:
-            w.writerow(base + ["", "", "", c.get("note") or ""] + proof)
+            w.writerow(base + ["", "", "", c.get("note") or ""] + proof + [""])
         for field, diff in changes.items():
             frm, to = ("", "")
+            raw = ""
             if isinstance(diff, dict):
-                frm, to = str(diff.get("from") or ""), str(diff.get("to") or "")
-            w.writerow(base + [field, frm, to, c.get("note") or ""] + proof)
+                if "from" in diff or "to" in diff:
+                    frm, to = value_text(diff.get("from")), value_text(diff.get("to"))
+                    extra = set(diff) - {"from", "to"}
+                elif "before" in diff or "after" in diff:
+                    frm, to = value_text(diff.get("before")), value_text(diff.get("after"))
+                    extra = set(diff) - {"before", "after"}
+                else:
+                    extra = True
+                if extra:
+                    raw = json.dumps(diff, ensure_ascii=False, sort_keys=True)
+            else:
+                raw = json.dumps(diff, ensure_ascii=False, sort_keys=True)
+            w.writerow(base + [field, frm, to, c.get("note") or ""] + proof + [raw])
     # BOM so Excel decodes the Chinese route names correctly.
     return Response("﻿" + buf.getvalue(), media_type="text/csv",
                     headers={"Content-Disposition":
