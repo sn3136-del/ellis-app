@@ -72,11 +72,11 @@ test('freshness labels preserve separate read, evidence, and failure counters in
 
 
 test('source quality badges scope evidence to the visa requirement in every locale', () => {
-  const scopes = { en: /visa requirement|Requirement:/, 'zh-CN': /签证要求/, 'zh-Hant': /簽證要求/ }
+  const scopes = { en: /[Vv]isa requirement|Requirement:/, 'zh-CN': /签证要求/, 'zh-Hant': /簽證要求/ }
   for (const code of SUPPORTED) {
     for (const key of ['ops.check.quoted', 'ops.check.aiQuoted', 'ops.check.grounded',
       'ops.tip.quoted', 'ops.tip.aiQuoted', 'ops.tip.grounded', 'ops.tip.reference',
-      'ops.stat.srcLine', 'ops.stat.sourcesSub', 'ops.stat.substantiatedSub']) {
+      'ops.stat.requirementSupportLine', 'ops.stat.substantiatedSub']) {
       assert.match(t(code, key), scopes[code], `${code}:${key} must identify the supported requirement`)
     }
   }
@@ -87,4 +87,11 @@ test('source quality badges scope evidence to the visa requirement in every loca
   assert.match(t('en', 'ops.tip.confidence'), /does not certify every field or replace the release status/)
   assert.match(t('zh-CN', 'ops.tip.confidence'), /不能代替发布状态/)
   assert.match(t('zh-Hant', 'ops.tip.confidence'), /不能代替發布狀態/)
+})
+
+ test('source coverage copy describes link presence separately from evidence', () => {
+  for (const [code, pattern] of Object.entries({en: /source link/, 'zh-CN': /来源链接/, 'zh-Hant': /來源連結/})) {
+    assert.match(t(code, 'ops.stat.srcLine'), pattern)
+    assert.match(t(code, 'ops.stat.sourcesSub'), pattern)
+  }
 })

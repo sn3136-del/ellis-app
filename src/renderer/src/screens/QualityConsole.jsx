@@ -2679,7 +2679,7 @@ function QualityWorkspace() {
       }
     }
     const fillable = filledCells + gaps
-    const src = t0.filter((r) => ['human-quote', 'ai-quote', 'grounded-consistent'].includes(r.source_check)).length
+    const src = t0.filter((r) => typeof r.source_url === 'string' && r.source_url.trim()).length
     const sub = t0.filter((r) => r.source_check === 'human-quote'
       || r.source_check === 'ai-quote' || r.source_check === 'grounded-consistent').length
     return { total: t0.length,
@@ -2976,6 +2976,10 @@ function QualityWorkspace() {
                                     color: GRAY, fontVariantNumeric: 'tabular-nums' }}>
                         {t('ops.stat.srcLine')
                           .replace('{n}', s.sourced.toLocaleString())
+                          .replace('{total}', s.total.toLocaleString())}
+                        <br />
+                        {t('ops.stat.requirementSupportLine')
+                          .replace('{n}', s.substantiated.toLocaleString())
                           .replace('{total}', s.total.toLocaleString())}
                       </div>
                     </div>
