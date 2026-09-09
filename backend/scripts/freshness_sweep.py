@@ -6,7 +6,7 @@ lock stays held until every worker has stopped; cancelled, partial and failed
 checks never become invented verification or hidden backlog.
 """
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import fcntl
 import json
 import logging
@@ -36,6 +36,60 @@ _COUNTS = ("attempted", "read", "verified", "renewed", "partial", "corrected", "
 
 def _utc():
     return datetime.now(timezone.utc).isoformat()
+
+
+def _timestamp(value):
+    try:
+        stamp = datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+        return stamp if stamp.tzinfo else stamp.replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def _continuation(previous, now):
+    """Resume only a stopped cycle whose original five-hour budget remains.
+
+    The process lock is already held, so a persisted 'running' state means
+    its writer is gone. Counters remain per invocation; no old evidence is
+    relabelled as a new check. A completed or expired cycle starts normally.
+    """
+    if not isinstance(previous, dict) or previous.get('state') not in {
+            'running', 'interrupted', 'failed', 'budget_exhausted'}:
+        return None
+    if previous.get('schema_version') not in (2, 3):
+        return None
+    start = _timestamp(previous.get('cycle_started_at') or previous.get('started_at'))
+    budget = previous.get('cycle_time_budget_seconds', previous.get('time_budget_seconds'))
+    if isinstance(budget, bool) or not isinstance(budget, (int, float)) or not 0 < budget <= MAX_SECONDS:
+        return None
+    if start is None or start > now or now >= start + timedelta(seconds=budget):
+        return None
+    return {'cycle_started_at': start.isoformat(), 'cycle_time_budget_seconds': budget,
+            'remaining_seconds': (start + timedelta(seconds=budget) - now).total_seconds(),
+            'resumed_from_started_at': previous.get('started_at'),
+            'prior_attempt_results': previous.get('attempted', 0)}
+
+
+def _remaining_cycle_rows(rows, cycle_started_at, now):
+    """Skip recorded attempts already made in this cycle, not unverified facts.
+
+    Use the original due cutoff, also supporting a pre-checkpoint worker.
+    A cancelled in-flight check may be retried. Other attempted outcomes,
+    including unreadable or insufficient evidence, wait for the next cycle.
+    Newly created/changed rows without a recorded attempt remain eligible.
+    """
+    start = _timestamp(cycle_started_at)
+    cutoff = start - timedelta(hours=DUE_AFTER_HOURS)
+    remaining = []
+    for row in rows:
+        verification = getattr(row, 'verification', None)
+        check = verification.get('grounded_check') if isinstance(verification, dict) else None
+        check = check if isinstance(check, dict) else {}
+        at = _timestamp(check.get('at'))
+        if (at is None or at > now or at < cutoff or
+                (check.get('outcome') == 'cancelled' and at >= start)):
+            remaining.append(row)
+    return remaining
 
 
 def _write_status(path: Path, status: dict) -> None:
@@ -201,45 +255,77 @@ def main() -> int:
         except BlockingIOError:
             log.info("another sweep is running; this invocation is skipped")
             return 0
+        # Preserve the actual previous invocation before replacing its status.
+        # A corrupt status is not trusted as a continuation instruction.
+        previous = None
+        try:
+            if path.is_file():
+                if path.stat().st_size > 128 * 1024:
+                    raise ValueError('oversized sweep status')
+                previous = json.loads(path.read_text(encoding='utf-8'))
+                if isinstance(previous, dict):
+                    _write_status(path.with_suffix('.previous.json'), previous)
+        except (OSError, ValueError, TypeError):
+            log.exception('cannot preserve or validate prior sweep status')
+            return 1
+        continuation = _continuation(previous, datetime.now(timezone.utc))
         if threading.current_thread() is threading.main_thread():
             for sig in (signal.SIGTERM, signal.SIGINT):
                 previous_handlers[sig] = signal.signal(sig, lambda _sig, _frame: stop.set())
         started = time.monotonic()
-        deadline = started + MAX_SECONDS
-        status = {"schema_version": 2, "running": True, "state": "running", "process_id": os.getpid(),
+        budget = continuation['remaining_seconds'] if continuation else MAX_SECONDS
+        deadline = started + budget
+        status = {"schema_version": 3, "running": True, "state": "running", "process_id": os.getpid(),
             "started_at": _utc(), "finished_at": None, "updated_at": _utc(), "last_progress_at": None,
             "elapsed_seconds": 0, "target_cycle_hours": 6, "due_after_hours": DUE_AFTER_HOURS,
-            "time_budget_seconds": MAX_SECONDS, "route_budget_seconds": ROUTE_SECONDS,
+            "time_budget_seconds": budget, "route_budget_seconds": ROUTE_SECONDS,
             "row_limit": MAX_ROWS, "workers": WORKERS, "due_before": None, "selected": 0,
             "scheduled": 0, "completed": 0, "in_flight": 0, "cycle_unattempted": 0,
             "integrity_violations": 0, "integrity_resolved": 0, "backlog_remaining": None,
             "last_error": None, **{key: 0 for key in _COUNTS}}
+        status.update({k:v for k,v in continuation.items() if k != 'remaining_seconds'} if continuation else {
+            'cycle_started_at': status['started_at'], 'cycle_time_budget_seconds': MAX_SECONDS})
         result = 0
         attempted_keys = set()
+        checkpoint_failed = False
         def save():
+            nonlocal checkpoint_failed
             status["updated_at"] = _utc()
             status["elapsed_seconds"] = round(time.monotonic() - started, 3)
             try:
                 _write_status(path, status)
+                return True
             except OSError:
+                checkpoint_failed = True
+                stop.set()
+                status['state'] = 'failed'
+                status['last_error'] = {'message': 'Unable to persist sweep checkpoint; dispatch stopped.', 'at': _utc()}
                 log.exception("cannot write freshness sweep status")
-        save()
+                return False
+        if not save():
+            return 1  # no integrity audit or paid work without a durable budget
         db = None
         try:
             db = SessionLocal()
             integrity = freshness.audit_integrity(db)
             status["integrity_violations"] = integrity["violated"]
             status["integrity_resolved"] = integrity.get("resolved", 0)
-            due = freshness.due_rows(db, older_than_hours=DUE_AFTER_HOURS, limit=10**9)
+            due = freshness.due_rows(db, older_than_hours=0 if continuation else DUE_AFTER_HOURS, limit=10**9)
+            if continuation:
+                due = _remaining_cycle_rows(due, status['cycle_started_at'], datetime.now(timezone.utc))
             status["due_before"] = len(due)
             keys = [row.cache_key for row in due[:MAX_ROWS]]
             db.close(); db = None  # no coordinator transaction survives worker dispatch
             status["selected"] = status["cycle_unattempted"] = len(keys)
             save()
             log.info("sweep: %d due, %d selected, %d workers", status["due_before"], len(keys), WORKERS)
+            if continuation:
+                log.info('continuing cycle from %s with %.1f seconds of original budget remaining',
+                         status['cycle_started_at'], budget)
             attempted_keys = _run_workers(keys, deadline, stop, status, save)
             if status["state"] == "running":
-                status["state"] = "complete_with_errors" if status["errors"] else "complete"
+                status["state"] = ("interrupted" if stop.is_set() else
+                    "complete_with_errors" if status["errors"] else "complete")
             if status["errors"] or status["state"] in {"failed", "interrupted"}:
                 result = 1
         except BaseException as exc:
@@ -259,9 +345,12 @@ def main() -> int:
             final_db = None
             try:
                 final_db = SessionLocal()
-                eligible = freshness.due_rows(final_db, older_than_hours=DUE_AFTER_HOURS, limit=10**9)
+                eligible = freshness.due_rows(final_db, older_than_hours=0 if continuation else DUE_AFTER_HOURS, limit=10**9)
+                if continuation:
+                    eligible = _remaining_cycle_rows(eligible, status['cycle_started_at'], datetime.now(timezone.utc))
                 status["eligible_now"] = len(eligible)
-                status["backlog_remaining"] = sum(row.cache_key not in attempted_keys for row in eligible)
+                status["backlog_remaining"] = (len(eligible) if continuation else
+                    sum(row.cache_key not in attempted_keys for row in eligible))
             except Exception as exc:
                 status["last_error"] = {"message": "backlog count failed: " + str(exc)[:250], "at": _utc()}
             finally:
@@ -271,6 +360,8 @@ def main() -> int:
             status["running"] = False
             status["finished_at"] = _utc()
             save()
+        if checkpoint_failed:
+            result = 1
         log.info("sweep %s: %d attempts, %d reads, %d verified, %d cycle routes unattempted, %s currently due",
             status["state"], status["attempted"], status["read"], status["verified"],
             status["cycle_unattempted"], status["backlog_remaining"])
