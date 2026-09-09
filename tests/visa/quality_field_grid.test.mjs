@@ -9,7 +9,7 @@ import { t } from '../../src/renderer/src/lib/i18n.js'
 
 // Compile the actual component in memory, without a production bundle or DOM.
 const compiled = await build({
-  stdin: { contents: "export { FieldGrid } from './src/renderer/src/screens/QualityConsole.jsx'",
+  stdin: { contents: "export { FieldGrid, NextSweepCountdown } from './src/renderer/src/screens/QualityConsole.jsx'",
     resolveDir: resolve('.'), sourcefile: 'quality-field-grid-entry.jsx' },
   bundle: true, write: false, platform: 'node', format: 'cjs', jsx: 'automatic',
   external: ['react', 'react/jsx-runtime'], logLevel: 'silent',
@@ -17,7 +17,7 @@ const compiled = await build({
 const module = { exports: {} }
 new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(
   createRequire(import.meta.url), module, module.exports)
-const { FieldGrid } = module.exports
+const { FieldGrid, NextSweepCountdown } = module.exports
 
 function record(text, extra = {}) {
   return { max_stay_duration: null, max_stay_unit: null, max_stay_text: text,
@@ -104,3 +104,58 @@ for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
     assert.deepEqual(rec, before)
   })
 }
+
+function renderSweep(run, lang = 'en') {
+  return renderToStaticMarkup(createElement(NextSweepCountdown, {
+    at: null, t: key => t(lang, key), summary: {
+      scheduler: { status: 'inactive' }, canonical_total: 10,
+      attempted_target: 8, overdue_attempts: 2, verified_target: 3, last_run: run,
+    },
+  }))
+}
+const currentRun = {
+  status: 'running', started_at: '2026-09-09T15:00:00+00:00',
+  attempted: 2, selected: 5, cycle_unattempted: 3, verified: 1, partial: 1,
+  unreadable: 0, errors: 0, read: 2, source_reads: 3, insufficient_evidence: 1,
+  model_comparisons: 2, model_comparisons_reused: 1, source_fetch_failures: 0,
+  provider_failed: 0, no_official_source: 0,
+}
+
+for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
+  test('actual Freshness component explains continuation without adding prior counts: ' + lang, () => {
+    const run = { ...currentRun, cycle_started_at: '2026-09-09T12:00:00+00:00',
+      resumed_from_started_at: '2026-09-09T14:00:00+00:00', prior_attempt_results: 7 }
+    const before = structuredClone(run)
+    const html = renderSweep(run, lang)
+    assert.match(html, /data-testid="ops-fresh-continuation"/)
+    assert.ok(html.includes(t(lang, 'ops.fresh.runContinuation')
+      .replace('{start}', run.cycle_started_at).replace('{prior}', '7')))
+    assert.ok(html.includes(t(lang, 'ops.fresh.runCoverage')
+      .replace('{attempted}', '2').replace('{selected}', '5').replace('{unfinished}', '3')))
+    assert.ok(html.includes(t(lang, 'ops.fresh.runEvidence')
+      .replace('{verified}', '1').replace('{partial}', '1').replace('{unreadable}', '0').replace('{errors}', '0')))
+    assert.deepEqual(run, before)
+  })
+}
+
+test('regular Freshness cycle has no continuation note', () => {
+  const html = renderSweep({ ...currentRun, cycle_started_at: currentRun.started_at })
+  assert.doesNotMatch(html, /ops-fresh-continuation|Continuation of the cycle/)
+  assert.ok(html.includes('Attempts recorded for 2/5 selected routes'))
+})
+
+test('zero prior attempts remain zero, while unavailable counts are not invented', () => {
+  const resumed = { ...currentRun, cycle_started_at: '2026-09-09T12:00:00Z',
+    resumed_from_started_at: '2026-09-09T14:00:00Z' }
+  assert.ok(renderSweep({ ...resumed, prior_attempt_results: 0 }).includes('Previous run: 0 attempts.'))
+  for (const count of [undefined, -1, '7', true]) {
+    assert.ok(renderSweep({ ...resumed, prior_attempt_results: count }).includes('Previous run: — attempts.'))
+  }
+})
+
+test('malformed continuation timestamps cannot imply a recorded prior cycle', () => {
+  for (const extra of [
+    { cycle_started_at: 'invalid', resumed_from_started_at: currentRun.started_at },
+    { cycle_started_at: currentRun.started_at, resumed_from_started_at: 'invalid' },
+  ]) assert.doesNotMatch(renderSweep({ ...currentRun, ...extra }), /ops-fresh-continuation/)
+})

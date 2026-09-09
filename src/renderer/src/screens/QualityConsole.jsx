@@ -1407,7 +1407,7 @@ function DrillCard({ countries, onDrill, t }) {
   )
 }
 
-function NextSweepCountdown({ at, summary, t }) {
+export function NextSweepCountdown({ at, summary, t }) {
   // The clock is the sweep timer itself: the backend reads the next firing
   // from systemd, so this counts down to the run that will actually happen.
   const [now, setNow] = useState(() => Date.now())
@@ -1427,6 +1427,10 @@ function NextSweepCountdown({ at, summary, t }) {
     'interrupted', 'failed', 'status_stale', 'status_unconfirmed']
   const runState = runStates.includes(run?.status) ? run.status : 'status_unconfirmed'
   const runCount = name => Number.isFinite(run?.[name]) ? run[name] : '—'
+  const validTime = value => typeof value === 'string' && Number.isFinite(Date.parse(value))
+  const continued = validTime(run?.resumed_from_started_at) && validTime(run?.cycle_started_at)
+  const priorAttempts = Number.isInteger(run?.prior_attempt_results) && run.prior_attempt_results >= 0
+    ? run.prior_attempt_results : '—'
   return (
     <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14,
                   background: '#fff', padding: '16px 18px',
@@ -1460,6 +1464,10 @@ function NextSweepCountdown({ at, summary, t }) {
               ? `${t(`ops.fresh.run.${runState}`)} · ${run.finished_at || run.started_at || '·'}`
               : t('ops.fresh.runUnknown')}</div>
             {run && <>
+              {continued && <div data-testid="ops-fresh-continuation" style={{ color: NAVY }}>
+                {t('ops.fresh.runContinuation')
+                  .replace('{start}', run.cycle_started_at).replace('{prior}', priorAttempts)}
+              </div>}
               <div>{t('ops.fresh.runCoverage')
                 .replace('{attempted}', runCount('attempted')).replace('{selected}', runCount('selected'))
                 .replace('{unfinished}', runCount('cycle_unattempted'))}</div>
