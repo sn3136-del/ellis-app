@@ -2701,6 +2701,7 @@ function QualityWorkspace() {
       <div className="page" style={{ maxWidth: 1160, margin: '0 auto',
                                      padding: '30px 24px 80px' }}
            data-testid="quality-console">
+        <a href="/recovered-sources.html" target="_blank" rel="noreferrer" style={{ color: BLUE, fontSize: 13 }}>{t('ops.recoveredSources')}</a>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14,
                       flexWrap: 'wrap' }}>
