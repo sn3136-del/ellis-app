@@ -704,13 +704,79 @@ def _consulate_district(g: dict, route: dict) -> str | None:
     return None
 
 
+_PROCESSING_MEASURE = re.compile(
+    r"(?<![\d.])(\d+(?:\.\d+)?)(?:\s*(?:[-–—]|to|or)\s*(\d+(?:\.\d+)?))?"
+    r"\s*(?:(working|business|calendar)\s+)?(hours?|days?|weeks?|months?|years?)\b", re.I)
+_PROCESSING_SCOPE = re.compile(
+    r"\b(?:short[- ]stay|long[- ]stay|short[- ]term|long[- ]term|"
+    r"standard|priority|express|urgent|student|tourist|transit|e-?visa|e-?ta|esta)\b", re.I)
+
+
 def _processing(guidance: dict) -> tuple[float | None, str | None]:
-    n, unit = _num_unit(guidance.get("processing_time"))
-    if n is None:
+    """Read a minimum only in the contract's day units, never relabel hours.
+
+    Calendar weeks have seven days; working hours/weeks and calendar months
+    have no fixed day conversion. Multiple timings and upper bounds do not
+    establish a single minimum. Their full wording remains in the record.
+    """
+    raw = guidance.get("processing_time")
+    if not isinstance(raw, str):
         return None, None
-    text = str(guidance.get("processing_time") or "").lower()
-    return n, ("Working Day" if "working" in text or "business" in text
-               else "Calendar Day")
+    text = raw.lower()
+    for word, digit in (("one", "1"), ("two", "2"), ("three", "3"),
+                        ("four", "4"), ("five", "5"), ("six", "6"),
+                        ("seven", "7"), ("eight", "8"), ("nine", "9"),
+                        ("ten", "10"), ("eleven", "11"), ("twelve", "12")):
+        text = re.sub(rf"\b{word}\b(?:\s*\({digit}\))?", digit, text)
+    measures = list(_PROCESSING_MEASURE.finditer(text))
+    if len(measures) != 1:
+        return None, None
+    measure, = measures
+    lo, hi, kind, unit = measure.groups()
+    n = float(lo)
+    if hi is not None and float(hi) < n:
+        return None, None
+    prefix = text[:measure.start()]
+    if re.search(r"[-+−–—]\s*$|\b(?:not|never|no)\b(?:[\s-]+\w+){0,6}\s*$", prefix):
+        return None, None  # malformed signs or a negated duration are not facts
+    if re.search(r"(?:\b(?:up to|within|at most|maximum(?: of)?|less than|under)|[<≤])\s*$", prefix):
+        return None, None  # an upper limit is not a minimum
+    if unit.startswith("day"):
+        result_unit = "Working Day" if kind in ("working", "business") else "Calendar Day"
+    elif unit.startswith("week") and kind not in ("working", "business"):
+        n *= 7
+        result_unit = "Calendar Day"
+    else:
+        return None, None
+    return (int(n) if n.is_integer() else n), result_unit
+
+
+def _processing_note(guidance: dict, *, ambiguous: bool = False):
+    text = guidance.get("processing_time")
+    if not isinstance(text, str) or not text.strip():
+        return None
+    # Keep bounds, conditions and estimates even when a numeric minimum is
+    # representable. No verification status is inferred from this wording.
+    n, _ = _processing(guidance)
+    simple = re.fullmatch(r"\s*\d+(?:\.\d+)?\s*(?:(?:working|business|calendar)\s+)?days?\s*[.]?\s*", text, re.I)
+    if n is not None and simple and not ambiguous:
+        return None
+    label = ("Route processing information (product scope must be checked)"
+             if ambiguous else "Processing time (as stated)")
+    return {"label": label, "text": text.strip()}
+
+
+def _ambiguous_inherited_processing(guidance: dict, products: list[dict]) -> bool:
+    if len(products) < 2:
+        return False
+    text = str(guidance.get("processing_time") or "")
+    if _PROCESSING_SCOPE.search(text):
+        return True
+    # A labelled category such as 'Children: 5 days' cannot be silently
+    # assigned to another product. Generic timing labels do not narrow scope.
+    label = re.match(r"\s*([^:;\n]{1,80}):", text)
+    return bool(label and label.group(1).strip().lower() not in (
+        "processing", "processing time", "processing times", "decision", "decisions"))
 
 
 # Which subcategories each primary classification owns. Their tree nests the
@@ -926,6 +992,7 @@ def _product_fields(row: dict, product: dict) -> None:
             row[key] = ", ".join(str(x) for x in v if x) if isinstance(v, list) else v
     if "processing_time" in product:
         row["processing_min_days"], row["processing_unit"] = _processing(product)
+        row["_processing_note"] = _processing_note(product)
     if "consular_jurisdiction" in product:
         row["consulate_district"] = _consulate_district(product, {})
     if "exceptions" in product:
@@ -1088,6 +1155,13 @@ def _regrade(row: dict, g: dict, disputed: list | None,
         # No path emits this any more. Kept so a stale row can never say it.
         row["application_method"] = None
     prov, grounded = row.pop("_prov", None), row.pop("_grounded", False)
+    timing = row.pop("_processing_note", None)
+    if (timing and row.get("visa_requirement") != "Visa-free"
+            and row.get("visa_requirement_detail") not in _VISA_FREE_DETAILS):
+        current = str(row.get("special_conditions") or "")
+        if timing["text"] not in current:
+            note = f"{timing['label']}: {timing['text']}"
+            row["special_conditions"] = (current.rstrip(". ") + ". " + note) if current else note
     st = field_status(row, unpublished)
     complete = not any(v == "missing" for v in st.values())
     conflicted = bool(disputed)
@@ -1176,6 +1250,7 @@ def records_for_route(route: dict, guidance: dict,
         "max_stay_duration": None, "max_stay_unit": None,
         "entries": None,
         "processing_min_days": proc_n, "processing_unit": proc_unit,
+        "_processing_note": _processing_note(g),
         "visa_fee_amount": None, "visa_fee_currency": None,
         "visa_fee_qualifier": _fee_qualifier({}, g),
         "application_method": method,
@@ -1242,10 +1317,14 @@ def records_for_route(route: dict, guidance: dict,
             row.get("visa_requirement_detail"), method, row, method_from_channel)
         return [_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
     rows = []
+    ambiguous_timing = _ambiguous_inherited_processing(g, products)
     product_families = {_permission_family(_product_detail(p, base.get("visa_requirement_detail")))
                         for p in products} - {None}
     for p in products:
         row = dict(base)
+        if ambiguous_timing:
+            row["processing_min_days"], row["processing_unit"] = None, None
+            row["_processing_note"] = _processing_note(g, ambiguous=True)
         row["visa_type_name"] = str(p.get("type"))
         row["visa_requirement_detail"] = _subcategory_for(
             p, base.get("visa_requirement_detail"), requirement, method)
@@ -1273,7 +1352,7 @@ def records_for_route(route: dict, guidance: dict,
             row["visa_requirement"] = _DISPOSITION_TO_REQUIREMENT[own_disposition]
             row["visa_requirement_detail"] = own_detail
             for key in ("required_documents", "entry_requirements", "special_conditions",
-                        "processing_min_days", "processing_unit", "application_method",
+                        "processing_min_days", "processing_unit", "_processing_note", "application_method",
                         "consulate_district", "source_url", "collected_at", "info_validity"):
                 row[key] = None
             product_g = dict(p, disposition=own_disposition, requirement_detail=_key_of(own_detail))
