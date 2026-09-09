@@ -458,7 +458,7 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
         # A zero consular fee on a visa that must be applied for is almost
         # always a hallucinated "free": the acceptance audit found sources
         # charging 60-90 EUR where 0 was stored. Zero survives only when the
-        # answer itself says the visa is free; otherwise the fee is honestly
+        # answer itself says the fee is waived; otherwise the fee is honestly
         # missing (and the completeness campaign researches it).
         disposition = str(guidance.get("disposition") or "").upper()
         if disposition not in ("VISA_EXEMPT", ""):
@@ -466,7 +466,8 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
                 product.get("notes"), fee.get("note"), fee.get("notes"),
                 guidance.get("requirement_detail"),
                 guidance.get("application_channel_detail"))).lower()
-            if not any(k in texts for k in ("free", "gratis", "no fee",
+            if not any(k in texts for k in ("free", "gratis", "no fee", "fee waiver",
+                                            "no visa fee", "no visa application fee",
                                             "waived", "exempt", "nil",
                                             "zero-fee", "免费", "免簽費",
                                             "免签费", "免收")):
@@ -731,21 +732,54 @@ _NESTED_UNDER = {
                     "conditional_visa_free", "transit_visa_free"),
 }
 
-# A product that is itself an exemption: its name or note says no visa is
-# issued and it costs nothing. On a conditional route (Chinese passport
-# transiting Korea, Indonesian e-passport to Japan) such a lane sat beside
-# priced visa products and was labelled "eVisa, Embassy Submission" because
-# the route-level channel was copied onto every product.
-_FREE_WORDS = ("visa-free", "visa free", "no visa", "exempt", "waiver",
-               "without a visa", "without passing immigration",
-               "free of charge", "entry is free", "free, no visa")
+# A fee exemption changes the price of a visa, not the need for that visa.
+# Require an explicit visa/entry exemption phrase; bare "waiver", "exempt"
+# and "free of charge" also describe fees, interviews and biometrics.
+_VISA_EXEMPTION_WORDING = re.compile(
+    r"\b(?:visa[-\s]+free(?!\s+of\s+charge)|visa[-\s]+exempt(?:ion)?|"
+    r"visa\s+waiver|free\s+entry|"
+    r"no\s+visa\b(?![-\s]+(?:fee|charge|cost|application|processing|service|exemption|waiver))|"
+    r"without\s+(?:a\s+)?visa\b(?![-\s]+(?:fee|charge|cost|application|processing|service))|"
+    r"visa\s+(?:is\s+)?not\s+(?:required|needed)|"
+    r"exempt(?:ed)?\s+from\s+(?:the\s+|a\s+)?visa\b(?![-\s]+(?:fee|charge|cost|application|processing|service)))",
+    re.I)
+
+
+def _explicit_exemption_wording(text: str) -> bool:
+    for match in _VISA_EXEMPTION_WORDING.finditer(text):
+        # Do not turn "not eligible for visa-free entry" or "no visa
+        # exemption" into an exemption. This is classification, not proof.
+        before = re.split(r"[.;\n]", text[:match.start()])[-1]
+        after = text[match.end():]
+        if re.search(r"\b(?:not|never|ineligible)\b(?:[\s-]+\w+){0,6}[\s-]*$|\bno\s+$", before):
+            continue
+        if re.match(r"\s+(?:(?:entry|travel|status|scheme)\s+)?(?:(?:is|are|does)\s+)?(?:unavailable|not\s+(?:available|permitted|allowed|applicable|apply))\b", after):
+            continue
+        return True
+    return False
 
 
 def _product_is_exemption(product: dict) -> bool:
+    explicit = _key_of(product.get("requirement_detail"))
+    if explicit:
+        return SUBCATEGORY[explicit] in _VISA_FREE_DETAILS
     fee = product.get("fee") if isinstance(product.get("fee"), dict) else {}
     amount = (fee or {}).get("amount")
-    words = f"{product.get('type') or ''} {product.get('notes') or ''}".lower()
-    return amount in (0, 0.0) and any(k in words for k in _FREE_WORDS)
+    if type(amount) not in (int, float) or amount != 0:
+        return False
+    name = str(product.get("type") or "").lower()
+    notes = str(product.get("notes") or "").lower()
+    if re.search(r"\b(?:e[- ]?ta|esta|k[- ]?eta)\b|electronic\s+(?:travel|authori)", name):
+        return False
+    words = name + ". " + notes
+    if re.search(r"\b(?:fee|charge|payment)[- ]only\b", words):
+        return False
+    for clause in re.split(r"[.;\n]", words):
+        required = re.search(r"\bvisa\s+(?:(?:is|are)\s+)?(?:still\s+)?(?:required|needed)\b", clause)
+        if (required and not re.search(r"\b(?:no|without)\s+$", clause[:required.start()])
+                and not re.search(r"\b(?:if|unless|otherwise|outside|over|longer|beyond|except)\b", clause)):
+            return False
+    return _explicit_exemption_wording(name) or _explicit_exemption_wording(notes)
 
 
 def _subcategory_for(product: dict, route_default: str | None,
@@ -767,14 +801,15 @@ def _subcategory_for(product: dict, route_default: str | None,
     """
     allowed = _NESTED_UNDER.get(str(requirement or ""))
     name = f"{product.get('type') or ''}".lower()
+    visa_product = any(k in name for k in ("visa", "visitor", "permit", "endorsement")) or bool(
+        re.search(r"\bschengen\s+[acd]\b", name))
     electronic = any(k in name for k in ("e-visa", "evisa", "electronic visa",
                                          "online", "e-tourist", "etourist"))
     authorisation = any(k in name for k in (
         "eta", "esta", "electronic travel", "travel authoris",
         "travel authoriz", "authorisation", "authorization"))
     at_border = "on arrival" in name or "on-arrival" in name
-    exempt_name = not authorisation and any(k in name for k in (
-        "visa-free", "visa free", "free entry", "exempt", "waiver", "no visa"))
+    exempt_name = not authorisation and _product_is_exemption(product)
 
     if allowed is None:
         # An unknown or absent primary: fall back to the old name-only reading
@@ -786,7 +821,7 @@ def _subcategory_for(product: dict, route_default: str | None,
                                else "paper_visa_on_arrival"]
         if electronic:
             return SUBCATEGORY["evisa"]
-        if any(k in name for k in ("visa", "visitor", "permit", "endorsement")):
+        if visa_product:
             return SUBCATEGORY["paper_visa"]
         return route_default
 
@@ -816,7 +851,7 @@ def _subcategory_for(product: dict, route_default: str | None,
         # word "visa" in it and filing it as a paper visa gave an exemption
         # an embassy to apply at.
         return SUBCATEGORY["conditional_visa_free"]
-    if any(k in name for k in ("visa", "visitor", "permit", "endorsement")):
+    if visa_product:
         # A product whose name says nothing electronic stays a paper visa
         # even on a route whose channel is online: a UK visitor visa is
         # applied for online and issued as a vignette. Only the product's
