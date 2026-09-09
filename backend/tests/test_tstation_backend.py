@@ -370,3 +370,30 @@ def test_an_exemption_lane_on_a_conditional_route_is_not_a_visa():
     assert rows2[0]["application_method"] == "Online Application"
     assert rows2[1]["application_method"] == "Agency Service"
     assert rows2[1]["visa_requirement_detail"] == "Paper Visa"
+def test_conditional_arrival_card_scope_survives_record_rendering():
+    from app.visa_snapshot import tstation
+    card = {"required": None, "name": "TWAC", "submission_window": "Within7 days",
+            "notes": "Only multiple-entry permit holders file; resident holders are excluded."}
+    guidance = {"disposition": "VISA_EXEMPT", "arrival_card": card}
+    text = tstation._entry_requirements(guidance)
+    assert card["notes"] in text
+    assert "Within7 days" in text
+    assert "must still file" not in text
+    assert "TWAC required" not in text
+    guidance["entry_requirements"] = "Return ticket needed."
+    rows = tstation.records_for_route({"passport_nationality": "HKG", "destination_country": "TWN",
+                                      "travel_purpose": "tourism"}, guidance)
+    assert rows
+    assert all("Only multiple-entry permit holders file" in row["entry_requirements"]
+               and "resident holders are excluded" in row["entry_requirements"] for row in rows)
+    assert all("Return ticket needed" in row["entry_requirements"] for row in rows)
+
+
+def test_required_arrival_card_retains_resident_exemptions_and_legacy_notes():
+    from app.visa_snapshot import tstation
+    text = tstation._entry_requirements({"disposition": "VISA_REQUIRED", "arrival_card": {
+        "required": True, "name": "TWAC", "submission_window": "Within7 days",
+        "notes": ["Resident holders are excluded."], "note": "Filing is free."}})
+    assert "TWAC required" in text
+    assert "Resident holders are excluded" in text
+    assert "Filing is free" in text

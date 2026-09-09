@@ -15,6 +15,7 @@ import { DEPARTURE_CITIES } from '../lib/departureCities.js'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
+import { arrivalCardLines } from '../lib/arrivalCard.js'
 import { parseDatabaseRouteHash, databaseRouteHash } from '../lib/databaseRoute.js'
 
 const NAVY = 'var(--trip-navy, #0f294d)'
@@ -774,6 +775,7 @@ export default function TravelDatabase({ onBack }) {
       humanizeEnum(g.application_channel),
       asText(g.application_channel_detail),
       asText(g.arrival_card && g.arrival_card.note),
+      ...(Array.isArray(g.arrival_card?.notes) ? g.arrival_card.notes : [g.arrival_card?.notes]).map(asText),
       // The card's name and window render as a visible value; they must
       // switch languages too (the audit caught "Visit Japan Web, Register
       // before departure..." staying English under Chinese chrome).
@@ -809,6 +811,7 @@ export default function TravelDatabase({ onBack }) {
     return () => { live = false }
   }, [g, lang])
   const T = (s) => (s && tx[s]) || s
+  const arrivalLines = arrivalCardLines(g?.arrival_card, T)
 
   // AI Q&A as a conversation: every exchange is a turn in a thread, the
   // half-read route survives a clarify, and each answer is summarised in one
@@ -1735,15 +1738,14 @@ export default function TravelDatabase({ onBack }) {
                   </Section>
                 ) })
               }
-              if (entryFacts.length > 0 || g.arrival_card?.required || health.length > 0) {
+              if (entryFacts.length > 0 || arrivalLines.length > 0 || health.length > 0) {
                 cards.push({ key: 'entry',
-                  weight: entryFacts.length + (g.arrival_card?.required ? 2 : 0)
+                  weight: entryFacts.length + arrivalLines.length
                           + health.length + 1, node: (
                   <Section title={t('db.entry')} accent={BLUE} key="entry">
                     {entryFacts.map(([l, [v, tone]]) => <Fact key={l} label={l} value={v} pill={tone} />)}
-                    {g.arrival_card?.required ? (
-                      <Fact label={t('db.arrivalCard')} value={
-                        `${T(asText(g.arrival_card.name)) || t('db.arrivalCard')}${g.arrival_card.submission_window ? ', ' + T(asText(g.arrival_card.submission_window)) : ''}`} />
+                    {arrivalLines.length > 0 ? (
+                      <Fact label={t('db.arrivalCard')} value={arrivalLines.join('. ')} />
                     ) : null}
                     {health.length > 0 && (
                       <div style={{ marginTop: 8 }}>

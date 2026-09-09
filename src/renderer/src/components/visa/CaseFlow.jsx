@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, KVList, Empty } from '../ui.jsx'
 import { useLocale } from '../../lib/locale.jsx'
 import { HANDOFF_COPY, HANDOFF_UI } from '../../lib/visaBackend.js'
+import { arrivalCardLines } from '../../lib/arrivalCard.js'
 import { handoffCopy, isTerminal, formatSlot, resultDisposition } from '../../lib/visaSession.js'
 import {
   preferencesTabVisible,
@@ -684,6 +685,7 @@ function EntryPrep({ t, client, caseId, journey, onToDocuments, onOpenCase }) {
   const counts = journey.checklist_counts || {}
   const done = (counts.required_missing || 0) === 0
   const card = g.arrival_card || {}
+  const arrivalLines = arrivalCardLines(card)
 
   async function renewFirst() {
     setRenewBusy(true)
@@ -707,12 +709,11 @@ function EntryPrep({ t, client, caseId, journey, onToDocuments, onOpenCase }) {
         <ValidityRow t={t} label={g.passport_validity} validity={validity}
           onRenew={renewFirst} renewBusy={renewBusy} />
       )}
-      {card.required && (
+      {arrivalLines.length > 0 && (
         <div className="kv" data-testid="arrival-card-row">
           <div className="kv__k">{t('case.entryPrep.arrivalCard')}</div>
           <div className="kv__v">
-            {card.name || t('case.entryPrep.arrivalCard')}
-            {card.submission_window ? ` — ${card.submission_window}` : ''}
+            {arrivalLines.join('. ')}
           </div>
         </div>
       )}

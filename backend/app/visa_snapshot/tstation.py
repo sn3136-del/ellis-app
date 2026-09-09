@@ -617,6 +617,19 @@ def _entry_requirements(g: dict) -> str | None:
         name = str(ac.get("name") or "arrival card").strip()
         when = str(ac.get("submission_window") or "").strip()
         parts.append(f"{name} required" + (f" ({when})" if when else ""))
+    if isinstance(ac, dict):
+        notes = []
+        for key in ("notes", "note"):
+            value = ac.get(key)
+            for note in value if isinstance(value, list) else [value]:
+                if isinstance(note, str) and note.strip() and note.strip() not in notes:
+                    notes.append(note.strip())
+        if notes:
+            if ac.get("required") is not True:
+                name = str(ac.get("name") or "Arrival card").strip()
+                when = str(ac.get("submission_window") or "").strip()
+                parts.append(name + (f" ({when})" if when and ac.get("required") is not False else ""))
+            parts.extend(notes)
     for key, label in (("onward_travel_evidence", "Onward travel"),
                        ("accommodation_evidence", "Accommodation"),
                        ("financial_evidence", "Funds")):
@@ -1060,6 +1073,10 @@ def records_for_route(route: dict, guidance: dict,
         method = "Online Application" if _files_something_online(g) else None
         method_from_channel = False
     entry_req = g.get("entry_requirements")
+    if isinstance(entry_req, str):
+        arrival_text = _entry_requirements({"arrival_card": g.get("arrival_card")})
+        if arrival_text and arrival_text not in entry_req:
+            entry_req = entry_req.rstrip(". ") + ". " + arrival_text
     if isinstance(entry_req, list):
         entry_req = ". ".join(str(x) for x in entry_req if x) or None
     exceptions = g.get("exceptions")

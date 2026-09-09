@@ -8,6 +8,17 @@ import {
   isDocumentQuestion, splitQuestions, isValidDateShape, collectAnswers
 } from '../../src/renderer/src/lib/visaSession.js'
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
+import { arrivalCardLines } from '../../src/renderer/src/lib/arrivalCard.js'
+
+test('arrival filing preserves conditions and exclusions when required is unknown', () => {
+  const card={required:null,name:'TWAC',submission_window:'Within7 days',
+    notes:'Required for multiple-entry permit holders; resident holders are excluded.'}
+  assert.deepEqual(arrivalCardLines(card),['TWAC, Within7 days',card.notes])
+  assert.deepEqual(arrivalCardLines({...card,required:false}),['TWAC',card.notes])
+  assert.deepEqual(arrivalCardLines({required:null,name:'TWAC'}),[])
+  assert.deepEqual(arrivalCardLines({...card,notes:[card.notes],note:card.notes},s=>'translated:'+s),
+    ['translated:TWAC, translated:Within7 days','translated:'+card.notes])
+})
 
 test('operator navigation shares the current tab login without a privileged default', (t) => {
   const prior = Object.getOwnPropertyDescriptor(globalThis, 'sessionStorage')
