@@ -1887,3 +1887,58 @@ def test_a_neutralised_retry_puts_the_place_name_back(monkeypatch):
     out = kp._live_call("s", '{"facts": "Taiwan passport"}', timeout=5.0, max_tokens=50)
     assert out["corrected_fields"]["application_channel_detail"] == "Eligible Taiwan passport holders apply online."
     assert out["corrected_fields"]["nationality"] == "TWN"
+
+
+def test_a_travel_date_never_forks_the_route_decision():
+    """The arrival month used to be part of the cache key, so a lookup with
+    a travel date got a brand-new model answer instead of the verified row.
+    Hong Kong to Vietnam answered "visa required, e-visa" with no date and
+    "visa-free, 30 days" with one, the same morning. One route, one row."""
+    base = {"passport_nationality": "HKG", "lawful_country_of_residence": "HKG",
+            "destination_country": "VNM", "travel_purpose": "tourism"}
+    k = kimi_primary.cache_key(base)
+    assert kimi_primary.cache_key(dict(base, arrival_date="2026-09-24")) == k
+    assert kimi_primary.cache_key(dict(base, arrival_date="2027-03-15")) == k
+    assert kimi_primary.cache_key(dict(base, policy_period="2026-10-01")) == k
+    assert k.split("|")[5] == "unknown"
+
+
+def test_a_verified_requirement_detail_implies_the_verdict(tmp_path, monkeypatch):
+    """An override checked for "evisa" with its fee and products, but with no
+    disposition written, let the model's VISA_EXEMPT stand under it: "No visa
+    needed" over an eVisa badge and a 25 USD fee. The verified subcategory
+    is the verdict, and the model's exemption narrative goes with it."""
+    import json as _json
+    from app.visa_snapshot import verified_overrides as vo
+    f = tmp_path / "verified_overrides.json"
+    f.write_text(_json.dumps([{
+        "route": {"nationality": "HKG", "destination": "VNM"},
+        "verified_at": "2026-08-30", "verified_by": "audit",
+        "source_url": "https://evisa.gov.vn/",
+        "fields": {"requirement_detail": "evisa",
+                   "government_fee": {"amount": 25, "currency": "USD"},
+                   "visa_products": [{"type": "Single-entry tourist e-visa",
+                                      "entry": "single", "validity": "90 days",
+                                      "max_stay_days": 90,
+                                      "fee": {"amount": 25, "currency": "USD"}}]}}]))
+    monkeypatch.setattr(vo, "OVERRIDES", f)
+    vo.reload()
+    guidance = {"disposition": "VISA_EXEMPT", "permitted_stay": "Up to 30 days",
+                "application_channel": "not_required",
+                "exceptions": ["Hong Kong SAR ordinary passport holders are "
+                               "visa-exempt for Vietnam for stays of up to 30 days."]}
+    route = {"passport_nationality": "HKG", "destination_country": "VNM",
+             "travel_purpose": "tourism"}
+    merged, prov = vo.apply(guidance, route)
+    assert merged["disposition"] == "VISA_REQUIRED"
+    assert merged["requirement_detail"] == "evisa"
+    assert merged["government_fee"] == {"amount": 25, "currency": "USD"}
+    assert "exceptions" not in merged or not any(
+        "exempt" in str(x) for x in merged["exceptions"])
+    assert "disposition" in prov["fields"]
+    # A model verdict already inside the detail's family is left alone.
+    ok = {"disposition": "VISA_REQUIRED", "permitted_stay": "90 days"}
+    merged2, _ = vo.apply(ok, route)
+    assert merged2["disposition"] == "VISA_REQUIRED"
+    assert merged2["permitted_stay"] == "90 days"
+    vo.reload()

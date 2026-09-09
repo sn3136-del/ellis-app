@@ -481,6 +481,25 @@ def _drop_exemption_leftovers(merged: dict, fields: dict,
                 merged.pop(k, None)
 
 
+def _verdict_implied_by_detail(fields: dict, guidance: dict) -> str | None:
+    """A verified requirement subcategory IS a verdict. An override that was
+    checked for "evisa" (with its fee and products) but never wrote
+    `disposition` let a model answer of VISA_EXEMPT stand underneath it, and
+    Hong Kong to Vietnam showed "No visa needed" over an eVisa badge and a
+    25 USD fee. Returns the disposition the detail belongs to when the model's
+    verdict is outside that family, else None (nothing to correct)."""
+    if "disposition" in fields:
+        return None
+    detail = str(fields.get("requirement_detail") or "").strip()
+    if not detail:
+        return None
+    for verdict, family in _DETAIL_FAMILY.items():
+        if detail in family:
+            current = str(guidance.get("disposition") or "").upper()
+            return None if current == verdict else verdict
+    return None
+
+
 def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     """Return (guidance, provenance). The guidance is a COPY with the verified
     fields replaced; provenance names the source, the date and the fields so
@@ -488,12 +507,16 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     hit = find(route or {})
     if not hit or not isinstance(guidance, dict):
         return guidance, None
+    fields = dict(hit["fields"])
+    implied = _verdict_implied_by_detail(fields, guidance)
+    if implied:
+        fields["disposition"] = implied
     merged = dict(guidance)
-    merged.update(hit["fields"])
-    _drop_application_leftovers(merged, hit["fields"])
-    _drop_exemption_leftovers(merged, hit["fields"], guidance)
+    merged.update(fields)
+    _drop_application_leftovers(merged, fields)
+    _drop_exemption_leftovers(merged, fields, guidance)
     return merged, {
         "source_url": hit["source_url"], "verified_at": hit["verified_at"],
         "verified_by": hit["verified_by"], "note": hit["note"],
-        "fields": sorted(hit["fields"].keys()),
+        "fields": sorted(fields.keys()),
     }

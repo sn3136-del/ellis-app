@@ -869,8 +869,16 @@ def derive_workflow_plan(g: dict) -> list[dict]:
 
 # ---- cache -------------------------------------------------------------------
 def cache_key(route: dict) -> str:
-    arrival = str(route.get("arrival_date") or route.get("policy_period") or "")
-    policy_month = arrival[:7] or "unknown"          # YYYY-MM: the policy date bucket
+    # A travel date is NOT a different policy, so it never forks the decision.
+    # Bucketing by arrival month gave the same route two answers: the verified
+    # row, and a fresh model answer under a "2026-09" key that nobody had
+    # checked. Hong Kong to Vietnam read "visa required, e-visa" without a
+    # date and "visa-free, 30 days" with one, on the same day, to Trip.com's
+    # testers. The freshness sweep keeps the ONE row current, which is how a
+    # policy that changes on a future date reaches readers: through the
+    # re-check on the day, never through a speculative dated copy. The slot
+    # stays in the key so every shipped row keeps its address.
+    policy_month = "unknown"
     parts = [
         str(route.get("passport_nationality", "")).upper(),
         str(route.get("lawful_country_of_residence", "")).upper(),

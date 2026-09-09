@@ -289,3 +289,37 @@ def test_productless_visa_routes_show_a_validity_bound():
          "permitted_stay": "90 days in any 180-day period"}
     rows = tstation.records_for_route(route, g)
     assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (90, "Day")
+
+
+def test_records_listing_prefers_the_canonical_row_over_a_newer_dated_copy(client, db):
+    """A row keyed to an arrival month was a fresh, unverified model answer
+    (the travel date used to fork the decision). Being newest must not let
+    it displace the route's canonical row: Trip.com's console showed Hong
+    Kong to Vietnam as "Visa-free" from a dated copy generated that morning,
+    beside the verified visa-required answer readers got without a date."""
+    from datetime import datetime, timezone
+    from app.visa_snapshot.models import KimiRouteGuidanceCache
+    for row in db.query(KimiRouteGuidanceCache).all():
+        db.delete(row)
+    db.commit()
+    _warm(client, "NZL", "BLZ")
+    canonical = db.query(KimiRouteGuidanceCache).one()
+    assert canonical.cache_key.split("|")[5] == "unknown"
+    wrong = dict(canonical.guidance)
+    wrong["disposition"] = "VISA_EXEMPT"
+    wrong["visa_products"] = [
+        {"type": "Phantom visa-free entry", "entry": "single",
+         "validity": None, "max_stay_days": 30, "fee": None}]
+    parts = canonical.cache_key.split("|")
+    parts[5] = "2026-09"
+    db.add(KimiRouteGuidanceCache(
+        cache_key="|".join(parts), route=dict(canonical.route),
+        status="KIMI_PRIMARY", guidance=wrong,
+        generated_at=datetime.now(timezone.utc)))
+    db.commit()
+    out = client.get("/database/records?nationality=NZL&destination=BLZ",
+                     headers=ADMIN).json()
+    names = {r["visa_type_name"] for r in out["records"]}
+    assert "Phantom visa-free entry" not in names
+    assert all(r["visa_requirement"] != "Visa-free" for r in out["records"]) \
+        or canonical.guidance.get("disposition") == "VISA_EXEMPT"

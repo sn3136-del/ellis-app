@@ -1265,8 +1265,16 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
                 str(route.get("travel_purpose") or "tourism").lower(), doc)
         # Canonicality outranks answer status: a transit (via:) variant is
         # contextual advice and must never displace the route's own row,
-        # however confident it is. Among canonical rows the freshest wins.
-        score = ("|via:" not in (r.cache_key or ""), r.status == "KIMI_PRIMARY",
+        # however confident it is. A row keyed to an arrival month is a
+        # leftover of the days when a travel date forked the decision; it
+        # was generated fresh by the model and never verified, and picking
+        # it for being newest is exactly how the console showed Hong Kong
+        # to Vietnam as "Visa-free" beside the verified visa-required row.
+        # Among canonical rows the freshest wins.
+        _parts = (r.cache_key or "").split("|")
+        canonical_month = len(_parts) > 5 and _parts[5] == "unknown"
+        score = ("|via:" not in (r.cache_key or ""), canonical_month,
+                 r.status == "KIMI_PRIMARY",
                  r.generated_at.isoformat() if r.generated_at else "")
         prev = candidates.get(gkey)
         if prev is None or score > prev[0]:
