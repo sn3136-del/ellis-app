@@ -5713,7 +5713,7 @@
       "verified_at": "2026-09-09",
       "verified_by": "Ellis AI official-source field review",
       "verifier": "ai",
-      "source_url": "https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en",
+      "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en",
       "note": "DEU ordinary passport; FRA; tourism. EU citizen free movement; no third-country90/180 rule.",
       "fields": {
         "disposition": "VISA_EXEMPT",
@@ -5732,9 +5732,9 @@
       },
       "field_provenance": {
         "disposition": {
-          "source_id": "eu-germany",
-          "source_url": "https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en",
-          "quote": "EU Member State: since 1 January 1958",
+          "source_id": "fr-eu",
+          "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en",
+          "quote": "You can enter and be present for up to 3 months in France without special formalities.",
           "verified_at": "2026-09-09",
           "verifier": "ai",
           "verified_by": "Ellis AI official-source field review",
@@ -5748,16 +5748,16 @@
           },
           "supporting_evidence": [
             {
-              "source_id": "fr-eu",
-              "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en",
-              "quote": "You can enter and be present for up to 3 months in France without special formalities."
+              "source_id": "eu-germany",
+              "source_url": "https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en",
+              "quote": "EU Member State: since 1 January 1958"
             }
           ]
         },
         "requirement_detail": {
-          "source_id": "eu-germany",
-          "source_url": "https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en",
-          "quote": "EU Member State: since 1 January 1958",
+          "source_id": "fr-eu",
+          "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en",
+          "quote": "You can enter and be present for up to 3 months in France without special formalities.",
           "verified_at": "2026-09-09",
           "verifier": "ai",
           "verified_by": "Ellis AI official-source field review",
@@ -5771,9 +5771,9 @@
           },
           "supporting_evidence": [
             {
-              "source_id": "fr-eu",
-              "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en",
-              "quote": "You can enter and be present for up to 3 months in France without special formalities."
+              "source_id": "eu-germany",
+              "source_url": "https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en",
+              "quote": "EU Member State: since 1 January 1958"
             }
           ]
         },
@@ -5856,9 +5856,9 @@
           }
         },
         "source_url": {
-          "source_id": "eu-germany",
-          "source_url": "https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en",
-          "quote": "EU Member State: since 1 January 1958",
+          "source_id": "fr-eu",
+          "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en",
+          "quote": "You can enter and be present for up to 3 months in France without special formalities.",
           "verified_at": "2026-09-09",
           "verifier": "ai",
           "verified_by": "Ellis AI official-source field review",
@@ -5872,9 +5872,9 @@
           },
           "supporting_evidence": [
             {
-              "source_id": "fr-eu",
-              "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en",
-              "quote": "You can enter and be present for up to 3 months in France without special formalities."
+              "source_id": "eu-germany",
+              "source_url": "https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en",
+              "quote": "EU Member State: since 1 January 1958"
             }
           ]
         },

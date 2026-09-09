@@ -33,14 +33,25 @@ def field_provenance(proof, route, field, product=None):
                 'verified_at': None, 'verified_by': '', 'reason': proof['reason'],
                 'note': proof['reason'], 'subject': _subject(route, product)}
     evidence = proof['evidence']
-    primary = evidence[0]
+    primary_index = 0
+    if field in {'disposition', 'requirement_detail', 'source_url'}:
+        # A companion country's membership proves the traveller's status,
+        # not the destination's admission rule. The already-validated combined
+        # proof must headline its applicable rule source and retain companions.
+        from app.visa_snapshot.evidence_validator import jurisdiction_matches
+        primary_index = next((i for i, item in enumerate(evidence)
+            if jurisdiction_matches(item['source_url'], route['destination_country'])), None)
+        if primary_index is None:
+            raise PatchRejected('A published requirement needs a destination-rule source')
+    primary = evidence[primary_index]
+    remaining = evidence[:primary_index] + evidence[primary_index + 1:]
     result = {'source_id': primary['source_id'], 'source_url': primary['source_url'],
               'quote': primary['quote'], 'verified_at': proof['verified_at'],
               'verifier': 'ai', 'verified_by': 'Ellis AI official-source field review',
               'status': 'reviewed', 'note': proof['scope_note'],
               'subject': _subject(route, product)}
-    same = [p['quote'] for p in evidence[1:] if p['source_url'] == primary['source_url']]
-    other = [deepcopy(p) for p in evidence[1:] if p['source_url'] != primary['source_url']]
+    same = [p['quote'] for p in remaining if p['source_url'] == primary['source_url']]
+    other = [deepcopy(p) for p in remaining if p['source_url'] != primary['source_url']]
     if same: result['additional_quotes'] = same
     if other: result['supporting_evidence'] = other
     if proof.get('retained_unverified_elements') is not None:

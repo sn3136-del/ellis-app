@@ -33,6 +33,42 @@ def test_actual16entries_load_independent_product_verdicts_without_work_publicat
    assert all(r['_product_source_verified']['fields']==['disposition'] for r in rows)
  assert all(not p['new_grounded_check'] and not p['new_release'] and not p['renew_fresh_until'] for p in converted['preflight'])
 
+
+def test_eu_citizenship_companion_does_not_replace_french_rule_headline(manifest, converted):
+ seed, _, _, prov = output(manifest, converted, 'DEU')
+ french = 'https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en'
+ german_membership = 'https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en'
+ assert seed['source_url'] == french
+ for field in ('disposition', 'requirement_detail', 'source_url'):
+  proof = seed['field_provenance'][field]
+  assert proof['source_url'] == french
+  assert proof['quote'] == 'You can enter and be present for up to 3 months in France without special formalities.'
+  assert any(item['source_url'] == german_membership and item['quote'] == 'EU Member State: since 1 January 1958'
+             for item in proof['supporting_evidence'])
+ assert prov['source_url'] == french
+
+
+def test_all_shipped_reviewed_stores_pass_the_actual_registered_loader():
+ # Intentionally use the production path resolution and full table reader.
+ # Individual _parse_rows tests miss file-level authority/schema rejection,
+ # which holds every route when even one active overlay entry is invalid.
+ seed = Path(__file__).resolve().parents[2] / 'data/database_seed'
+ assert vo.OVERRIDES == seed / 'verified_overrides.json'
+ assert all(path.is_file() for path in vo._reviewed_overlay_paths())
+ vo.reload()
+ try:
+  table = vo._table()
+  assert table.store_errors == ()
+  for path in vo._reviewed_overlay_paths():
+   overlay = json.loads(path.read_text())
+   for entry in overlay['entries']:
+    route = entry['route']
+    key = vo._key(route['nationality'], route['destination'], route['travel_purpose'], route.get('travel_document_type'))
+    assert key in table
+  assert table[vo._key('DEU', 'FRA', 'tourism')]['source_url'] == 'https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en'
+ finally:
+  vo.reload()
+
 def test_unknown_clears_do_not_inherit_entry_source_or_date(manifest,converted):
  _,_,g,p=output(manifest,converted,'CHN',purpose='study')
  for field in ['government_fee','processing_time']:
