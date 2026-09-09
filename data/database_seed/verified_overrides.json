@@ -7937,7 +7937,30 @@
     "Work, study and news coverage are not covered; a visa is required for those purposes",
     "The policy runs until 31 December 2027; check before travelling after that date",
     "Stay is counted from 00:00 on the day after entry; there is no cap on the number of entries"
-   ]
+   ],
+   "passport_validity": "For visa-free entry, use an ordinary passport that remains valid throughout the intended stay in China.",
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": 0
+   }
+  },
+  "field_provenance": {
+   "passport_validity": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+    "quote": "For foreign nationals, an ordinary passport valid for at least the duration of intended stay in China is needed.",
+    "note": "Current MFA visa-free-entry FAQ Q7 supports the entry-validity rule. Q1 includes Russian ordinary-passport tourism and Q2 confirms its current policy period. Zero months is the canonical representation of validity through departure, not an added source minimum.",
+    "verified_by": "Ellis AI source review"
+   },
+   "passport_validity_requirement": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+    "quote": "For foreign nationals, an ordinary passport valid for at least the duration of intended stay in China is needed.",
+    "note": "Current MFA visa-free-entry FAQ Q7 supports the entry-validity rule. Q1 includes Russian ordinary-passport tourism and Q2 confirms its current policy period. Zero months is the canonical representation of validity through departure, not an added source minimum.",
+    "verified_by": "Ellis AI source review"
+   }
   }
  },
  {
