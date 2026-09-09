@@ -8229,61 +8229,6 @@
  {
   "route": {
    "nationality": "IDN",
-   "destination": "JPN",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Ellis source audit (fee/validity verification)",
-  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
-  "note": "Both fee and stay were left null. Indonesia is not on the visa-fee-exemption list, so a tourist visa costs ~JPY 15,000 single / ~JPY 30,000 multiple. Stay on a tourist eVISA for residents of Indonesia is up to 90 days. Ellis also misses the visa-free alternative: MOFA note (1) 'For nationals of Indo | quote: The \"Cabinet Order on Fees Collected by Consular Officers,\" which sets forth vis",
-  "fields": {
-   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
-   "government_fee": {
-    "amount": 15000,
-    "currency": "JPY"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Visa exemption via registered ICAO ePassport",
-     "entry": "per entry",
-     "validity": "registration valid 3 years or until passport expiry",
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 0,
-      "currency": "JPY"
-     },
-     "notes": null
-    },
-    {
-     "type": "Single-entry Temporary Visitor / JAPAN eVISA (tourism)",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 15000,
-      "currency": "JPY"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry Temporary Visitor (tourism)",
-     "entry": "multiple",
-     "validity": "1 to 5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 30000,
-      "currency": "JPY"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "15 days per entry"
-  }
- },
- {
-  "route": {
-   "nationality": "IDN",
    "destination": "HKG",
    "travel_purpose": "tourism"
   },
@@ -53912,6 +53857,417 @@
     }
    ],
    "confidence": "high"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "ALB",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-09",
+  "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+  "source_url": "https://punetejashtme.gov.al/en/informacione-mbi-regjimin-e-vizave-te-shtetasve-te-huaj/",
+  "note": "Verified 2026-09-09 against the Albanian Ministry for Europe and Foreign Affairs visa regime table (country selector: HONG KONG (CHINA)), which reads for the national passport: 'A-AIRPORT VISA / C-SHORT TERM VISA: WITHOUT VISA ... GRATIS'. Law 79/2021 on Foreigners, article 29: 'Aliens who are free of the obligation to obtain a visa, shall have the right to enter and stay in the Republic of Albania for a 90-day term within 180 days upon their entry'. The MFA table is rendered by script, so the automatic re-check may not read it.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free short stay",
+   "permitted_stay": "Up to 90 days within any 180-day period, counted from the first entry",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "EUR"
+   },
+   "official_portal_url": null,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa or online authorisation is needed for a tourist visit of up to 90 days. Show your passport at the border.",
+   "processing_time": "No advance processing",
+   "visa_products": [
+    {
+     "type": "Visa-free short stay (tourism)",
+     "entry": "multiple",
+     "validity": "90 days within 180 days from the first entry",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "Entry is free. No visa is required for Hong Kong SAR passport holders for a short stay. The passport must be valid for at least 3 months after the date you leave Albania and must have been issued within the last 10 years."
+    }
+   ],
+   "exceptions": [
+    "Albania also admits without a visa any foreign citizen holding a valid multiple-entry Schengen visa that has already been used in a Schengen state, or a valid Schengen residence permit. They must leave Albania no later than 3 days from the expiry of that document.",
+    "The same applies to holders of a valid multiple-entry visa or residence permit issued by an EU country, the United States or the United Kingdom, including electronic visas, once used in the issuing country.",
+    "Visitors staying longer than 30 days must register with the General Border Directorate of Migration within the first 30 days, or face a fine on departure."
+   ],
+   "required_documents": [
+    "Hong Kong SAR passport valid for at least 3 months after the date you leave Albania and issued within the last 10 years"
+   ],
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "unpublished_fields": [],
+   "source_url": "https://punetejashtme.gov.al/en/informacione-mbi-regjimin-e-vizave-te-shtetasve-te-huaj/",
+   "corroborating_sources": [
+    {
+     "url": "https://punetejashtme.gov.al/en/regjimi-i-vizave-per-te-huajt/",
+     "quote": "Foreign nationals who do not need a visa to enter the Republic of Albania: Your passport must be valid for at least 3 months after the date you leave the Republic of Albania and must have been issued within the last 10 years.",
+     "authority": ""
+    },
+    {
+     "url": "https://mb.gov.al/wp-content/uploads/2024/10/Ligj-per-te-Huajt-%E2%80%93-nr.-79.2021_English.pdf",
+     "quote": "Aliens who are free of the obligation to obtain a visa, shall have the right to enter and stay in the Republic of Albania for a 90-day term within 180 days upon their entry",
+     "authority": ""
+    },
+    {
+     "url": "https://punetejashtme.gov.al/wp-content/uploads/2024/09/II-NR.8-TARIFAT-E-VIZES-PER-TE-HUAJT.pdf",
+     "quote": "Hong Kong, Kine  Pekin  ----  -----  -----  EUR 35,00 (no fee for A or C visas, D visa 35 EUR)",
+     "authority": ""
+    },
+    {
+     "url": "https://ambasadat.gov.al/united-arab-emirates/en/embassy-services/",
+     "quote": "For the citizens that enter the territory of the Republic of Albania without visas, the permit of stay is 90 days within a period of 180 days and during the first 30 days of their stay, they should show up to the General Border Directorate of Migration",
+     "authority": ""
+    }
+   ],
+   "confidence": "high"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "KOR",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-09-09",
+  "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+  "source_url": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=161&PARENT_ID=135",
+  "note": "Verified 2026-09-09 against the Korea Immigration Service page on visa-free entry (last modified 30 December 2024): the third-country transit waiver ('제3국 통과여객 무사증 입국허가 제도', B-2, 30 days) for holders of a visa, permanent residency or re-entry permit of the US, Canada, Australia, New Zealand or one of 32 European countries, the Incheon transfer programme (B-2, 3 days), Jeju direct entry (B-2, 30 days), and the two China-specific group transit lanes (B-2, 15 days). The visa-free pilot for Chinese group tourists ran 29 September 2025 to 30 June 2026 and has no published extension: the Ministry of Justice release of 1 July 2026 extends only the 15 USD group visa fee waiver to 31 December 2026.",
+  "fields": {
+   "disposition": "CONDITIONAL",
+   "requirement_detail": "transit_visa_free",
+   "visa_category": "Transit without a Korean visa (conditional)",
+   "permitted_stay": "Up to 30 days under the third-country transit waiver, 3 days under the Incheon transfer programme, 30 days on direct entry to Jeju, 15 days on the group transit lanes",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "KRW"
+   },
+   "official_portal_url": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=161&PARENT_ID=135",
+   "application_channel": "not_required",
+   "application_channel_detail": "No Korean visa is needed on the transit lanes listed below. A Chinese national who does not qualify for any lane needs a Korean visa, applied for through the Embassy's designated agencies before travel.",
+   "processing_time": "No advance processing on the visa-free lanes",
+   "visa_products": [
+    {
+     "type": "Airside transit at Incheon without passing immigration",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 0,
+      "currency": "KRW"
+     },
+     "notes": "Free, no visa needed while you stay in the transit area. If your bags must be collected or you change airports you pass immigration and need a lane below or a visa. No time limit is published on the current Korea Immigration Service page."
+    },
+    {
+     "type": "Third-country transit waiver (B-2), holders of a US, Canada, Australia, New Zealand or European visa",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": "KRW"
+     },
+     "notes": "Free, no Korean visa needed. You must hold a valid visa, permanent residency or re-entry permit of the US (including Guam and Saipan), Canada, Australia, New Zealand or one of 32 European countries, be travelling through Korea to that country or from it to China or a third country, and hold an onward ticket within 30 days."
+    },
+    {
+     "type": "Incheon Airport transit tourism programme (B-2)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 3,
+     "fee": {
+      "amount": 0,
+      "currency": "KRW"
+     },
+     "notes": "Free, no visa needed for transfer passengers at Incheon joining the programme, up to 3 days."
+    },
+    {
+     "type": "Jeju direct entry (B-2)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": "KRW"
+     },
+     "notes": "Free, no visa needed on a direct international arrival at a Jeju airport or port. Limited to Jeju."
+    },
+    {
+     "type": "Jeju group transit for Chinese tour groups (B-2)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 15,
+     "fee": {
+      "amount": 0,
+      "currency": "KRW"
+     },
+     "notes": "Free. Chinese tour groups of 3 or more from China, Hong Kong or Macao arriving at Incheon, Gimpo, Gimhae, Cheongju, Muan, Daegu or Yangyang on the way to Jeju may stay up to 5 days in the permitted tourism areas, through a designated agency."
+    },
+    {
+     "type": "Chinese tour groups holding a Japanese group visa (B-2)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 15,
+     "fee": {
+      "amount": 0,
+      "currency": "KRW"
+     },
+     "notes": "Free. Tour groups of 3 or more holding a Japanese group visa, travelling from China through Korea to Japan or from Japan through Korea to China or a third country."
+    }
+   ],
+   "exceptions": [
+    "The third-country transit waiver only works when Korea is on the way to, or back from, the country whose visa you hold. The visa must be a sticker in the passport, except a UK e-visa checked on gov.uk or an Australian visa checked on VEVO.",
+    "You must not have spent more than 3 days in another transit country before reaching Korea, must have had no Korean visa refusal in the past year and no entry refusal in the past 3 years.",
+    "The visa-free entry pilot for Chinese group tourists ended on 30 June 2026 with no published extension as of 8 September 2026. Group tourists now need a group visa, whose 15 USD fee is waived until 31 December 2026."
+   ],
+   "required_documents": [
+    "Passport",
+    "Onward ticket within the lane's stay limit",
+    "For the third-country waiver: the qualifying visa sticker, permanent residency or re-entry permit"
+   ],
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ],
+   "source_url": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=161&PARENT_ID=135",
+   "corroborating_sources": [
+    {
+     "url": "https://www.immigration.go.kr/bbs/immigration/214/484963/download.do",
+     "quote": "'25.9.29.(월) ~ '26.6.30.(화) 기간 중국 단체관광객 한시 무사증 시행",
+     "authority": ""
+    },
+    {
+     "url": "https://www.immigration.go.kr/bbs/immigration/214/607993/artclView.do",
+     "quote": "비자발급 수수료($15, 약 22,500원) 면제 조치를 당초 올해 6월까지에서 2026년 12월 31일까지 연장합니다",
+     "authority": ""
+    },
+    {
+     "url": "https://overseas.mofa.go.kr/ca-en/brd/m_5238/view.do?seq=727682&page=1",
+     "quote": "Transit tourists holding a valid visa of the US, Canada, Australia, New Zealand or a European country may enter Korea without a visa for up to 30 days",
+     "authority": ""
+    }
+   ],
+   "confidence": "high"
+  }
+ },
+ {
+  "route": {
+   "nationality": "IDN",
+   "destination": "JPN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-09",
+  "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+  "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per 1 Juli 2026, biaya visa menjadi seperti tabel di bawah ini. 1. Visa Single Entry Rp1.650.000 ... 2. Visa Multiple Entry Rp3.330.000'. MOFA's eVISA page lists Indonesia among the countries where 'Application should be made through an accredited agency'. MOFA and embassy pages block automated reading, so the re-check may list this record for a person.",
+  "fields": {
+   "disposition": "CONDITIONAL",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "Visa exemption with e-passport registration, or short-term stay visa",
+   "permitted_stay": "15 days per visit with a registered ICAO-compliant e-passport",
+   "permitted_stay_days": 15,
+   "government_fee": {
+    "amount": 0,
+    "currency": "JPY"
+   },
+   "official_portal_url": "https://www.evisa.mofa.go.jp/personal/logintoko",
+   "application_channel": "online_portal",
+   "application_channel_detail": "Register the e-passport before departure on the Japan Visa Exemption System (JAVES) and show the registration notice on your phone or tablet at the airport. Printouts and screenshots are not accepted. Paper registration with a sticker is still available at the Japan Visa Application Center (JVAC) in Jakarta or a consulate general, in about 2 to 3 working days. Travellers who do not register apply for a paper visa through JVAC by appointment, or for the JAPAN eVISA through an accredited agency. Residents of Indonesia cannot apply on the JAPAN eVISA website themselves.",
+   "processing_time": "Registration about 2 to 3 working days",
+   "visa_products": [
+    {
+     "type": "E-passport visa exemption registration (JAVES or sticker)",
+     "entry": "multiple",
+     "validity": "3 years or until the passport expires, whichever is shorter",
+     "max_stay_days": 15,
+     "fee": {
+      "amount": 0,
+      "currency": "JPY"
+     },
+     "notes": "Registration and entry are free of charge. Repeated visits of up to 15 days during the registration validity."
+    },
+    {
+     "type": "Single-entry short-term stay visa (paper visa via JVAC, or eVISA via an accredited agency)",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 1650000,
+      "currency": "IDR"
+     },
+     "notes": "Fee from 1 July 2026 is Rp1,650,000, about 15,000 yen, paid in cash. Needed for holders of a non-electronic passport, for stays over 15 days, or for those who do not register."
+    },
+    {
+     "type": "Multiple-entry short-term stay visa (tourism)",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 3330000,
+      "currency": "IDR"
+     },
+     "notes": "Fee from 1 July 2026 is Rp3,330,000, about 30,000 yen. Issued to applicants who meet the embassy's conditions."
+    }
+   ],
+   "exceptions": [
+    "Holders of a non-electronic Indonesian passport must obtain a visa before travel.",
+    "E-passport holders who have not registered are refused entry at the Japanese airport.",
+    "Stays longer than 15 days, or any paid work, require a visa even with a registered e-passport.",
+    "The transit visa was abolished on 1 July 2026."
+   ],
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "unpublished_fields": [],
+   "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+   "corroborating_sources": [
+    {
+     "url": "https://www.mofa.go.jp/press/release/press4e_000498.html",
+     "quote": "Duration of stay : 15 (fifteen) days. Period of validity : Whichever is the shorter period between either three years or the validity of the passport",
+     "authority": ""
+    },
+    {
+     "url": "https://www.id.emb-japan.go.jp/itpr_id/visa.html",
+     "quote": "Per 1 Juli 2026, biaya visa menjadi seperti tabel di bawah ini. 1. Visa Single Entry Rp1.650.000 2. Visa Multiple Entry Rp3.330.000. Aplikasi visa : Diajukan di JVAC (dengan sistem janji temu/reservasi).",
+     "authority": ""
+    },
+    {
+     "url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+     "quote": "Application should be made through an accredited agency in countries/regions below ... (4) Hong Kong, India, Indonesia, Macau, Mongolia, the Republic of Korea, Singapore and United Arab Emirates",
+     "authority": ""
+    },
+    {
+     "url": "https://www.surabaya.id.emb-japan.go.jp/itpr_id/visa_waiver.html",
+     "quote": "Masa tinggal : 15 hari. Masa berlaku : 3 tahun atau sampai batas akhir berlaku paspor",
+     "authority": ""
+    }
+   ],
+   "confidence": "high"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "JPN",
+   "travel_purpose": "tourism",
+   "travel_document_type": "prc_travel_document"
+  },
+  "verified_at": "2026-09-09",
+  "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+  "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/00_000485_00222.html",
+  "note": "Verified 2026-09-09. No official Japanese or Chinese page states whether Japan issues a short-term visa on a PRC Travel Document (旅行证). The Embassy of Japan in China's fee notice of 24 June 2026 sets fees by nationality for applications in China: '2026年7月1日起 ... 单次签证 715元 两次签证 1,430元 数次签证 1,430元', and MOFA directs Chinese nationals living outside China to the Japanese mission for their place of residence, where fees are the local equivalent of about 15,000 yen single or 30,000 yen multiple. Because no page addresses the travel document, the fee is recorded as not publicly available with that explanation.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Short-term stay visa (tourism)",
+   "permitted_stay": "15 or 30 days on a single-entry tourist visa, 30 days per visit on the 3-year multiple, 90 days per visit on the 5-year multiple",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "official_portal_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
+   "application_channel": "embassy_designated_agency",
+   "application_channel_detail": "Tourist visas for Chinese nationals in China are lodged through the Embassy's designated travel agencies, never directly. No official page states whether Japan accepts a PRC Travel Document, which is issued abroad, for a short-term visa. Ask the Japanese embassy or consulate for the place where you live before booking.",
+   "processing_time": "Not published for this document",
+   "visa_products": [
+    {
+     "type": "Group tourist visa (团队旅游签证)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 15,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For tour groups of 5 to about 40 people on a trip of up to 15 days, through a designated travel agency. Fee not published for this document: missions in China charge Chinese nationals 715 CNY by nationality."
+    },
+    {
+     "type": "Individual single-entry tourist visa (个人单次旅游签证)",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Stay of 15 or 30 days decided by the mission. Fee not published for this document: missions in China charge Chinese nationals 715 CNY by nationality."
+    },
+    {
+     "type": "3-year multiple-entry tourist visa (三年多次旅游签证)",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For applicants with sufficient financial capacity, or with a first stay in Okinawa or the six Tohoku prefectures. Fee not published for this document: missions in China charge Chinese nationals 1,430 CNY by nationality."
+    },
+    {
+     "type": "5-year multiple-entry visa for high-income applicants (相当高收入人士的多次签证)",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Usable for tourism and other short visits from the first trip. Fee not published for this document: missions in China charge Chinese nationals 1,430 CNY by nationality."
+    }
+   ],
+   "exceptions": [
+    "No official Japanese page states whether a PRC Travel Document is accepted for a short-term visa. Confirm with the Japanese mission for your place of residence before booking.",
+    "Tourist visas must be applied for through designated travel agencies. Direct applications are not accepted."
+   ],
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "unpublished_fields": [
+    "visa_fee_amount",
+    "visa_fee_currency"
+   ],
+   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/00_000485_00222.html",
+   "corroborating_sources": [
+    {
+     "url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_qa.html",
+     "quote": "此Q&A适用于拥有中国国籍的人员在中国国内申请签证的情景。居住在第三国且拥有中国国籍的人员，请向居住所在地区的日本使领馆进行咨询。 Q：签证手续费用？ A：中国人申请签证，单次签证715元/回，多次签证1,430元/回",
+     "authority": ""
+    },
+    {
+     "url": "https://www.mofa.go.jp/mofaj/toko/visa/tetsuzuki/pagew_000001_02672.html",
+     "quote": "一次有効査証は約15,000円、数次有効査証は約30,000円となります。 ... 渡航目的及び国籍によって、手数料を必要としない場合や、金額が異なる場合があります。",
+     "authority": ""
+    },
+    {
+     "url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
+     "quote": "（2）个人单次旅游签证 ... 有效期为「3个月」，停留期限分为「15天」或「30天」，由本馆根据情况决定。 （5）相当高收入人士的多次签证 该签证可以在5年有效期之内多次使用，停留期限为「90天」。",
+     "authority": ""
+    }
+   ],
+   "confidence": "medium"
   }
  }
 ]
