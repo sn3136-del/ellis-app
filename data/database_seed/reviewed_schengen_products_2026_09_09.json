@@ -315,6 +315,17 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "de71e77dfa2bde6bbb73f9350a815b2034f4bc9756b8ed1ad43d783b25aa98bb",
+        "raw_route": {
+          "passport_nationality": "CHN",
+          "lawful_country_of_residence": "CHN",
+          "destination_country": "ESP",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Schengen short-stay (C) tourist visa",
@@ -647,7 +658,7 @@
         "disposition": "VISA_REQUIRED",
         "requirement_detail": "paper_visa",
         "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
-        "official_portal_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "official_portal_url": null,
         "permitted_stay": "Up to 90 days in any 180-day period across the Schengen Area; the visa may authorise a shorter stay.",
         "permitted_stay_days": 90,
         "government_fee": {
@@ -806,18 +817,8 @@
         },
         "official_portal_url": {
           "verifier": "ai",
-          "verified_at": "2026-09-09",
-          "scope_note": "CHN ordinary passport; ESP; tourism. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
-          "evidence": [
-            {
-              "source_id": "es-short",
-              "source_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
-              "quote": "The Schengen visa is issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806. This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports."
-            }
-          ],
-          "review_type": "field_specific_official_source_review",
-          "is_grounded_check": false,
-          "is_release": false
+          "status": "unknown",
+          "reason": "France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified."
         },
         "permitted_stay": {
           "verifier": "ai",
@@ -1935,7 +1936,8 @@
         "visa_category": "business_visa",
         "travel_purpose": "business",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "CHN|CHN|FRA|business|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -1943,6 +1945,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "9f2745f80636b0888b9acfab69dda64a65b4269784c7db7946216c3ec6fa11f7",
+        "raw_route": {
+          "passport_nationality": "CHN",
+          "lawful_country_of_residence": "CHN",
+          "destination_country": "FRA",
+          "visa_category": "business_visa",
+          "travel_purpose": "business",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Short-stay Schengen business visa (C-type)",
@@ -2410,7 +2421,7 @@
         "official_portal_url": {
           "verifier": "ai",
           "verified_at": "2026-09-09",
-          "scope_note": "CHN ordinary passport; FRA; business. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
+          "scope_note": "CHN ordinary passport; FRA; business. France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified.",
           "evidence": [
             {
               "source_id": "fr-short",
@@ -3206,7 +3217,8 @@
         "visa_category": "visitor_visa",
         "travel_purpose": "family_visit",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "CHN|CHN|FRA|family_visit|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -3214,6 +3226,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "033cdeb58543db9acfbd0acbf2e222cd271eff458d8a5df1b5e846057704cbb9",
+        "raw_route": {
+          "passport_nationality": "CHN",
+          "lawful_country_of_residence": "CHN",
+          "destination_country": "FRA",
+          "visa_category": "visitor_visa",
+          "travel_purpose": "family_visit",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Short-stay Schengen C (family visit)",
@@ -3694,7 +3715,7 @@
         "official_portal_url": {
           "verifier": "ai",
           "verified_at": "2026-09-09",
-          "scope_note": "CHN ordinary passport; FRA; family_visit. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
+          "scope_note": "CHN ordinary passport; FRA; family_visit. France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified.",
           "evidence": [
             {
               "source_id": "fr-short",
@@ -4823,7 +4844,8 @@
         "visa_category": "student_visa",
         "travel_purpose": "study",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "CHN|CHN|FRA|study|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -4831,6 +4853,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "57275498e0b3e6f700b0f3e73ec01d77c077f4f9245b8e6d962ee62454b89f12",
+        "raw_route": {
+          "passport_nationality": "CHN",
+          "lawful_country_of_residence": "CHN",
+          "destination_country": "FRA",
+          "visa_category": "student_visa",
+          "travel_purpose": "study",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Student visa",
@@ -5946,7 +5977,8 @@
         "visa_category": "tourist_visa",
         "travel_purpose": "tourism",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "CHN|CHN|FRA|tourism|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -5954,6 +5986,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "1c415672f59c5dd6b3d43d1b4c86c8fa0a879f3d136b27d6878d9204b5cfb2be",
+        "raw_route": {
+          "passport_nationality": "CHN",
+          "lawful_country_of_residence": "CHN",
+          "destination_country": "FRA",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Short-stay Schengen C (tourism)",
@@ -6470,7 +6511,7 @@
         "official_portal_url": {
           "verifier": "ai",
           "verified_at": "2026-09-09",
-          "scope_note": "CHN ordinary passport; FRA; tourism. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
+          "scope_note": "CHN ordinary passport; FRA; tourism. France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified.",
           "evidence": [
             {
               "source_id": "fr-short",
@@ -7260,7 +7301,8 @@
         "visa_category": "work_visa",
         "travel_purpose": "work",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "CHN|CHN|FRA|work|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -7268,6 +7310,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "34f5ea530005f2f1fbbcb11b770a8de4830b9828de7eac82c073444a42b7fd8e",
+        "raw_route": {
+          "passport_nationality": "CHN",
+          "lawful_country_of_residence": "CHN",
+          "destination_country": "FRA",
+          "visa_category": "work_visa",
+          "travel_purpose": "work",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Long-stay work visa (visa de long séjour)",
@@ -8267,7 +8318,8 @@
         "visa_category": "tourist_visa",
         "travel_purpose": "tourism",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "DEU|DEU|FRA|tourism|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -8275,6 +8327,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "542ac8ef5ad09fa99b9cdecaf28afd5bcc38d0d426d8bac6b36b30348d099a16",
+        "raw_route": {
+          "passport_nationality": "DEU",
+          "lawful_country_of_residence": "DEU",
+          "destination_country": "FRA",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_EXEMPT",
           "visa_category": "Tourist",
@@ -8583,7 +8644,8 @@
         "visa_category": "business_visa",
         "travel_purpose": "business",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "HKG|HKG|ESP|business|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -8591,6 +8653,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "ee2b78aa8d0d67f28929300c82b48208bc70c685e0d25f8176742ffc5d12b581",
+        "raw_route": {
+          "passport_nationality": "HKG",
+          "lawful_country_of_residence": "HKG",
+          "destination_country": "ESP",
+          "visa_category": "business_visa",
+          "travel_purpose": "business",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_EXEMPT",
           "visa_category": "Short-stay business",
@@ -8779,6 +8850,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             }
           ],
           "review_type": "field_specific_official_source_review",
@@ -8799,6 +8875,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             }
           ],
           "review_type": "field_specific_official_source_review",
@@ -8849,6 +8930,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             }
           ],
           "review_type": "field_specific_official_source_review",
@@ -8887,7 +8973,8 @@
         "visa_category": "transit_visa",
         "travel_purpose": "transit",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "HKG|HKG|ESP|transit|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -8895,6 +8982,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "329079313d93c10017b676e7eaf184922f268059d21ee20fc2e978050b30acf0",
+        "raw_route": {
+          "passport_nationality": "HKG",
+          "lawful_country_of_residence": "HKG",
+          "destination_country": "ESP",
+          "visa_category": "transit_visa",
+          "travel_purpose": "transit",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_EXEMPT",
           "visa_category": "transit",
@@ -9074,6 +9170,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             }
           ],
           "review_type": "field_specific_official_source_review",
@@ -9094,6 +9195,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             }
           ],
           "review_type": "field_specific_official_source_review",
@@ -9144,6 +9250,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             }
           ],
           "review_type": "field_specific_official_source_review",
@@ -9164,6 +9275,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             },
             {
               "source_id": "es-transit",
@@ -9224,6 +9340,17 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "f9f0e572a245bcadd83bfe731dad066838e9d4b44054675a5bc51dcafec2353d",
+        "raw_route": {
+          "passport_nationality": "HKG",
+          "lawful_country_of_residence": "HKG",
+          "destination_country": "FRA",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
         "raw_guidance": {
           "disposition": "VISA_EXEMPT",
           "visa_category": "Short-stay tourism",
@@ -9407,6 +9534,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             }
           ],
           "review_type": "field_specific_official_source_review",
@@ -9427,6 +9559,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             }
           ],
           "review_type": "field_specific_official_source_review",
@@ -9477,6 +9614,11 @@
               "source_id": "eu-nationality",
               "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
               "quote": "The exemption from the visa requirement shall only apply to holders of a ‘Hong Kong Special Administrative Region’ passport."
+            },
+            {
+              "source_id": "eu-nationality",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
+              "quote": "Hong Kong SAR ( 14 )"
             }
           ],
           "review_type": "field_specific_official_source_review",
@@ -9531,6 +9673,17 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "d682f8a7b474831f4e87b008567ef55a77e7278174c480a0f30fcbc3076a12b7",
+        "raw_route": {
+          "passport_nationality": "IDN",
+          "lawful_country_of_residence": "IDN",
+          "destination_country": "FRA",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Short-stay Schengen C visa",
@@ -10039,7 +10192,7 @@
         "official_portal_url": {
           "verifier": "ai",
           "verified_at": "2026-09-09",
-          "scope_note": "IDN ordinary passport; FRA; tourism. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
+          "scope_note": "IDN ordinary passport; FRA; tourism. France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified.",
           "evidence": [
             {
               "source_id": "fr-short",
@@ -11417,7 +11570,8 @@
         "visa_category": "tourist_visa",
         "travel_purpose": "tourism",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "PHL|PHL|ESP|tourism|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -11425,6 +11579,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "27a23c3a10259520a323a071ce298f02521f76b93b8c3fcf0f9eb32c37e73e2a",
+        "raw_route": {
+          "passport_nationality": "PHL",
+          "lawful_country_of_residence": "PHL",
+          "destination_country": "ESP",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Schengen Type C short-stay",
@@ -11787,7 +11950,7 @@
         "disposition": "VISA_REQUIRED",
         "requirement_detail": "paper_visa",
         "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
-        "official_portal_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "official_portal_url": null,
         "permitted_stay": "Up to 90 days in any 180-day period across the Schengen Area; the visa may authorise a shorter stay.",
         "permitted_stay_days": 90,
         "government_fee": {
@@ -11952,18 +12115,8 @@
         },
         "official_portal_url": {
           "verifier": "ai",
-          "verified_at": "2026-09-09",
-          "scope_note": "PHL ordinary passport; ESP; tourism. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
-          "evidence": [
-            {
-              "source_id": "es-short",
-              "source_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
-              "quote": "The Schengen visa is issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806. This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports."
-            }
-          ],
-          "review_type": "field_specific_official_source_review",
-          "is_grounded_check": false,
-          "is_release": false
+          "status": "unknown",
+          "reason": "France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified."
         },
         "permitted_stay": {
           "verifier": "ai",
@@ -13395,7 +13548,8 @@
         "visa_category": "tourist_visa",
         "travel_purpose": "tourism",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "RUS|RUS|ESP|tourism|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -13403,6 +13557,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "52430897c43a96b5a8aa0bb0f2667599b6c1fff1f56f7610f0c82489abf31dca",
+        "raw_route": {
+          "passport_nationality": "RUS",
+          "lawful_country_of_residence": "RUS",
+          "destination_country": "ESP",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Short-stay Schengen C (tourism)",
@@ -13727,7 +13890,7 @@
         "disposition": "VISA_REQUIRED",
         "requirement_detail": "paper_visa",
         "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
-        "official_portal_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "official_portal_url": null,
         "permitted_stay": "Up to 90 days in any 180-day period across the Schengen Area; the visa may authorise a shorter stay.",
         "permitted_stay_days": 90,
         "government_fee": {
@@ -13896,18 +14059,8 @@
         },
         "official_portal_url": {
           "verifier": "ai",
-          "verified_at": "2026-09-09",
-          "scope_note": "RUS ordinary passport; ESP; tourism. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
-          "evidence": [
-            {
-              "source_id": "es-short",
-              "source_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
-              "quote": "The Schengen visa is issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806. This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports."
-            }
-          ],
-          "review_type": "field_specific_official_source_review",
-          "is_grounded_check": false,
-          "is_release": false
+          "status": "unknown",
+          "reason": "France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified."
         },
         "permitted_stay": {
           "verifier": "ai",
@@ -14735,6 +14888,17 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "83db2c75aea87036f7eb73d9fb20589ce6a4a0d09770b3c8fb9f79b2e76454b2",
+        "raw_route": {
+          "passport_nationality": "SEN",
+          "lawful_country_of_residence": "SEN",
+          "destination_country": "FRA",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Schengen short-stay visa (C) - tourism",
@@ -15232,7 +15396,7 @@
         "official_portal_url": {
           "verifier": "ai",
           "verified_at": "2026-09-09",
-          "scope_note": "SEN ordinary passport; FRA; tourism. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
+          "scope_note": "SEN ordinary passport; FRA; tourism. France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified.",
           "evidence": [
             {
               "source_id": "fr-short",
@@ -17660,7 +17824,8 @@
         "visa_category": "tourist_visa",
         "travel_purpose": "tourism",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "THA|THA|ESP|tourism|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -17668,6 +17833,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "1d4daa3291cc74ce37dd065c303cce148e0be221d38cb0d630e6f95ac54658a3",
+        "raw_route": {
+          "passport_nationality": "THA",
+          "lawful_country_of_residence": "THA",
+          "destination_country": "ESP",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Short-stay Schengen (C) tourist visa",
@@ -17954,7 +18128,7 @@
         "disposition": "VISA_REQUIRED",
         "requirement_detail": "paper_visa",
         "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
-        "official_portal_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "official_portal_url": null,
         "permitted_stay": "Up to 90 days in any 180-day period across the Schengen Area; the visa may authorise a shorter stay.",
         "permitted_stay_days": 90,
         "government_fee": {
@@ -18120,18 +18294,8 @@
         },
         "official_portal_url": {
           "verifier": "ai",
-          "verified_at": "2026-09-09",
-          "scope_note": "THA ordinary passport; ESP; tourism. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
-          "evidence": [
-            {
-              "source_id": "es-short",
-              "source_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
-              "quote": "The Schengen visa is issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806. This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports."
-            }
-          ],
-          "review_type": "field_specific_official_source_review",
-          "is_grounded_check": false,
-          "is_release": false
+          "status": "unknown",
+          "reason": "France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified."
         },
         "permitted_stay": {
           "verifier": "ai",
@@ -18937,7 +19101,8 @@
         "visa_category": "tourist_visa",
         "travel_purpose": "tourism",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "THA|THA|FRA|tourism|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -18945,6 +19110,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "c76fac462ce124860bea05151fa821798d2cb5b36c006fcdc172ca6ff232630f",
+        "raw_route": {
+          "passport_nationality": "THA",
+          "lawful_country_of_residence": "THA",
+          "destination_country": "FRA",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Schengen short-stay (Type C) tourist visa",
@@ -19442,7 +19616,7 @@
         "official_portal_url": {
           "verifier": "ai",
           "verified_at": "2026-09-09",
-          "scope_note": "THA ordinary passport; FRA; tourism. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
+          "scope_note": "THA ordinary passport; FRA; tourism. France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified.",
           "evidence": [
             {
               "source_id": "fr-short",
@@ -20537,7 +20711,8 @@
         "visa_category": "tourist_visa",
         "travel_purpose": "tourism",
         "arrival_date": null,
-        "consular_jurisdiction": null
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport"
       },
       "cache_key": "VNM|VNM|ESP|tourism|default|unknown|v6",
       "reviewed_at": "2026-09-09",
@@ -20545,6 +20720,15 @@
       "baseline": {
         "captured_at": "2026-09-09T18:26:00Z",
         "raw_guidance_sha256": "77f3343f23fbac04ff748fccbc5c973049a6a71c3e68871d818cf2502a7ce4eb",
+        "raw_route": {
+          "passport_nationality": "VNM",
+          "lawful_country_of_residence": "VNM",
+          "destination_country": "ESP",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
         "raw_guidance": {
           "disposition": "VISA_REQUIRED",
           "visa_category": "Short-stay Schengen C (tourist)",
@@ -20888,7 +21072,7 @@
         "disposition": "VISA_REQUIRED",
         "requirement_detail": "paper_visa",
         "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230",
-        "official_portal_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "official_portal_url": null,
         "permitted_stay": "Up to 90 days in any 180-day period across the Schengen Area; the visa may authorise a shorter stay.",
         "permitted_stay_days": 90,
         "government_fee": {
@@ -21055,18 +21239,8 @@
         },
         "official_portal_url": {
           "verifier": "ai",
-          "verified_at": "2026-09-09",
-          "scope_note": "VNM ordinary passport; ESP; tourism. Official destination information page; jurisdiction and appointed application provider depend on legal residence.",
-          "evidence": [
-            {
-              "source_id": "es-short",
-              "source_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
-              "quote": "The Schengen visa is issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806. This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports."
-            }
-          ],
-          "review_type": "field_specific_official_source_review",
-          "is_grounded_check": false,
-          "is_release": false
+          "status": "unknown",
+          "reason": "France-Visas is the national starting point. For Spain, the Hong Kong mission is only a general-rule source; the application portal for this applicant’s actual legal residence has not been verified."
         },
         "permitted_stay": {
           "verifier": "ai",

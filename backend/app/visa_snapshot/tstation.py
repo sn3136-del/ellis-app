@@ -327,6 +327,54 @@ def _as_stay_unit(n, unit):
     return None, None
 
 
+def _validity_num_unit(text) -> tuple[float | None, str | None]:
+    """Read one explicitly stated validity measure, never a stay or a grant option.
+
+    The shared stay parser deliberately has broader semantics. A validity
+    column cannot select one member of a range, a consular choice or a rolling
+    stay window, even when its product name happens to contain the same number.
+    """
+    if not isinstance(text, str) or not text.strip():
+        return None, None
+    t = text.strip().lower()
+    # A field may contain copied stay/processing prose despite its name.
+    # Its number remains that other fact, not a visa entry window.
+    if re.search(r"\b(?:stay|stays|staying|processing|turnaround)\b", t):
+        return None, None
+    if any(k in t for k in _DISCRETIONARY) or re.search(
+            r"\b(?:discretion\w*|determin\w*|decid\w*|depend\w*|var(?:y|ies|iable)|"
+            r"may|might|usually|normally|generally|whichever)\b|"
+            r"\b(?:as issued|subject to|case[- ]by[- ]case|until (?:the )?passport)\b", t):
+        return None, None
+    if re.fullmatch(r"(?:permanent|long[- ]term(?: valid(?:ity)?)?)", t):
+        return 0, "Long-term Valid"
+    numbers = {word: str(index) for index, word in enumerate(
+        ("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"), 1)}
+    # Collapse only matching duplicated notation: Six (6), not Six (7).
+    for word, digit in numbers.items():
+        t = re.sub(rf"\b{word}\s*\(\s*{digit}\s*\)", digit, t)
+        t = re.sub(rf"\b{word}\b", digit, t)
+    # Exactly one number must own exactly one unit. This rejects 1/3/5 years,
+    # 1–3 years, 1 year or 3 years, mixed units and 90 days in any 180 days.
+    if len(re.findall(r"\d+(?:\.\d+)?", t)) != 1:
+        return None, None
+    if re.search(r"\b(?:or|alternatively|working|business)\b|[或至]", t):
+        return None, None
+    if re.search(r"\b(?:not|never)\b(?!\s+(?:exceeding|more than|longer than)\b)|"
+                 r"\b(?:at least|minimum|unknown)\b", t):
+        return None, None
+    match = re.search(r"(?<![\d.\-–—−])(\d+(?:\.\d+)?)\s*(?:calendar\s+)?"
+                      r"(hour|day|month|year|week)s?\b", t)
+    if not match or float(match.group(1)) <= 0:
+        return None, None
+    n = float(match.group(1))
+    unit = {"hour": "Hour", "day": "Day", "month": "Month",
+            "year": "Year", "week": "Day"}[match.group(2)]
+    if match.group(2) == "week":
+        n *= 7
+    return (int(n) if n == int(n) else n), unit
+
+
 _CALENDAR_MEASURE = re.compile(
     r"\b(?:\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)"
     r"\s*(?:\(\d+\)\s*)?(?:calendar\s+)?(?:months?|years?)\b", re.I)
@@ -407,9 +455,14 @@ def _as_validity_unit(n, unit):
 
 def _set_validity(row: dict, n, unit, text=None) -> None:
     row["validity_duration"], row["validity_unit"] = _as_validity_unit(n, unit)
+    raw = str(text or "").strip()
+    if n is None and raw:
+        row["validity_text"] = raw
+        row["_validity_representation_reason"] = (
+            "The stated validity is not one unambiguous duration; its exact wording is retained.")
     if unit != "Hour" or row.get("visa_requirement") == "Visa-free":
         return
-    raw = str(text or "").strip() or f"{n} hours"
+    raw = raw or f"{n} hours"
     row["validity_text"] = raw
     if row["validity_duration"] is None:
         row["_validity_representation_reason"] = (
@@ -1000,6 +1053,37 @@ def _product_fields(row: dict, product: dict) -> None:
         row["special_conditions"] = ". ".join(str(x) for x in v if x) if isinstance(v, list) else v
 
 
+def _explicit_product_verdict_provenance(product: dict, route: dict) -> tuple[bool, dict | None]:
+    """A new explicit product review replaces, never inherits, parent proof."""
+    proofs = product.get("field_provenance")
+    if not isinstance(proofs, dict) or "disposition" not in proofs:
+        return False, None
+    proof = proofs.get("disposition")
+    if not isinstance(proof, dict) or proof.get("status") not in (None, "reviewed", "verified"):
+        return True, None
+    subject = proof.get("subject") or {}
+    if not isinstance(subject, dict):
+        return True, None
+    if (not isinstance(subject.get("disposition"), str)
+            or subject["disposition"] not in _DISPOSITION_TO_REQUIREMENT
+            or (subject.get("requirement_detail") is not None and
+                (not isinstance(subject["requirement_detail"], str) or
+                 subject["requirement_detail"] not in SUBCATEGORY)) or any(
+            key not in subject or subject[key] != product.get(key)
+            for key in ("disposition", "requirement_detail"))):
+        return True, None
+    route = dict(route, travel_document_type=route.get('travel_document_type') or 'ordinary_passport')
+    if (subject.get("product_type") != product.get("type") or any(
+            subject.get(key) != route.get(key) for key in
+            ("passport_nationality", "destination_country", "travel_purpose", "travel_document_type"))):
+        return True, None
+    from .evidence_validator import jurisdiction_matches
+    if not jurisdiction_matches(str(proof.get("source_url") or ""), route.get("destination_country", "")):
+        return True, None
+    candidate = dict(proof, fields=["disposition"])
+    return True, candidate if verdict_provenance_supported(candidate) else None
+
+
 def _separate_product_method(product: dict, detail: str, guidance: dict) -> str | None:
     explicit = (_method_for_channel(product.get("application_channel"))
                 or _method_from_detail(product))
@@ -1304,12 +1388,10 @@ def records_for_route(route: dict, guidance: dict,
         else:
             row["visa_type_name"] = g.get("visa_category") or None
             _set_stay(row, g.get("permitted_stay"), g.get("permitted_stay_days"))
-            n, unit = row["max_stay_duration"], row["max_stay_unit"]
-            # A product-less route states no separate validity window, so the
-            # granted stay is its honest bound, exactly as the product rows
-            # and the visa-free branch already read it. Without this the
-            # validity column sat empty on every product-less visa answer.
-            _set_validity(row, n, unit, g.get("permitted_stay"))
+            # A separate, explicit validity may exist on a product-less route.
+            # Permitted stay never supplies that independent entry window.
+            n, unit = _validity_num_unit(g.get("validity"))
+            _set_validity(row, n, unit, g.get("validity"))
             amt, cur = _fee({}, g)
             row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
         row["visa_fee_qualifier"] = _fee_qualifier({}, g)
@@ -1396,6 +1478,17 @@ def records_for_route(route: dict, guidance: dict,
                 row["_grounded"] = False
         if p.get("corroborating_sources"):
             row["corroborating_sources"] = _corroborating(p)
+        explicit_review, own_review = _explicit_product_verdict_provenance(p, route)
+        if explicit_review:
+            # An invalid explicit review must not fall back to a valid parent
+            # visa-products citation. Only this product's reviewed verdict is
+            # credited; fees/documents remain separately scoped evidence.
+            row["_product_source_verified"] = row["_prov"] = own_review
+            row["_grounded"] = False
+            row["collected_at"] = own_review.get("verified_at") if own_review else None
+            row["data_source"] = (own_review.get("verified_by") or "Ellis product visa requirement source review") if own_review else "Ellis product information (reference only)"
+            if own_review:
+                row["source_url"] = own_review["source_url"]
         exemption_lane = requirement == "Conditional" and _product_is_exemption(p)
         if exemption_lane:
             # The lane is the route's own kind of exemption (transit-only or
@@ -1405,30 +1498,10 @@ def records_for_route(route: dict, guidance: dict,
                 route_key if route_key in ("transit_visa_free",
                                            "conditional_visa_free")
                 else "conditional_visa_free"]
-        n, unit = _num_unit(p.get("validity"),
-                            stay_bound=p.get("max_stay_days"))
-        if n is None:
-            # Definitional: a product NAMED "3-year multiple" or "5年多次"
-            # states its own validity; reading it is not a guess.
-            m = re.search(r"(\d+)[\s-]*(?:year|年)", str(p.get("type") or ""),
-                          re.I)
-            if m:
-                n, unit = int(m.group(1)), "Year"
-            else:
-                m = re.search(r"(\d+)[\s-]*(?:month|个月|個月)",
-                              str(p.get("type") or ""), re.I)
-                if m:
-                    n, unit = int(m.group(1)), "Month"
-        if n is None and p.get("max_stay_days"):
-            # Same rule as the _DISCRETIONARY markers, generalised: when a
-            # product publishes its stay but no separate validity window
-            # (visas issued at the border, Schengen C stickers cut to the
-            # trip), the granted stay is the validity's honest lower bound,
-            # which is how Trip.com's own display standard writes these.
-            # A product whose validity genuinely exceeds its stay (a
-            # multi-year visa) always names that validity and never lands
-            # here.
-            n, unit = int(p["max_stay_days"]), "Day"
+        # A permitted stay and a marketed product name cannot establish the
+        # visa's separate validity. In particular, "5-year multiple entry"
+        # may name a conditional option whose grant remains discretionary.
+        n, unit = _validity_num_unit(p.get("validity"))
         _set_validity(row, n, unit, p.get("validity"))
         _set_stay(row, p.get("permitted_stay") or product_g.get("permitted_stay"),
                   p.get("max_stay_days"))
@@ -1443,7 +1516,13 @@ def records_for_route(route: dict, guidance: dict,
             row["special_conditions"] = (str(note) if not row["special_conditions"]
                                          else f"{row['special_conditions']}. {note}")
         own_method = _method_for_channel(p.get("application_channel")) or _method_from_detail(p)
-        if own_method:
+        explicitly_unknown_method = ('application_channel' in p and p['application_channel'] is None
+                                     and 'application_channel_detail' in p and p['application_channel_detail'] is None)
+        if explicitly_unknown_method:
+            # Electronic issuance does not establish who may file the
+            # application. A reviewed unknown must not inherit online filing.
+            row['application_method'] = None
+        elif own_method:
             row["application_method"] = own_method
         elif separate_permission:
             row["application_method"] = _separate_product_method(

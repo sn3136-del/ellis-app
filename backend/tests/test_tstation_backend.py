@@ -163,11 +163,8 @@ def test_excel_export_has_two_sheets_and_the_data(client):
     assert client.get("/database/export.xlsx", headers=READER).status_code == 403
 
 
-def test_discretionary_validity_maps_to_the_stay_bound():
-    """"Set by the consulate" is not a parser failure — it is the truth that
-    no fixed validity exists. Their own display standard writes these as
-    "Up to N days (determined at issuance)", so the record carries the stay
-    length as the upper bound; with no stay known it stays honestly empty."""
+def test_discretionary_validity_remains_separate_from_the_stay_bound():
+    """A stay ceiling cannot establish the independently granted visa validity."""
     route = {"passport_nationality": "CHN", "destination_country": "FRA",
              "travel_purpose": "tourism"}
     g = {"disposition": "VISA_REQUIRED", "confidence": "high",
@@ -180,15 +177,14 @@ def test_discretionary_validity_maps_to_the_stay_bound():
               "validity": "as granted", "max_stay_days": None, "fee": None},
          ]}
     rows = tstation.records_for_route(route, g)
-    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (90, "Day")
+    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (None, None)
+    assert rows[0]["max_stay_duration"] == 90
     assert rows[1]["validity_duration"] is None      # no bound, no guess
 
 
-def test_parenthesized_and_on_arrival_validities_read_definitionally():
-    """"Six (6) months" and "One (1) to three (3) months" state their own
-    figures with parentheses between digit and unit; a range reads at the
-    number written beside the unit word. A visa-on-arrival product with no
-    validity text starts when granted, so its validity is the granted stay."""
+def test_parenthesized_duration_does_not_collapse_a_validity_range():
+    """Six (6) months is a duration; one-to-three is an unresolved range.
+    An on-arrival product's stay cannot establish its separate validity."""
     route = {"passport_nationality": "HKG", "destination_country": "GAB",
              "travel_purpose": "tourism"}
     g = {"disposition": "VISA_REQUIRED", "confidence": "high",
@@ -203,9 +199,11 @@ def test_parenthesized_and_on_arrival_validities_read_definitionally():
               "validity": None, "max_stay_days": 30, "fee": None},
          ]}
     rows = tstation.records_for_route(route, g)
-    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (3, "Month")
+    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (None, None)
+    assert rows[0]["validity_text"] == "One (1) to three (3) months"
     assert (rows[1]["validity_duration"], rows[1]["validity_unit"]) == (6, "Month")
-    assert (rows[2]["validity_duration"], rows[2]["validity_unit"]) == (30, "Day")
+    assert (rows[2]["validity_duration"], rows[2]["validity_unit"]) == (None, None)
+    assert rows[2]["max_stay_duration"] == 30
 
 
 def test_spelled_out_validities_read_definitionally():
@@ -279,17 +277,15 @@ def test_proven_free_visas_keep_their_zero_and_get_a_currency():
     assert rows[2]["visa_fee_amount"] is None     # an unexplained zero stays out
 
 
-def test_productless_visa_routes_show_a_validity_bound():
-    """A Senegalese tourist bound for France saw an empty validity cell: a
-    product-less VISA_REQUIRED answer never set the column. The granted stay
-    is the honest bound, same as product rows and the visa-free branch."""
+def test_productless_visa_does_not_invent_validity_from_rolling_stay():
+    """A permitted stay is not a visa's entry window, even without products."""
     route = {"passport_nationality": "SEN", "destination_country": "FRA",
              "travel_purpose": "tourism"}
     g = {"disposition": "VISA_REQUIRED", "confidence": "high",
          "visa_category": "Short-stay Schengen C",
          "permitted_stay": "90 days in any 180-day period"}
     rows = tstation.records_for_route(route, g)
-    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (90, "Day")
+    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (None, None)
 
 
 def test_records_listing_prefers_the_canonical_row_over_a_newer_dated_copy(client, db):

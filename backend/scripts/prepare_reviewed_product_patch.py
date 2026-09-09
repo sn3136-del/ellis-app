@@ -23,6 +23,10 @@ def digest(value):
 
 
 def route_identity(route):
+    route = dict(route or {})
+    # The legacy canonical `default` cache lane is an ordinary passport. An
+    # explicit other document is never normalised into that lane.
+    route['travel_document_type'] = route.get('travel_document_type') or 'ordinary_passport'
     return tuple(str(route.get(k) or "").strip() for k in
                  ("passport_nationality", "destination_country",
                   "travel_purpose", "travel_document_type"))
@@ -32,7 +36,117 @@ def _norm(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
 
 
-def _proofs(values, proofs, sources):
+def _authority_matches(url, route, field):
+    from app.visa_snapshot.evidence_validator import jurisdiction_matches
+    if jurisdiction_matches(url, route.get("destination_country", "")):
+        return True
+    # Two narrowly scoped EU companion sources used by this reviewed batch.
+    # Neither opens all EU websites to arbitrary destination-policy claims.
+    if (url == "https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en"
+            and route.get("passport_nationality") == "DEU"
+            and route.get("destination_country") == "FRA"
+            and field in {"disposition", "requirement_detail", "source_url"}):
+        return True
+    return (url == "https://home-affairs.ec.europa.eu/document/download/409a8179-9885-49f8-ab40-9c1a07b1f581_en"
+            and route.get("passport_nationality") == "RUS"
+            and route.get("destination_country") == "ESP" and field == "notes")
+
+
+def _fee_scope(value, evidence, route, product):
+    """Bind fee evidence to the actual named visa and age/procedure tier.
+
+    This bounded converter accepts only the reviewed Schengen/France fee
+    contracts; another country's prices or a sibling's age tier cannot supply
+    a fee merely because the same number appears on a government page.
+    """
+    if not isinstance(value, dict) or value.get("currency") != "EUR":
+        return False
+    name = str((product or {}).get("type") or "").lower()
+    purpose = route.get("travel_purpose")
+    if purpose == "work" or "long-stay" in name or "vls-ts" in name:
+        if route.get("destination_country") != "FRA":
+            return False
+        for item in evidence:
+            if item['source_url'] != 'https://www.france-visas.gouv.fr/documents/d/france-visas/frais-de-visa-anglais':
+                continue
+            match = re.search(r'Long-stay visa\s+(\d+(?:\.\d+)?) euros', _norm(item['quote']))
+            if match and float(match.group(1)) == value.get('amount'):
+                return True
+        return False
+    if route.get('destination_country') not in {'FRA', 'ESP'}:
+        return False
+    texts = [item['quote'] for item in evidence if item['source_url'] ==
+             'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02009R0810-20240628']
+    text = _norm('\n'.join(texts))
+    # The rule and its cohort must occur in this field's own evidence.
+    if 'child under 6' in name or 'child under six' in name:
+        return value.get('amount') == 0 and bool(re.search(
+            r'visa fee (?:shall be |is )?waived.{0,110}children under six years', text, re.I))
+    if 'child 6-11' in name:
+        match = re.search(r'Children from the age of six years and below the age of 12 years shall pay a visa fee of EUR (\d+(?:\.\d+)?)', text)
+    elif purpose == 'study' and 'short-stay' in name:
+        return value.get('amount') == 0 and bool(re.search(
+            r'visa fee (?:shall be |is )?waived.{0,450}school pupils, students, postgraduate students and accompanying teachers who undertake stays for the purpose of study or educational training', text, re.I))
+    else:
+        match = re.search(r'Applicants shall pay a visa fee of EUR (\d+(?:\.\d+)?)', text)
+    return bool(match) and float(match.group(1)) == value.get('amount')
+
+
+def _decision_scope(value, evidence, sources, route, product):
+    """Named ordinary-passport EU/France/Spain proof, not a generic URL gate."""
+    if (route.get('travel_document_type') != 'ordinary_passport'
+            or route.get('destination_country') not in {'FRA', 'ESP'}):
+        return False
+    nat, purpose = route.get('passport_nationality'), route.get('travel_purpose')
+    def passages(url):
+        return '\n'.join(x['quote'] for x in evidence if x['source_url'] == url)
+    eu = 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230'
+    law = passages(eu)
+    if nat == 'DEU':
+        return (value == 'VISA_EXEMPT' and purpose == 'tourism'
+                and route['destination_country'] == 'FRA'
+                and 'EU Member State: since 1 January 1958' in passages('https://european-union.europa.eu/principles-countries-history/eu-countries/germany_en')
+                and 'You can enter and be present for up to 3 months in France without special formalities.' in passages('https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en'))
+    if nat == 'HKG':
+        return (value == 'VISA_EXEMPT' and purpose in {'tourism', 'business', 'transit'}
+                and 'Nationals of third countries listed in Annex II shall be exempt' in law
+                and 'Hong Kong SAR ( 14 )' in law
+                and 'Hong Kong Special Administrative Region' in law)
+    if value != 'VISA_REQUIRED' or purpose not in {'tourism', 'business', 'family_visit', 'study'}:
+        return False
+    if 'Nationals of third countries listed in Annex I shall be required to be in possession of a visa' not in law:
+        return False
+    from app.visa_snapshot.evidence_validator import _NATIONALITY_NAMES
+    aliases = _NATIONALITY_NAMES.get(nat, ()) or {'SEN': ('Senegal',)}.get(nat, ())
+    matching_table = False
+    for item in evidence:
+        if item['source_url'] != eu:
+            continue
+        source_text = sources[item['source_id']]['text']
+        start = source_text.find('ANNEX I\nLIST OF THIRD COUNTRIES WHOSE NATIONALS ARE REQUIRED')
+        end = source_text.find('ANNEX II', start)
+        if start < 0 or end <= start:
+            continue
+        table = source_text[start:end].strip()
+        if _norm(item['quote']) != _norm(table):
+            continue
+        if any(re.search(r'^\s*' + re.escape(alias) + r'\s*$', table, re.I | re.M) for alias in aliases):
+            matching_table = True
+    if not matching_table:
+        return False
+    if route['destination_country'] == 'ESP':
+        return purpose == 'tourism' and 'purposes of tourism' in passages('https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx')
+    if purpose in {'tourism', 'business', 'family_visit'}:
+        return 'This type of visa is generally issued for tourism, business trips or family visits.' in passages('https://www.france-visas.gouv.fr/en/visa-de-court-sejour')
+    student = passages('https://www.france-visas.gouv.fr/en/etudiant')
+    name = str((product or {}).get('type') or '')
+    if 'Long-stay' in name:
+        return ('For a training or course of study longer than 3 months, you will be issued a long-stay visa' in student
+                and 'For any stay in France exceeding 90 days, you are required to apply in advance for a long-stay' in passages('https://www.france-visas.gouv.fr/en/visa-de-long-sejour'))
+    return 'For a training course not exceeding three months, you will be issued a short-stay visa' in student
+
+
+def _proofs(values, proofs, sources, route=None, product=None):
     from app.visa_snapshot.authority import hostname, is_government_host
     if not isinstance(values, dict) or not isinstance(proofs, dict) or set(values) != set(proofs):
         raise PatchRejected("Every changed field requires its own proof or explicit unknown status")
@@ -53,6 +167,8 @@ def _proofs(values, proofs, sources):
                     or source.get("url") != item.get("source_url")
                     or not is_government_host(hostname(source["url"]))):
                 raise PatchRejected("Unread or unofficial field source")
+            if route and not _authority_matches(source['url'], route, field):
+                raise PatchRejected("Source authority does not cover this destination and field")
             try:
                 day = date.fromisoformat(str(source.get("checked_at", ""))[:10])
             except ValueError as exc:
@@ -71,6 +187,8 @@ def _proofs(values, proofs, sources):
                 _norm(value) in _norm(sources[item["source_id"]]["text"])
                 for item in evidence):
             raise PatchRejected("The product source quote is not literal source text")
+        if route and field == 'disposition' and not _decision_scope(value, evidence, sources, route, product):
+            raise PatchRejected("Decision proof does not establish this nationality, document, purpose and product")
         if field in {"government_fee", "fee", "max_stay_days", "permitted_stay_days"} and value is not None:
             from app.visa_snapshot.evidence_validator import field_value_supported
             passages = "\n".join(item["quote"] for item in evidence)
@@ -81,6 +199,8 @@ def _proofs(values, proofs, sources):
                       and bool(re.search(r"visa fee (?:shall be |is )?waived", passages, re.I)))
             if not waived and not field_value_supported(field, value, numeric_text):
                 raise PatchRejected("Numeric field is not supported by its own quoted evidence: " + field)
+            if route and field in {'government_fee', 'fee'} and not _fee_scope(value, evidence, route, product):
+                raise PatchRejected("Fee evidence belongs to another product, age tier or procedure")
 
 
 def prepare(guidance, route, entry, sources):
@@ -94,6 +214,7 @@ def prepare(guidance, route, entry, sources):
         raise PatchRejected("Expected guidance and a patch entry")
     if route_identity(route) != route_identity(entry.get("route") or {}):
         raise PatchRejected("Nationality, destination, purpose or document differs")
+    route = dict(route, travel_document_type=route.get('travel_document_type') or 'ordinary_passport')
     if entry.get("publication_blocked"):
         raise PatchRejected("Unresolved product or entry facts require review before publication")
     fields = entry.get("fields") or {}
@@ -106,7 +227,7 @@ def prepare(guidance, route, entry, sources):
         actual = {"present": field in guidance, "value": guidance.get(field)}
         if actual != expected:
             raise PatchRejected("Route field changed since the reviewed baseline: " + field)
-    _proofs(fields, entry.get("field_provenance") or {}, sources)
+    _proofs(fields, entry.get("field_provenance") or {}, sources, route)
     products = guidance.get("visa_products") or []
     if not isinstance(products, list) or any(not isinstance(p, dict) for p in products):
         raise PatchRejected("Malformed existing product list")
@@ -129,7 +250,7 @@ def prepare(guidance, route, entry, sources):
         if any(k in updates for k in ("held", "operator_released", "confidence", "verification",
                                       "fresh_until", "generated_at")):
             raise PatchRejected("Product patch cannot release or renew a record")
-        _proofs(updates, patch.get("field_provenance") or {}, sources)
+        _proofs(updates, patch.get("field_provenance") or {}, sources, route, products[pos])
         candidate.setdefault("visa_products", deepcopy(products))[pos].update(deepcopy(updates))
         prior_proofs = candidate["visa_products"][pos].get("field_provenance") or {}
         candidate["visa_products"][pos]["field_provenance"] = {

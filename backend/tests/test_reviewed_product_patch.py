@@ -252,3 +252,29 @@ def test_actual_conditional_circulation_and_russian_scope_are_preserved():
     multiple = next(p for p in rus['product_patches'] if p['fields']['entry'] == 'multiple')
     assert 'resident in Russia' in multiple['fields']['notes']
     assert 'not a worldwide ban' in multiple['fields']['notes']
+
+
+@pytest.mark.parametrize('url',['https://eviza.mae.ro/TypeOfVisa','https://overseas.mofa.go.kr/us-en/index.do'])
+def test_foreign_government_cannot_supply_destination_field_proof(url):
+    g,e=fixture(); sources=copy.deepcopy(SOURCES); sources['code']['url']=url
+    e['product_patches'][0]['field_provenance']['fee']['evidence'][0]['source_url']=url
+    with pytest.raises(PatchRejected,match='authority'): prepare(g,ROUTE,e,sources)
+
+
+@pytest.mark.parametrize('change',['nationality','verdict','fee_tier'])
+def test_actual_named_scope_rejects_other_nationality_verdict_or_sibling_fee(change):
+    m,sources=actual_manifest()
+    e=copy.deepcopy(next(x for x in m['routes'] if x['route']['passport_nationality']=='CHN' and x['route']['destination_country']=='ESP'))
+    if change=='nationality': e['route']['passport_nationality']='USA'
+    elif change=='verdict': e['fields'].update(disposition='VISA_EXEMPT',requirement_detail='conditional_visa_free')
+    else:e['product_patches'][0]['fields']['fee']['amount']=45
+    with pytest.raises(PatchRejected,match='Decision proof|another product, age tier'):
+        prepare(e['baseline']['effective_guidance'],e['route'],e,sources)
+
+
+def test_spanish_application_portal_never_guesses_hong_kong_residence():
+    m,_=actual_manifest()
+    for e in m['routes']:
+        if e['route']['destination_country']=='ESP' and e['route']['passport_nationality']!='HKG':
+            assert e['fields']['official_portal_url'] is None
+            assert e['field_provenance']['official_portal_url']['status']=='unknown'
