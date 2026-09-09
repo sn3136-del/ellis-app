@@ -81,3 +81,35 @@ test('database client bypasses a previously stored browser response', async () =
     assert.ok(options.every(init=>init.cache==='no-store'))
   } finally {globalThis.fetch=original}
 })
+
+test('a stalled optional response body cannot indefinitely hide completed Freshness data', async () => {
+  const original=globalThis.fetch; let stalledSignal
+  globalThis.fetch=async (url, init) => {
+    if(url.endsWith('/health/uptime')) {
+      stalledSignal=init.signal
+      return {ok:true,text:()=>new Promise(()=>{})}
+    }
+    return {ok:true,text:async()=>url.endsWith('/database/freshness') ? '{"verified":4}' : '[]'}
+  }
+  try {
+    const real=createVisaClient({token:'public-quality-control'})
+    const client={get:(path,options)=>real.get(path, options ? {timeoutMs:5} : undefined)}
+    assert.deepEqual(await readQualityTab(client,'freshness'), {freshness:{verified:4},issues:[]})
+    assert.equal(stalledSignal.aborted,true)
+  } finally {globalThis.fetch=original}
+})
+
+test('a stalled primary QC read exits loading with an error and permits a later refresh', async () => {
+  const original=globalThis.fetch; let stalledSignal
+  globalThis.fetch=(_url,init)=>{stalledSignal=init.signal; return new Promise(()=>{})}
+  try {
+    const client=createVisaClient({token:'public-quality-control'})
+    const {loader,state}=harness(()=>client.get('/database/records',{timeoutMs:5}))
+    await loader.run('records')
+    assert.equal(state.busy,false); assert.match(state.errors[0],/timed out/)
+    assert.equal(stalledSignal.aborted,true)
+    globalThis.fetch=async()=>({ok:true,text:async()=>'{}'})
+    await loader.run('records')
+    assert.deepEqual(state.data,{}); assert.equal(state.busy,false)
+  } finally {globalThis.fetch=original}
+})

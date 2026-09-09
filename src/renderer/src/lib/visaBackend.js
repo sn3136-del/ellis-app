@@ -52,23 +52,41 @@ export function errorMessageFrom(detail, status) {
   return `HTTP ${status}`
 }
 
-async function call(method, path, session, body) {
-  const res = await fetch(`${BASE}${path}`, {
-    method,
-    ...(path.startsWith('/database/') ? { cache: 'no-store' } : {}),
-    headers: authHeaders(session),
-    body: body === undefined ? undefined : JSON.stringify(body)
-  })
-  const text = await res.text()
-  const data = text ? JSON.parse(text) : {}
-  if (!res.ok) {
-    const detail = data.detail
-    const err = new Error(errorMessageFrom(detail, res.status))
-    err.status = res.status
-    err.detail = detail // structured payloads (e.g. resolve 422 {missing_fields})
-    throw err
+async function call(method, path, session, body, options = {}) {
+  // Bound QC reads, including response-body delivery. Mutation requests are
+  // deliberately outside this read deadline: timing one out cannot establish
+  // whether the server completed a correction.
+  const qualityRead = method === 'GET' && (path.startsWith('/database/') || path === '/health/uptime')
+  const timeoutMs = qualityRead ? (options.timeoutMs ?? 30000) : 0
+  const controller = timeoutMs > 0 ? new AbortController() : null
+  let timer
+  const deadline = controller ? new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error('The Quality Control read timed out. Please refresh to try again.'))
+      controller.abort()
+    }, timeoutMs)
+  }) : null
+  const request = async () => {
+    const res = await fetch(`${BASE}${path}`, {
+      method,
+      ...(path.startsWith('/database/') ? { cache: 'no-store' } : {}),
+      ...(controller ? { signal: controller.signal } : {}),
+      headers: authHeaders(session),
+      body: body === undefined ? undefined : JSON.stringify(body)
+    })
+    const text = await res.text()
+    const data = text ? JSON.parse(text) : {}
+    if (!res.ok) {
+      const detail = data.detail
+      const err = new Error(errorMessageFrom(detail, res.status))
+      err.status = res.status
+      err.detail = detail // structured payloads (e.g. resolve 422 {missing_fields})
+      throw err
+    }
+    return data
   }
-  return data
+  try { return await (deadline ? Promise.race([request(), deadline]) : request()) }
+  finally { if (timer) clearTimeout(timer) }
 }
 
 // Runtime-mode probe. GET {base}/capabilities and return its "runtime_mode"
@@ -99,7 +117,7 @@ export function createVisaClient(session) {
     base: BASE,
     baseUrl: BASE,
     // Generic GET for the ops quality console (records, changes, freshness).
-    get: (path) => call('GET', path, session),
+    get: (path, options) => call('GET', path, session, undefined, options),
     post: (path, payload = {}) => call('POST', path, session, payload),
     capabilities: () => call('GET', '/capabilities', session),
     listAdapters: () => call('GET', '/adapters', session),

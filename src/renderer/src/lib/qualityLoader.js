@@ -51,7 +51,9 @@ export async function readQualityTab(client, tab) {
   if (tab === 'freshness-poll') return { freshness: await client.get('/database/freshness') }
   if (tab === 'freshness') {
     const [fresh, issues, uptime] = await Promise.allSettled([
-      client.get('/database/freshness'), client.get('/database/issues'), client.get('/health/uptime'),
+      client.get('/database/freshness'),
+      client.get('/database/issues', { timeoutMs: 5000 }),
+      client.get('/health/uptime', { timeoutMs: 5000 }),
     ])
     if (fresh.status === 'rejected') throw fresh.reason
     return { freshness: fresh.value,
