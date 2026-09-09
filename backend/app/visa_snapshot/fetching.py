@@ -30,6 +30,9 @@ class FetchResult:
     error: str = ""
     links: list = field(default_factory=list)   # absolute http(s) links on the page
     challenge: bool = False                      # anti-bot / JS-shell detected
+    media_type: str = ""
+    extraction_method: str = ""
+    page_count: int | None = None
 
 
 _TAG_RE = re.compile(r"<(script|style)[^>]*>.*?</\1>", re.S | re.I)
@@ -38,6 +41,7 @@ _WS_RE = re.compile(r"[ \t\r\f\v]+")
 _HREF_RE = re.compile(r"""<a\b[^>]*\bhref\s*=\s*["']([^"'#>]+)["']""", re.I)
 
 MAX_TEXT_CHARS = 40_000
+MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024
 
 # A 200 response whose body is one of these (or is a tiny shell) is an anti-bot
 # / JS-render challenge, NOT the official content — it must route to the render
@@ -143,26 +147,58 @@ def _default_fetch(url: str, *, timeout_seconds: float = 20.0) -> FetchResult:
           "(KHTML, like Gecko) Chrome/125.0 Safari/537.36 "
           "EllisVisaResearch/1.0 (+official-source verification)")
     chain: list[str] = []
+    metadata = {}
+    started = time.monotonic()
     try:
         with httpx.Client(follow_redirects=True, timeout=timeout_seconds,
                           headers={"User-Agent": ua, "Accept-Language": "en,zh;q=0.8,es;q=0.7"}) as c:
-            r = c.get(url)
-        chain = [str(h.url) for h in r.history] + ([str(r.url)] if r.history else [])
-        text = html_to_text(r.text or "")
+            with c.stream("GET", url) as r:
+                chain = [str(h.url) for h in r.history] + ([str(r.url)] if r.history else [])
+                media_type = r.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+                metadata = dict(final_url=str(r.url), redirect_chain=chain,
+                    final_hostname=(r.url.host or "").lower(), http_status=r.status_code,
+                    media_type=media_type)
+                raw = bytearray()
+                for chunk in r.iter_bytes():
+                    if len(raw) + len(chunk) > MAX_DOWNLOAD_BYTES:
+                        return FetchResult(requested_url=url, ok=False, **metadata,
+                            retrieved_at=_now(), error="source_download_size_limit")
+                    raw.extend(chunk)
+                    if time.monotonic() - started > timeout_seconds:
+                        return FetchResult(requested_url=url, ok=False, **metadata,
+                            retrieved_at=_now(), error="source_download_deadline")
+                body = bytes(raw)
+                encoding = r.encoding or "utf-8"
+        content_hash = hashlib.sha256(body).hexdigest()
+        is_pdf = media_type == "application/pdf" or body.lstrip().startswith(b"%PDF-")
+        if is_pdf:
+            from .pdf_text import extract_pdf_text
+            metadata["media_type"] = "application/pdf"
+            if r.status_code != 200:
+                return FetchResult(requested_url=url, ok=False, **metadata,
+                    retrieved_at=_now(), content_hash=content_hash, error=f"http {r.status_code}")
+            result = extract_pdf_text(body, timeout_seconds=max(0.0,
+                timeout_seconds - (time.monotonic() - started)))
+            return FetchResult(requested_url=url, ok=bool(result.text) and not result.error,
+                **metadata, retrieved_at=_now(), content_hash=content_hash,
+                content_text=result.text, page_language=_detect_lang(result.text),
+                extraction_method="pypdf_text", page_count=result.page_count or None,
+                error=result.error)
+        html = body.decode(encoding, errors="replace")
+        text = html_to_text(html)
         challenge = _is_challenge(text, r.status_code)
         return FetchResult(
             requested_url=url, ok=r.status_code == 200 and bool(text) and not challenge,
-            final_url=str(r.url), redirect_chain=chain,
-            final_hostname=(r.url.host or "").lower(), http_status=r.status_code,
+            **metadata,
             content_text=text,
-            content_hash=hashlib.sha256((r.text or "").encode("utf-8", "ignore")).hexdigest(),
+            content_hash=content_hash, extraction_method="html_text",
             page_language=_detect_lang(text), retrieved_at=_now(),
-            links=extract_links(r.text or "", str(r.url)),
+            links=extract_links(html, str(r.url)),
             challenge=challenge,
             error=("anti-bot/JS challenge shell" if challenge
                    else "" if r.status_code == 200 else f"http {r.status_code}"))
     except Exception as e:  # noqa: BLE001 - recorded honestly, never guessed around
-        return FetchResult(requested_url=url, ok=False, redirect_chain=chain,
+        return FetchResult(requested_url=url, ok=False, **(metadata or {"redirect_chain": chain}),
                            retrieved_at=_now(), error=str(e)[:300])
 
 
@@ -238,6 +274,12 @@ def _fetch(url: str, *, timeout_seconds: float, deadline: float | None = None) -
     if _FETCHER is not None:
         return _FETCHER(url, timeout_seconds=timeout_seconds)
     res = _default_fetch(url, timeout_seconds=timeout_seconds)
+    # Image-only/encrypted/malformed PDFs and bounded-download failures require
+    # an honest manual source reading. A browser cannot supply the missing PDF
+    # text, and a paid rendering attempt must not disguise that failure.
+    if not res.ok and (res.media_type == "application/pdf" or res.error in {
+            "source_download_size_limit", "source_download_deadline"}):
+        return res
     # A blocked or JS-empty official page (200 but no extractable text, an
     # anti-bot challenge shell, or a transport error) gets ONE render attempt
     # when a renderer is available, under a HARD wall-clock cap. The rendered

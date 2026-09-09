@@ -69,7 +69,7 @@ NATIONALITY_SPECIFIC = frozenset({
 
 FETCH_TIMEOUT_SECONDS = 20.0
 CALL_TIMEOUT_SECONDS = 45.0
-MAX_PAGE_CHARS = 28_000
+MAX_PAGE_CHARS = 28_000  # model prompt only; deterministic proof uses the bounded full fetch
 MAX_SOURCES = 8
 ROUTE_BUDGET_SECONDS = 120.0
 EVIDENCE_CONTRACT = 2
@@ -503,7 +503,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                 'comparison_reused': False, 'error': str(e)[:160]})
             return
         if not isinstance(answer, dict): answer = {}
-        quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text[:MAX_PAGE_CHARS], route)
+        quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text, route)
         unquoted_all.update(unquoted)
         check = {'source_url': fr.final_url, 'outcome': 'page_not_relevant', 'at': when,
             'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
@@ -531,7 +531,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         tried.append(fr.final_url)
         full_captures[url] = full_captures[fr.final_url] = {'url': fr.final_url, 'text': fr.content_text}
         captures[url] = captures[fr.final_url] = {'url': fr.final_url,
-            'text': fr.content_text[:MAX_PAGE_CHARS], 'checked_at': when[:10]}
+            'text': fr.content_text, 'checked_at': when[:10]}
         companion = url in catalog.values()
         if ((not _source_authority_matches(fr.final_url, route) and not companion) or
                 _future_scheduled_source(fr.final_url, route, when[:10])):
@@ -932,7 +932,7 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
                 and is_government_host(fr.final_hostname)):
             continue
         captures[url] = captures[fr.final_url] = {'url':fr.final_url,
-            'text':fr.content_text[:MAX_PAGE_CHARS], 'checked_at':when[:10]}
+            'text':fr.content_text, 'checked_at':when[:10]}
         companion = url in catalog.values()
         if ((not _source_authority_matches(fr.final_url, route) and not companion) or
                 _future_scheduled_source(fr.final_url, route, when[:10])):
@@ -967,7 +967,7 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
         if not isinstance(raw, dict):
             outcome = "provider_error"
             continue
-        quoted, evidence, unquoted = _quoted_proposals(raw, fr.content_text[:MAX_PAGE_CHARS], route)
+        quoted, evidence, unquoted = _quoted_proposals(raw, fr.content_text, route)
         candidates.append((fr,raw,quoted,evidence,unquoted))
     fresh_sources = proof_helpers.source_map(captures,catalog)
     applicable, route_results, deferred = [], [], []
@@ -1005,7 +1005,7 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
                       "quote": evidence[k]} for k, v in quoted.items()}
         confirmed = ((allowed is None or requested in allowed) and (requested == "disposition" or
                      isinstance(evidence.get(requested), str)
-                     and quote_in_text(evidence[requested], fr.content_text[:MAX_PAGE_CHARS])
+                     and quote_in_text(evidence[requested], fr.content_text)
                      and field_value_supported(requested, guidance.get(requested), evidence[requested])
                      and proof_helpers.field_scope_matches_route(requested,evidence[requested],route)))
         proposal = {"outcome": "checked", "source_url": fr.final_url,
