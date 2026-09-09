@@ -555,21 +555,16 @@ def _confidence(guidance: dict, provenance: dict | None,
     return "Medium"
 
 
-# House style for everything a reader sees: no em dashes and no semicolons.
-# A semicolon joins two clauses a reader has to hold at once, and an em dash
-# hides a pause that a full stop states plainly, so both are rewritten rather
-# than banned at the source, which would only push the problem into whichever
-# page the next fact is quoted from.
-_DASHES = ("\u2014", "\u2013", " -- ")
-
-
 def _clean_text(v):
-    """Rewrite one served string into house style, leaving the facts alone."""
+    """Tidy prose without changing range punctuation in policy facts.
+
+    Dashes can denote continuous date, age, fee and processing intervals.
+    Replacing them with commas changed April–June into April, June and could
+    alter which seasonal fee applies. Source quotations bypass this helper.
+    """
     if not isinstance(v, str) or not v:
         return v
     out = v
-    for d in _DASHES:
-        out = out.replace(f" {d} ", ", ").replace(d, ", ")
     # A semicolon separating clauses becomes a sentence; one inside a list of
     # short items becomes a comma, which is what it was standing in for.
     out = re.sub(r";\s+(?=[A-Z\u4e00-\u9fff])", ". ", out)
@@ -1379,7 +1374,8 @@ def _corroborating(g: dict) -> list:
         url = str(item.get("url") or "").strip()
         if not url:
             continue
-        row = {"url": url, "quote": _clean_text(item.get("quote"))}
+        # Preserve exact evidence text, including punctuation and ranges.
+        row = {"url": url, "quote": item.get("quote")}
         for k in ("authority", "checked_at", "agrees"):
             if item.get(k) not in (None, ""):
                 row[k] = item[k]
