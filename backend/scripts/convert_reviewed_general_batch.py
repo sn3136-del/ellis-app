@@ -55,6 +55,50 @@ def _norm(value):
     return ' '.join(unicodedata.normalize('NFKC', str(value or '')).casefold().split())
 
 
+def quote_literal(quote, text):
+    """The whole quote must occur in the captured text. Whitespace is the
+    only thing a capture may change (a list line "9. Australia" renders as
+    "9.Australia" in another reader), so a second comparison ignores it."""
+    from app.visa_snapshot.evidence_validator import quote_in_text
+    if quote_in_text(quote, text):
+        return True
+    q = re.sub(r'\s+', '', _norm(quote)); t = re.sub(r'\s+', '', _norm(text))
+    return bool(q) and len(q) >= 8 and q in t
+
+
+# Names of the station nationalities in the languages of the destinations
+# whose official pages are read most (Russian, French, Spanish, Portuguese,
+# German, Italian, Vietnamese, Thai, Indonesian/Malay, Japanese, Korean,
+# Chinese, Arabic, Turkish). They extend, never replace, the validator's own
+# English and Chinese anchors.
+_EXTRA_ALIASES = {
+    'HKG': ('гонконг', 'hong-kong', 'hongkong', '홍콩', '香港', 'hồng kông', 'ฮ่องกง', 'هونغ كونغ'),
+    'TWN': ('тайвань', 'taïwan', 'taiwán', '대만', '台灣', '台湾', 'đài loan', 'ไต้หวัน', 'تايوان'),
+    'JPN': ('япония', 'japon', 'japón', 'japão', 'giappone', '일본', '日本', 'nhật bản', 'ญี่ปุ่น', 'jepang', 'اليابان', 'japonya'),
+    'KOR': ('корея', 'республика корея', 'corée', 'corea', 'coreia', '한국', '대한민국', '韓国', '韩国', '韓國', 'hàn quốc', 'เกาหลี', 'korea selatan', 'كوريا', 'güney kore'),
+    'USA': ('сша', 'соединенные штаты', 'états-unis', 'etats-unis', 'estados unidos', 'stati uniti', 'vereinigte staaten', '미국', 'アメリカ', '米国', '美国', '美國', 'hoa kỳ', 'สหรัฐ', 'amerika serikat', 'الولايات المتحدة', 'amerika birleşik devletleri'),
+    'THA': ('таиланд', 'thaïlande', 'tailandia', 'tailândia', '태국', 'タイ', '泰国', '泰國', 'thái lan', 'ไทย', 'تايلاند', 'tayland'),
+    'SGP': ('сингапур', 'singapour', 'singapur', 'singapura', '싱가포르', 'シンガポール', '新加坡', 'สิงคโปร์', 'سنغافورة'),
+    'MYS': ('малайзия', 'malaisie', 'malasia', 'malásia', '말레이시아', 'マレーシア', '马来西亚', '馬來西亞', 'มาเลเซีย', 'ماليزيا', 'malezya'),
+    'GBR': ('великобритания', 'соединенное королевство', 'royaume-uni', 'reino unido', 'regno unito', 'vereinigtes königreich', 'großbritannien', '영국', 'イギリス', '英国', '英國', 'anh', 'vương quốc anh', 'สหราชอาณาจักร', 'britania raya', 'inggris', 'المملكة المتحدة', 'birleşik krallık', 'great britain'),
+    'RUS': ('россия', 'russie', 'rusia', 'rússia', '러시아', 'ロシア', '俄罗斯', '俄羅斯', 'nga', 'liên bang nga', 'รัสเซีย', 'روسيا', 'rusya'),
+    'AUS': ('австралия', 'australie', 'australien', '호주', 'オーストラリア', '澳大利亚', '澳大利亞', '澳洲', 'úc', 'ออสเตรเลีย', 'أستراليا', 'avustralya'),
+    'IDN': ('индонезия', 'indonésie', 'indonesien', '인도네시아', 'インドネシア', '印度尼西亚', '印尼', 'อินโดนีเซีย', 'إندونيسيا', 'endonezya'),
+    'PHL': ('филиппины', 'philippines', 'filipinas', 'philippinen', 'filippine', '필리핀', 'フィリピン', '菲律宾', '菲律賓', 'ฟิลิปปินส์', 'filipina', 'الفلبين', 'filipinler'),
+    'FRA': ('франция', 'francia', 'frança', 'frankreich', '프랑스', 'フランス', '法国', '法國', 'pháp', 'ฝรั่งเศส', 'perancis', 'prancis', 'فرنسا', 'fransa'),
+    'VNM': ('вьетнам', 'viet nam', 'việt nam', 'vietnã', '베트남', 'ベトナム', '越南', 'เวียดนาม', 'فيتنام'),
+    'ESP': ('испания', 'espagne', 'españa', 'espanha', 'spanien', 'spagna', '스페인', 'スペイン', '西班牙', 'tây ban nha', 'สเปน', 'spanyol', 'إسبانيا', 'ispanya'),
+    'IND': ('индия', 'inde', 'índia', 'indien', '인도', 'インド', '印度', 'ấn độ', 'อินเดีย', 'الهند', 'hindistan'),
+    'CAN': ('канада', 'canadá', 'kanada', '캐나다', 'カナダ', '加拿大', 'كندا'),
+    'CHN': ('китай', 'кнр', 'chine', 'china', '중국', '中国', '中國', 'trung quốc', 'จีน', 'tiongkok', 'الصين', 'çin'),
+}
+
+
+def _aliases(nat):
+    from app.visa_snapshot.evidence_validator import _NATIONALITY_NAMES
+    return sorted({_norm(a) for a in (*_NATIONALITY_NAMES.get(nat, ()), *_EXTRA_ALIASES.get(nat, ())) if _norm(a)})
+
+
 def _today():
     return date.today()
 
@@ -99,16 +143,17 @@ def _check_proof(proof, sources, route, field, value, *, product=None):
     evidence = proof.get('evidence')
     if not isinstance(evidence, list) or not evidence:
         raise PatchRejected(f'{field}: missing evidence')
-    from app.visa_snapshot.evidence_validator import quote_in_text, jurisdiction_matches
+    from app.visa_snapshot.evidence_validator import jurisdiction_matches
     destination = route['destination_country']
     for item in evidence:
         source = sources.get(item.get('source_id'))
         if not source or source['url'] != item.get('source_url'):
             raise PatchRejected(f'{field}: evidence cites an uncaptured page')
         quote = item.get('quote')
-        if not isinstance(quote, str) or len(quote.strip()) < 8 or '...' in quote or '…' in quote:
+        short_ok = isinstance(quote, str) and _list_line(quote, _aliases(route['passport_nationality']))
+        if not isinstance(quote, str) or (len(quote.strip()) < 8 and not short_ok) or '...' in quote or '…' in quote:
             raise PatchRejected(f'{field}: a quote must be a literal passage without ellipsis')
-        if not quote_in_text(quote, source['text']):
+        if not quote_literal(quote, source['text']):
             raise PatchRejected(f'{field}: quote is not on its captured page')
     if not any(jurisdiction_matches(item['source_url'], destination) for item in evidence):
         raise PatchRejected(f'{field}: no destination-government page in the evidence')
@@ -139,28 +184,87 @@ def _monetary_text(passages, code):
     text = passages
     for symbol in _CURRENCY_SYMBOLS.get(code, ()):
         text = re.sub(symbol, f' {code} ', text, flags=re.I)
-    # Indonesian and some European pages use dots as thousands separators.
-    if code in ('IDR', 'VND', 'EUR', 'RUB'):
-        text = re.sub(r'(?<=\d)\.(?=\d{3}\b)', ',', text)
+    # European and Indonesian figures: 1.650.000 or 500.000,00 mean 1650000
+    # and 500000.00. Only groups of exactly three digits are thousands.
+    text = re.sub(r'(?<!\d)(\d{1,3}(?:\.\d{3})+),(\d{2})(?!\d)', lambda m: m.group(1).replace('.', '') + '.' + m.group(2), text)
+    text = re.sub(r'(?<!\d)(\d{1,3}(?:\.\d{3})+)(?![\d,])', lambda m: m.group(1).replace('.', ''), text)
+    # The validator consumes "1 IDR" out of "B1 IDR 500000" and then cannot see
+    # the code beside the amount; repeat the code after the amount so either
+    # reading finds the same literal number.
+    text = re.sub(r'\b' + code + r'\s*(\d[\d,]*(?:\.\d+)?)', lambda m: f'{code} {m.group(1)} {code}', text)
     return text
 
 
+_VERDICT_RULES = {
+    # A sentence that states the rule, and the words that flip it.
+    'VISA_REQUIRED': (r"(?:e-?visa|visa)s?\b[^.;\n]{0,60}\b(?:is |are )?(?:required|mandatory|needed|necessary|obligatoire|obligatorio|necesario|bắt buộc)|"
+                      r"\b(?:need|needs|require|requires|must|shall|should|have to|has to|required to|doivent|doit|deben|debe|phải|cần)\b[^.;\n]{0,40}"
+                      r"\b(?:obtain|hold|have|apply for|possess|be in possession of|get|obtenir|être munis?|obtener|xin|có)\b[^.;\n]{0,40}\b(?:e-?visa|visa|thị thực)\b|"
+                      r"\b(?:can|may|eligible to|entitled to) apply for (?:an? )?(?:e-?visa|electronic visa)|"
+                      r"\beligible for (?:the |an? )?(?:unified |electronic )?e-?visa|"
+                      r"виз[аы] по всем|требуется виза|необходима виза|нужна виза|оформить визу|получить визу|"
+                      r"需要办理签证|需申请签证|应当申请签证|必须持有签证|需要签证|事前に査証|ビザが必要|签证申请|비자.{0,6}필요|ต้องขอวีซ่า|wajib memiliki visa|harus memiliki visa|يجب الحصول على تأشيرة",
+                      r"visa[- ]free|no visa|without (?:a )?visa|exempt|not required|do(?:es)? not (?:require|need)|без виз|sans visa|sin visa|miễn thị thực|"
+                      r"免签|无需签证|免办签证|査証免除|ビザ免除|무비자|면제|bebas visa|ยกเว้นวีซ่า"),
+    'VISA_EXEMPT': (r"visa[- ]free|visa[- ]exempt|exempt(?:ed|ion)? from (?:the )?(?:visa|obtaining a visa|visa requirement)|do(?:es)? not (?:require|need) (?:a |an |any )?(?:entry |tourist )?visa|"
+                    r"without (?:a |an |the need for a )?(?:entry |tourist )?visa|no visa (?:is )?(?:required|needed|necessary)|not required to (?:obtain|hold) (?:a |an )?visa|"
+                    r"без виз|безвизов|sans visa|dispensés? de visa|exemptés? de visa|sin visa|exento|exención de visa|isento|isenção de visto|visumfrei|ohne visum|senza visto|"
+                    r"miễn thị thực|ยกเว้นวีซ่า|bebas visa|免签|无需签证|免办签证|查証免除|査証免除|ビザ免除|ビザなし|무비자|사증면제|معفى|إعفاء من التأشيرة|vizeden muaf",
+                    r"\bnot (?:visa[- ]free|exempt|eligible)|do(?:es)? not (?:qualify|benefit)|unless|except(?:ion)? (?:for|of)?\s*(?:holders|nationals|citizens) of|"
+                    r"(?:visa|e-?visa) (?:is |are )?(?:required|mandatory)|must (?:obtain|hold|apply)"),
+    'ELECTRONIC_AUTHORIZATION_REQUIRED': (r"\b(?:eta|etas|esta|k-eta|evisitor|etias|nzeta|e-?ta)\b|electronic travel authori[sz]ation|travel authori[sz]ation|电子旅行授权|電子旅行許可|전자여행허가",
+                                          r"not required|exempt(?:ed)? from (?:the )?(?:k-eta|eta|esta)|without (?:an? )?(?:k-eta|eta|esta)|do(?:es)? not need"),
+    'VISA_ON_ARRIVAL': (r"visa[- ]on[- ]arrival|on arrival|upon arrival|at the port of entry|落地签|到着ビザ|도착비자|e-?voa",
+                        r"not (?:available|eligible|issued)|no visa on arrival|cannot obtain"),
+}
+
+
+def _list_line(quote, aliases):
+    """A quote that is essentially the nationality's own line in a list."""
+    text = _norm(re.sub(r'^\s*(?:\d+[.)]|[-*•])\s*', '', quote))
+    return len(text) <= 60 and any(re.search(r'(?<![a-z])' + re.escape(_norm(a)) + r'(?![a-z])', text) for a in aliases)
+
+
+def _decision_supported(value, evidence_quotes, nat):
+    """Strict but shaped for real official pages: the nationality must be named
+    in the evidence (in the rule sentence, or as its own list line beside the
+    rule sentence) and a sentence of the evidence must state the rule without
+    flipping it in the same sentence."""
+    from app.visa_snapshot.evidence_validator import supports_disposition
+    passages = '\n'.join(evidence_quotes)
+    aliases = _aliases(nat)
+    low = _norm(passages)
+    named = any(re.search(r'(?<![a-z])' + re.escape(a) + r'(?![a-z])', low) for a in aliases)
+    if value == 'CONDITIONAL':
+        return named and bool(_CONDITION_RE.search(passages))
+    if supports_disposition(passages, value, nationality=nat):
+        return True
+    if not named:
+        return False
+    positive, negative = _VERDICT_RULES.get(value, (None, None))
+    if not positive:
+        return False
+    listed = any(_list_line(q, aliases) for q in evidence_quotes)
+    for sentence in re.split(r'(?<=[.;!?])\s+|\n+', passages):
+        sl = _norm(sentence)
+        if not re.search(positive, sl, re.I):
+            continue
+        if negative and re.search(negative, sl, re.I):
+            continue
+        sentence_named = any(re.search(r'(?<![a-z])' + re.escape(a) + r'(?![a-z])', sl) for a in aliases)
+        general = bool(re.search(r'\b(?:all|any|every|foreign nationals|foreigners|following countries|following states|listed below|eligible countries|countries/territories)\b', sl))
+        if sentence_named or (listed and general) or (listed and value != 'VISA_EXEMPT'):
+            return True
+    return False
+
+
 def _check_value(field, value, passages, route, product):
-    from app.visa_snapshot.evidence_validator import field_value_supported, supports_disposition, _NATIONALITY_NAMES
+    from app.visa_snapshot.evidence_validator import field_value_supported
     if field == 'disposition':
-        nat = route['passport_nationality']
-        aliases = _NATIONALITY_NAMES.get(nat, ())
-        low = _norm(passages)
-        named = any(_norm(alias) in low for alias in aliases)
-        if value == 'CONDITIONAL':
-            if not (named and _CONDITION_RE.search(passages)):
-                raise PatchRejected('disposition: a conditional rule needs the nationality and its condition in the evidence')
-            return
-        if supports_disposition(passages, value, nationality=nat):
-            return
-        if named and supports_disposition(passages, value):
-            return
-        raise PatchRejected('disposition: evidence does not state this verdict for this nationality')
+        quotes = [q for q in passages.split('\n') if q.strip()]
+        if not _decision_supported(value, quotes, route['passport_nationality']):
+            raise PatchRejected('disposition: evidence does not state this verdict for this nationality')
+        return
     if field in ('permitted_stay_days', 'max_stay_days'):
         if value is not None and not field_value_supported(field, value, passages):
             raise PatchRejected(f'{field}: the figure is not in its evidence')
@@ -197,16 +301,35 @@ def _check_value(field, value, passages, route, product):
             raise PatchRejected('validity: the validity figure is not in its evidence')
 
 
-def validate_batch(batch):
+def validate_batch(batch, *, strict=True):
+    """Validate every row. Strict mode raises on the first defect; otherwise
+    the defective rows are returned separately with their reason, so one
+    unprovable route never blocks the publishable ones. A rejected row is
+    never published either way."""
     if batch.get('kind') != KIND or batch.get('schema_version') != 1 or not batch.get('id'):
         raise PatchRejected('Not a general reviewed batch')
     sources = _source_table(batch)
     rows = batch.get('rows') or []
     if not rows or len({r.get('cache_key') for r in rows}) != len(rows):
         raise PatchRejected('Empty batch or duplicate route rows')
+    accepted, rejected = [], []
+    for row in rows:
+        try:
+            _validate_row(row, sources)
+            accepted.append(row)
+        except PatchRejected as exc:
+            if strict:
+                raise
+            rejected.append({'cache_key': row.get('cache_key'), 'reason': str(exc)})
+    if strict:
+        return sources
+    return sources, accepted, rejected
+
+
+def _validate_row(row, sources):
     from app.visa_snapshot.kimi_primary import DISPOSITIONS
     from app.visa_snapshot.verified_overrides import _DETAIL_FAMILY
-    for row in rows:
+    if True:
         route = row.get('route') or {}
         if not all(route.get(k) for k in ('passport_nationality', 'destination_country', 'travel_purpose')):
             raise PatchRejected('Incomplete route identity')
@@ -219,11 +342,22 @@ def validate_batch(batch):
             raise PatchRejected('A published verdict cannot be unknown')
         proofs = row.get('route_field_proofs') or {}
         values = row.get('route_fields') or {}
+        dropped = row.setdefault('dropped', [])
         for key, covered in ROUTE_PROOF_COVERS.items():
             if key in proofs:
-                _check_proof(proofs[key], sources, route, key, values.get(key))
+                try:
+                    _check_proof(proofs[key], sources, route, key, values.get(key))
+                except PatchRejected as exc:
+                    # An ancillary value that cannot be proved is not asserted;
+                    # the verdict is the only field that decides the row.
+                    dropped.append(str(exc))
+                    proofs.pop(key, None)
+                    for c in covered:
+                        values.pop(c, None)
             elif any(values.get(c) not in (None, [], '') for c in covered):
-                raise PatchRejected(f'{key}: a value without a proof')
+                dropped.append(f'{key}: a value without a proof')
+                for c in covered:
+                    values.pop(c, None)
         for product in row.get('products') or []:
             if product.get('action') not in ('keep', 'patch', 'remove', 'add'):
                 raise PatchRejected('Unknown product action')
@@ -240,17 +374,27 @@ def validate_batch(batch):
             pproofs = product.get('proofs') or {}
             for field in PRODUCT_PROOF_FIELDS:
                 value = spec.get(field)
-                if field in pproofs:
-                    _check_proof(pproofs[field], sources, route, field, value, product=spec)
-                elif value not in (None, '', {}) and not (isinstance(value, dict) and value.get('amount') is None):
-                    raise PatchRejected(f'{spec["type"]}: {field} has a value but no proof')
-    return sources
+                try:
+                    if field in pproofs:
+                        _check_proof(pproofs[field], sources, route, field, value, product=spec)
+                    elif value not in (None, '', {}) and not (isinstance(value, dict) and value.get('amount') is None):
+                        raise PatchRejected(f'{spec["type"]}: {field} has a value but no proof')
+                except PatchRejected as exc:
+                    dropped.append(str(exc))
+                    pproofs.pop(field, None)
+                    if field != 'disposition':
+                        spec[field] = {'amount': None, 'currency': None} if field == 'fee' else None
+                        pproofs[field] = {'status': 'unknown', 'verifier': 'ai', 'reason': 'No literal official quote supports this value'}
 
 
 def build_manifest(batch, layers):
-    """Bind the batch to exact captured serving layers; no writes."""
-    validate_batch(batch)
-    by_key = {r['cache_key']: r for r in batch['rows']}
+    """Bind the accepted rows to exact captured serving layers; no writes.
+    Rejected rows are listed with their reason and bound to nothing."""
+    _, accepted, rejected = validate_batch(batch, strict=False)
+    if not accepted:
+        raise PatchRejected('No row in the batch is publishable: ' + '; '.join(r['reason'] for r in rejected)[:400])
+    by_key = {r['cache_key']: r for r in accepted}
+    layers = [l for l in (layers or []) if l.get('cache_key') in by_key]
     if not isinstance(layers, list) or {l.get('cache_key') for l in layers} != set(by_key) or len(layers) != len(by_key):
         raise PatchRejected('Missing, extra or duplicate baseline routes')
     entries = []
@@ -276,8 +420,9 @@ def build_manifest(batch, layers):
         baseline = {k: deepcopy(layer[k]) for k in BASELINE_KEYS}
         entries.append({'cache_key': layer['cache_key'], 'route': deepcopy(layer['route']), 'matches': matches,
                         'baseline': baseline, 'baseline_sha256': {k: digest(v) for k, v in baseline.items()}})
+    kept = dict(deepcopy(batch), rows=[r for r in batch['rows'] if r['cache_key'] in by_key])
     return {'schema_version': 1, 'kind': 'general_reviewed_exact_layers', 'id': batch['id'],
-            'batch': deepcopy(batch), 'routes': entries,
+            'batch': kept, 'routes': entries, 'rejected': rejected,
             'status': 'detached candidate; no registration or activation'}
 
 
@@ -308,12 +453,15 @@ def convert(manifest, current_layers):
     batch = manifest['batch']
     sources = validate_batch(batch)
     rebuilt = build_manifest(batch, [dict(deepcopy(e['baseline']), cache_key=e['cache_key']) for e in manifest['routes']])
+    if rebuilt['rejected']:
+        raise PatchRejected('A bound row no longer validates: ' + rebuilt['rejected'][0]['reason'])
     for actual, checked in zip(manifest['routes'], rebuilt['routes'], strict=True):
         if actual != checked:
             raise PatchRejected('Match or baseline contract was altered')
     rows = {r['cache_key']: r for r in batch['rows']}
-    current = {l['cache_key']: l for l in current_layers}
-    if len(current) != len(current_layers) or set(current) != {e['cache_key'] for e in manifest['routes']}:
+    wanted = {e['cache_key'] for e in manifest['routes']}
+    current = {l['cache_key']: l for l in current_layers if l.get('cache_key') in wanted}
+    if set(current) != wanted:
         raise PatchRejected('Current route set differs from baseline')
     today = _today().isoformat()
     entries, reports = [], []
@@ -369,6 +517,11 @@ def convert(manifest, current_layers):
             pproofs = deepcopy(product.get('field_provenance') or {})
             for field in PRODUCT_FIELDS:
                 proof = (spec.get('proofs') or {}).get(field)
+                unbound = isinstance(proof, dict) and str(proof.get('reason') or '').startswith('No literal official quote')
+                if unbound and action != 'add':
+                    # The reviewer's quote could not be captured: the current
+                    # value stays as it was, unsupported and untouched.
+                    continue
                 if field in pspec and (proof is not None or action == 'add'):
                     if proof is not None and proof.get('status') in ('unknown', 'not_published'):
                         product[field] = None if field != 'fee' else {'amount': None, 'currency': None}
@@ -379,6 +532,19 @@ def convert(manifest, current_layers):
                         product[field] = deepcopy(pspec[field])
                         pproofs[field] = _proof_for(proof, route, field, product)
             decision = (spec.get('proofs') or {}).get('disposition')
+            if (decision is None or decision.get('status') != 'reviewed') \
+                    and product['disposition'] == verdict['disposition'] \
+                    and product['requirement_detail'] == verdict['requirement_detail'] \
+                    and action != 'add' or (action == 'add' and decision is None
+                                            and product['disposition'] == verdict['disposition']
+                                            and product['requirement_detail'] == verdict['requirement_detail']
+                                            and any(p.get('status') == 'reviewed' for p in pproofs.values())):
+                # A product that carries the route's own verdict inherits the
+                # route's nationality-anchored verdict proof: the rule is
+                # proved once for the traveller, the product's own quotes bind
+                # its identity, fee, stay and validity. A product whose verdict
+                # differs from the route's must prove its own.
+                decision = verdict['proof']
             if decision is None or decision.get('status') != 'reviewed':
                 unsupported.append(product['type'])
                 product['field_provenance'] = pproofs
@@ -451,5 +617,8 @@ if __name__ == '__main__':
     overlay, reports = convert(manifest, layers)
     json.dump(overlay, open(sys.argv[3], 'w'), ensure_ascii=False, indent=1)
     json.dump({'manifest_routes': [{k: e[k] for k in ('cache_key', 'matches', 'baseline_sha256')} for e in manifest['routes']],
-               'reports': reports}, open(sys.argv[4], 'w'), ensure_ascii=False, indent=1)
-    print(json.dumps({'entries': len(overlay['entries']), 'unsupported_products': sum(len(r['unsupported_products']) for r in reports)}))
+               'rejected': manifest['rejected'], 'reports': reports}, open(sys.argv[4], 'w'), ensure_ascii=False, indent=1)
+    if len(sys.argv) > 5:
+        json.dump(manifest, open(sys.argv[5], 'w'), ensure_ascii=False)
+    print(json.dumps({'entries': len(overlay['entries']), 'rejected': len(manifest['rejected']),
+                      'unsupported_products': sum(len(r['unsupported_products']) for r in reports)}))

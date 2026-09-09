@@ -89,8 +89,6 @@ def test_a_quote_bound_batch_converts_into_a_supported_product_row():
 @pytest.mark.parametrize('mutate, message', [
     (lambda b: b['rows'][0]['verdict']['proof']['evidence'].__setitem__(0, {'source_id': 's1', 'source_url': URL, 'quote': 'Hong Kong SAR passport holders are visa exempt'}), 'not on its captured page'),
     (lambda b: b['rows'][0]['verdict']['proof']['evidence'].__setitem__(0, {'source_id': 's1', 'source_url': URL, 'quote': 'Nationals of Japan do not require a visa for stays of up to 45 days.'}), 'does not state this verdict'),
-    (lambda b: b['rows'][0]['route_field_proofs']['government_fee']['evidence'].__setitem__(0, {'source_id': 's1', 'source_url': URL, 'quote': 'Your application will be processed in 3 working days'}), 'fee amount is not in its evidence'),
-    (lambda b: b['rows'][0]['route_field_proofs'].pop('processing_time'), 'value without a proof'),
     (lambda b: b['sources'][0].__setitem__('checked_at', '2999-01-01'), 'Future source-read date'),
     (lambda b: b['sources'][0].__setitem__('sha256', 'deadbeef'), 'hash mismatch'),
 ])
@@ -98,6 +96,21 @@ def test_unproven_or_unsound_evidence_is_rejected(mutate, message):
     b = batch(); mutate(b)
     with pytest.raises(PatchRejected, match=message):
         validate_batch(b)
+
+
+def test_an_unproven_ancillary_value_is_dropped_not_published():
+    """The verdict decides the row. A fee whose quote does not carry the
+    amount, or a value with no proof at all, is removed with its reason and
+    the row still publishes what it can prove."""
+    b = batch()
+    b['rows'][0]['route_field_proofs']['government_fee']['evidence'][0] = {'source_id': 's1', 'source_url': URL, 'quote': 'Your application will be processed in 3 working days'}
+    b['rows'][0]['route_field_proofs'].pop('processing_time')
+    _, accepted, rejected = validate_batch(b, strict=False)
+    assert rejected == [] and len(accepted) == 1
+    row = accepted[0]
+    assert 'government_fee' not in row['route_fields'] and 'processing_time' not in row['route_fields']
+    assert any(d.startswith('government_fee:') for d in row['dropped'])
+    assert any(d.startswith('processing_time:') for d in row['dropped'])
 
 
 def test_a_foreign_or_unofficial_page_cannot_prove_the_destination_rule():
