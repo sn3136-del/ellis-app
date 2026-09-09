@@ -22,26 +22,55 @@ from .config import settings
 _BACKENDS = {}  # ref -> ciphertext (write-through cache over vault_secrets)
 
 
-def _db_session():
-    from .db import SessionLocal
-    return SessionLocal()
+class VaultPersistenceError(ValueError):
+    """Safe public failure: callers must not report an ephemeral save as durable."""
 
 
-def _db_put(ref: str, ciphertext: str, meta: dict | None) -> None:
+def _put_in_session(db, ref: str, ciphertext: str, meta: dict | None):
+    """Join the caller's transaction; never open another SQLite writer."""
     from . import models
-    db = _db_session()
     try:
         row = db.get(models.VaultSecret, ref)
         if row is None:
             db.add(models.VaultSecret(ref=ref, ciphertext=ciphertext, meta=meta or {}))
         else:
             row.ciphertext = ciphertext
+        db.flush()
+    except Exception:
+        db.rollback()
+        raise VaultPersistenceError("Credential vault save could not be confirmed.") from None
+
+
+def _db_session():
+    from .db import SessionLocal
+    return SessionLocal()
+
+
+def _db_put(ref: str, ciphertext: str, meta: dict | None, *, must_exist=False) -> None:
+    from . import models
+    db = None
+    try:
+        db = _db_session()
+        row = db.get(models.VaultSecret, ref)
+        if row is None:
+            if must_exist:
+                raise KeyError("vault ref not found")
+            db.add(models.VaultSecret(ref=ref, ciphertext=ciphertext, meta=meta or {}))
+        else:
+            row.ciphertext = ciphertext
         db.commit()
         _DB_SEEN.add(ref)
-    except Exception:  # noqa: BLE001 — cache still holds it for this process
-        db.rollback()
+    except KeyError:
+        if db is not None:
+            db.rollback()
+        raise KeyError("vault ref not found") from None
+    except Exception:
+        if db is not None:
+            db.rollback()
+        raise VaultPersistenceError("Credential vault save could not be confirmed.") from None
     finally:
-        db.close()
+        if db is not None:
+            db.close()
 
 
 def _db_get(ref: str) -> str | None:
@@ -58,19 +87,22 @@ def _db_get(ref: str) -> str | None:
 
 def _db_delete(ref: str) -> bool:
     from . import models
-    db = _db_session()
+    db = None
     try:
+        db = _db_session()
         row = db.get(models.VaultSecret, ref)
         if row is None:
             return False
         db.delete(row)
         db.commit()
         return True
-    except Exception:  # noqa: BLE001
-        db.rollback()
-        return False
+    except Exception:
+        if db is not None:
+            db.rollback()
+        raise VaultPersistenceError("Credential revocation could not be saved.") from None
     finally:
-        db.close()
+        if db is not None:
+            db.close()
 
 
 _DEFAULT_PASSPHRASE = "local-dev-passphrase"
@@ -163,11 +195,16 @@ def _decrypt(blob: str) -> str:
     return AESGCM(_key()).decrypt(nonce, ct, b"ellis").decode()
 
 
-def store(secret_value: str, meta: dict | None = None) -> dict:
+def store(secret_value: str, meta: dict | None = None, *, db=None) -> dict:
     ref = "vault://local/" + secrets.token_hex(16)
     ct = _encrypt(secret_value)
-    _BACKENDS[ref] = ct
-    _db_put(ref, ct, meta)
+    if db is not None:
+        # The surrounding setup transaction owns commit/rollback. Do not put
+        # uncommitted credentials into the process fallback cache.
+        _put_in_session(db, ref, ct, meta)
+    else:
+        _db_put(ref, ct, meta)
+        _BACKENDS[ref] = ct
     return {"ref": ref, "provider": "local_encrypted", "meta": meta or {}}
 
 
@@ -184,6 +221,7 @@ def reveal(ref: str) -> str:
             raise KeyError("vault ref not found")
     else:
         _BACKENDS[ref] = ct
+        _DB_SEEN.add(ref)
     return _decrypt(ct)
 
 
@@ -196,18 +234,47 @@ def _db_had_ref(ref: str) -> bool:
     return ref in _DB_SEEN
 
 
-def rotate(ref: str, new_value: str) -> dict:
-    if _BACKENDS.get(ref) is None and _db_get(ref) is None:
-        raise KeyError("vault ref not found")
+def rotate(ref: str, new_value: str, *, db=None) -> dict:
+    if db is not None:
+        from . import models
+        try:
+            current = db.get(models.VaultSecret, ref)
+        except Exception:
+            db.rollback()
+            raise VaultPersistenceError("Credential vault save could not be confirmed.") from None
+        if current is None:
+            raise KeyError("vault ref not found")
+        _put_in_session(db, ref, _encrypt(new_value), None)
+        return {"ref": ref, "rotated": True}
     ct = _encrypt(new_value)
+    try:
+        # Check existence within the write session. A stale process cache may
+        # not resurrect a credential another process has revoked.
+        _db_put(ref, ct, None, must_exist=True)
+    except KeyError:
+        _BACKENDS.pop(ref, None)
+        raise
     _BACKENDS[ref] = ct
-    _db_put(ref, ct, None)
     return {"ref": ref, "rotated": True}
 
 
-def destroy(ref: str) -> bool:
-    in_cache = _BACKENDS.pop(ref, None) is not None
+def destroy(ref: str, *, db=None) -> bool:
+    if db is not None:
+        from . import models
+        try:
+            row = db.get(models.VaultSecret, ref)
+            if row is not None:
+                db.delete(row)
+                db.flush()
+        except Exception:
+            db.rollback()
+            raise VaultPersistenceError("Credential vault save could not be confirmed.") from None
+        # A previously persisted ref may never revive from the fallback cache.
+        # Rollback is safe: reveal will still find the authoritative DB row.
+        _DB_SEEN.add(ref)
+        return row is not None
     in_db = _db_delete(ref)
+    in_cache = _BACKENDS.pop(ref, None) is not None
     return in_cache or in_db
 
 

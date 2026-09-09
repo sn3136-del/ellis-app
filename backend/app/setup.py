@@ -40,6 +40,14 @@ def fingerprint(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()[:12]
 
 
+def _commit_credentials(db):
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise vault.VaultPersistenceError("Credential changes could not be committed securely.") from None
+
+
 def _row(db, org_id: str) -> models.TenantSetup:
     row = db.get(models.TenantSetup, org_id)
     if not row:
@@ -106,7 +114,7 @@ def save_setup(db, *, org_id: str, actor: str, payload: dict) -> dict:
     for comp in SECRET_COMPONENTS:
         val = payload.get(comp)
         if val:
-            stored = vault.store(val, meta={"component": comp, "org": org_id})
+            stored = vault.store(val, meta={"component": comp, "org": org_id}, db=db)
             refs[comp] = stored["ref"]
             fps[comp] = fingerprint(val)
     row.credential_refs = refs
@@ -117,7 +125,7 @@ def save_setup(db, *, org_id: str, actor: str, payload: dict) -> dict:
     row.setup_complete = _is_complete(row)
     if row.setup_complete and not row.completed_by:
         row.completed_by = actor
-    db.commit()
+    _commit_credentials(db)
     audit.record(db, org_id=org_id, application_id="", action="tenant_setup_saved",
                  detail={"components": [c for c in SECRET_COMPONENTS if c in refs],
                          "setup_complete": row.setup_complete}, actor=actor)
@@ -229,16 +237,16 @@ def rotate_component(db, *, org_id: str, component: str, new_value: str, actor: 
     refs = dict(row.credential_refs or {})
     if component in refs:
         try:
-            vault.rotate(refs[component], new_value)
+            vault.rotate(refs[component], new_value, db=db)
         except KeyError:
-            refs[component] = vault.store(new_value)["ref"]
+            refs[component] = vault.store(new_value, db=db)["ref"]
     else:
-        refs[component] = vault.store(new_value)["ref"]
+        refs[component] = vault.store(new_value, db=db)["ref"]
     row.credential_refs = refs
     fps = dict(row.credential_fingerprints or {})
     fps[component] = fingerprint(new_value)
     row.credential_fingerprints = fps
-    db.commit()
+    _commit_credentials(db)
     audit.record(db, org_id=org_id, application_id="", action="setup_rotate_credential",
                  detail={"component": component}, actor=actor)
     return {"component": component, "rotated": True, "fingerprint": fps[component]}
@@ -249,16 +257,13 @@ def revoke_component(db, *, org_id: str, component: str, actor: str) -> dict:
     refs = dict(row.credential_refs or {})
     fps = dict(row.credential_fingerprints or {})
     if component in refs:
-        try:
-            vault.destroy(refs[component])
-        except Exception:
-            pass
+        vault.destroy(refs[component], db=db)
         refs.pop(component, None)
         fps.pop(component, None)
     row.credential_refs = refs
     row.credential_fingerprints = fps
     row.setup_complete = _is_complete(row)
-    db.commit()
+    _commit_credentials(db)
     audit.record(db, org_id=org_id, application_id="", action="setup_revoke_credential",
                  detail={"component": component}, actor=actor)
     return {"component": component, "revoked": True}
