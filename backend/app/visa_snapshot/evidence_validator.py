@@ -32,7 +32,10 @@ _DEST_GOV_SUFFIXES = {
     "CHN": ("gov.cn", "org.cn"), "MEX": ("gob.mx",), "USA": ("gov", "mil"),
     "VNM": ("gov.vn",), "KHM": ("gov.kh",), "IND": ("gov.in",), "GBR": ("gov.uk",),
     "AUS": ("gov.au",), "JPN": ("go.jp",), "KOR": ("go.kr",), "SGP": ("gov.sg",),
-    "THA": ("go.th",), "MYS": ("gov.my",), "IDN": ("go.id",), "PHL": ("gov.ph",),
+    "THA": ("go.th",), "MYS": ("gov.my",), "IDN": ("go.id",),
+    # authority.py admits only the independently reviewed MECO website hosts.
+    # It represents the Philippines, despite the website's Taiwanese ccTLD.
+    "PHL": ("gov.ph", "meco.org.tw"),
     "ARE": ("gov.ae", "uae-embassy.org"), "SAU": ("gov.sa",), "QAT": ("gov.qa",), "EGY": ("gov.eg",),
     "MAR": ("gov.ma",), "TUR": ("gov.tr",), "NZL": ("govt.nz",),
 }

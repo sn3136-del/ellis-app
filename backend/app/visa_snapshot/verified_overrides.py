@@ -445,16 +445,19 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
         if errors:
             raise ValueError("; ".join(errors))
         from .kimi_primary import serve_time_invariants
+        from .permission_eligibility import issues as eligibility_issues
         implied = _verdict_implied_by_detail(checked, {})
         if implied:
             checked = dict(checked, disposition=implied)
         if checked.get("disposition"):
             errors.extend(serve_time_invariants(checked))
+        errors.extend(eligibility_issues(checked, route))
         if errors:
             raise ValueError("; ".join(errors))
         if guidance is not None:
             merged, _ = merge_verified_fields(guidance, checked, source_url=url)
             errors = serve_time_invariants(merged)
+            errors.extend(eligibility_issues(merged, route))
             if errors:
                 raise ValueError("edit conflicts with the complete cached answer: " + "; ".join(errors))
         rows = _read_rows(path)
@@ -712,7 +715,7 @@ def _drop_changed_permission_leftovers(merged: dict, fields: dict,
               "government_fee", "visa_category", "application_channel",
               "application_channel_detail", "route_workflow_type",
               "required_documents", "entry_requirements", "exceptions",
-              "biometrics_required", "appointment_required", "interview_required",
+              "photo_requirements", "biometrics_required", "appointment_required", "interview_required",
               "consular_jurisdiction", "source_url"):
         if k not in fields:
             merged.pop(k, None)
@@ -836,11 +839,12 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     fields replaced; provenance names the source, the date and the fields so
     the answer can show what was checked rather than implying all of it was."""
     from . import scheduled_policies
+    from .permission_eligibility import annotate
     guidance = _normalise_text_lists(guidance)
     hit = find(route or {})
     if not hit or not isinstance(guidance, dict):
         result, provenance = scheduled_policies.apply(guidance, None, route)
-        return _finalize_guidance(result, provenance), provenance
+        return _finalize_guidance(annotate(result, route), provenance), provenance
     implied = _verdict_implied_by_detail(hit["fields"], guidance)
     merged, fields = merge_verified_fields(guidance, hit["fields"], source_url=hit["source_url"])
     field_provenance = dict(hit.get("field_provenance") or {})
@@ -853,4 +857,4 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     provenance = dict(verdict_provenance, fields=sorted(fields),
                       field_provenance=field_provenance)
     result, provenance = scheduled_policies.apply(merged, provenance, route)
-    return _finalize_guidance(result, provenance), provenance
+    return _finalize_guidance(annotate(result, route), provenance), provenance

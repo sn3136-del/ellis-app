@@ -13899,10 +13899,10 @@
    "destination": "KOR",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-25",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
-  "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+  "verified_at": "2026-09-09",
+  "verified_by": "Ellis official-source audit",
+  "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+  "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
@@ -13932,7 +13932,8 @@
    ],
    "exceptions": [
     "A qualifying direct international arrival to Jeju, without transit through another part of Korea, may use the separate Jeju visa-free scheme. The nationality exclusions and itinerary conditions must be met.",
-    "The temporary K-ETA waiver does not apply to Indonesian nationality."
+    "The temporary K-ETA waiver does not apply to Indonesian nationality.",
+    "From 28 May through 31 December 2026, Indonesian tour groups of at least 3 people recruited by a designated Indonesian travel agency may qualify for visa-free travel throughout Korea for up to 15 days. The linked Korean agency must submit the group list for Ministry of Justice pre-screening and approval. Approved travelers must hold valid passports and enter and leave together on the same flight or vessel. This scheme does not grant visa-free entry to independent tourists."
    ],
    "permitted_stay_days": null,
    "permitted_stay": null,
@@ -13948,7 +13949,7 @@
     },
     {
      "url": "https://www.k-eta.go.kr/portal/guide/viewetaalification.do",
-     "quote": "MALAYSIA Allowed Period of Stay : 03 Months",
+     "quote": "You can apply for K-ETA if you hold a passport from countries or regions listed below.",
      "checked_at": "2026-09-09"
     },
     {
@@ -13965,6 +13966,16 @@
      "url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
      "quote": "Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9)",
      "checked_at": "2026-09-09"
+    },
+    {
+     "url": "https://www.moj.go.kr/bbs/immigration/214/606932/artclView.do",
+     "quote": "3인 이상 단체관광객 대상, 5월 28일부터 12월 31일까지 시범 시행",
+     "checked_at": "2026-09-09"
+    },
+    {
+     "url": "https://mojhome.moj.go.kr/bbs/immigration/214/495139/download.do",
+     "quote": "관광·통과(B-2), 15일",
+     "checked_at": "2026-09-09"
     }
    ]
   },
@@ -13974,7 +13985,7 @@
     "verified_at": "2026-09-09",
     "verified_by": "Ellis official-source audit",
     "verifier": "ai",
-    "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+    "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions."
    },
    "requirement_detail": {
     "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
@@ -14026,11 +14037,11 @@
     "note": "Quote: Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9) Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
    },
    "exceptions": {
-    "source_url": "https://www.mofa.go.kr/sg-en/brd/m_2435/view.do?seq=761394",
+    "source_url": "https://www.moj.go.kr/bbs/immigration/214/606932/artclView.do",
     "verified_at": "2026-09-09",
     "verified_by": "Ellis official-source audit",
     "verifier": "ai",
-    "note": "Quote: Foreigners from visa-required countries who will be taking a direct flight from overseas to Jeju Island without stopping over at any other parts of Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+    "note": "Approved Indonesian groups of 3+ only, 28 May–31 December 2026, up to 15 days throughout Korea. The linked official attachment describes designated travel agencies, MOJ pre-screening and same flight/vessel entry and exit. The separate Jeju source remains in corroborating_sources. This does not change the independent-tourist default."
    },
    "permitted_stay_days": {
     "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
@@ -14065,7 +14076,7 @@
     "verified_at": "2026-09-09",
     "verified_by": "Ellis official-source audit",
     "verifier": "ai",
-    "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+    "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions."
    },
    "source_url": {
     "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
@@ -14079,7 +14090,7 @@
     "verified_at": "2026-09-09",
     "verified_by": "Ellis official-source audit",
     "verifier": "ai",
-    "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+    "note": "Fresh official MOFA and K-ETA nationality list establish the independent-tourist default; MOJ 27 May 2026 release and its attachment establish the separate 15-day approved-group exception."
    }
   },
   "verifier": "ai"
@@ -63590,240 +63601,6 @@
        "checked_at": "2026-09-09"
       }
      ]
-    },
-    {
-     "type": "Single-entry tourist visa",
-     "entry": "single",
-     "validity": "up to 30 days",
-     "max_stay_days": 30,
-     "fee": null,
-     "notes": null,
-     "requirement_detail": "paper_visa",
-     "processing_time": null,
-     "application_channel": null,
-     "application_channel_detail": null,
-     "required_documents": null,
-     "entry_requirements": null,
-     "source_url": null,
-     "source_quote": null,
-     "verified_at": null,
-     "field_provenance": {
-      "type": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "entry": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "validity": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "max_stay_days": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "fee": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "notes": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "requirement_detail": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "processing_time": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "application_channel": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "application_channel_detail": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "required_documents": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "entry_requirements": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "source_url": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "verified_at": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      }
-     }
-    },
-    {
-     "type": "Double-entry tourist visa",
-     "entry": "double",
-     "validity": "up to 30 days",
-     "max_stay_days": 30,
-     "fee": null,
-     "notes": null,
-     "requirement_detail": "paper_visa",
-     "processing_time": null,
-     "application_channel": null,
-     "application_channel_detail": null,
-     "required_documents": null,
-     "entry_requirements": null,
-     "source_url": null,
-     "source_quote": null,
-     "verified_at": null,
-     "field_provenance": {
-      "type": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "entry": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "validity": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "max_stay_days": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "fee": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "notes": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "requirement_detail": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "processing_time": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "application_channel": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "application_channel_detail": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "required_documents": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "entry_requirements": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "source_url": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      },
-      "verified_at": {
-       "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
-       "verified_at": "2026-08-30",
-       "verified_by": "Ellis source audit (validity and jurisdiction)",
-       "verifier": "ai",
-       "note": "Verified 2026-08-30. Consular jurisdiction for RUS."
-      }
-     }
     }
    ],
    "consular_jurisdiction": "Apply at the Russian consular office covering your place of permanent residence.",
@@ -63897,7 +63674,7 @@
     "verified_at": "2026-09-09",
     "verified_by": "Ellis official-source audit",
     "verifier": "ai",
-    "note": "Quote: The unified e-visa is a single entry visa. Scope: Only unified e-visa product reverified. Existing paper product names/validities/stays remain unresolved; procedure/source/fee claims copied from e-visa removed. Do not classify those alternates fully verified."
+    "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA e-visa conditions establish the supported primary product. Unverified regular-visa alternatives and their unsupported 30-day validity/stay claims are omitted from the published projection; original cached content and version history are retained."
    },
    "consular_jurisdiction": {
     "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
@@ -66856,18 +66633,258 @@
    "destination": "AUS",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
-  "note": "Verified 2026-08-30. Validity published by AUS for this product, distinct from the permitted stay.",
+  "verified_at": "2026-09-09",
+  "verified_by": "Ellis official-source audit",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+  "note": "Thai ordinary passports are absent from the current complete ETA601 eligibility list (updated 8 September 2026). Visitor600 outside-Australia tourist stream applies; Home Affairs page updated 1 July 2026: base charge from AUD250, usually 3 months and sometimes up to 12 months as granted. Online ImmiAccount application; digital visa issuance.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
-   "permitted_stay": "Up to 12 months as granted on a Visitor visa (subclass 600), Tourist stream; most tourist grants are 3 months",
-   "permitted_stay_days": 365,
-   "validity_duration": 12,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
+   "visa_category": "Visitor visa (subclass 600) — Tourist stream (apply outside Australia)",
+   "permitted_stay": "Usually 3 months; up to 12 months in certain circumstances. The visa grant letter sets the permitted stay case by case.",
+   "permitted_stay_days": null,
+   "government_fee": {
+    "amount": 250,
+    "currency": "AUD",
+    "qualifier": "from",
+    "note": "Base application charge from AUD250 per applicant; additional health checks, police certificates or biometrics costs may apply."
+   },
+   "application_channel": "online_portal",
+   "application_channel_detail": "Apply online through ImmiAccount, attach supporting documents and pay the Visitor 600 application charge. Follow any subsequent requests for biometrics or other evidence.",
+   "official_portal_url": "https://online.immi.gov.au/ola/app",
+   "required_documents": [
+    "Current passport pages showing photo, personal details, issue date and expiry date; national identity card if held and name-change documents if applicable.",
+    "Evidence of temporary visitor plans, sufficient money for the stay and departure, and reasons to return home. Financial evidence may include 3 months of itemised bank statements, payslips or tax records.",
+    "An invitation and supporting funds information if visiting or being supported by relatives or friends, where applicable.",
+    "English translations of supporting documents; additional evidence for minors, longer stays or other individual circumstances as specified by Home Affairs."
+   ],
+   "processing_time": "Consult the official visa processing times guide. Published estimates do not guarantee an individual decision date.",
+   "exceptions": [
+    "Thai ordinary passports are not eligible for the Electronic Travel Authority (subclass 601). The Visitor visa (subclass 600), Tourist stream, is the general application route for tourism from outside Australia.",
+    "Apply while outside Australia and remain outside Australia when this visa is decided. Work is not permitted.",
+    "The application charge starts from AUD250 per applicant. Additional health examinations, police certificates or biometrics costs may apply.",
+    "Stay, validity and single or multiple entries are set by the visa grant; 12 months is not guaranteed. Home Affairs will notify you if biometrics are required."
+   ],
+   "entry_requirements": "Obtain a Visitor 600 visa before travel. It is digitally linked to your passport. Follow the stay and entry conditions in the visa grant; this visa does not permit work.",
+   "biometrics_required": null,
+   "appointment_required": null,
+   "interview_required": null,
+   "onward_travel_evidence": "Provide evidence of enough funds to leave Australia and reasons to return home; follow the individual application checklist.",
+   "accommodation_evidence": "If staying with relatives or friends, an invitation may describe the purpose and length of the visit and where you will stay.",
+   "financial_evidence": "Provide evidence of sufficient funds for the stay and departure, such as 3 months of itemised bank statements, payslips or tax records.",
+   "consular_jurisdiction": "The Tourist stream outside-Australia application is lodged online through ImmiAccount; follow location-specific instructions for any requested biometrics.",
+   "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+   "corroborating_sources": [
+    {
+     "url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+     "quote": "You must hold a valid passport from one of these countries or jurisdictions to be eligible for an ETA.",
+     "checked_at": "2026-09-09"
+    },
+    {
+     "url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+     "quote": "This visa costs from AUD250.00 for each applicant",
+     "checked_at": "2026-09-09"
+    }
+   ],
+   "visa_products": [
+    {
+     "type": "Visitor visa (subclass 600) — Tourist stream (apply outside Australia)",
+     "requirement_detail": "evisa",
+     "entry": null,
+     "validity": null,
+     "permitted_stay": "Usually 3 months; up to 12 months in certain circumstances. The visa grant letter sets the permitted stay case by case.",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD",
+      "qualifier": "from",
+      "note": "Base application charge from AUD250 per applicant; additional health checks, police certificates or biometrics costs may apply."
+     },
+     "application_channel": "online_portal",
+     "application_channel_detail": "Apply online through ImmiAccount, attach supporting documents and pay the Visitor 600 application charge. Follow any subsequent requests for biometrics or other evidence.",
+     "official_portal_url": "https://online.immi.gov.au/ola/app",
+     "required_documents": [
+      "Current passport pages showing photo, personal details, issue date and expiry date; national identity card if held and name-change documents if applicable.",
+      "Evidence of temporary visitor plans, sufficient money for the stay and departure, and reasons to return home. Financial evidence may include 3 months of itemised bank statements, payslips or tax records.",
+      "An invitation and supporting funds information if visiting or being supported by relatives or friends, where applicable.",
+      "English translations of supporting documents; additional evidence for minors, longer stays or other individual circumstances as specified by Home Affairs."
+     ],
+     "processing_time": "Consult the official visa processing times guide. Published estimates do not guarantee an individual decision date.",
+     "entry_requirements": "Obtain a Visitor 600 visa before travel. It is digitally linked to your passport. Follow the stay and entry conditions in the visa grant; this visa does not permit work.",
+     "biometrics_required": null,
+     "appointment_required": null,
+     "interview_required": null,
+     "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+     "source_quote": "Visitor visa (subclass 600)",
+     "verified_at": "2026-09-09",
+     "verifier": "ai",
+     "notes": "Apply from outside Australia. Base charge starts from AUD250; extra checks can cost more. Entries, validity and stay are as granted. Biometrics may be requested."
+    }
+   ]
+  },
+  "verifier": "ai",
+  "field_provenance": {
+   "disposition": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The complete ETA601 list excludes Thai ordinary passports. Visitor600 outside-Australia tourist stream is the general visitor visa application route; approval is subject to its criteria."
+   },
+   "requirement_detail": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "Home Affairs states that the visa is digitally linked to the passport and no label is placed in the passport. This is a Visitor600 visa, not an ETA."
+   },
+   "visa_category": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "Official page identifies Visitor visa (subclass 600), Tourist stream (apply outside Australia)."
+   },
+   "permitted_stay": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "Home Affairs determines stay case by case in the grant letter; usually 3 months and up to 12 months in certain circumstances. Calendar months are not converted to days."
+   },
+   "permitted_stay_days": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "Cleared unsupported 365-day conversion. The source states calendar months and case-by-case granted stay, not a fixed number of days."
+   },
+   "government_fee": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "Current Cost section: base charge from AUD250 per applicant; limited concessions and additional health, police certificate and biometrics costs are separate."
+   },
+   "application_channel": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "application_channel_detail": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "official_portal_url": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "required_documents": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "processing_time": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The official page links to a dynamic processing-times guide and warns it is not specific to an individual application. The old ETA immediate/minutes timing does not apply to Visitor600."
+   },
+   "exceptions": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "entry_requirements": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "biometrics_required": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The official Step4 says Home Affairs will notify the applicant if biometrics are needed. A nationality-only boolean cannot encode location and exemption conditions, so the previous false is cleared."
+   },
+   "appointment_required": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "Cleared the ETA-only no-appointment assertion. Additional requested biometrics can involve local appointment procedures; no universal boolean is supported."
+   },
+   "interview_required": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "Cleared the ETA-only no-interview assertion. This source does not establish a universal interview boolean."
+   },
+   "onward_travel_evidence": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "accommodation_evidence": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "financial_evidence": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "consular_jurisdiction": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "source_url": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "corroborating_sources": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "The Visitor600 outside-Australia page, About and Step by step sections, supports this field for this application stream. Documents and evidence depend on individual circumstances; no ETA mobile-app procedure is inherited."
+   },
+   "visa_products": {
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas",
+    "verified_at": "2026-09-09",
+    "verified_by": "Ellis official-source audit",
+    "verifier": "ai",
+    "note": "Explicit Visitor600 product replaces the ineligible ETA601 product. Current About and Step by step sections support the base fee, digital issuance, documents and online application. Validity, entries and stay remain as granted."
+   }
   }
  },
  {

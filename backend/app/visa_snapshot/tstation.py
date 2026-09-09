@@ -385,6 +385,13 @@ def _entries(text) -> str | None:
     return None
 
 
+def _fee_qualifier(product: dict, guidance: dict) -> str | None:
+    fee = product.get("fee") if isinstance(product.get("fee"), dict) else None
+    if not fee:
+        fee = guidance.get("government_fee")
+    return "from" if isinstance(fee, dict) and fee.get("qualifier") == "from" else None
+
+
 def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
     fee = product.get("fee") if isinstance(product.get("fee"), dict) else None
     if not fee:
@@ -1071,6 +1078,7 @@ def records_for_route(route: dict, guidance: dict,
         "entries": None,
         "processing_min_days": proc_n, "processing_unit": proc_unit,
         "visa_fee_amount": None, "visa_fee_currency": None,
+        "visa_fee_qualifier": _fee_qualifier({}, g),
         "application_method": method,
         "required_documents": docs,
         "consulate_district": _consulate_district(g, route),
@@ -1130,6 +1138,7 @@ def records_for_route(route: dict, guidance: dict,
             _set_validity(row, n, unit, g.get("permitted_stay"))
             amt, cur = _fee({}, g)
             row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
+        row["visa_fee_qualifier"] = _fee_qualifier({}, g)
         row["application_method"] = _method_for_detail(
             row.get("visa_requirement_detail"), method, row, method_from_channel)
         return [_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
@@ -1250,6 +1259,7 @@ def records_for_route(route: dict, guidance: dict,
         row["entries"] = _entries(p.get("entry")) or _entries(p.get("type"))
         amt, cur = _fee(p, product_g)
         row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
+        row["visa_fee_qualifier"] = _fee_qualifier(p, product_g)
         note = p.get("notes")
         if note:
             row["special_conditions"] = (str(note) if not row["special_conditions"]

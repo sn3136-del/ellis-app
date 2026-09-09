@@ -224,3 +224,17 @@ test('newSession carries dev token + org/user', () => {
   assert.equal(s.orgId, 'acme')
   assert.equal(s.userId, 'u1')
 })
+
+// Same formatter for the route headline, product table and record detail.
+import { publishedFeeText } from '../../src/renderer/src/lib/publishedFee.js'
+test('published visa fees preserve a from qualifier and existing fixed/free formats', () => {
+  assert.equal(publishedFeeText({ amount: 250, currency: 'AUD', qualifier: 'from' }), 'From 250 AUD')
+  assert.equal(publishedFeeText({ amount: 250, currency: 'AUD' }), '250 AUD')
+  assert.equal(publishedFeeText({ amount: 0, currency: 'AUD' }), 'None')
+  assert.equal(publishedFeeText({ amount: 0, currency: 'AUD' }, { zeroLabel: 'Free' }), 'Free')
+  assert.equal(publishedFeeText({ amount: 0, currency: 'AUD', qualifier: 'from' }), 'From 0 AUD')
+  assert.equal(publishedFeeText({ amount: 250, currency: 'AUD', qualifier: 'from' }, { fromLabel: '起价' }), '起价 250 AUD')
+  for (const amount of [null, undefined, NaN, Infinity, -1, false, '']) {
+    assert.equal(publishedFeeText({ amount, currency: 'AUD' }), null)
+  }
+})

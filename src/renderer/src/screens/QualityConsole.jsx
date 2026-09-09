@@ -128,6 +128,7 @@ const SEQ = { high: '#0b7a44', medium: '#2563eb', low: '#d97706' }
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import { useLocale } from '../lib/locale.jsx'
+import { publishedFeeText } from '../lib/publishedFee.js'
 import { useLocalizedCountries } from '../lib/countryNames.js'
 import { matchCountry, matchCountryStrict } from '../lib/countryMatch.js'
 
@@ -526,6 +527,10 @@ function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
       if (v === 'Ellis source audit') return t('ops.src.audit')
       if (v === 'Ellis verified route engine') return t('ops.src.engine')
       return String(v)
+    }
+    if (f === 'visa_fee_amount') {
+      return publishedFeeText({ amount: v, currency: rec.visa_fee_currency, qualifier: rec.visa_fee_qualifier },
+        { zeroLabel: `0 ${rec.visa_fee_currency || ''}`.trim(), fromLabel: t('db.feeFromPrefix') }) || '·'
     }
     if (PAIR[f]) {
       const u = rec[PAIR[f]]
@@ -1694,7 +1699,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                                color: NAVY, whiteSpace: 'nowrap',
                                fontVariantNumeric: 'tabular-nums' }}>
                     {rec.visa_fee_amount != null
-                      ? `${rec.visa_fee_amount} ${rec.visa_fee_currency || ''}`
+                      ? publishedFeeText({ amount: rec.visa_fee_amount, currency: rec.visa_fee_currency, qualifier: rec.visa_fee_qualifier }, { zeroLabel: `0 ${rec.visa_fee_currency || ''}`.trim(), fromLabel: t('db.feeFromPrefix') })
                       : '·'}
                   </td>
                   <td className="ops-cell" data-label={t('ops.col.quality')}
@@ -3188,7 +3193,7 @@ function QualityWorkspace({ token, onSignOut }) {
               case 'permitted_stay': case 'permitted_stay_days':
                 return rec.max_stay_text || j(rec.max_stay_duration, unitName(rec.max_stay_unit))
               case 'government_fee':
-                return j(rec.visa_fee_amount, rec.visa_fee_currency)
+                return publishedFeeText({ amount: rec.visa_fee_amount, currency: rec.visa_fee_currency, qualifier: rec.visa_fee_qualifier }, { zeroLabel: `0 ${rec.visa_fee_currency || ''}`.trim(), fromLabel: t('db.feeFromPrefix') })
               case 'processing_time':
                 return j(rec.processing_min_days, unitName(rec.processing_unit))
               case 'application_channel': return methodName(rec.application_method)

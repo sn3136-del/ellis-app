@@ -8,6 +8,7 @@
 // case is saved and queued for administrator review.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale } from '../../lib/locale.jsx'
+import { publishedFeeText } from '../../lib/publishedFee.js'
 import { useToast, Loading, ErrorNote } from '../ui.jsx'
 import {
   conditionField, missingRequired, readinessMeta, checksSummary,
@@ -1141,8 +1142,7 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew, onRetry,
     // A zero fee is a FACT worth a tile ("Free"), not a number that reads
     // like a suspiciously free visa ("0 SGD").
     fee.amount != null && { label: t('guidance.t.fee'),
-      value: fee.amount === 0 ? t('guidance.t.free')
-        : `${fee.amount} ${fee.currency || ''}`.trim() },
+      value: publishedFeeText(fee, { zeroLabel: t('guidance.t.free'), fromLabel: t('db.feeFromPrefix') }) },
   ].filter(Boolean)
 
   return (

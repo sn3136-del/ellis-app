@@ -14,6 +14,7 @@ import { useLocalizedCountries } from '../lib/countryNames.js'
 import { DEPARTURE_CITIES } from '../lib/departureCities.js'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
+import { publishedFeeText } from '../lib/publishedFee.js'
 import { parseDatabaseRouteHash, databaseRouteHash } from '../lib/databaseRoute.js'
 
 const NAVY = 'var(--trip-navy, #0f294d)'
@@ -184,12 +185,8 @@ function itemsOf(v) {
   return (Array.isArray(v) ? v : [v]).map((x) => sentence(asText(x))).filter(Boolean)
 }
 
-function feeText(fee) {
-  if (!fee || typeof fee !== 'object') return null
-  const amt = fee.amount
-  if (amt === 0) return 'None'
-  if (!amt && amt !== 0) return null
-  return `${amt} ${fee.currency || ''}`.trim()
+function feeText(fee, t) {
+  return publishedFeeText(fee, { fromLabel: t('db.feeFromPrefix') })
 }
 
 // Type-ahead country picker: type to filter, click to choose.
@@ -833,7 +830,7 @@ export default function TravelDatabase({ onBack }) {
     const prods = Array.isArray(gg.visa_products) ? gg.visa_products : []
     const focusLine = {
       fee: fee && fee.amount != null
-        ? `${t('db.fee')}: ${fee.amount} ${fee.currency || ''}`.trim() : null,
+        ? `${t('db.fee')}: ${feeText(fee, t)}` : null,
       stay: gg.permitted_stay
         ? `${t('db.stay')}: ${gg.permitted_stay}` : null,
       processing: gg.processing_time
@@ -1485,7 +1482,7 @@ export default function TravelDatabase({ onBack }) {
           {/* The fact the question asked for, answered first. */}
           {focus && (() => {
             const v = focus === 'fee'
-              ? (feeText(g.government_fee) || t('db.feeSeeProducts'))
+              ? (feeText(g.government_fee, t) || t('db.feeSeeProducts'))
               : focus === 'stay' ? T(asText(g.permitted_stay))
               : focus === 'processing' ? T(asText(g.processing_time))
               : focus === 'documents' ? (itemsOf(g.required_documents).length
@@ -1544,8 +1541,8 @@ export default function TravelDatabase({ onBack }) {
                         gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
             <Tile label={t('db.stay')} value={T(asText(g.permitted_stay))} />
             <Tile label={t('db.fee')}
-                  value={feeText(g.government_fee)
-                         || ((g.visa_products || []).some((vp) => feeText(vp.fee))
+                  value={feeText(g.government_fee, t)
+                         || ((g.visa_products || []).some((vp) => feeText(vp.fee, t))
                              ? t('db.feeSeeProducts') : null)} />
             <Tile label={t('db.processing')} value={T(asText(g.processing_time))} />
             {/* Nothing is applied for on a visa-free route, so "Where to
@@ -1699,7 +1696,7 @@ export default function TravelDatabase({ onBack }) {
                         )}
                       </div>
                       <div style={{ color: NAVY, fontWeight: 600 }}>
-                        {feeText(vp.fee) || '·'}</div>
+                        {feeText(vp.fee, t) || '·'}</div>
                     </div>
                   ))}
                 </div>

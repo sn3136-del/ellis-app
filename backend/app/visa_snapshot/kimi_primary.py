@@ -95,6 +95,9 @@ def serve_time_invariants(g: dict | None) -> list[str]:
     if not isinstance(g, dict) or not g:
         return []
     problems: list[str] = []
+    eligibility = g.get("_permission_eligibility_issues")
+    if isinstance(eligibility, list):
+        problems.extend(str(value) for value in eligibility if isinstance(value, str))
     disp = str(g.get("disposition") or "").upper()
     detail = str(g.get("requirement_detail") or "").strip().lower()
     fee = g.get("government_fee") if isinstance(g.get("government_fee"), dict) else {}
@@ -1255,6 +1258,11 @@ def apply_verified_overrides(out: dict, route: dict) -> dict:
     if prov is None:
         # Shared display normalization is not new evidence. Preserve the
         # stored completeness/status and every substantive disagreement.
+        if problems:
+            out["held"] = True
+            out["review_required"] = True
+            out["status"] = STATUS_UNCERTAIN
+            out["contradictions"] = list(dict.fromkeys(list(out.get("contradictions") or []) + problems))
         return out
     # The contradictions are re-derived from the FINAL answer: the model's
     # were about parts the verified facts have now replaced, and a verified

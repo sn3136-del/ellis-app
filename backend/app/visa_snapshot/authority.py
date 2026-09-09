@@ -12,6 +12,12 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
+# MECO is the Philippines' representative office in Taiwan. Its exact
+# website is independently listed by Taiwan's Ministry of Foreign Affairs:
+# https://www.mofa.gov.tw/OfficesInROC_Content.aspx?n=169&os=18&s=126&sms=86
+# Read 2026-09-09. Do not authorize the org.tw suffix or unreviewed subdomains.
+EXACT_OFFICIAL_HOSTS = frozenset({"meco.org.tw", "www.meco.org.tw"})
+
 # Government second-level suffix patterns used worldwide. Proper suffix match
 # only (host == suffix or host endswith "." + suffix). This is a curated,
 # versioned allowlist — additions require evidence review.
@@ -194,7 +200,7 @@ def hostname(url: str) -> str:
 
 def is_government_host(host: str) -> bool:
     host = (host or "").lower()
-    return any(host == s or host.endswith("." + s) for s in GOV_SUFFIXES)
+    return host in EXACT_OFFICIAL_HOSTS or any(host == s or host.endswith("." + s) for s in GOV_SUFFIXES)
 
 
 def registrable_domain(host: str) -> str:
