@@ -1755,52 +1755,23 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                       </div>
                     )}
                   </td>
-                  {/* One column, one question: is this record in front of
-                      customers? A held record answers no and offers the one
-                      control that changes it. The source link sits under the
-                      answer rather than beside it, which is what jammed the
-                      link, the chip and the button onto the same short line. */}
+                  {/* QC inspection is available independently of traveler publication. */}
                   <td className="ops-cell" data-label={t('ops.col.site')}
                       style={{ padding: '10px 12px', verticalAlign: 'top' }}>
                     <div style={{ display: 'flex', flexDirection: 'column',
                                   alignItems: 'flex-start', gap: 6 }}>
-                      {held ? (
-                        <>
-                          <span title={t('ops.heldTip')}
-                                style={{ display: 'inline-flex', gap: 5,
-                                         alignItems: 'center',
-                                         fontSize: 11, fontWeight: 700,
-                                         color: '#9a5b00',
-                                         background: '#fdf3e2',
-                                         borderRadius: 999,
-                                         padding: '3px 10px',
-                                         whiteSpace: 'nowrap',
-                                         cursor: 'help' }}>
-                            <span style={{ width: 6, height: 6, borderRadius: 3,
-                                           background: AMBER, flexShrink: 0 }} />
-                            {t('ops.heldChip')}
-                          </span>
-                          <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
-                                  data-testid="ops-release"
-                                  title={t('ops.heldTip')}
-                                  style={{ border: `1px solid ${GREEN}`,
-                                           background: '#fff', color: GREEN,
-                                           borderRadius: 8, fontSize: 11,
-                                           fontWeight: 700, padding: '4px 12px',
-                                           whiteSpace: 'nowrap',
-                                           cursor: 'pointer' }}>
-                            {t('ops.releaseAction')}
-                          </button>
-                        </>
-                      ) : (
-                        <span style={{ display: 'inline-flex', gap: 5,
-                                       alignItems: 'center', fontSize: 11,
-                                       fontWeight: 700, color: '#1c6b45',
-                                       whiteSpace: 'nowrap' }}>
-                          <span style={{ width: 6, height: 6, borderRadius: 3,
-                                         background: GREEN, flexShrink: 0 }} />
-                          {t('ops.liveChip')}
-                        </span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: BLUE }}>
+                        {t('ops.qcAvailable')}
+                      </span>
+                      {held && (
+                        <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
+                                data-testid="ops-release"
+                                title={t('ops.heldTip')}
+                                style={{ border: `1px solid ${GREEN}`, background: '#fff',
+                                         color: GREEN, borderRadius: 8, fontSize: 11,
+                                         padding: '4px 12px', cursor: 'pointer' }}>
+                          {t('ops.releaseAction')}
+                        </button>
                       )}
                       {rec.source_url && (
                         <a href={rec.source_url} target="_blank" rel="noreferrer"
