@@ -831,5 +831,54 @@
     "superseded_stay_days": [
       60
     ]
+  },
+  {
+    "id": "THA-2026-09-15-MAC-ordinary-tourism",
+    "route": {
+      "nationality": "MAC",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\nBilateral Agreement on Visa Exemption for Ordinary Passport Holders\n30 days\nMacao\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Macao",
+        "document": "for ordinary passport holders",
+        "exemption": "Bilateral Agreement on Visa Exemption for Ordinary Passport Holders",
+        "stay": "30 days"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
   }
 ]

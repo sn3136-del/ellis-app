@@ -43,10 +43,10 @@ def test_effective_day_switches_answer_without_forking_canonical_key(arrival, st
         assert g["scheduled_policy"]["date_used"] == arrival
 
 
-def test_all_and_only_seventeen_manifest_nationalities_are_scheduled():
+def test_all_and_only_eighteen_manifest_nationalities_are_scheduled():
     loaded = sp._parse_rows(rows())
-    assert len(loaded) == 17
-    assert {r["route"]["nationality"] for r in loaded} == {"KOR", "HKG", "RUS", "VNM", "TWN", "JPN", "USA", "SGP", "MYS", "GBR", "AUS", "IDN", "PHL", "FRA", "ESP", "IND", "CAN"}
+    assert len(loaded) == 18
+    assert {r["route"]["nationality"] for r in loaded} == {"KOR", "HKG", "RUS", "VNM", "TWN", "JPN", "USA", "SGP", "MYS", "GBR", "AUS", "IDN", "PHL", "FRA", "ESP", "IND", "CAN", "MAC"}
     for row in loaded:
         nat = row["route"]["nationality"]
         g, _ = sp.apply(BASE, None, {**ROUTE, "passport_nationality": nat, "arrival_date": "2026-09-15"})
@@ -130,6 +130,6 @@ def test_invalid_store_cannot_keep_applying_previously_loaded_policy(tmp_path, m
     path = tmp_path / "scheduled.json"
     path.write_text(json.dumps(rows()))
     monkeypatch.setattr(sp, "POLICIES", path)
-    assert len(sp._load()) == 17
+    assert len(sp._load()) == 18
     path.write_text("not json")
     assert sp._load() == []
