@@ -40,6 +40,7 @@ import pathlib
 import re
 import threading
 from copy import deepcopy
+from contextvars import ContextVar
 from functools import lru_cache
 
 from .authority import hostname, is_government_host
@@ -180,6 +181,31 @@ def _key(nat: str, dest: str, purpose: str = "tourism",
 
 
 _CACHE: dict = {"mtime": None, "table": {}}
+# A lookup must retain the status of the table it actually selected, even
+# when another request reloads repaired files before this response is built.
+# ContextVar also preserves find(route)'s public return contract (entry/None).
+_LOOKUP_STORE_ERRORS: ContextVar[tuple[str, ...]] = ContextVar(
+    "verified_override_lookup_store_errors", default=())
+
+
+class _VerificationTable(dict):
+    def __init__(self, entries, errors=()):
+        super().__init__(entries)
+        self._store_errors = tuple(sorted(set(errors)))
+
+    @property
+    def store_errors(self) -> tuple[str, ...]:
+        return self._store_errors
+
+
+REVIEWED_OVERLAY_NAMES = (
+    "reviewed_schengen_overlay_2026_09_09.json",
+    "reviewed_australia_overlay_2026_09_09.json",
+)
+
+
+def _reviewed_overlay_paths():
+    return [OVERRIDES.parent / name for name in REVIEWED_OVERLAY_NAMES]
 
 
 def _table() -> dict:
@@ -187,16 +213,19 @@ def _table() -> dict:
     disk so a newly verified fact reaches readers without a restart. Entries
     missing a source or a date, or citing a non-government domain, are
     dropped with no effect."""
+    global _CACHE
     op = operator_overrides_path()
     try:
-        mtime = (OVERRIDES.stat().st_mtime if OVERRIDES.is_file() else None,
-                 op.stat().st_mtime if op.is_file() else None)
+        mtime = tuple((path.stat().st_mtime_ns, path.stat().st_size)
+                      if path.is_file() else None
+                      for path in [OVERRIDES, *_reviewed_overlay_paths(), op])
     except OSError:
-        mtime = None
-    if _CACHE["mtime"] == mtime and _CACHE["table"] is not None:
-        return _CACHE["table"]
+        mtime = ("unreadable",)
+    cached = _CACHE
+    if cached["mtime"] == mtime and cached["table"] is not None:
+        return cached["table"]
     table = _load_table()
-    _CACHE["mtime"], _CACHE["table"] = mtime, table
+    _CACHE = {"mtime": mtime, "table": table}
     return table
 
 
@@ -210,6 +239,69 @@ def _read_rows(path: pathlib.Path) -> list:
     return rows if isinstance(rows, list) else []
 
 
+def _read_verification_store(path, kind, *, required=False, reviewed=False, errors=None):
+    """Distinguish absent optional stores from corrupt/unreadable evidence."""
+    errors = [] if errors is None else errors
+    try:
+        path.stat()
+    except FileNotFoundError:
+        if required:
+            errors.append(kind)
+        return []
+    except OSError:
+        errors.append(kind)
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if reviewed:
+            from .evidence_validator import jurisdiction_matches
+            if (not isinstance(data, dict) or data.get('schema_version') != 1
+                    or data.get('kind') != 'reviewed_overlay_conversion'
+                    or not isinstance(data.get('entries'), list)):
+                raise ValueError('invalid reviewed overlay schema')
+            rows = data['entries']
+            # Reviewed files are produced by a bounded converter. A malformed
+            # entry must not quietly disappear and expose an older answer.
+            for row in rows:
+                if (not isinstance(row, dict) or not isinstance(row.get('route'), dict)
+                        or not row['route'].get('nationality') or not row['route'].get('destination')
+                        or not row.get('verified_at') or not row.get('fields')
+                        or not is_government_host(hostname(str(row.get('source_url') or '')))
+                        or not jurisdiction_matches(str(row.get('source_url') or ''), row['route']['destination'])
+                        or _field_errors(row['fields'])):
+                    raise ValueError('invalid reviewed overlay entry')
+        else:
+            rows = data
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+            raise ValueError('invalid verification store container')
+        if any((row.get('fields') is not None and not isinstance(row.get('fields'), dict))
+               or (row.get('route') is not None and not isinstance(row.get('route'), dict))
+               for row in rows):
+            raise ValueError('invalid verification record shape')
+        return rows
+    except (OSError, ValueError, TypeError, AttributeError):
+        errors.append(kind)
+        return []
+
+
+def _annotate_store_status(guidance, errors):
+    if not isinstance(guidance, dict):
+        return guidance
+    guidance = dict(guidance)
+    prior = guidance.get('source_verification_store_unavailable')
+    if isinstance(prior, dict) and prior.get('component') == 'verified_overrides':
+        guidance.pop('source_verification_store_unavailable', None)
+        prior = prior.get('prior_unavailable')
+        if prior:
+            guidance['source_verification_store_unavailable'] = deepcopy(prior)
+    if errors:
+        marker = {'component': 'verified_overrides', 'stores': list(errors)}
+        if prior:
+            marker['prior_unavailable'] = deepcopy(prior)
+        guidance['source_verification_store_unavailable'] = marker
+    return guidance
+
+
 def _load_table() -> dict:
     # Seed first, then operator entries MERGED per field on top. An operator
     # who corrects one field must not wipe the seed's other verified facts:
@@ -217,10 +309,13 @@ def _load_table() -> dict:
     # verified entry and the flagship fee vanished from the served answer
     # (2026-09-01). Each field retains its own source and verifier identity.
     # The headline provenance is selected from the verified verdict at apply.
-    table = _parse_rows(_read_rows(OVERRIDES), {})
+    errors = []
+    table = _parse_rows(_read_verification_store(OVERRIDES, 'core_seed', required=True, errors=errors), {})
+    for path in _reviewed_overlay_paths():
+        table = _parse_rows(_read_verification_store(path, 'reviewed_overlay', reviewed=True, errors=errors), table)
     # Validate narrow operator edits against the already verified seed
     # verdict, never against the model's current guess.
-    ops = _parse_rows(_read_rows(operator_overrides_path()), {}, inherited=table)
+    ops = _parse_rows(_read_verification_store(operator_overrides_path(), 'operator_overrides', errors=errors), {}, inherited=table)
     for k, op in ops.items():
         base = table.get(k)
         if base is None:
@@ -240,7 +335,7 @@ def _load_table() -> dict:
                     "note": (base.get("note") or "").strip()}
         if op.get("note"):
             table[k]["note"] = (table[k]["note"] + " | " + op["note"]).strip(" |")[:400]
-    return table
+    return _VerificationTable(table, errors)
 
 
 def _field_errors(fields: dict) -> list[str]:
@@ -316,7 +411,9 @@ def _provenance(entry: dict) -> dict:
     # must hold an invalid interval rather than silently remove its limit.
     for key in ("effective_from", "effective_to", "policy_interval_evidence", "source_id",
                 "source_table", "source_closed_list", "source_eu_citizen", "source_country_section",
-                "supporting_sources", "supporting_evidence", "additional_quotes"):
+                "supporting_sources", "supporting_evidence", "additional_quotes",
+                "status", "verification_scope", "verified_elements", "retained_unverified_elements",
+                "subject"):
         if key in entry:
             result[key] = deepcopy(entry[key])
     if isinstance(entry.get("quote"), str):
@@ -385,6 +482,13 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
                         .get("field_provenance") or {})
         for k in clean:
             p = (r.get("field_provenance") or {}).get(k)
+            if isinstance(p, dict) and p.get("status") == "unknown" and clean[k] is None:
+                # A deliberate unknown/null clears an unsupported old value;
+                # it does not inherit the entry's source or verification date.
+                per_field[k] = {"status": "unknown", "verifier": "ai",
+                                "source_url": "", "verified_at": None,
+                                "verified_by": "", "note": str(p.get("reason") or p.get("note") or "Unknown")}
+                continue
             if (isinstance(p, dict) and p.get("verified_at") and
                     is_government_host(hostname(str(p.get("source_url") or ""))) and
                     p.get("verifier", "ai") in ("human", "ai", "public")):
@@ -404,7 +508,8 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
 
 def reload() -> None:
     """Forget the cached table (tests swap the file path)."""
-    _CACHE["mtime"], _CACHE["table"] = None, None
+    global _CACHE
+    _CACHE = {"mtime": None, "table": None}
 
 
 def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
@@ -455,6 +560,8 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
         # Re-read under the write lock. A concurrent edit may have changed
         # the verdict since the request began, invalidating a fee-only edit.
         current_table = _load_table()
+        if getattr(current_table, 'store_errors', ()):
+            raise ValueError("source verification store is unavailable; restore it before editing")
         existing = current_table.get(route_key) or {}
         checked = dict(existing.get("fields") or {}, **clean)
         errors = _field_errors(checked)
@@ -516,7 +623,9 @@ def find(route: dict) -> dict | None:
     # matches ONLY an override verified for that document. Ordinary-passport
     # routes match only document-less overrides.
     doc = str(route.get("travel_document_type") or "ordinary_passport")
-    return _table().get(_key(route.get("passport_nationality", ""),
+    table = _table()
+    _LOOKUP_STORE_ERRORS.set(getattr(table, 'store_errors', ()))
+    return table.get(_key(route.get("passport_nationality", ""),
                              route.get("destination_country", ""),
                              route.get("travel_purpose", "tourism"),
                              doc))
@@ -873,8 +982,18 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     the answer can show what was checked rather than implying all of it was."""
     from . import scheduled_policies, policy_intervals
     from .permission_eligibility import annotate
+    token = _LOOKUP_STORE_ERRORS.set(())
+    try:
+        hit = find(route or {})
+        guidance = _annotate_store_status(guidance, _LOOKUP_STORE_ERRORS.get())
+    finally:
+        _LOOKUP_STORE_ERRORS.reset(token)
+    # Missing evidence must hold the original claims, not run exemption or
+    # product-family cleanup against an incomplete set of verified layers.
+    # Another component's existing hold likewise remains intact on recovery.
+    if isinstance(guidance, dict) and guidance.get('source_verification_store_unavailable'):
+        return guidance, None
     guidance = _normalise_legacy_shapes(guidance)
-    hit = find(route or {})
     if not hit or not isinstance(guidance, dict):
         result, provenance = scheduled_policies.apply(guidance, None, route)
         result = policy_intervals.annotate(annotate(result, route), provenance, route)
