@@ -51,7 +51,8 @@ def issues(guidance: dict, route: dict) -> list[str]:
         return []
     destination = str(route.get("destination_country") or route.get("destination") or "").upper()
     nationality = str(route.get("passport_nationality") or route.get("nationality") or "").upper()
-    document = str(route.get("travel_document_type") or "ordinary_passport").lower()
+    document = re.sub(r"[\s-]+", "_", str(
+        route.get("travel_document_type") or "ordinary_passport").strip().lower())
     products = guidance.get("visa_products")
     products = products if isinstance(products, list) else []
     out = []
@@ -64,6 +65,17 @@ def issues(guidance: dict, route: dict) -> list[str]:
         reason = None
         if nationality not in program.eligible_nationalities:
             reason = f"passport nationality {nationality or 'unknown'} is absent from the official eligible list"
+        elif program.id == "aus_eta_601" and document in {
+                "identity_certificate", "certificate_of_identity", "document_of_identity",
+                "refugee_travel_document", "stateless_travel_document", "prc_travel_document",
+                "laissez_passer", "non_citizen_passport", "noncitizen_passport",
+                "alien_passport", "emergency_travel_document"}:
+            # The same official eligibility page explicitly excludes
+            # non-citizen passports, certificates of identity and other
+            # travel documents. This is not an exclusion of BN(O) passports:
+            # they are expressly listed alongside British Citizen passports.
+            # Temporary/emergency PASSPORT eligibility is not inferred here.
+            reason = "the official ETA rules exclude non-citizen passports, certificates of identity and other non-passport travel documents"
         elif program.id == "aus_eta_601" and nationality == "TWN" and document in {
                 "diplomatic", "diplomatic_passport", "official", "official_passport", "service", "service_passport"}:
             reason = "the official list excludes Taiwan official and diplomatic passports"

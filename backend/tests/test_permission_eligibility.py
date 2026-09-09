@@ -104,3 +104,86 @@ def test_malaysian_russia_correction_exposes_only_supported_products(monkeypatch
     assert product["source_url"] == "https://evisa.kdmid.ru/"
     assert g["government_fee"] is None  # Unverified amount is never a free visa.
     vo.reload()
+
+
+@pytest.mark.parametrize('document', [
+    'identity_certificate', 'certificate_of_identity', 'document_of_identity',
+    'refugee_travel_document', 'stateless_travel_document', 'prc_travel_document',
+    'laissez_passer', 'non_citizen_passport', 'noncitizen_passport',
+    'alien_passport', 'emergency_travel_document', ' Certificate of Identity ',
+])
+def test_eta_rejects_known_nonpassport_documents_for_listed_nationality(monkeypatch, document):
+    monkeypatch.setattr(vo, 'find', lambda _: None)
+    rt = route('HKG', document=document)
+    assert pe.issues(eta(), rt)
+    out = kp.apply_verified_overrides(kp._result(kp.STATUS_PRIMARY, eta(),
+        cached=True, stale=False, released=True), rt)
+    assert out['held'] and out['review_required']
+    assert any('non-citizen passports' in issue for issue in out['contradictions'])
+    assert out['apply_steps'] == out['workflow_plan'] == []
+
+
+@pytest.mark.parametrize('document', ['ordinary_passport', 'child_passport',
+    'bno_passport', 'british_national_overseas_passport', 'British National Overseas Passport'])
+def test_explicit_bno_passports_are_not_treated_as_nonpassport_documents(document):
+    assert pe.issues(eta(), route('GBR', document=document)) == []
+
+
+def test_operator_recomputes_stale_marker_but_preserves_unrelated_conflicts(monkeypatch, tmp_path):
+    import json
+    path = tmp_path / 'operator.json'; path.write_text('[]\n')
+    seed = tmp_path / 'seed.json'; seed.write_text('[]\n')
+    monkeypatch.setattr(vo, 'OVERRIDES', seed)
+    monkeypatch.setenv('ELLIS_OPERATOR_OVERRIDES', str(path))
+    vo.reload()
+    rt = route()
+    raw = pe.annotate(eta(), rt)
+    original = deepcopy(raw)
+    fields = {'disposition':'VISA_REQUIRED','requirement_detail':'evisa',
+              'visa_category':'Visitor visa (subclass 600)', 'visa_products':[],
+              'government_fee':{'amount':250,'currency':'AUD','qualifier':'from'},
+              'application_channel':'online_portal'}
+    entry = {'route':{'nationality':'THA','destination':'AUS','travel_purpose':'tourism'},
+             'verified_at':'2026-09-09','verified_by':'AI regression','verifier':'ai',
+             'source_url':'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream-overseas',
+             'note':'Official Visitor600 stream replacement for an ineligible ETA.','fields':fields}
+    try:
+        vo.append_operator_entry(entry, guidance=raw)
+        assert len(json.loads(path.read_text())) == 1
+        assert raw == original
+        g, _ = vo.apply(raw, rt)
+        assert '_permission_eligibility_issues' not in g
+        before = path.read_bytes()
+        # Recomputing the private marker cannot erase a malformed substantive
+        # field in the original answer or write half of the correction.
+        with pytest.raises(ValueError, match='health_requirements'):
+            vo.append_operator_entry(entry, guidance=dict(raw, health_requirements={'unsupported':'shape'}))
+        assert path.read_bytes() == before
+        invalid = deepcopy(entry)
+        invalid['fields']['visa_products']=[{'type':'ETA (601)','requirement_detail':'eta_electronic_authorization'}]
+        with pytest.raises(ValueError, match='product eligibility'):
+            vo.append_operator_entry(invalid, guidance=raw)
+        assert path.read_bytes() == before
+    finally:
+        vo.reload()
+
+
+def test_operator_cannot_authorise_eta_for_certificate_of_identity(monkeypatch, tmp_path):
+    path = tmp_path / 'operator.json'; path.write_text('[]\n')
+    seed = tmp_path / 'seed.json'; seed.write_text('[]\n')
+    monkeypatch.setattr(vo, 'OVERRIDES', seed)
+    monkeypatch.setenv('ELLIS_OPERATOR_OVERRIDES', str(path))
+    vo.reload()
+    fields = eta(); fields.pop('confidence')
+    entry = {'route':{'nationality':'HKG','destination':'AUS','travel_purpose':'tourism',
+                      'travel_document_type':'identity_certificate'},
+             'verified_at':'2026-09-09','verified_by':'Operator fixture','verifier':'human',
+             'source_url':pe.PROGRAMS[0].source_url,
+             'note':'A human attribution cannot override the explicit document exclusion.','fields':fields}
+    before = path.read_bytes()
+    try:
+        with pytest.raises(ValueError, match='non-citizen passports'):
+            vo.append_operator_entry(entry)
+        assert path.read_bytes() == before
+    finally:
+        vo.reload()

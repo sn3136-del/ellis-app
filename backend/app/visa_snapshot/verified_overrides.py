@@ -445,7 +445,7 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
         if errors:
             raise ValueError("; ".join(errors))
         from .kimi_primary import serve_time_invariants
-        from .permission_eligibility import issues as eligibility_issues
+        from .permission_eligibility import issues as eligibility_issues, annotate as annotate_eligibility
         implied = _verdict_implied_by_detail(checked, {})
         if implied:
             checked = dict(checked, disposition=implied)
@@ -456,8 +456,11 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
             raise ValueError("; ".join(errors))
         if guidance is not None:
             merged, _ = merge_verified_fields(guidance, checked, source_url=url)
+            # A cached/imported marker described the old product. Recompute
+            # only this derived marker after the correction; keep all facts
+            # so unrelated contradictions still reject the atomic write.
+            merged = annotate_eligibility(merged, route)
             errors = serve_time_invariants(merged)
-            errors.extend(eligibility_issues(merged, route))
             if errors:
                 raise ValueError("edit conflicts with the complete cached answer: " + "; ".join(errors))
         rows = _read_rows(path)
