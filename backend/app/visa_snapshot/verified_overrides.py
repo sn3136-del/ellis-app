@@ -256,9 +256,8 @@ def _field_errors(fields: dict) -> list[str]:
     for key in _BOOLEAN_FIELDS:
         if fields.get(key) is not None and not isinstance(fields[key], bool):
             errors.append(f"{key} must be a boolean or null")
-    if fields.get("passport_validity_requirement") is not None and not isinstance(
-            fields["passport_validity_requirement"], dict):
-        errors.append("passport_validity_requirement must be an object or null")
+    from ..passport_validity import passport_validity_rule_errors
+    errors.extend(passport_validity_rule_errors(fields.get("passport_validity_requirement")))
     if verdict is not None and verdict not in DISPOSITIONS:
         errors.append("unknown disposition")
     if detail is not None and detail not in details:

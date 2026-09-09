@@ -95,6 +95,8 @@ def serve_time_invariants(g: dict | None) -> list[str]:
     if not isinstance(g, dict) or not g:
         return []
     problems: list[str] = []
+    from ..passport_validity import passport_validity_rule_errors
+    problems.extend(passport_validity_rule_errors(g.get("passport_validity_requirement")))
     eligibility = g.get("_permission_eligibility_issues")
     if isinstance(eligibility, list):
         problems.extend(str(value) for value in eligibility if isinstance(value, str))

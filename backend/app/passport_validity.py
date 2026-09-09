@@ -47,6 +47,36 @@ RULE_KINDS = ("valid_on_arrival", "valid_through_departure",
               "months_after_arrival", "months_after_departure")
 
 
+def passport_validity_rule_errors(value) -> list[str]:
+    """Validate the route guidance contract without inferring a policy.
+
+    Null means the entry rule is unknown. Application-stage requirements are
+    separate facts: neither an unrecognised kind nor a vague "remaining
+    months" statement may be silently interpreted as an arrival rule.
+    Evidence-backed vocabulary normalization belongs at source extraction.
+    """
+    field = "passport_validity_requirement"
+    if value is None:
+        return []
+    if not isinstance(value, dict):
+        return [f"{field} must be an object or null"]
+    errors = []
+    if set(value) - {"kind", "months"}:
+        errors.append(f"{field} contains unsupported fields")
+    kind = value.get("kind")
+    if not isinstance(kind, str) or kind not in RULE_KINDS:
+        errors.append(f"{field} has an unknown kind")
+        return errors
+    months = value.get("months")
+    if kind in ("months_after_arrival", "months_after_departure"):
+        # bool is an int subclass, and int(6.9) would silently change a rule.
+        if type(months) is not int or months <= 0:
+            errors.append(f"{field} needs positive integer months for its kind")
+    elif months is not None and (type(months) is not int or months != 0):
+        errors.append(f"{field} must have zero or null months for its kind")
+    return errors
+
+
 class PassportBlocked(Exception):
     """Raised to hard-block a workflow transition when the passport is expired
     or has insufficient validity for the destination. Carries the verdict."""

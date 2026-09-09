@@ -98,7 +98,8 @@ def test_lookup_and_records_share_sourced_correction_without_inventing_fee_or_me
     assert response.status_code == 200, response.text
     customer = response.json()
     records = client.get("/database/records", headers=dict(headers, Authorization="Bearer admin-token"),
-                         params={"nationality": "ISL", "destination": "NRU"}).json()["records"]
+                         params={"nationality": "ISL", "destination": "NRU",
+                                 "purpose": "tourism", "document": "ordinary_passport"}).json()["records"]
     assert records and all(record["held"] == customer["held"] for record in records)
     assert not customer["held"]
     assert customer["guidance"]["disposition"] == "VISA_REQUIRED"
@@ -141,7 +142,8 @@ def test_lossless_legacy_lists_preserve_real_disagreements_and_reader_hold_parit
                          json={"nationality": "ISL", "destination": "NRU"})
     assert lookup.status_code == 200, lookup.text
     records = client.get("/database/records", headers=dict(headers, Authorization="Bearer admin-token"),
-                         params={"nationality": "ISL", "destination": "NRU"}).json()["records"]
+                         params={"nationality": "ISL", "destination": "NRU",
+                                 "purpose": "tourism", "document": "ordinary_passport"}).json()["records"]
     assert lookup.json()["held"] == disputed
     assert records and all(record["held"] == disputed for record in records)
     raw_result = kp.apply_verified_overrides(kp._result(kp.STATUS_PRIMARY, raw,

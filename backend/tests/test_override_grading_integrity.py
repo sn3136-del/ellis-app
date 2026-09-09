@@ -313,7 +313,7 @@ def test_explicit_evisa_issuance_does_not_mean_eta_or_override_visa_centre():
 def test_verified_entry_rules_reach_both_guidance_and_records(files):
     changes = {"disposition": "VISA_REQUIRED", "entry_requirements": "Valid passport for visit",
                "passport_validity": "Valid throughout the visit",
-               "passport_validity_requirement": {"kind": "duration_of_stay"},
+               "passport_validity_requirement": {"kind": "valid_through_departure", "months": 0},
                "biometrics_required": True, "appointment_required": True,
                "onward_travel_evidence": "Return or onward itinerary"}
     vo.append_operator_entry(entry(changes, verifier="human"))
