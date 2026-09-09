@@ -1,0 +1,178 @@
+[
+ {
+  "key": "HKG|HKG|SGP|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "IND|IND|JPN|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "RUS|RUS|GBR|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "THA|THA|GBR|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "VNM|VNM|GBR|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "FRA|FRA|MYS|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|JPN|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "VNM|VNM|JPN|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|MYS|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|HTI|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|GNB|tourism|default|unknown|v6",
+  "why": "refuted",
+  "votes": [
+   "All four rgb-visa.com quotes and the HK ImmD quote are literally on the cited pages, and Guinea-Bissau is indeed absent from the ImmD visa-free/VoA list. But the draft's requirement_detail \"evisa_on_a",
+   "The draft's VISA_ON_ARRIVAL / evisa_on_arrival verdict rests entirely on rgb-visa.com, which is not a .gw government domain (footer: Copyright 2014 by CETIS), has its homepage injected with casino spa"
+  ]
+ },
+ {
+  "key": "HKG|HKG|MEX|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|DZA|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|LBR|tourism|default|unknown|v6",
+  "why": "refuted",
+  "votes": [
+   "All six quotes are literally present on the cited pages (verified by direct fetch of visaonarrival.lis.gov.lr, mofa.gov.lr/general/foreign-missions and the IMMD visa_free_access page). The draft fails",
+   "The draft's VISA_ON_ARRIVAL disposition rests on an inference, not a published rule. The LIS portal's only eligibility test is \"If there is a Liberian embassy in your country, you are required to appl"
+  ]
+ },
+ {
+  "key": "HKG|HKG|NZL|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|TUV|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|TON|tourism|default|unknown|v6",
+  "why": "refuted",
+  "votes": [
+   "All four quotes are literally present on the cited pages (verified 2026-09-09 by fetching both). But the VISA_REQUIRED verdict rests on an inference, not a statement: the Tonga Ministry of Revenue pag",
+   "The draft relies on an incomplete list on the Ministry of Revenue page (which also omits mainland China despite the 2016 mutual visa exemption). Another Tonga government page, the Embassy of Tonga in "
+  ]
+ },
+ {
+  "key": "HKG|HKG|SEN|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|LCA|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|ZWE|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "USA|USA|BEN|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|TJK|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|LKA|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|RWA|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|UZB|tourism|default|unknown|v6",
+  "why": "refuted",
+  "votes": [
+   "All three quotes are verbatim on the Uzbekistan MFA visa page (last updated 2026-06-01 19:22:44). Entry 88 sits in the \"Up to 30 days\" section of the visa-free list and explicitly names the Hong Kong ",
+   "The disposition VISA_EXEMPT survives, but the draft's max_stay of 30 days, the \"unconditional_visa_free\" detail, and the changes_2026 claim that the 10-day rule is obsolete are contradicted by the Hon"
+  ]
+ },
+ {
+  "key": "USA|USA|BHS|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "HKG|HKG|NPL|tourism|default|unknown|v6",
+  "why": "refuted",
+  "votes": [
+   "Every cited quote is literally present on its page. The Nepal Department of Immigration ETA page lists the visa-on-arrival exclusion countries (Nigeria, Ghana, Zimbabwe, Swaziland, Cameroon, Somalia, ",
+   "The disposition itself (visa on arrival, HK not on Nepal's exclusion list) holds: immigration.gov.np/eta-visa-nepal lists Nigeria, Ghana, Zimbabwe, Swaziland, Cameroon, Somalia, Liberia, Ethiopia, Ira"
+  ]
+ },
+ {
+  "key": "HKG|HKG|AUS|tourism|default|unknown|v6",
+  "why": "no refuter verdict for a flip or exemption"
+ },
+ {
+  "key": "RUS|RUS|SGP|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "JPN|JPN|MYS|tourism|default|unknown|v6",
+  "why": "no refuter verdict for a flip or exemption"
+ },
+ {
+  "key": "RUS|RUS|JPN|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "TWN|TWN|VNM|tourism|default|unknown|v6",
+  "why": "no refuter verdict for a flip or exemption"
+ },
+ {
+  "key": "PHL|PHL|JPN|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "TWN|TWN|USA|tourism|default|unknown|v6",
+  "why": "no refuter verdict for a flip or exemption"
+ },
+ {
+  "key": "IND|IND|ESP|tourism|default|unknown|v6",
+  "why": "verdict quote not bound to a captured page"
+ },
+ {
+  "key": "IDN|IDN|MYS|tourism|default|unknown|v6",
+  "why": "no refuter verdict for a flip or exemption"
+ },
+ {
+  "key": "KOR|KOR|AUS|tourism|default|unknown|v6",
+  "why": "no refuter verdict for a flip or exemption"
+ },
+ {
+  "key": "JPN|JPN|AUS|tourism|default|unknown|v6",
+  "why": "no refuter verdict for a flip or exemption"
+ },
+ {
+  "key": "USA|USA|AUS|tourism|default|unknown|v6",
+  "why": "no refuter verdict for a flip or exemption"
+ }
+]
