@@ -152,3 +152,28 @@ def test_a_visa_free_verdict_keeps_only_a_free_entry_product():
     assert [p['type'] for p in fields['visa_products']] == ['Visa-free entry']
     assert 'validity_duration' in fields['unpublished_fields']
     assert reports[0]['removed_products'][0]['type'] == 'Single-entry tourist e-visa'
+
+
+def test_a_listed_general_overlay_is_loaded_with_the_reviewed_gates(tmp_path, monkeypatch):
+    """General batches register through reviewed_overlays.json beside the seed,
+    not through code edits. A listed file still has to pass the reviewed
+    overlay schema, and an unlisted or path-like name is ignored."""
+    seed = tmp_path / 'verified_overrides.json'
+    seed.write_text('[]')
+    b = batch(); manifest = build_manifest(b, [layer()])
+    overlay, _ = convert(manifest, [layer()])
+    (tmp_path / 'reviewed_general_overlay_test.json').write_text(json.dumps(overlay))
+    (tmp_path / 'reviewed_overlays.json').write_text(json.dumps(['reviewed_general_overlay_test.json', '../escape.json', 42]))
+    monkeypatch.setattr(vo, 'OVERRIDES', seed)
+    monkeypatch.setattr(vo, 'operator_overrides_path', lambda: tmp_path / 'operator_overrides.json')
+    vo.reload()
+    names = [p.name for p in vo._reviewed_overlay_paths()]
+    assert 'reviewed_general_overlay_test.json' in names and '../escape.json' not in names
+    hit = vo.find(ROUTE)
+    assert hit and hit['fields']['disposition'] == 'VISA_REQUIRED'
+    assert vo._table().store_errors == ()
+    # A malformed listed overlay is a store error, never a silent skip.
+    (tmp_path / 'reviewed_general_overlay_test.json').write_text(json.dumps({'kind': 'wrong'}))
+    vo.reload()
+    assert 'reviewed_overlay' in vo._table().store_errors
+    vo.reload()

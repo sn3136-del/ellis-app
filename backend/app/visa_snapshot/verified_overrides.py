@@ -205,8 +205,28 @@ REVIEWED_OVERLAY_NAMES = (
 )
 
 
+REVIEWED_OVERLAY_LIST = "reviewed_overlays.json"
+
+
+def _listed_reviewed_overlay_names():
+    """Batches converted by the general reviewed-batch converter register
+    through a committed list beside the seed, installed with the same pinned
+    deployment as the overlay itself. The list names files only: each file
+    still passes the reviewed-overlay schema and per-entry gates."""
+    path = OVERRIDES.parent / REVIEWED_OVERLAY_LIST
+    try:
+        names = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    if not isinstance(names, list):
+        return []
+    return [n for n in names if isinstance(n, str) and n.endswith(".json")
+            and "/" not in n and n not in REVIEWED_OVERLAY_NAMES]
+
+
 def _reviewed_overlay_paths():
-    return [OVERRIDES.parent / name for name in REVIEWED_OVERLAY_NAMES]
+    return [OVERRIDES.parent / name
+            for name in (*REVIEWED_OVERLAY_NAMES, *_listed_reviewed_overlay_names())]
 
 
 def _table() -> dict:
@@ -219,7 +239,8 @@ def _table() -> dict:
     try:
         mtime = tuple((path.stat().st_mtime_ns, path.stat().st_size)
                       if path.is_file() else None
-                      for path in [OVERRIDES, *_reviewed_overlay_paths(), op])
+                      for path in [OVERRIDES, OVERRIDES.parent / REVIEWED_OVERLAY_LIST,
+                                   *_reviewed_overlay_paths(), op])
     except OSError:
         mtime = ("unreadable",)
     cached = _CACHE
