@@ -148,3 +148,69 @@ def test_final_inflight_cancellation_remains_interrupted_and_retryable(sweep, mo
     # the cancelled route despite its recent persisted attempt timestamp.
     assert sweep._continuation(status, datetime.now(timezone.utc))
     assert sweep._remaining_cycle_rows([unfinished], status['cycle_started_at'], datetime.now(timezone.utc)) == [unfinished]
+
+
+def completed_status(now, **changes):
+    original = now - timedelta(hours=2, minutes=30)
+    return {'schema_version': 3, 'state': 'complete', 'running': False,
+            'started_at': (now-timedelta(minutes=40)).isoformat(),
+            'finished_at': (now-timedelta(minutes=20)).isoformat(),
+            'cycle_started_at': original.isoformat(), 'cycle_time_budget_seconds': 18000,
+            'time_budget_seconds': 11400, 'attempted': 151, 'backlog_remaining': 61,
+            'eligible_now': 61, **changes}
+
+
+def test_a_completed_cycle_with_backlog_resumes_inside_its_original_budget(sweep):
+    """9 September 2026: the invocation ended 'complete' with 61 rows whose
+    checks the JSON comparison defect had discarded. Starting the service
+    again would have opened a new cycle and bought hundreds of recently
+    completed checks. The completed cycle is resumed instead, with the
+    original start and deadline, and the reason is recorded."""
+    now = datetime.now(timezone.utc)
+    plan = sweep._continuation(completed_status(now), now)
+    assert plan['continuation_reason'] == 'completed_with_backlog'
+    assert plan['prior_backlog_remaining'] == 61
+    assert plan['cycle_started_at'] == completed_status(now)['cycle_started_at']
+    assert 8999 < plan['remaining_seconds'] <= 9000
+    assert plan['prior_attempt_results'] == 151
+
+
+@pytest.mark.parametrize('changes', [
+    {'backlog_remaining': 0}, {'backlog_remaining': None}, {'backlog_remaining': True},
+    {'backlog_remaining': -3}, {'backlog_remaining': '61'}, {'schema_version': 2},
+    {'cycle_started_at': '2000-01-01T00:00:00+00:00'},
+    {'cycle_started_at': '2999-01-01T00:00:00+00:00'}, {'state': 'interrupted_by_hand'},
+])
+def test_a_completed_cycle_without_a_real_backlog_or_budget_starts_normally(sweep, changes):
+    now = datetime.now(timezone.utc)
+    assert sweep._continuation(completed_status(now, **changes), now) is None
+
+
+def test_the_backlog_continuation_retries_only_rows_with_no_recorded_attempt(sweep, monkeypatch):
+    now = datetime.now(timezone.utc)
+    prior = completed_status(now)
+    start = datetime.fromisoformat(prior['cycle_started_at'])
+    path = freshness.sweep_status_path(); path.write_text(json.dumps(prior))
+    rows = [row('checked-in-cycle', start+timedelta(minutes=5), 'checked'),
+            row('unreadable-in-cycle', start+timedelta(minutes=6), 'fetch_failed'),
+            row('deferred-in-cycle', start+timedelta(minutes=7), 'concurrent_change'),
+            # The discarded write left the old stamp in place: no attempt recorded.
+            row('discarded-write', start-timedelta(days=2), 'checked'),
+            row('never')]
+    setup(monkeypatch, rows); seen = []
+    def check(db, r, **kwargs):
+        seen.append(r.cache_key)
+        r.verification = {'grounded_check': {'at': datetime.now(timezone.utc).isoformat(), 'outcome': 'page_not_relevant'}}
+        return {'outcome': 'page_not_relevant', 'source_reads': 1}
+    monkeypatch.setattr(freshness, 'recheck_row', check)
+    assert sweep.main() == 0
+    s = freshness.read_sweep_status()
+    assert set(seen) == {'discarded-write', 'never'}
+    assert s['selected'] == s['attempted'] == s['read'] == 2
+    assert s['verified'] == s['renewed'] == 0
+    assert s['continuation_reason'] == 'completed_with_backlog'
+    assert s['prior_backlog_remaining'] == 61
+    assert s['cycle_started_at'] == prior['cycle_started_at']
+    assert s['prior_attempt_results'] == 151
+    assert s['backlog_remaining'] == 0
+    assert json.loads(path.with_suffix('.previous.json').read_text()) == prior

@@ -46,28 +46,53 @@ def _timestamp(value):
         return None
 
 
+def _positive_backlog(previous) -> bool:
+    backlog = previous.get('backlog_remaining')
+    return isinstance(backlog, int) and not isinstance(backlog, bool) and backlog > 0
+
+
 def _continuation(previous, now):
     """Resume only a stopped cycle whose original five-hour budget remains.
 
     The process lock is already held, so a persisted 'running' state means
     its writer is gone. Counters remain per invocation; no old evidence is
-    relabelled as a new check. A completed or expired cycle starts normally.
+    relabelled as a new check. An expired cycle starts normally.
+
+    A cycle that finished dispatch but left a positive backlog is resumed
+    too, inside the same original budget: on 9 September 2026 an invocation
+    ended "complete" with 61 rows whose checks had been discarded by the
+    JSON comparison defect, and the only way to retry them was a fresh
+    cycle that would have bought hundreds of recently completed checks
+    again. The continuation selects exactly the rows with no recorded
+    attempt in the cycle, so a completed cycle with nothing left, or one
+    whose deadline has passed, still starts normally.
     """
-    if not isinstance(previous, dict) or previous.get('state') not in {
-            'running', 'interrupted', 'failed', 'budget_exhausted'}:
+    if not isinstance(previous, dict):
+        return None
+    state = previous.get('state')
+    finished_with_backlog = (state in {'complete', 'complete_with_errors'}
+                             and _positive_backlog(previous))
+    if state not in {'running', 'interrupted', 'failed', 'budget_exhausted'} \
+            and not finished_with_backlog:
         return None
     if previous.get('schema_version') not in (2, 3):
         return None
+    if finished_with_backlog and previous.get('schema_version') != 3:
+        return None          # only a checkpointed cycle knows its own start
     start = _timestamp(previous.get('cycle_started_at') or previous.get('started_at'))
     budget = previous.get('cycle_time_budget_seconds', previous.get('time_budget_seconds'))
     if isinstance(budget, bool) or not isinstance(budget, (int, float)) or not 0 < budget <= MAX_SECONDS:
         return None
     if start is None or start > now or now >= start + timedelta(seconds=budget):
         return None
-    return {'cycle_started_at': start.isoformat(), 'cycle_time_budget_seconds': budget,
+    plan = {'cycle_started_at': start.isoformat(), 'cycle_time_budget_seconds': budget,
             'remaining_seconds': (start + timedelta(seconds=budget) - now).total_seconds(),
             'resumed_from_started_at': previous.get('started_at'),
             'prior_attempt_results': previous.get('attempted', 0)}
+    if finished_with_backlog:
+        plan['continuation_reason'] = 'completed_with_backlog'
+        plan['prior_backlog_remaining'] = previous['backlog_remaining']
+    return plan
 
 
 def _remaining_cycle_rows(rows, cycle_started_at, now):
@@ -320,8 +345,9 @@ def main() -> int:
             save()
             log.info("sweep: %d due, %d selected, %d workers", status["due_before"], len(keys), WORKERS)
             if continuation:
-                log.info('continuing cycle from %s with %.1f seconds of original budget remaining',
-                         status['cycle_started_at'], budget)
+                log.info('continuing cycle from %s with %.1f seconds of original budget remaining (%s)',
+                         status['cycle_started_at'], budget,
+                         continuation.get('continuation_reason') or 'stopped cycle')
             attempted_keys = _run_workers(keys, deadline, stop, status, save)
             if status["state"] == "running":
                 status["state"] = ("interrupted" if stop.is_set() else
