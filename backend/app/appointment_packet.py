@@ -299,6 +299,15 @@ def build_for_case(db, app_row) -> dict:
     from .visa_snapshot import registry
     from sqlalchemy import select
 
+    from .visa_snapshot.case_evidence import ensure_current_case_guidance, CaseEvidenceBlocked
+    try:
+        current = ensure_current_case_guidance(db, app_row)
+    except CaseEvidenceBlocked as exc:
+        raise PacketNotApplicable(str(exc)) from exc
+    if current and current["guidance"].get("disposition") in {
+            "VISA_EXEMPT", "ELECTRONIC_AUTHORIZATION_REQUIRED", "VISA_ON_ARRIVAL"}:
+        raise PacketNotApplicable("The current route does not require a consular visa application packet.")
+
     answers = app_row.answers or {}
     dest_name = app_row.destination_country or ""
     # One shared lookup (registry.iso3). The copy that lived here returned the

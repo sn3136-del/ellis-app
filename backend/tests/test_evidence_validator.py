@@ -245,7 +245,7 @@ def test_noisy_headline_page_skipped_and_hong_kong_evisa_ignored():
                       "Tourist visa application documents simplified.")}
     clean = {"url": "https://us.china-embassy.gov.cn/eng/notice.htm",
              "hostname": "us.china-embassy.gov.cn",
-             "text": ("For U.S. citizens: the documents required for the tourist "
+             "text": ("U.S. citizens must obtain a visa. The documents required for the tourist "
                       "visa (L-Visa) will be simplified. Apply at the Embassy.")}
     # The noisy page attests >1 disposition -> excluded; clean page grounds it.
     det = evv.detect_disposition_from_pages(
@@ -280,3 +280,98 @@ def test_chinese_destination_mention_does_not_anchor():
     # 美国公民 (US citizens) IS a nationality anchor.
     text2 = "美国公民来华旅游免签入境。"
     assert evv.supports_disposition(text2, "VISA_FREE", nationality="USA")
+
+
+@pytest.mark.parametrize("nationality", ["HKG", "TWN", "JPN", "KOR", "USA", "THA", "SGP", "MYS", "GBR", "RUS", "AUS", "IDN", "PHL", "FRA", "VNM", "ESP", "IND", "CAN"])
+def test_all_station_nationalities_have_a_deterministic_anchor(nationality):
+    name = evv._NATIONALITY_NAMES[nationality][0]
+    assert evv.supports_disposition(f"{name} passport holders must obtain a visa.", "VISA_REQUIRED", nationality=nationality)
+
+
+def test_unknown_nationality_does_not_pass_on_universal_wording():
+    assert not evv.supports_disposition("All foreign nationals must obtain a visa.", "VISA_REQUIRED", nationality="ZZZ")
+    assert not evv.supports_disposition("Citizens of the following countries are visa-free.", "VISA_FREE", nationality="ZZZ")
+
+
+def test_disposition_support_checks_later_matches_too():
+    text = "No visa is required for this other group. " + "Useful information. " * 50 + "Hong Kong passport holders must obtain a visa."
+    assert evv.supports_disposition(text, "VISA_REQUIRED", nationality="HKG")
+
+
+def test_arrival_visa_is_explicit_and_not_advance_visa_evidence():
+    text = "Indonesian passport holders may obtain a visa on arrival."
+    assert evv.supports_disposition(text, "VISA_ON_ARRIVAL", nationality="IDN")
+    assert not evv.supports_disposition("Visa on arrival is not available for Indonesian citizens.", "VISA_ON_ARRIVAL", nationality="IDN")
+
+
+def test_quote_matching_requires_full_normalized_text():
+    assert evv.quote_in_text("SINGLE   entry 25 USD", "Single entry\n25 USD")
+    assert not evv.quote_in_text("Single entry 25 USD for all applicants", "Single entry 25 USD")
+    assert not evv.quote_in_text("", "anything")
+
+
+@pytest.mark.parametrize("separator", [". ", "; ", "\n", " but "])
+def test_other_nationality_rule_cannot_use_nearby_hong_kong_name(separator):
+    text = "Hong Kong citizens must obtain a visa" + separator + "Chinese citizens are visa-free."
+    assert not evv.supports_disposition(text, "VISA_FREE", nationality="HKG")
+    assert evv.supports_disposition(text, "VISA_REQUIRED", nationality="HKG")
+
+
+def test_destination_mention_cannot_ground_applicant_nationality():
+    text = "British citizens do not need a visa to China."
+    assert not evv.supports_disposition(text, "VISA_FREE", nationality="CHN")
+
+
+@pytest.mark.parametrize("text", ["中国签证申请材料清单", "Chinese citizens: documents required for a tourist visa", "Chinese visa information and application forms"])
+def test_application_documents_or_visa_title_do_not_prove_required(text):
+    assert not evv.supports_disposition(text, "VISA_REQUIRED", nationality="CHN")
+
+
+def test_authorization_program_name_alone_does_not_prove_requirement():
+    assert not evv.supports_disposition("Hong Kong citizens: Electronic travel authorization ETA information", "ELECTRONIC_AUTHORIZATION_REQUIRED", nationality="HKG")
+    assert evv.supports_disposition("Hong Kong passport holders must obtain an ETA.", "ELECTRONIC_AUTHORIZATION_REQUIRED", nationality="HKG")
+
+
+
+def test_excerpt_uses_the_same_later_nationality_supported_statement():
+    text = "Canadian passport holders must obtain a visa. " + "Unrelated page text. " * 30 + "Hong Kong passport holders must obtain a visa."
+    quote = evv.find_supporting_excerpt(text, "VISA_REQUIRED", nationality="HKG")
+    assert quote == "Hong Kong passport holders must obtain a visa"
+
+
+@pytest.mark.parametrize('name,value,text', [
+    ('government_fee', {'amount': 999, 'currency': 'CAD'}, 'The fee is 7 CAD.'),
+    ('government_fee', {'amount': 999, 'currency': 'CAD'}, 'The fee is 7 CAD and the stay is 999 days.'),
+    ('biometrics_required', True, 'Page navigation.'),
+    ('biometrics_required', True, 'Biometrics are not required.'),
+    ('processing_time', '30 days', 'The permitted stay is 30 days.'),
+    ('permitted_stay_days', 30, 'Processing takes 30 days.'),
+])
+def test_field_evidence_matches_entire_value_and_its_subject(name, value, text):
+    assert not evv.field_value_supported(name, value, text)
+
+
+def test_eu_common_visa_law_competence_is_narrow():
+    assert evv.jurisdiction_matches('https://eur-lex.europa.eu/legal-content/EN/TXT/', 'FRA')
+    assert evv.jurisdiction_matches('https://eur-lex.europa.eu/legal-content/EN/TXT/', 'ESP')
+    assert not evv.jurisdiction_matches('https://eur-lex.europa.eu/legal-content/EN/TXT/', 'GBR')
+
+
+def test_curated_uae_embassy_has_exact_uae_jurisdiction():
+    url = 'https://www.uae-embassy.org/visas-services/visas-for-non-us-citizens'
+    assert evv.source_is_official(url)
+    assert evv.jurisdiction_matches(url, 'ARE')
+    # The embassy's physical location does not make it a US authority, and
+    # a curated non-government suffix must not become ownerless elsewhere.
+    for destination in ('USA', 'HKG', 'TGO'):
+        assert not evv.jurisdiction_matches(url, destination)
+    for spoof in ('https://uae-embassy.org.example.com/visa',
+                  'https://fake-uae-embassy.org/visa'):
+        assert not evv.jurisdiction_matches(spoof, 'ARE')
+
+
+def test_detector_includes_explicit_visa_on_arrival():
+    route = {'passport_nationality': 'IDN', 'destination_country': 'THA', 'travel_purpose': 'tourism'}
+    result = evv.detect_disposition_from_pages(route, [{'url': 'https://consular.mfa.go.th/visa',
+        'text': 'Indonesian citizens can obtain a visa on arrival for tourism.'}])
+    assert result['disposition'] == 'VISA_ON_ARRIVAL' and not result['conflict']

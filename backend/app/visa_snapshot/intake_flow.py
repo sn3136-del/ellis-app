@@ -384,6 +384,7 @@ def build_passport_profile(*, ocr_fields: dict, mrz: dict | None,
 # frontend mirrors this mapping for display only.
 KIND_BY_DISPOSITION = {
     "VISA_REQUIRED": "visa_application",
+    "VISA_ON_ARRIVAL": "visa_on_arrival_preparation",
     "VISA_EXEMPT": "entry_preparation",
     "ELECTRONIC_AUTHORIZATION_REQUIRED": "authorization_application",
     "CONDITIONAL": "conditional_guidance",
@@ -394,6 +395,9 @@ def continuation_meta(guidance_result: dict) -> dict:
     """Which continuation the guidance supports. Blocked ONLY when the missing
     issue prevents safe preparation (no known disposition); a known disposition
     with residual gaps continues 'with available guidance'."""
+    if (guidance_result or {}).get("held"):
+        return {"blocked": True, "kind": None, "disposition": None,
+                "partial": False, "blockers": ["guidance_requires_review"]}
     g = (guidance_result or {}).get("guidance") or {}
     status = (guidance_result or {}).get("status")
     disp = g.get("disposition")

@@ -148,13 +148,13 @@ const PURPOSE_KEY = { tourism: 'db.purpose.tourism', business: 'db.purpose.busin
                       work: 'db.purpose.work', transit: 'db.purpose.transit',
                       other: 'db.purpose.other' }
 
-function useOpsClient() {
+function useOpsClient(token) {
   return useMemo(() => {
     const s = newSession()
     // The ops surface authenticates as the operator; the backend refuses
     // reader tokens on every endpoint this screen calls.
-    return createVisaClient({ ...s, token: 'admin-token' })
-  }, [])
+    return createVisaClient({ ...s, token })
+  }, [token])
 }
 
 const card = { background: '#fff', border: `1px solid ${BORDER}`,
@@ -643,7 +643,7 @@ function siteOf(url) {
 }
 
 const CONF_RANK = { High: 3, Medium: 2, Low: 1 }
-const CHECK_RANK = { 'human-quote': 3, 'grounded-consistent': 2,
+const CHECK_RANK = { 'human-quote': 4, 'grounded-consistent': 3, 'ai-quote': 2,
                      reference: 1, unchecked: 0 }
 
 function SortHeader({ label, k, sort, onSort, align = 'left', width }) {
@@ -1402,14 +1402,18 @@ function NextSweepCountdown({ at, summary, t }) {
     const id = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(id)
   }, [])
-  if (!at) return null
-  const target = new Date(at).getTime()
-  const left = Math.max(0, Math.floor((target - now) / 1000))
+  const target = at ? new Date(at).getTime() : null
+  const left = target ? Math.max(0, Math.floor((target - now) / 1000)) : 0
   const hh = String(Math.floor(left / 3600)).padStart(2, '0')
   const mm = String(Math.floor((left % 3600) / 60)).padStart(2, '0')
   const ss = String(left % 60).padStart(2, '0')
   const local = new Date(at).toLocaleString(undefined,
     { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
+  const run = summary.last_run
+  const runStates = ['running', 'complete', 'complete_with_errors', 'budget_exhausted',
+    'interrupted', 'failed', 'status_stale', 'status_unconfirmed']
+  const runState = runStates.includes(run?.status) ? run.status : 'status_unconfirmed'
+  const runCount = name => Number.isFinite(run?.[name]) ? run[name] : '—'
   return (
     <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14,
                   background: '#fff', padding: '16px 18px',
@@ -1422,46 +1426,36 @@ function NextSweepCountdown({ at, summary, t }) {
         </div>
         <div style={{ fontSize: 30, fontWeight: 800, color: NAVY,
                       fontVariantNumeric: 'tabular-nums', marginTop: 2 }}>
-          {hh}:{mm}:{ss}
+          {target && target > now ? `${hh}:${mm}:${ss}` : t(summary.scheduler?.status === 'active' ? 'ops.fresh.awaitingRun' : 'ops.fresh.schedulerUnavailable')}
         </div>
         <div style={{ fontSize: 12, color: GRAY }}>
-          {t('ops.fresh.nextAt').replace('{time}', local)}
+          {target && t('ops.fresh.nextAt').replace('{time}', local)}
         </div>
       </div>
       <div style={{ fontSize: 12.5, color: GRAY, maxWidth: 520,
                     lineHeight: 1.5, display: 'grid', gap: 4 }}>
-        {/* The explanatory paragraph beside the countdown is hidden on the
-            owner's request (2026-09-03); the measured coverage line stays. */}
-        {false && <div>{t('ops.fresh.nextHint')}</div>}
-        {/* The measured coverage line ("Re-check attempted in the last 48 h")
-            is hidden too, on the owner's request (2026-09-03). */}
-        {false && summary && summary.canonical_total > 0 && (() => {
-          const pct = Math.round(100 * summary.checked_48h / summary.canonical_total)
-          const oldestH = summary.oldest_check_at
-            ? Math.round((now - new Date(summary.oldest_check_at).getTime()) / 3600000)
-            : null
-          return (
-            <div style={{ color: pct === 100 ? GREEN : '#b26a00',
-                          fontWeight: 700 }}>
-              {t('ops.fresh.coverage48')
-                .replace('{n}', summary.checked_48h)
-                .replace('{total}', summary.canonical_total)
-                .replace('{pct}', pct)}
-              {oldestH !== null && (
-                <span style={{ color: GRAY, fontWeight: 500 }}>
-                  {' · '}{t('ops.fresh.oldest').replace('{h}', oldestH)}
-                </span>
-              )}
-              {false && typeof summary.read_48h === 'number' && (
-                <div style={{ color: GRAY, fontWeight: 500 }}>
-                  {t('ops.fresh.read48')
-                    .replace('{r}', summary.read_48h)
-                    .replace('{total}', summary.canonical_total)}
-                </div>
-              )}
+        <div>{t('ops.fresh.nextHint')}</div>
+        {summary && summary.canonical_total > 0 && (
+          <>
+            <div style={{ color: summary.overdue_attempts ? AMBER : GRAY }}>
+              {t('ops.fresh.attemptsMeasured').replace('{n}', summary.attempted_target).replace('{total}', summary.canonical_total).replace('{overdue}', summary.overdue_attempts)}
             </div>
-          )
-        })()}
+            <div style={{ color: summary.verified_target === summary.canonical_total ? GREEN : AMBER, fontWeight: 700 }}>
+              {t('ops.fresh.verifiedMeasured').replace('{n}', summary.verified_target).replace('{total}', summary.canonical_total)}
+            </div>
+            <div>{t('ops.fresh.runResult')}: {run
+              ? `${t(`ops.fresh.run.${runState}`)} · ${run.finished_at || run.started_at || '·'}`
+              : t('ops.fresh.runUnknown')}</div>
+            {run && <>
+              <div>{t('ops.fresh.runCoverage')
+                .replace('{attempted}', runCount('attempted')).replace('{selected}', runCount('selected'))
+                .replace('{unfinished}', runCount('cycle_unattempted'))}</div>
+              <div>{t('ops.fresh.runEvidence')
+                .replace('{verified}', runCount('verified')).replace('{partial}', runCount('partial'))
+                .replace('{unreadable}', runCount('unreadable')).replace('{errors}', runCount('errors'))}</div>
+            </>}
+          </>
+        )}
       </div>
     </div>
   )
@@ -1595,6 +1589,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
   }
   const CHECKS = {
     'human-quote': [t('ops.check.quoted'), GREEN, t('ops.tip.quoted')],
+    'ai-quote': [t('ops.check.aiQuoted'), BLUE, t('ops.tip.aiQuoted')],
     'grounded-consistent': [t('ops.check.grounded'), BLUE, t('ops.tip.grounded')],
     reference: [t('ops.check.reference'), GRAY, t('ops.tip.reference')],
     unchecked: [t('ops.check.none'), RED, t('ops.tip.none')],
@@ -1643,7 +1638,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
               const confKey = 'ops.conf.' + String(rec.confidence_level || '').toLowerCase()
               const confLabel = t(confKey) !== confKey ? t(confKey) : rec.confidence_level
               const pctDone = Math.round(rec.completeness * 100)
-              const held = rec.confidence_level === 'Low' && !rec.operator_released
+              const held = rec.held ?? (rec.confidence_level === 'Low' && !rec.operator_released)
               return [
                 <tr key={id} onClick={() => setOpen(opened ? null : id)}
                     style={{ cursor: 'pointer',
@@ -1692,7 +1687,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                     {rec.max_stay_duration != null
                       ? `${rec.max_stay_duration} ${rec.max_stay_unit === 'Hour'
                           ? t('ops.u.hour') : t('ops.u.day')}`
-                      : '·'}
+                      : rec.max_stay_text || '·'}
                   </td>
                   <td className="ops-cell" data-label={t('ops.col.fee')}
                       style={{ padding: '10px 12px', textAlign: 'right',
@@ -2242,7 +2237,48 @@ const EMPTY_FILTERS = { nationality: '', destination: '', purpose: '',
                         fieldMissing: '', document: '' }
 
 export default function QualityConsole() {
-  const client = useOpsClient()
+  const { t } = useLocale()
+  const [token, setToken] = useState(() => {
+    try { return sessionStorage.getItem('ellis_operator_access') || '' } catch { return '' }
+  })
+  const [candidate, setCandidate] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const signOut = useCallback(() => {
+    try { sessionStorage.removeItem('ellis_operator_access') } catch { /* memory only */ }
+    setToken(''); setCandidate('')
+  }, [])
+  if (token) return <QualityWorkspace token={token} onSignOut={signOut} />
+  return <div style={{ ...card, maxWidth: 420, margin: '60px auto', padding: 28 }}>
+    <h1 style={{ fontSize: 24 }}>{t('ops.title')}</h1>
+    <p>{t('ops.auth.intro')}</p>
+    <form onSubmit={async (event) => {
+      event.preventDefault(); setBusy(true); setError('')
+      try {
+        const key = candidate.trim()
+        if (!key) return
+        const client = createVisaClient({ ...newSession(), token: key })
+        await client.get('/database/freshness')
+        try { sessionStorage.setItem('ellis_operator_access', key) } catch { /* memory only */ }
+        setCandidate(''); setToken(key)
+      } catch { setError(t('ops.auth.failed')) }
+      finally { setBusy(false) }
+    }}>
+      <label style={{ display: 'grid', gap: 8 }}>
+        {t('ops.auth.key')}
+        <input type="password" autoComplete="current-password" required value={candidate}
+          onChange={(e) => setCandidate(e.target.value)} style={input} />
+      </label>
+      {error && <p role="alert" style={{ color: RED }}>{error}</p>}
+      <button className="btn" style={{ marginTop: 16 }} disabled={busy || !candidate.trim()}>
+        {busy ? t('ops.loading') : t('ops.auth.signIn')}
+      </button>
+    </form>
+  </div>
+}
+
+function QualityWorkspace({ token, onSignOut }) {
+  const client = useOpsClient(token)
 
   async function runDrill(nat, dest) {
     return client.post('/database/freshness/drill', {
@@ -2403,6 +2439,7 @@ export default function QualityConsole() {
       // once quietly, and only then say what happened in plain words. The
       // last loaded data stays on screen either way.
       const msg = String(e?.message || e)
+      if (e?.status === 401 || e?.status === 403) { onSignOut(); return }
       if (attempt === 0 && /fetch|network|load failed/i.test(msg)) {
         await new Promise((r) => setTimeout(r, 800))
         return load(1)
@@ -2412,8 +2449,24 @@ export default function QualityConsole() {
     } finally {
       setBusy(false)
     }
-  }, [client, tab, qs, t])
+  }, [client, tab, qs, t, onSignOut])
   useEffect(() => { load() }, [load])
+  useEffect(() => {
+    if (tab !== 'freshness') return
+    let active = true
+    let pending = false
+    const timer = setInterval(async () => {
+      if (pending || document.visibilityState === 'hidden') return
+      pending = true
+      try {
+        const latest = await client.get('/database/freshness')
+        if (active) setFreshness(latest)
+      } catch {
+        // Keep the last result; its timestamps still show its age.
+      } finally { pending = false }
+    }, 30000)
+    return () => { active = false; clearInterval(timer) }
+  }, [client, tab])
 
   async function flag(rec, note) {
     await client.databaseReportIssue({
@@ -2560,7 +2613,7 @@ export default function QualityConsole() {
     setBusy(true)
     try {
       const res = await fetch(`${client.baseUrl}/database/export.xlsx?${qs()}`, {
-        headers: { authorization: 'Bearer admin-token',
+        headers: { authorization: `Bearer ${token}`, 'x-ellis-token': token,
                    'x-org-id': 'ops', 'x-user-id': 'ops' },
       })
       if (!res.ok) throw new Error(`export failed (${res.status})`)
@@ -2582,7 +2635,7 @@ export default function QualityConsole() {
     setBusy(true)
     try {
       const res = await fetch(`${client.baseUrl}/database/changes.csv`, {
-        headers: { authorization: 'Bearer admin-token',
+        headers: { authorization: `Bearer ${token}`, 'x-ellis-token': token,
                    'x-org-id': 'ops', 'x-user-id': 'ops' },
       })
       if (!res.ok) throw new Error(`export failed (${res.status})`)
@@ -2660,9 +2713,9 @@ export default function QualityConsole() {
       }
     }
     const fillable = filledCells + gaps
-    const src = t0.filter((r) => r.source_url).length
+    const src = t0.filter((r) => ['human-quote', 'ai-quote', 'grounded-consistent'].includes(r.source_check)).length
     const sub = t0.filter((r) => r.source_check === 'human-quote'
-      || r.source_check === 'grounded-consistent').length
+      || r.source_check === 'ai-quote' || r.source_check === 'grounded-consistent').length
     return { total: t0.length,
              completeness_rate: fillable ? filledCells / fillable : null,
              completeness_literal: cells ? filledCells / cells : null,
@@ -2689,6 +2742,9 @@ export default function QualityConsole() {
                        letterSpacing: -0.4 }}>
             {t('ops.title')}
           </h1>
+          <button className="btn btn--ghost" onClick={onSignOut} style={{ marginLeft: 'auto' }}>
+            {t('ops.auth.signOut')}
+          </button>
           {/* Subtitle hidden per owner instruction: the title stands alone. */}
         </div>
 
@@ -3130,7 +3186,7 @@ export default function QualityConsole() {
               case 'visa_category':
                 return typeNames?.[rec.visa_type_name] || rec.visa_type_name
               case 'permitted_stay': case 'permitted_stay_days':
-                return j(rec.max_stay_duration, unitName(rec.max_stay_unit))
+                return rec.max_stay_text || j(rec.max_stay_duration, unitName(rec.max_stay_unit))
               case 'government_fee':
                 return j(rec.visa_fee_amount, rec.visa_fee_currency)
               case 'processing_time':

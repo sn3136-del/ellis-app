@@ -1851,3 +1851,21 @@ test('the group-appointment minimum follows the POST, not a global constant', as
   assert.ok(!other.preChecks.some((c) => c.code === 'too_few'),
     '12 travellers meet the baseline of 10')
 })
+
+// VOA preparation must not imply an advance government filing.
+test('visa on arrival and held guidance have safe continuations', async () => {
+  const { applicableStages, continueButtonMeta } = await import('../../src/renderer/src/lib/intake.js')
+  const guidance = { status: 'KIMI_PRIMARY', guidance: { disposition: 'VISA_ON_ARRIVAL' } }
+  assert.equal(continuationMeta(guidance).kind, 'visa_on_arrival_preparation')
+  assert.equal(continuationMeta({ ...guidance, held: true }).blocked, true)
+  assert.deepEqual(applicableStages('visa_on_arrival_preparation', [{ step: 'submission' }]), [])
+  assert.equal(continueButtonMeta({ continuation_kind: 'visa_on_arrival_preparation', checklist_counts: { required_missing: 0 } }).labelKey, 'checklist.continue.voa')
+})
+
+test('database shared links preserve date, document, purpose and stopovers', async () => {
+  const { databaseRouteHash, parseDatabaseRouteHash } = await import('../../src/renderer/src/lib/databaseRoute.js')
+  const route = { nat: 'HKG', dest: 'THA', purpose: 'business', doc: 'ordinary_passport', transit: ['SGP', 'JPN'], arrival: '2026-09-15' }
+  assert.deepEqual(parseDatabaseRouteHash(databaseRouteHash(route), ['tourism', 'business']), { ...route, transit: ['JPN', 'SGP'] })
+  assert.equal(parseDatabaseRouteHash('#database/HKG/THA/tourism/ordinary_passport').arrival, '')
+  assert.equal(parseDatabaseRouteHash('#database/HKG/THA/tourism/ordinary_passport/on/2026-02-30').arrival, '')
+})

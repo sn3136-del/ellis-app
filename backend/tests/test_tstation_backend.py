@@ -81,7 +81,8 @@ def test_visa_free_yields_one_clean_record_and_human_check_is_high():
     g = {"disposition": "VISA_EXEMPT", "permitted_stay": "30 days",
          "permitted_stay_days": 30, "confidence": "high"}
     prov = {"source_url": "https://cs.mfa.gov.cn/x", "verified_at": "2026-08-22",
-            "verified_by": "Ellis source audit"}
+            "verified_by": "Ellis operator", "verifier": "human",
+            "fields": ["disposition"], "note": "Official page confirms the exemption."}
     rows = tstation.records_for_route(route, g, prov,
                                       valid_until="2026-11-20T00:00:00")
     assert len(rows) == 1

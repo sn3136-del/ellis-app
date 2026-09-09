@@ -10,7 +10,7 @@ ADMIN_BOT = {"Authorization": "Bearer admin-token", "X-Org-Id": "platform",
              "X-User-Id": "ellis-workflow", "X-Role": "admin"}  # AI-looking actor
 
 
-def _new(client, headers=AUTH):
+def _new(client, headers=ADMIN):
     return client.post("/admin/adapters", headers=headers, json={
         "country": "Testland", "visa_type": "tourist",
         "config": {"portal_operator": "Testland MOI", "official_domains": ["evisa.testland.gov"]}}).json()
@@ -72,9 +72,10 @@ def test_api_full_lifecycle_and_audit(client):
     rec = _new(client)
     aid = rec["id"]
     assert rec["lifecycle_state"] == "discovered"
-    # advance through non-activation states as a normal reviewer
+    # A public applicant token cannot perform administrative draft edits.
+    # An authenticated operator advances the lifecycle.
     for s in ("disabled_draft", "technical_review", "policy_review", "mock_tested", "staging_tested"):
-        r = client.post(f"/admin/adapters/{aid}/transition", headers=AUTH, json={"to_state": s})
+        r = client.post(f"/admin/adapters/{aid}/transition", headers=ADMIN, json={"to_state": s})
         assert r.status_code == 200, r.text
     # applicant (non-admin) is refused activation
     r = client.post(f"/admin/adapters/{aid}/transition", headers=AUTH, json={"to_state": "approved"})
@@ -90,7 +91,7 @@ def test_api_full_lifecycle_and_audit(client):
     # immutable audit records the human activation
     actions = [e["action"] for e in got["audit"]]
     assert actions.count("adapter_transition") >= 6
-    assert any(e["actor"] == "alice-admin" and e["detail"]["to"] == "approved" for e in got["audit"])
+    assert any(e["actor"] == "alice-admin" and e["detail"].get("to") == "approved" for e in got["audit"])
 
 
 def test_api_kill_requires_admin(client):

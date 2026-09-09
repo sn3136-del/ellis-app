@@ -24,6 +24,7 @@ STAGE_DOCUMENT_INTAKE = "document_intake"
 # mandatory document is fulfilled. Never creates a new case.
 NEXT_STAGE_BY_KIND = {
     "visa_application": "application_preparation",
+    "visa_on_arrival_preparation": "entry_preparation",
     "authorization_application": "application_preparation",
     "conditional_guidance": "application_preparation",
     "entry_preparation": "entry_preparation",
@@ -425,6 +426,11 @@ def complete_stage(db, p, app_row) -> dict:
     stage. Refuses while any mandatory requirement is unfulfilled; idempotent
     once completed. Advances the EXISTING case to its route's next stage —
     never a new case, never a restarted wizard."""
+    from .visa_snapshot.case_evidence import ensure_current_case_guidance, CaseEvidenceBlocked
+    try:
+        ensure_current_case_guidance(db, app_row)
+    except CaseEvidenceBlocked as exc:
+        raise ChecklistError(409, exc.detail) from exc
     cg = case_guidance(db, app_row.id)
     if cg is None:
         raise ChecklistError(409, "this case has no route checklist")

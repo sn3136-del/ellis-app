@@ -1,0 +1,835 @@
+[
+  {
+    "id": "THA-2026-09-15-KOR-ordinary-tourism",
+    "route": {
+      "nationality": "KOR",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\nBilateral Agreement on Visa Exemption for Ordinary Passport Holders\n90 days\nKorea (ROK)\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Korea (ROK)",
+        "document": "for ordinary passport holders",
+        "exemption": "Bilateral Agreement on Visa Exemption for Ordinary Passport Holders",
+        "stay": "90 days"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "90 days",
+      "permitted_stay_days": 90,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 90 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-HKG-ordinary-tourism",
+    "route": {
+      "nationality": "HKG",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\nBilateral Agreement on Visa Exemption for Ordinary Passport Holders\n30 days\nHong Kong\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Hong Kong",
+        "document": "for ordinary passport holders",
+        "exemption": "Bilateral Agreement on Visa Exemption for Ordinary Passport Holders",
+        "stay": "30 days"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-RUS-ordinary-tourism",
+    "route": {
+      "nationality": "RUS",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\nBilateral Agreement on Visa Exemption for Ordinary Passport Holders\n30 days\nRussia\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Russia",
+        "document": "for ordinary passport holders",
+        "exemption": "Bilateral Agreement on Visa Exemption for Ordinary Passport Holders",
+        "stay": "30 days"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-VNM-ordinary-tourism",
+    "route": {
+      "nationality": "VNM",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\nBilateral Agreement on Visa Exemption for Ordinary Passport Holders\n30 days\nVietnam\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Vietnam",
+        "document": "for ordinary passport holders",
+        "exemption": "Bilateral Agreement on Visa Exemption for Ordinary Passport Holders",
+        "stay": "30 days"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-TWN-ordinary-tourism",
+    "route": {
+      "nationality": "TWN",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nTaiwan\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Taiwan",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-JPN-ordinary-tourism",
+    "route": {
+      "nationality": "JPN",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nJapan\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Japan",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-USA-ordinary-tourism",
+    "route": {
+      "nationality": "USA",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nUSA\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "USA",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-SGP-ordinary-tourism",
+    "route": {
+      "nationality": "SGP",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nSingapore\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Singapore",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-MYS-ordinary-tourism",
+    "route": {
+      "nationality": "MYS",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nMalaysia\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Malaysia",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-GBR-ordinary-tourism",
+    "route": {
+      "nationality": "GBR",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nUK\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "UK",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-AUS-ordinary-tourism",
+    "route": {
+      "nationality": "AUS",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nAustralia\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Australia",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-IDN-ordinary-tourism",
+    "route": {
+      "nationality": "IDN",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nIndonesia\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Indonesia",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-PHL-ordinary-tourism",
+    "route": {
+      "nationality": "PHL",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nPhilippines\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Philippines",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-FRA-ordinary-tourism",
+    "route": {
+      "nationality": "FRA",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nFrance\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "France",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-ESP-ordinary-tourism",
+    "route": {
+      "nationality": "ESP",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nSpain\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Spain",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-IND-ordinary-tourism",
+    "route": {
+      "nationality": "IND",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nIndia\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "India",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  },
+  {
+    "id": "THA-2026-09-15-CAN-ordinary-tourism",
+    "route": {
+      "nationality": "CAN",
+      "destination": "THA",
+      "travel_purpose": "tourism",
+      "travel_document_type": "ordinary_passport"
+    },
+    "effective_from": "2026-09-15",
+    "effective_to": null,
+    "verified_at": "2026-09-09",
+    "verifier": "ai",
+    "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+    "evidence": {
+      "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B8%AA%E0%B8%A5%E0%B8%81__0301/2_4.png",
+      "reading_method": "visually_read_official_infographic",
+      "text": "Summary: The revision of Thailand’s visa exemption and VoA schemes, 2026\n(for ordinary passport holders)\n30-day visa exemption (60 Countries/Territories)\n30-day visa exemption\nCanada\nEffective from 15 September 2026",
+      "quotes": {
+        "effective_from": "Effective from 15 September 2026",
+        "nationality": "Canada",
+        "document": "for ordinary passport holders",
+        "exemption": "30-day visa exemption (60 Countries/Territories)",
+        "stay": "30-day visa exemption"
+      }
+    },
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa exemption",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa application is required for this exempt tourism stay.",
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation",
+      "source_url": "https://consular.mfa.go.th/th/content/1-9-69-00?page=5d68c88b15e39c160c008173",
+      "exceptions": [
+        "For arrivals from 15 September 2026, the visa-exempt tourism stay is up to 30 days."
+      ]
+    },
+    "superseded_stay_days": [
+      60
+    ]
+  }
+]

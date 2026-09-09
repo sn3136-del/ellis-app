@@ -53,7 +53,7 @@ GOV_SUFFIXES = (
     # Eritrea's embassies (us. prefix is the Washington DC embassy);
     # embassyofpanama.org is Panama's embassy in Washington DC.
     "equatorialguinea-evisa.com", "yemenevisa.org", "embassyeritrea.org",
-    "embassyofpanama.org",
+    "embassyofpanama.org", "uae-embassy.org",
     # Verified 2026-08-29 (dispute adjudication, each opened and read):
     # ind.nl is the Netherlands' Immigration and Naturalisation Service;
     # mozambiquehighcommission.org.uk and ghanaembassydc.org are those

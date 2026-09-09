@@ -78,6 +78,9 @@ class Settings:
         # --- Auth ---
         self.dev_api_token = os.getenv("ELLIS_DEV_TOKEN", "dev-token")
         self.admin_token = os.getenv("ELLIS_ADMIN_TOKEN", "admin-token")  # dev admin role
+        self.require_secure_admin = _bool("ELLIS_REQUIRE_SECURE_ADMIN",
+            self.runtime_mode in ("tripcom_evaluation", "staging", "production"))
+        self.admin_user_id = os.getenv("ELLIS_ADMIN_USER_ID", "").strip()
         self.clerk_secret_key = os.getenv("CLERK_SECRET_KEY", "")
         self.action_token_secret = os.getenv("ELLIS_ACTION_SECRET", "local-action-secret")
 

@@ -14,6 +14,7 @@ from sqlalchemy import select
 
 from . import SNAPSHOT_DATE, SNAPSHOT_LABEL
 from .matrix import matrix_key
+from .evidence_validator import jurisdiction_matches, source_is_official
 from .models import (AdapterDevelopmentTask, ConsularJurisdictionRule,
                      HumanReviewTask, OfficialPortalRecord,
                      PassportValidityRuleRecord, RouteMatrixEntry,
@@ -101,6 +102,7 @@ def resolve(db, *, org_id: str, answers: dict, case_id: str | None = None,
         SourceEvidence.snapshot_date == SNAPSHOT_DATE,
         SourceEvidence.applicable_jurisdiction == dest,
         SourceEvidence.verification_status == "verified")).scalars().all()
+    verified_evidence = [e for e in verified_evidence if jurisdiction_matches(e.final_url, dest)]
     checks["source_evidence"] = {
         "verified_count": len(verified_evidence),
         "authorities": sorted({e.source_authority for e in verified_evidence}),
@@ -149,6 +151,8 @@ def resolve(db, *, org_id: str, answers: dict, case_id: str | None = None,
         OfficialPortalRecord.destination_country == dest,
         OfficialPortalRecord.verification_status.in_(
             ("verified_official_domain", "verified_via_official_link")))).scalars().all()
+    portals = [p for p in portals if jurisdiction_matches(
+        p.url if source_is_official(p.url) else p.official_linking_source, dest)]
     checks["official_portal"] = {
         "verified_count": len(portals),
         "portals": [{"kind": p.portal_kind, "url": p.url,

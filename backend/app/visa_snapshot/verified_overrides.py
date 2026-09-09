@@ -1,4 +1,4 @@
-"""Human-verified facts that outrank the model's answer.
+"""Source-checked facts that outrank the model's answer.
 
 WHY THIS EXISTS. The Database's fast path answers from Kimi's own knowledge
 (see kimi_primary's header: no official-source fetching runs there). That is
@@ -13,10 +13,11 @@ visa regime, and Indonesia being visa-on-arrival rather than visa-free for US
 nationals.
 
 Guessing harder does not fix that. A checked fact does. An override is a fact
-a PERSON verified against a named official page on a named date, and it wins
+checked against a named official page on a named date, and it wins
 over the model for exactly the fields it names — nothing else is touched, and
 an answer that carries one says so, with the source and the date, instead of
-presenting a model recollection as established fact.
+presenting a model recollection as established fact. Each field records
+whether its verifier was human or AI. Historical entries default to AI.
 
 RULES, all deliberate:
   * An override MUST carry a source_url on an official government domain and a
@@ -32,6 +33,8 @@ RULES, all deliberate:
 from __future__ import annotations
 
 import json
+import logging
+import math
 import os
 import pathlib
 import re
@@ -39,6 +42,8 @@ import threading
 from functools import lru_cache
 
 from .authority import hostname, is_government_host
+
+log = logging.getLogger(__name__)
 
 OVERRIDES = pathlib.Path(__file__).resolve().parents[3] / "data" / \
     "database_seed" / "verified_overrides.json"
@@ -66,7 +71,13 @@ OVERRIDABLE = frozenset({
     "disposition", "requirement_detail", "visa_category", "permitted_stay",
     "permitted_stay_days", "application_channel", "application_channel_detail",
     "government_fee", "official_portal_url", "visa_products", "processing_time",
-    "exceptions", "required_documents", "confidence",
+    "exceptions", "required_documents", "entry_requirements", "confidence",
+    # Route entry rules render separately on the traveller page. Correcting
+    # only its synthesized entry_requirements text left these stale facts
+    # visible beneath the corrected record.
+    "passport_validity", "passport_validity_requirement",
+    "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
+    "biometrics_required", "appointment_required", "interview_required",
     # A mandatory pre-arrival filing (Malaysia's MDAC, the SG Arrival Card) is
     # the difference between boarding and not boarding, so a verified fact
     # must be able to correct it.
@@ -114,7 +125,10 @@ _REVIEWER_VOICE = (
 # The fields whose text a customer actually reads.
 _CUSTOMER_TEXT = ("exceptions", "application_channel_detail", "requirement_detail",
                   "permitted_stay", "processing_time", "required_documents",
-                  "entry_requirements", "consular_jurisdiction")
+                  "entry_requirements", "consular_jurisdiction", "passport_validity",
+                  "onward_travel_evidence", "accommodation_evidence", "financial_evidence")
+
+_BOOLEAN_FIELDS = ("biometrics_required", "appointment_required", "interview_required")
 
 
 def _clean_corroborating(value):
@@ -199,10 +213,12 @@ def _load_table() -> dict:
     # who corrects one field must not wipe the seed's other verified facts:
     # a console edit of processing_time once shadowed a route's entire
     # verified entry and the flagship fee vanished from the served answer
-    # (2026-09-01). Entry-level provenance follows the newest editor; the
-    # seed's note is kept alongside so the trail stays readable.
+    # (2026-09-01). Each field retains its own source and verifier identity.
+    # The headline provenance is selected from the verified verdict at apply.
     table = _parse_rows(_read_rows(OVERRIDES), {})
-    ops = _parse_rows(_read_rows(operator_overrides_path()), {})
+    # Validate narrow operator edits against the already verified seed
+    # verdict, never against the model's current guess.
+    ops = _parse_rows(_read_rows(operator_overrides_path()), {}, inherited=table)
     for k, op in ops.items():
         base = table.get(k)
         if base is None:
@@ -210,17 +226,92 @@ def _load_table() -> dict:
             continue
         merged_fields = dict(base["fields"])
         merged_fields.update(op["fields"])
+        field_provenance = dict(base.get("field_provenance") or {})
+        field_provenance.update(op.get("field_provenance") or {})
         table[k] = {"fields": merged_fields,
                     "source_url": op["source_url"],
                     "verified_at": op["verified_at"],
                     "verified_by": op["verified_by"],
+                    "verifier": op["verifier"],
+                    "field_provenance": field_provenance,
                     "note": (base.get("note") or "").strip()}
         if op.get("note"):
             table[k]["note"] = (table[k]["note"] + " | " + op["note"]).strip(" |")[:400]
     return table
 
 
-def _parse_rows(rows, table: dict) -> dict:
+def _field_errors(fields: dict) -> list[str]:
+    """Pure structural lint. A named product is not proof of a route's rule."""
+    from .kimi_primary import DISPOSITIONS
+    errors = []
+    verdict, detail = fields.get("disposition"), fields.get("requirement_detail")
+    details = {d for family in _DETAIL_FAMILY.values() for d in family}
+    if verdict is not None and not isinstance(verdict, str):
+        return ["unknown disposition"]
+    if detail is not None and not isinstance(detail, str):
+        return ["unknown requirement_detail"]
+    for key in _BOOLEAN_FIELDS:
+        if fields.get(key) is not None and not isinstance(fields[key], bool):
+            errors.append(f"{key} must be a boolean or null")
+    if fields.get("passport_validity_requirement") is not None and not isinstance(
+            fields["passport_validity_requirement"], dict):
+        errors.append("passport_validity_requirement must be an object or null")
+    if verdict is not None and verdict not in DISPOSITIONS:
+        errors.append("unknown disposition")
+    if detail is not None and detail not in details:
+        errors.append("unknown requirement_detail")
+    if verdict in _DETAIL_FAMILY and detail is not None and detail not in _DETAIL_FAMILY[verdict]:
+        errors.append("requirement_detail contradicts disposition")
+    if any(k in fields for k in ("government_fee", "visa_products")) and not (verdict or detail):
+        errors.append("fee/products need a verified disposition or requirement_detail")
+    def valid_fee(fee):
+        if fee is None:
+            return True
+        if not isinstance(fee, dict):
+            return False
+        amount = fee.get("amount")
+        return amount is None or (not isinstance(amount, bool) and
+                                  isinstance(amount, (int, float)) and
+                                  math.isfinite(amount) and amount >= 0)
+    if "government_fee" in fields and not valid_fee(fields["government_fee"]):
+        errors.append("government_fee must contain a nonnegative finite numeric amount or null")
+    if "visa_products" in fields and fields["visa_products"] is not None:
+        products = fields["visa_products"]
+        if (not isinstance(products, list) or any(
+                not isinstance(p, dict) or not valid_fee(p.get("fee"))
+                for p in products)):
+            errors.append("visa_products must be an array of objects with valid numeric fees")
+        elif any(p.get("requirement_detail") is not None and
+                 (not isinstance(p["requirement_detail"], str) or
+                  p["requirement_detail"] not in details) for p in products):
+            errors.append("visa_products contain an unknown requirement_detail")
+        elif any(p.get("source_url") and not is_government_host(
+                hostname(str(p["source_url"]))) for p in products):
+            errors.append("visa_products source_url must be an official government page")
+    return errors
+
+
+def lint_rows(rows: list) -> list[dict]:
+    """Report unsafe raw entries without dropping their audit trail."""
+    out = []
+    for r in rows:
+        errors = _field_errors(r.get("fields") or {})
+        if r.get("verifier", "ai") not in ("human", "ai"):
+            errors.append("verifier must be human or ai")
+        if errors:
+            out.append({"route": r.get("route"), "errors": errors,
+                        "source_url": r.get("source_url"), "fields": r.get("fields")})
+    return out
+
+
+def _provenance(entry: dict) -> dict:
+    return {"source_url": entry["source_url"], "verified_at": entry["verified_at"],
+            "verified_by": str(entry.get("verified_by") or "").strip(),
+            "verifier": entry.get("verifier", "ai"),
+            "note": str(entry.get("note") or "").strip()[:400]}
+
+
+def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
     for r in rows if isinstance(rows, list) else []:
         if not isinstance(r, dict):
             continue
@@ -234,7 +325,32 @@ def _parse_rows(rows, table: dict) -> dict:
             continue
         if not is_government_host(hostname(url)):
             continue          # an override must cite an official source
+        if r.get("verifier", "ai") not in ("human", "ai"):
+            continue
         clean = {k: v for k, v in fields.items() if k in OVERRIDABLE}
+        route_key = _key(route["nationality"], route["destination"],
+                         route.get("travel_purpose", "tourism"),
+                         route.get("travel_document_type", ""))
+        previous = (inherited or {}).get(route_key, {}).get("fields", {})
+        errors = _field_errors(dict(previous, **clean))
+        if errors:
+            # Keep safe ancillary facts (arrival cards, processing times,
+            # citations) while quarantining unanchored application claims.
+            # Raw files remain intact for the correction queue.
+            log.warning("Override %s quarantined: %s", route_key, "; ".join(errors))
+            invalid_decision = bool(set(errors) & {
+                "unknown disposition", "unknown requirement_detail",
+                "requirement_detail contradicts disposition"})
+            unanchored = any("need a verified" in e for e in errors)
+            if invalid_decision:
+                clean.pop("disposition", None)
+                clean.pop("requirement_detail", None)
+            for k in ("government_fee", "visa_products"):
+                if invalid_decision or unanchored or any(e.startswith(k) for e in errors):
+                    clean.pop(k, None)
+            for k in _BOOLEAN_FIELDS + ("passport_validity_requirement",):
+                if any(e.startswith(k) for e in errors):
+                    clean.pop(k, None)
         for k in _URL_FIELDS:
             v = str(clean.get(k) or "").strip()
             if v and not is_government_host(hostname(v)):
@@ -250,11 +366,21 @@ def _parse_rows(rows, table: dict) -> dict:
                 clean.pop("corroborating_sources", None)
         if not clean:
             continue
-        table[_key(route["nationality"], route["destination"],
-                   route.get("travel_purpose", "tourism"),
-                   route.get("travel_document_type", ""))] = {
+        provenance = _provenance(dict(r, source_url=url, verified_at=when))
+        per_field = {}
+        for k in clean:
+            p = (r.get("field_provenance") or {}).get(k)
+            if (isinstance(p, dict) and p.get("verified_at") and
+                    is_government_host(hostname(str(p.get("source_url") or ""))) and
+                    p.get("verifier", "ai") in ("human", "ai")):
+                per_field[k] = _provenance(p)
+            else:
+                per_field[k] = dict(provenance)
+        table[route_key] = {
             "fields": clean, "source_url": url, "verified_at": when,
             "verified_by": str(r.get("verified_by") or "").strip(),
+            "verifier": r.get("verifier", "ai"),
+            "field_provenance": per_field,
             "note": str(r.get("note") or "").strip()[:400],
         }
     return table
@@ -265,11 +391,14 @@ def reload() -> None:
     _CACHE["mtime"], _CACHE["table"] = None, None
 
 
-def append_operator_entry(entry: dict) -> dict:
+def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
     """Persist one operator-written override, applying the same gates the
     loader applies, but LOUDLY: a rejected entry raises ValueError naming the
     reason, so the console can tell the operator exactly what to fix instead
-    of silently dropping their work."""
+    of silently dropping their work. When a cached answer exists, its retained
+    raw fields are part of the same pre-write contradiction check."""
+    if guidance is not None and not isinstance(guidance, dict):
+        raise ValueError("cached guidance must be an object before an edit can be validated")
     route = entry.get("route") or {}
     if not (route.get("nationality") and route.get("destination")):
         raise ValueError("the route needs a nationality and a destination")
@@ -279,7 +408,13 @@ def append_operator_entry(entry: dict) -> dict:
                          "government domain")
     if not str(entry.get("note") or "").strip():
         raise ValueError("say what was checked and why, in the note")
+    if not str(entry.get("verified_at") or "").strip():
+        raise ValueError("every edit needs a verification date")
+    if entry.get("verifier", "ai") not in ("human", "ai"):
+        raise ValueError("verifier must be human or ai")
     fields = entry.get("fields") or {}
+    if not isinstance(fields, dict):
+        raise ValueError("fields must be an object")
     unknown = [k for k in fields if k not in OVERRIDABLE]
     if unknown:
         raise ValueError(f"these fields cannot be edited: {sorted(unknown)}")
@@ -295,17 +430,51 @@ def append_operator_entry(entry: dict) -> dict:
                              "customer-facing fact. State the fact plainly")
     if not clean:
         raise ValueError("no editable fields were given")
-    entry = dict(entry, fields=clean)
+    route_key = _key(route["nationality"], route["destination"],
+                     route.get("travel_purpose", "tourism"),
+                     route.get("travel_document_type", ""))
+    entry = dict(entry, fields=clean, verifier=entry.get("verifier", "ai"))
     path = operator_overrides_path()
     with _OP_LOCK:
+        # Re-read under the write lock. A concurrent edit may have changed
+        # the verdict since the request began, invalidating a fee-only edit.
+        current_table = _load_table()
+        existing = current_table.get(route_key) or {}
+        checked = dict(existing.get("fields") or {}, **clean)
+        errors = _field_errors(checked)
+        if errors:
+            raise ValueError("; ".join(errors))
+        from .kimi_primary import serve_time_invariants
+        implied = _verdict_implied_by_detail(checked, {})
+        if implied:
+            checked = dict(checked, disposition=implied)
+        if checked.get("disposition"):
+            errors.extend(serve_time_invariants(checked))
+        if errors:
+            raise ValueError("; ".join(errors))
+        if guidance is not None:
+            merged, _ = merge_verified_fields(guidance, checked, source_url=url)
+            errors = serve_time_invariants(merged)
+            if errors:
+                raise ValueError("edit conflicts with the complete cached answer: " + "; ".join(errors))
         rows = _read_rows(path)
-        # One entry per route: a re-edit replaces the previous operator entry
-        # for the same route instead of stacking shadowed duplicates.
+        # One entry per route: consolidate edits with per-field provenance
+        # instead of stacking shadowed duplicates or losing earlier facts.
         def _rk(r):
             rr = r.get("route") or {}
-            return (rr.get("nationality"), rr.get("destination"),
-                    rr.get("travel_purpose", "tourism"),
-                    rr.get("travel_document_type", ""))
+            return _key(rr.get("nationality", ""), rr.get("destination", ""),
+                        rr.get("travel_purpose", "tourism"),
+                        rr.get("travel_document_type", ""))
+        prior = next((r for r in reversed(rows) if _rk(r) == _rk(entry)), None)
+        if prior:
+            # Retain prior verified fields AND their original authors. A
+            # human correcting one fee cannot turn an AI verdict human.
+            parsed = _parse_rows([prior], {}, inherited=current_table).get(route_key) or {}
+            retained = dict(parsed.get("fields") or {})
+            retained.update(clean)
+            per_field = dict(parsed.get("field_provenance") or {})
+            per_field.update({k: _provenance(entry) for k in clean})
+            entry = dict(entry, fields=retained, field_provenance=per_field)
         rows = [r for r in rows if _rk(r) != _rk(entry)]
         rows.append(entry)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -473,6 +642,28 @@ def _drop_exemption_leftovers(merged: dict, fields: dict,
     if flipped:
         pat = re.compile(r"免签|免簽|visa[- ]?free|visa[- ]?exempt|exemption",
                          re.I)
+        # These values only described the superseded exemption. A verified
+        # required verdict establishes neither a zero fee nor absence of an
+        # appointment. Remove those claims; never invent their replacements.
+        # Nonzero fees and alternate products remain available for review.
+        channel = str(merged.get("application_channel") or "").lower()
+        if "application_channel" not in fields and channel in (
+                "not_required", "none", "no_application_required", "none_or_port_of_entry"):
+            merged.pop("application_channel", None)
+        fee = merged.get("government_fee")
+        if "government_fee" not in fields and isinstance(fee, dict) \
+                and fee.get("amount") in (0, 0.0) and not isinstance(fee.get("amount"), bool):
+            merged.pop("government_fee", None)
+        for key in ("appointment_required", "interview_required", "biometrics_required"):
+            if key not in fields and merged.get(key) is False:
+                merged.pop(key, None)
+        for key in ("processing_time", "route_workflow_type", "visa_category",
+                    "application_channel_detail"):
+            value = merged.get(key)
+            if key not in fields and isinstance(value, str) and re.search(
+                    r"no[_ -]?visa|visa[_ -]?exempt|visa[_ -]?free|not applicable|免签|免簽",
+                    value, re.I):
+                merged.pop(key, None)
         if "exceptions" not in fields:
             v = merged.get("exceptions")
             if isinstance(v, list):
@@ -488,6 +679,44 @@ def _drop_exemption_leftovers(merged: dict, fields: dict,
             if k not in fields and isinstance(merged.get(k), str) \
                     and pat.search(merged[k]):
                 merged.pop(k, None)
+
+
+def _drop_changed_permission_leftovers(merged: dict, fields: dict,
+                                       original: dict) -> bool:
+    """A new permission family invalidates unverified application details.
+
+    A visa-to-ETA correction left UK visitor-visa biometrics, documents,
+    processing times, and visa-required prose beneath the verified ETA.
+    Retain explicitly checked fields and alternate products; the record
+    layer assigns each product only its own procedure and evidence.
+    """
+    def family(g):
+        verdict = g.get("disposition")
+        known = {"VISA_REQUIRED": "visa", "VISA_ON_ARRIVAL": "arrival",
+                 "ELECTRONIC_AUTHORIZATION_REQUIRED": "authorisation",
+                 "VISA_EXEMPT": "exemption"}.get(verdict)
+        if known:
+            return known
+        detail = g.get("requirement_detail")
+        for disposition, details in _DETAIL_FAMILY.items():
+            if detail in details:
+                return family({"disposition": disposition})
+        return None
+    before, after = family(original), family(fields)
+    if not before or not after or before == after or "exemption" in (before, after):
+        # The dedicated exemption cleanup above already distinguishes
+        # application-only documents from ordinary border documents.
+        return False
+    for k in ("processing_time", "forms", "account_registration_steps",
+              "payment_process", "submission_process", "official_portal_url",
+              "government_fee", "visa_category", "application_channel",
+              "application_channel_detail", "route_workflow_type",
+              "required_documents", "entry_requirements", "exceptions",
+              "biometrics_required", "appointment_required", "interview_required",
+              "consular_jurisdiction", "source_url"):
+        if k not in fields:
+            merged.pop(k, None)
+    return True
 
 
 def _verdict_implied_by_detail(fields: dict, guidance: dict) -> str | None:
@@ -526,51 +755,69 @@ def _product_is_free(p: dict) -> bool:
 
 
 def enforce_verdict_invariants(merged: dict) -> None:
-    """A served answer may not contradict its own verdict, whoever wrote the
-    parts. Trip.com's testers saw "No visa needed" over an eVisa badge and a
-    25 USD fee: the verdict came from one hand and the products from another.
-    The audit of 2026-09-09 found 27 more verified visa-free routes carrying
-    priced visa products (Britain to Vietnam listed the 25 USD e-visa under
-    a 45-day exemption). Under a visa-free verdict only free products stay,
-    the fee is zero and the channel is "not required" unless something is
-    filed online. Under a verdict that needs a visa, an exemption-only
-    subcategory cannot stand. Nothing is invented: values are removed or
-    reset to what the verdict itself states."""
+    """Normalize only definitional vocabulary; preserve disputed evidence.
+
+    Contradictions are reported by kimi_primary.serve_time_invariants and
+    held from readers. Deleting a verified price or rewriting it to zero
+    would erase the evidence an operator needs to settle the contradiction.
+    """
     if not isinstance(merged, dict):
         return
-    verdict = str(merged.get("disposition") or "").upper()
-    if verdict == "VISA_EXEMPT":
-        products = merged.get("visa_products")
-        if isinstance(products, list) and products:
-            kept = [p for p in products if isinstance(p, dict) and _product_is_free(p)]
-            if len(kept) != len(products):
-                merged["visa_products"] = kept
-        fee = merged.get("government_fee")
-        if isinstance(fee, dict) and (fee.get("amount") or 0) > 0:
-            merged["government_fee"] = {"amount": 0, "currency": fee.get("currency")}
-        detail = str(merged.get("requirement_detail") or "")
-        if detail and detail not in _DETAIL_FAMILY["VISA_EXEMPT"]:
-            merged.pop("requirement_detail", None)
-        channel = str(merged.get("application_channel") or "").lower()
-        if channel and channel not in ("not_required", "online_portal", "none"):
-            merged["application_channel"] = "not_required"
-    elif verdict in ("VISA_REQUIRED", "VISA_ON_ARRIVAL",
-                     "ELECTRONIC_AUTHORIZATION_REQUIRED"):
-        detail = str(merged.get("requirement_detail") or "")
-        if detail in _DETAIL_FAMILY["VISA_EXEMPT"]:
-            merged.pop("requirement_detail", None)
-        if str(merged.get("application_channel") or "").lower() in ("not_required", "none"):
-            merged.pop("application_channel", None)
+    if merged.get("disposition") == "VISA_REQUIRED" and merged.get(
+            "requirement_detail") in _DETAIL_FAMILY["VISA_ON_ARRIVAL"]:
+        merged["disposition"] = "VISA_ON_ARRIVAL"
 
 
-def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
-    """Return (guidance, provenance). The guidance is a COPY with the verified
-    fields replaced; provenance names the source, the date and the fields so
-    the answer can show what was checked rather than implying all of it was."""
-    hit = find(route or {})
-    if not hit or not isinstance(guidance, dict):
-        return guidance, None
-    fields = dict(hit["fields"])
+_TEXT_LIST_FIELDS = frozenset({
+    "forms", "required_documents", "exceptions", "account_registration_steps",
+    "payment_process", "submission_process",
+})
+
+
+def _normalise_text_lists(guidance):
+    """Preserve a historical prose value as one item, without inventing a split.
+
+    Only these string-list fields have a known lossless legacy conversion.
+    Unknown shapes and object-list fields remain untouched for invariant review.
+    """
+    if not isinstance(guidance, dict):
+        return guidance
+    out = guidance
+    for key in _TEXT_LIST_FIELDS:
+        value = out.get(key)
+        if isinstance(value, str):
+            if out is guidance:
+                out = dict(guidance)
+            out[key] = [value] if value.strip() else []
+    return out
+
+
+def _finalize_guidance(guidance, provenance=None):
+    """One cleanup boundary for records, transit and traveler responses.
+
+    Only a consistent final exempt answer may lose application leftovers.
+    Priced products, contradictory channels and malformed shapes survive
+    unchanged so the shared invariant gate can hold them for review.
+    """
+    from . import kimi_primary
+    guidance = _normalise_text_lists(guidance)
+    if not isinstance(guidance, dict) or kimi_primary.serve_time_invariants(guidance):
+        return guidance
+    return kimi_primary._strip_visa_free_leftovers(
+        guidance, verified_fields=(provenance or {}).get("fields") or ())
+
+
+def merge_verified_fields(guidance: dict, fields: dict, *, source_url: str = "") -> tuple[dict, dict]:
+    """Pure merge used by both serving and atomic operator-write validation.
+
+    Return the merged guidance and effective checked fields, including a
+    verdict implied by a checked detail. This performs no file lookup and
+    does not choose a dated policy. Unsupported or contradictory values
+    remain visible to the invariant validator unless the sourced correction
+    explicitly replaces them or makes an old exemption claim inapplicable.
+    """
+    guidance = _normalise_text_lists(guidance)
+    fields = dict(_normalise_text_lists(fields))
     implied = _verdict_implied_by_detail(fields, guidance)
     if implied:
         fields["disposition"] = implied
@@ -578,9 +825,32 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     merged.update(fields)
     _drop_application_leftovers(merged, fields)
     _drop_exemption_leftovers(merged, fields, guidance)
+    if _drop_changed_permission_leftovers(merged, fields, guidance) and "source_url" not in fields:
+        merged["source_url"] = source_url
     enforce_verdict_invariants(merged)
-    return merged, {
-        "source_url": hit["source_url"], "verified_at": hit["verified_at"],
-        "verified_by": hit["verified_by"], "note": hit["note"],
-        "fields": sorted(fields.keys()),
-    }
+    return _finalize_guidance(merged, {"fields": list(fields)}), fields
+
+
+def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
+    """Return (guidance, provenance). The guidance is a COPY with the verified
+    fields replaced; provenance names the source, the date and the fields so
+    the answer can show what was checked rather than implying all of it was."""
+    from . import scheduled_policies
+    guidance = _normalise_text_lists(guidance)
+    hit = find(route or {})
+    if not hit or not isinstance(guidance, dict):
+        result, provenance = scheduled_policies.apply(guidance, None, route)
+        return _finalize_guidance(result, provenance), provenance
+    implied = _verdict_implied_by_detail(hit["fields"], guidance)
+    merged, fields = merge_verified_fields(guidance, hit["fields"], source_url=hit["source_url"])
+    field_provenance = dict(hit.get("field_provenance") or {})
+    if implied:
+        field_provenance["disposition"] = dict(
+            field_provenance.get("requirement_detail") or _provenance(hit))
+    # A newer edit of a side field never takes authorship or the source link
+    # of a previously checked verdict. Keep each field's trail available.
+    verdict_provenance = field_provenance.get("disposition") or _provenance(hit)
+    provenance = dict(verdict_provenance, fields=sorted(fields),
+                      field_provenance=field_provenance)
+    result, provenance = scheduled_policies.apply(merged, provenance, route)
+    return _finalize_guidance(result, provenance), provenance

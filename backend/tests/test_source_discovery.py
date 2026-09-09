@@ -147,8 +147,8 @@ def _fake_fetch_ok(url, timeout_seconds=20):
     host = url.split("/")[2]
     return FetchResult(requested_url=url, ok=True, final_url=url, redirect_chain=[],
                        final_hostname=host, http_status=200,
-                       content_text="Cambodia e-Visa for tourism. Fee USD 30. "
-                                    "Stay 30 days. Singapore citizens eligible.",
+                       content_text="Singapore citizens must obtain an e-Visa for tourism. "
+                                    "Fee USD 30. Stay 30 days.",
                        content_hash="c" * 64, page_language="en",
                        retrieved_at="2026-07-23T12:00:00Z")
 
@@ -195,13 +195,15 @@ def test_on_demand_job_completes_via_route_aware_discovery(db):
     assert "route-aware discovery proposed" in notes
 
 
-def test_research_auto_triggers_adapter_build_when_authorized(db):
+def test_research_auto_triggers_adapter_build_when_authorized(db, monkeypatch):
     """After research verifies a portal-requiring route, the backend AUTOMATICALLY
     starts the adapter build when the applicant's standing authorization covers
     portal selection — removing the routine 'click Build connector' break."""
     from tests.test_e2e import _new_case
     from app.adapter_factory import models as afm
     app_id = _new_case(db)  # creates a standing authorization covering portal selection
+    monkeypatch.setitem(globals(), "GOV_URL", _gov_url("BN"))
+    monkeypatch.setitem(globals(), "GOV_ROOT", _gov_url("BN", "/"))
     ri = _ri_dest("BN")     # Brunei — un-researched, distinct destination
     answers = dict(ROUTE_ANSWERS, destination_country="BN")
     source_discovery.set_proposer(lambda q: [GOV_URL])
@@ -222,9 +224,11 @@ def test_research_auto_triggers_adapter_build_when_authorized(db):
     assert req.standing_authorization_id
 
 
-def test_research_no_autobuild_without_standing_authorization(db):
+def test_research_no_autobuild_without_standing_authorization(db, monkeypatch):
     """Adapter-ready but no standing authorization -> NO build is auto-started
     (honest; the applicant must authorize first)."""
+    monkeypatch.setitem(globals(), "GOV_URL", _gov_url("BH"))
+    monkeypatch.setitem(globals(), "GOV_ROOT", _gov_url("BH", "/"))
     ri = _ri_dest("BH")     # Bahrain — un-researched, distinct destination
     answers = dict(ROUTE_ANSWERS, destination_country="BH")
     source_discovery.set_proposer(lambda q: [GOV_URL])

@@ -5,13 +5,16 @@ travel-history question; a qualifying recent origin/transit triggers the
 question and, once confirmed, the certificate item with its explanation;
 irrelevant vaccination items are entirely absent (never 'optional'); the
 travel-history question is asked ONLY when a conditional rule needs it."""
+import json
+from datetime import date
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.db import SessionLocal, create_all
 from app.main import app as fastapi_app
-from app.visa_snapshot import intake_flow, kimi_primary
+from app.visa_snapshot import intake_flow, kimi_primary, verified_overrides as vo
 from app.visa_snapshot.models import KimiRouteGuidanceCache
 
 H = {"Authorization": "Bearer dev-token", "X-Org-Id": "org-vax", "X-User-Id": "uv"}
@@ -38,6 +41,7 @@ SGP_GUIDANCE = {
                      "submission_window": "within 3 days before arrival"},
     "route_workflow_type": "visa_exempt_preparation",
     "uncertainty": [], "confidence": "high",
+    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
 }
 
 USA_SGP = {
@@ -75,12 +79,27 @@ def client():
 
 
 @pytest.fixture(autouse=True)
-def _reset(db):
+def _reset(db, monkeypatch, tmp_path):
+    # Keep the health workflow independent of live seed facts, while giving
+    # its route an explicit scoped source check accepted by the real gate.
+    source = tmp_path / "verified-test-route.json"
+    source.write_text(json.dumps([{
+        "route": {"nationality": "USA", "destination": "SGP", "purpose": "tourism",
+                  "travel_document_type": "ordinary_passport"},
+        "source_url": SGP_GUIDANCE["source_url"], "verified_at": date.today().isoformat(),
+        "verified_by": "Health test evidence fixture", "verifier": "ai",
+        "note": "Fixture: United States ordinary passport holders visiting Singapore for tourism do not require a visa.",
+        "fields": {"disposition": "VISA_EXEMPT", "requirement_detail": "unconditional_visa_free"},
+    }]))
+    monkeypatch.setattr(vo, "OVERRIDES", source)
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES", str(tmp_path / "operators.json"))
+    vo.reload()
     for row in db.execute(select(KimiRouteGuidanceCache)).scalars().all():
         db.delete(row)
     db.commit()
     yield
     kimi_primary.set_provider(None)
+    vo.reload()
 
 
 # ---- pure deterministic logic ------------------------------------------------

@@ -4,6 +4,7 @@ Kimi-guidance continuation into a case per disposition, route checklist,
 duplicate-safety, refresh-resume, and the non-blocking official-source audit.
 No administrator approval exists anywhere on this path."""
 import base64
+import json
 from datetime import date
 
 import pytest
@@ -22,7 +23,31 @@ def _no_shipped_overrides(tmp_path, monkeypatch):
     which turns a mock's exempt continuation into a different flow. Data
     correctness has its own suites; here the overrides are pointed away."""
     from app.visa_snapshot import verified_overrides as vo
-    monkeypatch.setattr(vo, "OVERRIDES", tmp_path / "none.json")
+    # Synthetic route evidence isolates journey mechanics from real policy.
+    # A mock model's self-rated confidence alone must never release guidance.
+    required = {"CHN", "IND", "BRA"}
+    destinations = {"SGP", "CHN", "GBR", "KOR", "MYS", "THA", "VNM",
+                    "EGY", "IND", "IDN", "KHM", "LAO", "BRA", "NZL", "FJI"}
+    entries = []
+    for destination in destinations:
+        disposition = ("VISA_REQUIRED" if destination in required else
+                       "ELECTRONIC_AUTHORIZATION_REQUIRED" if destination == "GBR" else
+                       "VISA_EXEMPT")
+        entries.append({
+            "route": {"nationality": "USA", "destination": destination,
+                      "purpose": "tourism", "travel_document_type": "ordinary_passport"},
+            "source_url": "https://www.ica.gov.sg/journey-test-fixture",
+            "verified_at": date.today().isoformat(), "verifier": "ai",
+            "verified_by": "Synthetic journey test evidence",
+            "note": f"Synthetic fixture: USA ordinary tourism to {destination}: {disposition}.",
+            "fields": {"disposition": disposition, **(
+                {"arrival_card": {"required": True, "name": "SG Arrival Card",
+                                  "submission_window": "Within 3 days including arrival"}}
+                if destination == "SGP" else {})},
+        })
+    fixture_path = tmp_path / "journey-evidence.json"
+    fixture_path.write_text(json.dumps(entries))
+    monkeypatch.setattr(vo, "OVERRIDES", fixture_path)
     vo.reload()
     yield
     vo.reload()
@@ -81,7 +106,7 @@ EXEMPT_ANSWER = {
     "interview_required": False, "appointment_required": False,
     "account_registration_steps": [], "payment_process": [],
     "submission_process": [], "exceptions": [], "uncertainty": [],
-    "confidence": "high",
+    "confidence": "high", "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
 }
 
 REQUIRED_ANSWER = dict(
@@ -99,7 +124,7 @@ ETA_ANSWER = dict(
     visa_category="Electronic travel authorization",
     application_channel="online_portal",
     government_fee={"amount": 10, "currency": "GBP"},
-    official_portal_url=None, forms=[], processing_time="3 business days")
+    official_portal_url="https://www.gov.uk/eta", source_url="https://www.gov.uk/eta", forms=[], processing_time="3 business days")
 
 
 @pytest.fixture()
@@ -310,7 +335,7 @@ def test_visa_exempt_guidance_continues_to_entry_preparation(client, db):
     ids = {i["id"] for i in body["checklist"]}
     assert "passport" in ids and "flight_itinerary" in ids
     assert "hotel_booking" in ids
-    assert any(i.startswith("form:") for i in ids)
+    assert "arrival_card" in ids
     # The intake is converted and linked — not restarted.
     ri = client.get(f"/intake/{iid}", headers=H).json()
     assert ri["status"] == "converted" and ri["case_id"] == body["case_id"]
@@ -344,10 +369,10 @@ def test_uncertain_guidance_without_disposition_shows_precise_blocker(client):
     assert g["status"] == "KIMI_UNCERTAIN"
     r = client.post(f"/intake/{iid}/continue", headers=H)
     assert r.status_code == 409
-    assert "disposition" in r.json()["detail"]["blockers"]
+    assert "guidance_requires_review" in r.json()["detail"]["blockers"]
 
 
-def test_uncertain_guidance_with_disposition_continues_with_available(client):
+def test_uncertain_sourced_guidance_with_disposition_continues_with_available(client):
     partial = dict(EXEMPT_ANSWER)
     # A gap that does NOT block safe prep. (processing_time is no longer
     # demanded of a visa-free route — there is nothing to process — so a

@@ -41,7 +41,7 @@ OFFICIAL_PAGE = FetchResult(
     requested_url="https://www.mofa.go.jp/j_info/visit/visa/index.html",
     ok=True, final_url="https://www.mofa.go.jp/j_info/visit/visa/index.html",
     final_hostname="www.mofa.go.jp", http_status=200,
-    content_text=("Visa fees revised 1 July 2026: single entry 715 CNY. "
+    content_text=("Chinese nationals must obtain a visa for tourism in Japan. Visa fees revised 1 July 2026: single entry 715 CNY. "
                   "Single-entry temporary visitor visas for tourism permit a "
                   "stay of 15 days or 30 days as decided by the mission."),
     content_hash="abc123", retrieved_at="2026-08-22T00:00:00Z")
@@ -100,7 +100,7 @@ def test_japan_regression_the_page_corrects_the_stored_answer(db):
             "permitted_stay": "15 or 30 days, decided by the mission",
             "government_fee": {"amount": 715, "currency": "CNY"}},
         "evidence": {
-            "permitted_stay": "a stay of 15 days or 30 days as decided",
+            "permitted_stay": "a stay of 15 days or 30 days as decided by the mission",
             "government_fee": "single entry 715 CNY"},
         "note": "fee and stay revised"})
     out = freshness.recheck_route(db, ROUTE)
@@ -112,7 +112,9 @@ def test_japan_regression_the_page_corrects_the_stored_answer(db):
     gc = row.verification["grounded_check"]
     assert gc["outcome"] == "checked" and gc["changed_fields"]
     assert gc["source_url"] == OFFICIAL_PAGE.final_url
-    assert row.fresh_until is not None       # checked -> fresh again
+    assert row.fresh_until is None  # the page does not verify the other detail fields
+    assert gc["verified_fields"] == ["disposition", "government_fee", "permitted_stay"]
+    assert gc["unverified_fields"] and not gc["renewed"]
 
 
 def test_a_correction_without_a_page_quote_is_discarded(db):
@@ -144,8 +146,8 @@ def test_the_machine_never_outvotes_a_human_override(db, tmp_path, monkeypatch):
     fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
     freshness.set_provider(lambda system, user: {
         "page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
-        "corrected_fields": {"permitted_stay": "60 days"},
-        "evidence": {"permitted_stay": "some new wording"}, "note": ""})
+        "corrected_fields": {"permitted_stay": "30 days"},
+        "evidence": {"permitted_stay": "stay of 15 days or 30 days as decided by the mission"}, "note": ""})
     out = freshness.recheck_route(db, ROUTE)
     assert out["outcome"] == "checked"
     assert out["changed"] == [] and out["disputed"] == ["permitted_stay"]
@@ -154,7 +156,7 @@ def test_the_machine_never_outvotes_a_human_override(db, tmp_path, monkeypatch):
     issue = db.query(DatabaseIssueReport).one()
     assert issue.reported_by == "freshness_monitor"
     assert issue.status == "open"
-    assert "60 days" in issue.note
+    assert "30 days" in issue.note
     vo.reload()
 
 
@@ -192,7 +194,7 @@ def test_a_correction_that_contradicts_itself_is_refused_and_filed(db):
     freshness.set_provider(lambda system, user: {
         "page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
         "corrected_fields": {"visa_products": []},
-        "evidence": {"visa_products": "some quote"}, "note": ""})
+        "evidence": {"visa_products": "Single-entry temporary visitor visas"}, "note": ""})
     out = freshness.recheck_route(db, ROUTE)
     assert out["outcome"] == "checked"
     assert out["changed"] == [] and out["disputed"] == ["visa_products"]
@@ -297,7 +299,7 @@ def test_a_disagreeing_check_is_not_served_as_a_clean_bill_of_health(db):
     freshness.set_provider(lambda system, user: {
         "page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
         "corrected_fields": {"permitted_stay": "15 or 30 days"},
-        "evidence": {"permitted_stay": "15 days or 30 days as decided"},
+        "evidence": {"permitted_stay": "stay of 15 days or 30 days as decided"},
         "note": ""})
     freshness.recheck_route(db, ROUTE)
     db.commit()
@@ -316,28 +318,35 @@ def test_a_generic_page_cannot_touch_nationality_specific_fields(db):
     nationality-specific field — enforced in code, not requested in the
     prompt."""
     _seed(db)
-    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    from dataclasses import replace
+    generic = replace(OFFICIAL_PAGE, content_text=(
+        "Visa information. A stay of up to 90 days. Apply at the diplomatic mission. "
+        "Processing takes 5 working days."))
+    fetching.set_fetcher(lambda url, timeout_seconds=0: generic)
     freshness.set_provider(lambda system, user: {
         "page_relevant": True, "page_is_nationality_specific": False,
         "consistent": False,
         "corrected_fields": {
             "permitted_stay_days": 90,
             "application_channel": "embassy",
-            "processing_time": "5 working days from application"},
+            "processing_time": "5 working days"},
         "evidence": {"permitted_stay_days": "stay of up to 90 days",
                      "application_channel": "apply at the diplomatic mission",
-                     "processing_time": "five working days"},
+                     "processing_time": "Processing takes 5 working days"},
         "note": "generic page"})
     out = freshness.recheck_route(db, ROUTE)
-    assert out["outcome"] == "checked"
+    assert out["outcome"] == "page_not_relevant"
     # The nationality-specific corrections were skipped...
     assert "permitted_stay_days" not in out["changed"]
     assert "application_channel" not in out["changed"]
     assert set(out["generic_skipped"]) == {"application_channel",
                                            "permitted_stay_days"}
-    # ...while a non-nationality field from the same page still applies.
-    assert out["changed"] == ["processing_time"]
+    # No generic discrepancy renews the route or silently disappears.
+    assert out["changed"] == []
+    assert set(out["disputed"]) == {"permitted_stay_days", "application_channel", "processing_time"}
+    assert db.query(DatabaseIssueReport).count() == 1
     row = db.query(KimiRouteGuidanceCache).one()
+    assert row.fresh_until is None
     assert row.guidance["permitted_stay"] == "90 days"  # untouched original
     assert row.guidance["application_channel"] == "authorised_agent"
 
@@ -350,7 +359,7 @@ def test_a_nationality_specific_page_may_correct_those_fields(db):
         "consistent": False,
         "corrected_fields": {"permitted_stay_days": 30},
         "evidence": {"permitted_stay_days":
-                     "Chinese nationals: 15 or 30 days as decided"},
+                     "stay of 15 days or 30 days as decided"},
         "note": "China-specific page"})
     out = freshness.recheck_route(db, ROUTE)
     assert out["changed"] == ["permitted_stay_days"]
@@ -430,19 +439,12 @@ def test_due_rows_selects_the_48_hour_backlog_oldest_first(db):
 
 
 
-def test_next_sweep_time_is_real_and_in_the_future():
-    """The countdown must be rooted in truth: with systemd absent the time
-    comes from the timer's own schedule (minute 20 past 00/06/12/18 UTC)
-    and always lies within the next six hours."""
-    from datetime import datetime, timezone
+def test_next_sweep_time_is_absent_when_timer_is_unavailable(monkeypatch):
+    """A missing timer cannot earn a fabricated six-hour countdown."""
+    import subprocess
     from app.main import _next_sweep_at
-    raw = _next_sweep_at()
-    assert raw
-    nxt = datetime.fromisoformat(raw)
-    now = datetime.now(timezone.utc)
-    assert nxt > now
-    assert (nxt - now).total_seconds() <= 6 * 3600 + 600
-    assert nxt.minute == 20 or nxt.tzinfo is not None
+    monkeypatch.setattr(subprocess, "run", lambda *_a, **_k: (_ for _ in ()).throw(FileNotFoundError()))
+    assert _next_sweep_at() is None
 
 
 def test_human_flags_get_an_ai_proposal_operators_accept_or_decline(db):
@@ -467,9 +469,9 @@ def test_human_flags_get_an_ai_proposal_operators_accept_or_decline(db):
     freshness.set_provider(lambda system, user: {
         "page_relevant": True, "page_is_nationality_specific": True,
         "consistent": False,
-        "corrected_fields": {"government_fee": {"amount": 715,
+        "corrected_fields": {"disposition": "VISA_REQUIRED", "government_fee": {"amount": 715,
                                                 "currency": "CNY"}},
-        "evidence": {"government_fee": "single entry 715 CNY"},
+        "evidence": {"disposition": "Chinese nationals must obtain a visa for tourism in Japan", "government_fee": "single entry 715 CNY"},
         "note": "fee revised on the page"})
     prop = freshness.propose_for_issue(db, flagged["id"])
     assert prop["outcome"] == "checked"
@@ -543,7 +545,9 @@ def test_the_48_hour_drill_plants_catches_and_never_leaves_a_trace(db):
     ADMIN = {"authorization": "Bearer admin-token", "x-org-id": "org-b",
              "x-user-id": "op-1"}
     _seed(db)
-    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    from dataclasses import replace
+    page = replace(OFFICIAL_PAGE, content_text=OFFICIAL_PAGE.content_text.replace("715 CNY", "200 CNY"))
+    fetching.set_fetcher(lambda url, timeout_seconds=0: page)
     freshness.set_provider(lambda system, user: {
         "page_relevant": True, "page_is_nationality_specific": True,
         "consistent": False,
@@ -572,7 +576,8 @@ def test_the_48_hour_drill_plants_catches_and_never_leaves_a_trace(db):
 def test_due_rows_takes_never_checked_first_and_respects_the_threshold(db):
     """The sweep's worklist: never-checked rows first, then the oldest, and
     nothing younger than the threshold. The threshold the sweep script uses
-    is 40 hours so the 48-hour promise survives a 6-hour cadence."""
+    excludes only the last 15 minutes so late rows in a five-hour run are
+    eligible again at the next six-hour start."""
     from datetime import datetime, timedelta, timezone
     import importlib.util, pathlib
     now = datetime.now(timezone.utc)
@@ -590,14 +595,17 @@ def test_due_rows_takes_never_checked_first_and_respects_the_threshold(db):
     spec = importlib.util.spec_from_file_location(
         "sweep", pathlib.Path(__file__).resolve().parents[1] / "scripts" / "freshness_sweep.py")
     mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
-    assert mod.DUE_AFTER_HOURS == 40 and mod.MAX_SECONDS <= 2 * 3600
+    assert mod.DUE_AFTER_HOURS == 0.25 and mod.MAX_SECONDS <= 5 * 3600
 
 
 def test_a_page_cannot_correct_a_field_to_nothing(db):
     """The monitor applies values a page states and never an absence: an
     empty correction is dropped, the sourced value survives."""
     _seed(db)
-    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    from dataclasses import replace
+    page = replace(OFFICIAL_PAGE, content_text=OFFICIAL_PAGE.content_text +
+                   " Applications are processed within 8 working days.")
+    fetching.set_fetcher(lambda url, timeout_seconds=0: page)
     freshness.set_provider(lambda system, user: {
         "page_relevant": True, "page_is_nationality_specific": True,
         "consistent": False,
@@ -613,3 +621,405 @@ def test_a_page_cannot_correct_a_field_to_nothing(db):
     row = db.query(KimiRouteGuidanceCache).one()
     assert row.guidance.get("application_channel") == before_channel
     assert row.guidance.get("processing_time") == "8 working days"
+
+
+@pytest.mark.parametrize("claims_specific", [False, True])
+def test_menu_text_cannot_confirm_any_route_even_when_model_claims_it_does(db, claims_specific):
+    from dataclasses import replace
+    row = _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: replace(
+        OFFICIAL_PAGE, content_text="Visa services home page. Search contact help login " * 8))
+    freshness.set_provider(lambda *_: {"page_relevant": True,
+        "page_is_nationality_specific": claims_specific, "consistent": True})
+    out = freshness.recheck_row(db, row)
+    assert out["outcome"] == "page_not_relevant"
+    assert row.fresh_until is None and freshness.effective_check(row.verification) == {}
+
+
+def test_entire_quote_must_appear_and_unquoted_correction_blocks_renewal(db):
+    row = _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda *_: {"page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": False, "corrected_fields": {
+            "government_fee": {"amount": 715, "currency": "CNY"}, "permitted_stay": "60 days"},
+        "evidence": {"government_fee": " SINGLE  ENTRY  715 CNY ",
+                     "permitted_stay": "Single-entry temporary visitor visas for tourism permit a stay of 60 days"}})
+    out = freshness.recheck_row(db, row)
+    assert out["changed"] == ["government_fee"]
+    assert out["unquoted_fields"] == ["permitted_stay"]
+    assert row.guidance["permitted_stay"] == "90 days" and row.fresh_until is None
+
+
+def test_irrelevant_same_page_retires_prior_check_but_other_page_does_not(db):
+    row = _seed(db)
+    good = {"outcome": "checked", "evidence_contract": freshness.EVIDENCE_CONTRACT, "consistent": True, "source_url": OFFICIAL_PAGE.final_url}
+    freshness._stamp(row, good)
+    freshness._stamp(row, {"outcome": "page_not_relevant", "sources_tried": ["https://www.mofa.go.jp/other"]})
+    assert freshness.effective_check(row.verification) == good
+    freshness._stamp(row, {"outcome": "page_not_relevant", "sources_tried": [OFFICIAL_PAGE.final_url]})
+    assert freshness.effective_check(row.verification) == {}
+    assert row.verification["superseded_check"] == good
+
+
+@pytest.mark.parametrize("missing", [[], ["government_fee"]])
+def test_uncertain_rows_never_get_primary_ttl(db, missing):
+    from datetime import datetime, timedelta, timezone
+    row = _seed(db, guidance={"disposition": "VISA_REQUIRED", "source_url": OFFICIAL_PAGE.final_url})
+    row.status, row.missing_fields = kimi_primary.STATUS_UNCERTAIN, missing
+    db.commit()
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda *_: {"page_relevant": True, "page_is_nationality_specific": True,
+                                      "consistent": True, "corrected_fields": {}})
+    freshness.recheck_row(db, row)
+    if missing:
+        assert row.fresh_until is None
+    else:
+        assert row.fresh_until <= datetime.now(timezone.utc) + timedelta(days=kimi_primary.UNCERTAIN_TTL_DAYS)
+
+
+def test_only_canonical_complete_detail_rows_are_scheduled(db):
+    canonical = _seed(db)
+    for key in (canonical.cache_key.replace("CHN|CHN|", "CHN|SGP|"),
+                canonical.cache_key.replace("unknown", "2026-09"), canonical.cache_key + "|via:SGP"):
+        db.add(KimiRouteGuidanceCache(cache_key=key, route=ROUTE, guidance=STALE_JPN, status="KIMI_PRIMARY"))
+    pending = _seed(db, route={**ROUTE, "destination_country": "AAA"})
+    pending.verification = {"detail_pending": True}
+    db.commit()
+    assert freshness.due_rows(db) == [canonical]
+    fetching.set_fetcher(lambda *_a, **_k: (_ for _ in ()).throw(AssertionError("must await detail")))
+    assert freshness.recheck_row(db, pending)["outcome"] == "detail_pending"
+
+
+def test_recheck_writes_only_corrected_fields_without_baking_override(db, monkeypatch):
+    from dataclasses import replace
+    from app.visa_snapshot import verified_overrides as vo
+    row = _seed(db)
+    override = {"fields": {"disposition": "VISA_REQUIRED", "government_fee": {"amount": 715, "currency": "CNY"}},
+                "source_url": OFFICIAL_PAGE.final_url}
+    monkeypatch.setattr(vo, "find", lambda *_: override)
+    monkeypatch.setattr(vo, "apply", lambda g, _: ({**g, **override["fields"]}, None))
+    page = replace(OFFICIAL_PAGE, content_text=OFFICIAL_PAGE.content_text + " Processing takes 8 working days.")
+    fetching.set_fetcher(lambda *_a, **_k: page)
+    freshness.set_provider(lambda *_: {"page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": False, "corrected_fields": {"processing_time": "8 working days"},
+        "evidence": {"processing_time": "Processing takes 8 working days"}})
+    out = freshness.recheck_row(db, row)
+    assert out["changed"] == ["processing_time"]
+    assert row.guidance == {**STALE_JPN, "processing_time": "8 working days"}
+
+
+def test_integrity_sweep_files_one_issue_per_canonical_conflict(db):
+    row = _seed(db, guidance={**STALE_JPN, "disposition": "VISA_EXEMPT"})
+    db.add(KimiRouteGuidanceCache(cache_key=row.cache_key + "|via:SGP", route=ROUTE,
+                                  guidance=dict(row.guidance), status="KIMI_PRIMARY"))
+    db.commit()
+    assert freshness.audit_integrity(db) == {"checked": 1, "violated": 1, "created": 1, "resolved": 0}
+    assert freshness.audit_integrity(db) == {"checked": 1, "violated": 1, "created": 0, "resolved": 0}
+    issue = db.query(DatabaseIssueReport).one()
+    assert issue.field == "integrity" and issue.proposal["contradictions"]
+
+
+def test_human_proposal_discards_fabricated_quote(db):
+    row = _seed(db)
+    issue = DatabaseIssueReport(org_id="platform", cache_key=row.cache_key, route=ROUTE,
+        field="permitted_stay", note="check", reported_by="person", status="open")
+    db.add(issue); db.commit()
+    fetching.set_fetcher(lambda *_a, **_k: OFFICIAL_PAGE)
+    freshness.set_provider(lambda *_: {"page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": False, "corrected_fields": {"permitted_stay": "60 days"},
+        "evidence": {"permitted_stay": "Chinese nationals may stay 60 days"}})
+    proposal = freshness.propose_for_issue(db, issue.id)
+    assert proposal["fields"] == {} and proposal["unquoted_fields"] == ["permitted_stay"]
+    assert proposal["consistent"] is False
+
+
+
+def test_active_material_disputes_survive_new_check_but_outages_do_not(db):
+    row = _seed(db)
+    for field, status in (("source_unreadable", "open"), ("integrity", "open"),
+                          ("government_fee", "acknowledged"), ("permitted_stay", "corrected")):
+        db.add(DatabaseIssueReport(org_id="platform", cache_key=row.cache_key,
+            route=ROUTE, field=field, note="check", reported_by="freshness_monitor", status=status))
+    freshness._stamp(row, {"outcome": "checked", "consistent": True})
+    db.commit()
+    assert freshness.active_disputed_fields(db, row.cache_key + "|via:SGP") == ["government_fee", "integrity"]
+
+
+def test_mismatched_issue_identity_never_reads_another_routes_page(db):
+    row = _seed(db)
+    issue = DatabaseIssueReport(org_id="platform", cache_key=row.cache_key,
+        route={**ROUTE, "destination_country": "VNM"}, field="disposition",
+        note="mismatched route", reported_by="person", status="open")
+    db.add(issue); db.commit()
+    fetching.set_fetcher(lambda *_a, **_k: (_ for _ in ()).throw(AssertionError("wrong route must not be read")))
+    assert freshness.propose_for_issue(db, issue.id)["outcome"] == "route_identity_mismatch"
+
+
+def test_home_government_outbound_rule_requires_destination_context():
+    raw = {"page_relevant": True, "page_is_nationality_specific": True}
+    route = {"passport_nationality": "HKG", "destination_country": "VNM"}
+    good = "Visa requirements for Hong Kong SAR passport holders. Vietnam: visa required."
+    assert freshness._supports_route(good, raw, route, {"disposition": "VISA_REQUIRED"}, {}, "https://www.immd.gov.hk/visa")
+    wrong = "Visa requirements for Hong Kong SAR passport holders. Japan: visa required."
+    assert not freshness._supports_route(wrong, raw, route, {"disposition": "VISA_REQUIRED"}, {}, "https://www.immd.gov.hk/visa")
+    assert not freshness._source_authority_matches("https://www.exteriores.gob.es/visa", route)
+
+
+def test_curated_uae_embassy_supports_uae_route_only():
+    url = "https://www.uae-embassy.org/visas-services/visas-for-non-us-citizens"
+    route = {"passport_nationality": "CAN", "destination_country": "ARE"}
+    raw = {"page_relevant": True, "page_is_nationality_specific": True}
+    text = "Canadian passport holders may obtain a visa on arrival for tourism."
+    assert freshness._supports_route(text, raw, route,
+        {"disposition": "VISA_ON_ARRIVAL"}, {}, url)
+    for destination in ("USA", "HKG", "TGO"):
+        assert not freshness._source_authority_matches(url, {**route,
+            "destination_country": destination})
+
+
+def test_future_schedule_source_cannot_rewrite_current_canonical_answer(db):
+    from dataclasses import replace
+    from app.visa_snapshot import scheduled_policies as sp
+    policy = next(p for p in sp._load() if p["route"]["nationality"] == "HKG")
+    route = {**ROUTE, "passport_nationality": "HKG", "destination_country": "THA"}
+    row = _seed(db, guidance={**STALE_JPN, "source_url": policy["source_url"]}, route=route)
+    page = replace(OFFICIAL_PAGE, final_url=policy["source_url"], final_hostname="consular.mfa.go.th",
+                   content_text="Hong Kong passport holders are visa-exempt for 30 days, effective from 15 September 2026.")
+    fetching.set_fetcher(lambda *_a, **_k: page)
+    freshness.set_provider(lambda *_: (_ for _ in ()).throw(AssertionError("future page cannot correct today's raw row")))
+    before = dict(row.guidance)
+    out = freshness.recheck_row(db, row, today="2026-09-09T12:00:00Z")
+    assert out["outcome"] == "page_not_relevant"
+    assert row.guidance == before and row.fresh_until is None
+
+
+
+def test_legacy_weak_page_checks_have_no_verification_credit(db):
+    row = _seed(db)
+    legacy = {"outcome": "checked", "consistent": True, "source_url": OFFICIAL_PAGE.final_url}
+    row.verification = {"grounded_check": legacy, "last_good_check": legacy}
+    assert freshness.effective_check(row.verification) == {}
+    assert not freshness.has_been_grounded(row)
+    assert row.verification["last_good_check"] == legacy  # retained as audit history
+
+
+@pytest.mark.parametrize('text,route,disposition,url', [
+    ('Canadian diplomatic passport holders may enter Japan visa-free.',
+     {'passport_nationality': 'CAN', 'destination_country': 'JPN'}, 'VISA_EXEMPT', 'https://www.mofa.go.jp/visa'),
+    ('Canadian citizens may visit Japan for tourism visa-free.',
+     {'passport_nationality': 'CAN', 'destination_country': 'JPN', 'travel_purpose': 'work'}, 'VISA_EXEMPT', 'https://www.mofa.go.jp/visa'),
+    ('From 1 December 2030 Canadian citizens must obtain a visa for Japan.',
+     {'passport_nationality': 'CAN', 'destination_country': 'JPN'}, 'VISA_REQUIRED', 'https://www.mofa.go.jp/visa'),
+    ('United States passport holders should check travel advice. India allows Nepal nationals to enter visa-free.',
+     {'passport_nationality': 'USA', 'destination_country': 'IND'}, 'VISA_EXEMPT', 'https://travel.state.gov/visa'),
+])
+def test_different_document_purpose_future_date_or_nationality_never_supports_route(text, route, disposition, url):
+    raw = {'page_relevant': True, 'page_is_nationality_specific': True}
+    assert not freshness._supports_route(text, raw, route, {'disposition': disposition}, {}, url, '2026-09-09')
+
+
+def test_literal_but_unrelated_quote_cannot_apply_invented_fee(db):
+    row = _seed(db)
+    fetching.set_fetcher(lambda *_a, **_k: OFFICIAL_PAGE)
+    freshness.set_provider(lambda *_: {'page_relevant': True, 'page_is_nationality_specific': True,
+        'consistent': False, 'corrected_fields': {'government_fee': {'amount': 999, 'currency': 'CNY'}},
+        'evidence': {'government_fee': 'Chinese nationals must obtain a visa for tourism in Japan'}})
+    result = freshness.recheck_row(db, row)
+    assert result['changed'] == [] and result['unquoted_fields'] == ['government_fee']
+    assert row.guidance['government_fee']['amount'] == 200 and row.fresh_until is None
+
+
+def test_verdict_only_page_does_not_renew_unchecked_detail_fields(db):
+    from dataclasses import replace
+    row = _seed(db)
+    fetching.set_fetcher(lambda *_a, **_k: replace(OFFICIAL_PAGE,
+        content_text='Chinese nationals must obtain a visa for tourism in Japan.'))
+    freshness.set_provider(lambda *_: {'page_relevant': True, 'page_is_nationality_specific': True,
+        'consistent': True, 'corrected_fields': {}, 'evidence': {}})
+    freshness.recheck_row(db, row)
+    check = freshness.effective_check(row.verification)
+    assert check['consistent'] and check['verified_fields'] == ['disposition']
+    assert 'government_fee' in check['unverified_fields'] and not check['renewed']
+    assert row.fresh_until is None
+
+
+def test_corrupt_or_future_attempt_timestamps_never_hide_due_rows(db):
+    from datetime import datetime, timedelta, timezone
+    for index, stamp in enumerate(['zzzz', '9999-12-31T00:00:00+00:00',
+                                   (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()]):
+        route = {**ROUTE, 'destination_country': ['JPN', 'VNM', 'CAN'][index]}
+        row = _seed(db, route=route)
+        row.verification = {'grounded_check': {'at': stamp}}
+    db.commit()
+    assert len(freshness.due_rows(db)) == 3
+
+
+def test_malformed_cached_payload_gets_integrity_issue_without_aborting_audit(db):
+    row = _seed(db)
+    row.guidance = 'corrupt JSON shape'
+    db.commit()
+    assert freshness.audit_integrity(db) == {'checked': 1, 'violated': 1, 'created': 1, 'resolved': 0}
+    assert db.query(DatabaseIssueReport).one().proposal['contradictions'] == ['Cached route and guidance must be objects']
+
+
+def test_second_field_source_is_checked_after_matching_headline_and_corrects_fee(db):
+    import json
+    from dataclasses import replace
+    fee_url = 'https://www.mofa.go.jp/visa/fees'
+    row = _seed(db, guidance={**STALE_JPN, 'corroborating_sources': [{'url': fee_url}]})
+    fetched = []
+    def fetch(url, **_):
+        fetched.append(url)
+        return replace(OFFICIAL_PAGE, final_url=url, content_text=(
+            'Chinese nationals must obtain a visa for tourism in Japan. '
+            + ('The visa fee is 715 CNY.' if url == fee_url else 'See the separate fee schedule.')))
+    def answer(_system, user):
+        fee = json.loads(user)['official_page_url'] == fee_url
+        return {'page_relevant': True, 'page_is_nationality_specific': True, 'consistent': not fee,
+            'corrected_fields': {'government_fee': {'amount': 715, 'currency': 'CNY'}} if fee else {},
+            'evidence': {'government_fee': 'The visa fee is 715 CNY'} if fee else {}}
+    fetching.set_fetcher(fetch); freshness.set_provider(answer)
+    result = freshness.recheck_row(db, row)
+    assert fetched == [OFFICIAL_PAGE.final_url, fee_url]
+    assert result['changed'] == ['government_fee'] and row.guidance['government_fee']['amount'] == 715
+    check = freshness.effective_check(row.verification)
+    assert len(check['source_checks']) == 2
+    assert check['field_sources']['government_fee']['source_url'] == fee_url
+    assert check['field_sources']['government_fee']['quote'] == 'The visa fee is 715 CNY'
+
+
+def test_freshness_renews_only_when_all_fields_are_supported_across_sources(db):
+    import json
+    from dataclasses import replace
+    fee_url = 'https://www.mofa.go.jp/visa/fees'
+    row = _seed(db, guidance={'disposition': 'VISA_REQUIRED', 'permitted_stay': '30 days',
+        'government_fee': {'amount': 7, 'currency': 'USD'}, 'source_url': OFFICIAL_PAGE.final_url,
+        'visa_products': [], 'corroborating_sources': [{'url': fee_url}]})
+    def fetch(url, **_):
+        return replace(OFFICIAL_PAGE, final_url=url, content_text=(
+            'Chinese nationals must obtain a visa for tourism in Japan. '
+            + ('The visa fee is 7 USD.' if url == fee_url else 'The permitted stay is 30 days.')))
+    def answer(_system, user):
+        fee = json.loads(user)['official_page_url'] == fee_url
+        return {'page_relevant': True, 'page_is_nationality_specific': True, 'consistent': True,
+            'corrected_fields': {}, 'evidence': {'government_fee': 'The visa fee is 7 USD'} if fee
+            else {'permitted_stay': 'The permitted stay is 30 days'}}
+    fetching.set_fetcher(fetch); freshness.set_provider(answer)
+    freshness.recheck_row(db, row)
+    check = freshness.effective_check(row.verification)
+    assert check['verified_fields'] == ['disposition', 'government_fee', 'permitted_stay']
+    assert check['unverified_fields'] == [] and check['renewed'] and row.fresh_until is not None
+
+
+def test_generic_fee_page_disagreement_is_not_hidden_by_first_matching_page(db):
+    import json
+    from dataclasses import replace
+    fee_url = 'https://www.mofa.go.jp/visa/fees'
+    row = _seed(db, guidance={**STALE_JPN, 'visa_products': [
+        {**STALE_JPN['visa_products'][0], 'source_url': fee_url}]})
+    fetching.set_fetcher(lambda url, **_: replace(OFFICIAL_PAGE, final_url=url, content_text=(
+        'The visa fee is 715 CNY.' if url == fee_url else OFFICIAL_PAGE.content_text)))
+    def answer(_system, user):
+        fee = json.loads(user)['official_page_url'] == fee_url
+        return {'page_relevant': True, 'page_is_nationality_specific': not fee, 'consistent': not fee,
+            'corrected_fields': {'government_fee': {'amount': 715, 'currency': 'CNY'}} if fee else {},
+            'evidence': {'government_fee': 'The visa fee is 715 CNY'} if fee else {}}
+    freshness.set_provider(answer)
+    freshness.recheck_row(db, row)
+    issue = db.query(DatabaseIssueReport).one()
+    assert issue.field == 'government_fee' and issue.proposal['source_url'] == fee_url
+    assert row.guidance['government_fee']['amount'] == 200 and row.fresh_until is None
+    assert freshness.effective_check(row.verification)['consistent'] is False
+
+
+def test_source_budget_rotates_overflow_instead_of_ignoring_later_citations(db):
+    from dataclasses import replace
+    links = [f'https://www.mofa.go.jp/visa/field{i}' for i in range(12)]
+    row = _seed(db, guidance={'disposition': 'VISA_REQUIRED', 'source_url': links[0],
+        'corroborating_sources': [{'url': u} for u in links[1:]]})
+    fetched = []
+    def fetch(url, **_):
+        fetched.append(url)
+        return replace(OFFICIAL_PAGE, final_url=url)
+    fetching.set_fetcher(fetch)
+    freshness.set_provider(lambda *_: {'page_relevant': True, 'page_is_nationality_specific': True,
+        'consistent': True, 'corrected_fields': {}})
+    freshness.recheck_row(db, row)
+    first = set(fetched)
+    assert len(first) == freshness.MAX_SOURCES and freshness.effective_check(row.verification)['unchecked_sources']
+    assert row.fresh_until is None
+    freshness.recheck_row(db, row)
+    assert set(fetched) == set(links)
+
+
+def test_fee_issue_does_not_stop_at_verdict_only_headline(db):
+    import json
+    from dataclasses import replace
+    fee_url = 'https://www.mofa.go.jp/visa/fee-flag'
+    row = _seed(db, guidance={**STALE_JPN, 'corroborating_sources': [{'url': fee_url}]})
+    issue = DatabaseIssueReport(org_id='platform', cache_key=row.cache_key, route=ROUTE,
+        field='visa_fee_amount', note='fee changed', reported_by='reader', status='open')
+    db.add(issue); db.commit()
+    fetching.set_fetcher(lambda url, **_: replace(OFFICIAL_PAGE, final_url=url))
+    def answer(_system, user):
+        fee = json.loads(user)['official_page_url'] == fee_url
+        return {'page_relevant': True, 'page_is_nationality_specific': True, 'consistent': not fee,
+            'corrected_fields': {'government_fee': {'amount': 715, 'currency': 'CNY'}} if fee else {},
+            'evidence': {'government_fee': 'single entry 715 CNY'} if fee else {}}
+    freshness.set_provider(answer)
+    proposal = freshness.propose_for_issue(db, issue.id)
+    assert proposal['source_url'] == fee_url and not proposal['consistent']
+    assert proposal['fields']['government_fee']['page_says']['amount'] == 715
+    assert row.guidance['government_fee']['amount'] == 200
+
+
+def test_repaired_integrity_issue_is_corrected_without_closing_source_or_user_disputes(db):
+    row = _seed(db, guidance={**STALE_JPN, 'disposition': 'VISA_EXEMPT'})
+    freshness.audit_integrity(db); freshness.audit_integrity(db)
+    own = db.query(DatabaseIssueReport).one()
+    old_proposal = dict(own.proposal)
+    source = DatabaseIssueReport(org_id='platform', cache_key=row.cache_key, route=ROUTE,
+        field='government_fee', note='source disagreement', reported_by='freshness_monitor', status='open')
+    human = DatabaseIssueReport(org_id='platform', cache_key=row.cache_key, route=ROUTE,
+        field='integrity', note='reader complaint', reported_by='reader', status='open')
+    db.add_all([source, human])
+    row.guidance = dict(STALE_JPN)
+    db.commit()
+    result = freshness.audit_integrity(db)
+    assert result == {'checked': 1, 'violated': 0, 'created': 0, 'resolved': 1}
+    assert own.status == 'corrected' and own.resolved_by == 'freshness_monitor' and own.resolved_at
+    assert own.proposal['contradictions'] == old_proposal['contradictions']
+    assert own.proposal['resolution_check']['outcome'] == 'integrity_passed'
+    assert source.status == human.status == 'open'
+    assert freshness.active_disputed_fields(db, row.cache_key) == ['government_fee']
+    assert freshness.audit_integrity(db)['resolved'] == 0
+
+
+def test_source_cursor_resumes_actual_attempts_after_partial_route_budget(db):
+    import threading
+    from dataclasses import replace
+    links = [f'https://www.mofa.go.jp/visa/rotate{i}' for i in range(4)]
+    row = _seed(db, guidance={'disposition': 'VISA_REQUIRED', 'source_url': links[0],
+        'corroborating_sources': [{'url': u} for u in links[1:]]})
+    fetched = []
+    stop = threading.Event()
+    fetching.set_fetcher(lambda url, **_: (fetched.append(url) or replace(OFFICIAL_PAGE, final_url=url)))
+    def answer(*_):
+        stop.set()
+        return {'page_relevant': True, 'page_is_nationality_specific': True,
+            'consistent': True, 'corrected_fields': {}}
+    freshness.set_provider(answer)
+    freshness.recheck_row(db, row, should_stop=stop.is_set)
+    assert fetched == links[:1] and row.verification['grounded_check']['source_cursor'] == 1
+    stop.clear()
+    freshness.recheck_row(db, row, should_stop=stop.is_set)
+    assert fetched == links[:2]
+    assert row.verification['grounded_check']['unchecked_sources']
+
+
+def test_previous_cycles_late_rows_are_due_at_next_six_hour_start(db):
+    from datetime import datetime, timedelta, timezone
+    row = _seed(db)
+    row.verification = {'grounded_check': {'at': (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()}}
+    db.commit()
+    assert freshness.due_rows(db, older_than_hours=0.25) == [row]

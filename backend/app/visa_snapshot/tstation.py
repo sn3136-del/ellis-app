@@ -12,7 +12,9 @@ fill stays None and shows as "missing" in the checklist — the honest state.
 """
 from __future__ import annotations
 
+import math
 import re
+from datetime import datetime, timezone
 
 # Their field order, exactly as numbered 1-25 in the requirements document.
 FIELD_ORDER = (
@@ -92,29 +94,27 @@ _DISPOSITION_TO_REQUIREMENT = {
 }
 
 def _files_something_online(g: dict) -> bool:
-    """Whether a visa-exempt traveller must still submit a form before travel.
-
-    A mandatory arrival card or electronic authorisation IS an online
-    application, and it is the difference between boarding and being turned
-    away, so the channel has to say so.
-    """
+    """Use explicit requirements, not mentions of optional/exempt filings."""
+    if g.get("requirement_detail") == "eta_electronic_authorization":
+        return True
     ac = g.get("arrival_card")
     if isinstance(ac, dict) and ac.get("required"):
-        return True
-    hay = " ".join(str(x) for x in (
-        [g.get("application_channel_detail"), g.get("requirement_detail")]
-        + list(g.get("exceptions") or []))).lower()
-    return any(k in hay for k in (
-        "esta", "e-ta", "eta ", "k-eta", "keta", "arrival card",
-        "electronic travel authoris", "electronic travel authoriz",
-        "travel authorisation is mandatory", "must be obtained online"))
+        # A card that can be handed over on arrival need not be filed online.
+        # Merely providing a portal URL does not make an optional service
+        # mandatory (for example, Japan's paper ED card vs Visit Japan Web).
+        when = str(ac.get("submission_window") or "").lower()
+        return (g.get("application_channel") == "online_portal" and
+                not re.search(r"\bon arrival\b|\bat (?:the )?arrival\b", when))
+    return False
 
 
 def _method_from_product(g: dict) -> str | None:
     """Last resort: read the channel off the visa product's own name. Only
     unambiguous words count, so a route stays "Other" rather than guessing."""
-    names = " ".join(str((p or {}).get("type") or "")
-                     for p in (g.get("visa_products") or []))
+    products = g.get("visa_products")
+    names = " ".join(str(p.get("type") or "")
+                     for p in (products if isinstance(products, list) else [])
+                     if isinstance(p, dict))
     names = f"{names} {g.get('visa_category') or ''}".lower()
     if not names.strip():
         return None
@@ -233,7 +233,10 @@ def _method_for_detail(detail: str | None, route_method: str | None,
     if d == "Paper Visa":
         if route_method in _IN_PERSON_METHODS:
             return route_method
-        return "Embassy Submission"
+        # A paper permission does not establish where it must be lodged
+        # (mission, agent, visa centre or government office). A verdict-only
+        # correction must leave this unknown until its method is sourced.
+        return None
     return route_method
 
 
@@ -314,20 +317,61 @@ def _num_unit(text, stay_bound=None) -> tuple[float | None, str | None]:
 
 
 def _as_stay_unit(n, unit):
-    """Their max_stay_unit enum is Hour | Day only: month- and year-denominated
-    stays are converted to days rather than shipping an off-enum unit."""
+    """Calendar months/years cannot be converted to exact days without dates.
+
+    The external enum only permits Hour/Day. Keep a calendar stay in the
+    accompanying text instead of manufacturing a numerical duration.
+    """
     if n is None or unit in (None, "Hour", "Day"):
         return n, unit
-    factor = {"Month": 30, "Year": 365}.get(unit)
-    return (n * factor, "Day") if factor else (n, unit)
+    return None, None
+
+
+def _set_stay(row: dict, text, days=None) -> None:
+    raw = str(text or "").strip()
+    n, unit = _num_unit(raw)
+    # Even discretionary wording must not fall back to a cached 180-day
+    # approximation when the source gives a calendar-month stay.
+    calendar = unit in ("Month", "Year") or bool(re.search(
+        r"\b(?:\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)"
+        r"\s*(?:\(\d+\)\s*)?(?:calendar\s+)?(?:months?|years?)\b", raw, re.I))
+    if raw:
+        row["max_stay_text"] = raw
+    if calendar:
+        row["max_stay_duration"], row["max_stay_unit"] = None, None
+        row["_max_stay_representation_reason"] = (
+            "The source uses calendar months or years; the Hour/Day numeric contract cannot express it exactly.")
+        clause = f"Permitted stay: {raw}"
+        prior = str(row.get("special_conditions") or "")
+        if raw not in prior:
+            row["special_conditions"] = f"{prior}. {clause}".lstrip(". ")
+        return
+    if days is not None:
+        n, unit = days, "Day"
+    row["max_stay_duration"], row["max_stay_unit"] = _as_stay_unit(n, unit)
 
 
 def _as_validity_unit(n, unit):
-    """Their validity_unit enum has no Hour: sub-day validities round up to
-    one day."""
+    """Only convert hours when the allowed Day unit expresses them exactly."""
     if unit == "Hour":
-        return 1, "Day"
+        if n is not None and n % 24 == 0:
+            return n // 24, "Day"
+        return None, None
     return n, unit
+
+
+def _set_validity(row: dict, n, unit, text=None) -> None:
+    row["validity_duration"], row["validity_unit"] = _as_validity_unit(n, unit)
+    if unit != "Hour" or row.get("visa_requirement") == "Visa-free":
+        return
+    raw = str(text or "").strip() or f"{n} hours"
+    row["validity_text"] = raw
+    if row["validity_duration"] is None:
+        row["_validity_representation_reason"] = (
+            "The source uses hours that are not a whole number of days; the Day/Month/Year numeric contract cannot express it exactly.")
+        prior = str(row.get("special_conditions") or "")
+        if raw not in prior:
+            row["special_conditions"] = f"{prior}. Validity: {raw}".lstrip(". ")
 
 
 def _entries(text) -> str | None:
@@ -353,6 +397,8 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
     try:
         amount = float(amount)
     except (TypeError, ValueError):
+        return None, str(currency) if currency else None
+    if not math.isfinite(amount) or amount < 0:
         return None, str(currency) if currency else None
     if amount == int(amount):
         amount = int(amount)
@@ -381,6 +427,35 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
     return amount, str(currency) if currency else None
 
 
+def verdict_provenance_supported(provenance: dict | None) -> bool:
+    """Validate recorded verdict evidence, without inventing its authorship.
+
+    Manual note semantics remain the operator's checked assertion; this
+    structural gate does not reinterpret multilingual source notes.
+    """
+    from .authority import hostname, is_government_host
+    if not isinstance(provenance, dict):
+        return False
+    fields = provenance.get("fields")
+    if not isinstance(fields, (list, tuple, set, dict)) or "disposition" not in fields:
+        return False
+    if not is_government_host(hostname(str(provenance.get("source_url") or ""))):
+        return False
+    note = provenance.get("note")
+    raw_date = provenance.get("verified_at")
+    if not isinstance(note, str) or not note.strip():
+        return False
+    if not isinstance(raw_date, str) or not re.match(r"^\d{4}-\d{2}-\d{2}(?:T|$)", raw_date):
+        return False
+    try:
+        checked = datetime.fromisoformat(raw_date.replace("Z", "+00:00"))
+        if checked.tzinfo is None:
+            checked = checked.replace(tzinfo=timezone.utc)
+        return checked <= datetime.now(timezone.utc)
+    except ValueError:
+        return False
+
+
 def _confidence(guidance: dict, provenance: dict | None,
                 grounded_ok: bool = False, *, complete: bool = True,
                 disputed: bool = False) -> str:
@@ -390,28 +465,33 @@ def _confidence(guidance: dict, provenance: dict | None,
     ONLY, which by definition includes an answer carrying no source URL at
     all: the model's memory alone is not an official source.
 
-    An answer that ASSERTS VISA PRODUCTS — fees, validity, entry counts — but
-    has never been checked against its official page is Low as well. That is
-    not caution, it is measurement: an adversarial audit of every such record
-    (2026-08-29, 21 route+purpose combinations) confirmed none of them and
-    found 19 wrong, including superseded fees, products the destination does
-    not issue, and visas demanded of travellers who are visa-exempt. A URL
-    attached to an unread claim is not a source."""
-    if provenance:
+    Every verdict needs an actual source check, including a productless
+    exemption. A URL attached to an unread claim is not a source."""
+    if disputed:
+        return "Low"
+    from .authority import hostname, is_government_host
+    fields = set((provenance or {}).get("fields") or [])
+    if provenance and "disposition" in fields:
         # Their §4.2.3 ladder: High is a single official source, complete, and
-        # free of conflict. A verified override satisfies the first of those
-        # three, never all three on its own, so a record that is still missing
-        # a required field or carries a field its own official page disputes
-        # is Medium however carefully a person checked the rest.
-        if disputed:
-            return "Medium"
-        return "High" if complete else "Medium"
-    if not (guidance.get("source_url") or guidance.get("official_portal_url")):
+        # free of conflict. Provenance for an ancillary field cannot verify
+        # the verdict, and an AI source check cannot claim human authorship.
+        human = provenance.get("verifier", "ai") == "human"
+        official = is_government_host(hostname(str(provenance.get("source_url") or "")))
+        if not official:
+            return "Low"
+        evidence = verdict_provenance_supported(provenance)
+        if not evidence:
+            # A new automated source check can establish the verdict but
+            # cannot manufacture the missing human verification record.
+            return "Medium" if grounded_ok else "Low"
+        return "High" if human and complete else "Medium"
+    source = guidance.get("source_url") or guidance.get("official_portal_url")
+    if not is_government_host(hostname(str(source or ""))):
         return "Low"
     c = str(guidance.get("confidence") or "").lower()
     if c == "low":
         return "Low"
-    if (guidance.get("visa_products") or []) and not grounded_ok:
+    if not grounded_ok:
         return "Low"
     return "Medium"
 
@@ -506,7 +586,7 @@ def _entry_requirements(g: dict) -> str | None:
         if isinstance(ac, dict) and ac.get("required"):
             nm = str(ac.get("name") or "arrival card").strip()
             when = str(ac.get("submission_window") or "").strip()
-            parts.append(f"No visa. You must still file the {nm} before travel"
+            parts.append(f"No visa. You must still file the {nm}"
                          + (f", {when}" if when else ""))
         elif _files_something_online(g):
             parts.append("No visa. You must still hold an approved travel "
@@ -598,8 +678,6 @@ def _product_is_exemption(product: dict) -> bool:
     fee = product.get("fee") if isinstance(product.get("fee"), dict) else {}
     amount = (fee or {}).get("amount")
     words = f"{product.get('type') or ''} {product.get('notes') or ''}".lower()
-    if any(k in words for k in ("visa fee", "the fee is", "fee is")) and (amount or 0) > 0:
-        return False
     return amount in (0, 0.0) and any(k in words for k in _FREE_WORDS)
 
 
@@ -710,6 +788,73 @@ def _nested_detail(raw, requirement: str | None) -> str | None:
     if requirement == "Visa-free":
         return SUBCATEGORY["unconditional_visa_free"]
     return SUBCATEGORY[allowed[0]] if key else None
+
+
+def _permission_family(detail, disposition=None) -> str | None:
+    key = _key_of(detail)
+    if key in ("evisa", "paper_visa"):
+        return "visa"
+    if key in ("evisa_on_arrival", "paper_visa_on_arrival"):
+        return "arrival"
+    if key == "eta_electronic_authorization":
+        return "authorisation"
+    if key in ("unconditional_visa_free", "conditional_visa_free", "transit_visa_free"):
+        return "exemption"
+    return {"VISA_REQUIRED": "visa", "VISA_ON_ARRIVAL": "arrival",
+            "ELECTRONIC_AUTHORIZATION_REQUIRED": "authorisation",
+            "VISA_EXEMPT": "exemption"}.get(disposition)
+
+
+def _product_detail(product: dict, route_detail=None) -> str | None:
+    explicit = _key_of(product.get("requirement_detail"))
+    if explicit:
+        return SUBCATEGORY[explicit]
+    if _product_is_exemption(product):
+        key = _key_of(route_detail)
+        return SUBCATEGORY[key if key in ("conditional_visa_free", "transit_visa_free")
+                           else "unconditional_visa_free"]
+    return _subcategory_for(product, None, None)
+
+
+def _product_fields(row: dict, product: dict) -> None:
+    """Read explicit product facts; missing facts never borrow another visa."""
+    for key in ("required_documents", "entry_requirements"):
+        if key in product:
+            v = product[key]
+            row[key] = ", ".join(str(x) for x in v if x) if isinstance(v, list) else v
+    if "processing_time" in product:
+        row["processing_min_days"], row["processing_unit"] = _processing(product)
+    if "consular_jurisdiction" in product:
+        row["consulate_district"] = _consulate_district(product, {})
+    if "exceptions" in product:
+        v = product["exceptions"]
+        row["special_conditions"] = ". ".join(str(x) for x in v if x) if isinstance(v, list) else v
+
+
+def _separate_product_method(product: dict, detail: str, guidance: dict) -> str | None:
+    explicit = (_method_for_channel(product.get("application_channel"))
+                or _method_from_detail(product))
+    if explicit:
+        return explicit
+    # Electronic permissions and arrival processing state their method in
+    # their own kind. A paper visa alone does not say where it is lodged.
+    if detail in ("eVisa", "ETA Electronic Authorization", "eVisa on Arrival"):
+        return "Online Application"
+    if detail == "Paper Visa on Arrival":
+        return "On-arrival Processing"
+    name_method = _method_from_detail({"application_channel_detail": product.get("type")})
+    if name_method:
+        return name_method
+    if _permission_family(detail) == "visa":
+        # Some mixed routes explicitly describe the alternative in a route
+        # sentence: "apply for a paper visa through JVAC" is evidence for
+        # that visa's method. An ETA portal sentence is not.
+        for sentence in re.split(r"[.;]\s*", str(guidance.get("application_channel_detail") or "")):
+            if re.search(r"\b(?:paper|consular|visitor|short[- ]stay)\s+visa\b", sentence, re.I):
+                method = _method_from_detail({"application_channel_detail": sentence})
+                if method:
+                    return method
+    return None
 
 
 def _key_of(value) -> str:
@@ -836,23 +981,18 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     record missing a required field, or carrying one its own official page
     disputes, was still being shown as High.
     """
-    row = _strip_visa_only_fields(dict(row))
+    row = dict(row) if disputed else _strip_visa_only_fields(dict(row))
     if row.get("application_method") == "Other":
         # No path emits this any more. Kept so a stale row can never say it.
         row["application_method"] = None
-    prov, grounded = row.pop("_prov", False), row.pop("_grounded", False)
+    prov, grounded = row.pop("_prov", None), row.pop("_grounded", False)
     st = field_status(row, unpublished)
     complete = not any(v == "missing" for v in st.values())
-    conflicted = bool(disputed) and any(
-        f in FIELD_ORDER or f in OVERRIDABLE_HINT for f in (disputed or []))
-    row["confidence_level"] = _confidence(g, {"x": 1} if prov else None,
+    conflicted = bool(disputed)
+    row["confidence_level"] = _confidence(g, prov,
                                           grounded, complete=complete,
                                           disputed=conflicted)
     return row
-
-
-OVERRIDABLE_HINT = frozenset({"disposition", "government_fee", "permitted_stay",
-                              "visa_products", "requirement_detail"})
 
 
 def records_for_route(route: dict, guidance: dict,
@@ -864,10 +1004,20 @@ def records_for_route(route: dict, guidance: dict,
     """The route's answer as T-Station 25-field records, one per visa
     product; a product-less route (visa-free, or detail still filling)
     yields a single route-level record."""
-    g = guidance or {}
+    g = dict(guidance or {})
+    disposition = str(g.get("disposition") or "").upper()
+    # The on-arrival subtype defines the category even for historical rows
+    # that used the broad VISA_REQUIRED enum.
+    if disposition == "VISA_REQUIRED" and g.get("requirement_detail") in (
+            "evisa_on_arrival", "paper_visa_on_arrival"):
+        disposition = g["disposition"] = "VISA_ON_ARRIVAL"
+    from .kimi_primary import serve_time_invariants
+    contradictions = serve_time_invariants(g)
+    disputed_fields = list(disputed_fields or [])
+    if contradictions:
+        disputed_fields.append("disposition")
     # Fields a destination has been checked for and does not publish.
     _unpub = {str(x) for x in (g.get("unpublished_fields") or [])}
-    disposition = str(g.get("disposition") or "").upper()
     requirement = _DISPOSITION_TO_REQUIREMENT.get(disposition)
     docs = g.get("required_documents")
     docs = ", ".join(str(d) for d in docs if d) if isinstance(docs, list) else (
@@ -927,8 +1077,9 @@ def records_for_route(route: dict, guidance: dict,
         "entry_requirements": (entry_req if isinstance(entry_req, str)
                                else _entry_requirements(g)),
         "special_conditions": exceptions if isinstance(exceptions, str) else None,
-        "data_source": (provenance or {}).get("verified_by")
-                       or ("Ellis verified route engine" if g else None),
+        "data_source": ((provenance or {}).get("verified_by")
+                       or ("Ellis official-page check" if grounded_ok else
+                           "Ellis route engine (reference only)" if g else None)),
         "source_url": _headline_source(g, provenance),
         "collected_at": ((provenance or {}).get("verified_at")
                          or (collected_at or "")[:10]) or None,
@@ -944,50 +1095,120 @@ def records_for_route(route: dict, guidance: dict,
         # export shape is unchanged. What was missing was any slot at all for
         # the second and third page a route was checked against.
         "corroborating_sources": _corroborating(g),
-        "_prov": bool(provenance), "_grounded": grounded_ok,
+        "_prov": provenance, "_grounded": grounded_ok,
+        "_disputed_fields": sorted(set(disputed_fields)),
         "_unpublished": sorted(_unpub),
     }
-    products = [p for p in (g.get("visa_products") or [])
+    raw_products = g.get("visa_products")
+    products = [p for p in (raw_products if isinstance(raw_products, list) else [])
                 if isinstance(p, dict) and p.get("type")]
-    if disposition == "VISA_EXEMPT" or not products:
+    exempt_conflict = disposition == "VISA_EXEMPT" and bool(contradictions)
+    if (disposition == "VISA_EXEMPT" and not exempt_conflict) or not products:
         row = dict(base)
         if disposition == "VISA_EXEMPT":
-            row["visa_type_name"] = "No visa needed"
+            row["visa_type_name"] = (g.get("visa_category") or
+                                     "Requirement under review") if exempt_conflict else "No visa needed"
             if not row["required_documents"]:
                 row["required_documents"] = "Valid passport"
-            n, unit = _as_stay_unit(*_num_unit(g.get("permitted_stay")))
-            if n is None and g.get("permitted_stay_days"):
-                n, unit = g.get("permitted_stay_days"), "Day"
-            row["max_stay_duration"], row["max_stay_unit"] = n, unit
+            _set_stay(row, g.get("permitted_stay"), g.get("permitted_stay_days"))
+            n, unit = row["max_stay_duration"], row["max_stay_unit"]
             # The stay may legitimately be in hours (a transit exemption),
             # but their validity_unit enum has no Hour: route it through the
             # same conversion the product rows use.
-            row["validity_duration"], row["validity_unit"] = _as_validity_unit(n, unit)
+            _set_validity(row, n, unit, g.get("permitted_stay"))
             row["entries"] = "Unlimited"
-            row["visa_fee_amount"], row["visa_fee_currency"] = 0, "USD"
+            row["visa_fee_amount"], row["visa_fee_currency"] = (
+                _fee({}, g) if exempt_conflict else (0, "USD"))
         else:
             row["visa_type_name"] = g.get("visa_category") or None
-            n, unit = _as_stay_unit(*_num_unit(g.get("permitted_stay")))
-            if n is None and g.get("permitted_stay_days"):
-                n, unit = g.get("permitted_stay_days"), "Day"
-            row["max_stay_duration"], row["max_stay_unit"] = n, unit
+            _set_stay(row, g.get("permitted_stay"), g.get("permitted_stay_days"))
+            n, unit = row["max_stay_duration"], row["max_stay_unit"]
             # A product-less route states no separate validity window, so the
             # granted stay is its honest bound, exactly as the product rows
             # and the visa-free branch already read it. Without this the
             # validity column sat empty on every product-less visa answer.
-            row["validity_duration"], row["validity_unit"] = \
-                _as_validity_unit(n, unit)
+            _set_validity(row, n, unit, g.get("permitted_stay"))
             amt, cur = _fee({}, g)
             row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
         row["application_method"] = _method_for_detail(
             row.get("visa_requirement_detail"), method, row, method_from_channel)
         return [_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
     rows = []
+    product_families = {_permission_family(_product_detail(p, base.get("visa_requirement_detail")))
+                        for p in products} - {None}
     for p in products:
         row = dict(base)
         row["visa_type_name"] = str(p.get("type"))
         row["visa_requirement_detail"] = _subcategory_for(
             p, base.get("visa_requirement_detail"), requirement, method)
+        own_detail = _product_detail(p, base.get("visa_requirement_detail"))
+        if _key_of(p.get("requirement_detail")):
+            # Electronic issuance is an explicit product fact, independent
+            # of its name (UK Standard Visitor visas now issue as eVisas).
+            row["visa_requirement_detail"] = own_detail
+        own_family = _permission_family(own_detail)
+        route_family = _permission_family(g.get("requirement_detail"), disposition)
+        separate_permission = bool(own_family and (
+            (route_family and own_family != route_family) or
+            (own_family == route_family == "visa" and
+             _key_of(g.get("requirement_detail")) in ("evisa", "paper_visa") and
+             _key_of(own_detail) != _key_of(g.get("requirement_detail"))) or
+            (disposition == "CONDITIONAL" and not route_family and len(product_families) > 1)))
+        product_g, product_unpublished = g, _unpub
+        if separate_permission:
+            # ETA eligibility does not verify an optional Standard Visitor
+            # visa's documents, timing, application method, or source. The
+            # same separation applies to exemptions, visas, and arrival visas.
+            own_disposition = {"visa": "VISA_REQUIRED", "arrival": "VISA_ON_ARRIVAL",
+                               "authorisation": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+                               "exemption": "VISA_EXEMPT"}[own_family]
+            row["visa_requirement"] = _DISPOSITION_TO_REQUIREMENT[own_disposition]
+            row["visa_requirement_detail"] = own_detail
+            for key in ("required_documents", "entry_requirements", "special_conditions",
+                        "processing_min_days", "processing_unit", "application_method",
+                        "consulate_district", "source_url", "collected_at", "info_validity"):
+                row[key] = None
+            product_g = dict(p, disposition=own_disposition, requirement_detail=_key_of(own_detail))
+            product_unpublished = set(p.get("unpublished_fields") or [])
+            row["_unpublished"] = sorted(product_unpublished)
+            row["_prov"], row["_grounded"] = None, False
+            row["_separate_permission"] = True
+            row["_product_source_verified"] = None
+            row["corroborating_sources"] = []
+            row["data_source"] = "Ellis product information (reference only)"
+            from .authority import hostname, is_government_host
+            own_url = str(p.get("source_url") or "")
+            if is_government_host(hostname(own_url)):
+                row["source_url"] = own_url
+                row["collected_at"] = p.get("verified_at")
+                product_prov = ((provenance or {}).get("field_provenance") or {}).get("visa_products")
+                if not product_prov and "visa_products" in ((provenance or {}).get("fields") or []):
+                    product_prov = provenance
+                if product_prov and p.get("source_quote"):
+                    row["_prov"] = dict(product_prov, source_url=own_url,
+                                        note=p["source_quote"],
+                                        verified_at=p.get("verified_at") or product_prov.get("verified_at"),
+                                        fields=["disposition", "visa_products"])
+                    row["_product_source_verified"] = row["_prov"]
+                    row["data_source"] = product_prov.get("verified_by") or "Ellis product source check"
+        _product_fields(row, p)
+        if not separate_permission and p.get("source_url"):
+            from .authority import hostname, is_government_host
+            own_url = str(p["source_url"])
+            if is_government_host(hostname(own_url)):
+                row["source_url"] = own_url
+                row["collected_at"] = p.get("verified_at")
+                parent_prov = ((provenance or {}).get("field_provenance") or {}).get("visa_products")
+                if not parent_prov and "visa_products" in ((provenance or {}).get("fields") or []):
+                    parent_prov = provenance
+                own_prov = (dict(parent_prov, source_url=own_url, note=p["source_quote"],
+                                 verified_at=p.get("verified_at") or parent_prov.get("verified_at"),
+                                 fields=["disposition", "visa_products"])
+                            if parent_prov and p.get("source_quote") else None)
+                row["_product_source_verified"] = row["_prov"] = own_prov
+                row["_grounded"] = False
+        if p.get("corroborating_sources"):
+            row["corroborating_sources"] = _corroborating(p)
         exemption_lane = requirement == "Conditional" and _product_is_exemption(p)
         if exemption_lane:
             # The lane is the route's own kind of exemption (transit-only or
@@ -1021,23 +1242,25 @@ def records_for_route(route: dict, guidance: dict,
             # multi-year visa) always names that validity and never lands
             # here.
             n, unit = int(p["max_stay_days"]), "Day"
-        row["validity_duration"], row["validity_unit"] = _as_validity_unit(n, unit)
-        stay = p.get("max_stay_days")
-        if stay:
-            row["max_stay_duration"], row["max_stay_unit"] = stay, "Day"
-        else:
-            n2, u2 = _num_unit(g.get("permitted_stay"))
-            row["max_stay_duration"], row["max_stay_unit"] = _as_stay_unit(n2, u2)
+        _set_validity(row, n, unit, p.get("validity"))
+        _set_stay(row, p.get("permitted_stay") or product_g.get("permitted_stay"),
+                  p.get("max_stay_days"))
         # Definitional fallback: "single-entry" / "multiple-entry" in the
         # product's own name states the entries field.
         row["entries"] = _entries(p.get("entry")) or _entries(p.get("type"))
-        amt, cur = _fee(p, g)
+        amt, cur = _fee(p, product_g)
         row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
         note = p.get("notes")
         if note:
             row["special_conditions"] = (str(note) if not row["special_conditions"]
                                          else f"{row['special_conditions']}. {note}")
-        if exemption_lane:
+        own_method = _method_for_channel(p.get("application_channel")) or _method_from_detail(p)
+        if own_method:
+            row["application_method"] = own_method
+        elif separate_permission:
+            row["application_method"] = _separate_product_method(
+                p, row["visa_requirement_detail"], g)
+        elif exemption_lane:
             # Nothing is applied for on an exemption lane, unless the lane
             # itself is an online registration (Japan's e-passport waiver).
             words = f"{p.get('type') or ''} {p.get('notes') or ''}".lower()
@@ -1058,7 +1281,8 @@ def records_for_route(route: dict, guidance: dict,
         else:
             row["application_method"] = _method_for_detail(
                 row["visa_requirement_detail"], method, row, method_from_channel)
-        rows.append(_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub))
+        rows.append(_regrade({k: _clean_text(v) for k, v in row.items()}, product_g,
+                             disputed_fields, product_unpublished))
     return rows
 
 

@@ -6,6 +6,7 @@ behavior — everything runs against the real FastAPI app + DB; no real portal,
 payment, or government submission ever occurs here."""
 import base64
 import time
+from datetime import date
 
 import pytest
 
@@ -36,6 +37,30 @@ from .test_intake_flow import (H, ANSWERS_SGP, EXEMPT_ANSWER, REQUIRED_ANSWER,
                                _resolve_with_guidance, _new_intake)
 
 H2 = {"Authorization": "Bearer dev-token", "X-Org-Id": "org-other", "X-User-Id": "u2"}
+
+
+@pytest.fixture(autouse=True)
+def _source_checked_routes(monkeypatch):
+    """Inject explicit scoped source evidence for the synthetic journey rules.
+
+    These tests exercise upload and checklist mechanics; an unread official
+    URL or the model's own confidence no longer releases a route.
+    """
+    original = kimi_primary.get_route_guidance
+    def checked(db, route, **kwargs):
+        result = original(db, route, **kwargs)
+        guidance = result.get("guidance") or {}
+        if guidance.get("disposition") in kimi_primary.DISPOSITIONS and guidance.get("source_url"):
+            result = dict(result, source_verified={
+                "fields": ["disposition"], "source_url": guidance["source_url"],
+                "verified_at": date.today().isoformat(), "verifier": "ai",
+                "verified_by": "Synthetic document-workflow source fixture",
+                "note": "Fixture source establishes " + str(guidance["disposition"]) +
+                    " for " + str(route.get("passport_nationality")) + " ordinary passport " +
+                    str(route.get("travel_purpose", "tourism")) + " travel to " + str(route.get("destination_country")),
+            })
+        return result
+    monkeypatch.setattr(kimi_primary, "get_route_guidance", checked)
 
 JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 64
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64

@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import hashlib
 import re
+import threading
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
@@ -175,25 +177,36 @@ def _render_fetcher():
 # The renderer already passes timeouts to each step, but a hung session/CDP
 # connect could still block forever; this guarantees the pipeline never stalls.
 RENDER_HARD_TIMEOUT = 45.0
+_IO_SLOTS = threading.BoundedSemaphore(4)
 
 
 def _call_with_hard_timeout(fn, url, timeout_seconds, hard_timeout):
     """Run fn(url, timeout_seconds=...) but abandon it after hard_timeout wall
     seconds so a hung network call can never stall research. A timed-out call's
     thread is left as a daemon (the process exits normally regardless)."""
-    import concurrent.futures
-    ex = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-    fut = ex.submit(lambda: fn(url, timeout_seconds=timeout_seconds))
+    from .bounded_io import call
     try:
-        return fut.result(timeout=hard_timeout)
-    except concurrent.futures.TimeoutError:
+        return call(lambda: fn(url, timeout_seconds=timeout_seconds), hard_timeout, _IO_SLOTS)
+    except TimeoutError:
         return FetchResult(requested_url=url, ok=False, retrieved_at=_now(),
                            error=f"render fallback hard-timeout after {hard_timeout:.0f}s")
-    finally:
-        ex.shutdown(wait=False)
 
 
-def fetch(url: str, *, timeout_seconds: float = 20.0) -> FetchResult:
+def fetch(url: str, *, timeout_seconds: float = 20.0,
+          total_timeout_seconds: float | None = None) -> FetchResult:
+    if total_timeout_seconds is not None:
+        from .bounded_io import call
+        deadline = time.monotonic() + max(0.0, total_timeout_seconds)
+        try:
+            return call(lambda: _fetch(url, timeout_seconds=min(timeout_seconds,
+                max(0.001, deadline - time.monotonic())), deadline=deadline), total_timeout_seconds, _IO_SLOTS)
+        except TimeoutError:
+            return FetchResult(requested_url=url, ok=False, retrieved_at=_now(),
+                error="source fetch exceeded total wall-clock deadline")
+    return _fetch(url, timeout_seconds=timeout_seconds)
+
+
+def _fetch(url: str, *, timeout_seconds: float, deadline: float | None = None) -> FetchResult:
     if _FETCHER is not None:
         return _FETCHER(url, timeout_seconds=timeout_seconds)
     res = _default_fetch(url, timeout_seconds=timeout_seconds)
@@ -205,8 +218,15 @@ def fetch(url: str, *, timeout_seconds: float = 20.0) -> FetchResult:
         rf = _render_fetcher()
         if rf is not None:
             try:
-                rendered = _call_with_hard_timeout(
-                    rf, url, timeout_seconds, RENDER_HARD_TIMEOUT)
+                if deadline is not None:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        return res
+                    # The whole source attempt already owns one bounded I/O
+                    # slot; no nested thread/slot and no extra 45-second budget.
+                    rendered = rf(url, timeout_seconds=min(timeout_seconds, remaining))
+                else:
+                    rendered = _call_with_hard_timeout(rf, url, timeout_seconds, RENDER_HARD_TIMEOUT)
             except Exception as e:  # noqa: BLE001 - honest failure, never fabricated
                 return res if res.error else FetchResult(
                     requested_url=url, ok=False, retrieved_at=_now(),

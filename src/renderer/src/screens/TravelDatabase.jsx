@@ -14,6 +14,7 @@ import { useLocalizedCountries } from '../lib/countryNames.js'
 import { DEPARTURE_CITIES } from '../lib/departureCities.js'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
+import { parseDatabaseRouteHash, databaseRouteHash } from '../lib/databaseRoute.js'
 
 const NAVY = 'var(--trip-navy, #0f294d)'
 const GRAY = 'var(--trip-gray, #64748b)'
@@ -32,6 +33,7 @@ const DISPOSITION_VIEW = {
   ELECTRONIC_AUTHORIZATION_REQUIRED:
     { key: 'db.verdict.eta', color: '#9a6200', tint: '#fff7e8' },
   VISA_REQUIRED: { key: 'db.verdict.required', color: '#b3261e', tint: '#fdeeed' },
+  VISA_ON_ARRIVAL: { key: 'db.verdict.voa', color: '#9a6200', tint: '#fff7e8' },
   CONDITIONAL: { key: 'db.verdict.conditional', color: '#9a6200', tint: '#fff7e8' },
 }
 
@@ -159,15 +161,7 @@ const NO_APPLICATION_CHANNELS = new Set([
 
 function routeFromHash() {
   const raw = (typeof window !== 'undefined' && window.location.hash) || ''
-  const m = raw.replace(/^#\/?/, '').split('/')
-  if ((m[0] || '').toLowerCase() !== 'database') return null
-  const [, nat, dest, purpose, doc] = m
-  if (!/^[A-Za-z]{3}$/.test(nat || '') || !/^[A-Za-z]{3}$/.test(dest || '')) return null
-  return {
-    nat: nat.toUpperCase(), dest: dest.toUpperCase(),
-    purpose: PURPOSES.some(([v]) => v === purpose) ? purpose : 'tourism',
-    doc: /^[a-z_]+$/.test(doc || '') ? doc : 'ordinary_passport',
-  }
+  return parseDatabaseRouteHash(raw, PURPOSES.map(([v]) => v))
 }
 
 function clearHash() {
@@ -177,9 +171,9 @@ function clearHash() {
   }
 }
 
-function writeHash({ nat, dest, purpose, doc }) {
-  if (typeof window === 'undefined' || !nat || !dest) return
-  const next = `#database/${nat}/${dest}/${purpose || 'tourism'}/${doc || 'ordinary_passport'}`
+function writeHash(route) {
+  const next = databaseRouteHash(route)
+  if (typeof window === 'undefined' || !next) return
   if (window.location.hash !== next) {
     window.history.replaceState(null, '', next)
   }
@@ -693,12 +687,14 @@ export default function TravelDatabase({ onBack }) {
       booted.current = true
       return
     }
-    const key = [r.nat, r.dest, r.purpose, r.doc].join('|')
+    const key = [r.nat, r.dest, r.purpose, r.doc, r.transit.join(','), r.arrival].join('|')
     if (booted.current && key === openedRoute.current) return
     booted.current = true
     openedRoute.current = key
     setNat(r.nat); setDest(r.dest); setPurpose(r.purpose); setDoc(r.doc)
-    lookUp({ nat: r.nat, dest: r.dest, purpose: r.purpose, doc: r.doc })
+    setTransit(r.transit)
+    setArrival(r.arrival)
+    lookUp(r)
   }
   useEffect(() => {
     openHash.current()
@@ -943,7 +939,7 @@ export default function TravelDatabase({ onBack }) {
           setTransit(out.route.transit_countries || [])
           setFocus(out.focus || null)
           writeHash({ nat: out.route.nationality, dest: out.route.destination,
-                      purpose: out.route.travel_purpose, doc: askedDoc })
+                      purpose: out.route.travel_purpose, doc: askedDoc, transit: out.route.transit_countries || [] })
         }
         const noAnswer = !out.guidance && !out.held
         if (!noAnswer || !result) setResult(out)
@@ -972,12 +968,13 @@ export default function TravelDatabase({ onBack }) {
   const pollRef = useRef(0)
   function pollDetail(body) {
     const mine = ++pollRef.current
+    const request = askSeq.current
     let tries = 0
     const tick = async () => {
-      if (pollRef.current !== mine || tries++ > 12) return
+      if (pollRef.current !== mine || askSeq.current !== request || tries++ > 12) return
       try {
         const out = await client.databaseLookup(body)
-        if (pollRef.current !== mine) return
+        if (pollRef.current !== mine || askSeq.current !== request) return
         if (!out.detail_pending) { setResult(out); return }
       } catch { /* keep what we have */ }
       setTimeout(tick, 2500)
@@ -1016,6 +1013,8 @@ export default function TravelDatabase({ onBack }) {
     // before the state it just set has flushed.
     const useNat = override.nat ?? nat
     const useDest = override.dest ?? dest
+    const useTransit = override.transit ?? transit
+    const useArrival = override.arrival ?? arrival
     if (!useNat || !useDest) return
     const seq = ++askSeq.current
     const current = () => seq === askSeq.current
@@ -1024,20 +1023,20 @@ export default function TravelDatabase({ onBack }) {
     try {
       const out = await client.databaseLookup({
         nationality: useNat, destination: useDest, travel_document_type: useDoc,
-        travel_purpose: usePurpose, arrival_date: arrival || '',
+        travel_purpose: usePurpose, arrival_date: useArrival || '',
         departure_city: departureCity || '',
-        transit_countries: transit,
+        transit_countries: useTransit,
       })
       if (!current()) return true   // a newer question is already on screen
       setResult(out)
-      setShown({ purpose: usePurpose, doc: useDoc })
+      setShown({ purpose: usePurpose, doc: useDoc, transit: useTransit })
       if (!override.keepFocus) setFocus(null)
-      writeHash({ nat: useNat, dest: useDest, purpose: usePurpose, doc: useDoc })
+      writeHash({ nat: useNat, dest: useDest, purpose: usePurpose, doc: useDoc, transit: useTransit, arrival: useArrival })
       setBusy(false)
       if (out.detail_pending) pollDetail({
         nationality: useNat, destination: useDest, travel_document_type: useDoc,
-        travel_purpose: usePurpose, arrival_date: arrival || '',
-        departure_city: departureCity || '', transit_countries: transit,
+        travel_purpose: usePurpose, arrival_date: useArrival || '',
+        departure_city: departureCity || '', transit_countries: useTransit,
       })
       return true
     } catch (e) {
@@ -1463,10 +1462,7 @@ export default function TravelDatabase({ onBack }) {
                           color: disp?.color || NAVY,
                           marginTop: 8, letterSpacing: -0.4 }}
                  data-testid="database-disposition">
-              {['evisa_on_arrival', 'paper_visa_on_arrival']
-                 .includes(g.requirement_detail)
-                ? t('db.verdict.voa')
-                : disp ? t(disp.key) : asText(g.disposition)}
+              {disp ? t(disp.key) : asText(g.disposition)}
             </div>
             {asText(g.visa_category) && (
               <div style={{ fontSize: 14, color: NAVY, marginTop: 8, opacity: 0.85 }}>
@@ -1585,14 +1581,17 @@ export default function TravelDatabase({ onBack }) {
 
           {/* Transit: answered ONLY when a stopover was named, so an empty
               answer is never dressed up as "no transit visa needed". */}
-          {transit.length > 0 && g.transit_requirement
-            && g.transit_requirement.required !== null && (
+          {transit.length > 0 && g.transit_requirement && (
             <div style={{ marginTop: 16 }}>
               <Section title={t('db.transitReq')} accent={BLUE}>
-                <Fact label={transit.map(countryName).join(', ')}
-                      value={g.transit_requirement.required
-                             ? t('db.transitNeeded') : t('db.transitNotNeeded')}
-                      pill={g.transit_requirement.required ? 'warn' : 'no'} />
+                {(g.transit_requirement.checks?.length
+                  ? g.transit_requirement.checks
+                  : [{ country: null, required: g.transit_requirement.required }]).map((check, i) => (
+                  <Fact key={check.country || i} label={check.country ? countryName(check.country) : transit.map(countryName).join(', ')}
+                        value={check.required == null ? t('db.transitUnknown')
+                               : check.required ? t('db.transitNeeded') : t('db.transitNotNeeded')}
+                        pill={check.required === false ? 'no' : 'warn'} />
+                ))}
                 {sentence(asText(g.transit_requirement.note)) && (
                   <div style={{ fontSize: 13, color: NAVY, lineHeight: 1.6,
                                 paddingTop: 10 }}
@@ -1600,6 +1599,13 @@ export default function TravelDatabase({ onBack }) {
                     {T(sentence(asText(g.transit_requirement.note)))}
                   </div>
                 )}
+                {(g.transit_requirement.checks || []).filter((check) => /^https?:\/\//i.test(check.source_url || '')).map((check, i) => (
+                  <div key={i} style={{ marginTop: 8, fontSize: 12 }}>
+                    <a href={check.source_url} target="_blank" rel="noreferrer">
+                      {countryName(check.country || check.destination_country)} · {t('db.source')}
+                    </a>
+                  </div>
+                ))}
               </Section>
             </div>
           )}
@@ -1859,16 +1865,23 @@ export default function TravelDatabase({ onBack }) {
             </button>
           </div>
 
+          {g.upcoming_policy && (
+            <div style={{ marginTop: 16, padding: 16, background: '#fff7e8', borderRadius: 12 }}>
+              {t('db.policyFrom', { date: g.upcoming_policy.effective_from, days: g.upcoming_policy.permitted_stay_days })}{' '}
+              <a href={g.upcoming_policy.source_url} target="_blank" rel="noreferrer">{t('db.verifiedSource')}</a>
+            </div>
+          )}
+
           {/* Checked against an official source: shown ONLY for the fields a
               person actually verified, with the source and the date. An
               answer without this badge is the engine's own, and says so
               rather than borrowing the authority of a checked one. */}
-          {result.source_verified && (
+          {result.source_verified?.fields?.includes('disposition') && (
             <div style={{ marginTop: 16, padding: '12px 16px', borderRadius: 12,
                           background: '#eefaf1', fontSize: 12.5, color: NAVY }}
                  data-testid="database-source-verified">
-              <span style={{ fontWeight: 800 }}>{t('db.verifiedTitle')}</span>{' '}
-              {t('db.verifiedOn', { date: result.source_verified.verified_at })}{' '}
+              <span style={{ fontWeight: 800 }}>{t(result.source_verified.verifier === 'human' ? 'db.verifiedTitle' : 'db.citedTitle')}</span>{' '}
+              {t(result.source_verified.verifier === 'human' ? 'db.verifiedOn' : 'db.citedOn', { date: result.source_verified.verified_at })}{' '}
               <a href={result.source_verified.source_url} target="_blank"
                  rel="noreferrer" style={{ color: '#0f8a3d',
                                            display: 'inline-block',
@@ -1888,7 +1901,7 @@ export default function TravelDatabase({ onBack }) {
           {/* Machine provenance, deliberately weaker than the green human
               badge: the official page was READ on this date and agreed (or
               corrections were applied) — never "a person verified this". */}
-          {!result.source_verified && result.grounded_check?.at
+          {!result.source_verified?.fields?.includes('disposition') && result.grounded_check?.at
             && result.grounded_check.consistent === true && (
             <div style={{ fontSize: 12, color: GRAY, marginTop: 14,
                           textAlign: 'center' }}

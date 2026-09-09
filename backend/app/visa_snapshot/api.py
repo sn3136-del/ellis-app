@@ -166,8 +166,13 @@ def get_intake(intake_id: str, db=Depends(get_session), p: Principal = Depends(g
     if r.resolution_id:
         res = db.get(RouteResolution, r.resolution_id)
         if res:
-            out["resolution"] = {"id": res.id, "readiness_status": res.readiness_status,
-                                 "route_key": res.route_key, "checks": res.checks}
+            # Stored pair verdicts belong to the legacy adapter resolver.
+            # Reopening an intake must use the same safe projection as resolve;
+            # the canonical guidance endpoint supplies the current decision.
+            checks = res.checks if isinstance(res.checks, dict) else {}
+            out["resolution"] = {"id": res.id, "readiness_status": "NOT_READY",
+                                 "route_key": res.route_key,
+                                 "checks": {k: checks[k] for k in ("normalization", "adapter") if k in checks}}
     return out
 
 
@@ -377,16 +382,7 @@ def resolve_intake(intake_id: str, background: BackgroundTasks,
         cached_row = kimi_primary._cached(db, kimi_primary.cache_key(route))
         if cached_row is not None:
             g = kimi_primary.get_route_guidance(db, route)
-            if g.get("guidance"):
-                # Same rule as every other serve site: the registry's verified
-                # pair record outranks the cached prose on WHAT KIND of journey
-                # this is. This attach path was the fourth serve site — missed
-                # on 2026-08-04, caught because a fresh install served the
-                # stale "tourist visa, 30 SGD" card on a visa-free route.
-                g["guidance"] = kimi_primary.reconcile_guidance_with_route(
-                    db, g["guidance"],
-                    nationality=route.get("passport_nationality", ""),
-                    destination=route.get("destination_country", ""))
+            g = _reader_guidance(db, route, g)
             result["kimi_guidance"] = g
             if g.get("stale"):
                 background.add_task(kimi_primary.refresh_stale_async,
@@ -395,7 +391,63 @@ def resolve_intake(intake_id: str, background: BackgroundTasks,
             result["kimi_guidance_pending"] = kimi_primary.is_available()
     except kimi_primary.GuidanceUnavailable:
         result["kimi_guidance_pending"] = False
+    current = result.get("kimi_guidance") or {}
+    # Resolution still measures adapter readiness internally. Its historical
+    # pair verdict must never compete with the canonical reader decision.
+    result["disposition"] = (current.get("guidance") or {}).get("disposition")
+    result["checks"] = {k: checks[k] for k in ("normalization", "adapter") if k in checks}
+    if not result["disposition"]:
+        result["readiness_status"] = "NOT_READY"
     return result
+
+
+def _reader_guidance(db, route, result):
+    """The applicant and database readers share one final decision and gate.
+
+    A legacy nationality-pair registry must not overwrite a purpose- and
+    document-specific decision after its verified overrides were applied.
+    """
+    from .records_guard import apply_records_hold, held_envelope
+    from . import kimi_primary
+    from .registry import iso3
+    route = dict(route or {})
+    for field in ("passport_nationality", "destination_country", "lawful_country_of_residence"):
+        if route.get(field):
+            route[field] = iso3(route[field], default=str(route[field]).upper())
+    if not isinstance(result, dict):
+        return {"guidance": None, "held": True, "review_required": True}
+    if result.get("guidance"):
+        result = kimi_primary.apply_verified_overrides(result, route)
+    result = apply_records_hold(route, result, db)
+    return held_envelope(result) if result.get("held") else result
+
+
+def _sync_case_reader_guidance(db, case_row, cg, guidance):
+    """Refresh a saved checklist from the same served facts, keeping uploads.
+
+    Submission bindings refer to stable item IDs and survive this reversible
+    requirements update; old route/checklist claims cannot accompany new facts.
+    """
+    from . import intake_flow
+    if guidance.get("held") or not guidance.get("guidance"):
+        return
+    inner = guidance["guidance"]
+    disposition = inner.get("disposition")
+    kind = intake_flow.KIND_BY_DISPOSITION.get(disposition)
+    if not kind:
+        return
+    checklist = intake_flow.derive_document_checklist(inner, answers=case_row.answers or {})
+    if ((cg.guidance or {}).get("guidance") == inner and cg.disposition == disposition
+            and cg.continuation_kind == kind and cg.checklist == checklist):
+        return
+    before = cg.disposition
+    cg.guidance, cg.disposition, cg.continuation_kind = guidance, disposition, kind
+    cg.checklist = checklist
+    db.commit()
+    audit.record(db, org_id=cg.org_id, application_id=cg.case_id,
+                 action="case_requirements_refreshed", actor="ellis-source-refresh",
+                 detail={"previous_disposition": before, "disposition": disposition,
+                         "checklist_item_count": len(checklist)})
 
 
 def _new_session():
@@ -434,13 +486,7 @@ def route_guidance(intake_id: str, background: BackgroundTasks,
                                          "reason": e.envelope.get("user_message"),
                                          "category": e.envelope.get("category"),
                                          "provider_status": e.envelope.get("provider_status")})
-    if g.get("guidance"):
-        # The registry's verified pair record outranks the model's prose on
-        # WHAT KIND of journey this is (visa vs arrival card).
-        g["guidance"] = kimi_primary.reconcile_guidance_with_route(
-            db, g["guidance"],
-            nationality=route.get("passport_nationality", ""),
-            destination=route.get("destination_country", ""))
+    g = _reader_guidance(db, route, g)
     if g.get("stale"):
         background.add_task(kimi_primary.refresh_stale_async, _new_session, route)
     # Guidance-driven adapter generation (authorized bridge; reversible build +
@@ -477,7 +523,6 @@ def route_guidance(intake_id: str, background: BackgroundTasks,
 def _continuation_summary(db, r, cg, case_row) -> dict:
     from . import kimi_primary
     from .. import checklist_intake
-    status = checklist_intake.checklist_state(db, case_row, cg)
     # Serve-time normalization: stored two-pass-era guidance rows carry a label
     # claiming a retired second-pass check — it must never reach the UI. And
     # the registry's pair record outranks stored model prose on whether this
@@ -486,12 +531,15 @@ def _continuation_summary(db, r, cg, case_row) -> dict:
     # (2026-08-04).
     answers = case_row.answers or {}
     guidance = kimi_primary.normalize_guidance_label(cg.guidance)
-    if isinstance(guidance, dict) and guidance.get("guidance"):
-        guidance = {**guidance, "guidance":
-                    kimi_primary.reconcile_guidance_with_route(
-                        db, guidance["guidance"],
-                        nationality=answers.get("passport_nationality", ""),
-                        destination=case_row.destination_country or "")}
+    route = dict(answers, destination_country=case_row.destination_country or "")
+    guidance = _reader_guidance(db, route, guidance)
+    if guidance.get("held"):
+        return {"case_id": case_row.id, "intake_id": r.id, "status": r.status,
+                "case_state": case_row.state, "guidance": guidance,
+                "disposition": None, "continuation_kind": None,
+                "checklist": [], "checklist_counts": {}, "verification": {}}
+    _sync_case_reader_guidance(db, case_row, cg, guidance)
+    status = checklist_intake.checklist_state(db, case_row, cg)
     return {"case_id": case_row.id, "intake_id": r.id, "status": r.status,
             "case_state": case_row.state,
             "disposition": cg.disposition,
@@ -536,6 +584,7 @@ def continue_intake(intake_id: str, background: BackgroundTasks,
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": e.envelope.get("user_message"),
                                          "category": e.envelope.get("category")})
+    g = _reader_guidance(db, route, g)
     meta = intake_flow.continuation_meta(g)
     if meta["blocked"]:
         # The precise unresolved blocker, never a silent dead-end.

@@ -6,6 +6,9 @@ real linked case that reuses the OCR-extracted passport data; a completed
 renewal (approved NEW passport) updates the travel case's passport fields and
 re-evaluates destination validity; creation is idempotent; and no
 administrator approval exists anywhere on the path."""
+import json
+from datetime import date
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
@@ -14,7 +17,7 @@ from app import models as core_models
 from app.db import SessionLocal, create_all
 from app.main import app as fastapi_app
 from app.providers.ocr import mrz_check_digit
-from app.visa_snapshot import kimi_primary
+from app.visa_snapshot import kimi_primary, verified_overrides as vo
 from app.visa_snapshot.models import CaseRouteGuidance, KimiRouteGuidanceCache
 
 H = {"Authorization": "Bearer dev-token", "X-Org-Id": "org-renew", "X-User-Id": "ur"}
@@ -31,6 +34,7 @@ ROUTE_GUIDANCE = {
     "processing_time": "none (exempt)", "appointment_required": False,
     "health_requirements": [], "route_workflow_type": "visa_exempt_preparation",
     "uncertainty": [], "confidence": "high",
+    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
 }
 
 RENEWAL_GUIDANCE = {
@@ -81,13 +85,28 @@ def client():
 
 
 @pytest.fixture(autouse=True)
-def _reset(db):
+def _reset(db, monkeypatch, tmp_path):
+    # Renewal mechanics use an explicit, route-scoped source-check fixture.
+    # The provider's own confidence and an unread URL cannot release a route.
+    source = tmp_path / "verified-test-route.json"
+    source.write_text(json.dumps([{
+        "route": {"nationality": "USA", "destination": "SGP", "purpose": "tourism",
+                  "travel_document_type": "ordinary_passport"},
+        "source_url": ROUTE_GUIDANCE["source_url"], "verified_at": date.today().isoformat(),
+        "verified_by": "Renewal test evidence fixture", "verifier": "ai",
+        "note": "Fixture: United States ordinary passport holders visiting Singapore for tourism do not require a visa.",
+        "fields": {"disposition": "VISA_EXEMPT", "requirement_detail": "unconditional_visa_free"},
+    }]))
+    monkeypatch.setattr(vo, "OVERRIDES", source)
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES", str(tmp_path / "operators.json"))
+    vo.reload()
     for row in db.execute(select(KimiRouteGuidanceCache)).scalars().all():
         db.delete(row)
     db.commit()
     kimi_primary.set_provider(provider)
     yield
     kimi_primary.set_provider(None)
+    vo.reload()
 
 
 def _make_case(client, *, expiry_iso="2026-10-01", email="r@example.com",

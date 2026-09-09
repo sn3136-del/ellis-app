@@ -484,6 +484,32 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     if status == "reviewed" and row.resolved_by == p.user_id:
         raise HTTPException(422, "the correction has to be reviewed by someone "
                                  "other than the person who wrote it")
+    if status in ("corrected", "reviewed", "published"):
+        # Workflow status is not a policy edit. A correction must already
+        # have been applied through a sourced write, preserving the canonical
+        # answer and its history instead of deleting it for model regeneration.
+        from sqlalchemy import select as _sel
+        from .visa_snapshot import kimi_primary
+        from .visa_snapshot.models import DatabaseChangeLog
+        aliases = {"visa_fee_amount": "government_fee", "visa_fee_currency": "government_fee",
+                   "visa_requirement": "disposition", "visa_requirement_detail": "requirement_detail",
+                   "visa_type_name": "visa_category", "max_stay_duration": "permitted_stay_days",
+                   "application_method": "application_channel"}
+        requested = {aliases.get(f.strip(), f.strip()) for f in str(row.field or "").split(",") if f.strip()}
+        changes = db.execute(_sel(DatabaseChangeLog).where(
+            DatabaseChangeLog.cache_key == kimi_primary.canonical_key(row.cache_key),
+            DatabaseChangeLog.created_at >= row.created_at,
+            DatabaseChangeLog.origin.in_(("operator-edit", "grounded_recheck")))).scalars()
+        corrected_fields = set()
+        for change in changes:
+            corrected_fields.update((change.changes or {}).keys())
+        accepted = (row.proposal or {}).get("correction_evidence") or {}
+        corrected_fields.update(accepted.get("fields") or [])
+        covered = (bool(corrected_fields) if requested <= {"", "record", "ai_answer"}
+                   else requested <= corrected_fields)
+        if not covered:
+            raise HTTPException(422, "apply a sourced correction to the reported fields before "
+                                     "advancing this issue; changing its status does not change visa facts")
     row.status = status
     if body.resolution:
         row.resolution = body.resolution[:1000]
@@ -500,29 +526,8 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
         row.reviewed_by, row.reviewed_at = p.user_id, now
     if status == "published":
         row.published_at = now
-    # "Corrected" has to change what readers actually see. Without this the
-    # cached wrong answer kept serving for the rest of its TTL and the queue
-    # said the problem was fixed. Expiring the row makes the next lookup
-    # re-ask the engine; the reader is never shown a stale answer that an
-    # operator has just declared wrong.
-    if status in ("corrected", "published") and row.cache_key:
-        from sqlalchemy import select as _sel
-        from .visa_snapshot import change_log
-        from .visa_snapshot.models import KimiRouteGuidanceCache
-        cached = db.execute(_sel(KimiRouteGuidanceCache).where(
-            KimiRouteGuidanceCache.cache_key == row.cache_key)).scalars().first()
-        if cached is not None:
-            # The expiry IS a change readers can see: the served answer is
-            # withdrawn until the route re-warms. Their §4.1.2 asks change
-            # management to distinguish add/modify/DELETE, and this was the
-            # one path that removed an answer without writing the log.
-            change_log.record(db, row.cache_key, cached.route,
-                              cached.guidance, None,
-                              origin=f"issue-{status}",
-                              note=f"answer withdrawn while issue "
-                                   f"{row.id} ({row.field or 'record'}) "
-                                   f"is {status}")
-            db.delete(cached)
+    # The sourced edit has already changed the served projection in place.
+    # Retain the raw row, its provenance and all existing references.
     db.commit()
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_issue_" + status,
@@ -568,21 +573,51 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
     doc_codes = {e["code"] for e in load_registry("travel_document_types")["entries"]}
     if body.travel_document_type and body.travel_document_type not in doc_codes:
         raise HTTPException(422, f"unknown travel_document_type; one of {sorted(doc_codes)}")
-    key = body.cache_key.strip() or kimi_primary.cache_key({
+    key = kimi_primary.canonical_key(body.cache_key.strip()) if body.cache_key.strip() else kimi_primary.cache_key({
         "passport_nationality": nat, "lawful_country_of_residence": nat,
         "destination_country": dest,
         "travel_purpose": body.travel_purpose or "tourism",
         "travel_document_type": body.travel_document_type or "ordinary_passport"})
+    expected = kimi_primary.cache_key({"passport_nationality": nat,
+        "destination_country": dest, "travel_purpose": body.travel_purpose or "tourism",
+        "travel_document_type": body.travel_document_type or "ordinary_passport"})
+    if key != expected:
+        raise HTTPException(422, "cache_key does not match the requested route")
     row = db.execute(_select(KimiRouteGuidanceCache).where(
         KimiRouteGuidanceCache.cache_key == key)).scalars().first()
     if row is None:
         raise HTTPException(404, "no cached answer for that route")
-    ver = dict(row.verification or {})
-    ver["operator_released"] = {
+    release = {
         "by": p.user_id, "at": datetime.now(timezone.utc).isoformat(),
         "note": (body.note or "")[:500]}
-    row.verification = ver
-    db.commit()
+    # The API and freshness sweep are separate processes. Compare the exact
+    # metadata read immediately before the write, so a concurrent page check
+    # or detail-stage update cannot be replaced by a stale ORM dictionary.
+    from sqlalchemy import update as _update
+    from .visa_snapshot.freshness import json_unchanged
+    row_id = row.id
+    for attempt in range(3):
+        with db.no_autoflush:
+            current = db.execute(_select(KimiRouteGuidanceCache.verification).where(
+                KimiRouteGuidanceCache.id == row_id)).first()
+        if current is None:
+            raise HTTPException(404, "no cached answer for that route")
+        previous = current.verification
+        merged = dict(previous) if isinstance(previous, dict) else {}
+        merged["operator_released"] = release
+        statement = _update(KimiRouteGuidanceCache).where(
+            KimiRouteGuidanceCache.id == row_id,
+            json_unchanged(db, KimiRouteGuidanceCache.verification, previous)
+        ).values(verification=merged).execution_options(synchronize_session=False)
+        with db.no_autoflush:
+            written = db.execute(statement)
+        if written.rowcount == 1:
+            db.commit()
+            db.expire(row, ["verification"])
+            break
+        db.rollback()
+    else:
+        raise HTTPException(409, "the route was updated concurrently; reload it before releasing")
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_answer_released",
                  detail={"nationality": nat, "destination": dest}, actor=p.user_id)
@@ -754,19 +789,9 @@ def _answer_anyway(db, route: dict, exc) -> dict:
     return near
 
 
-_HELD_LEAKS = ("guidance", "workflow_plan", "advisories",
-               "missing_fields", "contradictions", "apply_steps")
-
-
-def _held_envelope(out: dict) -> dict:
-    """A held answer's claims never leave the server — and a claim is not
-    only the guidance: the workflow plan, advisories and missing-field lists
-    all hint at the withheld verdict (a live audit read the verdict straight
-    out of workflow_plan on a held row). Only the identity and the flags
-    survive."""
-    out = {k: v for k, v in out.items() if k not in _HELD_LEAKS}
-    out["guidance"] = None
-    return out
+from .visa_snapshot.records_guard import (
+    apply_records_hold as _apply_records_hold, held_envelope as _held_envelope,
+    grounded_verdict_supported as _grounded_verdict_supported)
 
 
 class DatabaseIssueIn(BaseModel):
@@ -804,9 +829,13 @@ def travel_database_report_issue(body: DatabaseIssueIn, db=Depends(get_session),
              "destination_country": dest, "travel_purpose": body.travel_purpose or "tourism"}
     route["visa_category"] = kimi_primary.category_for_purpose(
         route["travel_purpose"])
+    expected = kimi_primary.canonical_key(kimi_primary.cache_key(route))
+    reported_key = kimi_primary.canonical_key(body.cache_key.strip()[:200] or expected)
+    if reported_key != expected:
+        raise HTTPException(422, "cache_key does not match the reported route")
     row = DatabaseIssueReport(
         org_id=p.org_id,
-        cache_key=(body.cache_key.strip()[:200]
+        cache_key=kimi_primary.canonical_key(body.cache_key.strip()[:200]
                    or kimi_primary.cache_key(route)),
         route=route,
         field=(body.field or "")[:64], note=(body.note or "")[:1000],
@@ -850,8 +879,9 @@ def travel_database_issue_accept_proposal(issue_id: str,
     every verified fact), the reader sees them immediately, and the issue
     moves to corrected for the usual second-person review."""
     from datetime import datetime, timezone
-    from .visa_snapshot import verified_overrides
-    from .visa_snapshot.models import DatabaseIssueReport
+    from .visa_snapshot import verified_overrides, kimi_primary
+    from .visa_snapshot.models import DatabaseIssueReport, KimiRouteGuidanceCache
+    from sqlalchemy import select as _select
     require_admin(p)
     row = db.get(DatabaseIssueReport, issue_id)
     if row is None:
@@ -865,6 +895,13 @@ def travel_database_issue_accept_proposal(issue_id: str,
         raise HTTPException(422, "monitor disputes are ruled through the "
                                  "normal stages, not accepted wholesale")
     rt = dict(row.route or {})
+    canonical = kimi_primary.cache_key(rt)
+    if kimi_primary.canonical_key(row.cache_key) != canonical:
+        raise HTTPException(422, "issue cache_key does not match its route")
+    cached = db.execute(_select(KimiRouteGuidanceCache).where(
+        KimiRouteGuidanceCache.cache_key == canonical)).scalars().first()
+    if cached is None:
+        raise HTTPException(422, "no canonical cached answer exists to validate this correction")
     quotes = "; ".join(f"{k}: {str(v.get('quote') or '')[:120]}"
                        for k, v in (prop.get("fields") or {}).items()
                        if isinstance(v, dict) and v.get("quote"))
@@ -873,6 +910,7 @@ def travel_database_issue_accept_proposal(issue_id: str,
                        "travel_purpose": rt.get("travel_purpose", "tourism")},
              "verified_at": datetime.now(timezone.utc).date().isoformat(),
              "verified_by": f"Ellis AI research, accepted by {p.user_id}",
+             "verifier": "human",
              "source_url": str(prop.get("source_url") or ""),
              "note": (f"Flag by {row.reported_by}: {row.note or row.field}. "
                       f"Ellis read the official page; quotes: {quotes}")[:400],
@@ -881,7 +919,7 @@ def travel_database_issue_accept_proposal(issue_id: str,
     if doc and doc != "ordinary_passport":
         entry["route"]["travel_document_type"] = doc
     try:
-        verified_overrides.append_operator_entry(entry)
+        verified_overrides.append_operator_entry(entry, guidance=cached.guidance)
     except ValueError as e:
         raise HTTPException(422, str(e))
     row.status = "corrected"
@@ -890,6 +928,9 @@ def travel_database_issue_accept_proposal(issue_id: str,
                       f"{prop.get('source_url')}")[:1000]
     row.resolved_by = p.user_id
     row.resolved_at = datetime.now(timezone.utc)
+    row.proposal = dict(prop, correction_evidence={
+        "fields": sorted(fields), "source_url": entry["source_url"],
+        "at": row.resolved_at.isoformat(), "accepted_by": p.user_id})
     db.commit()
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_issue_proposal_accepted",
@@ -908,39 +949,50 @@ def travel_database_freshness(db=Depends(get_session),
     override covers it. Admin only; read only."""
     from datetime import datetime, timezone
     from sqlalchemy import select as _select
-    from .visa_snapshot import verified_overrides
+    from .visa_snapshot import verified_overrides, tstation
     from .visa_snapshot.models import KimiRouteGuidanceCache
     require_admin(p)
     now = datetime.now(timezone.utc)
     rows = []
     for r in db.execute(_select(KimiRouteGuidanceCache).order_by(
             KimiRouteGuidanceCache.fresh_until)).scalars():
-        from .visa_snapshot import freshness as _fresh
+        from .visa_snapshot import freshness as _fresh, kimi_primary
+        if not kimi_primary.is_canonical_key(r.cache_key):
+            continue
         # The latest attempt, for the sweep's own bookkeeping, and the
         # grounding that counts: a failed attempt never erases a good read.
         gc = (r.verification or {}).get("grounded_check") or {}
         eff = _fresh.effective_check(r.verification)
         fresh_until = r.fresh_until
+        merged, provenance = verified_overrides.apply(r.guidance or {}, r.route or {})
+        disputed = sorted(set((eff.get("disputed_fields") or []) +
+            _fresh.active_disputed_fields(db, r.cache_key) + kimi_primary.serve_time_invariants(merged)))
+        human = bool((provenance or {}).get("verifier") == "human" and
+                     tstation.verdict_provenance_supported(provenance) and not disputed)
+        verified = bool(_grounded_verdict_supported(eff) and not disputed)
         rows.append({
             "cache_key": r.cache_key,
             "route": {k: (r.route or {}).get(k) for k in
                       ("passport_nationality", "destination_country",
-                       "travel_purpose")},
+                       "travel_purpose", "travel_document_type")},
             "generated_at": r.generated_at.isoformat() if r.generated_at else None,
             "fresh_until": fresh_until.isoformat() if fresh_until else None,
             "stale": bool(fresh_until and
                           fresh_until.replace(tzinfo=fresh_until.tzinfo or timezone.utc)
                           < now),
-            "grounded": bool(eff),
-            "grounded_at": gc.get("at"),
+            "grounded": verified,
+            "grounded_at": eff.get("at") if verified else None,
+            "last_attempt_at": gc.get("at"),
             "last_attempt_outcome": gc.get("outcome"),
             "read_at": eff.get("at"),
             "grounded_source": eff.get("source_url"),
             "grounded_consistent": eff.get("consistent"),
             "changed_fields": eff.get("changed_fields") or [],
-            "disputed_fields": eff.get("disputed_fields") or [],
-            "human_override": verified_overrides.find(r.route or {}) is not None,
+            "disputed_fields": disputed,
+            "human_override": human,
+            **_freshness_field_check(eff),
         })
+    timer = _sweep_timer_status()
     return {"answers": rows,
             "summary": {
                 "total": len(rows),
@@ -952,77 +1004,151 @@ def travel_database_freshness(db=Depends(get_session),
                                 if x["grounded"] and not x["human_override"]),
                 "human_verified": sum(1 for x in rows if x["human_override"]),
                 "disputed": sum(1 for x in rows if x["disputed_fields"]),
-                "next_sweep_at": _next_sweep_at(),
-                # The truth behind "every record at least every 48 hours":
-                # how many canonical answers carry a grounded check inside
-                # the window right now, and how old the oldest check is.
-                # Transit variants inherit their route's corrections, so
-                # they are not counted as separate promises.
+                "next_sweep_at": timer.get("next_sweep_at"),
+                "scheduler": timer,
+                "last_run": _last_sweep_status(),
+                "sweep_interval_hours": 6,
+                "attempt_target_hours": 6,
+                # Current six-hour attempt/read/verdict coverage and legacy
+                # 24/48-hour comparisons. Only canonical destination answers
+                # count; request-specific transit checks are separate.
                 **_recheck_coverage(rows, now),
             }}
 
 
+def _freshness_field_check(check: dict) -> dict:
+    """Expose the stored strict reading's scope, not private provider payloads.
+    These fields describe the reading at verification_at, which may precede
+    a later failed attempt. Renewal is never inferred from a verified verdict.
+    """
+    def strings(value):
+        return [x for x in value if isinstance(x, str)] if isinstance(value, (list, tuple)) else []
+    verified = strings(check.get("verified_fields"))
+    sources = check.get("field_sources")
+    sources = sources if isinstance(sources, dict) else {}
+    field_sources = {field: {name: value for name, value in source.items()
+        if name in ("source_url", "checked_at", "quote", "scope_quote") and isinstance(value, str)}
+        for field, source in sources.items() if field in verified and isinstance(source, dict)}
+    source_checks = []
+    for source in check.get("source_checks") if isinstance(check.get("source_checks"), list) else []:
+        if not isinstance(source, dict):
+            continue
+        source_checks.append({**{name: source[name] for name in ("source_url", "outcome", "at")
+            if isinstance(source.get(name), str)},
+            "verified_fields": strings(source.get("verified_fields")),
+            "unquoted_fields": strings(source.get("unquoted_fields"))})
+    return {"verification_at": check.get("at"), "evidence_contract": check.get("evidence_contract"),
+        "verified_fields": verified, "unverified_fields": strings(check.get("unverified_fields")),
+        "renewed": check.get("renewed") is True,
+        "unchecked_sources": strings(check.get("unchecked_sources")),
+        "field_sources": field_sources, "source_checks": source_checks}
+
+
 def _recheck_coverage(rows: list, now) -> dict:
+    """Separate attempts, relevant page reads, and actual verdict checks."""
     from datetime import datetime, timedelta
-    canonical = [x for x in rows if "|via:" not in (x.get("cache_key") or "")]
-    def _at(x):
-        raw = x.get("grounded_at")
-        if not raw:
-            return None
-        try:
-            dt = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
-        except ValueError:
-            return None
-        return dt if dt.tzinfo else dt.replace(tzinfo=now.tzinfo)
-    ats = [(_at(x), x) for x in canonical]
-    h48 = now - timedelta(hours=48)
-    h24 = now - timedelta(hours=24)
-    stamped = [a for a, _ in ats if a is not None]
-    # Attempts are the promise ("every record at least every 48 hours");
-    # successful reads are the truth behind it. A site that blocks robots
-    # counts as attempted, never as read, so both numbers are shown.
-    reads = [_at(dict(x, grounded_at=x.get("read_at"))) for x in canonical]
-    reads = [a for a in reads if a is not None]
-    return {
-        "canonical_total": len(canonical),
-        "checked_48h": sum(1 for a in stamped if a >= h48),
-        "checked_24h": sum(1 for a in stamped if a >= h24),
-        "read_48h": sum(1 for a in reads if a >= h48),
-        "never_read": len(canonical) - len(reads),
-        "never_checked": len(canonical) - len(stamped),
-        "oldest_check_at": min(stamped).isoformat() if stamped else None,
-    }
+    from .visa_snapshot import kimi_primary
+    rows = [x for x in rows if kimi_primary.is_canonical_key(x.get("cache_key") or "")]
+    def stamps(field):
+        result = []
+        for x in rows:
+            try:
+                at = datetime.fromisoformat(str(x.get(field) or "").replace("Z", "+00:00"))
+                at = at if at.tzinfo else at.replace(tzinfo=now.tzinfo)
+                if at <= now:  # Future/corrupt timestamps cannot prove freshness.
+                    result.append(at)
+            except (ValueError, TypeError):
+                pass
+        return result
+    attempted, read, verified = stamps("last_attempt_at"), stamps("read_at"), stamps("grounded_at")
+    h48, h24, target = (now - timedelta(hours=h) for h in (48, 24, 6))
+    return {"canonical_total": len(rows),
+        "checked_48h": sum(a >= h48 for a in verified),
+        "checked_24h": sum(a >= h24 for a in verified),
+        "attempted_48h": sum(a >= h48 for a in attempted),
+        "read_48h": sum(a >= h48 for a in read),
+        "attempted_target": sum(a >= target for a in attempted),
+        "read_target": sum(a >= target for a in read),
+        "verified_target": sum(a >= target for a in verified),
+        "never_read": len(rows) - len(read),
+        "never_checked": len(rows) - len(verified),
+        "overdue_attempts": len(rows) - sum(a >= target for a in attempted),
+        "oldest_check_at": min(verified).isoformat() if verified else None}
+
+
+def _sweep_timer_status() -> dict:
+    """Report the real timer state; a missing/stopped timer has no countdown."""
+    import subprocess
+    from datetime import datetime, timezone
+    try:
+        proc = subprocess.run(["systemctl", "show", "ellis-freshness.timer",
+            "--property=LoadState,ActiveState,NextElapseUSecRealtime"],
+            capture_output=True, text=True, timeout=2)
+        fields = dict(line.split("=", 1) for line in (proc.stdout or "").splitlines() if "=" in line)
+        active = proc.returncode == 0 and fields.get("LoadState") == "loaded" and fields.get("ActiveState") == "active"
+        at = None
+        raw = fields.get("NextElapseUSecRealtime", "")
+        if active and raw not in ("", "n/a", "0"):
+            parts = raw.split()
+            if len(parts) >= 3 and parts[-1] == "UTC":
+                dt = datetime.strptime(parts[1] + " " + parts[2], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                if dt > datetime.now(timezone.utc):
+                    at = dt.isoformat()
+        return {"status": "active" if active else "inactive", "next_sweep_at": at}
+    except Exception:
+        return {"status": "unavailable", "next_sweep_at": None}
 
 
 def _next_sweep_at() -> str | None:
-    """When the next automatic re-verification sweep fires, as truth: read
-    from the systemd timer that actually runs it, falling back to the
-    timer's own schedule (minute 20 past 00/06/12/18 UTC) where systemd is
-    not available, so a dev machine still shows the real cadence."""
-    import subprocess
-    from datetime import datetime, timedelta, timezone
-    try:
-        p = subprocess.run(
-            ["systemctl", "show", "ellis-freshness.timer",
-             "--property=NextElapseUSecRealtime", "--value"],
-            capture_output=True, text=True, timeout=2)
-        raw = (p.stdout or "").strip()
-        # "Wed 2026-09-02 06:25:45 UTC" — locale-stable under systemd.
-        if raw and raw not in ("", "n/a", "0"):
-            parts = raw.split()
-            if len(parts) >= 3:
-                dt = datetime.strptime(parts[1] + " " + parts[2],
-                                       "%Y-%m-%d %H:%M:%S")
-                return dt.replace(tzinfo=timezone.utc).isoformat()
-    except Exception:  # noqa: BLE001 - fall through to the schedule
-        pass
-    now = datetime.now(timezone.utc)
-    for hour in (0, 6, 12, 18, 24):
-        candidate = (now.replace(hour=0, minute=20, second=0, microsecond=0)
-                     + timedelta(hours=hour))
-        if candidate > now:
-            return candidate.isoformat()
-    return None
+    return _sweep_timer_status().get("next_sweep_at")
+
+
+def _last_sweep_status() -> dict | None:
+    from .visa_snapshot import freshness
+    from datetime import datetime, timezone
+    data = freshness.read_sweep_status()
+    if not data:
+        return None
+    # Public monitoring fields only; never expose arbitrary raw error/log text.
+    allowed = ("state", "running", "started_at", "finished_at", "updated_at", "elapsed_seconds",
+        "due_after_hours", "time_budget_seconds", "row_limit", "due_before", "selected",
+        "attempted", "read", "verified", "corrected", "disputed", "unreadable", "skipped_pending",
+        "errors", "integrity_violations", "backlog_remaining", "completed", "workers",
+        "in_flight", "cycle_unattempted", "renewed", "partial", "deferred",
+        "last_progress_at", "eligible_now", "scheduled", "target_cycle_hours",
+        "route_budget_seconds", "integrity_resolved")
+    result = {k: data[k] for k in allowed if k in data}
+    result.update(status=data.get("state"), checked=data.get("attempted", 0))
+    if data.get("running") is True:
+        # SIGKILL/power loss cannot execute the worker's finally block. A
+        # persisted running flag alone never proves the worker still exists.
+        # This works for scheduled and manually launched workers alike.
+        state = reason = None
+        pid = data.get("process_id")
+        if isinstance(pid, int) and not isinstance(pid, bool) and pid > 0:
+            try:
+                os.kill(pid, 0)  # liveness check only; sends no signal
+            except ProcessLookupError:
+                state, reason = "interrupted", "worker_no_longer_exists"
+            except (PermissionError, OSError):
+                pass  # no permission is not proof the worker died
+        else:
+            state, reason = "status_unconfirmed", "worker_identity_missing"
+        if state is None:
+            try:
+                updated = datetime.fromisoformat(str(data.get("updated_at") or "").replace("Z", "+00:00"))
+                if updated.tzinfo is None:
+                    raise ValueError("progress timestamp has no timezone")
+                age = (datetime.now(timezone.utc) - updated).total_seconds()
+                if age < -5 or age > freshness.ROUTE_BUDGET_SECONDS + 60:
+                    state, reason = "status_stale", "no_recent_progress"
+            except (TypeError, ValueError, OverflowError):
+                state, reason = "status_unconfirmed", "progress_timestamp_invalid"
+        if state:
+            result.update(running=False, state=state, status=state, status_reason=reason)
+            # Preserve finished_at=None: an interrupted/unconfirmed worker is
+            # not a completed run, and this read must not rewrite its history.
+    return result
 
 
 class FreshnessDrillIn(BaseModel):
@@ -1230,18 +1356,12 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
     from .visa_snapshot import kimi_primary, verified_overrides, tstation
     from .visa_snapshot.models import KimiRouteGuidanceCache
     verified_overrides.reload()
-    # One cached answer per canonical route decides the dataset. A route is
-    # also cached per transit itinerary (via:) and per arrival month, because
-    # those change the ADVICE, but the 25-field view is the route's current
-    # product table: mixing vintages let a stale variant's half-empty
-    # products stand beside the fresh row's complete ones as phantom twins
-    # (CHN→JPN listed a fee-less August answer next to September's full one).
-    # The freshest primary, non-transit answer for each (nationality,
-    # destination, purpose, document) wins; transit-only routes fall back to
-    # what they have.
+    # Only canonical policy rows can represent current route products.
+    # Legacy dated/residence/transit rows stay in storage for migration and
+    # history, but an orphan variant is never promoted to a route decision.
     candidates: dict[tuple, tuple] = {}
     for r in db.execute(_select(KimiRouteGuidanceCache)).scalars():
-        if f"|{kimi_primary.CACHE_VERSION}" not in (r.cache_key or ""):
+        if not kimi_primary.is_canonical_key(r.cache_key or ""):
             continue
         route = dict(r.route or {})
         if nationality and str(route.get("passport_nationality") or "").upper() != nationality.upper():
@@ -1271,9 +1391,7 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
         # it for being newest is exactly how the console showed Hong Kong
         # to Vietnam as "Visa-free" beside the verified visa-required row.
         # Among canonical rows the freshest wins.
-        _parts = (r.cache_key or "").split("|")
-        canonical_month = len(_parts) > 5 and _parts[5] == "unknown"
-        score = ("|via:" not in (r.cache_key or ""), canonical_month,
+        score = (kimi_primary.is_canonical_key(r.cache_key),
                  r.status == "KIMI_PRIMARY",
                  r.generated_at.isoformat() if r.generated_at else "")
         prev = candidates.get(gkey)
@@ -1283,20 +1401,33 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
     out = []
     for _score, r, route in candidates.values():
         doc = route["travel_document_type"]
-        g, prov = verified_overrides.apply(dict(r.guidance or {}), route)
-        g = kimi_primary.apply_portal_fallback({"guidance": g}, route)["guidance"]
+        reader = kimi_primary.apply_verified_overrides(kimi_primary._result(
+            r.status, kimi_primary.served_guidance(r), cached=True,
+            stale=kimi_primary._is_stale(r), missing=r.missing_fields,
+            contradictions=r.contradictions, model=r.model,
+            released=bool((r.verification or {}).get("operator_released"))), route)
+        g, prov = reader["guidance"], reader.get("source_verified")
         collected = (r.generated_at.isoformat() if r.generated_at else "")
         until = (r.fresh_until.isoformat() if r.fresh_until else "")
         # Whether the official page has actually been read and agreed with:
         # the difference between a source and a link nobody opened.
         from .visa_snapshot import freshness as _fresh
         _gc = _fresh.effective_check(r.verification)
-        _grounded = bool(_gc) and bool(_gc.get("consistent"))
+        _grounded = _grounded_verdict_supported(_gc)
         _disputed_now = list(_gc.get("disputed_fields") or [])
+        _disputed_now.extend(_fresh.active_disputed_fields(db, r.cache_key))
+        _problems = kimi_primary.serve_time_invariants(g)
+        if _problems:
+            _disputed_now.extend(_problems)
+        _route_state = _apply_records_hold(route, {
+            **reader, "grounded_check": _gc,
+            "detail_pending": bool((r.verification or {}).get("detail_pending")),
+            "operator_released": bool((r.verification or {}).get("operator_released")),
+        }, db)
         for rec in tstation.records_for_route(route, g, prov, collected, until,
                                               grounded_ok=_grounded,
                                               disputed_fields=_disputed_now):
-            if not rec.get("source_url"):
+            if not rec.get("source_url") and not rec.get("_separate_permission"):
                 # The destination's browser-verified official portal is the
                 # official reference page for a record whose answer carries
                 # no page of its own (visa-free routes especially).
@@ -1305,18 +1436,21 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
                 if portal:
                     rec["source_url"] = portal
                     rec["data_source"] = (rec.get("data_source")
-                                          or "Official government portal")
+                                          or "Official portal (reference only)")
             if requirement and str(rec.get("visa_requirement") or "") != requirement:
                 continue
             if confidence and str(rec.get("confidence_level") or "").lower() \
                     != confidence.strip().lower():
                 continue
             rec["_cache_key"] = r.cache_key
-            rec["_status"] = r.status
+            rec["_status"] = kimi_primary.STATUS_UNCERTAIN if _problems else r.status
+            rec["_contradictions"] = _problems
             # Whether an operator has released this answer despite low
             # confidence: without it the release half of the confidence gate
             # cannot be audited from the records surface.
             rec["_released"] = bool((r.verification or {}).get("operator_released"))
+            rec["_held"] = bool(_route_state.get("held"))
+            rec["_review_required"] = bool(_route_state.get("review_required"))
             # How solidly the source BACKS what this record shows:
             #   human-quote        a person verified these fields against the
             #                      named page and quoted it
@@ -1327,10 +1461,13 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
             gc = _gc
             # Fields the page disputed that no human has ruled on yet: the
             # spec's third checklist state, 未过审 (not approved).
-            rec["_disputed"] = list(gc.get("disputed_fields") or [])
-            if prov:
-                rec["_source_check"] = "human-quote"
-            elif gc.get("outcome") == "checked" and gc.get("consistent"):
+            rec["_disputed"] = _disputed_now
+            record_prov = rec.get("_product_source_verified") or (None if rec.get("_separate_permission") else prov)
+            if rec.get("_separate_permission"):
+                gc = {}
+            if tstation.verdict_provenance_supported(record_prov):
+                rec["_source_check"] = "human-quote" if record_prov.get("verifier") == "human" else "ai-quote"
+            elif _grounded_verdict_supported(gc):
                 rec["_source_check"] = "grounded-consistent"
             elif rec.get("source_url"):
                 rec["_source_check"] = "reference"
@@ -1352,7 +1489,7 @@ def _dedupe_dataset_rows(rows: list[dict]) -> list[dict]:
     survives, so deduplicating can never downgrade what a reader sees.
     """
     from .visa_snapshot import tstation as _ts
-    rank = {"human-quote": 3, "grounded-consistent": 2, "reference": 1,
+    rank = {"human-quote": 4, "grounded-consistent": 3, "ai-quote": 2, "reference": 1,
             "unchecked": 0}
     best: dict[tuple, dict] = {}
     order: list[tuple] = []
@@ -1419,8 +1556,12 @@ def travel_database_records(nationality: str = "", destination: str = "",
                          # the one that fits field 22.
                          "corroborating_sources": r.get("corroborating_sources") or [],
                          "cache_key": r["_cache_key"],
+                         "status": r.get("_status"),
+                         "contradictions": r.get("_contradictions") or [],
                          "source_check": r.get("_source_check", "unchecked"),
                          "operator_released": r.get("_released", False),
+                         "held": r.get("_held", False),
+                         "review_required": r.get("_review_required", False),
                          "field_status": _with_pending(tstation.field_status(r),
                                                        r.get("_disputed")),
                          "completeness": round(tstation.completeness(r), 4)}
@@ -1430,8 +1571,9 @@ def travel_database_records(nationality: str = "", destination: str = "",
                         "high": sum(1 for r in rows if r.get("confidence_level") == "High"),
                         "medium": sum(1 for r in rows if r.get("confidence_level") == "Medium"),
                         "low": sum(1 for r in rows if r.get("confidence_level") == "Low"),
-                        "source_coverage": round(sum(1 for r in rows if r.get("source_url")) / len(rows), 4) if rows else None,
-                        "substantiated": sum(1 for r in rows if r.get("_source_check") in ("human-quote", "grounded-consistent"))}}
+                        "source_coverage": round(sum(1 for r in rows if r.get("_source_check") in ("human-quote", "ai-quote", "grounded-consistent")) / len(rows), 4) if rows else None,
+                        "source_link_coverage": round(sum(1 for r in rows if r.get("source_url")) / len(rows), 4) if rows else None,
+                        "substantiated": sum(1 for r in rows if r.get("_source_check") in ("human-quote", "ai-quote", "grounded-consistent"))}}
 
 
 def _change_source(db, row) -> dict:
@@ -1715,6 +1857,7 @@ def travel_database_record_edit(body: DatabaseRecordEditIn,
     entry = {"route": route,
              "verified_at": date.today().isoformat(),
              "verified_by": f"Trip.com operations ({p.user_id})",
+             "verifier": "human",
              "source_url": body.source_url.strip(),
              "note": body.note.strip()[:400],
              "fields": body.fields or {}}
@@ -1765,7 +1908,8 @@ def travel_database_record_edit(body: DatabaseRecordEditIn,
             hit["notes"] = str(pf["notes"]).strip()[:340]
         entry["fields"]["visa_products"] = prods
     try:
-        verified_overrides.append_operator_entry(entry)
+        verified_overrides.append_operator_entry(entry,
+            guidance=cached.guidance if cached is not None else None)
     except ValueError as e:
         raise HTTPException(422, str(e))
     after = None
@@ -1821,7 +1965,7 @@ def travel_database_route_research(body: DatabaseRouteResearchIn,
              "travel_purpose": purpose,
              "visa_category": kimi_primary.category_for_purpose(purpose)}
     try:
-        out = kimi_primary.get_route_guidance(db, route, stage="core",
+        out = kimi_primary.get_route_guidance(db, route, stage="full",
                                               after=None)
     except (kimi_primary.GuidanceTimeout, kimi_primary.GuidanceUnavailable,
             kimi_primary.GuidanceProviderError) as e:
@@ -1831,13 +1975,14 @@ def travel_database_route_research(body: DatabaseRouteResearchIn,
         report = freshness.recheck_route(db, route)
     except Exception:  # noqa: BLE001 — a research failure is a report, not a 500
         report = None
-    # Serve the post-research answer.
+    # Serve the post-research answer without repeating the detail wait.
     try:
         out = kimi_primary.get_route_guidance(db, route, stage="core",
                                               after=None)
     except Exception:  # noqa: BLE001
         pass
-    g = out.get("guidance") or {}
+    out = _apply_records_hold(route, out, db)
+    g = {} if out.get("held") else (out.get("guidance") or {})
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_route_research",
                  detail={"nationality": nat, "destination": dest,
@@ -1982,53 +2127,58 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     if _comp and not _comp_nat:
         _comp_nat, _comp = assistant.split_nationality(body.question, _comp)
     if _comp_nat and len(_comp) >= 2:
-        from sqlalchemy import select as _sel
-        from .visa_snapshot import special_policies as _sp
-        from .visa_snapshot import verified_overrides as _vo
-        from .visa_snapshot.models import KimiRouteGuidanceCache as _KC
+        comp_context = body.context or {}
+        comp_question = str(body.question or "")
+        comp_lower = comp_question.lower()
+        comp_purpose = next((name for name, words in kimi_primary._PURPOSE_WORDS
+                             if any(word in comp_lower for word in words)),
+                            comp_context.get("travel_purpose") or "tourism")
+        if any(word in comp_lower for word in ("tourism", "tourist", "旅游", "旅遊")):
+            comp_purpose = "tourism"
+        comp_doc = kimi_primary._doc_from_text(comp_question, comp_lower)
+        if any(word in comp_lower for word in ("ordinary", "普通护照", "普通護照")):
+            comp_doc = "ordinary_passport"
+        comp_doc = comp_doc or comp_context.get("travel_document_type") or "ordinary_passport"
+        comp_arrival = kimi_primary._extract_arrival(comp_question) or comp_context.get("arrival_date")
         sides = []
         for dch in _comp[:3]:
             rte = {"passport_nationality": _comp_nat,
                    "passport_issuing_country": _comp_nat,
-                   "lawful_country_of_residence": _comp_nat,
-                   "travel_document_type": "ordinary_passport",
-                   "destination_country": dch, "travel_purpose": "tourism",
-                   "visa_category": kimi_primary.category_for_purpose("tourism")}
-            # Any cached answer for the pair serves the comparison: the
-            # exact key carries a policy month or a document slot that a
-            # comparative question never states, and an exact miss called
-            # a fully answered route "not answered yet".
-            _cands = db.execute(_sel(_KC).where(_KC.cache_key.like(
-                f"{_comp_nat}|%|{dch}|%"))).scalars().all()
-            _cands = [r for r in _cands if r.guidance
-                      and f"|{kimi_primary.CACHE_VERSION}" in (r.cache_key or "")]
-
-            def _side_rank(r):
-                parts = r.cache_key.split("|")
-                return (len(parts) <= 3 or parts[3] != "tourism",
-                        "doc:" in r.cache_key, "via:" in r.cache_key,
-                        r.status != kimi_primary.STATUS_PRIMARY)
-            row = sorted(_cands, key=_side_rank)[0] if _cands else None
+                   "lawful_country_of_residence": comp_context.get("residence") or _comp_nat,
+                   "travel_document_type": comp_doc,
+                   "destination_country": dch, "travel_purpose": comp_purpose,
+                   "visa_category": kimi_primary.category_for_purpose(comp_purpose)}
+            if comp_arrival:
+                rte["arrival_date"] = comp_arrival
+            # A different purpose or travel document is a different rule.
+            # Compare only the exact canonical route through the same final
+            # override and evidence gate used by the ordinary lookup.
+            row = kimi_primary._cached(db, kimi_primary.cache_key(rte))
             side = {"nationality": _comp_nat, "destination": dch}
             if row is None:
                 side["unverified"] = ("Ellis has not answered this route "
                                       "yet. Ask it on its own for a full "
                                       "answer.")
             else:
-                g2, _prov2 = _vo.apply(dict(row.guidance or {}), rte)
-                side["facts"] = {k: g2.get(k) for k in
+                try:
+                    side_out = kimi_primary.get_route_guidance(db, rte, stage="core")
+                    side_out = _apply_records_hold(rte, side_out, db)
+                except (kimi_primary.GuidanceTimeout, kimi_primary.GuidanceUnavailable,
+                        kimi_primary.GuidanceProviderError):
+                    side_out = {"held": True}
+                if side_out.get("held") or not side_out.get("guidance"):
+                    side["held"] = True
+                else:
+                    g2 = side_out["guidance"]
+                    side["facts"] = {k: g2.get(k) for k in
                                  ("disposition", "permitted_stay",
                                   "government_fee", "processing_time",
                                   "application_channel_detail", "source_url")
                                  if g2.get(k) is not None}
-                side["policies"] = [n.get("title") for n in
-                                    _sp.for_route(rte)][:3]
             sides.append(side)
-        reply = assistant.compose_reply(
-            body.question, body.history,
-            {"guidance": None, "route": {"nationality": _comp_nat},
-             "comparison": sides})
-        if not reply:
+        # Deterministic prose cannot recreate a held answer from prior chat
+        # history or fill an unverified side from the composer's memory.
+        if sides:
             cjk2 = assistant.wants_chinese(body.question, body.lang)
             words = {"VISA_REQUIRED": ("visa required", "需要签证"),
                      "VISA_EXEMPT": ("no visa needed", "免签"),
@@ -2038,7 +2188,11 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
                      "CONDITIONAL": ("depends on your details", "视情况而定")}
             bits = []
             for sd in sides:
-                if sd.get("unverified"):
+                if sd.get("held"):
+                    bits.append(f"{sd['destination']}: " +
+                                ("正在核对官方来源，请稍后查看" if cjk2
+                                 else "being checked against official sources; please check back shortly"))
+                elif sd.get("unverified"):
                     bits.append(f"{sd['destination']}: " +
                                 ("尚未收录，请单独提问" if cjk2
                                  else "not answered yet, ask it on its own"))
@@ -2060,8 +2214,14 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
             reply = ("各线路结论：" if cjk2 else "Route by route: ") + \
                 ". ".join(bits) + "."
         return {"understood": True, "comparison": True, "reply": reply,
+                "reply_source": "facts",
                 "routes": [{"nationality": _comp_nat,
-                            "destination": s2["destination"]}
+                            "destination": s2["destination"],
+                            "travel_purpose": comp_purpose,
+                            "travel_document_type": comp_doc,
+                            "arrival_date": comp_arrival,
+                            "held": bool(s2.get("held")),
+                            "unverified": bool(s2.get("unverified"))}
                            for s2 in sides],
                 "guidance": None, "held": False}
     try:
@@ -2241,7 +2401,11 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     if parsed.get("residence"):
         # "Indian passport, based in Dubai": the consular district follows
         # where the traveller lives, the rules follow the passport.
-        route["lawful_country_of_residence"] = parsed["residence"]
+        from .visa_snapshot.registry import iso3
+        residence = iso3(str(parsed["residence"]), default=None)
+        if not residence:
+            raise HTTPException(422, "residence must be a real country")
+        route["lawful_country_of_residence"] = residence
     if parsed.get("arrival_date"):
         route["arrival_date"] = parsed["arrival_date"]
     try:
@@ -2252,6 +2416,8 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
         out = _answer_anyway(db, route, e)
     if out.get("cached"):
         _ground_on_access(route, out)
+    out = _apply_records_hold(route, out, db)
+    out["cache_key"] = kimi_primary.canonical_key(kimi_primary.cache_key(route))
     if out.get("held"):
         out = _held_envelope(out)
     out["understood"] = True
@@ -2274,6 +2440,12 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     # transit) carries the verified policy note with the route answer.
     from .visa_snapshot import special_policies
     out = special_policies.attach(out, question=body.question, route=route)
+    if out.get("held"):
+        # Do not ask a model to rephrase a withheld answer: old conversation
+        # history can contain the exact claim that the gate just withdrew.
+        out["reply"] = assistant.fallback_reply(out, body.question, body.lang)
+        out["reply_source"] = "facts"
+        return out
     # The composer phrases the answer from the served facts. Any failure
     # leaves the page's own deterministic summary in charge.
     reply, why = assistant.compose_reply_ex(body.question, body.history, out,
@@ -2355,10 +2527,13 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     purpose = _PURPOSE_ALIAS.get(purpose_in, purpose_in)
     if purpose not in _PURPOSES:
         raise HTTPException(422, f"unknown travel purpose: {purpose_in}")
+    residence = iso3((body.residence or nat).strip(), default=None)
+    if not residence:
+        raise HTTPException(422, "residence must be a real country")
     route = {
         "passport_nationality": nat,
         "passport_issuing_country": nat,
-        "lawful_country_of_residence": (body.residence or nat).strip().upper(),
+        "lawful_country_of_residence": residence,
         "travel_document_type": doc,
         "destination_country": dest,
         "travel_purpose": purpose,
@@ -2407,28 +2582,14 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     # withheld from readers until an operator confirms it. Deciding the hold
     # from the engine's self-rating alone let records the console showed as
     # Low still reach customers unheld.
-    if out.get("guidance") and not out.get("operator_released"):
-        from .visa_snapshot import tstation as _ts
-        # A served grounded_check exists only when the page was actually
-        # read (the engine attaches it from the effective check), so its
-        # presence plus `consistent` is the whole test. Keying on an
-        # "outcome" field the served dict did not carry held every
-        # machine-grounded answer from readers (found 2026-09-03).
-        _gc2 = out.get("grounded_check") or {}
-        _rows = _ts.records_for_route(
-            route, out.get("guidance") or {},
-            (out.get("source_verified") or None),
-            grounded_ok=bool(_gc2) and bool(_gc2.get("consistent")))
-        if _rows and _rows[0].get("confidence_level") == "Low":
-            out["review_required"] = True
-            out["held"] = kimi_primary.hold_enabled()
+    out = _apply_records_hold(route, out, db)
     if out.get("held"):
         out = _held_envelope(out)
     # The answer carries the identity of the cached row it came from. A reader
     # flagging it, or an operator releasing it, then names THAT answer instead
     # of re-deriving a key from a subset of the inputs (which silently missed
     # any lookup carrying a travel date or a transit point).
-    out["cache_key"] = kimi_primary.cache_key(route)
+    out["cache_key"] = kimi_primary.canonical_key(kimi_primary.cache_key(route))
     # A stale cache entry was already served above — freshen it for the next
     # reader without making this one wait.
     if out.get("stale"):
@@ -4693,16 +4854,16 @@ def case_checklist(application_id: str, db=Depends(get_session),
     # claiming a retired second-pass check — it must never reach the UI.
     from .visa_snapshot import kimi_primary
     guidance = kimi_primary.normalize_guidance_label(cg.guidance)
-    if isinstance(guidance, dict) and guidance.get("guidance"):
-        # The registry's pair record outranks stored model prose on whether
-        # this journey is a visa at all (arrival-card case shown as
-        # "tourist visa, 30 SGD", 2026-08-04).
-        guidance = {**guidance, "guidance":
-                    kimi_primary.reconcile_guidance_with_route(
-                        db, guidance["guidance"],
-                        nationality=(app_row.answers or {}).get(
-                            "passport_nationality", ""),
-                        destination=app_row.destination_country or "")}
+    from .visa_snapshot.api import _reader_guidance
+    route = dict(app_row.answers or {}, destination_country=app_row.destination_country or "")
+    guidance = _reader_guidance(db, route, guidance)
+    if guidance.get("held"):
+        return {"guidance": guidance, "disposition": None, "continuation_kind": None,
+                "intake_id": cg.intake_id, "checklist": [], "checklist_counts": {},
+                "intake_stage": {}, "verification": None, "route_workflow_type": None,
+                "form_questions": []}
+    from .visa_snapshot.api import _sync_case_reader_guidance
+    _sync_case_reader_guidance(db, app_row, cg, guidance)
     g_inner = (guidance or {}).get("guidance") or {}
     # Per-item status now reflects the applicant's EXPLICIT submissions (an
     # upload alone never fulfils a requirement) + the durable intake stage.
@@ -5502,6 +5663,7 @@ def _signal_or_gate_error(db, p: Principal, application_id: str, name: str, **kw
     exceptions (service.enforce_safety) into honest 409s. Both /start and
     /signals route through here so neither can bypass the gate."""
     from . import personal_gate, passport_validity
+    from .visa_snapshot.case_evidence import CaseEvidenceBlocked
     from .portal.driver_factory import RealOnlyStop
     try:
         status, _ = service.signal(db, application_id, name, **kwargs)
@@ -5541,6 +5703,8 @@ def _signal_or_gate_error(db, p: Principal, application_id: str, name: str, **kw
         raise HTTPException(409, str(e))
     except passport_validity.PassportBlocked as e:
         raise HTTPException(409, detail={"reason": "passport_validity", "verdict": e.verdict})
+    except CaseEvidenceBlocked as e:
+        raise HTTPException(409, detail=e.detail)
     _record_terminal_execution(db, p, application_id)
     return status
 
@@ -5548,6 +5712,11 @@ def _signal_or_gate_error(db, p: Principal, application_id: str, name: str, **kw
 @app.post("/cases/{application_id}/start")
 def start_case(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
     app_row = _owned(db, p, application_id)
+    from .visa_snapshot.case_evidence import ensure_current_case_guidance, CaseEvidenceBlocked
+    try:
+        ensure_current_case_guidance(db, app_row, for_filing=True)
+    except CaseEvidenceBlocked as exc:
+        raise HTTPException(409, detail=exc.detail) from exc
     # Server-side enforcement for routed cases: the workflow may never start
     # while mandatory checklist documents remain unsubmitted (frontend state is
     # never trusted). Legacy cases without a route checklist are unaffected.
@@ -6130,6 +6299,7 @@ def admin_coverage(db=Depends(get_session), p: Principal = Depends(get_principal
 
 @app.post("/admin/adapters")
 def admin_create_adapter(body: AdapterCreate, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    require_admin(p)
     from . import adapters_admin as aa
     rec = aa.create_adapter(db, country=body.country, visa_type=body.visa_type,
                             config=body.config, actor=p.user_id)
@@ -6149,6 +6319,7 @@ def admin_get_adapter(adapter_id: str, db=Depends(get_session), p: Principal = D
 @app.put("/admin/adapters/{adapter_id}")
 def admin_update_adapter(adapter_id: str, config: dict, db=Depends(get_session),
                          p: Principal = Depends(get_principal)):
+    require_admin(p)
     from . import adapters_admin as aa
     return _adapter_err(lambda: aa.to_dict(aa.update_config(db, adapter_id, config, p.user_id)))
 
@@ -6156,6 +6327,7 @@ def admin_update_adapter(adapter_id: str, config: dict, db=Depends(get_session),
 @app.post("/admin/adapters/{adapter_id}/transition")
 def admin_transition_adapter(adapter_id: str, body: AdapterTransition, db=Depends(get_session),
                              p: Principal = Depends(get_principal)):
+    require_admin(p)
     from . import adapters_admin as aa
     return _adapter_err(lambda: aa.to_dict(aa.transition(
         db, adapter_id, body.to_state, actor=p.user_id, is_admin=(p.role == "admin"),

@@ -4,10 +4,33 @@ import assert from 'node:assert/strict'
 
 import {
   confidenceLevel, fieldRows, documentReady, defaultPreferences, formatFee,
-  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession, resultDisposition,
+  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession, newAdminSession, resultDisposition,
   isDocumentQuestion, splitQuestions, isValidDateShape, collectAnswers
 } from '../../src/renderer/src/lib/visaSession.js'
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
+
+test('operator navigation shares the current tab login without a privileged default', (t) => {
+  const prior = Object.getOwnPropertyDescriptor(globalThis, 'sessionStorage')
+  t.after(() => {
+    if (prior) Object.defineProperty(globalThis, 'sessionStorage', prior)
+    else delete globalThis.sessionStorage
+  })
+  const values = new Map()
+  Object.defineProperty(globalThis, 'sessionStorage', {
+    configurable: true, value: { getItem: (key) => values.get(key) || null }
+  })
+  assert.equal(newAdminSession().token, '')
+  values.set('ellis_operator_access', 'test-only-operator-session')
+  assert.equal(newAdminSession().token, 'test-only-operator-session')
+  assert.equal(newSession().token, 'dev-token')
+  assert.equal(newAdminSession({ token: 'explicit-test-key' }).token, 'explicit-test-key')
+  values.delete('ellis_operator_access')
+  assert.equal(newAdminSession().token, '')
+  Object.defineProperty(globalThis, 'sessionStorage', {
+    configurable: true, get() { throw new Error('storage access denied') }
+  })
+  assert.equal(newAdminSession().token, '')
+})
 
 test('resultDisposition never presents a MOCK completed case as real', () => {
   const d = resultDisposition({

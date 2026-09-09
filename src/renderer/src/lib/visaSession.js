@@ -8,10 +8,15 @@ export function newSession({ orgId = 'ellis-demo', userId = 'applicant-1', token
   return { token, orgId, userId }
 }
 
-// Admin session: the backend grants the admin role only for the dedicated admin
-// token (dev default 'admin-token'; production = a Clerk admin claim). Adapter
-// approval/activation/kill/rollback require this.
-export function newAdminSession({ orgId = 'platform', userId = 'admin-1', token = 'admin-token' } = {}) {
+// Operator screens share the key entered in Quality in this browser tab.
+// A production bundle has no privileged default; the server validates the
+// credential and binds its audit identity regardless of these display headers.
+export function newAdminSession({ orgId = 'platform', userId = 'admin-1', token } = {}) {
+  if (token === undefined) {
+    try { token = globalThis.sessionStorage?.getItem('ellis_operator_access') || '' }
+    catch { token = '' }
+    if (!token && import.meta.env?.DEV) token = 'admin-token'
+  }
   return { token, orgId, userId }
 }
 

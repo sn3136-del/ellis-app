@@ -229,6 +229,8 @@ def enforce_safety(db, application_id: str, wf) -> None:
     app_row = db.get(models.VisaApplication, application_id)
     if app_row is None:
         return
+    from .visa_snapshot.case_evidence import ensure_current_case_guidance
+    ensure_current_case_guidance(db, app_row, for_filing=True)
     ec = classify_adapter(getattr(wf, "adapter", None))
     # Belt-and-suspenders for the real-only boundary: in real-only runtime
     # modes a MOCK/LOCAL execution class must never transition at all.

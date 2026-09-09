@@ -69,8 +69,8 @@ def _fake_fetch_ok(url, timeout_seconds=20):
     host = url.split("/")[2]
     return FetchResult(requested_url=url, ok=True, final_url=url, redirect_chain=[],
                        final_hostname=host, http_status=200,
-                       content_text="Cambodia e-Visa for tourism. Fee USD 30. "
-                                    "Stay 30 days. Singapore citizens eligible.",
+                       content_text="Singapore citizens must obtain an e-Visa for tourism. "
+                                    "Fee USD 30. Stay 30 days.",
                        content_hash="c" * 64, page_language="en",
                        retrieved_at="2026-07-23T12:00:00Z")
 
@@ -262,6 +262,18 @@ def test_no_global_fleet_behavior():
 
 
 def test_date_honesty_for_late_research(db, monkeypatch):
+    from app.visa_snapshot.models import OfficialPortalRecord
+    # A previous authority audit may leave quarantined records behind. These
+    # must never become the first citation in fresh research for another
+    # country. Reproduce independently of global-orchestrator test order.
+    for suffix, status in (("conflicted", "conflicted"), ("wrong-country", "verified_official_domain")):
+        db.add(OfficialPortalRecord(snapshot_date=SNAPSHOT_DATE,
+            portal_uid=f"LAO:evisa:date-honesty-{suffix}", destination_country="LAO",
+            portal_kind="evisa_portal", operator="", operator_kind="government",
+            url="https://www.evisa.gov.kh/", hostnames=["www.evisa.gov.kh"],
+            allowed_redirect_hosts=[], official_linking_source="", supported_categories=[],
+            verification_status=status, evidence_ids=[]))
+    db.commit()
     fetching.set_fetcher(_fake_fetch_ok)
     # Jurisdiction-consistent official source for Laos (.gov.la) so the
     # evidence validator accepts the disposition (this test is about date
@@ -275,7 +287,7 @@ def test_date_honesty_for_late_research(db, monkeypatch):
     job.researched_at_date = "2026-08-15"    # simulated later on-demand research
     db.commit()
     job = ondemand.run_job(db, job.id)
-    assert job.status == "complete"
+    assert job.status == "complete", (job.status, job.error, job.progress[-3:])
     dh = job.result["date_honesty"]
     assert dh["snapshot_supported"] is False
     assert dh["label"] == "Route researched on demand on 2026-08-15"

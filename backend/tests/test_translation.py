@@ -20,7 +20,8 @@ from app.visa_snapshot.models import KimiRouteGuidanceCache
 
 from .test_intake_flow import (H, ANSWERS_SGP, EXEMPT_ANSWER, REQUIRED_ANSWER,
                                _resolve_with_guidance)
-from .test_document_intake import _continue_case, _item, _upload
+from .test_document_intake import (_continue_case, _item, _upload, _source_checked_routes,
+                                   _no_shipped_overrides)
 
 
 @pytest.fixture()

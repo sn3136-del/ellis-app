@@ -317,6 +317,7 @@ export function guidanceIsUsable(g) {
 // the backend is authoritative; this drives the primary CTA only).
 export const CONTINUATION_KIND = {
   VISA_REQUIRED: { kind: 'visa_application', ctaKey: 'guidance.continue.visa' },
+  VISA_ON_ARRIVAL: { kind: 'visa_on_arrival_preparation', ctaKey: 'guidance.continue.voa' },
   VISA_EXEMPT: { kind: 'entry_preparation', ctaKey: 'guidance.continue.exempt' },
   ELECTRONIC_AUTHORIZATION_REQUIRED: { kind: 'authorization_application', ctaKey: 'guidance.continue.eta' },
   CONDITIONAL: { kind: 'conditional_guidance', ctaKey: 'guidance.continue.partial' }
@@ -328,7 +329,7 @@ export const CONTINUATION_KIND = {
 // fail safe to blocked — the guidance page must never dead-end silently, but
 // it must never invent a route either.
 export function continuationMeta(g) {
-  if (!g || typeof g !== 'object') {
+  if (!g || typeof g !== 'object' || g.held === true) {
     return { blocked: true, kind: null, ctaKey: null, partial: false, blockers: [] }
   }
   const disp = g.guidance && typeof g.guidance === 'object' ? g.guidance.disposition : undefined
@@ -502,7 +503,7 @@ const STAGE_BY_STEP = {
 // no submission timeline exists for them at all.
 export function applicableStages(continuationKind, workflowPlan) {
   if (!continuationKind) return null
-  if (continuationKind === 'entry_preparation') return []
+  if (['entry_preparation', 'visa_on_arrival_preparation'].includes(continuationKind)) return []
   const base = ['DRAFT', 'APPLICANT_REVIEW_REQUIRED', 'AUTHORIZATION_PENDING']
   const steps = new Set((Array.isArray(workflowPlan) ? workflowPlan : [])
     .map((s) => (s && s.step) || s))
@@ -589,6 +590,7 @@ const CONTINUE_LABEL_BY_KIND = {
   visa_application: 'checklist.continue.visa',
   authorization_application: 'checklist.continue.eta',
   entry_preparation: 'checklist.continue.exempt',
+  visa_on_arrival_preparation: 'checklist.continue.voa',
   passport_renewal: 'checklist.continue.renewal',
   conditional_guidance: 'checklist.continue.visa'
 }

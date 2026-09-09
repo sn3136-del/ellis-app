@@ -285,7 +285,9 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   // where /start is guaranteed to answer "there is no government website to
   // submit through". The applicant's own words were "a lot of fluff"
   // (2026-08-04).
-  const inPerson = !started && !!packet
+  const guidanceHeld = journey?.guidance?.held === true
+  const arrivalPreparation = kind === 'visa_on_arrival_preparation'
+  const inPerson = !started && !!packet && !arrivalPreparation && !guidanceHeld
   // An H1B parent case is a petition CONTAINER (continuation kinds
   // 'h1b_petition' / 'h1b_filing'), not a single tourist filing. The tourist
   // "Authorize & start" card below runs /start on the parent, which can never
@@ -307,6 +309,19 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           gates every terminal claim, so an unverified run can never render as
           "Application submitted" or show a reference number as real. */}
       {error && <ErrorNote error={error} />}
+      {guidanceHeld && (
+        <div className="card" style={{ padding: 24 }}>
+          {t('guidance.continue.blockedTitle')}
+        </div>
+      )}
+      {!started && arrivalPreparation && !guidanceHeld && (
+        <div className="card" style={{ padding: 24 }}>
+          <h3>{t('guidance.continue.voa')}</h3>
+          <p>{t('guidance.voa.preparation')}</p>
+          {!docsPending && <ContinuePanel t={t} client={client} caseId={caseId}
+            journey={journey} onAdvanced={refresh} />}
+        </div>
+      )}
       {portalBlocked && (
         <PortalObservation t={t} client={client} caseId={caseId} />
       )}
@@ -336,7 +351,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           checklists; hiding it left their primary CTA pointing nowhere).
           In-person routes ask for their documents inside ConsularJourney's
           first step, in the same place as the questions. */}
-      {!started && !inPerson && (
+      {!started && !inPerson && !guidanceHeld && (
         <div ref={docsRef}>
           {/* Form answers the released flow is KNOWN to need — asked here,
               the moment the case opens, so the applicant never waits for a
@@ -377,7 +392,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           Start and nothing happened" they reported (2026-08-04). It is not a
           continuation kind being excluded; it is a route where the button
           could never have worked. */}
-      {!started && !docsPending && !inPerson && !isH1bParent && (
+      {!started && !docsPending && !inPerson && !isH1bParent && !arrivalPreparation && !guidanceHeld && (
         <div className="card fadeup-1" style={{ padding: 24 }}>
           <CaseValidity t={t} client={client} caseId={caseId} onOpenCase={onOpenCase} />
           <div style={{ fontWeight: 700, marginBottom: 6 }}>Ready to go?</div>

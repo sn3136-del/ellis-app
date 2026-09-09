@@ -1,0 +1,65 @@
+{
+ "id": "source-audit-2026-09-09",
+ "reviewed_at": "2026-09-09",
+ "verifier": "ai",
+ "scope": "Four bounded unresolved source findings. They are proposals for protective holds, not new visa-policy verdicts.",
+ "holds": [
+  {
+   "route_key": "USA|BFA|tourism|ordinary_passport",
+   "decision": "hold_required",
+   "finding": "Generic portal navigation does not establish American VOA eligibility. Fresh U.S. State Department reports Burkina Faso suspended visas to Americans from 30 December 2025, limited exceptions.",
+   "sources": [
+    {
+     "url": "https://travel.state.gov/en/international-travel/travel-advisories/burkina-faso.html?os=__",
+     "quote": "As of Dec 30, 2025, the Government of Burkina Faso suspended visas to Americans with limited exceptions.",
+     "checked_at": "2026-09-09"
+    }
+   ],
+   "unresolved": "Destination authority exception scope, existing visa treatment and any later reversal. Schema lacks entry-suspension verdict; hold rather than invent VOA or unrestricted ordinary visa availability."
+  },
+  {
+   "route_key": "USA|TCD|tourism|ordinary_passport",
+   "decision": "hold_required",
+   "finding": "Fresh U.S. official advice says Chad is not routinely issuing visas to U.S. citizens. An operational eVisa portal does not prove nationality-specific issuance is currently available.",
+   "sources": [
+    {
+     "url": "https://travel.state.gov/en/international-travel/travel-advisories/chad.html",
+     "quote": "However, the Government of Chad is not routinely issuing visas to U.S. citizens at this time.",
+     "checked_at": "2026-09-09"
+    }
+   ],
+   "unresolved": "Current destination-authority exception scope and any later restoration of routine issuance."
+  },
+  {
+   "route_key": "HKG|AFG|tourism|ordinary_passport",
+   "decision": "hold_required",
+   "finding": "The cited Afghanistan MFA visa URL returned unrelated Thai casino content during fresh web inspection, so it cannot validate the old visa fee or stay claims.",
+   "sources": [
+    {
+     "url": "https://mfa.gov.af/en/page/38999",
+     "checked_at": "2026-09-09",
+     "observation": "Fresh web open returned Thai casino/slot promotional content, not the expected tourist visa policy."
+    }
+   ],
+   "unresolved": "Need a relevant authoritative visa source. This is a page-integrity observation, not a claim that the entire government domain is compromised."
+  },
+  {
+   "route_key": "HKG|SEN|tourism|ordinary_passport",
+   "decision": "hold_pending_nationality_scope",
+   "finding": "Senegal MFA lists Chine in its visa-exemption list but does not expressly address HKSAR passports. It is unsafe to infer either inclusion or exclusion solely from that wording.",
+   "sources": [
+    {
+     "url": "https://www.diplomatie.gouv.sn/visiter-le-senegal",
+     "checked_at": "2026-09-09",
+     "quote": "Chine"
+    },
+    {
+     "url": "https://www.gov.hk/en/residents/culture/travel/travelout.htm",
+     "checked_at": "2026-09-09",
+     "quote": "If your destination is not among these countries or territories, you should contact the relevant consulates or the travel agency to ascertain the visa requirements for your visit."
+    }
+   ],
+   "unresolved": "HKSAR-specific written confirmation of tourist entry requirements; old 14 day visa-free and 90 day partial seed claims cannot be accepted from this page."
+  }
+ ]
+}

@@ -241,13 +241,22 @@ def run_job(db, job_id: str) -> OnDemandRouteResearchJob:
                 except Exception as e:  # noqa: BLE001 - seeds optional
                     _note(job, stage, f"seed load error: {str(e)[:100]}")
                 # 1) verified stored evidence + portals for THIS destination only.
+                from .evidence_validator import jurisdiction_matches, source_is_official
                 for e in db.execute(select(SourceEvidence).where(
                         SourceEvidence.applicable_jurisdiction == dest,
                         SourceEvidence.verification_status == "verified")).scalars():
-                    cands.append(e.final_url)
+                    if jurisdiction_matches(e.final_url, dest):
+                        cands.append(e.final_url)
                 for p in db.execute(select(OfficialPortalRecord).where(
-                        OfficialPortalRecord.destination_country == dest)).scalars():
-                    cands.append(p.url)
+                        OfficialPortalRecord.destination_country == dest,
+                        OfficialPortalRecord.verification_status.in_(
+                            ("verified_official_domain", "verified_via_official_link")))).scalars():
+                    # A stored destination label is not authority evidence.
+                    # Downgraded/wrong-country portals must not consume the
+                    # source budget or become the extractor's first citation.
+                    authority_url = p.url if source_is_official(p.url) else p.official_linking_source
+                    if jurisdiction_matches(authority_url, dest):
+                        cands.append(p.url)
                 # 2) prior research file for this destination (fleet or on-demand).
                 rf = pipeline.research_file(dest)
                 if rf.exists():

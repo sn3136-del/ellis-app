@@ -35,12 +35,19 @@ happens to remember today.
 from __future__ import annotations
 
 import json
+import re
+import os
+import time
+import threading
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 
 from .authority import hostname, is_government_host
 from .fetching import fetch
+from .evidence_validator import (quote_in_text, supports_disposition, jurisdiction_matches,
+                                 field_value_supported, route_supporting_excerpt)
 from .models import DatabaseIssueReport, KimiRouteGuidanceCache
 
 # Fields the page is allowed to correct — the same vocabulary a human
@@ -61,11 +68,14 @@ NATIONALITY_SPECIFIC = frozenset({
 FETCH_TIMEOUT_SECONDS = 20.0
 CALL_TIMEOUT_SECONDS = 45.0
 MAX_PAGE_CHARS = 28_000
-MAX_SOURCES = 2
+MAX_SOURCES = 8
+ROUTE_BUDGET_SECONDS = 120.0
+EVIDENCE_CONTRACT = 2
 
 _SYSTEM = """You are checking a stored visa-requirements answer against the
 OFFICIAL PAGE TEXT provided. Judge ONLY from the page text — never from your
-own knowledge.
+own knowledge. Apply only the policy in force on policy_date. A future
+announcement is not a correction to the current rule.
 
 CRITICAL — NATIONALITY. Most government pages describe the destination's
 rules for the WORLD, or for a different nationality than the one in the
@@ -99,7 +109,8 @@ Reply STRICT JSON:
     contradicts, with the value the page states; use the stored answer's own
     field names and shapes; {} when consistent),
  "evidence": {field: "short quote from the page", ...}  (a quote for EVERY
-    corrected field; a correction without a quote will be discarded),
+    corrected OR confirmed unchanged field; only explicitly supported fields
+    earn renewed freshness; a correction without a matching quote is discarded),
  "note": "one short sentence"}
 Rules: if the page does not mention a field, it is NOT a contradiction — leave
 it alone. Never invent a fee, date or URL the page does not state. If the page
@@ -108,6 +119,7 @@ When in doubt about whether the page speaks for THIS nationality, say
 page_is_nationality_specific false and correct nothing nationality-specific."""
 
 _PROVIDER = None
+_MODEL_SLOTS = threading.BoundedSemaphore(4)
 
 
 def set_provider(fn) -> None:
@@ -116,19 +128,22 @@ def set_provider(fn) -> None:
     _PROVIDER = fn
 
 
-def _call(system: str, user: str) -> dict:
-    if _PROVIDER is not None:
-        return _PROVIDER(system, user)
+def _call(system: str, user: str, *, timeout_seconds: float = CALL_TIMEOUT_SECONDS) -> dict:
+    from .bounded_io import call
     from . import kimi_primary
-    return kimi_primary._live_call(system, user, timeout=CALL_TIMEOUT_SECONDS,
-                                   max_tokens=6000)
+    budget = min(CALL_TIMEOUT_SECONDS, timeout_seconds)
+    deadline = time.monotonic() + budget
+    provider = _PROVIDER
+    return call(lambda: provider(system, user) if provider is not None else
+        kimi_primary._live_call(system, user, timeout=max(0.001, deadline - time.monotonic()),
+                                max_tokens=6000), budget, _MODEL_SLOTS)
 
 
 def _now():
     return datetime.now(timezone.utc)
 
 
-def candidate_sources(guidance: dict, override: dict | None) -> list[str]:
+def candidate_sources(guidance: dict, override: dict | None, *, limit: int | None = MAX_SOURCES) -> list[str]:
     """The official pages this answer rests on: the human override's source
     first (a person chose it), then the answer's own source, then the portal.
     Government domains only; order-preserving dedupe."""
@@ -137,9 +152,27 @@ def candidate_sources(guidance: dict, override: dict | None) -> list[str]:
         urls.append(override.get("source_url") or "")
     g = guidance or {}
     urls.append(str(g.get("source_url") or ""))
+    # A headline verdict page cannot attest the fees and conditions carried
+    # by other cited pages. Visit their actual field/product provenance too.
+    def collect(value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key in {"source_url", "url", "evidence_url"} and isinstance(item, str):
+                    urls.append(item)
+                elif key == "source_urls" and isinstance(item, list):
+                    urls.extend(u for u in item if isinstance(u, str))
+                elif isinstance(item, (dict, list)):
+                    collect(item)
+        elif isinstance(value, list):
+            for item in value:
+                collect(item)
+    collect(override or {})
+    collect(g)
     urls.append(str(g.get("official_portal_url") or ""))
     out, seen = [], set()
     for u in urls:
+        if not isinstance(u, str):
+            continue
         u = u.strip()
         if not u or u in seen or not u.lower().startswith(("http://", "https://")):
             continue
@@ -147,229 +180,461 @@ def candidate_sources(guidance: dict, override: dict | None) -> list[str]:
             continue
         seen.add(u)
         out.append(u)
-    return out[:MAX_SOURCES]
+    return out if limit is None else out[:limit]
 
 
 def _stamp(row, entry: dict) -> None:
-    """Record the latest grounding attempt. A successful read is ALSO kept as
-    the row's last good check, so a later failed attempt (a site that blocks
-    robots today, a provider outage, a landing page that states nothing)
-    records itself honestly without erasing the fact that the official page
-    was read and agreed with. A failed attempt used to overwrite the stamp
-    wholesale: eight grounded answers silently fell to Low and were held
-    from readers, which made the 48-hour sweep the thing that took verified
-    routes offline."""
-    ver = dict(row.verification or {})
+    """Retain an earlier good read through outages, but retire a disproved read.
+    Reading the same page and finding no route evidence is new evidence;
+    failing to read it is not evidence against the previous check."""
+    ver = dict(row.verification) if isinstance(row.verification, dict) else {}
+    previous = ver.get("last_good_check") or ver.get("grounded_check") or {}
+    previous = previous if isinstance(previous, dict) else {}
+    irrelevant = set(entry.get("irrelevant_sources") or [])
+    if entry.get("outcome") in ("page_not_relevant", "page_not_about_route"):
+        irrelevant.update(entry.get("sources_tried") or [])
+        if entry.get("source_url"):
+            irrelevant.add(entry["source_url"])
+    if previous.get("outcome") == "checked" and previous.get("source_url") in irrelevant:
+        ver["superseded_check"] = dict(previous)
+        ver.pop("last_good_check", None)
     ver["grounded_check"] = entry
     if entry.get("outcome") == "checked":
         ver["last_good_check"] = dict(entry)
     row.verification = ver
 
 
+def json_unchanged(db, column, value):
+    """Compare a JSON snapshot for guarded writes on SQLite or PostgreSQL."""
+    from sqlalchemy import literal, cast, or_
+    if db.get_bind().dialect.name == "postgresql":
+        from sqlalchemy.dialects.postgresql import JSONB
+        comparison = cast(column, JSONB) == literal(value, type_=JSONB)
+    else:
+        comparison = column == literal(value, type_=column.type)
+    return or_(column.is_(None), comparison) if value is None else comparison
+
+
+def _commit_recheck(db, row, entry: dict, *, expected_guidance: dict,
+                    expected_route: dict, fresh_until=None) -> bool:
+    """Merge metadata freshly and commit only if that exact row still exists.
+
+    API and sweep processes have separate memory/locks. A final refresh alone
+    still loses writes between SELECT and UPDATE, so the update compares the
+    read metadata and the guidance this check actually evaluated. A conflict
+    rolls back this attempt's pending issues/corrections/history, without
+    retrying evidence against an answer it did not read.
+    """
+    from types import SimpleNamespace
+    from sqlalchemy import update
+    from sqlalchemy.orm.attributes import set_committed_value
+
+    model = KimiRouteGuidanceCache
+    key, row_id = row.cache_key, row.id
+    desired_guidance = row.guidance
+    # Column selection bypasses the ORM identity map and never autoflushes
+    # the pending raw correction before its compare-and-swap guard.
+    with db.no_autoflush:
+        latest = db.execute(select(model.verification, model.guidance, model.route,
+            model.fresh_until).where(model.id == row_id)).first()
+    if (latest is None or latest.guidance != expected_guidance or latest.route != expected_route
+            or isinstance(latest.verification, dict) and latest.verification.get("detail_pending")):
+        db.rollback()
+        if latest is not None:
+            db.refresh(row)
+        return False
+    stamped = SimpleNamespace(verification=latest.verification)
+    _stamp(stamped, entry)
+
+    values = {"verification": stamped.verification}
+    changed = desired_guidance != expected_guidance
+    if changed:
+        values["guidance"] = desired_guidance
+    if fresh_until is not None:
+        values["fresh_until"] = fresh_until
+    stmt = update(model).where(model.id == row_id,
+        json_unchanged(db, model.verification, latest.verification),
+        json_unchanged(db, model.guidance, expected_guidance), json_unchanged(db, model.route, expected_route),
+        model.fresh_until == latest.fresh_until).values(**values).execution_options(synchronize_session=False)
+    with db.no_autoflush:
+        result = db.execute(stmt)
+    if result.rowcount != 1:
+        db.rollback()
+        db.refresh(row)
+        return False
+    # The guarded UPDATE already wrote these values. Mark them clean so the
+    # subsequent ORM commit cannot issue an unconditional stale UPDATE.
+    for name, value in values.items():
+        set_committed_value(row, name, value)
+    if changed:
+        from . import change_log
+        change_log.record(db, key, expected_route, expected_guidance, desired_guidance,
+            origin="grounded_recheck", note=f"corrected against {entry.get('source_url') or ''}")
+    db.commit()
+    return True
+
+
 def effective_check(verification: dict | None) -> dict:
-    """The grounding that counts for confidence and provenance: the latest
-    attempt when it actually read the page, otherwise the last successful
-    read. Empty when the page has never been read."""
-    ver = verification or {}
-    gc = ver.get("grounded_check") or {}
-    if gc.get("outcome") == "checked":
+    """Latest route-supported reading, or the last one through a failed read."""
+    ver = verification if isinstance(verification, dict) else {}
+    gc = ver.get("grounded_check") if isinstance(ver.get("grounded_check"), dict) else {}
+    if gc.get("outcome") == "checked" and gc.get("evidence_contract") == EVIDENCE_CONTRACT:
         return gc
-    good = ver.get("last_good_check") or {}
-    return good if good.get("outcome") == "checked" else {}
+    good = ver.get("last_good_check") if isinstance(ver.get("last_good_check"), dict) else {}
+    return good if good.get("outcome") == "checked" and good.get("evidence_contract") == EVIDENCE_CONTRACT else {}
 
 
-def recheck_row(db, row, *, today: str | None = None) -> dict:
-    """Ground one cached answer against its official page. Returns an honest
-    report dict; commits its own changes. Never raises for a page problem —
-    a failed fetch is a recorded outcome, not an exception."""
+def _page_has_visa_topic(text: str) -> bool:
+    return bool(re.search(r"visa|travel authori[sz]|\beta\b|\besta\b|免签|免簽|签证|簽證|thị thực", text or "", re.I))
+
+
+def _quoted_proposals(raw: dict, text: str) -> tuple[dict, dict, list[str]]:
+    fields = raw.get("corrected_fields") or {}
+    evidence = raw.get("evidence") or {}
+    if not isinstance(fields, dict):
+        fields = {}
+    if not isinstance(evidence, dict):
+        evidence = {}
+    quoted, unquoted = {}, []
+    for k, v in fields.items():
+        if k not in OVERRIDABLE:
+            continue
+        if (not isinstance(evidence.get(k), str) or not quote_in_text(evidence[k], text)
+                or (v not in (None, "", [], {}) and not field_value_supported(k, v, evidence[k]))):
+            unquoted.append(k)
+        else:
+            quoted[k] = v
+    return quoted, evidence, sorted(unquoted)
+
+
+def _supports_route(page_text: str, raw: dict, route: dict, guidance: dict,
+                    proposed: dict, source_url: str = "", policy_date: str = "") -> bool:
+    """Silence, generic pages and the model's relevance flag cannot renew a row.
+    A sourced NEW verdict is eligible too, so a wrong stored verdict can be
+    corrected instead of making its own correction impossible."""
     from . import kimi_primary
-    from . import verified_overrides
+    nationality = str(route.get("passport_nationality") or "")
+    if not nationality or raw.get("page_relevant") is not True \
+            or raw.get("page_is_nationality_specific") is not True:
+        return False
+    verdict = proposed.get("disposition", guidance.get("disposition"))
+    detail = proposed.get("requirement_detail")
+    if detail and "disposition" not in proposed:
+        verdict = next((d for d, details in kimi_primary.DETAIL_FAMILY.items()
+                        if detail in details), verdict)
+    statement = route_supporting_excerpt(page_text, verdict, route, policy_date=policy_date)
+    # A narrowly structured outbound table may scope its rows with a heading,
+    # e.g. 'Visa requirements for HKSAR passport holders. Vietnam: visa required'.
+    # Never join an unrelated nationality-bearing sentence to that heading.
+    if not statement and source_url and jurisdiction_matches(source_url, nationality):
+        from .evidence_validator import _NATIONALITY_NAMES
+        nat_names = _NATIONALITY_NAMES.get(nationality, ())
+        dest_names = _NATIONALITY_NAMES.get(route.get("destination_country", ""), ())
+        for nat_name in nat_names:
+            heading = re.search(r"Visa requirements for\s+" + re.escape(nat_name.strip()) +
+                                r"(?: SAR)? passport holders[.:\n]", page_text, re.I)
+            if not heading:
+                continue
+            for dest_name in dest_names:
+                row_match = re.search(r"(?:^|[.\n])\s*" + re.escape(dest_name.strip()) +
+                                     r"\s*:\s*(?:no visa required|visa required|visa[- ]free|visa[- ]exempt)\s*[.\n]",
+                                     page_text[heading.end():], re.I)
+                if row_match:
+                    combined = nationality + " " + nat_name.strip() + " passport holders: " + row_match.group().strip(".\n ")
+                    statement = route_supporting_excerpt(combined, verdict, route, policy_date=policy_date)
+    if not statement:
+        return False
+    if not source_url or jurisdiction_matches(source_url, route.get("destination_country", "")):
+        return True
+    # Home-government outbound guidance can settle its citizens' route too.
+    # It must explicitly name the traveller group and the DESTINATION in the
+    # supporting statement, so an inbound rule for visitors to that government
+    # cannot be recycled as a rule for travelling elsewhere.
+    from .evidence_validator import _NATIONALITY_NAMES
+    if not jurisdiction_matches(source_url, nationality):
+        return False
+    lower = statement.casefold()
+    names = _NATIONALITY_NAMES.get(nationality, ())
+    if not any(re.search(re.escape(n.strip()) + r".{0,25}(?:passport|citizen|national)|(?:passport|citizen|national).{0,25}" + re.escape(n.strip()), lower)
+               for n in names):
+        return False
+    destination_names = _NATIONALITY_NAMES.get(route.get("destination_country", ""), ())
+    return any(re.search(r"(?<![a-z])" + re.escape(n.strip()) + r"(?![a-z])", statement, re.I)
+               for n in destination_names)
 
-    route = dict(row.route or {})
+
+def _source_authority_matches(url: str, route: dict) -> bool:
+    return (jurisdiction_matches(url, route.get("destination_country", "")) or
+            jurisdiction_matches(url, route.get("passport_nationality", "")))
+
+
+def _file_dispute(db, row, route, guidance, fields, evidence, source_url, when):
+    if not fields:
+        return
+    field_key = ",".join(sorted(fields))[:64]
+    proposal = {"source_url": source_url, "checked_at": when,
+                "fields": {k: {"page_says": v, "record_holds": guidance.get(k),
+                               "quote": str(evidence.get(k) or "")}
+                           for k, v in sorted(fields.items())}}
+    note = (f"Automatic source check against {source_url}: " + "; ".join(
+        f"{k}: page says {json.dumps(v, ensure_ascii=False)[:120]} "
+        f"(quote: {str(evidence.get(k) or '')[:160]})" for k, v in sorted(fields.items())))[:1000]
+    existing = db.execute(select(DatabaseIssueReport).where(
+        DatabaseIssueReport.cache_key == row.cache_key,
+        DatabaseIssueReport.reported_by == "freshness_monitor",
+        DatabaseIssueReport.field == field_key,
+        DatabaseIssueReport.status.in_(("open", "acknowledged")))).scalars().first()
+    if existing is not None:
+        existing.note, existing.proposal = note, proposal
+    else:
+        db.add(DatabaseIssueReport(org_id="platform", cache_key=row.cache_key,
+                                   route=route, field=field_key, note=note,
+                                   reported_by="freshness_monitor", status="open",
+                                   proposal=proposal))
+
+
+def _future_scheduled_source(url: str, route: dict, policy_date: str) -> bool:
+    """Known future schedules cannot rewrite today's raw canonical answer."""
+    from . import scheduled_policies as scheduled
+    on = scheduled._date(policy_date) or scheduled._today()
+    route_key = (route.get("passport_nationality"), route.get("destination_country"),
+                 route.get("travel_purpose", "tourism"), route.get("travel_document_type", "ordinary_passport"))
+    normalized = str(url).split("?")[0].rstrip("/")
+    matches = [p for p in scheduled._load() if scheduled._key(p["route"]) == route_key and
+               normalized in {str(p["source_url"]).split("?")[0].rstrip("/"),
+                              str(p["evidence"]["source_url"]).split("?")[0].rstrip("/")}]
+    return bool(matches) and all(scheduled._date(p["effective_from"]) > on for p in matches)
+
+
+def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | None = None,
+                should_stop=None) -> dict:
+    """Read a canonical answer's actual source. Only route-supported, fully
+    quoted and consistent corrections can renew it. All other outcomes retain
+    the answer without claiming verification or inventing replacement facts."""
+    from . import kimi_primary, verified_overrides
+    if not kimi_primary.is_canonical_key(row.cache_key):
+        return {"outcome": "noncanonical", "route_key": row.cache_key}
+    if (row.verification or {}).get("detail_pending"):
+        return {"outcome": "detail_pending", "route_key": row.cache_key}
+    route, original = dict(row.route or {}), dict(row.guidance or {})
     override = verified_overrides.find(route)
-    guidance = dict(row.guidance or {})
-    # Compare what customers SEE: the override-merged answer. Comparing the
-    # raw engine answer kept re-disputing facts a sourced override already
-    # corrects at serve time, so the queue filled with phantom conflicts.
-    if override:
-        guidance, _ = verified_overrides.apply(guidance, route)
-    sources = candidate_sources(guidance, override)
+    guidance, _ = verified_overrides.apply(dict(original), route)
+    all_sources = candidate_sources(guidance, override, limit=None)
+    previous = (row.verification or {}).get("grounded_check") or {}
+    cursor = previous.get("source_cursor", 0)
+    cursor = cursor if isinstance(cursor, int) and cursor >= 0 else 0
+    offset = cursor % len(all_sources) if all_sources else 0
+    ordered = all_sources[offset:] + all_sources[:offset]
+    sources = ordered[:MAX_SOURCES]
+    route_budget = ROUTE_BUDGET_SECONDS if budget_seconds is None else max(0.0, min(ROUTE_BUDGET_SECONDS, budget_seconds))
+    deadline = time.monotonic() + route_budget
     when = today or _now().isoformat()
-
     if not sources:
-        _stamp(row, {"at": when, "outcome": "no_official_source",
-                     "note": "the answer names no government page to check"})
-        db.commit()
+        if not _commit_recheck(db, row, {"at": when, "outcome": "no_official_source",
+                "note": "the answer names no government page to check"},
+                expected_guidance=original, expected_route=route):
+            return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": []}
         return {"outcome": "no_official_source", "route_key": row.cache_key}
 
-    # Walk the sources until one is BOTH readable and actually about this
-    # route. A landing page that does not state the rule is not a check: the
-    # first Japan recheck stopped at the embassy homepage, called it
-    # irrelevant (honestly) and left the route unchecked. Irrelevance is a
-    # reason to try the next page, not to give up.
-    page = None
-    raw = None
-    fetched_any = False
-    tried = []
-    generic_skipped: list = []
+    tried, irrelevant, unquoted_all = [], [], set()
+    readings, source_checks = [], []
+    visited, completed = set(), set()
+    page = raw = None
+    fallback = None
     for url in sources:
-        fr = fetch(url, timeout_seconds=FETCH_TIMEOUT_SECONDS)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0 or (should_stop is not None and should_stop()):
+            break
+        visited.add(url)
+        fr = fetch(url, timeout_seconds=min(FETCH_TIMEOUT_SECONDS, remaining),
+                   total_timeout_seconds=min(FETCH_TIMEOUT_SECONDS, remaining))
         if not (fr.ok and fr.content_text and not fr.challenge
                 and is_government_host(fr.final_hostname)):
+            source_checks.append({"source_url": url, "outcome": "fetch_failed", "at": when})
             continue
-        fetched_any = True
+        if fr.final_url in completed:
+            continue
+        completed.add(fr.final_url)
         tried.append(fr.final_url)
-        payload = {
-            "route": {k: route.get(k) for k in
-                      ("passport_nationality", "destination_country",
-                       "travel_purpose", "travel_document_type")},
-            "stored_answer": {k: guidance.get(k) for k in OVERRIDABLE
-                              if k in guidance},
-            "official_page_url": fr.final_url,
-            "official_page_text": fr.content_text[:MAX_PAGE_CHARS],
-        }
+        if (not _source_authority_matches(fr.final_url, route) or
+                _future_scheduled_source(fr.final_url, route, when[:10])):
+            irrelevant.extend((url, fr.final_url))
+            source_checks.append({"source_url": fr.final_url, "outcome": "scope_or_effective_date_mismatch", "at": when})
+            continue
+        if not _page_has_visa_topic(fr.content_text):
+            irrelevant.extend((url, fr.final_url))
+            source_checks.append({"source_url": fr.final_url, "outcome": "page_not_relevant", "at": when})
+            continue
+        payload = {"route": {k: route.get(k) for k in
+                              ("passport_nationality", "destination_country",
+                               "travel_purpose", "travel_document_type")},
+                   "policy_date": when[:10],
+                   "stored_answer": {k: guidance[k] for k in OVERRIDABLE if k in guidance},
+                   "official_page_url": fr.final_url,
+                   "official_page_text": fr.content_text[:MAX_PAGE_CHARS]}
         try:
-            answer = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False))
-        except Exception as e:  # noqa: BLE001 — provider trouble is an outcome
-            _stamp(row, {"at": when, "outcome": "provider_error",
-                         "source_url": fr.final_url, "error": str(e)[:160]})
-            db.commit()
-            return {"outcome": "provider_error", "route_key": row.cache_key}
-        if isinstance(answer, dict) and answer.get("page_relevant"):
-            page, raw = fr, answer
-            break
+            remaining = deadline - time.monotonic()
+            if remaining <= 0 or (should_stop is not None and should_stop()):
+                visited.discard(url)
+                break
+            answer = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False), timeout_seconds=remaining)
+        except Exception as e:
+            source_checks.append({"source_url": fr.final_url, "outcome": "provider_error", "at": when,
+                                  "error": str(e)[:160]})
+            continue
+        if not isinstance(answer, dict):
+            answer = {}
+        quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text[:MAX_PAGE_CHARS])
+        unquoted_all.update(unquoted)
+        supported = _supports_route(fr.content_text[:MAX_PAGE_CHARS], answer, route, guidance, quoted, fr.final_url, when[:10])
+        source_checks.append({"source_url": fr.final_url, "outcome": "checked" if supported else "page_not_relevant",
+                              "at": when, "content_hash": fr.content_hash, "verified_fields": [],
+                              "unquoted_fields": unquoted,
+                              "proposed_fields": {k: {"value": v, "quote": evidence[k]} for k, v in quoted.items()}})
+        if supported:
+            if page is None:
+                page, raw = fr, answer
+            readings.append((fr, answer, quoted, evidence, source_checks[-1]))
+            continue
+        irrelevant.extend((url, fr.final_url))
+        # A generic page cannot change THIS route, but its discrepancies need
+        # an operator, even if another candidate source can confirm the route.
+        if quoted:
+            _file_dispute(db, row, route, guidance, quoted, evidence, fr.final_url, when)
+            fallback = (fr, quoted)
 
-    if not fetched_any:
-        _stamp(row, {"at": when, "outcome": "fetch_failed", "sources": sources})
-        db.commit()
-        return {"outcome": "fetch_failed", "route_key": row.cache_key,
-                "sources": sources}
+    # Advance by actual attempts. Advancing by the selected eight URLs could
+    # return to the same offset forever when a slow first page used the budget.
+    source_cursor = (offset + max(1, len(visited))) % len(all_sources) if all_sources else 0
     if page is None:
-        # Read, but none of the pages actually state this route's rule. Honest
-        # non-answer: nothing is changed and the row is NOT marked fresh, so
-        # it stays due for a better source.
-        _stamp(row, {"at": when, "outcome": "page_not_relevant",
-                     "sources_tried": tried})
-        db.commit()
-        return {"outcome": "page_not_relevant", "route_key": row.cache_key,
-                "sources_tried": tried}
+        if should_stop is not None and should_stop():
+            outcome = "cancelled"
+        elif time.monotonic() >= deadline:
+            outcome = "budget_exhausted"
+        else:
+            outcome = "provider_error" if any(s["outcome"] == "provider_error" for s in source_checks) else ("page_not_relevant" if tried else "fetch_failed")
+        entry = {"at": when, "outcome": outcome, "sources": sources,
+                 "sources_tried": tried, "irrelevant_sources": irrelevant,
+                 "unquoted_fields": sorted(unquoted_all), "source_checks": source_checks,
+                 "source_cursor": source_cursor, "unchecked_sources": [u for u in all_sources if u not in visited]}
+        if not _commit_recheck(db, row, entry, expected_guidance=original, expected_route=route):
+            return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": []}
+        return {**entry, "route_key": row.cache_key, "changed": [],
+                "disputed": sorted(fallback[1]) if fallback else [],
+                "generic_skipped": sorted(set(fallback[1]) & NATIONALITY_SPECIFIC) if fallback else []}
 
-    # Corrections: whitelisted, quote-backed, override-protected.
-    proposed = raw.get("corrected_fields") or {}
-    evidence = raw.get("evidence") or {}
-    proposed = {k: v for k, v in proposed.items()
-                if k in OVERRIDABLE and str(evidence.get(k) or "").strip()}
-    # A page can state a value; it cannot prove an absence. On 3 September
-    # 2026 a sweep "corrected" sourced channels, a consular jurisdiction,
-    # exception notes and not-published markers to nothing, which turned
-    # correct blanks into gaps. An empty correction is never applied: it
-    # goes to a person as a dispute instead.
-    emptied = {k: v for k, v in proposed.items()
-               if v is None or v == "" or v == [] or v == {}}
-    proposed = {k: v for k, v in proposed.items() if k not in emptied}
-    # A page that does not speak for THIS nationality may not touch a
-    # nationality-specific field. This is the Japan failure exactly: the
-    # ministry's worldwide page lists every channel and a 90-day stay, which
-    # is true in general and wrong for a Chinese applicant. Enforced here and
-    # not left to the prompt, because the prompt is a request and this is a
-    # rule.
-    if not raw.get("page_is_nationality_specific"):
-        blocked = [k for k in proposed if k in NATIONALITY_SPECIFIC]
-        for k in blocked:
-            proposed.pop(k)
-        if blocked:
-            generic_skipped.extend(sorted(blocked))
+    proposed, evidence, field_sources, conflicts = {}, {}, {}, set()
+    unquoted = sorted(unquoted_all)
+    for fr, answer, quoted, quotes, check in readings:
+        for key, value in quoted.items():
+            if key in proposed and proposed[key] != value:
+                conflicts.add(key)
+            proposed[key], evidence[key], field_sources[key] = value, quotes[key], fr.final_url
+    # The source read can take a minute. Refresh both the row and the override,
+    # and refuse to overwrite any field changed during that time.
+    db.refresh(row)
+    if (row.verification or {}).get("detail_pending"):
+        return {"outcome": "detail_pending", "route_key": row.cache_key}
+    override = verified_overrides.find(route)
     protected = set((override or {}).get("fields") or {})
-    disputed = dict(emptied)
-    applied = {}
+    current = dict(row.guidance or {})
+    seen, _ = verified_overrides.apply(dict(current), route)
+    disputed, applied = {}, {}
     for k, v in proposed.items():
-        if k in protected:
-            if v != (override or {}).get("fields", {}).get(k):
-                disputed[k] = v          # page vs human — a person decides
+        if k in conflicts:
+            disputed[k] = v
+            continue
+        if v == seen.get(k):
+            continue
+        if k in protected or k in conflicts or v in (None, "", [], {}) or current.get(k) != original.get(k):
+            disputed[k] = v
         else:
             applied[k] = v
-
     if applied:
-        # Merge onto the row as it is now, not the snapshot taken before the
-        # page read: a reader-triggered refresh or another sweep may have
-        # written in the meantime, and the last writer must not undo it.
-        try:
-            db.refresh(row)
-            base = dict(row.guidance or {})
-            if override:
-                base, _ = verified_overrides.apply(base, route)
-        except Exception:  # noqa: BLE001
-            base = dict(guidance)
-        merged = dict(base)
-        merged.update(applied)
+        candidate = {**current, **applied}
+        merged, _ = verified_overrides.apply(dict(candidate), route)
         clean, missing, contradictions = kimi_primary.validate_answer(merged)
-        if contradictions or missing:
-            # A correction that makes the answer contradict itself is refused
-            # wholesale — the operator queue gets it instead.
+        contradictions = list(contradictions) + kimi_primary.serve_time_invariants(merged)
+        # Validation may discard malformed fields. Never write the rejected
+        # original value into raw guidance while stamping it as corrected.
+        rejected = any(k not in clean or clean[k] != v for k, v in applied.items())
+        if contradictions or missing or rejected:
             disputed.update(applied)
             applied = {}
         else:
-            from . import change_log
-            change_log.record(db, row.cache_key, route,
-                              dict(guidance), clean,
-                              origin="grounded_recheck",
-                              note=f"corrected against {page.final_url}")
-            row.guidance = clean
-
-    if disputed:
-        note = "; ".join(f"{k}: page says {json.dumps(disputed[k], ensure_ascii=False)[:120]}"
-                         f" (quote: {str(evidence.get(k) or '')[:160]})"
-                         for k in sorted(disputed))
-        held = (override or {}).get("fields") or {}
-        field_key = ",".join(sorted(disputed))[:64]
-        proposal = {
-            "source_url": page.final_url,
-            "checked_at": when,
-            "fields": {
-                k: {"page_says": disputed[k],
-                    "record_holds": held.get(k, guidance.get(k)),
-                    "quote": str(evidence.get(k) or "")}
-                for k in sorted(disputed)
-            },
-        }
-        from sqlalchemy import select as _sel
-        existing = db.execute(_sel(DatabaseIssueReport).where(
-            DatabaseIssueReport.cache_key == row.cache_key,
-            DatabaseIssueReport.reported_by == "freshness_monitor",
-            DatabaseIssueReport.field == field_key,
-            DatabaseIssueReport.status.in_(("open", "acknowledged")))).scalars().first()
-        if existing is not None:
-            # The same dispute is refreshed, never filed twice: a drill or
-            # a repeated sweep must not stack identical open issues.
-            existing.note = (f"Automatic source check against {page.final_url}: " + note)[:1000]
-            existing.proposal = proposal
-        else:
-            db.add(DatabaseIssueReport(
-                org_id="platform", cache_key=row.cache_key, route=route,
-                field=field_key,
-                note=(f"Automatic source check against {page.final_url}: " + note)[:1000],
-                reported_by="freshness_monitor", status="open",
-                proposal=proposal))
-
-    consistent = bool(raw.get("consistent")) and not proposed
-    _stamp(row, {
-        "at": when, "outcome": "checked",
-        "source_url": page.final_url, "content_hash": page.content_hash,
-        "consistent": consistent,
-        "changed_fields": sorted(applied), "disputed_fields": sorted(disputed),
-        "generic_page_skipped": sorted(set(generic_skipped)),
-        "note": str(raw.get("note") or "")[:200],
-    })
-    # A checked answer — confirmed or corrected — is fresh again. A disputed
-    # one is NOT extended: it stays due for attention until a person acts.
-    if not disputed:
-        row.fresh_until = _now() + timedelta(days=kimi_primary.TTL_DAYS)
-    db.commit()
-    return {"outcome": "checked", "route_key": row.cache_key,
-            "consistent": consistent,
+            row.guidance = candidate  # only page corrections, never override copies
+            seen = merged
+    for source_url in {field_sources.get(k, page.final_url) for k in disputed}:
+        own_disputes = {k: v for k, v in disputed.items() if field_sources.get(k, page.final_url) == source_url}
+        _file_dispute(db, row, route, seen, own_disputes, evidence, source_url, when)
+    remaining_contradictions = kimi_primary.serve_time_invariants(seen)
+    consistent = (all(answer.get("consistent") is True for _, answer, _, _, _ in readings) and not proposed and not unquoted
+                  and not disputed and fallback is None and not remaining_contradictions)
+    # Verifying the verdict does not verify every accompanying fee, duration,
+    # document and condition. Renew the whole row only with explicit evidence
+    # for every substantive populated field; existing old provenance does not
+    # make an unmentioned detail newly checked today.
+    metadata_fields = {"confidence", "source_url", "official_portal_url", "corroborating_sources", "unpublished_fields"}
+    substantive = {k for k in OVERRIDABLE - metadata_fields if seen.get(k) not in (None, "", [], {})}
+    verified_fields, verified_field_sources = set(), {}
+    for fr, answer, quoted, quotes, check in readings:
+        supported_fields = {k for k in substantive if isinstance(quotes.get(k), str)
+                            and quote_in_text(quotes[k], fr.content_text[:MAX_PAGE_CHARS])
+                            and field_value_supported(k, seen[k], quotes[k])}
+        verified_fields.update(supported_fields)
+        if _supports_route(fr.content_text, answer, route, seen, {}, fr.final_url, when[:10]):
+            supported_fields.add("disposition")
+            verified_fields.add("disposition")
+            excerpt = route_supporting_excerpt(fr.content_text, seen.get("disposition"), route, policy_date=when[:10])
+            # Outbound tables bind their literal row to a separate literal
+            # applicant heading. Preserve both, never invent a joined quote.
+            if not excerpt:
+                from .evidence_validator import _NATIONALITY_NAMES
+                dest_names = _NATIONALITY_NAMES.get(route.get("destination_country"), ())
+                for name in dest_names:
+                    hit = re.search(r"(?:^|[.\n])\s*" + re.escape(name.strip()) + r"\s*:[^.\n]+", fr.content_text, re.I)
+                    if hit:
+                        excerpt = hit.group().strip(".\n ")
+                        break
+            verified_field_sources["disposition"] = {"source_url": fr.final_url, "checked_at": when, "quote": excerpt}
+            heading = re.search(r"Visa requirements for\s+[^.\n]{1,80} passport holders", fr.content_text, re.I)
+            if heading and not route_supporting_excerpt(fr.content_text, seen.get("disposition"), route, policy_date=when[:10]):
+                verified_field_sources["disposition"]["scope_quote"] = heading.group()
+        check["verified_fields"] = sorted(supported_fields)
+        for key in supported_fields:
+            if key != "disposition":
+                verified_field_sources[key] = {"source_url": fr.final_url, "checked_at": when, "quote": quotes[key]}
+    unverified_fields = sorted(substantive - verified_fields)
+    unchecked_sources = [u for u in all_sources if u not in visited]
+    failed_sources = any(c["outcome"] in {"fetch_failed", "provider_error"} for c in source_checks)
+    renewed = (not (disputed or unquoted or fallback or remaining_contradictions or row.missing_fields
+                    or unverified_fields or unchecked_sources or failed_sources
+                    or active_disputed_fields(db, row.cache_key)) and (consistent or bool(applied)))
+    entry = {"at": when, "outcome": "checked", "evidence_contract": EVIDENCE_CONTRACT,
+                 "source_url": page.final_url,
+                 "content_hash": page.content_hash, "consistent": consistent,
+                 "changed_fields": sorted(applied), "disputed_fields": sorted(disputed),
+                 "unquoted_fields": unquoted, "irrelevant_sources": irrelevant,
+                 "verified_fields": sorted(verified_fields), "unverified_fields": unverified_fields,
+                 "field_sources": verified_field_sources, "source_checks": source_checks,
+                 "source_cursor": source_cursor, "unchecked_sources": unchecked_sources,
+                 "renewed": renewed,
+                 "generic_page_skipped": sorted(fallback[1]) if fallback else [],
+                 "note": str(raw.get("note") or "")[:200]}
+    # No unresolved proposal, fabricated quote, missing cell or unexplained
+    # disagreement can silently extend the freshness promise.
+    fresh_until = None
+    if renewed:
+        ttl = (kimi_primary.TTL_DAYS if row.status == kimi_primary.STATUS_PRIMARY
+               else kimi_primary.UNCERTAIN_TTL_DAYS)
+        fresh_until = _now() + timedelta(days=ttl)
+    if not _commit_recheck(db, row, entry, expected_guidance=current, expected_route=route,
+            fresh_until=fresh_until):
+        return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], "disputed": []}
+    return {"outcome": "checked", "route_key": row.cache_key, "consistent": consistent,
             "changed": sorted(applied), "disputed": sorted(disputed),
-            "generic_skipped": sorted(set(generic_skipped)),
-            "source_url": page.final_url}
+            "generic_skipped": sorted(fallback[1]) if fallback else [],
+            "unquoted_fields": unquoted, "source_url": page.final_url}
 
 
 def note_unreadable(db, row, outcome: dict | None) -> None:
@@ -401,7 +666,7 @@ def note_unreadable(db, row, outcome: dict | None) -> None:
 def recheck_route(db, route: dict) -> dict | None:
     """Recheck by route (the stale-serving path). None when nothing is cached."""
     from . import kimi_primary
-    key = kimi_primary.cache_key(route)
+    key = kimi_primary.canonical_key(kimi_primary.cache_key(route))
     row = db.execute(select(KimiRouteGuidanceCache).where(
         KimiRouteGuidanceCache.cache_key == key)).scalars().first()
     if row is None:
@@ -421,18 +686,25 @@ def due_rows(db, *, older_than_hours: int = 48, limit: int = 400) -> list:
     corrections at read time through the same guidance fields."""
     from datetime import datetime, timedelta, timezone
     from . import kimi_primary
-    cutoff = (datetime.now(timezone.utc)
-              - timedelta(hours=older_than_hours)).isoformat()
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(hours=older_than_hours)
     out = []
     for row in db.execute(select(KimiRouteGuidanceCache)).scalars():
         key = row.cache_key or ""
-        if f"|{kimi_primary.CACHE_VERSION}" not in key or "|via:" in key:
+        verification = row.verification if isinstance(row.verification, dict) else {}
+        if not kimi_primary.is_canonical_key(key) or verification.get("detail_pending"):
             continue
-        gc = (row.verification or {}).get("grounded_check") or {}
-        at = str(gc.get("at") or "")
-        if not at or at < cutoff:
+        gc = verification.get("grounded_check") if isinstance(verification.get("grounded_check"), dict) else {}
+        try:
+            at = datetime.fromisoformat(str(gc.get("at") or "").replace("Z", "+00:00"))
+            at = at if at.tzinfo else at.replace(tzinfo=timezone.utc)
+            if at > now:
+                at = None
+        except (TypeError, ValueError, OverflowError):
+            at = None
+        if at is None or at < cutoff:
             out.append((at, row))
-    out.sort(key=lambda pair: pair[0])
+    out.sort(key=lambda pair: pair[0] or datetime.min.replace(tzinfo=timezone.utc))
     return [row for _at, row in out[:limit]]
 
 
@@ -448,10 +720,15 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
     if issue is None or issue.reported_by == "freshness_monitor":
         return None
     route = dict(issue.route or {})
+    expected_key = kimi_primary.canonical_key(kimi_primary.cache_key(route))
+    if issue.cache_key and kimi_primary.canonical_key(issue.cache_key) != expected_key:
+        issue.proposal = {"outcome": "route_identity_mismatch", "checked_at": _now().isoformat()}
+        db.commit()
+        return issue.proposal
     row = db.execute(select(KimiRouteGuidanceCache).where(
         KimiRouteGuidanceCache.cache_key ==
-        (issue.cache_key or kimi_primary.cache_key(route)))).scalars().first()
-    if row is None:
+        kimi_primary.canonical_key(issue.cache_key or kimi_primary.cache_key(route)))).scalars().first()
+    if row is None or (row.verification or {}).get("detail_pending"):
         return None
     guidance = dict(row.guidance or {})
     override = verified_overrides.find(route)
@@ -460,12 +737,25 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
     when = _now().isoformat()
     outcome = "page_unreachable"
     proposal = None
+    deadline = time.monotonic() + ROUTE_BUDGET_SECONDS
+    requested = {"visa_requirement": "disposition", "visa_fee_amount": "government_fee",
+                 "visa_fee_currency": "government_fee", "visa_type": "visa_category",
+                 "application_method": "application_channel", "stay_duration": "permitted_stay"}.get(issue.field, issue.field)
     for url in candidate_sources(guidance, override):
-        fr = fetch(url, timeout_seconds=FETCH_TIMEOUT_SECONDS)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        fr = fetch(url, timeout_seconds=min(FETCH_TIMEOUT_SECONDS, remaining),
+                   total_timeout_seconds=min(FETCH_TIMEOUT_SECONDS, remaining))
         if not (fr.ok and fr.content_text and not fr.challenge
                 and is_government_host(fr.final_hostname)):
             continue
+        if (not _source_authority_matches(fr.final_url, route) or
+                _future_scheduled_source(fr.final_url, route, when[:10])):
+            outcome = "page_not_relevant"
+            continue
         payload = {
+            "policy_date": when[:10],
             "route": {k: route.get(k) for k in
                       ("passport_nationality", "destination_country",
                        "travel_purpose", "travel_document_type")},
@@ -476,33 +766,124 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
             "official_page_text": fr.content_text[:MAX_PAGE_CHARS],
         }
         try:
-            raw = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False))
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            raw = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False), timeout_seconds=remaining)
         except Exception as e:  # noqa: BLE001 - an outcome, not a crash
             outcome = "provider_error"
             issue.proposal = {"outcome": outcome, "checked_at": when,
                               "error": str(e)[:160]}
             db.commit()
             return issue.proposal
-        if not (isinstance(raw, dict) and raw.get("page_relevant")):
+        if not isinstance(raw, dict):
+            outcome = "provider_error"
+            continue
+        quoted, evidence, unquoted = _quoted_proposals(raw, fr.content_text[:MAX_PAGE_CHARS])
+        supported = _supports_route(fr.content_text[:MAX_PAGE_CHARS], raw, route, guidance, quoted, fr.final_url, when[:10])
+        if not supported:
             outcome = "page_not_relevant"
             continue
-        evidence = raw.get("evidence") or {}
-        fields = {}
-        for k, v in (raw.get("corrected_fields") or {}).items():
-            if k not in OVERRIDABLE or not str(evidence.get(k) or "").strip():
-                continue
-            if not raw.get("page_is_nationality_specific") \
-                    and k in NATIONALITY_SPECIFIC:
-                continue
-            fields[k] = {"page_says": v,
-                         "record_holds": guidance.get(k),
-                         "quote": str(evidence.get(k) or "")[:300]}
+        fields = {k: {"page_says": v, "record_holds": guidance.get(k),
+                      "quote": evidence[k]} for k, v in quoted.items()}
+        confirmed = (requested == "disposition" or
+                     isinstance(evidence.get(requested), str)
+                     and quote_in_text(evidence[requested], fr.content_text[:MAX_PAGE_CHARS])
+                     and field_value_supported(requested, guidance.get(requested), evidence[requested]))
         proposal = {"outcome": "checked", "source_url": fr.final_url,
-                    "checked_at": when, "consistent": not fields,
-                    "fields": fields,
+                    "checked_at": when,
+                    "consistent": confirmed and raw.get("consistent") is True and not fields and not unquoted,
+                    "verified_fields": [requested] if confirmed else [],
+                    "unquoted_fields": unquoted, "fields": fields,
                     "note": str(raw.get("note") or "")[:200],
                     "proposed_by": "ellis-ai"}
-        break
+        if fields or confirmed:
+            break  # a proposal cites this exact source; no mixed-source claims
     issue.proposal = proposal or {"outcome": outcome, "checked_at": when}
     db.commit()
     return issue.proposal
+
+
+def audit_integrity(db) -> dict:
+    """Check every canonical served answer, independent of model/page access.
+    Refresh one open issue per row so every sweep exposes contradictions
+    without growing duplicate queue entries or modifying verified policy."""
+    from . import kimi_primary, verified_overrides
+    checked = violated = created = resolved = 0
+    for row in db.execute(select(KimiRouteGuidanceCache)).scalars():
+        if not kimi_primary.is_canonical_key(row.cache_key):
+            continue
+        checked += 1
+        route = row.route if isinstance(row.route, dict) else {}
+        if not isinstance(row.guidance, dict) or not isinstance(row.route, dict):
+            failures = ["Cached route and guidance must be objects"]
+        else:
+            guidance, _ = verified_overrides.apply(dict(row.guidance), dict(route))
+            failures = kimi_primary.serve_time_invariants(guidance)
+        issues = db.execute(select(DatabaseIssueReport).where(
+            DatabaseIssueReport.cache_key == row.cache_key,
+            DatabaseIssueReport.reported_by == "freshness_monitor",
+            DatabaseIssueReport.field == "integrity",
+            DatabaseIssueReport.status.in_(("open", "acknowledged")))).scalars().all()
+        if not failures:
+            for issue in issues:
+                prior = issue.proposal if isinstance(issue.proposal, dict) else {}
+                if prior.get("outcome") != "integrity_failed":
+                    continue  # close only findings this deterministic audit owns
+                now = _now()
+                issue.status, issue.resolved_by, issue.resolved_at = "corrected", "freshness_monitor", now
+                issue.resolution = "The current merged route passes the deterministic integrity checks. Source accuracy and other disputes retain their separate status."
+                issue.proposal = {**prior, "resolution_check": {"outcome": "integrity_passed",
+                    "checked_at": now.isoformat(), "contradictions": []}}
+                resolved += 1
+            continue
+        violated += 1
+        issue = issues[0] if issues else None
+        note = ("Deterministic integrity check: " + "; ".join(failures))[:1000]
+        proposal = {"outcome": "integrity_failed", "checked_at": _now().isoformat(),
+                    "contradictions": failures, "fields": {}}
+        if issue is None:
+            created += 1
+            db.add(DatabaseIssueReport(org_id="platform", cache_key=row.cache_key,
+                                       route=route, field="integrity",
+                                       note=note, reported_by="freshness_monitor",
+                                       status="open", proposal=proposal))
+        else:
+            issue.note, issue.proposal = note, proposal
+    db.commit()
+    return {"checked": checked, "violated": violated, "created": created, "resolved": resolved}
+
+
+def active_disputed_fields(db, cache_key: str) -> list[str]:
+    """Material, unresolved monitor findings survive a newer grounding stamp.
+    A transient source outage is not a dispute of previously checked facts.
+    All other open/acknowledged monitor issues require explicit resolution."""
+    from . import kimi_primary
+    key = kimi_primary.canonical_key(cache_key)
+    issues = db.execute(select(DatabaseIssueReport).where(
+        DatabaseIssueReport.cache_key == key,
+        DatabaseIssueReport.reported_by == "freshness_monitor",
+        DatabaseIssueReport.status.in_(("open", "acknowledged")),
+        DatabaseIssueReport.field != "source_unreadable")).scalars()
+    fields = set()
+    for issue in issues:
+        proposed = (issue.proposal or {}).get("fields") or {}
+        if isinstance(proposed, dict) and proposed:
+            fields.update(proposed)
+        else:
+            fields.update(f.strip() for f in str(issue.field or "source_dispute").split(",") if f.strip())
+    return sorted(fields)
+
+
+
+def sweep_status_path() -> Path:
+    return Path(os.environ.get("ELLIS_FRESHNESS_STATUS_FILE", "/var/lib/ellis/freshness-sweep-status.json"))
+
+
+def read_sweep_status() -> dict:
+    """Last durable sweep progress, never an invented scheduled/verified time."""
+    try:
+        result = json.loads(sweep_status_path().read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return {}
+    return result if isinstance(result, dict) else {}

@@ -84,7 +84,8 @@ def test_a_held_answer_ships_no_claims(client, monkeypatch):
     assert body["guidance"] is None
 
 
-def test_the_quality_loop_report_queue_correct_refresh(client):
+def test_the_quality_loop_report_queue_correct_refresh(client, db, tmp_path, monkeypatch):
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES", str(tmp_path / "operators.json"))
     _provide(ANSWER)
     look = client.post("/database/lookup", headers=READER,
                        json={"nationality": "ISL", "destination": "FSM"}).json()
@@ -105,7 +106,7 @@ def test_the_quality_loop_report_queue_correct_refresh(client):
     bad = client.post(f"/database/issues/{issue_id}", headers=OTHER_ORG_ADMIN,
                       json={"status": "corrected"})
     assert bad.status_code == 422
-    # 4. Corrected (with a reason) expires the cached answer...
+    # 4. Status text cannot replace a sourced correction or delete the answer.
     # The loop walks its five stages now: the provider is told, the fix is
     # written, someone else reviews it, and only then does it go live. Skipping
     # a stage is refused, which is what makes the queue a progression rather
@@ -120,19 +121,25 @@ def test_the_quality_loop_report_queue_correct_refresh(client):
     ok = client.post(f"/database/issues/{issue_id}", headers=OTHER_ORG_ADMIN,
                      json={"status": "corrected",
                            "resolution": "re-decided with the fixed prompt"})
-    assert ok.status_code == 200
-    # ...so the next lookup is a fresh decision, not the declared-wrong row.
-    _provide(dict(ANSWER, government_fee={"amount": 60, "currency": "USD"}))
+    assert ok.status_code == 422
+    from app.visa_snapshot.models import KimiRouteGuidanceCache
+    original = db.query(KimiRouteGuidanceCache).filter_by(cache_key=look["cache_key"]).one()
+    original_id = original.id
+    fields = {"disposition": "VISA_REQUIRED", "requirement_detail": "paper_visa",
+              "government_fee": {"amount": 60, "currency": "USD"},
+              "visa_products": [dict(p, fee={"amount": 60, "currency": "USD"}) for p in ANSWER["visa_products"]]}
+    edited = client.post("/database/records/edit", headers=OTHER_ORG_ADMIN, json={
+        "nationality": "ISL", "destination": "FSM", "fields": fields,
+        "source_url": ANSWER["source_url"], "note": "Fixture source establishes visa requirement and corrected 60 USD fee."})
+    assert edited.status_code == 200, edited.text
+    assert client.post(f"/database/issues/{issue_id}", headers=OTHER_ORG_ADMIN,
+        json={"status": "corrected", "resolution": "source correction applied"}).status_code == 200
+    kimi_primary.set_provider(lambda *a: (_ for _ in ()).throw(AssertionError("must not regenerate")))
     again = client.post("/database/lookup", headers=READER,
                         json={"nationality": "ISL", "destination": "FSM"}).json()
-    assert again["cached"] is False
-    # A refreshed answer asserting products is withheld until its official
-    # page has been read (4.2.3); the corrected fee is in the record either
-    # way, which is what the quality loop is being tested for.
-    if again["guidance"] is not None:
-        assert again["guidance"]["government_fee"]["amount"] == 60
-    else:
-        assert again["held"] is True
+    assert again["cached"] is True
+    assert again["guidance"]["government_fee"]["amount"] == 60
+    assert db.query(KimiRouteGuidanceCache).filter_by(cache_key=look["cache_key"]).one().id == original_id
 
 
 def test_release_binds_to_the_exact_answer_via_its_key(client, monkeypatch):
@@ -229,18 +236,9 @@ def test_the_database_answers_even_when_the_engine_fails(client):
     r = client.post("/database/lookup", headers=READER,
                     json={"nationality": "ISL", "destination": "BLZ",
                           "travel_purpose": "business"})
-    assert r.status_code == 200, r.text
-    body = r.json()
-    assert body["approximate"] is True
-    # The stand-in is delivered honestly: either its guidance, or the held
-    # card when the confidence ladder withholds an unconfirmed answer. What
-    # this test owns is the fallback itself, not the grading.
-    assert body["guidance"] is not None or body["held"] is True
-    if body["guidance"] is not None:
-        assert body["guidance"]["disposition"] == "VISA_REQUIRED"
-    assert body["approximate_reason"]
-    assert body["approximate_for"]["asked"]["travel_purpose"] == "business"
-
+    # A tourist answer is never substituted for a business permission.
+    assert r.status_code == 504
+    assert "guidance" not in r.json()
 
 def test_a_route_we_hold_nothing_for_still_fails_honestly(client):
     """The fallback never crosses to a different route: with nothing at all
@@ -335,10 +333,8 @@ def test_ask_review_writes_verdict_and_wrong_files_a_tracked_issue(client):
                for i in issues)
 
 
-def test_expiring_a_ruled_answer_writes_a_delete_change_entry(client):
-    """4.1.2 change management distinguishes add, modify and DELETE. The one
-    path that removes a served answer (an issue ruled corrected) must write
-    the delete entry, or the log claims nothing was withdrawn."""
+def test_issue_status_does_not_delete_a_canonical_answer_or_fake_a_change(client, db):
+    """A workflow label cannot replace evidence or destroy cached provenance."""
     _provide(ANSWER)
     look = client.post("/database/lookup", headers=READER,
                        json={"nationality": "ISL", "destination": "PLW"}).json()
@@ -351,13 +347,14 @@ def test_expiring_a_ruled_answer_writes_a_delete_change_entry(client):
         r = client.post(f"/database/issues/{rep['id']}",
                         headers=OTHER_ORG_ADMIN,
                         json={"status": status, "resolution": reason})
-        assert r.status_code == 200
+        assert r.status_code == (200 if status == "acknowledged" else 422)
     changes = client.get("/database/changes?limit=50",
                          headers=OTHER_ORG_ADMIN).json()["changes"]
     dele = [c for c in changes if c.get("action") == "delete"
             and c.get("cache_key") == look["cache_key"]]
-    assert dele, "withdrawing the answer must be logged as a delete"
-    assert "issue" in (dele[0].get("origin") or "")
+    assert not dele, "status changes cannot invent a policy deletion"
+    from app.visa_snapshot.models import KimiRouteGuidanceCache
+    assert db.query(KimiRouteGuidanceCache).filter_by(cache_key=look["cache_key"]).one()
 
 
 def test_ask_carries_policy_notes_and_continues_a_clarify(client):
@@ -418,10 +415,11 @@ def test_operator_edit_writes_a_gated_override_that_readers_see(client,
     _provide(dict(ANSWER, visa_products=[]))
     look = client.post("/database/lookup", headers=READER,
                        json={"nationality": "ISL", "destination": "KIR"}).json()
-    assert look["guidance"]["government_fee"]["amount"] == 100
+    assert look["held"] and look["guidance"] is None, \
+        "the unread initial answer must stay held until the operator verifies it"
     edit = {"nationality": "ISL", "destination": "KIR",
             "travel_purpose": "tourism",
-            "fields": {"government_fee": {"amount": 120, "currency": "USD"}},
+            "fields": {"disposition": "VISA_REQUIRED", "government_fee": {"amount": 120, "currency": "USD"}},
             "source_url": "https://www.mofa.go.jp/fee-page",
             "note": "fee updated per the official schedule"}
     # A reader cannot edit; a commercial source is refused; unknown fields
@@ -483,7 +481,7 @@ def test_operator_edit_layers_onto_seed_overrides_not_over_them(client,
     verified_overrides.reload()
 
 
-def test_the_assistant_is_ellis_refuses_off_topic_and_grounds_replies(client):
+def test_the_assistant_is_ellis_refuses_off_topic_and_grounds_replies(client, db, tmp_path, monkeypatch):
     """The conversation layer's three hard rules: identity questions answer
     Ellis with no model call, non-immigration questions get the one-sentence
     refusal, and a composed reply is built from the served facts through the
@@ -507,6 +505,24 @@ def test_the_assistant_is_ellis_refuses_off_topic_and_grounds_replies(client):
     assert r["reply"] == "抱歉，我只能协助出入境相关事务。"
     # A terse route question is never refused.
     calls = {}
+    import json
+    from datetime import date
+    from app.visa_snapshot import verified_overrides as vo
+    source = tmp_path / "assistant-fixture-evidence.json"
+    source.write_text(json.dumps([{
+        "route": {"nationality": "ISL", "destination": dest, "purpose": "tourism",
+                  "travel_document_type": "ordinary_passport"},
+        "fields": {"disposition": "VISA_REQUIRED", "requirement_detail": "paper_visa"},
+        "source_url": ANSWER["source_url"], "verified_at": date.today().isoformat(),
+        "verifier": "ai", "note": "Fixture: ordinary Icelandic passport tourism applicants need a visa."
+    } for dest in ("JPN", "NRU")]))
+    monkeypatch.setattr(vo, "OVERRIDES", source)
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES", str(tmp_path / "operators.json"))
+    vo.reload()
+    from app.visa_snapshot.models import KimiRouteGuidanceCache
+    db.query(KimiRouteGuidanceCache).filter(KimiRouteGuidanceCache.cache_key.like("ISL|%|JPN|%" )).delete(synchronize_session=False)
+    db.query(KimiRouteGuidanceCache).filter(KimiRouteGuidanceCache.cache_key.like("ISL|%|NRU|%" )).delete(synchronize_session=False)
+    db.commit()
 
     def model(system, user):
         if "Compose one short reply" in str(system):
@@ -585,7 +601,7 @@ def test_operator_edit_patches_one_visa_product_in_place(client, tmp_path,
     client.post("/database/lookup", headers=READER,
                 json={"nationality": "ISL", "destination": "NIU"})
     edit = {"nationality": "ISL", "destination": "NIU",
-            "travel_purpose": "tourism", "fields": {},
+            "travel_purpose": "tourism", "fields": {"disposition": "VISA_REQUIRED"},
             "product_patch": {"visa_type_name": "Tourist single",
                               "validity": "3 months", "fee_amount": 30},
             "source_url": "https://www.mofa.go.jp/fee-page",
@@ -754,6 +770,7 @@ def test_a_blocked_page_never_demotes_a_grounded_record_to_low(client):
     try:
         row = db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one()
         good = {"at": "2026-09-01T00:00:00+00:00", "outcome": "checked",
+                "evidence_contract": 2, "verified_fields": ["disposition"],
                 "consistent": True, "source_url": ANSWER["source_url"],
                 "changed_fields": [], "disputed_fields": []}
         row.verification = dict(row.verification or {},

@@ -18,6 +18,7 @@ rejected with a precise reason, not passed through.
 from __future__ import annotations
 
 import re
+import unicodedata
 
 from .authority import hostname, is_government_host, registrable_domain
 
@@ -25,11 +26,14 @@ from .authority import hostname, is_government_host, registrable_domain
 # official domains. Used for jurisdiction matching (a China disposition must be
 # cited from a Chinese official domain, etc.).
 _DEST_GOV_SUFFIXES = {
+    "BRA": ("gov.br",), "BRN": ("gov.bn",), "BHR": ("gov.bh",), "LAO": ("gov.la",),
+    "HKG": ("gov.hk",), "TWN": ("gov.tw",), "CAN": ("gc.ca", "canada.ca"),
+    "FRA": ("gouv.fr",), "ESP": ("gob.es",), "RUS": ("gov.ru", "mid.ru"),
     "CHN": ("gov.cn", "org.cn"), "MEX": ("gob.mx",), "USA": ("gov", "mil"),
     "VNM": ("gov.vn",), "KHM": ("gov.kh",), "IND": ("gov.in",), "GBR": ("gov.uk",),
     "AUS": ("gov.au",), "JPN": ("go.jp",), "KOR": ("go.kr",), "SGP": ("gov.sg",),
     "THA": ("go.th",), "MYS": ("gov.my",), "IDN": ("go.id",), "PHL": ("gov.ph",),
-    "ARE": ("gov.ae",), "SAU": ("gov.sa",), "QAT": ("gov.qa",), "EGY": ("gov.eg",),
+    "ARE": ("gov.ae", "uae-embassy.org"), "SAU": ("gov.sa",), "QAT": ("gov.qa",), "EGY": ("gov.eg",),
     "MAR": ("gov.ma",), "TUR": ("gov.tr",), "NZL": ("govt.nz",),
 }
 
@@ -38,15 +42,14 @@ _DEST_GOV_SUFFIXES = {
 # disposition when a positive pattern matches AND no negative pattern matches.
 _DISPOSITION_SUPPORT = {
     "VISA_REQUIRED": (
-        r"visa (is |are )?required|must (obtain|apply for|hold) (a )?visa|"
-        r"need(s|ed)? (a |an )?visa|apply for a( tourist| l| chinese)? visa|"
-        r"tourist \(l[- ]?visa\)|tourist \(l\) visa|\bl[- ]visa\b|"
-        r"documents? required for( a| the)? (tourist )?visa|"
-        r"签证|需要办理签证|需申请签证|应当申请签证|办理.{0,4}签证|"
+        r"\bvisa (is |are )?required\b|must (obtain|apply for|hold) (a |an )?"
+        r"(?:(?:tourist|visitor|business|transit|entry)(?: \([a-z]\))? )?(e-?visa|visa)|"
+        r"need(s|ed)? (a |an )?(e-?visa|visa)|"
+        r"需要办理签证|需申请签证|应当申请签证|必须持有签证|需要签证|"
         r"requiere (una )?visa|necesita(n)? (una )?visa|debe(n)? tramitar (una )?visa",
         # Negations (English/Spanish/Chinese) that flip a "visa" mention to
         # visa-free — must NOT be read as a requirement.
-        r"visa[- ]free|no visa (is )?required|without a visa|visa exemption|"
+        r"visa[- ]free|no visa (is )?required|without a visa|visa exemption|visa on arrival|"
         r"免签|无需签证|免办签证|"
         r"no (se )?requiere(n)?( de)? (una )?visa|no necesita(n)?( de)? (una )?visa|"
         r"do(es)? not (require|need)( a| an)? visa|not require a visa|"
@@ -72,9 +75,15 @@ _DISPOSITION_SUPPORT = {
         r"no (se )?requiere(n)? visa|no necesita(n)? visa|"
         r"hong kong|macao|macau|香港|澳门|澳門",
     ),
+    "VISA_ON_ARRIVAL": (
+        r"visa[- ]on[- ]arrival|visa.{0,20}(on|upon) arrival|落地签|落地簽",
+        r"not available|not eligible|not issued|no visa on arrival|must apply.{0,20}before",
+    ),
     "ETA_REQUIRED": (
-        r"electronic travel authoriz|\beta\b|电子旅行授权",
-        r"visa[- ]free|no visa (is )?required|免签",
+        r"(?:must|require[ds]?|needs?)[^.!?\n]{0,80}(?:electronic travel authori[sz]|\beta\b|\besta\b)|"
+        r"(?:electronic travel authori[sz][a-z ]*|\beta\b|\besta\b)[^.!?\n]{0,50}(?:is required|mandatory)|"
+        r"必须.{0,12}电子旅行授权|需要.{0,12}电子旅行授权",
+        r"not required|do(es)? not (require|need)|无需|不需要",
     ),
 }
 
@@ -92,6 +101,14 @@ _NATIONALITY_NAMES = {
             "estadounidense", "美国公民", "美国护照", "美国国民", "美籍"),
     "CHN": ("china", "chinese", "中国"), "MEX": ("mexico", "méxico", "mexican"),
     "GBR": ("united kingdom", "british", "u.k."), "CAN": ("canada", "canadian"),
+    "HKG": ("hong kong", "hksar", "香港"),
+    "TWN": ("taiwan", "taiwanese", "台湾", "台灣", "臺灣"),
+    "JPN": ("japan", "japanese", "日本"), "KOR": ("south korea", "republic of korea", "korean", "韩国", "韓國"),
+    "THA": ("thailand", "thai", "泰国", "泰國"), "MYS": ("malaysia", "malaysian", "马来西亚", "馬來西亞"),
+    "RUS": ("russia", "russian", "俄罗斯", "俄羅斯"), "AUS": ("australia", "australian", "澳大利亚", "澳大利亞"),
+    "IDN": ("indonesia", "indonesian", "印度尼西亚", "印度尼西亞"),
+    "PHL": ("philippines", "philippine", "filipino", "菲律宾", "菲律賓"),
+    "FRA": ("france", "french", "法国", "法國"), "ESP": ("spain", "spanish", "西班牙"),
     "IND": ("india", "indian"), "VNM": ("vietnam", "vietnamese"),
     "KHM": ("cambodia", "cambodian"), "SGP": ("singapore", "singaporean"),
 }
@@ -112,31 +129,46 @@ _MISSION_SELF_RE = re.compile(
     re.I)
 
 
+def _statement_bounds(text: str, at: int, window: int = 500) -> tuple[int, int]:
+    # Preserve abbreviation offsets while recognizing actual sentence/row and
+    # contrast boundaries. A nationality in the previous rule is not a subject
+    # of this one merely because it is fewer than 500 characters away.
+    masked = re.sub(r"\b(?:[a-z]\.){2,}", lambda m: m.group().replace(".", " "), text, flags=re.I)
+    breaks = list(re.finditer(r"[.!?。！？;\n]|\b(?:whereas|but|while)\b", masked, re.I))
+    left, right = max(0, at - window), min(len(text), at + window)
+    for boundary in breaks:
+        if boundary.end() <= at:
+            left = max(left, boundary.end())
+        elif boundary.start() >= at:
+            right = min(right, boundary.start())
+            break
+    return left, right
+
+
 def _nationality_anchored(text: str, nationality: str, at: int, *, window: int = 500) -> bool:
-    """True when the disposition statement applies to THIS applicant's
-    nationality: either the nationality name appears within `window` chars of
-    the matched phrase, OR the phrase is in a "list of countries" (universal
-    marker) context AND the nationality name appears somewhere on the page (i.e.
-    it is in that list). A generic list header alone never grounds a route, and
-    a mission's self-reference ("Embassy ... in the United States") never counts
-    as a nationality anchor."""
-    # Blank out mission self-references with SAME-LENGTH spaces so `at` (an
-    # offset into the original text) stays aligned.
+    """Require this applicant in the same statement as the disposition.
+    Country lists must name the applicant in that statement. A universal list
+    heading or a mention on another row never proves membership in the list."""
     text = _MISSION_SELF_RE.sub(lambda m: " " * len(m.group(0)), text or "")
-    low = (text or "").lower()
-    lo, hi = max(0, at - window), min(len(low), at + window)
+    low = text.lower()
+    lo, hi = _statement_bounds(low, at, window)
     seg = low[lo:hi]
-    names = [n for n in _NATIONALITY_NAMES.get((nationality or "").upper(), ()) if n.strip()]
-    if any(n in seg for n in names):
-        return True
-    if any(m in seg for m in _UNIVERSAL_MARKERS):
-        # A country-list context still requires the nationality to be listed.
-        return any(n in low for n in names) if names else True
+    names = _NATIONALITY_NAMES.get((nationality or "").upper(), ())
+    for name in names:
+        name = name.strip()
+        # Word boundaries avoid India matching an unrelated longer word.
+        pattern = r"(?<![a-z])" + re.escape(name) + r"(?![a-z])"
+        for match in re.finditer(pattern, seg):
+            before = seg[max(0, match.start() - 35):match.start()]
+            if re.search(r"(?:travel(?:l?ing)?|travell?ers?|enter(?:ing)?|visits?|flights?)\s+(?:to\s+)?$|\bto\s+(?:the\s+)?$", before):
+                continue  # destination mention, not passport nationality
+            return True
     return False
 
 # Canonical disposition aliases coming from the pipeline.
 _DISP_ALIASES = {
     "VISA_EXEMPT": "VISA_FREE", "VISA_FREE": "VISA_FREE",
+    "VISA_ON_ARRIVAL": "VISA_ON_ARRIVAL",
     "VISA_REQUIRED": "VISA_REQUIRED", "EMBASSY_VISA_REQUIRED": "VISA_REQUIRED",
     "AUTHORIZED_VISA_CENTER_REQUIRED": "VISA_REQUIRED",
     "EVISA_REQUIRED": "EVISA_REQUIRED", "ETA_REQUIRED": "ETA_REQUIRED",
@@ -181,6 +213,10 @@ def jurisdiction_matches(url: str, destination: str) -> bool:
     if not is_government_host(host):
         return False
     dest = (destination or "").upper()
+    # EU common visa law is competent for the served Schengen destinations;
+    # do not extend this exception to unrelated EU websites or nonmembers.
+    if host == "eur-lex.europa.eu" and dest in {"FRA", "ESP"}:
+        return True
     sufs = _DEST_GOV_SUFFIXES.get(dest)
     if sufs:
         return any(host == s or host.endswith("." + s) for s in sufs)
@@ -188,37 +224,160 @@ def jurisdiction_matches(url: str, destination: str) -> bool:
     return owner is None or owner == dest
 
 
-def supports_disposition(text: str, disposition: str, *, nationality: str = "") -> bool:
-    """Does the page text state this disposition? When `nationality` is given,
-    the statement must be nationality-anchored (the applicant's nationality or a
-    universal marker appears near the matched phrase) so a rule for OTHER
-    nationalities on the same page never counts."""
+def _supporting_match(text: str, disposition: str, nationality: str = ""):
     canon = _DISP_ALIASES.get((disposition or "").upper())
     spec = _DISPOSITION_SUPPORT.get(canon or "")
     if not spec:
-        return False
+        return None
     pos, neg = spec
     low = (text or "").lower()
-    m = re.search(pos, low, re.I)
-    if not m:
-        return False
-    if neg and re.search(neg, low[max(0, m.start() - 60):m.end() + 120], re.I):
-        return False
-    if nationality and not _nationality_anchored(text, nationality, m.start()):
-        return False
-    return True
+    for m in re.finditer(pos, low, re.I):
+        lo, hi = _statement_bounds(low, m.start())
+        if neg and re.search(neg, low[max(lo, m.start() - 60):min(hi, m.end() + 120)], re.I):
+            continue
+        if nationality and not _nationality_anchored(text, nationality, m.start()):
+            continue
+        return m
+    return None
 
 
-def find_supporting_excerpt(text: str, disposition: str, *, window: int = 240) -> str:
-    canon = _DISP_ALIASES.get((disposition or "").upper())
-    spec = _DISPOSITION_SUPPORT.get(canon or "")
-    if not spec:
+def supports_disposition(text: str, disposition: str, *, nationality: str = "") -> bool:
+    """Require explicit disposition evidence for this applicant in the same
+    statement. A title, program name, unrelated rule or list header is not a
+    statement that this applicant needs (or is exempt from) that permission."""
+    return _supporting_match(text, disposition, nationality) is not None
+
+
+def quote_in_text(quote: str, text: str) -> bool:
+    """Match the WHOLE quote after Unicode, case and whitespace normalization.
+    A true prefix followed by invented words never counts as a quotation."""
+    def normalized(value):
+        return " ".join(unicodedata.normalize("NFKC", str(value or "")).casefold().split())
+    needle = normalized(quote)
+    return bool(needle) and needle in normalized(text)
+
+
+def route_supporting_excerpt(text: str, disposition: str, route: dict, *, policy_date: str = "") -> str:
+    """An applicant, document, purpose and effective date belong to one rule.
+    A different passport category or a future announcement is not today's rule.
+    Generic ordinary visitor language is allowed; exceptional documents and
+    non-visitor purposes require their own explicit scope."""
+    from datetime import date, datetime
+    try:
+        on = date.fromisoformat(policy_date[:10]) if policy_date else date.today()
+    except (ValueError, TypeError):
+        on = date.today()
+    nationality = route.get("passport_nationality") or ""
+    if not nationality:
         return ""
-    m = re.search(spec[0], text or "", re.I)
-    if not m:
+    document = route.get("travel_document_type") or "ordinary_passport"
+    purpose = route.get("travel_purpose") or "tourism"
+    doc_words = {"diplomatic_passport": r"diplomatic|外交", "service_passport": r"service|official|公务|公務",
+                 "official_passport": r"official|service|公务|公務", "prc_travel_document": r"travel document|旅行证|旅行證"}
+    purpose_words = {"tourism": r"touris[mt]|holiday|visitor|旅游|旅遊", "business": r"business|商务|商務",
+                     "work": r"work|employment|工作", "study": r"stud[ye]|student|education|留学|留學",
+                     "transit": r"transit|过境|過境"}
+    canon = _DISP_ALIASES.get(str(disposition or "").upper())
+    if canon not in _DISPOSITION_SUPPORT:
         return ""
-    a = max(0, m.start() - window // 2)
-    return (text[a:a + window]).strip()
+    for match in re.finditer(_DISPOSITION_SUPPORT[canon][0], text or "", re.I):
+        lo, hi = _statement_bounds(text, match.start())
+        statement = text[lo:hi]
+        if not _supporting_match(statement, disposition, nationality):
+            continue
+        if document == "ordinary_passport":
+            if re.search(r"diplomatic|service passport|official passport|travel document|外交|公务|公務|旅行证|旅行證", statement, re.I):
+                continue
+        elif document not in doc_words or not re.search(doc_words[document], statement, re.I):
+            continue
+        own = purpose_words.get(purpose)
+        if not own:
+            continue
+        other_scope = any(re.search(pattern, statement, re.I) for key, pattern in purpose_words.items() if key != purpose)
+        if (other_scope or purpose != "tourism") and not re.search(own, statement, re.I):
+            continue
+        # Includes a immediately preceding dated heading, but does not scan
+        # arbitrary future dates elsewhere on a long policy page.
+        context = text[max(0, lo - 100):hi]
+        future = False
+        date_pattern = r"(?:from|effective(?:\s+from)?|starting|as of|beginning)\s+(\d{4}-\d{2}-\d{2}|\d{1,2}\s+[A-Za-z]+\s+\d{4}|[A-Za-z]+\s+\d{1,2},?\s+\d{4})"
+        for dated in re.finditer(date_pattern, context, re.I):
+            value = dated.group(1).replace(",", "")
+            for fmt in ("%Y-%m-%d", "%d %B %Y", "%B %d %Y", "%d %b %Y", "%b %d %Y"):
+                try:
+                    future |= datetime.strptime(value, fmt).date() > on
+                    break
+                except ValueError:
+                    pass
+        if not future:
+            return statement.strip()
+    return ""
+
+
+def field_value_supported(name: str, value, text: str) -> bool:
+    """Conservative claim matching, never a shared currency/token shortcut.
+    All numbers and substantive value tokens must occur in the cited text;
+    booleans require an explicit statement about that specific requirement."""
+    if value is None or value == "" or value == [] or value == {}:
+        return False
+    low = " ".join(unicodedata.normalize("NFKC", str(text or "")).casefold().split())
+    if isinstance(value, bool):
+        topic = {"biometrics_required": r"biometric|fingerprint", "appointment_required": r"appointment",
+                 "interview_required": r"interview"}.get(name)
+        if not topic:
+            return False
+        negative = rf"(?:no|not|without)[^.!?]{{0,35}}(?:{topic})|(?:{topic})[^.!?]{{0,35}}(?:not required|not needed|waived)"
+        positive = rf"(?:{topic})[^.!?]{{0,35}}(?:required|mandatory)|(?:must|require)[^.!?]{{0,35}}(?:{topic})"
+        return bool(re.search(positive if value else negative, low)) and not (value and re.search(negative, low))
+    if name == "disposition":
+        return supports_disposition(text, value)
+    if name == "application_channel":
+        pattern = {"authorised_agent": r"accredited (?:travel )?agen|authori[sz]ed agen",
+                   "embassy": r"embassy|consulate|mission", "visa_application_centre": r"visa application cent",
+                   "evisa": r"e-?visa|electronic visa", "online": r"online|electronic|e-?visa",
+                   "none": r"no application|visa[- ]free|without a visa", "on_arrival": r"on arrival|upon arrival"}.get(str(value))
+        return bool(pattern and re.search(pattern, low))
+    if name in {"permitted_stay", "permitted_stay_days", "max_stay_days"} and not re.search(r"stay|visit|remain|停留|逗留", low):
+        return False
+    if name == "processing_time" and not re.search(r"process|processing|处理|處理|审理|審理", low):
+        return False
+    if isinstance(value, dict):
+        if "amount" in value and "currency" in value:
+            amount, currency = str(value["amount"]), str(value["currency"]).casefold()
+            amount_pattern = r"(?<![\d.])" + re.escape(amount) + r"(?![\d.])"
+            if not re.search(r"(?:" + amount_pattern + r"\s*" + re.escape(currency) + r"\b|\b" + re.escape(currency) + r"\s*" + amount_pattern + r")", low):
+                return False
+        return all(field_value_supported(k, v, text) for k, v in value.items() if v not in (None, "", [], {})) and any(v not in (None, "", [], {}) for v in value.values())
+    if isinstance(value, list):
+        return bool(value) and all(field_value_supported(name, item, text) for item in value)
+    # Decimal numbers must match in full: 7 never proves 70 or 999; a currency
+    # mention alone never proves an amount. Keep all numbers, including <100.
+    raw = str(value).replace("_", " ").casefold()
+    numbers = re.findall(r"(?<![\w.])\d+(?:\.\d+)?(?![\w.])", raw)
+    if any(not re.search(r"(?<![\w.])" + re.escape(n) + r"(?![\w.])", low) for n in numbers):
+        return False
+    if isinstance(value, (int, float)):
+        return bool(numbers)
+    if quote_in_text(raw, low):
+        return True
+    ignored = {"the", "and", "for", "with", "are", "was", "were", "can", "may", "must", "as", "at", "by", "of", "or", "to", "a", "an", "is", "in", "be", "up", "per"}
+    tokens = [t for t in re.findall(r"[a-z]+", raw) if t not in ignored]
+    return bool(tokens or numbers) and all(re.search(r"(?<![a-z])" + re.escape(t) + r"(?![a-z])", low) for t in tokens)
+
+
+
+def find_supporting_excerpt(text: str, disposition: str, *, window: int = 240,
+                            nationality: str = "") -> str:
+    # The quote must come from the SAME match that passed, not a rejected
+    # earlier headline or another nationality's rule on this page.
+    m = _supporting_match(text, disposition, nationality)
+    if m is None:
+        return ""
+    lo, hi = _statement_bounds(text, m.start())
+    if hi - lo <= window:
+        return text[lo:hi].strip()
+    a = max(lo, m.start() - window // 2)
+    return text[a:min(hi, a + window)].strip()
 
 
 def validate_disposition(route: dict, disposition: str, source_urls: list[str],
@@ -247,9 +406,10 @@ def validate_disposition(route: dict, disposition: str, source_urls: list[str],
         if page is None:
             reasons.append(f"citation_unfetched: {url}")
             continue
-        if supports_disposition(text, disposition, nationality=nat):
+        excerpt = route_supporting_excerpt(text, disposition, route)
+        if excerpt:
             supporting_url = url
-            supporting_excerpt = find_supporting_excerpt(text, disposition)
+            supporting_excerpt = excerpt
             break
         reasons.append(f"citation_unsupported: {hostname(url)} text does not state {disposition}")
     ok = bool(supporting_url)
@@ -269,8 +429,6 @@ def validate_field(route: dict, name: str, value, source_urls: list[str],
     official = [u for u in source_urls if source_is_official(u)]
     if not official:
         return {"ok": False, "reason": "non_official_source"}
-    tokens = [t for t in re.findall(r"[A-Za-z0-9]{3,}", str(value)) if t.lower() not in
-              ("the", "and", "for", "visa", "not", "yes", "true", "false")][:4]
     for url in official:
         if not jurisdiction_matches(url, dest):
             continue
@@ -278,7 +436,7 @@ def validate_field(route: dict, name: str, value, source_urls: list[str],
         if page is None:
             continue
         low = (page.get("text", "") or "").lower()
-        if not tokens or any(t.lower() in low for t in tokens):
+        if field_value_supported(name, value, low):
             return {"ok": True, "reason": "", "url": url}
     return {"ok": False, "reason": "citation_unsupported"}
 
@@ -286,7 +444,7 @@ def validate_field(route: dict, name: str, value, source_urls: list[str],
 # Pipeline-canonical dispositions, in specificity order (electronic programs win
 # over the generic required/free classification). A generic "visa required"
 # resolves to EMBASSY_VISA_REQUIRED (the consular application channel).
-_DISP_SPECIFICITY = ("EVISA_REQUIRED", "ETA_REQUIRED", "VISA_FREE", "EMBASSY_VISA_REQUIRED")
+_DISP_SPECIFICITY = ("EVISA_REQUIRED", "ETA_REQUIRED", "VISA_ON_ARRIVAL", "VISA_FREE", "EMBASSY_VISA_REQUIRED")
 
 
 def detect_disposition_from_pages(route: dict, pages: list[dict]) -> dict:
@@ -311,18 +469,18 @@ def detect_disposition_from_pages(route: dict, pages: list[dict]) -> dict:
         # "visa-free") is NOISE — it is skipped, never allowed to ground or to
         # manufacture a conflict. Only a page with one clear disposition counts.
         page_disps = [d for d in _DISP_SPECIFICITY
-                      if supports_disposition(text, d, nationality=nat)]
+                      if route_supporting_excerpt(text, d, route)]
         if len(page_disps) != 1:
             continue
         disp = page_disps[0]
         attested.setdefault(disp, []).append(url)
-        excerpt_for.setdefault(disp, (url, find_supporting_excerpt(text, disp)))
+        excerpt_for.setdefault(disp, (url, route_supporting_excerpt(text, disp, route)))
     if not attested:
         return {"disposition": None, "supporting_url": "", "supporting_excerpt": "",
                 "attested": {}, "conflict": False}
     # VISA_FREE and EMBASSY_VISA_REQUIRED directly contradict; treat
     # co-attestation as a conflict to resolve, never silently pick one.
-    conflict = ("VISA_FREE" in attested and "EMBASSY_VISA_REQUIRED" in attested)
+    conflict = ("VISA_FREE" in attested and bool({"EMBASSY_VISA_REQUIRED", "VISA_ON_ARRIVAL"} & set(attested)))
     chosen = next((d for d in _DISP_SPECIFICITY if d in attested), None)
     url, exc = excerpt_for.get(chosen, ("", ""))
     return {"disposition": chosen, "supporting_url": url, "supporting_excerpt": exc,

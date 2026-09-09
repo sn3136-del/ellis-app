@@ -1,9 +1,10 @@
 """Authentication, tenant isolation, and short-lived action (step-up) tokens.
 
-Dev mode accepts a bearer token and a caller-supplied org/user (for local +
-tests). Production verifies Clerk session JWTs (activation: set CLERK_SECRET_KEY
-and implement `verify_clerk`). Object-level authorization is enforced by
-comparing the resource's org_id to the caller's principal in every route.
+Local mode accepts a bearer token and caller-supplied org/user. Secure operator
+mode requires a private admin token and binds the operator user to the server
+configuration; a public reader token cannot assert an admin role. Clerk session
+verification is a separate, currently unimplemented activation path. Object
+authorization compares a resource's org_id with the caller's principal.
 """
 from __future__ import annotations
 
@@ -48,12 +49,19 @@ async def get_principal(
     if s.clerk_secret_key:
         # Production path — verify a Clerk session token.
         return verify_clerk(token)
+    if s.require_secure_admin and token == s.admin_token:
+        # Public installations must never accept the bundled development
+        # credential or let an operator invent the reviewer identity.
+        _require(len(s.admin_token) >= 32 and s.admin_token != s.dev_api_token
+                 and bool(s.admin_user_id), 401, "operator authentication unavailable")
     # Dev path — a shared dev token plus explicit org/user headers. The admin
     # role is granted only when the caller presents the dedicated admin token
     # (ELLIS_ADMIN_TOKEN), never merely by asserting x_role.
     _require(token == s.dev_api_token or token == s.admin_token, 401, "invalid token")
     _require(bool(x_org_id and x_user_id), 401, "missing org/user")
     role = "admin" if (token == s.admin_token and s.admin_token) else "applicant"
+    if role == "admin" and s.require_secure_admin:
+        x_user_id = s.admin_user_id
     return Principal(org_id=x_org_id, user_id=x_user_id, role=role)
 
 

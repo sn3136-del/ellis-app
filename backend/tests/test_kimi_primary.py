@@ -75,7 +75,18 @@ def db():
 
 
 @pytest.fixture(autouse=True)
-def _reset():
+def _reset(request, monkeypatch, tmp_path):
+    from app.visa_snapshot import verified_overrides as vo
+    if request.node.name in {
+        "test_an_incomplete_answer_is_served_at_once_without_a_slow_retry",
+        "test_uncertain_results_are_cached_briefly_and_replaced_when_complete",
+        "test_malformed_disposition_rejected", "test_contradictory_answer_flagged_precisely",
+        "test_travel_authorization_page_cannot_prove_a_visa_requirement",
+    }:
+        f = tmp_path / "no_seed.json"
+        f.write_text("[]")
+        monkeypatch.setattr(vo, "OVERRIDES", f)
+        vo.reload()
     yield
     kimi_primary.set_provider(None)
 
@@ -610,21 +621,12 @@ def test_timeout_maps_to_504_with_retry_message(client, db, monkeypatch):
 
 # --- cache-key separation (Trip.com Database: transit + document type) -------
 
-def test_transit_gets_its_own_cache_key_but_plain_routes_are_unchanged():
-    """A stopover can add a transit-visa requirement, so it MUST change the
-    key. If it did not, a transit query would be served the cached
-    non-transit answer and the transit question would never be asked.
-    Plain routes must keep their existing key so the shipped warm cache
-    stays valid."""
+def test_stopovers_never_fork_the_destination_cache_key():
+    """Transit has separate checked facts, never another destination decision."""
     from app.visa_snapshot.kimi_primary import cache_key
-    base = {"passport_nationality": "CHN",
-            "lawful_country_of_residence": "CHN",
-            "destination_country": "JPN", "travel_purpose": "tourism"}
-    assert cache_key({**base, "transit_countries": ["SGP"]}) != cache_key(base)
-    # Order and duplicates must not produce a different key.
-    assert (cache_key({**base, "transit_countries": ["SGP", "THA"]})
-            == cache_key({**base, "transit_countries": ["THA", "SGP", "SGP"]}))
-    # An empty transit list is the plain route.
+    base = {"passport_nationality": "CHN", "destination_country": "JPN", "travel_purpose": "tourism"}
+    assert cache_key({**base, "transit_countries": ["SGP"]}) == cache_key(base)
+    assert cache_key({**base, "transit_countries": ["SGP", "THA"]}) == cache_key(base)
     assert cache_key({**base, "transit_countries": []}) == cache_key(base)
 
 
@@ -682,13 +684,13 @@ def test_low_confidence_answers_are_held_until_a_person_releases_them():
     assert _result("KIMI_PRIMARY", {"confidence": "high"},
                    cached=False, stale=False)["review_required"] is True
     for ok in ("high", "medium"):
-        assert _result("KIMI_PRIMARY", {"confidence": ok, "source_url": SRC},
+        assert _result("KIMI_PRIMARY", {"disposition": "VISA_EXEMPT", "confidence": ok, "source_url": SRC},
                        cached=False, stale=False)["review_required"] is False
 
 
 def test_an_operator_release_lifts_the_hold_for_that_answer_only():
     from app.visa_snapshot.kimi_primary import _result
-    released = _result("KIMI_PRIMARY", {"confidence": "low",
+    released = _result("KIMI_PRIMARY", {"disposition": "VISA_EXEMPT", "confidence": "low",
                                         "source_url": "https://x.gov.uk/a"},
                        cached=True, stale=False, released=True)
     assert released["review_required"] is False
@@ -1273,13 +1275,11 @@ def test_a_visa_free_answer_never_carries_application_machinery():
         "arrival_card": {"required": True, "note": "K-ETA style filing"},
     }, cached=False, stale=False)
     g = out["guidance"]
-    assert g.get("government_fee") is None
-    assert g.get("official_portal_url") is None
-    assert g.get("visa_products") is None
-    assert g.get("application_channel") is None
-    assert g["appointment_required"] is False
-    assert g["interview_required"] is False
-    assert g["arrival_card"]["required"] is True     # deliberately kept
+    assert out["held"] and out["review_required"]
+    assert g["government_fee"]["amount"] == 260  # retain evidence for operations
+    from app.main import _held_envelope
+    assert _held_envelope(out)["guidance"] is None
+    assert g["arrival_card"]["required"] is True
     assert g["permitted_stay_days"] == 90
 
 
@@ -1426,9 +1426,9 @@ def test_departure_city_resolves_a_district_without_disturbing_warm_routes():
     assert kimi_primary.cache_key(base) == kimi_primary.cache_key(
         {**base, "consular_jurisdiction": "default"})
 
-    # A resolved district DOES change the key, which is the whole point.
+    # A district is application context, not another unverified visa verdict.
     assert kimi_primary.cache_key({**base, "consular_jurisdiction": "shanghai"}) \
-        != kimi_primary.cache_key(base)
+        == kimi_primary.cache_key(base)
 
     # The city is normalised the way a traveller actually types it.
     n = consular_districts._norm
@@ -1944,11 +1944,12 @@ def test_a_verified_requirement_detail_implies_the_verdict(tmp_path, monkeypatch
     vo.reload()
 
 
-def test_a_visa_free_verdict_never_carries_a_priced_product(tmp_path, monkeypatch):
+def test_conflicting_verified_product_is_preserved_and_held(tmp_path, monkeypatch):
     """Britain to Vietnam: a verified 45-day exemption with the 25 USD e-visa
     products still listed underneath read "No visa needed" over a priced
     product table, the same shape Trip.com reported for Hong Kong to
-    Vietnam. Under a visa-free verdict only free products survive."""
+    Vietnam. Conflicting verified prices survive for review, while the
+    final serve gate holds the answer instead of erasing the evidence."""
     import json as _json
     from app.visa_snapshot import verified_overrides as vo
     f = tmp_path / "verified_overrides.json"
@@ -1972,11 +1973,17 @@ def test_a_visa_free_verdict_never_carries_a_priced_product(tmp_path, monkeypatc
                          {"passport_nationality": "GBR", "destination_country": "VNM",
                           "travel_purpose": "tourism"})
     assert merged["disposition"] == "VISA_EXEMPT"
-    assert [p["type"] for p in merged["visa_products"]] == ["Visa-free entry, 45 days"]
+    assert [p["type"] for p in merged["visa_products"]] == [
+        "Visa-free entry, 45 days", "90-day single-entry tourist e-Visa"]
+    assert any("priced visa products" in p for p in kimi_primary.serve_time_invariants(merged))
+    out = kimi_primary.apply_verified_overrides(
+        kimi_primary._result("KIMI_PRIMARY", merged, cached=True, stale=False),
+        {"passport_nationality": "GBR", "destination_country": "VNM",
+         "travel_purpose": "tourism"})
+    assert out["review_required"] is True
     # The model's 25 USD fee is an application-only leftover: dropped, or
     # zero, never a positive amount under a visa-free verdict.
     assert (merged.get("government_fee") or {}).get("amount") in (None, 0)
-    assert merged.get("application_channel") in (None, "not_required")
     vo.reload()
 
 
@@ -2068,7 +2075,7 @@ def test_only_a_verified_verdict_releases_a_held_answer(db, tmp_path, monkeypatc
     vo.reload()
     try:
         g = kimi_primary.get_route_guidance(db, ROUTE)
-        assert g["source_verified"]["fields"] == ["government_fee"]
+        assert not g.get("source_verified"), "fee-only evidence is quarantined"
         assert g["review_required"] is True, "a fee alone verifies nothing about the verdict"
         f.write_text(_json.dumps([{
             "route": {"nationality": "USA", "destination": "JPN"},
@@ -2189,12 +2196,13 @@ def test_the_nearest_answer_never_crosses_document_type_or_leaves_the_canonical_
     db.commit()
     assert kimi_primary.nearest_cached_answer(
         db, dict(ROUTE, travel_document_type="diplomatic_passport")) is None
-    near = kimi_primary.nearest_cached_answer(db, dict(ROUTE, travel_purpose="business"))
+    assert kimi_primary.nearest_cached_answer(db, dict(ROUTE, travel_purpose="business")) is None
+    near = kimi_primary.nearest_cached_answer(db, ROUTE)
     assert near["guidance"]["disposition"] == "VISA_EXEMPT"   # the canonical row, never the fork
     assert near["approximate_for"]["served_purpose"] == "tourism"
 
 
-def test_a_stopover_variant_inherits_the_route_release(db):
+def test_a_legacy_stopover_copy_cannot_replace_the_canonical_answer(db):
     _clear_cache(db)
     key = kimi_primary.cache_key(ROUTE)
     low = dict(GOOD_ANSWER, source_url=None, official_portal_url=None)
@@ -2203,11 +2211,14 @@ def test_a_stopover_variant_inherits_the_route_release(db):
                                   model="test",
                                   verification={"operator_released": {"by": "ops-a"}}))
     via_route = dict(ROUTE, transit_countries=["KOR"])
-    db.add(KimiRouteGuidanceCache(cache_key=kimi_primary.cache_key(via_route),
+    legacy = dict(low, disposition="VISA_REQUIRED", permitted_stay="7 days")
+    db.add(KimiRouteGuidanceCache(cache_key=key + "|via:KOR",
                                   route=dict(via_route), status="KIMI_PRIMARY",
-                                  guidance=low, missing_fields=[], contradictions=[],
+                                  guidance=legacy, missing_fields=[], contradictions=[],
                                   model="test", verification={}))
     db.commit()
     g = kimi_primary.get_route_guidance(db, via_route)
     assert g["cached"] is True and g["operator_released"] is True
     assert g["review_required"] is False
+    assert g["guidance"]["disposition"] == "VISA_EXEMPT"
+    assert g["guidance"]["transit_requirement"]["required"] is None
