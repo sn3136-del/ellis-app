@@ -1569,6 +1569,7 @@ def travel_database_records(nationality: str = "", destination: str = "",
     complete = sum(1 for r in rows if tstation.completeness(r) == 1.0)
     return {"fields": list(tstation.FIELD_ORDER),
             "required_fields": sorted(tstation.REQUIRED_FIELDS),
+            "acceptance_summary": tstation.acceptance_summary(rows),
             "records": [{**{k: r.get(k) for k in tstation.FIELD_ORDER},
                          # §4.2.1's per-source binding. Deliberately outside
                          # FIELD_ORDER so the 25-field export shape is

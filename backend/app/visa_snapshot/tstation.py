@@ -30,6 +30,59 @@ FIELD_ORDER = (
     "confidence_level",
 )
 
+# Requirements dictionary items 1–25. The separately exported subcategory
+# belongs to item 5; it is not an additional contractual completeness field.
+CONTRACT_FIELDS = tuple(f for f in FIELD_ORDER if f != "visa_requirement_detail")
+
+
+def acceptance_summary(rows: list[dict]) -> dict:
+    """Literal acceptance measurements, separate from fillable completeness.
+
+    The requirements dictionary marks five items "provide if available",
+    while acceptance §4.2.2 explicitly measures all 25 as non-null. Expose
+    both denominators; never manufacture a value or treat a pending field
+    as approved to reconcile that difference.
+    """
+    def present(v):
+        return v is not None and v != [] and v != {} and (
+            not isinstance(v, str) or bool(v.strip()))
+
+    def rate(n, d):
+        return n / d if d else None
+
+    total = len(rows)
+    filled = approved = complete = approved_complete = pending = 0
+    for row in rows:
+        disputed = set(row.get("_disputed") or ())
+        count = sum(present(row.get(f)) for f in CONTRACT_FIELDS)
+        reviewed = sum(present(row.get(f)) and f not in disputed for f in CONTRACT_FIELDS)
+        pending += sum(present(row.get(f)) and f in disputed for f in CONTRACT_FIELDS)
+        filled += count
+        approved += reviewed
+        complete += count == len(CONTRACT_FIELDS)
+        # Unchallenged content is not an accuracy certificate: this metric
+        # only indicates the absence of outstanding field disputes.
+        approved_complete += reviewed == len(CONTRACT_FIELDS)
+    return {
+        "field_names": list(CONTRACT_FIELDS),
+        "field_count": len(CONTRACT_FIELDS),
+        "dictionary_required_field_count": len(REQUIRED_FIELDS),
+        "record_count": total,
+        "filled_cells": filled,
+        "required_cells": total * len(CONTRACT_FIELDS),
+        "field_completeness_rate": rate(filled, total * len(CONTRACT_FIELDS)),
+        "complete_records": complete,
+        "record_completeness_rate": rate(complete, total),
+        "unchallenged_filled_cells": approved,
+        "unchallenged_complete_records": approved_complete,
+        "pending_review_cells": pending,
+        "source_url_presence_rate": rate(sum(present(r.get("source_url")) for r in rows), total),
+        "requirement_support_rate": rate(sum(r.get("_source_check") in
+            {"human-quote", "ai-quote", "grounded-consistent"} for r in rows), total),
+        "accuracy_certified": False,
+        "denominator_policy": "All 25 dictionary fields; no blank-field exclusions. Subcategory is part of field 5.",
+    }
+
 # 6 core + the detail/source fields their completeness metric counts as
 # required. "Provide if available" fields (12, 13, 18, 19, 20) are excluded
 # from the completeness denominator, per the spec's own Required column.

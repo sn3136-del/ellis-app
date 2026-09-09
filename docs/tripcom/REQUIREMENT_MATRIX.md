@@ -1,5 +1,14 @@
 # Requirement-to-Function Matrix
 
+> Historical evidence only. The PASS statements and 100% source coverage
+> below describe August/September 1 snapshots, not the current release.
+> The September 9 acceptance re-audit found 20 dashboard-required fields
+> versus the attached standard's 25, and 26 exported columns. Current
+> source URLs and requirement evidence must be measured separately.
+> Do not use these historical results to sign off current acceptance.
+> Run `backend/scripts/audit_acceptance_snapshot.py` on a full current
+> `/database/records` response and retain its remediation queue.
+
 T-Station Visa Information Base. Every requirement of the
 requirements specification and the Acceptance & Delivery Standard,
 traced to its implementation and verified LIVE against

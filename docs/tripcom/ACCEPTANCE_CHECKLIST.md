@@ -1,5 +1,13 @@
 # Acceptance Checklist and Stage Test Record
 
+> Historical checklist; current acceptance remains open. Existing checked
+> boxes are dated observations, not current certification. A working timer
+> does not prove the policy-update SLA, and a recovery runbook does not
+> prove a timed recovery. Re-run and attach current evidence before signing.
+> The attached standard's 25-field completeness denominator also needs to
+> be reconciled with the 20-required/26-exported implementation; do not
+> substitute fillable completeness or source-link presence for accuracy.
+
 Five stages per the Acceptance & Delivery Standard; each stage closes with
 this checklist, the stage test report, and both parties' signatures.
 
