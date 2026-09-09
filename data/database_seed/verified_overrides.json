@@ -48783,55 +48783,6 @@
  },
  {
   "route": {
-   "nationality": "HKG",
-   "destination": "VNM",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://evisa.gov.vn/",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
-  "fields": {
-   "official_portal_url": "https://evisa.gov.vn/",
-   "requirement_detail": "evisa",
-   "government_fee": {
-    "amount": 25,
-    "currency": "USD"
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "visa_products": [
-    {
-     "type": "Single-entry tourist e-visa",
-     "entry": "single",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist e-visa",
-     "entry": "multiple",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ],
-   "unpublished_fields": []
-  }
- },
- {
-  "route": {
    "nationality": "JPN",
    "destination": "IND",
    "travel_purpose": "tourism"
@@ -53877,6 +53828,90 @@
     "funds requirement",
     "arrival card / eTravel registration (not stated on the cited rule page)"
    ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-09-09",
+  "verified_by": "Ellis source audit (six official source families, adversarially verified 2026-09-09)",
+  "source_url": "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/khai-thi-thuc-dien-tu/cap-thi-thuc-dien-tu",
+  "note": "Verified 2026-09-09 after Trip.com saw a dated copy of this route answer visa-free. Hong Kong SAR ordinary passports are on no Vietnamese exemption list: Vietnam's MOFA list notes the 1992 China agreement 'khong ap dung doi voi Hong Kong va Ma Cao', and the HK Immigration Department's visa-free list updated 26 August 2026 has no Vietnam entry. Resolution 127/NQ-CP issues e-visas to citizens of all countries and territories. Immigration Department quote: 'Step 2: Pay E-visa fee. Your application will be processed in 3 working days; $25/single-entry electronic visa, $50/multiple-entry electronic visa'. The cited page is server-rendered so the automatic re-check can read it; evisa.gov.vn itself serves a script shell.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Tourist e-Visa",
+   "permitted_stay": "Up to 90 days, within the e-visa's 90-day validity",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "official_portal_url": "https://evisa.gov.vn/",
+   "application_channel": "online_portal",
+   "application_channel_detail": "Apply on the Vietnam Immigration Department's e-visa portal, evisa.gov.vn or thithucdientu.gov.vn, and pay the fee online. The fee is not refunded if the application is refused.",
+   "processing_time": "3 working days",
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": "Valid for up to 90 days from the date of entry stated on the e-visa"
+    },
+    {
+     "type": "Multiple-entry tourist e-visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Valid for up to 90 days, any number of entries"
+    }
+   ],
+   "exceptions": [
+    "Hong Kong SAR ordinary passport holders are not visa-exempt for Vietnam. The 1992 China-Vietnam visa exemption agreement does not apply to Hong Kong or Macao.",
+    "Visa on arrival is only issued with a pre-approved visa letter. The e-visa is the standard route and can be used at 83 international border gates."
+   ],
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "unpublished_fields": [],
+   "source_url": "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/khai-thi-thuc-dien-tu/cap-thi-thuc-dien-tu",
+   "corroborating_sources": [
+    {
+     "url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+     "quote": "Trung Quoc: Hiep dinh ... ky ngay 14/02/1992 ... [3] Hiep dinh nay khong ap dung doi voi Hong Kong va Ma Cao.",
+     "authority": ""
+    },
+    {
+     "url": "https://www.immd.gov.hk/pdf/Visa-free%20Access%20or%20Visa-on-arrival%20for%20HKSAR%20passport%20list_Eng.pdf",
+     "quote": "HKSAR passport holders have been granted visa-free access or visa-on-arrival to visit the following countries/territories (updated on 26 August 2026) (178 entries, no Viet Nam entry)",
+     "authority": ""
+    },
+    {
+     "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2023/8/127nq.signed.pdf",
+     "quote": "Dieu 1. Thuc hien cap thi thuc dien tu cho cong dan tat ca cac nuoc, vung lanh tho.",
+     "authority": ""
+    },
+    {
+     "url": "https://xaydungchinhsach.chinhphu.vn/muc-thu-le-phi-cap-ho-chieu-giay-thong-hanh-giay-phep-xuat-canh-tem-ab-119260401102312629.htm",
+     "quote": "Cap thi thuc co gia tri mot lan: 25 USD/chiec. Cap thi thuc co gia tri nhieu lan: Loai co gia tri khong qua 90 ngay: 50 USD/chiec ... Thong tu nay co hieu luc thi hanh tu ngay 01/4/2026 (Thong tu so 28/2026/TT-BTC).",
+     "authority": ""
+    }
+   ],
+   "confidence": "high"
   }
  }
 ]
