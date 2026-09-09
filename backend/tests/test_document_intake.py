@@ -16,9 +16,13 @@ def _no_shipped_overrides(tmp_path, monkeypatch):
     The shipped verified overrides are real data that rewrites dispositions
     at serve time (USA->EGY became visa-on-arrival in the 2026-08-28 batch),
     which turns a mock's exempt continuation into a different flow. Data
-    correctness has its own suites; here the overrides are pointed away."""
+    correctness has its own suites; here the overrides are an explicit empty
+    store. A missing required store correctly holds every route, so cannot
+    represent an intentionally empty fixture."""
     from app.visa_snapshot import verified_overrides as vo
-    monkeypatch.setattr(vo, "OVERRIDES", tmp_path / "none.json")
+    empty_store = tmp_path / "empty-overrides.json"
+    empty_store.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(vo, "OVERRIDES", empty_store)
     vo.reload()
     yield
     vo.reload()
@@ -103,7 +107,7 @@ def _continue_case(client, answer, destination, *, confirm_passport=True):
         profile = client.get(f"/intake/{iid}/passport", headers=H).json()
         client.put(f"/intake/{iid}", json={"answers": profile["prefill"]}, headers=H)
     r = client.post(f"/intake/{iid}/continue", headers=H)
-    assert r.status_code == 200
+    assert r.status_code == 200, r.text
     return r.json()["case_id"]
 
 

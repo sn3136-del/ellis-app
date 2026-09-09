@@ -777,7 +777,8 @@ def test_a_route_with_no_override_is_untouched_and_unmarked():
     assert vo.find(route) is None, "pick a route with no shipped override"
     guidance = {"disposition": "VISA_REQUIRED"}
     merged, prov = vo.apply(guidance, route)
-    assert merged is guidance and prov is None
+    assert merged == guidance == {"disposition": "VISA_REQUIRED"}
+    assert prov is None
 
 
 def test_verifying_a_disposition_lifts_the_low_confidence_hold(tmp_path, monkeypatch):
@@ -1587,9 +1588,13 @@ def test_application_method_is_never_other_and_names_where_to_apply():
     assert rows(g)[0]["application_method"] == "Embassy Submission"
 
     # A conditional exemption product is filed nowhere, and the checklist says so.
+    # The visa's filing procedure belongs to that product: a mixed route's
+    # generic channel cannot establish the procedure of each permission.
     g = {"disposition": "CONDITIONAL", "application_channel": "in_person",
          "application_channel_detail": "Apply at a Montenegrin diplomatic or consular mission.",
-         "visa_products": [{"type": "Single-entry short-stay visa (C)"},
+         "visa_products": [{"type": "Single-entry short-stay visa (C)",
+                            "application_channel": "embassy",
+                            "application_channel_detail": "Apply at a Montenegrin diplomatic or consular mission."},
                            {"type": "Visa-free entry as an organised tourist group (PRC nationals)"}]}
     sticker, group = rows(g)
     assert sticker["application_method"] == "Embassy Submission"

@@ -92,6 +92,28 @@ def test_zero_fee_alone_does_not_imply_no_visa():
     assert row["visa_requirement_detail"] == "Paper Visa"
 
 
+@pytest.mark.parametrize("fee", [None, {}, {"amount": None, "currency": None}])
+def test_explicit_group_entry_exemption_does_not_require_a_fee_cell(fee):
+    product = {"type": "Visa-free entry as an organised tourist group (PRC nationals)"}
+    if fee is not None:
+        product["fee"] = fee
+    row, = rows(product, disposition="CONDITIONAL", requirement_detail=None)
+    assert row["visa_requirement_detail"] == "Conditional Visa-free"
+    assert tstation.field_status(row)["application_method"] == "not-applicable"
+    assert row["confidence_level"] == "Low"  # classification cannot manufacture proof
+
+
+@pytest.mark.parametrize("amount", [25, "0", True])
+def test_named_exemption_with_contradictory_or_malformed_price_is_not_reclassified(amount):
+    product = {"type": "Visa-free entry", "fee": {"amount": amount, "currency": "EUR"}}
+    assert not tstation._product_is_exemption(product)
+
+
+def test_missing_fee_cannot_turn_a_visa_fee_waiver_into_entry_exemption():
+    product = {"type": "Visa fee waiver", "notes": "Children are exempt from the visa fee."}
+    assert not tstation._product_is_exemption(product)
+
+
 @pytest.mark.parametrize("wording", ["Visa fee waived", "Visa fee waiver", "No visa fee is payable",
                                      "No visa application fee", "Issued free of charge"])
 def test_explicit_fee_waiver_retains_zero_without_a_visa_exemption(wording):

@@ -884,7 +884,10 @@ def _product_is_exemption(product: dict) -> bool:
         return SUBCATEGORY[explicit] in _VISA_FREE_DETAILS
     fee = product.get("fee") if isinstance(product.get("fee"), dict) else {}
     amount = (fee or {}).get("amount")
-    if type(amount) not in (int, float) or amount != 0:
+    # A price cannot establish an exemption. An absent price also cannot
+    # erase an explicitly named entry exemption; the wording below must
+    # still identify a visa exemption, rather than a fee waiver.
+    if amount is not None and (type(amount) not in (int, float) or amount != 0):
         return False
     name = str(product.get("type") or "").lower()
     notes = str(product.get("notes") or "").lower()
