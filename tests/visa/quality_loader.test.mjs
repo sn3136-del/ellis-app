@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createLatestLoader, readQualityTab } from '../../src/renderer/src/lib/qualityLoader.js'
+import { createVisaClient } from '../../src/renderer/src/lib/visaBackend.js'
 
 function deferred() { let resolve, reject; const promise = new Promise((a,b) => { resolve=a; reject=b }); return { promise, resolve, reject } }
 function harness(read, wait) {
@@ -61,4 +62,22 @@ test('Freshness remains readable when its optional tiles fail', async () => {
     throw new Error('optional service unavailable')
   }},'freshness')
   assert.deepEqual(result,{freshness:{attempted:4,verified:1}})
+})
+
+test('record polling preserves pagination while reading the canonical list', async () => {
+  const paths=[]
+  const result=await readQualityTab({get:async path => { paths.push(path); return {records:[]} }},'records-poll')
+  assert.deepEqual(paths,['/database/records'])
+  assert.equal(result.resetShown,false)
+})
+
+test('database client bypasses a previously stored browser response', async () => {
+  const original=globalThis.fetch; const options=[]
+  globalThis.fetch=async (_url,init) => { options.push(init); return {ok:true,text:async ()=>'{}'} }
+  try {
+    const client=createVisaClient({token:'public-quality-control',orgId:'platform',userId:'test'})
+    await client.get('/database/records'); await client.databaseLookup({nationality:'IDN',destination:'KOR'})
+    assert.equal(options.length,2)
+    assert.ok(options.every(init=>init.cache==='no-store'))
+  } finally {globalThis.fetch=original}
 })

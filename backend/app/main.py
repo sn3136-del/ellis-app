@@ -54,6 +54,16 @@ from .observability import RequestLogMiddleware as _ReqLog, init_sentry as _init
 
 app.add_middleware(_ReqLog)
 
+
+@app.middleware("http")
+async def _canonical_database_response(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path == "/database" or request.url.path.startswith("/database/"):
+        # Policy and review status can change between two reads of the same
+        # URL. Browser/proxy caches are never a second source of visa facts.
+        response.headers["Cache-Control"] = "private, no-store"
+    return response
+
 # 2026-07-23 snapshot: applicant route intake + resolution + snapshot admin.
 from .visa_snapshot.api import router as _snapshot_router  # noqa: E402
 # Automated adapter factory: applicant build request/consent/progress + admin

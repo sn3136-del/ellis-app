@@ -2398,11 +2398,21 @@ function QualityWorkspace() {
     return () => loader.invalidate()
   }, [load, loader])
   useEffect(() => {
-    if (tab !== 'freshness') return
-    const timer = setInterval(() => {
-      if (document.visibilityState !== 'hidden') loader.run('freshness-poll', { quiet: true })
-    }, 30000)
-    return () => clearInterval(timer)
+    const refreshVisible = () => {
+      if (document.visibilityState === 'hidden') return
+      const which = tab === 'records' ? 'records-poll' : tab === 'freshness' ? 'freshness-poll' : tab
+      loader.run(which, { quiet: true })
+    }
+    // Keep a visible record list aligned with other testers' corrections.
+    // Focus refresh also updates the queue when an operator returns to it.
+    const timer = ['records', 'freshness'].includes(tab) ? setInterval(refreshVisible, 30000) : null
+    window.addEventListener('focus', refreshVisible)
+    document.addEventListener('visibilitychange', refreshVisible)
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener('focus', refreshVisible)
+      document.removeEventListener('visibilitychange', refreshVisible)
+    }
   }, [loader, tab])
 
   async function flag(rec, note) {

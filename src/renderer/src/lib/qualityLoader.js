@@ -39,7 +39,9 @@ export function createLatestLoader(read, { onStart, onData, onError, onFinish,
 }
 
 export async function readQualityTab(client, tab) {
-  if (tab === 'records') return { data: await client.get('/database/records'), resetShown: true }
+  if (tab === 'records' || tab === 'records-poll') return {
+    data: await client.get('/database/records'), resetShown: tab === 'records',
+  }
   if (tab === 'changes' || tab === 'issues') {
     const path = tab === 'changes' ? '/database/changes?limit=300' : '/database/issues'
     const [value, data] = await Promise.all([client.get(path), client.get('/database/records')])

@@ -55,6 +55,7 @@ export function errorMessageFrom(detail, status) {
 async function call(method, path, session, body) {
   const res = await fetch(`${BASE}${path}`, {
     method,
+    ...(path.startsWith('/database/') ? { cache: 'no-store' } : {}),
     headers: authHeaders(session),
     body: body === undefined ? undefined : JSON.stringify(body)
   })
