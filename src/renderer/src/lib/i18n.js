@@ -32,7 +32,7 @@ export function setDynamicCatalog(lang, entries) {
 }
 
 export function hasDynamicCatalog(lang) {
-  return !!DYNAMIC_CATALOGS[lang]
+  return Object.keys(DYNAMIC_CATALOGS[lang] || {}).length > 0
 }
 
 // Every locale MUST define the same keys as `en` (enforced by a test).
