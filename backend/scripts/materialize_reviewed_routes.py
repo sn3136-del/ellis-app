@@ -13,6 +13,9 @@ policy_valid_through?}]}. Each nonempty factual field has AI provenance with
 source_id,source_url,verified_at,quote,note. A disposition's reviewed country
 table may additionally provide source_table:{heading_quote,table_quote,
 nationality_quote}; all parts must be literal and bounded to that table.
+Named-program evidence may use source_closed_list for the ICA Singapore
+entry-visa list, or source_eu_citizen with an independently captured official
+EU member-country page. These are reviewed inferences, not grounded checks.
 """
 from __future__ import annotations
 
@@ -31,6 +34,7 @@ import uuid
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.visa_snapshot import evidence_validator as evidence
+from app.visa_snapshot.structured_evidence import validate_route_evidence
 from app.visa_snapshot import kimi_primary as kp, registry, tstation
 from app.visa_snapshot import verified_overrides as overrides
 from app.visa_snapshot.change_log import diff
@@ -40,6 +44,7 @@ METHODS = {'fetched_text', 'pdf_text', 'visual_official_document'}
 UNKNOWN = (None, '', [], {})
 CONSEQUENTIAL = {'permitted_stay', 'permitted_stay_days', 'visa_products',
                  'required_documents', 'entry_requirements'}
+
 
 
 class MaterializationError(ValueError):
@@ -89,44 +94,29 @@ def _numeric_support(value, quote):
         if value == 0 and re.search(r'\bfree\b|no (?:visa )?fee|without charge', quote, re.I):
             return True
         value = format(value, 'g')
+    # Currency-prefixed grouped amounts only: do not turn an ordinary decimal
+    # such as 0.500 into five hundred. Rp500.000 is Indonesian rupiah notation.
+    quote = re.sub(r'(?i)(?:Rp|IDR)\s*(\d{1,3}(?:\.\d{3})+)(?![\d.])',
+                   lambda m: m[0] + ' ' + m[1].replace('.', ''), quote)
+    quote = re.sub(r'(?<![\d.,])(\d{1,3}(?:,\d{3})+)(?![\d.,])',
+                   lambda m: m[0] + ' ' + m[1].replace(',', ''), quote)
     numbers = re.findall(r'(?<![\w.])\d+(?:\.\d+)?(?![\w.])', str(value))
-    return all(re.search(r'(?<![\d.])' + re.escape(n) + r'(?![\d.])', quote) for n in numbers)
+    return all(re.search(r'(?<![\d.])' + re.escape(n) + (r'(?:\.0+)?' if '.' not in n else '') + r'(?![\d.])', quote) for n in numbers)
 
 
-def _table_support(proof, source, route, disposition):
-    table = proof.get('source_table')
-    if not isinstance(table, dict) or route['travel_document_type'] != 'ordinary_passport' or route['travel_purpose'] != 'tourism':
-        return False
-    heading, region, country = (table.get(k) for k in ('heading_quote', 'table_quote', 'nationality_quote'))
-    if not all(isinstance(v, str) and v.strip() for v in (heading, region, country)):
-        return False
-    if (len(region) > 50000 or len(country) > 180 or not evidence.quote_in_text(region, source['text'])
-            or not evidence.quote_in_text(heading, region[:max(2000, len(heading))])
-            or not evidence.quote_in_text(country, region)):
-        return False
-    if not evidence.supports_disposition(heading, disposition):
-        return False
-    if not re.search(r'countries|nationalities|nationals|EO\s*408|Executive Order', heading, re.I):
-        return False
-    # This contract is a heading followed by country-name list items. Reject
-    # a second policy paragraph/heading, so membership cannot bleed into a
-    # neighbouring section with a different rule.
-    if not region.strip().startswith(heading.strip()):
-        return False
-    body = region.strip()[len(heading.strip()):]
-    if any(re.search(r'[:;!?]|\b(?:visa|passport|eligible|eligibility|required|conditions|holders|enter)\b', line, re.I)
-           for line in body.splitlines() if line.strip()):
-        return False
-    # Membership must be the actual list item, never another nationality
-    # mentioned in a neighbouring policy paragraph or a mission's address.
-    if not re.search(r'^\s*(?:\d+[.)]\s*)?' + re.escape(country.strip()) + r'\s*$', region, re.I | re.M):
-        return False
-    aliases = evidence._NATIONALITY_NAMES.get(route['passport_nationality'], ())
-    if not any(re.search(r'(?<![a-z])' + re.escape(a.strip()) + r'(?![a-z])', country, re.I) for a in aliases):
-        return False
-    if re.search(r'diplomatic|official passport|service passport|travel document|work permit|student visa', heading, re.I):
-        return False
-    return True
+def _referenced_source_ids(provenance, sources):
+    found = set()
+    def visit(value):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                if key.endswith('source_id') and isinstance(child, str) and child in sources:
+                    found.add(child)
+                visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+    visit(provenance)
+    return sorted(found)
 
 
 def _proof(name, value, proof, sources, route, today):
@@ -153,7 +143,8 @@ def _proof(name, value, proof, sources, route, today):
         raise ValueError(name + ' additional quote is absent from the captured source text')
     quoted_evidence = '\n'.join([quote] + additional)
     if name == 'disposition':
-        if not evidence.route_supporting_excerpt(quote, value, route, policy_date=today.isoformat()) and not _table_support(proof, source, route, value):
+        result = validate_route_evidence(proof, source, sources, route, value, policy_date=today.isoformat())
+        if not result['ok']:
             raise ValueError('disposition lacks exact route/document/purpose evidence')
     elif name in {'policy_valid_from', 'policy_valid_through'}:
         if not _date_in_quote(value, quoted_evidence):
@@ -219,7 +210,15 @@ def _validate_entry(entry, sources, today):
     if final_problems:
         raise ValueError('existing overlay creates contradiction: ' + '; '.join(final_problems))
     checked_fields = set((existing_provenance or {}).get('fields') or [])
-    if any(value not in UNKNOWN and name in checked_fields and merged.get(name) != value for name, value in guidance.items()):
+    # The common merger canonicalises empty collections to null and the
+    # exemption's not_required channel to null. Neither creates a new fact.
+    # Every other explicit value, including null clearing a stay/fee, is exact.
+    def equivalent(name, value):
+        actual = merged.get(name)
+        return (actual == value or value in UNKNOWN and actual in UNKNOWN
+                or name == 'application_channel' and value == 'not_required'
+                and actual is None and guidance.get('disposition') == 'VISA_EXEMPT')
+    if any(not equivalent(name, value) for name, value in guidance.items()):
         raise ValueError('existing overlay changes a reviewed field; correct the overlay explicitly first')
     records = tstation.records_for_route(route, merged, existing_provenance, grounded_ok=False)
     if not records or any(r.get('confidence_level') == 'High' for r in records):
@@ -229,7 +228,7 @@ def _validate_entry(entry, sources, today):
             'field_provenance': deepcopy(provenance),
             'policy_valid_from': entry.get('policy_valid_from'), 'policy_valid_through': entry.get('policy_valid_through'),
             'preview_grades': sorted({r.get('confidence_level') for r in records}),
-            'source_ids': sorted({p['source_id'] for p in provenance.values() if isinstance(p, dict) and p.get('source_id') in sources})}
+            'source_ids': _referenced_source_ids(provenance, sources)}
 
 
 def _manifest(path, today):

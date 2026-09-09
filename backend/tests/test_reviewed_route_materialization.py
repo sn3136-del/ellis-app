@@ -280,3 +280,232 @@ def test_unofficial_source_is_rejected_without_opening_database(tmp_path):
     data['sources'][0]['url'] = 'https://visa-example.com/not-government'
     with pytest.raises(ValueError, match='unofficial'):
         mod.materialize(tmp_path / 'does-not-exist.db', manifest=write_manifest(tmp_path, data), now=NOW)
+
+
+def closed_list_manifest():
+    data = fixture_manifest()
+    entry = data['routes'][0]
+    entry['route'].update(nationality='IDN', destination='SGP')
+    url = 'https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements'
+    heading = 'If your travel document is issued by one of the countries/ places listed below, you will require a valid visa to enter Singapore. Click on individual countries/ places to find out more.'
+    table = 'Afghanistan\nIndia\nRussia\nYemen'
+    closing = 'You will also need a visa if you are travelling on:'
+    text = heading + '\n' + table + '\n' + closing
+    data['sources'][0].update(url=url, text=text)
+    entry['guidance'] = {'disposition': 'VISA_EXEMPT', 'requirement_detail': 'unconditional_visa_free',
+                         'source_url': url, 'entry_requirements': 'Admission remains subject to border assessment.'}
+    base = dict(entry['field_provenance']['disposition'], source_url=url, quote=heading)
+    entry['field_provenance'] = {field: deepcopy(base) for field in entry['guidance']}
+    entry['field_provenance']['disposition']['source_closed_list'] = {
+        'program': 'singapore_entry_visa', 'heading_quote': heading, 'table_quote': table,
+        'closing_quote': closing, 'excluded_nationality': 'Indonesia'}
+    return data
+
+
+@pytest.mark.parametrize('change', ['valid', 'listed_nationality', 'omitted_row', 'wrong_program', 'wrong_document', 'wrong_purpose', 'reordered_boundary'])
+def test_closed_list_exclusion_is_complete_and_program_scoped(cache_database, tmp_path, change):
+    path, _ = cache_database
+    data = closed_list_manifest()
+    entry, source = data['routes'][0], data['sources'][0]
+    rule = entry['field_provenance']['disposition']['source_closed_list']
+    if change == 'listed_nationality':
+        entry['route']['nationality'] = 'RUS'; rule['excluded_nationality'] = 'Russia'
+    elif change == 'omitted_row':
+        source['text'] = source['text'].replace('Russia', 'Indonesia\nRussia')
+    elif change == 'wrong_program':
+        rule['program'] = 'optional_evisa_eligible'
+    elif change == 'wrong_document':
+        entry['route']['travel_document_type'] = 'refugee_travel_document'
+    elif change == 'wrong_purpose':
+        entry['route']['travel_purpose'] = 'work'
+    elif change == 'reordered_boundary':
+        source['text'] = rule['closing_quote'] + '\n' + rule['heading_quote'] + '\n' + rule['table_quote']
+    result = mod.materialize(path, manifest=write_manifest(tmp_path, data), now=NOW)
+    assert result['skipped_invalid'] == (0 if change == 'valid' else 1), result
+
+
+def eu_citizen_manifest():
+    data = fixture_manifest()
+    entry = data['routes'][0]
+    entry['route'].update(nationality='ESP', destination='FRA')
+    url = 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02004L0038-20110616'
+    quote = 'No entry visa or equivalent formality may be imposed on Union citizens.'
+    stay = 'Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.'
+    data['sources'][0].update(url=url, text=quote + '\n' + stay)
+    member = {'id': 'eu_spain', 'url': 'https://european-union.europa.eu/principles-countries-history/eu-countries/spain_en',
+              'checked_at': '2026-09-09', 'text': 'Spain\nOverview\nEU Member State: since 1 January 1986', 'reading_method': 'fetched_text'}
+    data['sources'].append(member)
+    entry['guidance'] = {'disposition': 'VISA_EXEMPT', 'requirement_detail': 'unconditional_visa_free',
+                         'source_url': url, 'permitted_stay': 'Up to three months under EU free movement rights', 'permitted_stay_days': None}
+    base = dict(entry['field_provenance']['disposition'], source_url=url, quote=quote)
+    entry['field_provenance'] = {field: deepcopy(base) for field, value in entry['guidance'].items() if value is not None}
+    entry['field_provenance']['permitted_stay']['quote'] = stay
+    entry['field_provenance']['disposition']['source_eu_citizen'] = {
+        'membership_source_id': member['id'], 'membership_quote': member['text']}
+    return data
+
+
+@pytest.mark.parametrize('change', ['valid', 'british_nationality', 'wrong_country_page', 'future_membership', 'forged_quote', 'family_only', 'wrong_destination'])
+def test_eu_citizenship_requires_current_country_membership_and_own_entry_right(cache_database, tmp_path, change):
+    path, engine = cache_database
+    data = eu_citizen_manifest()
+    entry, member = data['routes'][0], data['sources'][1]
+    rule = entry['field_provenance']['disposition']['source_eu_citizen']
+    if change == 'british_nationality':
+        entry['route']['nationality'] = 'GBR'
+    elif change == 'wrong_country_page':
+        member['url'] = member['url'].replace('spain_en', 'france_en')
+    elif change == 'future_membership':
+        member['text'] = member['text'].replace('1986', '2027'); rule['membership_quote'] = member['text']
+    elif change == 'forged_quote':
+        rule['membership_quote'] += ' This quoted sentence is invented.'
+    elif change == 'family_only':
+        quote = 'Family members who are not nationals of a Member State shall only be required to have an entry visa.'
+        data['sources'][0]['text'] += '\n' + quote
+        entry['field_provenance']['disposition']['quote'] = quote
+    elif change == 'wrong_destination':
+        entry['route']['destination'] = 'CAN'
+    manifest = write_manifest(tmp_path, data)
+    result = mod.materialize(path, manifest=manifest, now=NOW)
+    assert result['skipped_invalid'] == (0 if change == 'valid' else 1), result
+    if change == 'valid':
+        mod.materialize(path, manifest=manifest, now=NOW, apply=True, backup=tmp_path / 'eu-before.db')
+        with Session(engine) as db:
+            added = db.query(KimiRouteGuidanceCache).filter_by(model='reviewed-source-import').one()
+            assert len(added.verification['source_review']['sources']) == 2
+            assert added.guidance['permitted_stay_days'] is None
+
+
+def test_eur_lex_annex_heading_proves_only_its_own_list(cache_database, tmp_path):
+    path, _ = cache_database
+    data = fixture_manifest()
+    entry = data['routes'][0]
+    entry['route']['destination'] = 'FRA'
+    url = 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230'
+    heading = 'LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE EXEMPT FROM THE REQUIREMENT TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD'
+    table = heading + '\n1. STATES\nAustralia\nCanada\nJapan'
+    data['sources'][0].update(url=url, text=table)
+    entry['guidance'].update(source_url=url, permitted_stay_days=90)
+    for proof in entry['field_provenance'].values():
+        proof.update(source_url=url, quote=heading)
+    entry['field_provenance']['disposition']['source_table'] = {'heading_quote': heading, 'table_quote': table, 'nationality_quote': 'Canada'}
+    assert mod.materialize(path, manifest=write_manifest(tmp_path, data), now=NOW)['skipped_invalid'] == 0
+    entry['route']['nationality'] = 'IDN'
+    entry['field_provenance']['disposition']['source_table']['nationality_quote'] = 'Indonesia'
+    assert mod.materialize(path, manifest=write_manifest(tmp_path, data), now=NOW)['skipped_invalid'] == 1
+
+
+def program_fixture(program, nat=None):
+    """Compact complete synthetic sections; these are not policy fixtures."""
+    usa = program == 'usa_vwp_nonmember'
+    canada = program.startswith('canada_')
+    eta = program == 'canada_eta_member'
+    nat = nat or ('MYS' if usa else 'GBR' if eta else 'IDN' if canada else 'FRA')
+    dest = 'USA' if usa else 'CAN' if canada else 'AUS'
+    if usa:
+        url = 'https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html'
+        listing_url = 'https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visa-waiver-program.html'
+        primary = 'Generally, a citizen of a foreign country who wishes to travel to the United States must first obtain a visa, for tourism (B-2 visa).'
+        heading, closing = '## Must Be a Citizen or National of a VWP Designated Country*', '## Reference'
+        table = heading + '\n* Andorra\n* Australia\n* France\n* United Kingdom**'
+        exception = 'Citizens of Canada and Bermuda generally do not require visas to enter the United States, for visit, tourism and temporary business travel purposes.'
+        rule = dict(program=program, source_id='list', heading_quote=heading, table_quote=table, closing_quote=closing, excluded_nationality=nat,
+                    general_rule_source_id='main', general_rule_quote=primary, exception_source_id='main', exception_quote=exception)
+    elif canada:
+        url = listing_url = 'https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/entry-requirements-country.html'
+        heading = '## Travellers who need an electronic travel authorization (eTA)' if eta else '## Travellers who need a visa'
+        closing = 'Find out how to apply for an eTA' if eta else 'Stateless individuals and those with a refugee travel document also need a visa to visit or transit through Canada.'
+        primary = ('You need an eTA and a valid passport to board your flight to Canada if you’re a citizen of any of the countries or territories listed below. You don’t need a visitor visa.' if eta else
+                   'If you’re a citizen of any of the countries or territories listed below, you need a valid visitor visa and a valid passport to visit or transit through Canada.')
+        item = '* British citizen' if eta else '* Indonesia (Some citizens of Indonesia may be eligible for an eTA if they meet certain requirements .)'
+        table = heading + '\n' + primary + '\n' + item + '\n* France' if eta else heading + '\n' + primary + '\n' + item
+        rule = dict(program=program,source_id='main',heading_quote=heading,table_quote=table,closing_quote=closing,nationality_quote=item)
+        exception = ''
+    else:
+        url = 'https://www.abf.gov.au/crossing/Pages/arriving-and-leaving.aspx'
+        listing_url = 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651'
+        primary = 'If you are not an Australian Citizen you must hold a valid visa when entering Australia.'
+        heading, closing = 'You must be a citizen of and hold a valid passport from one of these countries to be eligible for the eVisitor:', 'You cannot apply with:'
+        table = heading + '\nFrance\nSpain\nUnited Kingdom – British Citizen'
+        rule = dict(program=program,source_id='list',heading_quote=heading,table_quote=table,closing_quote=closing,nationality_quote='France',general_rule_source_id='main',general_rule_quote=primary)
+        exception = ''
+    sources = {'main': dict(id='main',url=url,checked_at='2026-09-09',reading_method='fetched_text',text=primary+'\n'+exception)}
+    listtext = table + '\n' + closing + '\nas a tourist\nThis is a temporary visa.'
+    if canada: sources['main']['text'] = listtext
+    else: sources['list'] = dict(id='list',url=listing_url,checked_at='2026-09-09',reading_method='fetched_text',text=listtext)
+    route = dict(passport_nationality=nat,destination_country=dest,travel_purpose='tourism',travel_document_type='ordinary_passport')
+    proof = dict(verifier='ai',verified_at='2026-09-09',source_id='main',source_url=url,quote=primary,note='Explicit synthetic structured evidence review.',source_closed_list=rule)
+    return proof,sources,route,'ELECTRONIC_AUTHORIZATION_REQUIRED' if eta else 'VISA_REQUIRED'
+
+
+@pytest.mark.parametrize('program', ['usa_vwp_nonmember','canada_eta_member','canada_visitor_member','australia_evisitor_member'])
+@pytest.mark.parametrize('change', ['valid','omitted_row','wrong_doc','wrong_program','wrong_date'])
+def test_named_closed_programs_reject_incomplete_or_wrong_scope(program,change):
+    proof,sources,route,disp=program_fixture(program)
+    rule=proof['source_closed_list']
+    if change=='omitted_row': rule['table_quote']=rule['table_quote'].replace('\n* France','').replace('\nSpain','').replace(' if they meet certain requirements .','')
+    if change=='wrong_doc': route['travel_document_type']='diplomatic_passport'
+    if change=='wrong_program': rule['program']='optional_evisa_eligibility'
+    if change=='wrong_date': sources[rule['source_id']]['checked_at']='2026-09-08'
+    if change=='valid': mod._proof('disposition',disp,proof,sources,route,NOW.date())
+    else:
+        with pytest.raises(ValueError): mod._proof('disposition',disp,proof,sources,route,NOW.date())
+
+
+@pytest.mark.parametrize('change',['member','canada_exception','missing_general','missing_exception'])
+def test_us_nonmember_requires_general_rule_and_independent_exceptions(change):
+    proof,sources,route,disp=program_fixture('usa_vwp_nonmember')
+    if change=='member': route['passport_nationality']='FRA';proof['source_closed_list']['excluded_nationality']='FRA'
+    if change=='canada_exception':route['passport_nationality']='CAN';proof['source_closed_list']['excluded_nationality']='CAN'
+    if change=='missing_general':proof['source_closed_list'].pop('general_rule_source_id')
+    if change=='missing_exception':proof['source_closed_list'].pop('exception_quote')
+    with pytest.raises(ValueError):mod._proof('disposition',disp,proof,sources,route,NOW.date())
+
+
+def test_qualified_country_item_cannot_be_truncated_or_substituted():
+    for program,replacement in [('canada_visitor_member','* Indonesia'),('canada_eta_member','* British national overseas'),('australia_evisitor_member','United Kingdom')]:
+        proof,sources,route,disp=program_fixture(program)
+        proof['source_closed_list']['nationality_quote']=replacement
+        with pytest.raises(ValueError):mod._proof('disposition',disp,proof,sources,route,NOW.date())
+
+
+@pytest.mark.parametrize('value,quote,supported',[(500000,'Biaya visa B1 Rp500.000',True),(100,'100.00',True),(500000,'500,000',True),(500,'0.500',False),(500000,'Rp500.001',False),(100,'1100.00',False)])
+def test_exact_numeric_format_equivalence(value,quote,supported):
+    assert mod._numeric_support(value,quote) is supported
+
+
+@pytest.mark.parametrize('field,old,new',[('permitted_stay_days',None,90),('visa_products',[],[{'name':'invented product'}]),('government_fee',None,{'amount':25,'currency':'USD'})])
+def test_explicit_clear_cannot_be_refilled_by_surviving_overlay(tmp_path,monkeypatch,field,old,new):
+    data=fixture_manifest();entry=data['routes'][0];entry['guidance'][field]=old
+    entry['guidance']['required_documents']=['Valid ordinary passport']
+    entry['field_provenance']['required_documents']=deepcopy(entry['field_provenance']['disposition'])
+    def refill(g,r):
+        g[field]=new
+        return g,{'fields':[field]}
+    monkeypatch.setattr(mod.overrides,'apply',refill)
+    with pytest.raises(ValueError,match='reviewed field|contradiction'):
+        mod._validate_entry(entry,{s['id']:s for s in data['sources']},NOW.date())
+
+
+@pytest.mark.parametrize('change',['valid_exempt','valid_required','diplomatic_only','wrong_country','neighbour_bleed','evisa_without_general','forged_general'])
+def test_russian_passport_section_and_general_visa_baseline(change):
+    visa = change in {'valid_required','evisa_without_general','forged_general'}
+    nat,country = ('SGP','Сингапур') if visa else ('KOR','Республика Корея')
+    url='https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/'
+    heading,closing='#### '+country,'#### Следующая страна'
+    quote='Могут въезжать по электронной визе на срок до 30 дней.' if visa else '* по общегражданским паспортам – до 60 дней;'
+    section=heading+'\nБез виз по дипломатическим и служебным паспортам – до 90 дней.\n'+('' if visa else 'Безвизовой режим:\n')+quote
+    source=dict(id='ru',url=url,checked_at='2026-09-09',reading_method='fetched_text',text=section+'\n'+closing)
+    general='Для въезда в Российскую Федерацию иностранного гражданина или лица без гражданства необходима виза. При наличии соглашения возможен въезд в Российскую Федерацию иностранных граждан без виз.'
+    sources={'ru':source,'general':dict(id='general',url='https://www.kdmid.ru/cons/visas/',checked_at='2026-09-09',reading_method='fetched_text',text=general)}
+    rule=dict(program='russia_mfa_country_rule',source_id='ru',heading_quote=heading,section_quote=section,closing_quote=closing,nationality_quote=country,rule_quote=quote,general_rule_source_id='general',general_rule_quote=general)
+    proof=dict(verifier='ai',verified_at='2026-09-09',source_id='ru',source_url=url,quote=quote,note='Literal Russian rule reviewed for the specified passport.',source_country_section=rule)
+    route=dict(passport_nationality=nat,destination_country='RUS',travel_purpose='tourism',travel_document_type='ordinary_passport')
+    if change=='diplomatic_only':proof['quote']=rule['rule_quote']='Без виз по дипломатическим и служебным паспортам – до 90 дней.'
+    if change=='wrong_country':route['passport_nationality']='THA'
+    if change=='neighbour_bleed':rule['section_quote']+='\n'+closing
+    if change=='evisa_without_general':rule.pop('general_rule_source_id')
+    if change=='forged_general':rule['general_rule_quote']='Optional eVisa eligibility is proof everyone needs a visa.'
+    if change.startswith('valid'):mod._proof('disposition','VISA_REQUIRED' if visa else 'VISA_EXEMPT',proof,sources,route,NOW.date())
+    else:
+        with pytest.raises(ValueError):mod._proof('disposition','VISA_REQUIRED' if visa else 'VISA_EXEMPT',proof,sources,route,NOW.date())
