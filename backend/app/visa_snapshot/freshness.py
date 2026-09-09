@@ -50,6 +50,7 @@ from .evidence_validator import (quote_in_text, supports_disposition, jurisdicti
                                  field_value_supported, route_supporting_excerpt)
 from .models import DatabaseIssueReport, KimiRouteGuidanceCache
 from . import freshness_evidence as proof_helpers
+from . import comparison_reuse
 
 # Fields the page is allowed to correct — the same vocabulary a human
 # override may correct, minus nothing: what a person may fix from a source,
@@ -227,7 +228,7 @@ def json_unchanged(db, column, value):
 
 
 def _commit_recheck(db, row, entry: dict, *, expected_guidance: dict,
-                    expected_route: dict, fresh_until=None) -> bool:
+                    expected_route: dict, fresh_until=None, comparison_cache=None) -> bool:
     """Merge metadata freshly and commit only if that exact row still exists.
 
     API and sweep processes have separate memory/locks. A final refresh alone
@@ -256,6 +257,8 @@ def _commit_recheck(db, row, entry: dict, *, expected_guidance: dict,
         return False
     stamped = SimpleNamespace(verification=latest.verification)
     _stamp(stamped, entry)
+    if comparison_cache is not None:
+        stamped.verification['comparison_cache'] = comparison_cache
 
     values = {"verification": stamped.verification}
     changed = desired_guidance != expected_guidance
@@ -448,7 +451,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         return {"outcome": "detail_pending", "route_key": row.cache_key}
     route, original = dict(row.route or {}), dict(row.guidance or {})
     override = verified_overrides.find(route)
-    guidance, _ = verified_overrides.apply(dict(original), route)
+    guidance, provenance = verified_overrides.apply(dict(original), route)
+    old_comparisons = (row.verification or {}).get('comparison_cache')
     reviewed_fields, catalog = proof_helpers.reviewed_evidence(override, row.verification)
     source_override = dict(override or {}, supporting_sources=[{'id':k,'url':v} for k,v in catalog.items()])
     all_sources = candidate_sources(guidance, source_override, limit=None)
@@ -470,9 +474,43 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
 
     tried, irrelevant, unquoted_all = [], [], set()
     readings, source_checks, candidates, captures = [], [], [], {}
+    full_captures, deferred_comparisons, comparison_context = {}, [], {}
+    model_counts = {'model_comparisons': 0, 'model_comparisons_reused': 0}
     visited, completed = set(), set()
     page = raw = None
     fallback = None
+
+    def compare(fr, payload, signature, previous=None):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0 or (should_stop is not None and should_stop()):
+            visited.discard(fr.requested_url)
+            return
+        reused = previous is not None
+        compared_at = previous['model_compared_at'] if reused else _now().isoformat()
+        try:
+            if reused:
+                answer = previous['response']
+                model_counts['model_comparisons_reused'] += 1
+            else:
+                model_counts['model_comparisons'] += 1
+                answer = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False, sort_keys=True), timeout_seconds=remaining)
+        except Exception as e:
+            source_checks.append({'source_url': fr.final_url, 'outcome': 'provider_error', 'at': when,
+                'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
+                'comparison_reused': False, 'error': str(e)[:160]})
+            return
+        if not isinstance(answer, dict): answer = {}
+        quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text[:MAX_PAGE_CHARS], route)
+        unquoted_all.update(unquoted)
+        check = {'source_url': fr.final_url, 'outcome': 'page_not_relevant', 'at': when,
+            'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
+            'comparison_reused': reused, 'content_hash': fr.content_hash, 'verified_fields': [],
+            'unquoted_fields': unquoted,
+            'proposed_fields': {k: {'value': v, 'quote': evidence[k]} for k, v in quoted.items()}}
+        source_checks.append(check)
+        candidates.append((fr, answer, quoted, evidence, check))
+        comparison_context[fr.final_url] = signature
+
     for url in sources:
         remaining = deadline - time.monotonic()
         if remaining <= 0 or (should_stop is not None and should_stop()):
@@ -488,6 +526,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             continue
         completed.add(fr.final_url)
         tried.append(fr.final_url)
+        full_captures[url] = full_captures[fr.final_url] = {'url': fr.final_url, 'text': fr.content_text}
         captures[url] = captures[fr.final_url] = {'url': fr.final_url,
             'text': fr.content_text[:MAX_PAGE_CHARS], 'checked_at': when[:10]}
         companion = url in catalog.values()
@@ -512,25 +551,26 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                        (reviewed_fields.get('disposition') or {}).get('source_url') == fr.final_url else None,
                    "official_page_url": fr.final_url,
                    "official_page_text": fr.content_text[:MAX_PAGE_CHARS]}
-        try:
-            remaining = deadline - time.monotonic()
-            if remaining <= 0 or (should_stop is not None and should_stop()):
-                visited.discard(url)
-                break
-            answer = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False), timeout_seconds=remaining)
-        except Exception as e:
-            source_checks.append({"source_url": fr.final_url, "outcome": "provider_error", "at": when,
-                                  "error": str(e)[:160]})
-            continue
-        if not isinstance(answer, dict):
-            answer = {}
-        quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text[:MAX_PAGE_CHARS], route)
-        unquoted_all.update(unquoted)
-        source_checks.append({"source_url": fr.final_url, "outcome": "page_not_relevant",
-                              "at": when, "content_hash": fr.content_hash, "verified_fields": [],
-                              "unquoted_fields": unquoted,
-                              "proposed_fields": {k: {"value": v, "quote": evidence[k]} for k, v in quoted.items()}})
-        candidates.append((fr, answer, quoted, evidence, source_checks[-1]))
+        signature = comparison_reuse.identity(payload=payload, system=_SYSTEM,
+            guidance=guidance, provenance=provenance, reviewed_fields=reviewed_fields,
+            catalog=catalog, sources=all_sources, full_text=fr.content_text,
+            requested_url=url, evidence_contract=EVIDENCE_CONTRACT,
+            provider={'model': os.getenv('KIMI_GUIDANCE_MODEL') or os.getenv('KIMI_MODEL', 'kimi-k3'),
+                      'base_url': os.getenv('KIMI_BASE_URL', 'https://api.moonshot.ai/v1'),
+                      'test_provider': id(_PROVIDER) if _PROVIDER is not None else None})
+        previous = comparison_reuse.lookup(old_comparisons, signature=signature,
+            source_url=fr.final_url, policy_date=when[:10])
+        if previous:
+            # Wait for current companion reads before reusing extraction. A
+            # miss retains the existing read/compare order and bounded budget.
+            deferred_comparisons.append((fr, payload, signature, previous))
+        else:
+            compare(fr, payload, signature)
+
+    dependency_digest = comparison_reuse.dependencies(full_captures)
+    for fr, payload, signature, previous in deferred_comparisons:
+        compare(fr, payload, signature,
+            previous if previous['dependencies'] == dependency_digest else None)
 
     # Classify after all available pages are read: a named contract may need
     # a second official page, and a generic fee page cannot establish eligibility.
@@ -585,9 +625,10 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                  "source_reads": len(tried),
                  "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
                  "unquoted_fields": sorted(unquoted_all), "source_checks": source_checks,
-                 "source_cursor": source_cursor, "unchecked_sources": [u for u in all_sources if u not in visited]}
+                 "source_cursor": source_cursor, "unchecked_sources": [u for u in all_sources if u not in visited],
+                 **model_counts}
         if not _commit_recheck(db, row, entry, expected_guidance=original, expected_route=route):
-            return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": []}
+            return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], **model_counts}
         return {**entry, "route_key": row.cache_key, "changed": [],
                 "disputed": sorted(fallback[1]) if fallback else [],
                 "generic_skipped": sorted(set(fallback[1]) & NATIONALITY_SPECIFIC) if fallback else []}
@@ -619,7 +660,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     # and refuse to overwrite any field changed during that time.
     db.refresh(row)
     if (row.verification or {}).get("detail_pending"):
-        return {"outcome": "detail_pending", "route_key": row.cache_key}
+        return {"outcome": "detail_pending", "route_key": row.cache_key, **model_counts}
     override = verified_overrides.find(route)
     protected = set((override or {}).get("fields") or {})
     current = dict(row.guidance or {})
@@ -707,6 +748,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             supported_fields.discard('disposition')
         verified_fields.update(supported_fields)
         check['verified_fields'] = sorted(supported_fields)
+        if supported_fields:
+            check['revalidated_at'] = when
         for key in supported_fields:
             if key not in verified_field_sources:
                 verified_field_sources[key] = {'source_url':fr.final_url, 'checked_at':when, 'quote':quotes[key]}
@@ -728,7 +771,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                  "source_cursor": source_cursor, "unchecked_sources": unchecked_sources,
                  "renewed": renewed,
                  "generic_page_skipped": sorted(fallback[1]) if fallback else [],
-                 "note": str(raw.get("note") or "")[:200]}
+                 "note": str(raw.get("note") or "")[:200], **model_counts}
     # No unresolved proposal, fabricated quote, missing cell or unexplained
     # disagreement can silently extend the freshness promise.
     fresh_until = None
@@ -736,11 +779,30 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         ttl = (kimi_primary.TTL_DAYS if row.status == kimi_primary.STATUS_PRIMARY
                else kimi_primary.UNCERTAIN_TTL_DAYS)
         fresh_until = _now() + timedelta(days=ttl)
+    snapshots = []
+    if not (proposed or disputed or unquoted or fallback or remaining_contradictions):
+        for fr, answer, _, _, check in readings:
+            snapshot = comparison_reuse.snapshot(answer=answer, check=check,
+                signature=comparison_context.get(fr.final_url), dependency_digest=dependency_digest,
+                source_url=fr.final_url, policy_date=when[:10], page_text=captures[fr.final_url]['text'])
+            if snapshot and (check.get('route_evidence') or {}).get('proof'):
+                # A bounded serialization must not drop a required proof
+                # component and then poison every same-day reuse. Unknown new
+                # contract shapes simply do not enter the extraction cache.
+                roundtrip = proof_helpers.structured_route_result(snapshot['response'],
+                    reviewed_fields.get('disposition'), captures[fr.final_url], fresh_sources,
+                    route, seen.get('disposition'), seen, when[:10])
+                if (not roundtrip or roundtrip.get('scope_quotes') != check['route_evidence'].get('scope_quotes')
+                        or roundtrip.get('conditions') != check['route_evidence'].get('conditions')):
+                    snapshot = None
+            if snapshot: snapshots.append(snapshot)
+    updated_comparisons = comparison_reuse.merge(old_comparisons, snapshots)
     if not _commit_recheck(db, row, entry, expected_guidance=current, expected_route=route,
-            fresh_until=fresh_until):
-        return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], "disputed": []}
+            fresh_until=fresh_until, comparison_cache=updated_comparisons):
+        return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], "disputed": [], **model_counts}
     return {"outcome": "checked", "route_key": row.cache_key, "consistent": consistent,
             "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
+            **model_counts,
             "changed": sorted(applied), "disputed": sorted(disputed),
             "generic_skipped": sorted(fallback[1]) if fallback else [],
             "unquoted_fields": unquoted, "source_url": page.final_url}

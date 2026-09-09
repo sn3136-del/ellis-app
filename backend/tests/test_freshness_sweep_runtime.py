@@ -117,6 +117,27 @@ def test_concurrent_writer_defers_attempt_without_filing_outage(sweep, monkeypat
     assert status['unreadable'] == status['verified'] == status['renewed'] == 0
 
 
+def test_reused_comparisons_are_separate_from_reads_renewals_and_deferred_work(sweep, monkeypatch):
+    rows = [SimpleNamespace(cache_key=str(i), route={}, guidance={'disposition': 'VISA_REQUIRED'},
+                            verification={}) for i in range(2)]
+    setup(monkeypatch, rows)
+    def check(db, row, **kwargs):
+        if row.cache_key == '1':
+            return {'outcome': 'concurrent_change', 'source_reads': 1, 'model_comparisons': 1,
+                    'model_comparisons_reused': 0}
+        row.verification = {'grounded_check': {'outcome': 'checked', 'evidence_contract': freshness.EVIDENCE_CONTRACT,
+            'consistent': True, 'verified_fields': ['disposition'], 'unverified_fields': ['government_fee'],
+            'renewed': False}}
+        return {'outcome': 'checked', 'source_reads': 3, 'model_comparisons': 2, 'model_comparisons_reused': 1}
+    monkeypatch.setattr(freshness, 'recheck_row', check)
+    assert sweep.main() == 0
+    status = freshness.read_sweep_status()
+    assert status['model_comparisons'] == 3 and status['model_comparisons_reused'] == 1
+    assert status['source_reads'] == 4 and status['read'] == 2
+    assert status['verified'] == status['partial'] == status['deferred'] == 1
+    assert status['renewed'] == 0
+
+
 def test_four_workers_use_private_sessions_and_coordinator_only_status_writes(sweep, monkeypatch):
     rows = [SimpleNamespace(cache_key=str(i)) for i in range(12)]
     state = setup(monkeypatch, rows)
