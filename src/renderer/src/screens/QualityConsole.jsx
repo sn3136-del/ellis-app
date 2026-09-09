@@ -490,7 +490,7 @@ function fx(t, f) {
   return t(k) !== k ? t(k) : f.replace(/_/g, ' ')
 }
 
-function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
+export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
   const UNIT = { Day: t('ops.u.day'), Hour: t('ops.u.hour'),
                  Month: t('ops.u.month'), Year: t('ops.u.year'),
                  'Calendar Day': t('ops.u.calDay'),
@@ -514,6 +514,11 @@ function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
                  processing_min_days: 'processing_unit',
                  visa_fee_amount: 'visa_fee_currency' }
   const PAIRED = new Set(Object.values(PAIR))
+  // Calendar and conditional stays retain their wording even when the
+  // external Hour/Day fields cannot express an exact numeric amount. This
+  // is display context only: the existing field status remains unchanged.
+  const stayText = rec.max_stay_duration == null && typeof rec.max_stay_text === 'string'
+    && rec.max_stay_text.trim() ? rec.max_stay_text : null
   const show = (f) => {
     const v = rec[f]
     if (v == null || v === '') return '·'
@@ -561,7 +566,8 @@ function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
       {Object.entries(rec.field_status)
         .filter(([f]) => !PAIRED.has(f))
         .map(([f, st]) => (
-        <div key={f} style={{ background: '#fff', border: '1px solid #eef2f8',
+        <div key={f} data-record-field={f}
+             style={{ background: '#fff', border: '1px solid #eef2f8',
                               borderRadius: 10, padding: '8px 12px',
                               minWidth: 0 }}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -588,11 +594,19 @@ function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
                           && (rec[f] == null || rec[f] === '')
                           ? 'italic' : 'normal',
                         overflowWrap: 'anywhere' }}>
-            {(rec[f] == null || rec[f] === '')
+            {f === 'max_stay_duration' && stayText
+              ? <>
+                  <span>{stayText}</span>
+                  <div style={{ marginTop: 5, fontSize: 11, fontWeight: 400,
+                                fontStyle: 'normal', color: GRAY, lineHeight: 1.45 }}>
+                    {t('ops.stayTextOnly')}
+                  </div>
+                </>
+              : (rec[f] == null || rec[f] === '')
               ? (st === 'missing' ? t('ops.missingCounts')
                  : st === 'not-published' ? t('ops.notPublished')
                  : st === 'not-applicable' ? t('ops.notApplicable')
-                 : st === 'optional-empty' ? t('ops.notPublished') : tvv(show(f)))
+                 : st === 'optional-empty' ? t('ops.optionalEmpty') : tvv(show(f)))
               : /^https?:\/\//.test(String(rec[f]))
                 /* A source is only traceable if it can be OPENED: the
                    acceptance standard asks for a clickable source. */
