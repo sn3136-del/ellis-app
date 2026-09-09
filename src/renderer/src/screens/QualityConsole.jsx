@@ -488,7 +488,7 @@ function MissingLine({ missing, t }) {
 // humanized key so an unmapped field is still readable, never snake_case.
 let recoveredRecordRequest
 function RecoveredRecord({ rec, t }) {
-  const [history, setHistory] = useState([])
+  const [recoveredIndex, setRecoveredIndex] = useState(null)
   useEffect(() => {
     let active = true
     if (!recoveredRecordRequest) {
@@ -498,10 +498,11 @@ function RecoveredRecord({ rec, t }) {
         .catch((error) => { recoveredRecordRequest = null; throw error })
     }
     recoveredRecordRequest.then((index) => {
-      if (active) setHistory(recoveredForRecord(rec, index))
-    }).catch(() => { if (active) setHistory([]) })
+      if (active) setRecoveredIndex(index)
+    }).catch(() => { if (active) setRecoveredIndex(null) })
     return () => { active = false }
-  }, [rec])
+  }, [])
+  const history = recoveredIndex ? recoveredForRecord(rec, recoveredIndex) : []
   if (!history.length) return null
   return <section style={{ gridColumn: '1 / -1', padding: 12, background: '#f7f9fc', borderRadius: 10 }}>
     <strong>{t('ops.recoveredInline')}</strong>
