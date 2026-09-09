@@ -1690,7 +1690,9 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                   </td>
                   <td className="ops-cell" data-label={t('ops.col.stay')}
                       style={{ padding: '10px 12px', textAlign: 'right',
-                               color: NAVY, whiteSpace: 'nowrap',
+                               color: NAVY,
+                               whiteSpace: rec.max_stay_duration != null ? 'nowrap' : 'normal',
+                               lineHeight: 1.45, overflowWrap: 'anywhere',
                                fontVariantNumeric: 'tabular-nums' }}>
                     {rec.max_stay_duration != null
                       ? `${rec.max_stay_duration} ${rec.max_stay_unit === 'Hour'
