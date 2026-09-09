@@ -16,6 +16,8 @@ test('arrival filing preserves conditions and exclusions when required is unknow
   assert.deepEqual(arrivalCardLines(card),['TWAC, Within7 days',card.notes])
   assert.deepEqual(arrivalCardLines({...card,required:false}),['TWAC',card.notes])
   assert.deepEqual(arrivalCardLines({required:null,name:'TWAC'}),[])
+  assert.deepEqual(arrivalCardLines({required:true}),['Arrival card'])
+  assert.deepEqual(arrivalCardLines({required:true},value=>value,'入境卡'),['入境卡'])
   assert.deepEqual(arrivalCardLines({...card,notes:[card.notes],note:card.notes},s=>'translated:'+s),
     ['translated:TWAC, translated:Within7 days','translated:'+card.notes])
 })

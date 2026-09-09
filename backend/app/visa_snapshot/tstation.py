@@ -1073,12 +1073,12 @@ def records_for_route(route: dict, guidance: dict,
         method = "Online Application" if _files_something_online(g) else None
         method_from_channel = False
     entry_req = g.get("entry_requirements")
+    if isinstance(entry_req, list):
+        entry_req = ". ".join(str(x) for x in entry_req if x) or None
     if isinstance(entry_req, str):
         arrival_text = _entry_requirements({"arrival_card": g.get("arrival_card")})
         if arrival_text and arrival_text not in entry_req:
             entry_req = entry_req.rstrip(". ") + ". " + arrival_text
-    if isinstance(entry_req, list):
-        entry_req = ". ".join(str(x) for x in entry_req if x) or None
     exceptions = g.get("exceptions")
     if isinstance(exceptions, list):
         exceptions = ". ".join(str(x) for x in exceptions if x) or None

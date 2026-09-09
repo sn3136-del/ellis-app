@@ -370,7 +370,8 @@ def test_an_exemption_lane_on_a_conditional_route_is_not_a_visa():
     assert rows2[0]["application_method"] == "Online Application"
     assert rows2[1]["application_method"] == "Agency Service"
     assert rows2[1]["visa_requirement_detail"] == "Paper Visa"
-def test_conditional_arrival_card_scope_survives_record_rendering():
+@pytest.mark.parametrize("explicit_entry", ["Return ticket needed.", ["Return ticket needed."]])
+def test_conditional_arrival_card_scope_survives_record_rendering(explicit_entry):
     from app.visa_snapshot import tstation
     card = {"required": None, "name": "TWAC", "submission_window": "Within7 days",
             "notes": "Only multiple-entry permit holders file; resident holders are excluded."}
@@ -380,7 +381,7 @@ def test_conditional_arrival_card_scope_survives_record_rendering():
     assert "Within7 days" in text
     assert "must still file" not in text
     assert "TWAC required" not in text
-    guidance["entry_requirements"] = "Return ticket needed."
+    guidance["entry_requirements"] = explicit_entry
     rows = tstation.records_for_route({"passport_nationality": "HKG", "destination_country": "TWN",
                                       "travel_purpose": "tourism"}, guidance)
     assert rows

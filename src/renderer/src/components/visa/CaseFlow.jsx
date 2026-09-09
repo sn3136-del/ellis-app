@@ -685,7 +685,7 @@ function EntryPrep({ t, client, caseId, journey, onToDocuments, onOpenCase }) {
   const counts = journey.checklist_counts || {}
   const done = (counts.required_missing || 0) === 0
   const card = g.arrival_card || {}
-  const arrivalLines = arrivalCardLines(card)
+  const arrivalLines = arrivalCardLines(card, value => value, t('case.entryPrep.arrivalCard'))
 
   async function renewFirst() {
     setRenewBusy(true)

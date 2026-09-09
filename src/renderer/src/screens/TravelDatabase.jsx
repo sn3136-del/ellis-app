@@ -811,7 +811,7 @@ export default function TravelDatabase({ onBack }) {
     return () => { live = false }
   }, [g, lang])
   const T = (s) => (s && tx[s]) || s
-  const arrivalLines = arrivalCardLines(g?.arrival_card, T)
+  const arrivalLines = arrivalCardLines(g?.arrival_card, T, t('db.arrivalCard'))
 
   // AI Q&A as a conversation: every exchange is a turn in a thread, the
   // half-read route survives a clarify, and each answer is summarised in one
