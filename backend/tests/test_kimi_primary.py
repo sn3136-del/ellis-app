@@ -2091,18 +2091,23 @@ def test_only_a_verified_verdict_releases_a_held_answer(db, tmp_path, monkeypatc
         vo.reload()
 
 
-def test_a_stale_row_is_never_regenerated_from_memory(db):
-    """The page could not be read, so the answer stays as it is, honestly
-    stale, and a person is told which page failed. The model is not asked."""
+@pytest.mark.parametrize("has_source", [True, False], ids=["unreadable", "no_source"])
+def test_a_stale_row_is_never_regenerated_from_memory(db, tmp_path, monkeypatch,
+                                                    has_source):
+    """Neither a failed page read nor a missing source permits regeneration.
+    Only an attempted, failed read is reported as a source outage."""
     from datetime import datetime, timedelta, timezone
+    from app.visa_snapshot import freshness, verified_overrides as vo
+    from app.visa_snapshot.fetching import FetchResult
     from app.visa_snapshot.models import DatabaseIssueReport
     _clear_cache(db)
     for r in db.query(DatabaseIssueReport).all():
         db.delete(r)
     db.commit()
     key = kimi_primary.cache_key(ROUTE)
+    source = "https://www.mofa.go.jp/fixture-visa-source" if has_source else None
     row = KimiRouteGuidanceCache(cache_key=key, route=dict(ROUTE), status="KIMI_PRIMARY",
-                                 guidance=dict(GOOD_ANSWER, source_url=None,
+                                 guidance=dict(GOOD_ANSWER, source_url=source,
                                                official_portal_url=None),
                                  missing_fields=[], contradictions=[], model="test",
                                  verification={"passes": 1},
@@ -2110,19 +2115,51 @@ def test_a_stale_row_is_never_regenerated_from_memory(db):
                                  fresh_until=datetime.now(timezone.utc) - timedelta(days=1))
     db.add(row)
     db.commit()
-    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
-        AssertionError("a stale row must never be regenerated from memory")))
-    kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
-    db.expire_all()
-    again = db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one()
-    assert again.guidance["permitted_stay"] == GOOD_ANSWER["permitted_stay"]
-    issues = db.query(DatabaseIssueReport).filter_by(cache_key=key,
-                                                    field="source_unreadable").all()
-    assert len(issues) == 1 and issues[0].reported_by == "freshness_monitor"
-    # A second failed attempt refreshes the same issue, never stacks another.
-    kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
-    assert db.query(DatabaseIssueReport).filter_by(cache_key=key,
-                                                  field="source_unreadable").count() == 1
+    db.refresh(row)
+    original_guidance, original_deadline = dict(row.guidance), row.fresh_until
+    fetched = []
+
+    def failed_fetch(url, **kwargs):
+        assert has_source, "a route without a source must not perform a fetch"
+        fetched.append(url)
+        assert url == source
+        return FetchResult(requested_url=url, ok=False, error="fixture outage")
+
+    def no_model(*args, **kwargs):
+        raise AssertionError("a stale row must never be regenerated from memory")
+
+    # Shipped reviews now contribute their own source catalog. Isolate both
+    # override layers so this fixture tests only the source explicitly above.
+    seed = tmp_path / "empty-seed.json"
+    operator = tmp_path / "empty-operator.json"
+    seed.write_text("[]")
+    operator.write_text("[]")
+    try:
+        with monkeypatch.context() as scoped:
+            scoped.setattr(vo, "OVERRIDES", seed)
+            scoped.setenv("ELLIS_OPERATOR_OVERRIDES", str(operator))
+            scoped.setattr(freshness, "fetch", failed_fetch)
+            scoped.setattr(freshness, "_PROVIDER", no_model)
+            kimi_primary.set_provider(no_model)
+            vo.reload()
+            for attempt in range(2):
+                kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
+                db.expire_all()
+                again = db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one()
+                assert again.guidance == original_guidance
+                assert again.fresh_until == original_deadline
+                assert again.verification["grounded_check"]["outcome"] == (
+                    "fetch_failed" if has_source else "no_official_source")
+                issues = db.query(DatabaseIssueReport).filter_by(
+                    cache_key=key, field="source_unreadable").all()
+                # Repeated outages update one issue; no source is not an outage.
+                assert len(issues) == int(has_source)
+                if has_source:
+                    assert issues[0].reported_by == "freshness_monitor"
+                    assert source in issues[0].note
+                assert len(fetched) == (attempt + 1 if has_source else 0)
+    finally:
+        vo.reload()
 
 
 def test_a_released_or_page_checked_row_is_never_regenerated(db):
