@@ -327,16 +327,61 @@ def _as_stay_unit(n, unit):
     return None, None
 
 
+_CALENDAR_MEASURE = re.compile(
+    r"\b(?:\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)"
+    r"\s*(?:\(\d+\)\s*)?(?:calendar\s+)?(?:months?|years?)\b", re.I)
+
+
+def _day_stay_with_separate_calendar_context(raw: str, days=None):
+    """Read an explicit initial day stay, never convert calendar duration.
+
+    A later visa-validity, extension or rolling-window measure is a different
+    fact. Unknown/alternative stay scopes still leave the numeric field blank.
+    """
+    first = re.match(
+        r"^\s*(?:(?:up to|not exceeding|a maximum of|maximum(?: stay)?(?: of)?|"
+        r"visitor['’]s visa issued on arrival for)\s+)?(\d+)\s*(?:calendar\s+)?days?\b",
+        raw, re.I)
+    if not first:
+        return None
+    value = int(first.group(1))
+    if days is not None and (isinstance(days, bool) or days != value):
+        return None  # a numeric sibling cannot silently resolve conflicting text
+    tail = raw[first.end():]
+    if re.search(r"\bor\b.*?\b\d+\s*(?:calendar\s+)?(?:days?|months?|years?)\b", tail, re.I):
+        return None  # multiple stay alternatives need product-specific wording
+    measures = list(_CALENDAR_MEASURE.finditer(raw))
+    if not measures:
+        return None
+    for measure in measures:
+        prefix = raw[:measure.start()]
+        suffix = raw[measure.end():]
+        separate_role = re.search(
+            r"\b(?:valid(?:ity)?(?:\s+(?:for|of|is))?(?:\s+up\s+to)?|"
+            r"extend(?:able|ed|ible)(?:\s+(?:up\s+to|for|to))?|"
+            r"extension(?:\s+(?:up\s+to|for|of|to))?|"
+            r"within|during|over|in any|in a)\s*$", prefix, re.I)
+        # When the source supplies both '120 days (4 months)', keep its
+        # explicit day figure, without calculating one from the month figure.
+        parenthetical = prefix.rstrip().endswith('(') and suffix.lstrip().startswith(')')
+        if not separate_role and not parenthetical:
+            return None
+    return value
+
+
 def _set_stay(row: dict, text, days=None) -> None:
     raw = str(text or "").strip()
     n, unit = _num_unit(raw)
     # Even discretionary wording must not fall back to a cached 180-day
     # approximation when the source gives a calendar-month stay.
-    calendar = unit in ("Month", "Year") or bool(re.search(
-        r"\b(?:\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)"
-        r"\s*(?:\(\d+\)\s*)?(?:calendar\s+)?(?:months?|years?)\b", raw, re.I))
+    calendar = unit in ("Month", "Year") or bool(_CALENDAR_MEASURE.search(raw))
     if raw:
         row["max_stay_text"] = raw
+    scoped_days = _day_stay_with_separate_calendar_context(raw, days) if calendar else None
+    if scoped_days is not None:
+        row["max_stay_duration"], row["max_stay_unit"] = scoped_days, "Day"
+        row.pop("_max_stay_representation_reason", None)
+        return
     if calendar:
         row["max_stay_duration"], row["max_stay_unit"] = None, None
         row["_max_stay_representation_reason"] = (
