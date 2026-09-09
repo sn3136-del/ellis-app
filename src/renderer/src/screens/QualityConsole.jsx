@@ -2956,9 +2956,9 @@ function QualityWorkspace() {
                           reserved good/warning/critical colours; the
                           categorical set above never borrows them. */}
                       <MicroStack height={10} segs={[
-                        [s.high, '#0b7a44', t('ops.conf.high'), t('ops.tip.quoted')],
-                        [s.medium, '#d97706', t('ops.conf.medium'), t('ops.tip.grounded')],
-                        [s.low, '#b3261e', t('ops.conf.low'), t('ops.heldTip')],
+                        [s.high, '#0b7a44', t('ops.conf.high'), t('ops.tip.confidence')],
+                        [s.medium, '#d97706', t('ops.conf.medium'), t('ops.tip.confidence')],
+                        [s.low, '#b3261e', t('ops.conf.low'), t('ops.tip.confidence')],
                       ]} />
                     </div>
 
