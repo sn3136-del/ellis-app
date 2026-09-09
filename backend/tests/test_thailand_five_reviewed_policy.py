@@ -85,6 +85,9 @@ def test_five_current_routes_cross_effective_date_without_a_new_model_or_cache_k
     if nationality in ('SGP', 'USA', 'MAC'):
         assert g['onward_travel_evidence'] is None
         assert 'onward_travel_evidence' not in g.get('unpublished_fields', [])
+        cleared = proof['field_provenance']['onward_travel_evidence']
+        assert cleared['status'] == 'unknown'
+        assert not cleared['source_url'] and cleared['verified_at'] is None
     verdict_proof = proof['field_provenance']['disposition']
     assert verdict_proof['verifier'] == 'ai'
     if arrival >= '2026-09-15':

@@ -2871,29 +2871,11 @@
     ]
    },
    "onward_travel_evidence": {
-    "source_url": "https://image.mfa.go.th/mfa/0/qcuTAU8W4b/New_Visa_Measures/Visa_Exemption_60_Days_2024-07-15.pdf",
-    "verified_at": "2026-09-09",
+    "status": "unknown",
     "verifier": "ai",
-    "verified_by": "Ellis scoped official-source review",
-    "quote": "Department of Consular Affairs, 15 July 2024 \nList of Countries and Territories whose Nationals are entitled to Visa Exemption Scheme  \nfor the Purpose of Tourism and Short-Term Business Engagements for a Period Not \nExceeding 60 Days \nOrdinary Passport \n1. Albania 21. Dominican Republic 41. Jordan 61. New Zealand 81. Sweden \n2. Andorra 22. Ecuador 42. Kazakhstan 62. Norway 82. Switzerland \n3. Australia 23. Estonia 43. Korea (ROK) 63. Oman 83. Taiwan \n4. Austria 24. Fiji 44. Kosovo 64. Panama 84. Tonga \n5. Bahrain 25. Finland 45. Kuwait 65. Papua New Guinea 85. Trinidad and Tobago \n6. Belgium 26. France 46. Laos 66. Peru 86. Türkiye \n7. Bhutan 27. Georgia 47. Latvia 67. Philippines 87. Ukraine \n8. Brazil 28. Germany 48. Liechtenstein 68. Poland 88. UAE \n9. Brunei 29. Greece 49. Lithuania 69. Portugal 89. UK \n10. Bulgaria 30. Guatemala 50. Luxembourg 70. Qatar 90. USA \n11. Cambodia 31. Hong Kong 51. Macao 71. Romania 91. Uruguay \n12. Canada 32. Hungary 52. Malaysia 72. Russia 92. Uzbekistan \n13. China 33. Iceland 53. Maldives 73. San Marino 93. Vietnam \n14. Colombia 34. India 54. Malta 74. Saudi Arabia \n15. Croatia 35. Indonesia 55. Mauritius 75. Singapore \n16. Cuba 36. Ireland 56. Mexico 76. Slovakia \n17. Cyprus 37. Israel 57. Monaco 77. Slovenia \n18. Czechia 38. Italy 58. Mongolia 78. Spain \n19. Denmark 39. Jamaica 59. Morocco 79. Sri Lanka \n20. Dominica 40. Japan 60. Netherlands 80. South Africa",
-    "note": "Remove an unverified numeric onward-ticket deadline tied to the superseded stay. This does not establish that no onward ticket is required.",
-    "effective_to": "2026-09-14",
-    "policy_interval_evidence": {
-     "effective_to": {
-      "source_url": "https://www.mfa.go.th/en/content/pb-summary-03092026-en",
-      "verified_at": "2026-09-09",
-      "verifier": "ai",
-      "verified_by": "Ellis scoped official-source review",
-      "quote": "These measures will therefore take effect from 15 September 2026",
-      "note": "AI reading of the captured official source, limited to the named fields.",
-      "additional_quotes": [
-       "(1) granting one visa exemption arrangement per country/territory; (2) revoking the 60-day visa exemption scheme;",
-       "As such, foreigners who are already in Thailand under the current visa exemption schemes or plan to travel to Thailand before 15 September 2026 may stay until the last date of their permitted period of stay, which is indicated on the immigration stamp on their passport.",
-       "This review also covers only the 30-day and 15-day visa exemption and VoA schemes, which apply to travel for tourism purposes only, and does not affect other visa categories at this point."
-      ],
-      "derivation": "The replaced 60-day scheme applies to arrivals before 15 September; its final arrival day is 14 September 2026. Earlier admissions retain the stamped stay."
-     }
-    }
+    "source_url": "",
+    "verified_at": null,
+    "reason": "Remove an unverified numeric onward-ticket deadline tied to the superseded stay. This does not establish that no onward ticket is required."
    }
   }
  },
@@ -50230,29 +50212,11 @@
     ]
    },
    "onward_travel_evidence": {
-    "source_url": "https://image.mfa.go.th/mfa/0/qcuTAU8W4b/New_Visa_Measures/Visa_Exemption_60_Days_2024-07-15.pdf",
-    "verified_at": "2026-09-09",
+    "status": "unknown",
     "verifier": "ai",
-    "verified_by": "Ellis scoped official-source review",
-    "quote": "Department of Consular Affairs, 15 July 2024 \nList of Countries and Territories whose Nationals are entitled to Visa Exemption Scheme  \nfor the Purpose of Tourism and Short-Term Business Engagements for a Period Not \nExceeding 60 Days \nOrdinary Passport \n1. Albania 21. Dominican Republic 41. Jordan 61. New Zealand 81. Sweden \n2. Andorra 22. Ecuador 42. Kazakhstan 62. Norway 82. Switzerland \n3. Australia 23. Estonia 43. Korea (ROK) 63. Oman 83. Taiwan \n4. Austria 24. Fiji 44. Kosovo 64. Panama 84. Tonga \n5. Bahrain 25. Finland 45. Kuwait 65. Papua New Guinea 85. Trinidad and Tobago \n6. Belgium 26. France 46. Laos 66. Peru 86. Türkiye \n7. Bhutan 27. Georgia 47. Latvia 67. Philippines 87. Ukraine \n8. Brazil 28. Germany 48. Liechtenstein 68. Poland 88. UAE \n9. Brunei 29. Greece 49. Lithuania 69. Portugal 89. UK \n10. Bulgaria 30. Guatemala 50. Luxembourg 70. Qatar 90. USA \n11. Cambodia 31. Hong Kong 51. Macao 71. Romania 91. Uruguay \n12. Canada 32. Hungary 52. Malaysia 72. Russia 92. Uzbekistan \n13. China 33. Iceland 53. Maldives 73. San Marino 93. Vietnam \n14. Colombia 34. India 54. Malta 74. Saudi Arabia \n15. Croatia 35. Indonesia 55. Mauritius 75. Singapore \n16. Cuba 36. Ireland 56. Mexico 76. Slovakia \n17. Cyprus 37. Israel 57. Monaco 77. Slovenia \n18. Czechia 38. Italy 58. Mongolia 78. Spain \n19. Denmark 39. Jamaica 59. Morocco 79. Sri Lanka \n20. Dominica 40. Japan 60. Netherlands 80. South Africa",
-    "note": "Remove an unverified numeric onward-ticket deadline tied to the superseded stay. This does not establish that no onward ticket is required.",
-    "effective_to": "2026-09-14",
-    "policy_interval_evidence": {
-     "effective_to": {
-      "source_url": "https://www.mfa.go.th/en/content/pb-summary-03092026-en",
-      "verified_at": "2026-09-09",
-      "verifier": "ai",
-      "verified_by": "Ellis scoped official-source review",
-      "quote": "These measures will therefore take effect from 15 September 2026",
-      "note": "AI reading of the captured official source, limited to the named fields.",
-      "additional_quotes": [
-       "(1) granting one visa exemption arrangement per country/territory; (2) revoking the 60-day visa exemption scheme;",
-       "As such, foreigners who are already in Thailand under the current visa exemption schemes or plan to travel to Thailand before 15 September 2026 may stay until the last date of their permitted period of stay, which is indicated on the immigration stamp on their passport.",
-       "This review also covers only the 30-day and 15-day visa exemption and VoA schemes, which apply to travel for tourism purposes only, and does not affect other visa categories at this point."
-      ],
-      "derivation": "The replaced 60-day scheme applies to arrivals before 15 September; its final arrival day is 14 September 2026. Earlier admissions retain the stamped stay."
-     }
-    }
+    "source_url": "",
+    "verified_at": null,
+    "reason": "Remove an unverified numeric onward-ticket deadline tied to the superseded stay. This does not establish that no onward ticket is required."
    }
   }
  },
@@ -112373,29 +112337,11 @@
     ]
    },
    "onward_travel_evidence": {
-    "source_url": "https://image.mfa.go.th/mfa/0/qcuTAU8W4b/New_Visa_Measures/Visa_Exemption_60_Days_2024-07-15.pdf",
-    "verified_at": "2026-09-09",
+    "status": "unknown",
     "verifier": "ai",
-    "verified_by": "Ellis scoped official-source review",
-    "quote": "Department of Consular Affairs, 15 July 2024 \nList of Countries and Territories whose Nationals are entitled to Visa Exemption Scheme  \nfor the Purpose of Tourism and Short-Term Business Engagements for a Period Not \nExceeding 60 Days \nOrdinary Passport \n1. Albania 21. Dominican Republic 41. Jordan 61. New Zealand 81. Sweden \n2. Andorra 22. Ecuador 42. Kazakhstan 62. Norway 82. Switzerland \n3. Australia 23. Estonia 43. Korea (ROK) 63. Oman 83. Taiwan \n4. Austria 24. Fiji 44. Kosovo 64. Panama 84. Tonga \n5. Bahrain 25. Finland 45. Kuwait 65. Papua New Guinea 85. Trinidad and Tobago \n6. Belgium 26. France 46. Laos 66. Peru 86. Türkiye \n7. Bhutan 27. Georgia 47. Latvia 67. Philippines 87. Ukraine \n8. Brazil 28. Germany 48. Liechtenstein 68. Poland 88. UAE \n9. Brunei 29. Greece 49. Lithuania 69. Portugal 89. UK \n10. Bulgaria 30. Guatemala 50. Luxembourg 70. Qatar 90. USA \n11. Cambodia 31. Hong Kong 51. Macao 71. Romania 91. Uruguay \n12. Canada 32. Hungary 52. Malaysia 72. Russia 92. Uzbekistan \n13. China 33. Iceland 53. Maldives 73. San Marino 93. Vietnam \n14. Colombia 34. India 54. Malta 74. Saudi Arabia \n15. Croatia 35. Indonesia 55. Mauritius 75. Singapore \n16. Cuba 36. Ireland 56. Mexico 76. Slovakia \n17. Cyprus 37. Israel 57. Monaco 77. Slovenia \n18. Czechia 38. Italy 58. Mongolia 78. Spain \n19. Denmark 39. Jamaica 59. Morocco 79. Sri Lanka \n20. Dominica 40. Japan 60. Netherlands 80. South Africa",
-    "note": "Remove an unverified numeric onward-ticket deadline tied to the superseded stay. This does not establish that no onward ticket is required.",
-    "effective_to": "2026-09-14",
-    "policy_interval_evidence": {
-     "effective_to": {
-      "source_url": "https://www.mfa.go.th/en/content/pb-summary-03092026-en",
-      "verified_at": "2026-09-09",
-      "verifier": "ai",
-      "verified_by": "Ellis scoped official-source review",
-      "quote": "These measures will therefore take effect from 15 September 2026",
-      "note": "AI reading of the captured official source, limited to the named fields.",
-      "additional_quotes": [
-       "(1) granting one visa exemption arrangement per country/territory; (2) revoking the 60-day visa exemption scheme;",
-       "As such, foreigners who are already in Thailand under the current visa exemption schemes or plan to travel to Thailand before 15 September 2026 may stay until the last date of their permitted period of stay, which is indicated on the immigration stamp on their passport.",
-       "This review also covers only the 30-day and 15-day visa exemption and VoA schemes, which apply to travel for tourism purposes only, and does not affect other visa categories at this point."
-      ],
-      "derivation": "The replaced 60-day scheme applies to arrivals before 15 September; its final arrival day is 14 September 2026. Earlier admissions retain the stamped stay."
-     }
-    }
+    "source_url": "",
+    "verified_at": null,
+    "reason": "Remove an unverified numeric onward-ticket deadline tied to the superseded stay. This does not establish that no onward ticket is required."
    }
   }
  }
