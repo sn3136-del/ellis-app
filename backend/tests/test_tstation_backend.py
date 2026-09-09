@@ -323,3 +323,49 @@ def test_records_listing_prefers_the_canonical_row_over_a_newer_dated_copy(clien
     assert "Phantom visa-free entry" not in names
     assert all(r["visa_requirement"] != "Visa-free" for r in out["records"]) \
         or canonical.guidance.get("disposition") == "VISA_EXEMPT"
+
+
+def test_an_exemption_lane_on_a_conditional_route_is_not_a_visa():
+    """Chinese passport transiting Korea: the free transit lanes were
+    labelled "eVisa" with "Embassy Submission" because the route-level
+    channel sentence (which mentions the embassy for those who need a visa)
+    was copied onto every product. A lane that says no visa is needed and
+    costs nothing is the route's own exemption with nothing to apply for."""
+    route = {"passport_nationality": "CHN", "destination_country": "KOR",
+             "travel_purpose": "transit"}
+    g = {"disposition": "CONDITIONAL", "requirement_detail": "transit_visa_free",
+         "application_channel": "not_required",
+         "application_channel_detail": "No Korean visa is needed on the lanes below. "
+                                       "Otherwise apply through the Embassy's designated agencies.",
+         "visa_products": [
+             {"type": "Airside transit at Incheon", "entry": "single", "validity": None,
+              "max_stay_days": None, "fee": {"amount": 0, "currency": "KRW"},
+              "notes": "Free, no visa needed while you stay in the transit area."},
+             {"type": "Jeju direct entry (B-2)", "entry": "single", "validity": None,
+              "max_stay_days": 30, "fee": {"amount": 0, "currency": "KRW"},
+              "notes": "Free, no visa needed on a direct arrival at Jeju."}]}
+    rows = tstation.records_for_route(route, g)
+    assert [r["visa_requirement_detail"] for r in rows] == ["Transit Visa-free"] * 2
+    assert [r["application_method"] for r in rows] == [None, None]
+    # Indonesia to Japan: the registration lane is free and online, the paper
+    # visa beside it is lodged at the visa application centre named in the
+    # channel sentence, not "Online Application" copied from the route.
+    g2 = {"disposition": "CONDITIONAL", "requirement_detail": "conditional_visa_free",
+          "application_channel": "online_portal",
+          "application_channel_detail": "Register the e-passport online on JAVES. Travellers "
+                                        "who do not register apply for a paper visa through the "
+                                        "Japan Visa Application Center (JVAC).",
+          "visa_products": [
+              {"type": "E-passport visa exemption registration", "entry": "multiple",
+               "validity": "3 years", "max_stay_days": 15, "fee": {"amount": 0, "currency": "JPY"},
+               "notes": "Registration and entry are free of charge."},
+              {"type": "Multiple-entry short-term stay visa (tourism)", "entry": "multiple",
+               "validity": "5 years", "max_stay_days": 30,
+               "fee": {"amount": 3330000, "currency": "IDR"}, "notes": None}]}
+    rows2 = tstation.records_for_route({"passport_nationality": "IDN",
+                                        "destination_country": "JPN",
+                                        "travel_purpose": "tourism"}, g2)
+    assert rows2[0]["visa_requirement_detail"] == "Conditional Visa-free"
+    assert rows2[0]["application_method"] == "Online Application"
+    assert rows2[1]["application_method"] == "Agency Service"
+    assert rows2[1]["visa_requirement_detail"] == "Paper Visa"

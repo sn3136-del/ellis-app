@@ -1942,3 +1942,39 @@ def test_a_verified_requirement_detail_implies_the_verdict(tmp_path, monkeypatch
     assert merged2["disposition"] == "VISA_REQUIRED"
     assert merged2["permitted_stay"] == "90 days"
     vo.reload()
+
+
+def test_a_visa_free_verdict_never_carries_a_priced_product(tmp_path, monkeypatch):
+    """Britain to Vietnam: a verified 45-day exemption with the 25 USD e-visa
+    products still listed underneath read "No visa needed" over a priced
+    product table, the same shape Trip.com reported for Hong Kong to
+    Vietnam. Under a visa-free verdict only free products survive."""
+    import json as _json
+    from app.visa_snapshot import verified_overrides as vo
+    f = tmp_path / "verified_overrides.json"
+    f.write_text(_json.dumps([{
+        "route": {"nationality": "GBR", "destination": "VNM"},
+        "verified_at": "2026-09-01", "verified_by": "audit",
+        "source_url": "https://evisa.gov.vn/",
+        "fields": {"disposition": "VISA_EXEMPT",
+                   "requirement_detail": "unconditional_visa_free",
+                   "visa_products": [
+                       {"type": "Visa-free entry, 45 days", "entry": "multiple",
+                        "validity": None, "max_stay_days": 45,
+                        "fee": {"amount": 0, "currency": None}, "notes": "Entry is free"},
+                       {"type": "90-day single-entry tourist e-Visa", "entry": "single",
+                        "validity": "90 days", "max_stay_days": 90,
+                        "fee": {"amount": 25, "currency": "USD"}, "notes": None}]}}]))
+    monkeypatch.setattr(vo, "OVERRIDES", f)
+    vo.reload()
+    merged, _ = vo.apply({"disposition": "VISA_REQUIRED", "application_channel": "online_portal",
+                          "government_fee": {"amount": 25, "currency": "USD"}},
+                         {"passport_nationality": "GBR", "destination_country": "VNM",
+                          "travel_purpose": "tourism"})
+    assert merged["disposition"] == "VISA_EXEMPT"
+    assert [p["type"] for p in merged["visa_products"]] == ["Visa-free entry, 45 days"]
+    # The model's 25 USD fee is an application-only leftover: dropped, or
+    # zero, never a positive amount under a visa-free verdict.
+    assert (merged.get("government_fee") or {}).get("amount") in (None, 0)
+    assert merged.get("application_channel") in (None, "not_required")
+    vo.reload()

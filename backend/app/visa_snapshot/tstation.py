@@ -581,8 +581,26 @@ _NESTED_UNDER = {
     # the traveller has to meet. It can carry either an advance permission or
     # a conditional exemption, and nothing that is issued at the border.
     "Conditional": ("evisa", "paper_visa", "eta_electronic_authorization",
-                    "conditional_visa_free"),
+                    "conditional_visa_free", "transit_visa_free"),
 }
+
+# A product that is itself an exemption: its name or note says no visa is
+# issued and it costs nothing. On a conditional route (Chinese passport
+# transiting Korea, Indonesian e-passport to Japan) such a lane sat beside
+# priced visa products and was labelled "eVisa, Embassy Submission" because
+# the route-level channel was copied onto every product.
+_FREE_WORDS = ("visa-free", "visa free", "no visa", "exempt", "waiver",
+               "without a visa", "without passing immigration",
+               "free of charge", "entry is free", "free, no visa")
+
+
+def _product_is_exemption(product: dict) -> bool:
+    fee = product.get("fee") if isinstance(product.get("fee"), dict) else {}
+    amount = (fee or {}).get("amount")
+    words = f"{product.get('type') or ''} {product.get('notes') or ''}".lower()
+    if any(k in words for k in ("visa fee", "the fee is", "fee is")) and (amount or 0) > 0:
+        return False
+    return amount in (0, 0.0) and any(k in words for k in _FREE_WORDS)
 
 
 def _subcategory_for(product: dict, route_default: str | None,
@@ -970,6 +988,15 @@ def records_for_route(route: dict, guidance: dict,
         row["visa_type_name"] = str(p.get("type"))
         row["visa_requirement_detail"] = _subcategory_for(
             p, base.get("visa_requirement_detail"), requirement, method)
+        exemption_lane = requirement == "Conditional" and _product_is_exemption(p)
+        if exemption_lane:
+            # The lane is the route's own kind of exemption (transit-only or
+            # conditional), never a visa kind read off a stray word.
+            route_key = _key_of(base.get("visa_requirement_detail"))
+            row["visa_requirement_detail"] = SUBCATEGORY[
+                route_key if route_key in ("transit_visa_free",
+                                           "conditional_visa_free")
+                else "conditional_visa_free"]
         n, unit = _num_unit(p.get("validity"),
                             stay_bound=p.get("max_stay_days"))
         if n is None:
@@ -1010,8 +1037,27 @@ def records_for_route(route: dict, guidance: dict,
         if note:
             row["special_conditions"] = (str(note) if not row["special_conditions"]
                                          else f"{row['special_conditions']}. {note}")
-        row["application_method"] = _method_for_detail(
-            row["visa_requirement_detail"], method, row, method_from_channel)
+        if exemption_lane:
+            # Nothing is applied for on an exemption lane, unless the lane
+            # itself is an online registration (Japan's e-passport waiver).
+            words = f"{p.get('type') or ''} {p.get('notes') or ''}".lower()
+            row["application_method"] = (
+                "Online Application" if any(k in words for k in
+                                            ("regist", "online", "portal"))
+                else None)
+        elif requirement == "Conditional" and any(
+                _product_is_exemption(q) for q in products):
+            # A visa product on a mixed route: the route-level channel
+            # describes the exemption, so this product answers for itself.
+            # Its own place words first, then the sentence that says where
+            # visas are lodged, then its kind.
+            row["application_method"] = _method_for_detail(
+                row["visa_requirement_detail"],
+                _method_from_detail(g) or method, row,
+                _method_from_detail(g) in _IN_PERSON_METHODS)
+        else:
+            row["application_method"] = _method_for_detail(
+                row["visa_requirement_detail"], method, row, method_from_channel)
         rows.append(_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub))
     return rows
 

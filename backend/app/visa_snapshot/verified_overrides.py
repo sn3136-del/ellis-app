@@ -357,6 +357,15 @@ def _drop_application_leftovers(merged: dict, fields: dict) -> None:
         if k in fields:
             continue          # the verified fact wins, whatever it says
         merged.pop(k, None)
+    # The model's subcategory is a leftover too when it names a visa: a
+    # verified visa-free verdict cannot sit over "paper_visa" (Hong Kong to
+    # Algeria) or "eta_electronic_authorization" (Australia to Spain, for an
+    # ETIAS not yet in operation). Dropped, never rewritten: the route's own
+    # verified detail, if any, was already merged in.
+    if "requirement_detail" not in fields:
+        detail = str(merged.get("requirement_detail") or "")
+        if detail and detail not in _DETAIL_FAMILY["VISA_EXEMPT"]:
+            merged.pop("requirement_detail", None)
     # Both are about applying for a visa. With no visa to apply for they are
     # false, whatever the model said. (This previously only wrote False when
     # the value was ALREADY falsy, so a visa-free answer could still show
@@ -495,9 +504,63 @@ def _verdict_implied_by_detail(fields: dict, guidance: dict) -> str | None:
         return None
     for verdict, family in _DETAIL_FAMILY.items():
         if detail in family:
-            current = str(guidance.get("disposition") or "").upper()
-            return None if current == verdict else verdict
+            # Returned even when the model already agrees: the verdict is
+            # then a VERIFIED fact (recorded in the provenance) and the
+            # leftover-droppers run. Without this, 272 live routes whose
+            # override carried a detail or products but no disposition kept
+            # a model-only verdict labelled as verified, and a verified
+            # visa-free detail sat beside a model fee (China to Colombia,
+            # "No visa needed" with a 138 USD fee).
+            return verdict
     return None
+
+
+def _product_is_free(p: dict) -> bool:
+    fee = (p.get("fee") or {}) if isinstance(p.get("fee"), dict) else {}
+    amount = fee.get("amount")
+    words = f"{p.get('type') or ''} {p.get('notes') or ''}".lower()
+    exempt = any(k in words for k in ("visa-free", "visa free", "no visa",
+                                      "exempt", "waiver", "without a visa",
+                                      "free of charge", "entry is free"))
+    return (amount in (None, 0, 0.0)) and (exempt or amount == 0)
+
+
+def enforce_verdict_invariants(merged: dict) -> None:
+    """A served answer may not contradict its own verdict, whoever wrote the
+    parts. Trip.com's testers saw "No visa needed" over an eVisa badge and a
+    25 USD fee: the verdict came from one hand and the products from another.
+    The audit of 2026-09-09 found 27 more verified visa-free routes carrying
+    priced visa products (Britain to Vietnam listed the 25 USD e-visa under
+    a 45-day exemption). Under a visa-free verdict only free products stay,
+    the fee is zero and the channel is "not required" unless something is
+    filed online. Under a verdict that needs a visa, an exemption-only
+    subcategory cannot stand. Nothing is invented: values are removed or
+    reset to what the verdict itself states."""
+    if not isinstance(merged, dict):
+        return
+    verdict = str(merged.get("disposition") or "").upper()
+    if verdict == "VISA_EXEMPT":
+        products = merged.get("visa_products")
+        if isinstance(products, list) and products:
+            kept = [p for p in products if isinstance(p, dict) and _product_is_free(p)]
+            if len(kept) != len(products):
+                merged["visa_products"] = kept
+        fee = merged.get("government_fee")
+        if isinstance(fee, dict) and (fee.get("amount") or 0) > 0:
+            merged["government_fee"] = {"amount": 0, "currency": fee.get("currency")}
+        detail = str(merged.get("requirement_detail") or "")
+        if detail and detail not in _DETAIL_FAMILY["VISA_EXEMPT"]:
+            merged.pop("requirement_detail", None)
+        channel = str(merged.get("application_channel") or "").lower()
+        if channel and channel not in ("not_required", "online_portal", "none"):
+            merged["application_channel"] = "not_required"
+    elif verdict in ("VISA_REQUIRED", "VISA_ON_ARRIVAL",
+                     "ELECTRONIC_AUTHORIZATION_REQUIRED"):
+        detail = str(merged.get("requirement_detail") or "")
+        if detail in _DETAIL_FAMILY["VISA_EXEMPT"]:
+            merged.pop("requirement_detail", None)
+        if str(merged.get("application_channel") or "").lower() in ("not_required", "none"):
+            merged.pop("application_channel", None)
 
 
 def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
@@ -515,6 +578,7 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     merged.update(fields)
     _drop_application_leftovers(merged, fields)
     _drop_exemption_leftovers(merged, fields, guidance)
+    enforce_verdict_invariants(merged)
     return merged, {
         "source_url": hit["source_url"], "verified_at": hit["verified_at"],
         "verified_by": hit["verified_by"], "note": hit["note"],
