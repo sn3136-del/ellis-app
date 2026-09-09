@@ -127,6 +127,7 @@ function useCountUp(target, ms = 700) {
 const SEQ = { high: '#0b7a44', medium: '#2563eb', low: '#d97706' }
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newQualitySession, qualityRecordRoute } from '../lib/visaSession.js'
+import { createLatestLoader, readQualityTab } from '../lib/qualityLoader.js'
 import { useLocale } from '../lib/locale.jsx'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { useLocalizedCountries } from '../lib/countryNames.js'
@@ -2373,66 +2374,36 @@ function QualityWorkspace() {
     Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
   ).toString(), [filters])
 
-  const load = useCallback(async (attempt = 0) => {
-    setBusy(true); setError('')
-    try {
-      if (tab === 'records') { setData(await client.get('/database/records')); setShown(PAGE) }
-      else if (tab === 'changes') {
-        // Records ride along so visa type names can render translated.
-        const [chg, recs] = await Promise.all([
-          client.get('/database/changes?limit=300'),
-          client.get('/database/records')])
-        setChanges(chg); setData(recs)
-      }
-      else if (tab === 'issues') {
-        // The dispute cards compare the page's claim against the current
-        // record, so the record set must be present on this tab too.
-        const [iss, recs] = await Promise.all([
-          client.get('/database/issues'), client.get('/database/records')])
-        setIssues(iss); setData(recs)
-      }
-      else if (tab === 'asks') {
-        setAsks(await client.get('/database/asks?limit=300'))
-      }
-      else if (tab === 'freshness') {
-        setFreshness(await client.get('/database/freshness'))
-        try { setIssues(await client.get('/database/issues')) } catch { /* tile falls back */ }
-        // The availability record rides along: the acceptance metric should
-        // be visible where the acceptance runs, not only as raw JSON.
-        try { setUptime(await client.get('/health/uptime')) } catch { /* tile hides */ }
-      }
-    } catch (e) {
-      // One transient network drop should not paint a dead console: retry
-      // once quietly, and only then say what happened in plain words. The
-      // last loaded data stays on screen either way.
-      const msg = String(e?.message || e)
-      if (attempt === 0 && /fetch|network|load failed/i.test(msg)) {
-        await new Promise((r) => setTimeout(r, 800))
-        return load(1)
-      }
-      setError(/fetch|network|load failed/i.test(msg)
-        ? t('ops.loadFailed') : msg)
-    } finally {
-      setBusy(false)
-    }
-  }, [client, tab, qs, t])
-  useEffect(() => { load() }, [load])
+  const loader = useMemo(() => createLatestLoader(
+    (which) => readQualityTab(client, which), {
+      onStart: () => { setBusy(true); setError('') },
+      onData: (next) => {
+        if ('data' in next) setData(next.data)
+        if ('changes' in next) setChanges(next.changes)
+        if ('issues' in next) setIssues(next.issues)
+        if ('asks' in next) setAsks(next.asks)
+        if ('freshness' in next) setFreshness(next.freshness)
+        if ('uptime' in next) setUptime(next.uptime)
+        if (next.resetShown) setShown(PAGE)
+      },
+      onError: (error) => {
+        const message = String(error?.message || error)
+        setError(/fetch|network|load failed/i.test(message) ? t('ops.loadFailed') : message)
+      },
+      onFinish: () => setBusy(false),
+    }), [client, t])
+  const load = useCallback(() => loader.run(tab), [loader, tab])
+  useEffect(() => {
+    load()
+    return () => loader.invalidate()
+  }, [load, loader])
   useEffect(() => {
     if (tab !== 'freshness') return
-    let active = true
-    let pending = false
-    const timer = setInterval(async () => {
-      if (pending || document.visibilityState === 'hidden') return
-      pending = true
-      try {
-        const latest = await client.get('/database/freshness')
-        if (active) setFreshness(latest)
-      } catch {
-        // Keep the last result; its timestamps still show its age.
-      } finally { pending = false }
+    const timer = setInterval(() => {
+      if (document.visibilityState !== 'hidden') loader.run('freshness-poll', { quiet: true })
     }, 30000)
-    return () => { active = false; clearInterval(timer) }
-  }, [client, tab])
+    return () => clearInterval(timer)
+  }, [loader, tab])
 
   async function flag(rec, note) {
     await client.databaseReportIssue({
