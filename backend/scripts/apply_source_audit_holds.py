@@ -1,7 +1,9 @@
 """Apply reviewed source holds without changing any cached answer or history.
 
 Dry-run by default. --apply requires --backup to a new SQLite file. Every
-manifest route must have its canonical cache row before any hold is inserted.
+manifest route must have its canonical cache row unless its reviewed hold
+explicitly sets protect_uncached_route=true. That exception inserts only an
+issue, so a later cold lookup is held without inventing cached route coverage.
 Open or acknowledged freshness-monitor source_audit issues are reused. Existing
 resolved issues, reader reports, cached guidance and change history are retained.
 """
@@ -26,6 +28,10 @@ def _read_manifest(path):
         raise ValueError('Manifest must identify a non-empty list of reviewed holds')
     entries, seen = [], set()
     for hold in data['holds']:
+        if not isinstance(hold, dict):
+            raise ValueError('Each hold must be an object')
+        if 'protect_uncached_route' in hold and type(hold['protect_uncached_route']) is not bool:
+            raise ValueError('protect_uncached_route must be a boolean')
         parts = str(hold.get('route_key', '')).split('|')
         if len(parts) != 4:
             raise ValueError('Each hold needs nationality|destination|purpose|document')
@@ -68,21 +74,28 @@ def migrate(database, *, manifest=DEFAULT_MANIFEST, apply=False, backup=None):
                               "where reported_by='freshness_monitor' and field='source_audit' "
                               "and status in ('open','acknowledged') order by id"):
             existing.setdefault(canonical_key(row['cache_key']), []).append(dict(row))
-        missing = [key for key, _, _ in entries if key not in keys]
+        missing = [key for key, _, hold in entries
+                   if key not in keys and not hold.get('protect_uncached_route', False)]
+        uncached = [key for key, _, hold in entries
+                    if key not in keys and hold.get('protect_uncached_route', False)]
         plan = [{'cache_key': key, 'route_key': hold['route_key'],
-                 'action': 'missing_canonical' if key not in keys else
-                           ('reuse_existing' if existing.get(key) else 'insert_hold'),
+                 'canonical_present': key in keys,
+                 'protect_uncached_route': hold.get('protect_uncached_route', False),
+                 'action': 'missing_canonical' if key in missing else
+                           ('reuse_existing' if existing.get(key) else
+                            'insert_uncached_hold' if key in uncached else 'insert_hold'),
                  'existing_issue_ids': [row['id'] for row in existing.get(key, [])],
                  'finding': hold['finding']} for key, _, hold in entries]
         report = {'manifest_id': data['id'], 'manifest_holds': len(entries),
-                  'matched_routes': len(entries) - len(missing), 'missing_canonical': missing,
+                  'matched_routes': len(entries) - len(missing) - len(uncached),
+                  'missing_canonical': missing, 'uncached_protected_routes': uncached,
                   'applied': False, 'backup': None, 'plan': plan,
                   'inserted': 0, 'reused': 0, 'repointed_existing': 0,
                   'cache_and_change_history_unchanged': True}
         if not apply:
             return report
         if missing:
-            raise ValueError('All manifest routes must match canonical cache rows: ' + ', '.join(missing))
+            raise ValueError('All manifest routes without explicit uncached protection must match canonical cache rows: ' + ', '.join(missing))
         # Keep the writer lock while a separate read connection copies the
         # committed database, including WAL content. No changes precede backup.
         # Exclusive creation prevents accidentally replacing another backup.
@@ -106,6 +119,7 @@ def migrate(database, *, manifest=DEFAULT_MANIFEST, apply=False, backup=None):
             proposal = {'audit_id': data['id'], 'checked_at': data.get('reviewed_at'),
                         'verifier': data.get('verifier'), 'decision': hold['decision'],
                         'finding': hold['finding'], 'sources': hold['sources'],
+                        'protect_uncached_route': hold.get('protect_uncached_route', False),
                         'unresolved': hold.get('unresolved', ''),
                         'fields': {'source_audit': {'finding': hold['finding'],
                                                    'decision': hold['decision']}}}

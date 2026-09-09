@@ -2,7 +2,7 @@
  "id": "source-audit-2026-09-09",
  "reviewed_at": "2026-09-09",
  "verifier": "ai",
- "scope": "Four bounded unresolved source findings. They are proposals for protective holds, not new visa-policy verdicts.",
+ "scope": "Six bounded unresolved source findings. Two explicitly protect uncached Indonesian ordinary-passport Vietnam routes without creating cache rows. These are protective holds, not new visa-policy verdicts.",
  "holds": [
   {
    "route_key": "USA|BFA|tourism|ordinary_passport",
@@ -60,6 +60,64 @@
     }
    ],
    "unresolved": "HKSAR-specific written confirmation of tourist entry requirements; old 14 day visa-free and 90 day partial seed claims cannot be accepted from this page."
+  },
+  {
+   "route_key": "IDN|VNM|tourism|ordinary_passport",
+   "protect_uncached_route": true,
+   "decision": "hold_source_conflict",
+   "finding": "The authenticated Indonesian Embassy Hanoi notice effective 15 July 2026 says ordinary-passport tourism and family visits are limited to 14 visa-free days; the Vietnamese MFA table still lists 30 days. A cold lookup must not publish the disputed older stay as current policy.",
+   "sources": [
+    {
+     "url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+     "checked_at": "2026-09-09",
+     "publisher": "Embassy of the Republic of Indonesia in Hanoi; account indonesiahanoi",
+     "quote": "The Embassy of the Republic of Indonesia in Hanoi informs Indonesian citizens that, effective 15 July 2026, Vietnam has revised its visa exemption policy.\nIndonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports.",
+     "reading_method": "visual_official_document",
+     "authority_limit": "Origin-government embassy notice; not a Vietnamese destination-authority legal instrument."
+    },
+    {
+     "url": "https://kemlu.go.id/id/hanoi/pelayanan-perwakilan/standar-pelayanan",
+     "checked_at": "2026-09-09",
+     "observation": "The official Indonesian government embassy page links directly to https://www.instagram.com/indonesiahanoi/ in its header, authenticating the account ownership."
+    },
+    {
+     "url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+     "checked_at": "2026-09-09",
+     "quote": "14 days for Diplomatic and\nOfficial passport/30 days for\nOrdinary Passport",
+     "reading_method": "fetched_text",
+     "observation": "Table row conflicts with the newer embassy announcement; column scope distinguishes ordinary from diplomatic and official passports."
+    }
+   ],
+   "unresolved": "Obtain current Vietnamese destination-law corroboration or an explicit reviewed cross-jurisdiction decision. This hold does not certify 14 days, fabricate coverage, or apply to other purposes or document types."
+  },
+  {
+   "route_key": "IDN|VNM|family_visit|ordinary_passport",
+   "protect_uncached_route": true,
+   "decision": "hold_source_conflict",
+   "finding": "The authenticated Indonesian Embassy Hanoi notice effective 15 July 2026 says ordinary-passport tourism and family visits are limited to 14 visa-free days; the Vietnamese MFA table still lists 30 days. A cold lookup must not publish the disputed older stay as current policy.",
+   "sources": [
+    {
+     "url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+     "checked_at": "2026-09-09",
+     "publisher": "Embassy of the Republic of Indonesia in Hanoi; account indonesiahanoi",
+     "quote": "The Embassy of the Republic of Indonesia in Hanoi informs Indonesian citizens that, effective 15 July 2026, Vietnam has revised its visa exemption policy.\nIndonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports.",
+     "reading_method": "visual_official_document",
+     "authority_limit": "Origin-government embassy notice; not a Vietnamese destination-authority legal instrument."
+    },
+    {
+     "url": "https://kemlu.go.id/id/hanoi/pelayanan-perwakilan/standar-pelayanan",
+     "checked_at": "2026-09-09",
+     "observation": "The official Indonesian government embassy page links directly to https://www.instagram.com/indonesiahanoi/ in its header, authenticating the account ownership."
+    },
+    {
+     "url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+     "checked_at": "2026-09-09",
+     "quote": "14 days for Diplomatic and\nOfficial passport/30 days for\nOrdinary Passport",
+     "reading_method": "fetched_text",
+     "observation": "Table row conflicts with the newer embassy announcement; column scope distinguishes ordinary from diplomatic and official passports."
+    }
+   ],
+   "unresolved": "Obtain current Vietnamese destination-law corroboration or an explicit reviewed cross-jurisdiction decision. This hold does not certify 14 days, fabricate coverage, or apply to other purposes or document types."
   }
  ]
 }
