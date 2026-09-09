@@ -1124,11 +1124,35 @@
     "currency": "TWD"
    },
    "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
+    "required": null,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "People of the Mainland Area holding Multiple Entry & Exit Permits for the purpose of travel must submit the free arrival card within 7 days before arrival. Confirm the permit type: this category is not established by passport nationality alone."
    },
    "requirement_detail": null
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "People of the Mainland Area holding Multiple Entry & Exit Permits for the purpose of travel.",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -2031,10 +2055,34 @@
   "fields": {
    "arrival_card": {
     "required": true,
-    "name": "Taiwan Online Arrival Card",
-    "submission_window": "Any time before arrival, or on the paper form"
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
    },
    "official_portal_url": "https://twac.immigration.gov.tw/"
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -10590,7 +10638,36 @@
      },
      "notes": "US$100 overseas / NT$3,200 in Taiwan; Rs.8,400 at the Chennai mission"
     }
-   ]
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -28572,7 +28649,36 @@
      },
      "notes": "NT$1,646 total incl. NT$46 card-processing fee"
     }
-   ]
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -41425,7 +41531,36 @@
      },
      "notes": "NT$3,200 if applied for inside Taiwan"
     }
-   ]
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -41478,7 +41613,36 @@
      },
      "notes": "NT$3,200 if applied for inside Taiwan"
     }
-   ]
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -50573,7 +50737,36 @@
      },
      "notes": "BOCA visa-exempt entry for Singapore nationals: up to 30 days per entry, non-extendable"
     }
-   ]
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -50696,7 +50889,36 @@
      },
      "notes": "BOCA visa-exemption program: up to 30 days per entry for Malaysian nationals, non-extendable; entry subject to immigration officers' approval at the port of entry."
     }
-   ]
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -51157,7 +51379,36 @@
      },
      "notes": "90 days per entry, extendable up to 180 days for UK passport holders with British Citizen status; duration of stay starts from the day after arrival (BOCA Visa-Exempt Entry page)"
     }
-   ]
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -51392,7 +51643,36 @@
      },
      "notes": "90 days per entry, not extendable; BOCA Visa-Exempt Entry page"
     }
-   ]
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -51587,7 +51867,36 @@
      },
      "notes": "BOCA (Bureau of Consular Affairs, Taiwan): Canada is on the visa-exemption list with 90 days of stay, uniquely extendable up to 180 days for Canadian passport holders."
     }
-   ]
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -99492,7 +99801,36 @@
     "amount": 0,
     "currency": "TWD"
    },
-   "visa_products": []
+   "visa_products": [],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -99516,7 +99854,36 @@
     "amount": 0,
     "currency": "TWD"
    },
-   "visa_products": []
+   "visa_products": [],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -99540,7 +99907,36 @@
     "amount": 0,
     "currency": "TWD"
    },
-   "visa_products": []
+   "visa_products": [],
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+   }
   }
  },
  {
@@ -109996,6 +110392,49 @@
       "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta/about.html"
      }
     ]
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "AUS",
+   "destination": "TWN",
+   "travel_purpose": "tourism",
+   "travel_document_type": "ordinary_passport"
+  },
+  "fields": {
+   "arrival_card": {
+    "required": true,
+    "name": "Taiwan Arrival Card (TWAC)",
+    "url": "https://twac.immigration.gov.tw/",
+    "fee_amount": 0,
+    "fee_currency": null,
+    "submission_window": "Within 7 days before arrival",
+    "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+   }
+  },
+  "source_url": "https://twac.immigration.gov.tw/",
+  "verified_at": "2026-09-09",
+  "verifier": "ai",
+  "note": "Only the arrival-card field was independently read from the official Taiwan Arrival Card page. This entry makes no claim about visa eligibility, fee or stay.",
+  "field_provenance": {
+   "arrival_card": {
+    "verifier": "ai",
+    "verified_at": "2026-09-09",
+    "source_id": "twac",
+    "source_url": "https://twac.immigration.gov.tw/",
+    "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+    "additional_quotes": [
+     "Submission is Free.",
+     "Complete and submit within 7 days before arrival."
+    ],
+    "supporting_sources": [
+     {
+      "id": "twac",
+      "url": "https://twac.immigration.gov.tw/"
+     }
+    ],
+    "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
    }
   }
  }
