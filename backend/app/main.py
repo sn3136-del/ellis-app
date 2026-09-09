@@ -1136,7 +1136,8 @@ def _last_sweep_status() -> dict | None:
         "last_progress_at", "eligible_now", "scheduled", "target_cycle_hours",
         "route_budget_seconds", "integrity_resolved", "insufficient_evidence", "provider_failed",
         "no_official_source", "source_reads", "source_fetch_failures",
-        "model_comparisons", "model_comparisons_reused")
+        "model_comparisons", "model_comparisons_reused", "cycle_started_at",
+        "cycle_time_budget_seconds", "resumed_from_started_at", "prior_attempt_results")
     result = {k: data[k] for k in allowed if k in data}
     result.update(status=data.get("state"), checked=data.get("attempted", 0))
     if data.get("running") is True:

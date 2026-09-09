@@ -82,6 +82,8 @@ def test_sweep_summary_preserves_coverage_and_progress_distinctions(monkeypatch)
     from app.visa_snapshot import freshness
     counters = {'attempted': 10, 'read': 8, 'verified': 5, 'renewed': 2, 'partial': 6,
         'scheduled': 12, 'completed': 10, 'in_flight': 2, 'cycle_unattempted': 7,
+        'cycle_started_at': '2026-09-09T18:25:00+00:00', 'cycle_time_budget_seconds': 18000,
+        'resumed_from_started_at': '2026-09-09T18:25:00+00:00', 'prior_attempt_results': 600,
         'backlog_remaining': 3, 'eligible_now': 9, 'target_cycle_hours': 6,
         'route_budget_seconds': 75, 'integrity_resolved': 4,
         'source_reads': 20, 'source_fetch_failures': 3, 'insufficient_evidence': 2,
