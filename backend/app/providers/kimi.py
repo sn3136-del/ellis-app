@@ -230,9 +230,11 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
             body["max_tokens"] = int(max_tokens)
         if temperature is not None:
             body["temperature"] = float(temperature)
+        from . import provider_usage
         try:
-            r = self._httpx.post(self._url, headers={"authorization": f"Bearer {self._key}"},
-                                 json=body, timeout=timeout if timeout is not None else self._timeout)
+            r = provider_usage.post(self._httpx.post, self._url,
+                headers={"authorization": f"Bearer {self._key}"}, json=body,
+                timeout=timeout if timeout is not None else self._timeout)
         except self._httpx.TimeoutException as e:
             raise KimiTimeout(f"kimi call exceeded its {timeout or self._timeout}s budget") from e
         if r.status_code >= 400:

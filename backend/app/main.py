@@ -10,11 +10,11 @@ import os
 import re
 import threading
 
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 
 from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import select
 
 from .config import capabilities, settings
@@ -329,9 +329,9 @@ def get_capabilities(_: Principal = Depends(get_principal)):
 
 # ---- Internationalization (Phase 6): dynamic-content translation + identity ----
 class TranslateBody(BaseModel):
-    text: str
-    target_lang: str
-    source_lang: str = "auto"
+    text: str = Field(max_length=100_000)
+    target_lang: str = Field(max_length=32)
+    source_lang: str = Field(default="auto", max_length=32)
 
 
 @app.get("/i18n/languages")
@@ -354,8 +354,15 @@ def i18n_translate(body: TranslateBody, _: Principal = Depends(get_principal)):
 
 
 class CatalogBody(BaseModel):
-    target_lang: str
-    entries: dict
+    target_lang: str = Field(max_length=32)
+    entries: dict[Annotated[str, Field(strict=True, max_length=80)],
+                  Annotated[str, Field(strict=True, max_length=1000)]] = Field(max_length=2000)
+
+    @model_validator(mode="after")
+    def bounded_catalog_text(self):
+        if sum(map(len, self.entries.values())) > 320_000:
+            raise ValueError("catalog text must not exceed 320000 characters")
+        return self
 
 
 @app.post("/i18n/catalog")
@@ -363,10 +370,9 @@ def i18n_catalog(body: CatalogBody, _: Principal = Depends(get_principal)):
     """Dynamic UI-language support: translate the renderer's English string
     catalog into any supported language via Kimi K3 (masked, cached, chunked).
     Strings the model round-trip loses stay ENGLISH — never fabricated, never
-    a hole in the UI. Bounded: at most 800 short strings per call."""
+    a hole in the UI. Input bounds preserve the complete shipped catalog."""
     from . import i18n
-    entries = {str(k)[:80]: str(v)[:400] for k, v in list((body.entries or {}).items())[:800]}
-    out = i18n.translate_catalog(entries, body.target_lang)
+    out = i18n.translate_catalog(body.entries, body.target_lang)
     out["rtl"] = body.target_lang in i18n.RTL_LANGS
     return out
 
@@ -1043,8 +1049,10 @@ def _freshness_field_check(check: dict) -> dict:
     for source in check.get("source_checks") if isinstance(check.get("source_checks"), list) else []:
         if not isinstance(source, dict):
             continue
-        source_checks.append({**{name: source[name] for name in ("source_url", "outcome", "at")
+        source_checks.append({**{name: source[name] for name in ("source_url", "outcome", "at",
+            "model_compared_at", "source_read_at", "revalidated_at")
             if isinstance(source.get(name), str)},
+            "comparison_reused": source.get("comparison_reused") is True,
             "verified_fields": strings(source.get("verified_fields")),
             "unquoted_fields": strings(source.get("unquoted_fields"))})
     return {"verification_at": check.get("at"), "evidence_contract": check.get("evidence_contract"),
@@ -1127,7 +1135,8 @@ def _last_sweep_status() -> dict | None:
         "in_flight", "cycle_unattempted", "renewed", "partial", "deferred",
         "last_progress_at", "eligible_now", "scheduled", "target_cycle_hours",
         "route_budget_seconds", "integrity_resolved", "insufficient_evidence", "provider_failed",
-        "no_official_source", "source_reads", "source_fetch_failures")
+        "no_official_source", "source_reads", "source_fetch_failures",
+        "model_comparisons", "model_comparisons_reused")
     result = {k: data[k] for k in allowed if k in data}
     result.update(status=data.get("state"), checked=data.get("attempted", 0))
     if data.get("running") is True:
@@ -1971,8 +1980,11 @@ def travel_database_route_research(body: DatabaseRouteResearchIn,
     if not nat or not dest:
         raise HTTPException(422, "nationality and destination must be real "
                                  "countries (name or ISO code)")
-    purpose = (body.travel_purpose or "tourism").strip().lower()
-    doc = (body.travel_document_type or "ordinary_passport").strip().lower()
+    from .visa_snapshot.registry import normalize_route_scope, RegistryError
+    try:
+        purpose, doc = normalize_route_scope(body.travel_purpose, body.travel_document_type)
+    except RegistryError as exc:
+        raise HTTPException(422, str(exc)) from exc
     route = {"passport_nationality": nat, "passport_issuing_country": nat,
              "lawful_country_of_residence": nat,
              "travel_document_type": doc, "destination_country": dest,
@@ -2518,29 +2530,12 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     if not nat or not dest:
         raise HTTPException(422, "nationality and destination must be real "
                                  "countries (name or ISO code)")
-    # The registry is the ONE vocabulary: a hardcoded copy here silently
-    # rejected three document types the picker offers (公务普通护照, 儿童护照,
-    # 身份证明书) and collapsed 临时护照 into the emergency passport.
-    from .visa_snapshot.registry import load_registry as _lr
-    _DOCS = {e["code"] for e in _lr("travel_document_types")["entries"]}
-    _DOC_ALIAS = {"ordinary": "ordinary_passport", "passport": "ordinary_passport",
-                  "diplomatic": "diplomatic_passport", "official": "service_passport",
-                  "official_passport": "service_passport", "service": "service_passport",
-                  "emergency": "emergency_passport", "temporary": "temporary_passport",
-                  "child": "child_passport", "identity_certificate": "identity_certificate",
-                  "travel_document": "prc_travel_document"}
-    doc_in = (body.travel_document_type or "ordinary_passport").strip().lower()
-    doc = _DOC_ALIAS.get(doc_in, doc_in)
-    if doc not in _DOCS:
-        raise HTTPException(422, f"unknown travel document type: {doc_in}")
-    _PURPOSES = {"tourism", "business", "family_visit", "study", "work",
-                 "transit", "other"}
-    _PURPOSE_ALIAS = {"family": "family_visit", "visiting_relatives": "family_visit",
-                      "tourist": "tourism", "study_abroad": "study"}
-    purpose_in = (body.travel_purpose or "tourism").strip().lower()
-    purpose = _PURPOSE_ALIAS.get(purpose_in, purpose_in)
-    if purpose not in _PURPOSES:
-        raise HTTPException(422, f"unknown travel purpose: {purpose_in}")
+    # Lookup and explicit research share the same finite route vocabulary.
+    from .visa_snapshot.registry import normalize_route_scope, RegistryError
+    try:
+        purpose, doc = normalize_route_scope(body.travel_purpose, body.travel_document_type)
+    except RegistryError as exc:
+        raise HTTPException(422, str(exc)) from exc
     residence = iso3((body.residence or nat).strip(), default=None)
     if not residence:
         raise HTTPException(422, "residence must be a real country")

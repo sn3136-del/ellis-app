@@ -123,6 +123,27 @@ def normalize_document_type(value: str) -> str:
     raise RegistryError(f"travel_document_type: unknown {value!r}")
 
 
+def normalize_route_scope(purpose: str, document: str) -> tuple[str, str]:
+    """The finite public lookup/research scope; aliases never mint new keys."""
+    document_aliases = {"ordinary": "ordinary_passport", "passport": "ordinary_passport",
+        "diplomatic": "diplomatic_passport", "official": "service_passport",
+        "official_passport": "service_passport", "service": "service_passport",
+        "emergency": "emergency_passport", "temporary": "temporary_passport",
+        "child": "child_passport", "identity_certificate": "identity_certificate",
+        "travel_document": "prc_travel_document"}
+    doc_in = (document or "ordinary_passport").strip().lower()
+    doc = document_aliases.get(doc_in, doc_in)
+    if doc not in _document_type_codes():
+        raise RegistryError(f"unknown travel document type: {doc_in}")
+    purpose_aliases = {"family": "family_visit", "visiting_relatives": "family_visit",
+        "tourist": "tourism", "study_abroad": "study"}
+    purpose_in = (purpose or "tourism").strip().lower()
+    purpose = purpose_aliases.get(purpose_in, purpose_in)
+    if purpose not in {"tourism", "business", "family_visit", "study", "work", "transit", "other"}:
+        raise RegistryError(f"unknown travel purpose: {purpose_in}")
+    return purpose, doc
+
+
 def normalize_category(value: str, subtype: str | None = None) -> tuple[str, str]:
     v = (value or "").strip().lower().replace("-", "_").replace(" ", "_")
     cats = _category_index()

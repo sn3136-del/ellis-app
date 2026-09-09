@@ -30,13 +30,14 @@ def _chat_vision(image_b64: str, mime: str, prompt: str, max_tokens: int = 2000)
     # content. A small budget gets fully consumed by reasoning and returns empty
     # content, so we use a generous budget and fall back to reasoning_content.
     s = settings()
-    r = httpx.post(s.kimi_base_url.rstrip("/") + "/chat/completions",
+    from . import provider_usage
+    r = provider_usage.post(httpx.post, s.kimi_base_url.rstrip("/") + "/chat/completions",
                    headers={"authorization": f"Bearer {s.moonshot_api_key}"},
                    json={"model": s.kimi_model, "max_tokens": max_tokens,
                          "messages": [{"role": "user", "content": [
                              {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{image_b64}"}},
                              {"type": "text", "text": prompt}]}]},
-                   timeout=s.kimi_timeout_seconds)
+                   timeout=s.kimi_timeout_seconds, operation="vision")
     r.raise_for_status()
     msg = r.json()["choices"][0]["message"]
     return msg.get("content") or msg.get("reasoning_content") or ""
