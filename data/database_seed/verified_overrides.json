@@ -70862,7 +70862,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... United Kingdom(section)  July 1, 1988 ... (section) The  | Freshness audit 2026-09-01: Verified  | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... United Kingdom(section)  July 1, 1988 ... (section) The  | Freshness audit 2026-09-01: Verified  | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first. | Channel corrected 2026-09-09: an ESTA is applied for online before travel, so the channel is the online portal, not no application.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -70883,7 +70883,7 @@
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "requirement_detail": "eta_electronic_authorization",
-   "application_channel": "not_required",
+   "application_channel": "online_portal",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa; the application is made online at esta.cbp.dhs.gov and costs USD 40.27 per application, payable by credit card (MasterCard, VISA, American Express, Discover (JCB, Diners Club)) or PayPal.",
     "The ESTA application requires: a valid e-passport from a Visa Waiver Program country, the traveler's valid email address, home address and phone number, an emergency point of contact (phone and email), a payment card, a traveler's selfie photo to confirm identity, and the most recent employment information if applicable.",
@@ -70911,7 +70911,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first. | Channel corrected 2026-09-09: an ESTA is applied for online before travel, so the channel is the online portal, not no application.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -70932,7 +70932,7 @@
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "requirement_detail": "eta_electronic_authorization",
-   "application_channel": "not_required",
+   "application_channel": "online_portal",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
     "ESTA approval is MANDATORY before boarding: 8 CFR 217.5(b)(1) (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec217-5.xml). ESTA is not a visa. Fee USD 40.27 verified at https://www.govinfo.gov/content/pkg/FR-2025-11-19/html/2025-20304.htm. Ele"
@@ -70959,7 +70959,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first. | Channel corrected 2026-09-09: an ESTA is applied for online before travel, so the channel is the online portal, not no application.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -70980,7 +70980,7 @@
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "requirement_detail": "eta_electronic_authorization",
-   "application_channel": "not_required",
+   "application_channel": "online_portal",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
     "ESTA approval is MANDATORY before boarding: 8 CFR 217.5(b)(1) (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec217-5.xml). ESTA is not a visa. Fee USD 40.27 verified at https://www.govinfo.gov/content/pkg/FR-2025-11-19/html/2025-20304.htm. Ele"
@@ -71007,7 +71007,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currentl | Aligned with the VWP class  | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first. | Channel corrected 2026-09-09: an ESTA is applied for online before travel, so the channel is the online portal, not no application.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -71028,7 +71028,7 @@
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "requirement_detail": "eta_electronic_authorization",
-   "application_channel": "not_required",
+   "application_channel": "online_portal",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
     "ESTA approval is MANDATORY before boarding: 8 CFR 217.5(b)(1) (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec217-5.xml). ESTA is not a visa. Fee USD 40.27 verified at https://www.govinfo.gov/content/pkg/FR-2025-11-19/html/2025-20304.htm. Ele"
@@ -77405,7 +77405,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canad | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canad | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first. | Channel corrected 2026-09-09: an ESTA is applied for online before travel, so the channel is the online portal, not no application.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -77426,7 +77426,7 @@
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "requirement_detail": "eta_electronic_authorization",
-   "application_channel": "not_required",
+   "application_channel": "online_portal",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
     "PASSPORT-CLASS RESTRICTION, model as a condition and not a footnote: eligibility covers ONLY holders of a Taiwan e-passport bearing a personal identification (household registration) number, with unrestricted right of permanent abode on Taiwan. A Taiwan passport WITHOUT the house"
@@ -77454,7 +77454,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canad | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canad | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first. | Channel corrected 2026-09-09: an ESTA is applied for online before travel, so the channel is the online portal, not no application.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -77475,7 +77475,7 @@
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "requirement_detail": "eta_electronic_authorization",
-   "application_channel": "not_required",
+   "application_channel": "online_portal",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
     "ESTA approval is MANDATORY before boarding; without it the traveller is denied boarding. 8 CFR 217.5(b)(1): 'must receive a travel authorization via ESTA prior to boarding a carrier destined for travel to the United States' (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol"
@@ -77813,7 +77813,7 @@
   "verified_at": "2026-09-01",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canad | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first.",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Aligned with the VWP class ruling of 2026-09-01: an approved ESTA (USD 40.27, online) is mandatory before boarding, so the route is electronic authorization required rather than visa exempt. Canad | CBP: an approved ESTA is valid for two years from authorisation or until the passport expires, whichever comes first. | Channel corrected 2026-09-09: an ESTA is applied for online before travel, so the channel is the online portal, not no application.",
   "fields": {
    "government_fee": {
     "amount": 40.27,
@@ -77834,7 +77834,7 @@
    ],
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "requirement_detail": "eta_electronic_authorization",
-   "application_channel": "not_required",
+   "application_channel": "online_portal",
    "exceptions": [
     "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
     "ESTA approval is MANDATORY before boarding: 8 CFR 217.5(b)(1), 'must receive a travel authorization via ESTA prior to boarding a carrier destined for travel to the United States' (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec217-5.xml). EST"

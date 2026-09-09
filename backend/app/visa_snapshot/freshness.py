@@ -891,6 +891,12 @@ def note_unreadable(db, row, outcome: dict | None) -> None:
     # a transport outage. Never create a misleading source_unreadable issue.
     if o.get("outcome") != "fetch_failed" or o.get("source_reads", 0):
         return
+    # An unreadable page is a sweep statistic, not a correction for a person:
+    # filing one ticket per stale row put 803 machine notes in front of the
+    # operators on 2026-09-09 and buried the real disputes. The sweep summary
+    # already counts unreadable pages; the queue stays for facts to rule on.
+    if not os.getenv("ELLIS_FILE_UNREADABLE_ISSUES", "").strip():
+        return
     reason = str(o.get("outcome") or "unreadable")
     pages = o.get("sources") or o.get("sources_tried") or []
     note = (f"The official page could not be read ({reason}), so the answer "

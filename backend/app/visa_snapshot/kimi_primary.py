@@ -153,11 +153,31 @@ def serve_time_invariants(g: dict | None) -> list[str]:
     if disp == "VISA_EXEMPT":
         if amount:
             problems.append("disposition VISA_EXEMPT but a positive government fee is quoted")
-        if priced:
-            problems.append("disposition VISA_EXEMPT but priced visa products are listed")
+        # A visa-free route may still list an OPTIONAL priced visa beside its
+        # free lane (Vietnam's e-visa for stays beyond the 45-day exemption,
+        # Oman's sponsored visa, Thailand's Non-B for longer business trips).
+        # The contradiction is a visa-free verdict with NO free lane at all:
+        # every product on offer costs money, so nothing on the answer
+        # actually lets the traveller in without paying.
+        def _exemption_lane(p):
+            fee_ = p.get("fee") if isinstance(p.get("fee"), dict) else {}
+            words = f"{p.get('type') or ''} {p.get('notes') or ''}".lower()
+            zero = fee_.get("amount") in (0, 0.0)
+            named = any(w in words for w in ("visa-free", "visa free", "no visa", "exempt",
+                                              "waiver", "without a visa", "entry is free"))
+            return (zero or named) and not positive(fee_.get("amount"))
+        free_lane = any(_exemption_lane(p) for p in products)
+        if priced and not free_lane:
+            problems.append("disposition VISA_EXEMPT but every listed visa product is priced")
         if detail and detail not in _EXEMPT_DETAILS:
             problems.append(f"disposition VISA_EXEMPT but requirement_detail is {detail}")
-        if channel in _FILING_CHANNELS + ("online_portal", "authorized_agent", "visa_application_centre", "visa_application_center"):
+        # A free permit stamped at the border (a visitor's permit, an arrival
+        # card completed online) is not a visa application. Only a filing
+        # channel that presupposes an application before travel contradicts
+        # the verdict, and an on-arrival channel only when it costs money.
+        if channel in _FILING_CHANNELS and not (channel == "on_arrival" and not amount and not priced):
+            problems.append(f"disposition VISA_EXEMPT but application_channel is {channel}")
+        elif channel in ("authorized_agent", "visa_application_centre", "visa_application_center"):
             problems.append(f"disposition VISA_EXEMPT but application_channel is {channel}")
         if any("visa application" in f for f in forms):
             problems.append("disposition VISA_EXEMPT but forms include a visa application")
