@@ -39,9 +39,11 @@ import os
 import pathlib
 import re
 import threading
+from copy import deepcopy
 from functools import lru_cache
 
 from .authority import hostname, is_government_host
+from .policy_intervals import inherit_bounds
 
 log = logging.getLogger(__name__)
 
@@ -227,7 +229,8 @@ def _load_table() -> dict:
         merged_fields = dict(base["fields"])
         merged_fields.update(op["fields"])
         field_provenance = dict(base.get("field_provenance") or {})
-        field_provenance.update(op.get("field_provenance") or {})
+        for field, incoming in (op.get("field_provenance") or {}).items():
+            field_provenance[field] = inherit_bounds(field_provenance.get(field), incoming)
         table[k] = {"fields": merged_fields,
                     "source_url": op["source_url"],
                     "verified_at": op["verified_at"],
@@ -305,10 +308,19 @@ def lint_rows(rows: list) -> list[dict]:
 
 
 def _provenance(entry: dict) -> dict:
-    return {"source_url": entry["source_url"], "verified_at": entry["verified_at"],
-            "verified_by": str(entry.get("verified_by") or "").strip(),
-            "verifier": entry.get("verifier", "ai"),
-            "note": str(entry.get("note") or "").strip()[:400]}
+    result = {"source_url": entry["source_url"], "verified_at": entry["verified_at"],
+              "verified_by": str(entry.get("verified_by") or "").strip(),
+              "verifier": entry.get("verifier", "ai"),
+              "note": str(entry.get("note") or "").strip()[:400]}
+    # A verification timestamp is not the interval in which the rule applies.
+    # Preserve explicit policy bounds even when malformed: the common reader
+    # must hold an invalid interval rather than silently remove its limit.
+    for key in ("effective_from", "effective_to", "policy_interval_evidence"):
+        if key in entry:
+            result[key] = deepcopy(entry[key])
+    if isinstance(entry.get("quote"), str):
+        result["quote"] = entry["quote"][:2000]
+    return result
 
 
 def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
@@ -368,6 +380,8 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             continue
         provenance = _provenance(dict(r, source_url=url, verified_at=when))
         per_field = {}
+        prior_proofs = ((table.get(route_key) or (inherited or {}).get(route_key) or {})
+                        .get("field_provenance") or {})
         for k in clean:
             p = (r.get("field_provenance") or {}).get(k)
             if (isinstance(p, dict) and p.get("verified_at") and
@@ -376,6 +390,7 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
                 per_field[k] = _provenance(p)
             else:
                 per_field[k] = dict(provenance)
+            per_field[k] = inherit_bounds(prior_proofs.get(k), per_field[k])
         table[route_key] = {
             "fields": clean, "source_url": url, "verified_at": when,
             "verified_by": str(r.get("verified_by") or "").strip(),
@@ -463,6 +478,9 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
             errors = serve_time_invariants(merged)
             if errors:
                 raise ValueError("edit conflicts with the complete cached answer: " + "; ".join(errors))
+        incoming = _parse_rows([entry], {}, inherited=current_table).get(route_key) or {}
+        incoming_proofs = incoming.get("field_provenance") or {}
+        entry = dict(entry, field_provenance=incoming_proofs)
         rows = _read_rows(path)
         # One entry per route: consolidate edits with per-field provenance
         # instead of stacking shadowed duplicates or losing earlier facts.
@@ -479,7 +497,7 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
             retained = dict(parsed.get("fields") or {})
             retained.update(clean)
             per_field = dict(parsed.get("field_provenance") or {})
-            per_field.update({k: _provenance(entry) for k in clean})
+            per_field.update(incoming_proofs)
             entry = dict(entry, fields=retained, field_provenance=per_field)
         rows = [r for r in rows if _rk(r) != _rk(entry)]
         rows.append(entry)
@@ -841,13 +859,14 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     """Return (guidance, provenance). The guidance is a COPY with the verified
     fields replaced; provenance names the source, the date and the fields so
     the answer can show what was checked rather than implying all of it was."""
-    from . import scheduled_policies
+    from . import scheduled_policies, policy_intervals
     from .permission_eligibility import annotate
     guidance = _normalise_text_lists(guidance)
     hit = find(route or {})
     if not hit or not isinstance(guidance, dict):
         result, provenance = scheduled_policies.apply(guidance, None, route)
-        return _finalize_guidance(annotate(result, route), provenance), provenance
+        result = policy_intervals.annotate(annotate(result, route), provenance, route)
+        return _finalize_guidance(result, provenance), provenance
     implied = _verdict_implied_by_detail(hit["fields"], guidance)
     merged, fields = merge_verified_fields(guidance, hit["fields"], source_url=hit["source_url"])
     field_provenance = dict(hit.get("field_provenance") or {})
@@ -860,4 +879,5 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     provenance = dict(verdict_provenance, fields=sorted(fields),
                       field_provenance=field_provenance)
     result, provenance = scheduled_policies.apply(merged, provenance, route)
-    return _finalize_guidance(annotate(result, route), provenance), provenance
+    result = policy_intervals.annotate(annotate(result, route), provenance, route)
+    return _finalize_guidance(result, provenance), provenance

@@ -144,6 +144,8 @@ def serve_time_invariants(g: dict | None) -> list[str]:
     forms = [str(f).lower() for f in (g.get("forms") or [])] if isinstance(g.get("forms"), (list, tuple)) else []
     if g.get("scheduled_policy_conflict"):
         problems.append("scheduled_policy conflicts with protected verified fields")
+    if g.get("policy_interval_conflict"):
+        problems.append("policy interval is invalid or does not cover the selected travel date")
     if disp == "VISA_EXEMPT":
         if amount:
             problems.append("disposition VISA_EXEMPT but a positive government fee is quoted")
