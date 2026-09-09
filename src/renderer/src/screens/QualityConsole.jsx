@@ -2739,6 +2739,13 @@ function QualityWorkspace() {
                         fontSize: 13, marginBottom: 14 }}>{error}</div>
         )}
 
+        {busy && tab !== 'records' && (
+          <div role="status" aria-live="polite"
+               style={{ color: GRAY, fontSize: 13, marginBottom: 14 }}>
+            {t('ops.loading')}
+          </div>
+        )}
+
         {tab === 'records' && (
           <div style={{ display: 'grid', gap: 14 }}>
             {/* Spot-check filter bar: a header row (label + export), then the
