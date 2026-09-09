@@ -65,7 +65,9 @@ def test_independent_arrival_and_admission_requirements_survive():
     for field in ("arrival_card", "required_documents", "passport_validity", "health_requirements"):
         assert g[field] == BASE[field]
     assert g["visa_products"] == []
-    assert not any("60" in x for x in g["exceptions"])
+    assert "Hong Kong passport holders may stay 60 days." not in g["exceptions"]
+    assert "Extension before the 60-day limit" in g["exceptions"]
+    assert g["scheduled_policy_conflict"]["fields"] == ["exceptions"]
     assert "Proof of sufficient funds may be requested." in g["exceptions"]
     assert "entry remains subject to immigration inspection." in g["exceptions"]
 

@@ -92,7 +92,7 @@ def _parse_rows(raw):
         if end and not any(quote_in_text(form, quotes["effective_to"]) for form in
                            (end.isoformat(), f"{end.day} {end.strftime('%B')} {end.year}")):
             raise ValueError("expiry date is not supported by its quote")
-        names = _NATIONALITY_NAMES.get(key[0], ()) + {"KOR": ("Korea (ROK)",), "GBR": ("UK",), "USA": ("USA",)}.get(key[0], ())
+        names = _NATIONALITY_NAMES.get(key[0], ()) + {"KOR": ("Korea (ROK)",), "GBR": ("UK",), "USA": ("USA",), "MAC": ("Macao", "Macau")}.get(key[0], ())
         if not any(name.strip().casefold() == quotes["nationality"].strip().casefold() for name in names):
             raise ValueError("nationality quote does not match the policy route")
         if "ordinary passport holders" not in quotes["document"].casefold() or "exemption" not in quotes["exemption"].casefold():
@@ -144,15 +144,123 @@ def _metadata(row, on):
             "permitted_stay_days": row["fields"]["permitted_stay_days"], "verifier": "ai"}
 
 
+_DEPENDENT_STAY_FIELDS = (
+    "entry_requirements", "required_documents", "onward_travel_evidence",
+    "accommodation_evidence", "financial_evidence", "exceptions",
+)
+_ADMISSION_DETAIL = re.compile(
+    r"\b(?:return|onward|tickets?|transport|depart(?:ure|ing)?|leave|leaving|exit|"
+    r"extensions?|extend(?:ed|ing)?|funds?|money|insurance|accommodation|hotel|"
+    r"passport(?!\s+holders?\b)|valid|validity|proof|photos?|applications?|fees?|health|vaccin\w*|registration|cards?)\b", re.I)
+
+
+def _day_mentions(text, days):
+    word = {15: "fifteen", 30: "thirty", 45: "forty[- ]five", 60: "sixty", 90: "ninety"}.get(days)
+    amount = rf"(?:{word}(?:\s*\({days}\))?|{days})" if word else str(days)
+    return list(re.finditer(rf"\b{amount}\s*[-–—]?\s*(?:calendar\s+)?days?\b", text, re.I))
+
+
+def _stay_dependency(text, match, field):
+    """Bind the old day count to a stay or departure deadline, not any number.
+
+    This only identifies an unresolved dependency. It never concludes that
+    the schedule's source establishes ticket, funds or extension requirements.
+    """
+    before, after = text[:match.start()], text[match.end():]
+    historical = list(re.finditer(r"\b(?:formerly|previously|superseded)\b", before, re.I))
+    if historical:
+        history_scope = before[historical[-1].end():]
+        if not re.search(r"\b(?:and|but|however|now|currently|still)\b", history_scope, re.I):
+            return False
+    if re.match(r"\s+(?:(?:visa[- ](?:free|exempt)|permitted)\s+)?(?:period|stay|limit)?\s*"
+                r"(?:(?:is|was|has been)\s+)?superseded\b", after, re.I):
+        return False
+    if re.search(r"\bno longer\s+(?:applies|applicable|available|valid|in force)\b", after, re.I):
+        return False
+    negated = re.search(r"\b(?:not|never)\b(?:[\s-]+\w+){0,4}\s*$", before, re.I)
+    upper_bound = re.search(r"\b(?:not exceeding|no more than|not longer than|no longer than)\s*$", before, re.I)
+    if negated and not upper_bound:
+        return False
+    if re.match(
+        r"\s*(?:visa[- ](?:free|exempt(?:ion)?)\s+(?:period|stay|limit|entry|admission)|"
+        r"(?:permitted|allowed|authori[sz]ed|exempt)\s+(?:period|stay)|"
+        r"(?:(?:tourist|tourism|initial|maximum)\s+)?stays?|visa[- ]exemption)\b", after, re.I):
+        return True
+    if re.search(
+        r"\b(?:stay(?:s)?|admission(?:\s+period)?|permitted\s+period)\s*"
+        r"(?:(?:of|for|is|are|up to|not exceeding|no more than|not longer than|no longer than|maximum(?: of)?)\s*)*$", before, re.I):
+        return True
+    if re.search(r"\b(?:visa[- ](?:free|exempt(?:ion)?)|exemption)\s*"
+                 r"(?:(?:stay|period|is|are|of|for|up to|allows?|permits?)\s*)*$", before, re.I):
+        return True
+    # A ticket validity period or a passport's remaining validity is not a
+    # departure deadline. Require the deadline language and travel action.
+    deadline = re.search(r"\b(?:within|before|by|no later than)\s+(?:the\s+)?$", before, re.I)
+    action = re.search(r"\b(?:return|onward|tickets?|depart\w*|leav\w*|exit)\b", before, re.I)
+    if deadline and (field == "onward_travel_evidence" or action):
+        return True
+    if (deadline and re.search(r"\bextend\w*|\bextension\b", before, re.I)
+            and re.match(r"\s+(?:stay\s+)?limit\b", after, re.I)):
+        return True
+    return False
+
+
+def _historical_clause(text, policy):
+    start = _date(policy.get("effective_from"))
+    if not start:
+        return False
+    from datetime import timedelta
+    previous = start - timedelta(days=1)
+    dates = [("before", start), ("until", previous), ("through", previous)]
+    for word, when in dates:
+        for form in (when.isoformat(), f"{when.day} {when.strftime('%B')} {when.year}"):
+            if re.search(rf"\b{word}\s+{re.escape(form)}\b", text, re.I):
+                return True
+    return False
+
+
+def _text_leaves(value, path):
+    if isinstance(value, str):
+        yield path, value
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            yield from _text_leaves(item, f"{path}[{index}]")
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            yield from _text_leaves(item, f"{path}.{key}")
+
+
+def _dependent_stay_conflicts(guidance, policy):
+    issues = []
+    current = policy["fields"]["permitted_stay_days"]
+    old_days = [day for day in policy.get("superseded_stay_days", []) if day != current]
+    for field in _DEPENDENT_STAY_FIELDS:
+        for path, text in _text_leaves(guidance.get(field), field):
+            for part in re.split(r"(?<=[.!?;])\s+|\n+|,\s+(?=(?:but|however|now|currently)\b)", text, flags=re.I):
+                if _historical_clause(part, policy):
+                    continue
+                for day in old_days:
+                    if any(_stay_dependency(part, match, field) for match in _day_mentions(part, day)):
+                        issues.append({"field": field, "path": path,
+                                       "superseded_stay_days": day, "text": part.strip()})
+    return issues
+
+
 def _exceptions(existing, additions, superseded):
     kept = []
-    # Preserve unrelated admission conditions even when their original entry
-    # shared a sentence/line with the old visa-exemption duration.
+    # Only a pure obsolete stay statement can be superseded by this source.
+    # Independent requirements and conditions keep their original wording;
+    # unresolved dependencies are held below rather than rewritten or erased.
     for item in existing if isinstance(existing, list) else []:
         if not isinstance(item, str):
             continue
+        if item in additions:
+            kept.append(item)
+            continue
         for part in re.split(r"(?<=[.!?;])\s+|,\s+", item):
-            if any(re.search(rf"\b{days}\s*[- ]?\s*days?\b", part, re.I) for days in superseded):
+            old_stay = any(_stay_dependency(part, match, "exceptions")
+                           for days in superseded for match in _day_mentions(part, days))
+            if old_stay and not _ADMISSION_DETAIL.search(part):
                 continue
             if part.strip():
                 kept.append(part.strip())
@@ -199,13 +307,34 @@ def apply(guidance, provenance, route):
     g.update(candidate)
     g.pop("upcoming_policy", None)
     g["scheduled_policy"] = _metadata(row, selected)
+    dependencies = _dependent_stay_conflicts(g, row)
+    if dependencies:
+        g["scheduled_policy_conflict"] = {
+            **_metadata(row, selected),
+            "fields": sorted({issue["field"] for issue in dependencies}),
+            "reason": "Dependent entry guidance still refers to a superseded stay duration",
+            "dependent_stay_claims": dependencies,
+        }
     source = {"source_url": row["source_url"], "verified_at": row["verified_at"],
               "verified_by": "Ellis scheduled policy evidence review", "verifier": "ai",
               "note": "Official schedule, effective " + row["effective_from"],
               "effective_from": row["effective_from"], "effective_to": row.get("effective_to"),
               "evidence_url": row["evidence"]["source_url"], "quotes": deepcopy(row["evidence"]["quotes"])}
     for field in candidate:
+        old_proof = prior.get(field) or (provenance if field in ((provenance or {}).get("fields") or []) else {})
         prior[field] = dict(source)
+        if field == "exceptions":
+            preserved = [part for part in candidate[field] if part not in row["fields"][field]]
+            if preserved:
+                # The scheduled source only establishes its new exemption
+                # sentences, not any retained admission/extension conditions.
+                if isinstance(old_proof, dict) and old_proof.get("scope") == "scheduled_exemption_additions_only":
+                    old_proof = old_proof.get("prior_evidence") or {}
+                prior[field].update(
+                    scope="scheduled_exemption_additions_only",
+                    note="Official schedule supports only the added exemption statements; "
+                         "retained independent conditions keep their earlier evidence and are not reverified here.",
+                    prior_evidence=deepcopy(old_proof or {}), preserved_claims=deepcopy(preserved))
     prov.update(source)
     prov["fields"] = sorted(set(prov.get("fields") or []) | candidate.keys())
     prov["field_provenance"] = prior
