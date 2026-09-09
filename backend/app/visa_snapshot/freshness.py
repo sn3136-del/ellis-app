@@ -216,12 +216,73 @@ def _stamp(row, entry: dict) -> None:
     row.verification = ver
 
 
+def _canonical_json_guard(raw):
+    """Normalize representation, without accepting ambiguous or invalid JSON."""
+    from decimal import Decimal
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Duplicate JSON object key")
+            result[key] = value
+        return result
+
+    def invalid_constant(_value):
+        raise ValueError("Nonfinite JSON number")
+
+    def render(value):
+        if isinstance(value, dict):
+            return "{" + ",".join(json.dumps(key, ensure_ascii=True) + ":" + render(value[key])
+                                  for key in sorted(value)) + "}"
+        if isinstance(value, list):
+            return "[" + ",".join(render(item) for item in value) + "]"
+        if isinstance(value, Decimal):
+            if not value.is_finite():
+                raise ValueError("Nonfinite JSON number")
+            sign, digits, exponent = value.as_tuple()
+            digits = list(digits)
+            if not any(digits):
+                digits, exponent = [0], 0
+            else:
+                while digits[-1] == 0:
+                    digits.pop()
+                    exponent += 1
+            # Lossless decimal normalization must not round through a float
+            # or Decimal context. Keep exponent syntax distinct from integers.
+            return ("-" if sign else "") + "".join(map(str, digits)) + "e" + str(exponent)
+        return json.dumps(value, ensure_ascii=True, separators=(",", ":"), allow_nan=False)
+
+    if raw is None:
+        return None
+    try:
+        value = json.loads(raw, object_pairs_hook=unique_object,
+                           parse_float=Decimal, parse_constant=invalid_constant)
+        # Sorting object keys is semantic; array order and bool/int/float
+        # distinctions remain intact, including decimals beyond float precision.
+        return render(value)
+    except (ValueError, TypeError, RecursionError, ArithmeticError):
+        # SQL NULL never equals another NULL: malformed stored JSON must not
+        # pass a guarded write, even if the caller supplied the same bytes.
+        return None
+
+
 def json_unchanged(db, column, value):
-    """Compare a JSON snapshot for guarded writes on SQLite or PostgreSQL."""
-    from sqlalchemy import literal, cast, or_
+    """Compare parsed JSON atomically, including legacy SQLite encodings.
+
+    SQLite's JSON column is text. Direct equality rejects unchanged compact,
+    pretty, Unicode-escaped or reordered objects. The connection-local pure
+    function runs inside the UPDATE, so real edits after the final SELECT
+    still fail the compare-and-swap guard. No legacy rows are rewritten.
+    """
+    from sqlalchemy import literal, cast, or_, func
     if db.get_bind().dialect.name == "postgresql":
         from sqlalchemy.dialects.postgresql import JSONB
         comparison = cast(column, JSONB) == literal(value, type_=JSONB)
+    elif db.get_bind().dialect.name == "sqlite":
+        connection = db.connection().connection.driver_connection
+        connection.create_function("ellis_json_guard", 1, _canonical_json_guard, deterministic=True)
+        comparison = func.ellis_json_guard(column) == func.ellis_json_guard(literal(value, type_=column.type))
     else:
         comparison = column == literal(value, type_=column.type)
     return or_(column.is_(None), comparison) if value is None else comparison
@@ -631,7 +692,9 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                  "source_cursor": source_cursor, "unchecked_sources": [u for u in all_sources if u not in visited],
                  **model_counts}
         if not _commit_recheck(db, row, entry, expected_guidance=original, expected_route=route):
-            return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], **model_counts}
+            return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [],
+                    "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
+                    **model_counts}
         return {**entry, "route_key": row.cache_key, "changed": [],
                 "disputed": sorted(fallback[1]) if fallback else [],
                 "generic_skipped": sorted(set(fallback[1]) & NATIONALITY_SPECIFIC) if fallback else []}
@@ -663,7 +726,11 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     # and refuse to overwrite any field changed during that time.
     db.refresh(row)
     if (row.verification or {}).get("detail_pending"):
-        return {"outcome": "detail_pending", "route_key": row.cache_key, **model_counts}
+        db.rollback()
+        return {"outcome": "detail_pending", "route_key": row.cache_key,
+                "source_reads": len(tried),
+                "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
+                **model_counts}
     override = verified_overrides.find(route)
     protected = set((override or {}).get("fields") or {})
     current = dict(row.guidance or {})
@@ -802,7 +869,9 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     updated_comparisons = comparison_reuse.merge(old_comparisons, snapshots)
     if not _commit_recheck(db, row, entry, expected_guidance=current, expected_route=route,
             fresh_until=fresh_until, comparison_cache=updated_comparisons):
-        return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], "disputed": [], **model_counts}
+        return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], "disputed": [],
+                "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
+                **model_counts}
     return {"outcome": "checked", "route_key": row.cache_key, "consistent": consistent,
             "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
             **model_counts,
