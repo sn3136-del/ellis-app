@@ -526,7 +526,8 @@ def test_the_assistant_is_ellis_refuses_off_topic_and_grounds_replies(client):
     assert "100 USD" in (r.get("reply") or "")
     assert '"government_fee"' in calls.get("facts", ""), \
         "the composer must receive the served facts"
-    # Composer failure falls back silently: no reply key, answer intact.
+    # Composer failure falls back to a sentence built from the served facts:
+    # the feed never goes silent, and the fallback never invents a number.
     def broken(system, user):
         if "Compose one short reply" in str(system):
             raise RuntimeError("model down")
@@ -534,7 +535,8 @@ def test_the_assistant_is_ellis_refuses_off_topic_and_grounds_replies(client):
     kimi_primary.set_provider(broken)
     r2 = client.post("/database/ask", headers=READER,
                      json={"question": "from Iceland to Nauru for tourism"}).json()
-    assert r2["understood"] is True and "reply" not in r2
+    assert r2["understood"] is True
+    assert r2.get("reply") and r2.get("reply_source") == "facts"
     assert r2["guidance"]["government_fee"]["amount"] == 100
 
 

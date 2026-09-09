@@ -63,8 +63,73 @@ _AUTHORIZATION_NOT_VISA = ("etias", "esta", "/eta", "eta_", "k-eta", "keta",
                            "electronic travel authoris", "electronic travel authoriz",
                            "electronic system for travel author")
 
-DISPOSITIONS = ("VISA_REQUIRED", "VISA_EXEMPT",
+# VISA_ON_ARRIVAL is a verdict the overrides, the records and the assistant
+# already speak (52 shipped overrides carry it). Leaving it out of the
+# engine's vocabulary made every invariant below skip those routes.
+DISPOSITIONS = ("VISA_REQUIRED", "VISA_EXEMPT", "VISA_ON_ARRIVAL",
                 "ELECTRONIC_AUTHORIZATION_REQUIRED", "CONDITIONAL")
+
+# The requirement subcategories each verdict may carry. Shared with the
+# override layer so both hands agree on what contradicts what.
+DETAIL_FAMILY = {
+    "VISA_EXEMPT": ("unconditional_visa_free", "conditional_visa_free",
+                    "transit_visa_free"),
+    "VISA_ON_ARRIVAL": ("evisa_on_arrival", "paper_visa_on_arrival"),
+    "ELECTRONIC_AUTHORIZATION_REQUIRED": ("eta_electronic_authorization",),
+    "VISA_REQUIRED": ("evisa", "paper_visa", "evisa_on_arrival",
+                      "paper_visa_on_arrival"),
+}
+_EXEMPT_DETAILS = DETAIL_FAMILY["VISA_EXEMPT"]
+_FILING_CHANNELS = ("embassy_or_consulate", "embassy_designated_agency",
+                    "visa_center", "authorised_agent", "on_arrival",
+                    "embassy")
+
+
+def serve_time_invariants(g: dict | None) -> list[str]:
+    """Deterministic contradictions between an answer's verdict and its own
+    parts, whoever wrote them. Run at generation (validate_answer) AND on the
+    final merged answer at serve time, because the incident of 2026-09-09
+    was a verdict from one hand (the model: visa-free) sitting over parts
+    from another (a verified e-visa detail, a 25 USD fee). A served answer
+    that fails these is uncertain, and uncertain answers are held."""
+    if not isinstance(g, dict) or not g:
+        return []
+    problems: list[str] = []
+    disp = str(g.get("disposition") or "").upper()
+    detail = str(g.get("requirement_detail") or "").strip().lower()
+    fee = g.get("government_fee") if isinstance(g.get("government_fee"), dict) else {}
+    amount = fee.get("amount") or 0
+    products = [p for p in (g.get("visa_products") or []) if isinstance(p, dict)]
+    priced = [p for p in products if isinstance(p.get("fee"), dict)
+              and (p["fee"].get("amount") or 0) > 0]
+    channel = str(g.get("application_channel") or "").strip().lower()
+    forms = [str(f).lower() for f in (g.get("forms") or [])]
+    if disp == "VISA_EXEMPT":
+        if amount and amount > 0:
+            problems.append("disposition VISA_EXEMPT but a positive government fee is quoted")
+        if priced:
+            problems.append("disposition VISA_EXEMPT but priced visa products are listed")
+        if detail and detail not in _EXEMPT_DETAILS:
+            problems.append(f"disposition VISA_EXEMPT but requirement_detail is {detail}")
+        if channel in _FILING_CHANNELS:
+            problems.append(f"disposition VISA_EXEMPT but application_channel is {channel}")
+        if any("visa application" in f for f in forms):
+            problems.append("disposition VISA_EXEMPT but forms include a visa application")
+    elif disp in ("VISA_REQUIRED", "VISA_ON_ARRIVAL",
+                  "ELECTRONIC_AUTHORIZATION_REQUIRED"):
+        if detail in _EXEMPT_DETAILS:
+            problems.append(f"disposition {disp} but requirement_detail is {detail}")
+        if channel in ("not_required", "none"):
+            problems.append(f"disposition {disp} but application_channel is {channel}")
+        if disp == "VISA_REQUIRED" and detail == "eta_electronic_authorization":
+            problems.append("disposition VISA_REQUIRED but requirement_detail is an "
+                            "electronic travel authorisation, which is not a visa")
+        if disp == "ELECTRONIC_AUTHORIZATION_REQUIRED" and detail in ("evisa", "paper_visa"):
+            problems.append("disposition ELECTRONIC_AUTHORIZATION_REQUIRED but "
+                            f"requirement_detail is {detail}, which is a visa")
+        if disp == "VISA_ON_ARRIVAL" and detail in ("evisa", "paper_visa"):
+            problems.append(f"disposition VISA_ON_ARRIVAL but requirement_detail is {detail}")
+    return problems
 
 # Route-specific workflow types the journey renders from. Derived
 # deterministically from disposition/channel when Kimi omits it.
@@ -432,9 +497,14 @@ def route_facts(route: dict) -> dict:
     facts.setdefault("travel_purpose", "tourism")
     facts.setdefault("visa_category",
                      category_for_purpose(facts.get("travel_purpose")))
-    a, d = _iso(facts.get("arrival_date")), _iso(facts.get("departure_date"))
-    if a and d and d > a:
-        facts["trip_duration_days"] = (d - a).days
+    # A travel date never shapes the decision. The policy is the same
+    # whichever day the reader flies, so the dates, the trip length and the
+    # departure city stay out of the prompt: one route, one answer, kept
+    # current by the re-check on the day a policy changes. Date-specific
+    # messaging (a stay longer than the exemption) is deterministic and lives
+    # in deterministic_advisories.
+    for k in ("arrival_date", "departure_date", "departure_city"):
+        facts.pop(k, None)
     facts["consular_jurisdiction"] = (route or {}).get("consular_jurisdiction") or "default"
     # The model must reason about TIME: policies move, and its knowledge has a
     # cutoff. Today's date lets it say "this may have changed" honestly.
@@ -549,20 +619,13 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     wt = str(clean.get("route_workflow_type") or "").strip().lower()
     if wt not in WORKFLOW_TYPES:
         clean["route_workflow_type"] = derive_workflow_type(clean)
-    contradictions = []
-    # Narrow, precise checks — a visa-exempt route must not carry a visa
-    # application form or a positive government visa fee.
-    if clean.get("disposition") == "VISA_EXEMPT":
-        forms = [str(f).lower() for f in (clean.get("forms") or [])]
-        if any("visa application" in f for f in forms):
-            contradictions.append("disposition VISA_EXEMPT but forms include a visa application")
-        fee = clean.get("government_fee") or {}
-        if isinstance(fee, dict) and (fee.get("amount") or 0) and \
-                "visa" in str(clean.get("visa_category", "")).lower():
-            contradictions.append("disposition VISA_EXEMPT but a government visa fee is quoted")
-        if clean.get("route_workflow_type") not in ("visa_exempt_preparation", "conditional"):
-            contradictions.append("disposition VISA_EXEMPT but route_workflow_type "
-                                  f"is {clean.get('route_workflow_type')}")
+    # One deterministic invariant set, the same one the serve path re-runs
+    # on the final merged answer: a verdict may not contradict its own parts.
+    contradictions = serve_time_invariants(clean)
+    if clean.get("disposition") == "VISA_EXEMPT" and \
+            clean.get("route_workflow_type") not in ("visa_exempt_preparation", "conditional"):
+        contradictions.append("disposition VISA_EXEMPT but route_workflow_type "
+                              f"is {clean.get('route_workflow_type')}")
     ps_days = clean.get("permitted_stay_days")
     if ps_days is not None and (not isinstance(ps_days, (int, float)) or ps_days < 0
                                 or ps_days > 3660):
@@ -768,6 +831,8 @@ def derive_workflow_type(g: dict) -> str:
         return "visa_exempt_preparation"
     if disp == "ELECTRONIC_AUTHORIZATION_REQUIRED":
         return "electronic_authorization"
+    if disp == "VISA_ON_ARRIVAL":
+        return "visa_on_arrival"
     if disp == "VISA_REQUIRED":
         if chan == "online_portal":
             return "evisa_portal"
@@ -879,9 +944,15 @@ def cache_key(route: dict) -> str:
     # re-check on the day, never through a speculative dated copy. The slot
     # stays in the key so every shipped row keeps its address.
     policy_month = "unknown"
+    nationality = str(route.get("passport_nationality", "")).upper()
     parts = [
-        str(route.get("passport_nationality", "")).upper(),
-        str(route.get("lawful_country_of_residence", "")).upper(),
+        nationality,
+        # Residence never forks the decision either. No verified fact and no
+        # policy in this database depends on where the passport holder lives,
+        # yet "based in Dubai" used to mint a second, unverified model answer
+        # under a key nobody else could see. The slot stays so every shipped
+        # row keeps its address.
+        nationality,
         str(route.get("destination_country", "")).upper(),
         str(route.get("travel_purpose", "tourism")).lower(),
         str(route.get("consular_jurisdiction") or "default").lower(),
@@ -902,6 +973,30 @@ def cache_key(route: dict) -> str:
     if doc and doc != "ordinary_passport":
         parts.append("doc:" + doc)
     return "|".join(parts)
+
+
+def is_canonical_key(key: str) -> bool:
+    """The one row a route's verified facts live on: residence equal to the
+    nationality, no travel month, no stopover. Document variants stay
+    canonical (a diplomatic passport is its own verified answer), and so do
+    consular districts. Everything else is a variant that must inherit,
+    never a second decision."""
+    parts = str(key or "").split("|")
+    if len(parts) < 7 or parts[6] != CACHE_VERSION:
+        return False
+    if parts[1] != parts[0] or parts[5] != "unknown":
+        return False
+    return not any(p.startswith("via:") for p in parts[7:])
+
+
+def canonical_key(key: str) -> str:
+    """The canonical key a variant inherits from (see is_canonical_key)."""
+    parts = str(key or "").split("|")
+    if len(parts) < 7:
+        return str(key or "")
+    parts[1] = parts[0]
+    parts[5] = "unknown"
+    return "|".join(parts[:7] + [p for p in parts[7:] if not p.startswith("via:")])
 
 
 # Shorthand document names collapse to the registry codes: "ordinary" must
@@ -970,6 +1065,12 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
             released: bool = False) -> dict:
     # Exactly one Kimi pass produced this — the verification field says so
     # honestly for a complete decision and is empty otherwise.
+    # The invariants run on the answer AS STORED, before the visa-free strip
+    # below tidies it: a model verdict of visa-free over priced e-visa
+    # products is the shape of the Hong Kong to Vietnam incident, and tidying
+    # it away is how it was served with a straight face.
+    problems = serve_time_invariants(guidance)
+    contradictions = list(dict.fromkeys(list(contradictions or []) + problems))
     guidance = _strip_visa_free_leftovers(guidance)
     decided = status == STATUS_PRIMARY
     verification = {"passes": 1, "label": VERIFIED_LABEL} if decided else {}
@@ -1000,8 +1101,12 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
         # standard grades Low because no official source backs it. Keying
         # only on the engine's self-rating let records shown as Low in the
         # console still reach customers unheld.
+        # An answer that contradicts itself is uncertain, and uncertain
+        # answers are held: the engine's own doubt, a missing official
+        # source, or a verdict at odds with its own parts.
         "review_required": bool(guidance) and not released
-                           and _spec_confidence_is_low(guidance),
+                           and (_spec_confidence_is_low(guidance)
+                                or bool(problems)),
         "operator_released": released,
     }
     # `held` is what actually withholds: the flag above AND the switch. With
@@ -1100,13 +1205,27 @@ def apply_verified_overrides(out: dict, route: dict) -> dict:
     # brought into operation.
     out["apply_steps"] = canonical_steps(merged) if merged else []
     out["workflow_plan"] = derive_workflow_plan(merged) if merged else []
-    # A human verified this route against a named official page. That IS the
-    # confirmation the hold waits for — holding a verified answer served an
-    # empty card for China→UK while its checked fee and products sat in the
-    # override. Any verification releases, not only one that names the
-    # disposition.
-    out["review_required"] = False
-    out["held"] = False
+    # The contradictions are re-derived from the FINAL answer: the model's
+    # were about parts the verified facts have now replaced, and a verified
+    # part sitting at odds with the verdict is exactly what must never be
+    # served quietly.
+    problems = serve_time_invariants(merged)
+    out["contradictions"] = list(dict.fromkeys(
+        list(out.get("contradictions") or []) + problems))
+    verified_verdict = "disposition" in set(prov.get("fields") or [])
+    if problems:
+        out["review_required"] = True
+        out["held"] = hold_enabled()
+    elif verified_verdict:
+        # A verified verdict IS the confirmation the hold waits for: holding
+        # a verified answer served an empty card for China to the UK while
+        # its checked fee and products sat in the override. A verified detail
+        # implies its verdict (verified_overrides), so this covers every
+        # override that verified what kind of permission the route needs.
+        out["review_required"] = False
+        out["held"] = False
+    # An override that verified only a fee or a stay confirms nothing about
+    # the verdict, so the hold the answer earned on its own stands.
     return out
 
 
@@ -1242,9 +1361,22 @@ def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
                        timeout=60.0, max_tokens=PASS1_MAX_TOKENS)
     except Exception:  # noqa: BLE001 — the core answer stands on its own
         detail = None
-    merged = dict(core)
+    # Merge onto the row AS IT IS NOW, not the snapshot taken before a call
+    # that can run a minute: a grounded re-check or an operator edit may
+    # have written in the meantime, and the detail stage must never undo it.
+    try:
+        db.refresh(row)
+    except Exception:  # noqa: BLE001 - a refresh failure falls back to the snapshot
+        pass
+    current = dict(row.guidance or {})
+    changed_since = {k for k in set(current) | set(core)
+                     if current.get(k) != core.get(k)}
+    merged = dict(current)
     if isinstance(detail, dict):
-        merged.update(_detail_consistent(core, detail))
+        for k, v in _detail_consistent(core, detail).items():
+            if k in changed_since:
+                continue
+            merged[k] = v
     clean, missing, contradictions = validate_answer(merged, detail_known=isinstance(detail, dict))
     status = STATUS_PRIMARY if clean.get("disposition") and not missing and not contradictions \
         else STATUS_UNCERTAIN
@@ -1323,16 +1455,24 @@ def nearest_cached_answer(db, route: dict) -> dict | None:
     want_purpose = str(route.get("travel_purpose") or "tourism").lower()
     rows = db.execute(select(KimiRouteGuidanceCache).where(
         KimiRouteGuidanceCache.cache_key.like(f"{nat}|%|{dest}|%"))).scalars().all()
-    rows = [r for r in rows if r.guidance and f"|{CACHE_VERSION}" in (r.cache_key or "")]
+    # Only canonical rows, and only the same travel document: a diplomatic
+    # passport's answer is never "close" to an ordinary one, and a variant
+    # row is never a substitute for the route itself.
+    want_doc = normalize_document_type(route.get("travel_document_type")) or "ordinary_passport"
+    def _doc_of(key: str) -> str:
+        for p in key.split("|")[7:]:
+            if p.startswith("doc:"):
+                return p[4:]
+        return "ordinary_passport"
+    rows = [r for r in rows if r.guidance and is_canonical_key(r.cache_key or "")
+            and _doc_of(r.cache_key) == want_doc]
     if not rows:
         return None
     def rank(r):
         parts = r.cache_key.split("|")
         same_purpose = len(parts) > 3 and parts[3] == want_purpose
-        plain_doc = "doc:" not in r.cache_key
-        no_transit = "via:" not in r.cache_key
         complete = r.status == STATUS_PRIMARY
-        return (not complete, not same_purpose, not plain_doc, not no_transit)
+        return (not complete, not same_purpose)
     best = sorted(rows, key=rank)[0]
     out = _result(best.status, best.guidance, cached=True, stale=_is_stale(best),
                   missing=best.missing_fields, contradictions=best.contradictions,
@@ -1340,9 +1480,9 @@ def nearest_cached_answer(db, route: dict) -> dict | None:
                   advisories=deterministic_advisories(route, best.guidance or {}))
     out["approximate_for"] = {
         "asked": {"travel_purpose": want_purpose,
-                  "travel_document_type": route.get("travel_document_type"),
-                  "arrival_date": route.get("arrival_date")},
+                  "travel_document_type": route.get("travel_document_type")},
         "served": best.route or {},
+        "served_purpose": (best.cache_key.split("|") + [""] * 4)[3],
     }
     return apply_portal_fallback(apply_verified_overrides(out, route), route)
 
@@ -1376,6 +1516,19 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False,
                 db.expire_all()
             except Exception:  # noqa: BLE001 - session hygiene must not fail a lookup
                 pass
+        else:
+            # The lock timed out: another decision for this exact route is
+            # still running. Serve what exists rather than start a second,
+            # interleaving decision; with nothing cached the honest answer
+            # is the timeout the reader page already handles.
+            try:
+                db.expire_all()
+            except Exception:  # noqa: BLE001
+                pass
+            if _cached(db, key) is None:
+                raise GuidanceTimeout()
+            return _get_route_guidance_locked(db, route, force_refresh=False,
+                                              stage=stage, after=after)
         return _get_route_guidance_locked(db, route, force_refresh=force_refresh,
                                           stage=stage, after=after)
     finally:
@@ -1398,9 +1551,23 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
     """
     key = cache_key(route)
     row = _cached(db, key)
+    from . import freshness as _freshness
+    if row is not None and force_refresh:
+        # A released answer, or one already checked against its official
+        # page, is never regenerated from the model's memory: the page and
+        # the person outrank the model. The cached answer is served.
+        ver = row.verification or {}
+        if ver.get("operator_released") or _freshness.effective_check(ver):
+            force_refresh = False
     if row is not None and not force_refresh:
         released = bool((row.verification or {}).get("operator_released"))
-        from . import freshness as _freshness
+        if not released and not is_canonical_key(key):
+            # A stopover or residence variant inherits the release an
+            # operator gave the route itself; the console only ever sees the
+            # canonical row.
+            base = _cached(db, canonical_key(key))
+            released = bool(base is not None and
+                            (base.verification or {}).get("operator_released"))
         # The grounding that counts: a failed later attempt never erases
         # the last successful read of the official page.
         gc = _freshness.effective_check(row.verification)
@@ -1505,7 +1672,7 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
             db.add(row)
         row.route = {k: route.get(k) for k in (
             "passport_nationality", "lawful_country_of_residence", "destination_country",
-            "visa_category", "travel_purpose", "arrival_date", "consular_jurisdiction",
+            "visa_category", "travel_purpose", "consular_jurisdiction",
             # Without these two, a diplomatic-passport row later reads as an
             # ordinary-passport answer in the quality backend and the export,
             # and ordinary-passport overrides wrongly apply to it.
@@ -1515,8 +1682,14 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
         row.missing_fields = missing
         row.contradictions = contradictions
         row.model = model
-        row.verification = {"passes": 1, "label": VERIFIED_LABEL,
-                            **({"detail_pending": True} if staged else {})}
+        # Updated in place: a regeneration must never wipe the row's history
+        # (an operator's release, the last good page check, a drill shadow).
+        ver = dict(row.verification or {})
+        ver.pop("detail_pending", None)
+        ver.update({"passes": 1, "label": VERIFIED_LABEL})
+        if staged:
+            ver["detail_pending"] = True
+        row.verification = ver
         row.generated_at = now
         row.fresh_until = now + timedelta(days=ttl)
         from . import change_log
@@ -1550,6 +1723,10 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
     return out
 
 
+_REFRESH_IN_FLIGHT: set = set()
+_REFRESH_GUARD = _threading.Lock()
+
+
 def refresh_stale_async(db_factory, route: dict) -> None:
     """Background renewal for a stale cache entry (never blocks the reader).
 
@@ -1561,10 +1738,14 @@ def refresh_stale_async(db_factory, route: dict) -> None:
     names no official page; once a row has been checked against its page, a
     failed recheck keeps the existing answer (still honestly marked stale)
     rather than reverting to whatever the model remembers today."""
+    row_key = cache_key(route)
+    with _REFRESH_GUARD:
+        if row_key in _REFRESH_IN_FLIGHT:
+            return
+        _REFRESH_IN_FLIGHT.add(row_key)
     db = db_factory()
     try:
         from . import freshness
-        row_key = cache_key(route)
         row = db.execute(select(KimiRouteGuidanceCache).where(
             KimiRouteGuidanceCache.cache_key == row_key)).scalars().first()
         outcome = None
@@ -1573,16 +1754,18 @@ def refresh_stale_async(db_factory, route: dict) -> None:
         except Exception:  # noqa: BLE001 - grounded renewal is best-effort
             outcome = None
         ok = bool(outcome) and outcome.get("outcome") == "checked"
-        grounded_before = row is not None and freshness.has_been_grounded(row)
-        if not ok and not grounded_before:
-            # Never grounded and the page path failed (usually: no source
-            # URL): the old memory refresh is still better than serving a
-            # schema-stale row forever.
-            get_route_guidance(db, route, force_refresh=True)
+        if not ok and row is not None:
+            # The page could not be read, so nothing is renewed: the answer
+            # stays, honestly marked stale, and one open issue tells a person
+            # which page failed. Re-asking the model's memory was how a
+            # stale row became a fresh guess with a new timestamp.
+            freshness.note_unreadable(db, row, outcome)
     except Exception:  # noqa: BLE001 - background refresh is best-effort
         pass
     finally:
         db.close()
+        with _REFRESH_GUARD:
+            _REFRESH_IN_FLIGHT.discard(row_key)
 
 
 def maybe_start_adapter_build(db, *, org_id: str, user_id: str, case_id: str,

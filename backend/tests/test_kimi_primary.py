@@ -1978,3 +1978,236 @@ def test_a_visa_free_verdict_never_carries_a_priced_product(tmp_path, monkeypatc
     assert (merged.get("government_fee") or {}).get("amount") in (None, 0)
     assert merged.get("application_channel") in (None, "not_required")
     vo.reload()
+
+
+# ---- 2026-09-09: one decision per route, and a verdict that cannot contradict itself
+def test_residence_and_dates_never_fork_the_cache_key():
+    base = kimi_primary.cache_key(ROUTE)
+    assert kimi_primary.cache_key(dict(ROUTE, lawful_country_of_residence="ARE")) == base
+    assert kimi_primary.cache_key(dict(ROUTE, arrival_date="2027-03-01")) == base
+    assert kimi_primary.is_canonical_key(base)
+    forked = base.replace("USA|USA|", "USA|ARE|", 1)
+    assert not kimi_primary.is_canonical_key(forked)
+    assert not kimi_primary.is_canonical_key(base.replace("|unknown|", "|2026-09|"))
+    assert not kimi_primary.is_canonical_key(base + "|via:KOR")
+    assert kimi_primary.is_canonical_key(base + "|doc:diplomatic_passport")
+    assert kimi_primary.canonical_key(forked + "|via:KOR|doc:diplomatic_passport") == \
+        base + "|doc:diplomatic_passport"
+
+
+def test_travel_dates_never_reach_the_decision_prompt():
+    facts = kimi_primary.route_facts(dict(ROUTE, departure_city="Chicago"))
+    for k in ("arrival_date", "departure_date", "departure_city", "trip_duration_days"):
+        assert k not in facts
+    assert facts["today"]
+
+
+def test_serve_time_invariants_catch_the_hong_kong_vietnam_shape():
+    inv = kimi_primary.serve_time_invariants
+    evisa = [{"type": "Single-entry tourist e-visa", "entry": "single",
+              "validity": "90 days", "max_stay_days": 90,
+              "fee": {"amount": 25, "currency": "USD"}, "notes": None}]
+    # The incident: visa-free verdict over an e-visa detail and a priced product.
+    assert inv({"disposition": "VISA_EXEMPT", "requirement_detail": "evisa",
+                "visa_products": evisa, "government_fee": {"amount": 25, "currency": "USD"}})
+    assert inv({"disposition": "VISA_EXEMPT", "application_channel": "embassy_or_consulate"})
+    assert inv({"disposition": "VISA_REQUIRED", "requirement_detail": "unconditional_visa_free"})
+    assert inv({"disposition": "VISA_REQUIRED", "application_channel": "not_required"})
+    assert inv({"disposition": "VISA_REQUIRED", "requirement_detail": "eta_electronic_authorization"})
+    assert inv({"disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED", "requirement_detail": "evisa"})
+    # Consistent answers pass.
+    assert inv({"disposition": "VISA_EXEMPT", "requirement_detail": "unconditional_visa_free",
+                "government_fee": {"amount": 0, "currency": None}, "visa_products": []}) == []
+    assert inv({"disposition": "VISA_REQUIRED", "requirement_detail": "evisa",
+                "visa_products": evisa, "application_channel": "online_portal"}) == []
+    assert inv({"disposition": "VISA_ON_ARRIVAL", "requirement_detail": "evisa_on_arrival"}) == []
+    assert inv({"disposition": "CONDITIONAL", "requirement_detail": "conditional_visa_free"}) == []
+
+
+def test_a_self_contradicting_answer_is_held_until_a_person_verifies_it(db, tmp_path, monkeypatch):
+    """The model says visa-free and lists a priced e-visa in the same breath.
+    That answer is uncertain, so it is flagged and withheld, never tidied
+    into a confident "No visa needed". (Isolated from the shipped seed: a
+    verified verdict for this route would rightly release it.)"""
+    from app.visa_snapshot import verified_overrides as vo
+    empty = tmp_path / "no_overrides.json"
+    empty.write_text("[]")
+    monkeypatch.setattr(vo, "OVERRIDES", empty)
+    vo.reload()
+    _clear_cache(db)
+    shape = dict(GOOD_ANSWER, disposition="VISA_EXEMPT", requirement_detail="evisa",
+                 visa_products=[{"type": "Tourist e-visa", "entry": "single",
+                                 "validity": "90 days", "max_stay_days": 90,
+                                 "fee": {"amount": 25, "currency": "USD"},
+                                 "notes": None}],
+                 source_url="https://evisa.gov.vn/")
+    kimi_primary.set_provider(single_pass(shape))
+    g = kimi_primary.get_route_guidance(db, ROUTE)
+    assert g["status"] == "KIMI_UNCERTAIN"
+    assert any("priced visa products" in c for c in g["contradictions"])
+    assert g["review_required"] is True
+    assert g["held"] == kimi_primary.hold_enabled()
+    vo.reload()
+
+
+def test_only_a_verified_verdict_releases_a_held_answer(db, tmp_path, monkeypatch):
+    import json as _json
+    from app.visa_snapshot import verified_overrides as vo
+    _clear_cache(db)
+    # No official source: Low by the standard's ladder, so held.
+    kimi_primary.set_provider(single_pass(dict(GOOD_ANSWER, disposition="VISA_REQUIRED",
+                                               application_channel="embassy_or_consulate",
+                                               source_url=None, official_portal_url=None)))
+    f = tmp_path / "verified_overrides.json"
+    f.write_text(_json.dumps([{
+        "route": {"nationality": "USA", "destination": "JPN"},
+        "verified_at": "2026-09-09", "verified_by": "audit",
+        "source_url": "https://www.mofa.go.jp/x",
+        "fields": {"government_fee": {"amount": 30, "currency": "USD"}}}]))
+    monkeypatch.setattr(vo, "OVERRIDES", f)
+    vo.reload()
+    try:
+        g = kimi_primary.get_route_guidance(db, ROUTE)
+        assert g["source_verified"]["fields"] == ["government_fee"]
+        assert g["review_required"] is True, "a fee alone verifies nothing about the verdict"
+        f.write_text(_json.dumps([{
+            "route": {"nationality": "USA", "destination": "JPN"},
+            "verified_at": "2026-09-09", "verified_by": "audit",
+            "source_url": "https://www.mofa.go.jp/x",
+            "fields": {"requirement_detail": "paper_visa",
+                       "government_fee": {"amount": 30, "currency": "USD"}}}]))
+        vo.reload()
+        g2 = kimi_primary.get_route_guidance(db, ROUTE)
+        assert "disposition" in g2["source_verified"]["fields"]
+        assert g2["review_required"] is False and g2["held"] is False
+    finally:
+        vo.reload()
+
+
+def test_a_stale_row_is_never_regenerated_from_memory(db):
+    """The page could not be read, so the answer stays as it is, honestly
+    stale, and a person is told which page failed. The model is not asked."""
+    from datetime import datetime, timedelta, timezone
+    from app.visa_snapshot.models import DatabaseIssueReport
+    _clear_cache(db)
+    for r in db.query(DatabaseIssueReport).all():
+        db.delete(r)
+    db.commit()
+    key = kimi_primary.cache_key(ROUTE)
+    row = KimiRouteGuidanceCache(cache_key=key, route=dict(ROUTE), status="KIMI_PRIMARY",
+                                 guidance=dict(GOOD_ANSWER, source_url=None,
+                                               official_portal_url=None),
+                                 missing_fields=[], contradictions=[], model="test",
+                                 verification={"passes": 1},
+                                 generated_at=datetime.now(timezone.utc) - timedelta(days=30),
+                                 fresh_until=datetime.now(timezone.utc) - timedelta(days=1))
+    db.add(row)
+    db.commit()
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("a stale row must never be regenerated from memory")))
+    kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
+    db.expire_all()
+    again = db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one()
+    assert again.guidance["permitted_stay"] == GOOD_ANSWER["permitted_stay"]
+    issues = db.query(DatabaseIssueReport).filter_by(cache_key=key,
+                                                    field="source_unreadable").all()
+    assert len(issues) == 1 and issues[0].reported_by == "freshness_monitor"
+    # A second failed attempt refreshes the same issue, never stacks another.
+    kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
+    assert db.query(DatabaseIssueReport).filter_by(cache_key=key,
+                                                  field="source_unreadable").count() == 1
+
+
+def test_a_released_or_page_checked_row_is_never_regenerated(db):
+    _clear_cache(db)
+    key = kimi_primary.cache_key(ROUTE)
+    row = KimiRouteGuidanceCache(cache_key=key, route=dict(ROUTE), status="KIMI_PRIMARY",
+                                 guidance=dict(GOOD_ANSWER), missing_fields=[],
+                                 contradictions=[], model="test",
+                                 verification={"passes": 1,
+                                               "operator_released": {"by": "ops-a"}})
+    db.add(row)
+    db.commit()
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("a released row must never be regenerated")))
+    g = kimi_primary.get_route_guidance(db, ROUTE, force_refresh=True)
+    assert g["cached"] is True and g["operator_released"] is True
+    db.expire_all()
+    assert db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one() \
+             .verification["operator_released"] == {"by": "ops-a"}
+
+
+def test_the_detail_stage_never_overwrites_a_newer_write(db):
+    """While the detail call runs, a grounded re-check corrects the fee. The
+    detail merge lands on the row as it is now and keeps that correction."""
+    _clear_cache(db)
+    key = kimi_primary.cache_key(ROUTE)
+    core = dict(GOOD_ANSWER, disposition="VISA_REQUIRED",
+                application_channel="embassy_or_consulate",
+                government_fee={"amount": 100, "currency": "USD"},
+                source_url="https://www.mofa.go.jp/x")
+    row = KimiRouteGuidanceCache(cache_key=key, route=dict(ROUTE), status="KIMI_PRIMARY",
+                                 guidance=core, missing_fields=[], contradictions=[],
+                                 model="test", verification={"passes": 1, "detail_pending": True})
+    db.add(row)
+    db.commit()
+
+    def provider(system, user):
+        # A concurrent grounded correction lands while the detail call runs.
+        s = SessionLocal()
+        try:
+            r = s.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one()
+            r.guidance = dict(r.guidance, government_fee={"amount": 160, "currency": "USD"})
+            s.commit()
+        finally:
+            s.close()
+        return {"visa_products": [{"type": "Tourist visa", "entry": "single",
+                                   "validity": "3 months", "max_stay_days": 90,
+                                   "fee": {"amount": 160, "currency": "USD"},
+                                   "notes": None}],
+                "forms": [], "exceptions": []}
+    kimi_primary.set_provider(provider)
+    kimi_primary.fill_detail(db, key, ROUTE, "{}")
+    db.expire_all()
+    after = db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one()
+    assert after.guidance["government_fee"]["amount"] == 160, "the newer write survives"
+    assert after.guidance["visa_products"][0]["type"] == "Tourist visa"
+    assert "detail_pending" not in (after.verification or {})
+
+
+def test_the_nearest_answer_never_crosses_document_type_or_leaves_the_canonical_row(db):
+    _clear_cache(db)
+    key = kimi_primary.cache_key(ROUTE)
+    db.add(KimiRouteGuidanceCache(cache_key=key, route=dict(ROUTE), status="KIMI_PRIMARY",
+                                  guidance=dict(GOOD_ANSWER), missing_fields=[],
+                                  contradictions=[], model="test", verification={}))
+    db.add(KimiRouteGuidanceCache(cache_key=key.replace("USA|USA|", "USA|ARE|", 1),
+                                  route=dict(ROUTE), status="KIMI_PRIMARY",
+                                  guidance=dict(GOOD_ANSWER, disposition="VISA_REQUIRED"),
+                                  missing_fields=[], contradictions=[], model="test",
+                                  verification={}))
+    db.commit()
+    assert kimi_primary.nearest_cached_answer(
+        db, dict(ROUTE, travel_document_type="diplomatic_passport")) is None
+    near = kimi_primary.nearest_cached_answer(db, dict(ROUTE, travel_purpose="business"))
+    assert near["guidance"]["disposition"] == "VISA_EXEMPT"   # the canonical row, never the fork
+    assert near["approximate_for"]["served_purpose"] == "tourism"
+
+
+def test_a_stopover_variant_inherits_the_route_release(db):
+    _clear_cache(db)
+    key = kimi_primary.cache_key(ROUTE)
+    low = dict(GOOD_ANSWER, source_url=None, official_portal_url=None)
+    db.add(KimiRouteGuidanceCache(cache_key=key, route=dict(ROUTE), status="KIMI_PRIMARY",
+                                  guidance=low, missing_fields=[], contradictions=[],
+                                  model="test",
+                                  verification={"operator_released": {"by": "ops-a"}}))
+    via_route = dict(ROUTE, transit_countries=["KOR"])
+    db.add(KimiRouteGuidanceCache(cache_key=kimi_primary.cache_key(via_route),
+                                  route=dict(via_route), status="KIMI_PRIMARY",
+                                  guidance=low, missing_fields=[], contradictions=[],
+                                  model="test", verification={}))
+    db.commit()
+    g = kimi_primary.get_route_guidance(db, via_route)
+    assert g["cached"] is True and g["operator_released"] is True
+    assert g["review_required"] is False

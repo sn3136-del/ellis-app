@@ -372,6 +372,32 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
             "source_url": page.final_url}
 
 
+def note_unreadable(db, row, outcome: dict | None) -> None:
+    """A stale answer whose official page could not be read is never
+    regenerated from the model's memory. The answer stays, marked stale, and
+    ONE open issue tells a person which page failed and why. Refreshed in
+    place on every attempt, never stacked."""
+    from sqlalchemy import select as _sel
+    o = dict(outcome or {})
+    reason = str(o.get("outcome") or "unreadable")
+    pages = o.get("sources") or o.get("sources_tried") or []
+    note = (f"The official page could not be read ({reason}), so the answer "
+            f"was not renewed. Pages tried: {', '.join(str(p) for p in pages)[:400]}")
+    existing = db.execute(_sel(DatabaseIssueReport).where(
+        DatabaseIssueReport.cache_key == row.cache_key,
+        DatabaseIssueReport.reported_by == "freshness_monitor",
+        DatabaseIssueReport.field == "source_unreadable",
+        DatabaseIssueReport.status.in_(("open", "acknowledged")))).scalars().first()
+    if existing is not None:
+        existing.note = note[:1000]
+    else:
+        db.add(DatabaseIssueReport(
+            org_id="platform", cache_key=row.cache_key, route=dict(row.route or {}),
+            field="source_unreadable", note=note[:1000],
+            reported_by="freshness_monitor", status="open"))
+    db.commit()
+
+
 def recheck_route(db, route: dict) -> dict | None:
     """Recheck by route (the stale-serving path). None when nothing is cached."""
     from . import kimi_primary
