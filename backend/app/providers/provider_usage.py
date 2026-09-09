@@ -129,7 +129,13 @@ def _write_event(path, event):
             remaining = remaining[written:]
         os.fsync(fd)
     finally:
-        os.close(fd)
+        try:
+            # A forked child may retain this open-file description. Explicit
+            # unlock releases the parent's completed append without waiting
+            # for that child to close its inherited descriptor.
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        finally:
+            os.close(fd)
 
 
 def _writer_loop():

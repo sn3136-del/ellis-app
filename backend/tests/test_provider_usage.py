@@ -185,6 +185,46 @@ for _ in range(20):
     assert all(row["usage"] == {"total_tokens": 2} for row in rows)
 
 
+@pytest.mark.skipif(not hasattr(os, "fork"), reason="fork-only descriptor ownership regression")
+def test_child_fork_cannot_retain_a_completed_parent_append_lock(ledger):
+    script = '''import os, threading
+from app.providers import provider_usage as usage
+entered, release = threading.Event(), threading.Event()
+original = os.fsync
+def pause(fd):
+    entered.set()
+    assert release.wait(5)
+    original(fd)
+os.fsync = pause
+def emit():
+    usage.post(lambda *a,**k:object(), "https://api.moonshot.ai/v1", headers={}, json={"model":"test"},timeout=.05)
+emit()
+assert entered.wait(2)
+reader, writer = os.pipe()
+child = os.fork()
+if child == 0:
+    os.close(writer)
+    os.read(reader,1)
+    os._exit(0)
+os.close(reader)
+try:
+    release.set()
+    assert usage.flush(2)
+    emit()
+    completed_while_child_alive = usage.flush(.5)
+finally:
+    os.write(writer,b"x")
+    os.close(writer)
+    os.waitpid(child,0)
+    os.fsync = original
+assert completed_while_child_alive
+'''
+    backend = str(Path(__file__).resolve().parents[1])
+    subprocess.run([sys.executable, "-c", script], cwd=backend,
+        env=dict(os.environ, PYTHONPATH=backend), capture_output=True, text=True, check=True, timeout=15)
+    assert len(events(ledger)) == 2
+
+
 def test_busy_file_lock_cannot_delay_a_provider_response(ledger):
     import fcntl
     with ledger.open("w") as owner:
