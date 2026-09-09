@@ -47,6 +47,20 @@ RULE_KINDS = ("valid_on_arrival", "valid_through_departure",
               "months_after_arrival", "months_after_departure")
 
 
+def normalize_passport_validity_rule(value):
+    """Collapse a legacy empty contract to unknown, without deriving a rule.
+
+    Older model responses used {kind: null, months: null} (or an empty
+    subset) for missing information. These contain no policy to preserve.
+    A non-null value or an extra key is not an empty contract and remains
+    untouched for validation; even plausible kind synonyms need evidence.
+    """
+    if (isinstance(value, dict) and set(value) <= {"kind", "months"}
+            and all(v is None for v in value.values())):
+        return None
+    return value
+
+
 def passport_validity_rule_errors(value) -> list[str]:
     """Validate the route guidance contract without inferring a policy.
 
@@ -56,6 +70,7 @@ def passport_validity_rule_errors(value) -> list[str]:
     Evidence-backed vocabulary normalization belongs at source extraction.
     """
     field = "passport_validity_requirement"
+    value = normalize_passport_validity_rule(value)
     if value is None:
         return []
     if not isinstance(value, dict):
@@ -109,7 +124,8 @@ def _add_months(d: date, months: int) -> date:
 def required_valid_until(rule: dict, arrival: date | None, departure: date | None) -> tuple[date | None, str]:
     """The date the passport must remain valid until, per the destination rule,
     plus a human explanation. None when travel dates are unknown."""
-    kind = (rule or {}).get("kind", "")
+    rule = normalize_passport_validity_rule(rule) or {}
+    kind = rule.get("kind", "")
     months = int((rule or {}).get("months", 0) or 0)
     if kind == "valid_on_arrival":
         return arrival, "valid on the day of arrival"
@@ -164,8 +180,9 @@ def _guidance_rule(db, app_row: models.VisaApplication) -> dict | None:
     cg = db.query(CaseRouteGuidance).filter_by(case_id=app_row.id).first()
     if not cg:
         return None
-    req = ((cg.guidance or {}).get("guidance") or {}).get("passport_validity_requirement")
-    if isinstance(req, dict) and req.get("kind") in RULE_KINDS:
+    req = normalize_passport_validity_rule(
+        ((cg.guidance or {}).get("guidance") or {}).get("passport_validity_requirement"))
+    if isinstance(req, dict) and not passport_validity_rule_errors(req):
         return {"kind": req["kind"], "months": int(req.get("months") or 0)}
     return None
 
@@ -212,7 +229,9 @@ def check_case_passport(db, app_row: models.VisaApplication, *, today: date | No
                                      nationality=str(answers.get("passport_nationality", "") or ""),
                                      residence=str(answers.get("current_residence", "") or ""))
     if verified and verified.passport_validity_rule:
-        rule, rule_source = verified.passport_validity_rule, "verified_route_rule"
+        rule = normalize_passport_validity_rule(verified.passport_validity_rule)
+        if rule is not None:
+            rule_source = "verified_route_rule"
     if rule is None:
         g_rule = _guidance_rule(db, app_row)
         if g_rule:

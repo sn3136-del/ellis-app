@@ -322,6 +322,9 @@ def _quoted_proposals(raw: dict, text: str, route: dict | None = None) -> tuple[
     for k, v in fields.items():
         if k not in OVERRIDABLE:
             continue
+        if k == 'passport_validity_requirement':
+            from ..passport_validity import normalize_passport_validity_rule
+            v = normalize_passport_validity_rule(v)
         if k == 'passport_validity_requirement' and isinstance(v, dict) and v.get('kind') == 'valid_for_duration_of_stay':
             # A provider synonym is accepted only after the literal quote
             # proves this exact border-entry constraint; application validity

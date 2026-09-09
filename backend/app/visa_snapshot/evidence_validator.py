@@ -336,7 +336,8 @@ def field_value_supported(name: str, value, text: str) -> bool:
                 return True
         return False
     if name == 'passport_validity_requirement':
-        from app.passport_validity import passport_validity_rule_errors
+        from app.passport_validity import passport_validity_rule_errors, normalize_passport_validity_rule
+        value = normalize_passport_validity_rule(value)
         if passport_validity_rule_errors(value) or not isinstance(value, dict):
             return False
         if re.search(r'\b(?:not|no|if|unless|except)\b|provided that|only when|residen',low):

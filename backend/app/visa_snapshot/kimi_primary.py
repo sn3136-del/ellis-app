@@ -310,7 +310,7 @@ when genuinely unknown and add an entry to "uncertainty" naming the field and wh
 disposition: one of VISA_REQUIRED | VISA_EXEMPT | ELECTRONIC_AUTHORIZATION_REQUIRED | CONDITIONAL
 visa_category, permitted_stay, passport_validity, processing_time: short strings
 permitted_stay_days: integer number of days of permitted stay, or null
-passport_validity_requirement: {"kind": "valid_on_arrival"|"valid_through_departure"|"months_after_arrival"|"months_after_departure", "months": integer|null}
+passport_validity_requirement: null when the exact entry rule is unknown; otherwise {"kind": "valid_on_arrival"|"valid_through_departure"|"months_after_arrival"|"months_after_departure", "months": integer|null}. Never use a null kind or invent another kind. For month-based kinds, months must be a positive integer; for the two validity-only kinds use months: 0 or null. Do not turn visa-application passport requirements into border-entry rules.
 required_documents, forms, account_registration_steps, payment_process,
 submission_process, exceptions: arrays of short strings
 application_channel: online_portal | embassy | visa_center | authorised_agent | on_arrival | not_required — use authorised_agent when individuals may NOT file directly and a designated agency must lodge for them (e.g. Chinese nationals applying for Japan); never call that a visa_center
@@ -600,7 +600,11 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
         clean["disposition"] = clean["disposition"].upper()
     # Normalize the structured additions defensively (wrong shapes are dropped,
     # never trusted).
-    if not isinstance(clean.get("passport_validity_requirement"), dict):
+    from ..passport_validity import normalize_passport_validity_rule
+    if "passport_validity_requirement" in clean:
+        clean["passport_validity_requirement"] = normalize_passport_validity_rule(
+            clean["passport_validity_requirement"])
+    if clean.get("passport_validity_requirement") is not None and not isinstance(clean["passport_validity_requirement"], dict):
         clean.pop("passport_validity_requirement", None)
     if not isinstance(clean.get("arrival_card"), dict):
         clean.pop("arrival_card", None)
@@ -1113,11 +1117,11 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
     # The invariants run on the answer AS STORED: a model verdict of visa-free over priced e-visa
     # products is the shape of the Hong Kong to Vietnam incident, and tidying
     # it away is how it was served with a straight face.
-    from .verified_overrides import _normalise_text_lists
+    from .verified_overrides import _normalise_legacy_shapes
     raw_problems = set(serve_time_invariants(guidance))
-    # A legacy prose list has one lossless normalization shared with records.
-    # It is not a policy correction and must not create a reader-only hold.
-    guidance = _normalise_text_lists(guidance)
+    # Legacy prose lists and empty passport contracts have lossless shared
+    # normalizations. These are not new policy facts or source verification.
+    guidance = _normalise_legacy_shapes(guidance)
     problems = serve_time_invariants(guidance)
     resolved_shapes = raw_problems - set(problems)
     contradictions = list(dict.fromkeys(

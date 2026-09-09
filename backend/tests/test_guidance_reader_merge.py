@@ -122,11 +122,12 @@ def test_shared_pure_merge_retains_unreplaced_products_and_checked_fields():
 
 
 @pytest.mark.parametrize("disputed", [False, True])
+@pytest.mark.parametrize("passport_rule", [None, {"kind": None, "months": None}])
 def test_lossless_legacy_lists_preserve_real_disagreements_and_reader_hold_parity(
-        client, db, isolated, disputed):
+        client, db, isolated, disputed, passport_rule):
     from app.visa_snapshot.models import KimiRouteGuidanceCache
     from app.visa_snapshot.freshness import EVIDENCE_CONTRACT
-    raw = dict(RAW, required_documents="Passport")
+    raw = dict(RAW, required_documents="Passport", passport_validity_requirement=passport_rule)
     disagreement = "The stored source readings disagree on nationality eligibility"
     marker = {"outcome": "checked", "consistent": True, "evidence_contract": EVIDENCE_CONTRACT,
               "verified_fields": ["disposition"], "source_url": URL, "at": date.today().isoformat()}
@@ -149,4 +150,7 @@ def test_lossless_legacy_lists_preserve_real_disagreements_and_reader_hold_parit
     raw_result = kp.apply_verified_overrides(kp._result(kp.STATUS_PRIMARY, raw,
         cached=True, stale=False, contradictions=row.contradictions), ROUTE)
     assert raw_result["guidance"]["required_documents"] == ["Passport"]
+    assert raw_result["guidance"]["passport_validity_requirement"] is None
     assert (disagreement in raw_result["contradictions"]) == disputed
+    db.refresh(row)
+    assert row.guidance == raw  # Reader normalization never rewrites cache or history.

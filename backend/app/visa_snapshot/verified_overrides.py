@@ -340,7 +340,7 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             continue          # an override must cite an official source
         if r.get("verifier", "ai") not in ("human", "ai", "public"):
             continue
-        clean = {k: v for k, v in fields.items() if k in OVERRIDABLE}
+        clean = _normalise_legacy_shapes({k: v for k, v in fields.items() if k in OVERRIDABLE})
         route_key = _key(route["nationality"], route["destination"],
                          route.get("travel_purpose", "tourism"),
                          route.get("travel_document_type", ""))
@@ -434,7 +434,7 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
     unknown = [k for k in fields if k not in OVERRIDABLE]
     if unknown:
         raise ValueError(f"these fields cannot be edited: {sorted(unknown)}")
-    clean = {k: v for k, v in fields.items() if k in OVERRIDABLE}
+    clean = _normalise_legacy_shapes({k: v for k, v in fields.items() if k in OVERRIDABLE})
     for k in _URL_FIELDS:
         v = str(clean.get(k) or "").strip()
         if v and not is_government_host(hostname(v)):
@@ -817,6 +817,17 @@ def _normalise_text_lists(guidance):
     return out
 
 
+def _normalise_legacy_shapes(guidance):
+    """Share lossless unknown/list normalization across writers and readers."""
+    from ..passport_validity import normalize_passport_validity_rule
+    guidance = _normalise_text_lists(guidance)
+    if isinstance(guidance, dict) and "passport_validity_requirement" in guidance:
+        value = normalize_passport_validity_rule(guidance["passport_validity_requirement"])
+        if value is not guidance["passport_validity_requirement"]:
+            guidance = dict(guidance, passport_validity_requirement=value)
+    return guidance
+
+
 def _finalize_guidance(guidance, provenance=None):
     """One cleanup boundary for records, transit and traveler responses.
 
@@ -825,7 +836,7 @@ def _finalize_guidance(guidance, provenance=None):
     unchanged so the shared invariant gate can hold them for review.
     """
     from . import kimi_primary
-    guidance = _normalise_text_lists(guidance)
+    guidance = _normalise_legacy_shapes(guidance)
     if not isinstance(guidance, dict) or kimi_primary.serve_time_invariants(guidance):
         return guidance
     return kimi_primary._strip_visa_free_leftovers(
@@ -841,8 +852,8 @@ def merge_verified_fields(guidance: dict, fields: dict, *, source_url: str = "")
     remain visible to the invariant validator unless the sourced correction
     explicitly replaces them or makes an old exemption claim inapplicable.
     """
-    guidance = _normalise_text_lists(guidance)
-    fields = dict(_normalise_text_lists(fields))
+    guidance = _normalise_legacy_shapes(guidance)
+    fields = dict(_normalise_legacy_shapes(fields))
     implied = _verdict_implied_by_detail(fields, guidance)
     if implied:
         fields["disposition"] = implied
@@ -862,7 +873,7 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     the answer can show what was checked rather than implying all of it was."""
     from . import scheduled_policies, policy_intervals
     from .permission_eligibility import annotate
-    guidance = _normalise_text_lists(guidance)
+    guidance = _normalise_legacy_shapes(guidance)
     hit = find(route or {})
     if not hit or not isinstance(guidance, dict):
         result, provenance = scheduled_policies.apply(guidance, None, route)
