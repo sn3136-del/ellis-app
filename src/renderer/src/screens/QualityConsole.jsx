@@ -126,7 +126,7 @@ function useCountUp(target, ms = 700) {
 // both themes, worst adjacent pair ΔE 28.3.
 const SEQ = { high: '#0b7a44', medium: '#2563eb', low: '#d97706' }
 import { createVisaClient } from '../lib/visaBackend.js'
-import { newQualitySession } from '../lib/visaSession.js'
+import { newQualitySession, qualityRecordRoute } from '../lib/visaSession.js'
 import { useLocale } from '../lib/locale.jsx'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { useLocalizedCountries } from '../lib/countryNames.js'
@@ -2436,8 +2436,7 @@ function QualityWorkspace() {
 
   async function flag(rec, note) {
     await client.databaseReportIssue({
-      nationality: rec.travel_document_country,
-      destination: rec.destination_country,
+      ...qualityRecordRoute(rec),
       field: 'operator_spot_check', note, cache_key: rec.cache_key,
     })
   }
@@ -2448,8 +2447,7 @@ function QualityWorkspace() {
     if (!window.confirm(t('ops.releaseConfirm'))) return
     try {
       await client.databaseApprove({
-        nationality: rec.travel_document_country,
-        destination: rec.destination_country,
+        ...qualityRecordRoute(rec),
         cache_key: rec.cache_key,
         note: 'released from the quality console',
       })
@@ -2504,12 +2502,7 @@ function QualityWorkspace() {
 
   async function editRecord(rec, fields, sourceUrl, note, productPatch) {
     await client.post('/database/records/edit', {
-      nationality: rec.travel_document_country,
-      destination: rec.destination_country,
-      travel_purpose: rec.travel_purpose,
-      travel_document_type:
-        rec.travel_document_type === 'ordinary_passport'
-          ? '' : (rec.travel_document_type || ''),
+      ...qualityRecordRoute(rec),
       fields, source_url: sourceUrl, note,
       ...(productPatch ? { product_patch: productPatch } : {}) })
     await load()
@@ -2517,10 +2510,7 @@ function QualityWorkspace() {
 
   async function refreshRecord(rec) {
     const r = await client.post('/database/routes/research', {
-      nationality: rec.travel_document_country,
-      destination: rec.destination_country,
-      travel_purpose: rec.travel_purpose,
-      travel_document_type: rec.travel_document_type || 'ordinary_passport' })
+      ...qualityRecordRoute(rec) })
     await load()
     return r
   }

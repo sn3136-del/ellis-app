@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 
 import {
   confidenceLevel, fieldRows, documentReady, defaultPreferences, formatFee,
-  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession, newAdminSession, newQualitySession, resultDisposition,
+  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession, newAdminSession, newQualitySession, qualityRecordRoute, resultDisposition,
   isDocumentQuestion, splitQuestions, isValidDateShape, collectAnswers
 } from '../../src/renderer/src/lib/visaSession.js'
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
@@ -49,6 +49,14 @@ test('quality control opens without a key and keeps one public browser attributi
   Object.defineProperty(globalThis, 'sessionStorage', { configurable: true,
     get() { throw new Error('storage denied') } })
   assert.equal(newQualitySession().token, 'public-quality-control')
+})
+
+test('record actions preserve non-tourism and special-document scope', () => {
+  assert.deepEqual(qualityRecordRoute({ travel_document_country: 'CAN',
+    destination_country: 'JPN', travel_purpose: 'business',
+    travel_document_type: 'diplomatic_passport' }), {
+      nationality: 'CAN', destination: 'JPN', travel_purpose: 'business',
+      travel_document_type: 'diplomatic_passport' })
 })
 
 test('resultDisposition never presents a MOCK completed case as real', () => {

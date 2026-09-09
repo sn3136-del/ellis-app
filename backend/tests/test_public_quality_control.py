@@ -72,5 +72,13 @@ def test_public_edit_is_attributed_and_cannot_claim_verified_accuracy(client,db,
         rejected=client.post('/database/records/edit',headers=PUBLIC,json=bad)
         assert rejected.status_code==422 and ops.read_bytes()==before
         assert db.query(DatabaseChangeLog).filter_by(cache_key=row.cache_key).count()>=1
+        scoped={k:body[k] for k in ('nationality','destination','travel_purpose','travel_document_type')}
+        scoped['cache_key']=row.cache_key
+        flag=client.post('/database/report-issue',headers=PUBLIC,json=dict(scoped,field='permitted_stay',note='Evaluation check.'))
+        assert flag.status_code==200,flag.text
+        released=client.post('/database/approve',headers=PUBLIC,json=dict(scoped,note='Evaluation release.'))
+        assert released.status_code==200,released.text
+        assert released.json()['released_by'].startswith('public-qc-')
+
     finally:
         db.delete(row);db.commit();vo.reload()

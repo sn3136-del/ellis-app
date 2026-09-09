@@ -32,6 +32,14 @@ export function newQualitySession() {
   return { token: 'public-quality-control', orgId: 'platform', userId }
 }
 
+// Every record action preserves the complete decision identity.
+export function qualityRecordRoute(record) {
+  return { nationality: record.travel_document_country,
+    destination: record.destination_country,
+    travel_purpose: record.travel_purpose || 'tourism',
+    travel_document_type: record.travel_document_type || 'ordinary_passport' }
+}
+
 // Employer (petitioner) session: SAME org as the beneficiary's cases — org
 // tenancy grants shared case reads — but a distinct userId, so the backend's
 // per-party authorization (_authorize_step_action) can tell the parties apart.
