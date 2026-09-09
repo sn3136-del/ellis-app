@@ -1,5 +1,6 @@
 """Reviewed PHL fixture: passport-specific rules and evidence stay isolated."""
 import json
+from app.visa_snapshot import structured_evidence
 import os
 from pathlib import Path
 from datetime import date
@@ -68,11 +69,11 @@ def test_tampered_table_cannot_borrow_another_nationalitys_rule():
     proof = row['field_provenance']['disposition']
     source = next(s for s in data['sources'] if s['id']==proof['source_id'])
     route = {'passport_nationality':'JPN','destination_country':'PHL','travel_purpose':'tourism','travel_document_type':'ordinary_passport'}
-    assert importer._table_support(proof, source, route, 'VISA_EXEMPT')
+    assert structured_evidence._table_support(proof, source, route, 'VISA_EXEMPT')
     wrong = dict(proof, source_table=dict(proof['source_table'],nationality_quote='Indonesia'))
-    assert not importer._table_support(wrong, source, route, 'VISA_EXEMPT')
-    assert not importer._table_support(proof, source, dict(route,travel_document_type='diplomatic_passport'), 'VISA_EXEMPT')
-    assert not importer._table_support(proof, source, dict(route,travel_purpose='work'), 'VISA_EXEMPT')
+    assert not structured_evidence._table_support(wrong, source, route, 'VISA_EXEMPT')
+    assert not structured_evidence._table_support(proof, source, dict(route,travel_document_type='diplomatic_passport'), 'VISA_EXEMPT')
+    assert not structured_evidence._table_support(proof, source, dict(route,travel_purpose='work'), 'VISA_EXEMPT')
 
 
 def test_all_reviewed_fields_survive_the_real_overlay_before_materialization():

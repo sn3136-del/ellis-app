@@ -49,6 +49,7 @@ from .fetching import fetch
 from .evidence_validator import (quote_in_text, supports_disposition, jurisdiction_matches,
                                  field_value_supported, route_supporting_excerpt)
 from .models import DatabaseIssueReport, KimiRouteGuidanceCache
+from . import freshness_evidence as proof_helpers
 
 # Fields the page is allowed to correct — the same vocabulary a human
 # override may correct, minus nothing: what a person may fix from a source,
@@ -111,6 +112,14 @@ Reply STRICT JSON:
  "evidence": {field: "short quote from the page", ...}  (a quote for EVERY
     corrected OR confirmed unchanged field; only explicitly supported fields
     earn renewed freshness; a correction without a matching quote is discarded),
+ "route_evidence": {"quote": "literal rule heading", "source_id": "page",
+    "source_table": {"heading_quote": "literal visa rule heading",
+    "table_quote": "complete literal bounded heading and country list",
+    "nationality_quote": "exact standalone country list item"}}
+    (optional: only for an explicit finite country list; never infer visa-required
+    from eVisa eligibility; preserve qualifications. A supplied reviewed_evidence
+    contract can be reused only when every quoted passage still occurs.),
+ "field_scope": {field: "literal bounded passage naming the exact visa program and field"},
  "note": "one short sentence"}
 Rules: if the page does not mention a field, it is NOT a contradiction — leave
 it alone. Never invent a fee, date or URL the page does not state. If the page
@@ -299,7 +308,7 @@ def _page_has_visa_topic(text: str) -> bool:
     return bool(re.search(r"visa|travel authori[sz]|\beta\b|\besta\b|免签|免簽|签证|簽證|thị thực", text or "", re.I))
 
 
-def _quoted_proposals(raw: dict, text: str) -> tuple[dict, dict, list[str]]:
+def _quoted_proposals(raw: dict, text: str, route: dict | None = None) -> tuple[dict, dict, list[str]]:
     fields = raw.get("corrected_fields") or {}
     evidence = raw.get("evidence") or {}
     if not isinstance(fields, dict):
@@ -310,7 +319,17 @@ def _quoted_proposals(raw: dict, text: str) -> tuple[dict, dict, list[str]]:
     for k, v in fields.items():
         if k not in OVERRIDABLE:
             continue
+        if k == 'passport_validity_requirement' and isinstance(v, dict) and v.get('kind') == 'valid_for_duration_of_stay':
+            # A provider synonym is accepted only after the literal quote
+            # proves this exact border-entry constraint; application validity
+            # is a separate obligation and cannot be normalized into it.
+            normalized = {'kind': 'valid_through_departure', 'months': 0}
+            if (set(v) <= {'kind','months'} and not isinstance(v.get('months'),bool) and v.get('months') in (None,0)
+                    and isinstance(evidence.get(k),str) and quote_in_text(evidence[k],text)
+                    and field_value_supported(k,normalized,evidence[k])):
+                v = normalized
         if (not isinstance(evidence.get(k), str) or not quote_in_text(evidence[k], text)
+                or route is not None and not proof_helpers.field_scope_matches_route(k,evidence[k],route)
                 or (v not in (None, "", [], {}) and not field_value_supported(k, v, evidence[k]))):
             unquoted.append(k)
         else:
@@ -430,7 +449,9 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     route, original = dict(row.route or {}), dict(row.guidance or {})
     override = verified_overrides.find(route)
     guidance, _ = verified_overrides.apply(dict(original), route)
-    all_sources = candidate_sources(guidance, override, limit=None)
+    reviewed_fields, catalog = proof_helpers.reviewed_evidence(override, row.verification)
+    source_override = dict(override or {}, supporting_sources=[{'id':k,'url':v} for k,v in catalog.items()])
+    all_sources = candidate_sources(guidance, source_override, limit=None)
     previous = (row.verification or {}).get("grounded_check") or {}
     cursor = previous.get("source_cursor", 0)
     cursor = cursor if isinstance(cursor, int) and cursor >= 0 else 0
@@ -448,7 +469,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         return {"outcome": "no_official_source", "route_key": row.cache_key}
 
     tried, irrelevant, unquoted_all = [], [], set()
-    readings, source_checks = [], []
+    readings, source_checks, candidates, captures = [], [], [], {}
     visited, completed = set(), set()
     page = raw = None
     fallback = None
@@ -467,12 +488,18 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             continue
         completed.add(fr.final_url)
         tried.append(fr.final_url)
-        if (not _source_authority_matches(fr.final_url, route) or
+        captures[url] = captures[fr.final_url] = {'url': fr.final_url,
+            'text': fr.content_text[:MAX_PAGE_CHARS], 'checked_at': when[:10]}
+        companion = url in catalog.values()
+        if ((not _source_authority_matches(fr.final_url, route) and not companion) or
                 _future_scheduled_source(fr.final_url, route, when[:10])):
             irrelevant.extend((url, fr.final_url))
             source_checks.append({"source_url": fr.final_url, "outcome": "scope_or_effective_date_mismatch", "at": when})
             continue
         if not _page_has_visa_topic(fr.content_text):
+            if companion:
+                source_checks.append({'source_url': fr.final_url, 'outcome': 'supporting_source_read', 'at': when})
+                continue
             irrelevant.extend((url, fr.final_url))
             source_checks.append({"source_url": fr.final_url, "outcome": "page_not_relevant", "at": when})
             continue
@@ -481,6 +508,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                                "travel_purpose", "travel_document_type")},
                    "policy_date": when[:10],
                    "stored_answer": {k: guidance[k] for k in OVERRIDABLE if k in guidance},
+                   "reviewed_evidence": reviewed_fields.get('disposition') if
+                       (reviewed_fields.get('disposition') or {}).get('source_url') == fr.final_url else None,
                    "official_page_url": fr.final_url,
                    "official_page_text": fr.content_text[:MAX_PAGE_CHARS]}
         try:
@@ -495,24 +524,51 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             continue
         if not isinstance(answer, dict):
             answer = {}
-        quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text[:MAX_PAGE_CHARS])
+        quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text[:MAX_PAGE_CHARS], route)
         unquoted_all.update(unquoted)
-        supported = _supports_route(fr.content_text[:MAX_PAGE_CHARS], answer, route, guidance, quoted, fr.final_url, when[:10])
-        source_checks.append({"source_url": fr.final_url, "outcome": "checked" if supported else "page_not_relevant",
+        source_checks.append({"source_url": fr.final_url, "outcome": "page_not_relevant",
                               "at": when, "content_hash": fr.content_hash, "verified_fields": [],
                               "unquoted_fields": unquoted,
                               "proposed_fields": {k: {"value": v, "quote": evidence[k]} for k, v in quoted.items()}})
+        candidates.append((fr, answer, quoted, evidence, source_checks[-1]))
+
+    # Classify after all available pages are read: a named contract may need
+    # a second official page, and a generic fee page cannot establish eligibility.
+    fresh_sources = proof_helpers.source_map(captures, catalog)
+    route_results = []
+    deferred = []
+    for fr, answer, quoted, evidence, check in candidates:
+        source = captures[fr.final_url]
+        verdict = quoted.get('disposition', guidance.get('disposition'))
+        result = proof_helpers.structured_route_result(answer, reviewed_fields.get('disposition'),
+            source, fresh_sources, route, verdict, dict(guidance, **quoted), when[:10])
+        has_contract = proof_helpers.has_structured_contract(answer, reviewed_fields.get('disposition'), fr.final_url)
+        supported = bool(result) or (not has_contract and _supports_route(
+            source['text'], answer, route, guidance, quoted, fr.final_url, when[:10]))
         if supported:
-            if page is None:
-                page, raw = fr, answer
-            readings.append((fr, answer, quoted, evidence, source_checks[-1]))
-            continue
-        irrelevant.extend((url, fr.final_url))
-        # A generic page cannot change THIS route, but its discrepancies need
-        # an operator, even if another candidate source can confirm the route.
-        if quoted:
-            _file_dispute(db, row, route, guidance, quoted, evidence, fr.final_url, when)
-            fallback = (fr, quoted)
+            if result is None:
+                result = {'ok': True, 'quote': route_supporting_excerpt(source['text'], verdict, route,
+                    policy_date=when[:10]), 'scope_quotes': [], 'program': None}
+            check['route_evidence'] = result
+            check['route_supported'] = True
+            check['outcome'] = 'checked'
+            route_results.append(result)
+            if page is None: page, raw = fr, answer
+            readings.append((fr, answer, quoted, evidence, check))
+        else:
+            deferred.append((fr, answer, quoted, evidence, check))
+    for fr, answer, quoted, evidence, check in deferred:
+        allowed = proof_helpers.ancillary_fields(captures[fr.final_url], answer, guidance, route, route_results)
+        if allowed:
+            check['outcome'] = 'field_checked'
+            check['allowed_fields'] = sorted(allowed)
+            readings.append((fr, answer, {k:v for k,v in quoted.items() if k in allowed}, evidence, check))
+        rejected = {k:v for k,v in quoted.items() if k not in allowed}
+        if not allowed:
+            irrelevant.append(fr.final_url)
+        if rejected:
+            _file_dispute(db, row, route, guidance, rejected, evidence, fr.final_url, when)
+            fallback = (fr, rejected)
 
     # Advance by actual attempts. Advancing by the selected eight URLs could
     # return to the same offset forever when a slow first page used the budget.
@@ -536,6 +592,22 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                 "disputed": sorted(fallback[1]) if fallback else [],
                 "generic_skipped": sorted(set(fallback[1]) & NATIONALITY_SPECIFIC) if fallback else []}
 
+    effective_candidate = dict(guidance)
+    for _, _, changes, _, _ in readings:
+        effective_candidate.update(changes)
+    scoped_readings = []
+    for fr, answer, quoted, evidence, check in readings:
+        rejected = {k:v for k,v in quoted.items() if not proof_helpers.field_program_matches(k,evidence.get(k),effective_candidate)}
+        if proof_helpers.needs_program_scope(effective_candidate):
+            allowed = proof_helpers.ancillary_fields(captures[fr.final_url],answer,effective_candidate,route,route_results)
+            check['unscoped_program_fields'] = sorted({'government_fee','processing_time'} - allowed)
+            rejected.update({k:v for k,v in quoted.items() if k in {'government_fee','processing_time'} and k not in allowed})
+        if rejected:
+            _file_dispute(db,row,route,guidance,rejected,evidence,fr.final_url,when)
+            fallback=(fr,rejected)
+        scoped_readings.append((fr,answer,{k:v for k,v in quoted.items() if k not in rejected},evidence,check))
+    readings = scoped_readings
+
     proposed, evidence, field_sources, conflicts = {}, {}, {}, set()
     unquoted = sorted(unquoted_all)
     for fr, answer, quoted, quotes, check in readings:
@@ -554,7 +626,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     seen, _ = verified_overrides.apply(dict(current), route)
     disputed, applied = {}, {}
     for k, v in proposed.items():
-        if k in conflicts:
+        if k in conflicts or conflicts & {"disposition", "requirement_detail"}:
             disputed[k] = v
             continue
         if v == seen.get(k):
@@ -591,32 +663,53 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     substantive = {k for k in OVERRIDABLE - metadata_fields if seen.get(k) not in (None, "", [], {})}
     verified_fields, verified_field_sources = set(), {}
     for fr, answer, quoted, quotes, check in readings:
-        supported_fields = {k for k in substantive if isinstance(quotes.get(k), str)
-                            and quote_in_text(quotes[k], fr.content_text[:MAX_PAGE_CHARS])
-                            and field_value_supported(k, seen[k], quotes[k])}
+        source = captures[fr.final_url]
+        result, confirmed = None, False
+        if check.get('route_supported'):
+            result = proof_helpers.structured_route_result(answer, reviewed_fields.get('disposition'),
+                source, fresh_sources, route, seen.get('disposition'), seen, when[:10])
+            has_contract = proof_helpers.has_structured_contract(answer, reviewed_fields.get('disposition'), fr.final_url)
+            confirmed = bool(result) or (not has_contract and _supports_route(source['text'],answer,route,seen,{},fr.final_url,when[:10]))
+            if not confirmed:
+                check['verified_fields'] = []
+                continue
+        allowed = set(check.get('allowed_fields', substantive)) - set(check.get('unscoped_program_fields', []))
+        if proof_helpers.needs_program_scope(seen) or not check.get('route_supported'):
+            program_fields = proof_helpers.ancillary_fields(source,answer,seen,route,route_results)
+            allowed -= {'government_fee','processing_time'} - program_fields
+        supported_fields = {k for k in substantive & allowed if isinstance(quotes.get(k), str)
+                            and quote_in_text(quotes[k], source['text'])
+                            and field_value_supported(k, seen[k], quotes[k])
+                            and proof_helpers.field_scope_matches_route(k,quotes[k],route)
+                            and proof_helpers.field_program_matches(k,quotes[k],seen)}
+        supported_fields.discard('disposition')
+        for key in (substantive & allowed) - {'disposition'}:
+            reviewed = proof_helpers.reviewed_field_quote(key, seen[key], reviewed_fields,
+                                                         source, fresh_sources, route)
+            if reviewed and proof_helpers.field_program_matches(key,reviewed[0],seen):
+                supported_fields.add(key)
+                verified_field_sources[key] = {'source_url':fr.final_url, 'checked_at':when,
+                    'quote':reviewed[0], 'supporting_evidence':reviewed[1]}
+        if check.get('route_supported'):
+            verdict = seen.get('disposition')
+            if confirmed:
+                result = result or check['route_evidence']
+                supported_fields.add('disposition')
+                verified_field_sources['disposition'] = {'source_url':fr.final_url, 'checked_at':when,
+                    'quote':result['quote'], 'scope_quotes':result.get('scope_quotes', [])}
+                if verdict == 'VISA_EXEMPT' and seen.get('application_channel') in {'not_required','none'}:
+                    supported_fields.add('application_channel')
+                    verified_field_sources['application_channel'] = dict(verified_field_sources['disposition'],
+                        derived_from='disposition')
+        # A price on a generic page cannot verify a verdict, even if the model
+        # supplies a second unrelated visa quote in the same response.
+        if not check.get('route_supported'):
+            supported_fields.discard('disposition')
         verified_fields.update(supported_fields)
-        if _supports_route(fr.content_text, answer, route, seen, {}, fr.final_url, when[:10]):
-            supported_fields.add("disposition")
-            verified_fields.add("disposition")
-            excerpt = route_supporting_excerpt(fr.content_text, seen.get("disposition"), route, policy_date=when[:10])
-            # Outbound tables bind their literal row to a separate literal
-            # applicant heading. Preserve both, never invent a joined quote.
-            if not excerpt:
-                from .evidence_validator import _NATIONALITY_NAMES
-                dest_names = _NATIONALITY_NAMES.get(route.get("destination_country"), ())
-                for name in dest_names:
-                    hit = re.search(r"(?:^|[.\n])\s*" + re.escape(name.strip()) + r"\s*:[^.\n]+", fr.content_text, re.I)
-                    if hit:
-                        excerpt = hit.group().strip(".\n ")
-                        break
-            verified_field_sources["disposition"] = {"source_url": fr.final_url, "checked_at": when, "quote": excerpt}
-            heading = re.search(r"Visa requirements for\s+[^.\n]{1,80} passport holders", fr.content_text, re.I)
-            if heading and not route_supporting_excerpt(fr.content_text, seen.get("disposition"), route, policy_date=when[:10]):
-                verified_field_sources["disposition"]["scope_quote"] = heading.group()
-        check["verified_fields"] = sorted(supported_fields)
+        check['verified_fields'] = sorted(supported_fields)
         for key in supported_fields:
-            if key != "disposition":
-                verified_field_sources[key] = {"source_url": fr.final_url, "checked_at": when, "quote": quotes[key]}
+            if key not in verified_field_sources:
+                verified_field_sources[key] = {'source_url':fr.final_url, 'checked_at':when, 'quote':quotes[key]}
     unverified_fields = sorted(substantive - verified_fields)
     unchecked_sources = [u for u in all_sources if u not in visited]
     failed_sources = any(c["outcome"] in {"fetch_failed", "provider_error"} for c in source_checks)
@@ -757,11 +850,14 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
     when = _now().isoformat()
     outcome = "page_unreachable"
     proposal = None
+    reviewed_fields, catalog = proof_helpers.reviewed_evidence(override, row.verification)
+    source_override = dict(override or {}, supporting_sources=[{'id':k,'url':v} for k,v in catalog.items()])
+    captures, candidates = {}, []
     deadline = time.monotonic() + ROUTE_BUDGET_SECONDS
     requested = {"visa_requirement": "disposition", "visa_fee_amount": "government_fee",
                  "visa_fee_currency": "government_fee", "visa_type": "visa_category",
                  "application_method": "application_channel", "stay_duration": "permitted_stay"}.get(issue.field, issue.field)
-    for url in candidate_sources(guidance, override):
+    for url in candidate_sources(guidance, source_override):
         remaining = deadline - time.monotonic()
         if remaining <= 0:
             break
@@ -770,11 +866,18 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
         if not (fr.ok and fr.content_text and not fr.challenge
                 and is_government_host(fr.final_hostname)):
             continue
-        if (not _source_authority_matches(fr.final_url, route) or
+        captures[url] = captures[fr.final_url] = {'url':fr.final_url,
+            'text':fr.content_text[:MAX_PAGE_CHARS], 'checked_at':when[:10]}
+        companion = url in catalog.values()
+        if ((not _source_authority_matches(fr.final_url, route) and not companion) or
                 _future_scheduled_source(fr.final_url, route, when[:10])):
             outcome = "page_not_relevant"
             continue
+        if companion and not _page_has_visa_topic(fr.content_text):
+            continue
         payload = {
+            "reviewed_evidence": reviewed_fields.get('disposition') if
+                (reviewed_fields.get('disposition') or {}).get('source_url') == fr.final_url else None,
             "policy_date": when[:10],
             "route": {k: route.get(k) for k in
                       ("passport_nationality", "destination_country",
@@ -799,17 +902,47 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
         if not isinstance(raw, dict):
             outcome = "provider_error"
             continue
-        quoted, evidence, unquoted = _quoted_proposals(raw, fr.content_text[:MAX_PAGE_CHARS])
-        supported = _supports_route(fr.content_text[:MAX_PAGE_CHARS], raw, route, guidance, quoted, fr.final_url, when[:10])
-        if not supported:
-            outcome = "page_not_relevant"
+        quoted, evidence, unquoted = _quoted_proposals(raw, fr.content_text[:MAX_PAGE_CHARS], route)
+        candidates.append((fr,raw,quoted,evidence,unquoted))
+    fresh_sources = proof_helpers.source_map(captures,catalog)
+    applicable, route_results, deferred = [], [], []
+    for fr,raw,quoted,evidence,unquoted in candidates:
+        source=captures[fr.final_url]
+        verdict=quoted.get('disposition',guidance.get('disposition'))
+        result=proof_helpers.structured_route_result(raw,reviewed_fields.get('disposition'),source,
+            fresh_sources,route,verdict,dict(guidance,**quoted),when[:10])
+        has_contract=proof_helpers.has_structured_contract(raw,reviewed_fields.get('disposition'),fr.final_url)
+        if result or (not has_contract and _supports_route(source['text'],raw,route,guidance,quoted,fr.final_url,when[:10])):
+            result=result or {'ok':True,'quote':route_supporting_excerpt(source['text'],verdict,route,policy_date=when[:10])}
+            route_results.append(result)
+            applicable.append((fr,raw,quoted,evidence,unquoted,None))
+        else:
+            deferred.append((fr,raw,quoted,evidence,unquoted))
+    for fr,raw,quoted,evidence,unquoted in deferred:
+        allowed=proof_helpers.ancillary_fields(captures[fr.final_url],raw,guidance,route,route_results)
+        if allowed:
+            applicable.append((fr,raw,{k:v for k,v in quoted.items() if k in allowed},evidence,unquoted,allowed))
+    if candidates and not applicable:
+        outcome='page_not_relevant'
+    effective_candidate=dict(guidance)
+    for _,_,changes,_,_,_ in applicable:
+        effective_candidate.update(changes)
+    for fr,raw,quoted,evidence,unquoted,allowed in applicable:
+        quoted={k:v for k,v in quoted.items() if proof_helpers.field_program_matches(k,evidence.get(k),effective_candidate)}
+        if not proof_helpers.field_program_matches(requested,evidence.get(requested),effective_candidate):
             continue
+        if proof_helpers.needs_program_scope(effective_candidate):
+            program_fields=proof_helpers.ancillary_fields(captures[fr.final_url],raw,effective_candidate,route,route_results)
+            quoted={k:v for k,v in quoted.items() if k not in {'government_fee','processing_time'} or k in program_fields}
+            if requested in {'government_fee','processing_time'} and requested not in program_fields:
+                continue
         fields = {k: {"page_says": v, "record_holds": guidance.get(k),
                       "quote": evidence[k]} for k, v in quoted.items()}
-        confirmed = (requested == "disposition" or
+        confirmed = ((allowed is None or requested in allowed) and (requested == "disposition" or
                      isinstance(evidence.get(requested), str)
                      and quote_in_text(evidence[requested], fr.content_text[:MAX_PAGE_CHARS])
-                     and field_value_supported(requested, guidance.get(requested), evidence[requested]))
+                     and field_value_supported(requested, guidance.get(requested), evidence[requested])
+                     and proof_helpers.field_scope_matches_route(requested,evidence[requested],route)))
         proposal = {"outcome": "checked", "source_url": fr.final_url,
                     "checked_at": when,
                     "consistent": confirmed and raw.get("consistent") is True and not fields and not unquoted,

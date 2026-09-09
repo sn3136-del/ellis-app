@@ -20,16 +20,17 @@ def _table_support(proof, source, route, disposition):
     heading, region, country = (table.get(k) for k in ('heading_quote', 'table_quote', 'nationality_quote'))
     if not all(isinstance(v, str) and v.strip() for v in (heading, region, country)):
         return False
-    if (len(region) > 50000 or len(country) > 180 or not evidence.quote_in_text(region, source['text'])
-            or not evidence.quote_in_text(heading, region[:max(2000, len(heading))])
-            or not evidence.quote_in_text(country, region)):
+    if (len(region) > 50000 or len(country) > 180 or not _quote_in_source(region, source['text'])
+            or not _quote_in_source(heading, region[:max(2000, len(heading))])
+            or not _quote_in_source(country, region)):
         return False
+    heading, region, country = map(_block_text, (heading, region, country))
     legal_waiver = (disposition == 'VISA_EXEMPT'
         and urlsplit(source['url']).hostname == 'eur-lex.europa.eu'
         and re.search(r'WHOSE NATIONALS ARE EXEMPT FROM THE REQUIREMENT TO BE IN POSSESSION OF A VISA', heading, re.I))
     legal_required = (disposition == 'VISA_REQUIRED'
         and urlsplit(source['url']).hostname == 'eur-lex.europa.eu'
-        and re.search(r'WHOSE NATIONALS MUST BE IN POSSESSION OF A VISA', heading, re.I))
+        and re.search(r'WHOSE NATIONALS (?:MUST BE|ARE REQUIRED TO BE) IN POSSESSION OF A VISA', heading, re.I))
     if not (evidence.supports_disposition(heading, disposition) or legal_waiver or legal_required):
         return False
     if not re.search(r'countries|nationalities|nationals|EO\s*408|Executive Order', heading, re.I):
@@ -40,8 +41,12 @@ def _table_support(proof, source, route, disposition):
     if not region.strip().startswith(heading.strip()):
         return False
     body = region.strip()[len(heading.strip()):]
+    # The current legal list contains a Serbian authority name with a colon
+    # inside a country-row parenthesis. This exception is EUR-Lex only.
+    body_lines = [re.sub(r'\(.*', '', line) if legal_waiver or legal_required else line
+                  for line in body.splitlines() if line.strip()]
     if any(re.search(r'[:;!?]|\b(?:visa|passport|eligible|eligibility|required|conditions|enter)\b', line, re.I)
-           for line in body.splitlines() if line.strip()):
+           for line in body_lines):
         return False
     # Membership must be the actual list item, never another nationality
     # mentioned in a neighbouring policy paragraph or a mission's address.
@@ -55,8 +60,19 @@ def _table_support(proof, source, route, disposition):
     return True
 
 
+def _block_text(value):
+    # Browser captures use Markdown markers; HTML extraction supplies the same
+    # semantic blocks. Only formatting markers normalize, never policy words.
+    return '\n'.join(re.sub(r'^\s*(?:#{1,6}\s+|[*•]\s+)', '', line).strip()
+                     for line in str(value).splitlines())
+
+
+def _quote_in_source(quote, text):
+    return evidence.quote_in_text(_block_text(quote), _block_text(text))
+
+
 def _norm(value):
-    return ' '.join(str(value).split())
+    return ' '.join(_block_text(value).split())
 
 
 def _singapore_list_support(proof, source, route, disposition):
@@ -115,10 +131,19 @@ def _bounded_list(rule, source, heading, closing):
         return False
     text, heading, closing = _norm(source['text']), _norm(heading), _norm(closing)
     table = _norm(rule.get('table_quote'))
-    if len(table) > 50000 or text.count(heading) != 1 or text.count(closing) != 1:
+    if len(table) > 50000 or not heading or not closing:
         return False
-    start, stop = text.index(heading), text.index(closing)
-    return start < stop and text[start:stop].strip() == table
+    # Navigation may repeat the section title after Markdown is removed. The
+    # complete policy section itself must occur once and end immediately at
+    # the first following closing heading; a TOC entry cannot match its body.
+    matches = 0
+    for found in re.finditer(re.escape(heading), text):
+        start = found.start()
+        stop = text.find(closing, found.end())
+        if stop > start and text[start:stop].strip() == table:
+            matches += 1
+    return matches == 1
+
 
 
 def _country_member(rule, nat):
@@ -156,7 +181,7 @@ def _closed_list_support(proof, source, sources, route, disposition):
         exception = _companion(rule, 'exception_source_id', sources, proof)
         gq, eq = rule.get('general_rule_quote', ''), rule.get('exception_quote', '')
         if not (_exact_page(general, visitor_url) and _exact_page(exception, visitor_url) and source == general
-                and _norm(proof['quote']) == _norm(gq) and evidence.quote_in_text(gq, general['text']) and evidence.quote_in_text(eq, exception['text'])):
+                and _norm(proof['quote']) == _norm(gq) and _quote_in_source(gq, general['text']) and _quote_in_source(eq, exception['text'])):
             return False
         if not ('a citizen of a foreign country who wishes to travel to the United States must first obtain a visa' in _norm(gq)
                 and 'for tourism (B-2 visa)' in gq
@@ -185,7 +210,7 @@ def _closed_list_support(proof, source, sources, route, disposition):
             and _exact_page(listing, 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651')
             and _exact_page(general, 'https://www.abf.gov.au/crossing/Pages/arriving-and-leaving.aspx')
             and source == general and _norm(proof['quote']) == _norm(gq)
-            and evidence.quote_in_text(gq, general['text'])
+            and _quote_in_source(gq, general['text'])
             and 'If you are not an Australian Citizen you must hold a valid visa when entering Australia.' in _norm(gq)
             and _bounded_list(rule, listing, 'You must be a citizen of and hold a valid passport from one of these countries to be eligible for the eVisitor:', 'You cannot apply with:')
             and _country_member(rule, nat)
@@ -195,6 +220,59 @@ def _closed_list_support(proof, source, sources, route, disposition):
 
 def _country_section_support(proof, source, sources, route, disposition):
     rule = proof.get('source_country_section')
+    if isinstance(rule, dict) and rule.get('program') == 'korea_russian_keta':
+        q, age = _norm(proof['quote']), rule.get('age_quote', '')
+        return (route['passport_nationality'] == 'RUS' and route['destination_country'] == 'KOR'
+            and route['travel_document_type'] == 'ordinary_passport' and route['travel_purpose'] == 'tourism'
+            and disposition == 'ELECTRONIC_AUTHORIZATION_REQUIRED'
+            and _exact_page(source, 'https://overseas.mofa.go.kr/ru-ru/brd/m_25801/view.do?seq=761832')
+            and source == _companion(rule, 'source_id', sources, proof)
+            and _norm(rule.get('rule_quote')) == q and _quote_in_source(age, source['text'])
+            and 'граждане Российской Федерации могут въезжать' in q
+            and 'получение электронного разрешения на въезд в Республику Корея (K-ETA) является обязательным' in q
+            and 'до 17 лет включительно' in age and 'от 65 лет освобождаются от получения K-ETA' in age
+            and 'на момент въезда' in age and '18 лет' in age)
+    if isinstance(rule, dict) and rule.get('program') == 'india_vietnam_tourist_visa':
+        general = _companion(rule, 'general_rule_source_id', sources, proof)
+        nationality = _companion(rule, 'nationality_source_id', sources, proof)
+        gq, nq, eq = (rule.get(k, '') for k in ('general_rule_quote', 'nationality_quote', 'exception_quote'))
+        return (route['passport_nationality'] == 'VNM' and route['destination_country'] == 'IND'
+            and route['travel_document_type'] == 'ordinary_passport' and route['travel_purpose'] == 'tourism'
+            and disposition == 'VISA_REQUIRED' and source == general
+            and _exact_page(general, 'https://www.indianvisaonline.gov.in/')
+            and _exact_page(nationality, 'https://www.indembassyhanoi.gov.in/page/visa-services-and-fees/')
+            and _norm(proof['quote']) == _norm(gq) and _quote_in_source(gq, general['text'])
+            and _quote_in_source(nq, nationality['text']) and _quote_in_source(eq, general['text'])
+            and _norm(gq) == 'All foreign nationals entering India are required to possess a valid international travel document in the form of a national passport with a valid visa from an Indian Mission/Post or eVisa (Limited Categories) from Bureau of Immigration, Ministry of Home Affairs.'
+            and 'To avail e-Tourist Visa facility for Vietnam nationals' in nq
+            and 'Fly to India with Passport and ETA' in nq
+            and 'OCI card / eOCI' in eq and 'except for those exempted under bilateral arrangements' in eq)
+    if isinstance(rule, dict) and rule.get('program') == 'taiwan_hk_entry_permit':
+        eligibility = _companion(rule, 'eligibility_source_id', sources, proof)
+        eq, q = rule.get('eligibility_quote', ''), _norm(proof['quote'])
+        url = urlsplit(source['url'])
+        return (route['passport_nationality'] == 'HKG' and route['destination_country'] == 'TWN'
+            and route['travel_document_type'] == 'ordinary_passport' and route['travel_purpose'] == 'tourism'
+            and disposition == 'CONDITIONAL' and url.hostname == 'www.moi.gov.tw' and url.path == '/News_toggle3.aspx'
+            and _exact_page(eligibility, 'https://www.gov.tw/News_Content_2_371269')
+            and _quote_in_source(eq, eligibility['text']) and _norm(rule.get('rule_quote')) == q
+            and all(term in q for term in ('臨時入境停留（網簽）', '在香港或澳門出生者', '短期停留（入出境許可證）', '不符網簽申請資格或預定來臺停留期限超過30天者'))
+            and '香港永久居留資格' in eq and '未持有香港護照以外（不含BNO）者' in eq)
+    if isinstance(rule, dict) and rule.get('program') == 'taiwan_boca_temporary_exemption':
+        nat = route['passport_nationality']
+        names = {'THA': 'the Kingdom of Thailand', 'PHL': 'the Philippines'}
+        quote = _norm(proof['quote'])
+        # This exact BOCA paragraph excludes diplomatic/service documents;
+        # that exclusion is positive ordinary-passport eligibility evidence.
+        expected = r'Nationals of ' + re.escape(names.get(nat, 'INVALID')) + r' \(effective until ([A-Za-z]+ \d{1,2}, \d{4})\), except those holding diplomatic or official/service passports, are eligible for the visa-exemption program, with a duration of stay of up to 14 days\.'
+        quote = re.sub(r'^\d+[.]\s*', '', quote)
+        match = re.fullmatch(expected, quote)
+        return (nat in names and route['destination_country'] == 'TWN' and disposition == 'VISA_EXEMPT'
+            and route['travel_document_type'] == 'ordinary_passport' and route['travel_purpose'] == 'tourism'
+            and _exact_page(source, 'https://www.boca.gov.tw/cp-149-4486-7785a-2.html')
+            and source == _companion(rule, 'source_id', sources, proof)
+            and _norm(rule.get('rule_quote')) == _norm(proof['quote'])
+            and match is not None and datetime.strptime(match[1], '%B %d, %Y').date() >= date.fromisoformat(proof['verified_at']))
     names = {'KOR': 'Республика Корея', 'THA': 'Таиланд', 'SGP': 'Сингапур', 'IDN': 'Индонезия', 'VNM': 'Вьетнам', 'ESP': 'Испания'}
     nat = route['passport_nationality']
     if (not isinstance(rule, dict) or rule.get('program') != 'russia_mfa_country_rule'
@@ -205,7 +283,7 @@ def _country_section_support(proof, source, sources, route, disposition):
         return False
     heading, section, closing, quote = (rule.get(k, '') for k in ('heading_quote', 'section_quote', 'closing_quote', 'rule_quote'))
     if (heading != '#### ' + names[nat] or rule.get('nationality_quote') != names[nat]
-            or _norm(quote) != _norm(proof['quote']) or not evidence.quote_in_text(quote, section)
+            or _norm(quote) != _norm(proof['quote']) or not _quote_in_source(quote, section)
             or not closing.startswith('#### ') or section.count('#### ') != 1):
         return False
     bounded = {'heading_quote': heading, 'table_quote': section, 'closing_quote': closing}
@@ -213,7 +291,7 @@ def _country_section_support(proof, source, sources, route, disposition):
         return False
     if disposition == 'VISA_EXEMPT':
         return (nat in {'KOR', 'THA'} and 'Безвизовой режим:' in section
-            and re.fullmatch(r'\* по общегражданским паспортам [–-] до (?:30|60) дней[;.]', _norm(quote)) is not None)
+            and re.fullmatch(r'(?:\* )?по общегражданским паспортам [–-] до (?:30|60) дней[;.]', _norm(quote)) is not None)
     if disposition != 'VISA_REQUIRED':
         return False
     if _norm(quote) == 'Визы по всем видам паспортов.':
@@ -223,7 +301,7 @@ def _country_section_support(proof, source, sources, route, disposition):
     gq = rule.get('general_rule_quote', '')
     return (nat in {'SGP', 'IDN', 'VNM'} and _norm(quote) == 'Могут въезжать по электронной визе на срок до 30 дней.'
         and _exact_page(general, 'https://www.kdmid.ru/cons/visas/')
-        and evidence.quote_in_text(gq, general['text']) and len(gq) < 2000
+        and _quote_in_source(gq, general['text']) and len(gq) < 2000
         and 'Для въезда в Российскую Федерацию иностранного гражданина или лица без гражданства необходима виза.' in _norm(gq)
         and 'При наличии соглашения возможен въезд в Российскую Федерацию иностранных граждан без виз.' in _norm(gq)
         and 'общегражданским паспортам' not in section)
@@ -247,7 +325,7 @@ def _eu_citizen_support(proof, source, sources, route, disposition):
         return False
     expected = 'https://european-union.europa.eu/principles-countries-history/eu-countries/' + EU_MEMBERS[nat] + '_en'
     if (membership['url'] != expected or membership['checked_at'] != proof['verified_at']
-            or not evidence.quote_in_text(member_quote, membership['text'])):
+            or not _quote_in_source(member_quote, membership['text'])):
         return False
     since = re.search(r'EU Member State:\s*since\s*(\d{1,2}\s+[A-Za-z]+\s+\d{4})', member_quote, re.I)
     try:
@@ -260,7 +338,90 @@ def _eu_citizen_support(proof, source, sources, route, disposition):
 
 
 
+
+def _scope_current(proof, source, policy_date):
+    """Check dated text around the actual scope, never unrelated page dates."""
+    on = date.fromisoformat(policy_date)
+    scopes = [proof.get('quote', '')]
+    for key in ('source_table', 'source_closed_list', 'source_country_section'):
+        rule = proof.get(key)
+        if isinstance(rule, dict):
+            scopes += [rule[k] for k in ('heading_quote', 'table_quote', 'section_quote', 'rule_quote') if isinstance(rule.get(k), str)]
+    text = _norm(source['text'])
+    context = []
+    for scope in scopes:
+        normalized = _norm(scope)
+        if normalized and normalized in text:
+            at = text.index(normalized)
+            # A source can place an effective-date heading directly before its
+            # list. Keep the bounded preceding sentence, not the whole page.
+            context.append(text[max(0, at-200):at] + normalized)
+        else:
+            context.append(normalized)
+    date_token = r'(\d{4}-\d{2}-\d{2}|\d{1,2}\s+[A-Za-z]+\s+\d{4}|[A-Za-z]+\s+\d{1,2},?\s+\d{4})'
+    for passage in context:
+        for direction, pattern in [('start', r'(?:from|effective(?:\s+from)?|starting(?:\s+from)?|as of|beginning)\s+' + date_token),
+                                   ('end', r'(?:until|through|expires? on|expiry date[: ]*)\s*' + date_token)]:
+            for match in re.finditer(pattern, passage, re.I):
+                value = ' '.join(match[1].split())
+                parsed = None
+                for fmt in ('%Y-%m-%d', '%d %B %Y', '%d %b %Y', '%B %d, %Y', '%B %d %Y'):
+                    try: parsed = datetime.strptime(value, fmt).date(); break
+                    except ValueError: pass
+                if parsed is None or direction == 'start' and parsed > on or direction == 'end' and parsed < on:
+                    return False
+    return True
+
 CONTRACTS = ('source_table', 'source_closed_list', 'source_eu_citizen', 'source_country_section')
+
+
+def guidance_conditions_preserved(result, guidance):
+    """Do not turn a scoped rule into an unconditional customer claim.
+
+    This only checks preservation of conditions established by the named
+    source contract. It cannot authenticate new facts in the guidance.
+    """
+    if not isinstance(result, dict) or not result.get('ok') or not isinstance(guidance, dict):
+        return {'ok': False, 'reason': 'applicable route evidence is absent'}
+    def strings(value):
+        if isinstance(value, str):
+            yield value
+        elif isinstance(value, dict):
+            for name, child in value.items():
+                if name not in {'source_url', 'source_quote', 'field_provenance', 'quote', 'note', 'verifier'}:
+                    yield from strings(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from strings(child)
+    text = ' '.join(strings(guidance)).casefold()
+    program = result.get('program')
+    if program == 'canada_eta_member':
+        air = re.search(r'\bair\b|\bflight|\bflying', text)
+        surface = any(re.search(r'\b(?:land|sea|surface|car|bus|train|boat)\b', sentence) and
+                      re.search(r'\beta\b', sentence) and
+                      re.search(r'not required|not need|don.t need|unnecessary|no eta|without an? eta', sentence)
+                      for sentence in re.split(r'[.!?]\s+', text))
+        if not (air and surface):
+            return {'ok': False, 'reason': 'Canada eTA evidence is for air travel; preserve its surface-travel distinction'}
+    if program == 'canada_visitor_member' and any('may be eligible' in str(c).casefold() for c in result.get('conditions', [])):
+        if not (re.search(r'\beta\b', text) and re.search(r'\bif\b|eligible|conditional', text)
+                and re.search(r'\bair\b|\bflight|\bflying', text)):
+            return {'ok': False, 'reason': 'the listed nationality has a conditional air-eTA alternative'}
+    if program == 'australia_evisitor_member' and not re.search(r'evisitor|\b651\b', text):
+        return {'ok': False, 'reason': 'the reviewed product eligibility is specifically eVisitor 651'}
+    if program == 'korea_russian_keta':
+        if not (re.search(r'17.{0,35}(?:younger|under)|(?:under|younger).{0,20}18',text)
+                and re.search(r'65.{0,30}(?:older|over)|(?:older|over).{0,20}65',text)
+                and 'exempt' in text and re.search(r'18.{0,40}entry|turning 18',text)):
+            return {'ok': False, 'reason': 'K-ETA evidence includes age exemptions and age at entry'}
+    if program == 'india_vietnam_tourist_visa' and not ('oci' in text and 'bilateral' in text and 'exempt' in text):
+        return {'ok': False, 'reason': 'India general visa rule retains OCI and applicable bilateral exceptions'}
+    if program == 'taiwan_hk_entry_permit':
+        if not (('permanent residen' in text) and 'passport' in text and 'another' in text
+                and re.search(r'birth|born',text) and re.search(r'previous|prior',text)
+                and re.search(r'others|ineligible|not eligible',text)):
+            return {'ok': False, 'reason': 'Hong Kong temporary permit eligibility and other permit alternatives must remain explicit'}
+    return {'ok': True, 'reason': 'announced conditions remain in the customer guidance'}
 
 
 def validate_route_evidence(proof, source, sources, route, disposition, *, policy_date):
@@ -277,7 +438,7 @@ def validate_route_evidence(proof, source, sources, route, disposition, *, polic
         checked = proof.get('verified_at', policy_date)
         if checked > policy_date or checked != source.get('checked_at'):
             return result
-        if not isinstance(quote, str) or not quote.strip() or not evidence.quote_in_text(quote, source.get('text', '')):
+        if not isinstance(quote, str) or not quote.strip() or not _quote_in_source(quote, source.get('text', '')):
             return result
         if not evidence.source_is_official(source['url']) or not evidence.jurisdiction_matches(source['url'], route['destination_country']):
             return result
@@ -295,7 +456,7 @@ def validate_route_evidence(proof, source, sources, route, disposition, *, polic
             ok = _country_section_support(proof, source, sources, route, disposition)
         else:
             ok = bool(evidence.route_supporting_excerpt(quote, disposition, route, policy_date=policy_date))
-        if not ok:
+        if not ok or not _scope_current(proof, source, policy_date):
             return result
         scope = [{'source_id': proof.get('source_id'), 'quote': quote}]
         for key in contracts:
@@ -306,8 +467,9 @@ def validate_route_evidence(proof, source, sources, route, disposition, *, polic
                     prefix = field[:-6]
                     sid = rule.get(prefix + '_source_id', rule.get('source_id', proof.get('source_id')))
                     if key == 'source_eu_citizen': sid = rule.get('membership_source_id')
+                    if rule.get('program') == 'india_vietnam_tourist_visa' and field == 'exception_quote': sid = rule.get('general_rule_source_id')
                     companion = sources.get(sid)
-                    if not companion or companion.get('checked_at') != checked or not evidence.source_is_official(companion['url']) or not evidence.quote_in_text(value, companion.get('text', '')):
+                    if not companion or companion.get('checked_at') != checked or not evidence.source_is_official(companion['url']) or not _quote_in_source(value, companion.get('text', '')) or not _scope_current({'quote':value}, companion, policy_date):
                         return result
                     scope.append({'source_id': sid, 'quote': value})
             if key == 'source_closed_list' and rule.get('program') in {'canada_eta_member', 'canada_visitor_member', 'australia_evisitor_member'}:

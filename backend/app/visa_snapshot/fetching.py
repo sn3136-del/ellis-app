@@ -52,10 +52,38 @@ _MIN_REAL_TEXT = 120
 
 
 def html_to_text(html: str) -> str:
-    text = _TAG_RE.sub(" ", html)
-    text = _HTML_RE.sub(" ", text)
+    # Literal evidence needs the rendered document's structural boundaries.
+    # Replacing every tag with a space erased country-list rows in minified
+    # HTML, while keeping source-code newlines split ordinary sentences.
+    from html.parser import HTMLParser
+    class EvidenceText(HTMLParser):
+        blocks = {'address', 'article', 'aside', 'blockquote', 'br', 'caption', 'dd', 'div', 'dl', 'dt',
+                  'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li',
+                  'main', 'nav', 'ol', 'p', 'pre', 'section', 'table', 'tr', 'ul'}
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.parts, self.skip = [], None
+        def handle_starttag(self, tag, attrs):
+            if tag in {'script', 'style'}:
+                self.skip = tag
+            if not self.skip and tag in self.blocks:
+                self.parts.append('\n')
+        def handle_endtag(self, tag):
+            if tag == self.skip:
+                self.skip = None
+            elif not self.skip and tag in self.blocks:
+                self.parts.append('\n')
+            elif not self.skip and tag in {'td', 'th'}:
+                self.parts.append(' | ')
+        def handle_data(self, data):
+            if not self.skip:
+                self.parts.append(re.sub(r'\s+', ' ', data))
+    parser = EvidenceText()
+    parser.feed(html or '')
+    parser.close()
+    text = ''.join(parser.parts)
     text = _WS_RE.sub(" ", text)
-    lines = [ln.strip() for ln in text.splitlines()]
+    lines = [ln.strip().removesuffix(' |').rstrip() for ln in text.splitlines()]
     return "\n".join(ln for ln in lines if ln)[:MAX_TEXT_CHARS]
 
 

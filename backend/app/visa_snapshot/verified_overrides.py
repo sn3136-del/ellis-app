@@ -314,11 +314,13 @@ def _provenance(entry: dict) -> dict:
     # A verification timestamp is not the interval in which the rule applies.
     # Preserve explicit policy bounds even when malformed: the common reader
     # must hold an invalid interval rather than silently remove its limit.
-    for key in ("effective_from", "effective_to", "policy_interval_evidence"):
+    for key in ("effective_from", "effective_to", "policy_interval_evidence", "source_id",
+                "source_table", "source_closed_list", "source_eu_citizen", "source_country_section",
+                "supporting_sources", "supporting_evidence", "additional_quotes"):
         if key in entry:
             result[key] = deepcopy(entry[key])
     if isinstance(entry.get("quote"), str):
-        result["quote"] = entry["quote"][:2000]
+        result["quote"] = entry["quote"][:50000]
     return result
 
 

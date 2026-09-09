@@ -309,12 +309,64 @@ def field_value_supported(name: str, value, text: str) -> bool:
         return False
     if name == "processing_time" and not re.search(r"process|processing|处理|處理|审理|審理", low):
         return False
+    if name == 'visa_products':
+        if isinstance(value,list):
+            return bool(value) and all(field_value_supported(name,product,text) for product in value)
+        if not isinstance(value,dict) or not isinstance(value.get('type'),str) or not value['type'].strip():
+            return False
+        # Composite product fields cannot borrow a different product's fee
+        # elsewhere on a page. Unstructured proof must bind every claim to
+        # the same literal named-product statement; richer tables need their
+        # own reviewed structured evidence and remain unverified here.
+        metadata={'source_url','source_quote','verified_at','verifier','corroborating_sources'}
+        for statement in re.split(r'(?<=[.!?])\s+|\n+',str(text)):
+            if not quote_in_text(value['type'],statement):
+                continue
+            fee=value.get('fee')
+            if isinstance(fee,dict) and fee.get('amount') is not None:
+                if (not re.search(r'fee|cost|pay|price',statement,re.I)
+                        or re.search(r'\bnot\b|\bno\b|funds|balance|income|insurance|deposit',statement,re.I)):
+                    continue
+                currency=re.escape(str(fee.get('currency','')))
+                amounts=re.findall(r'(?<![\d.])([\d,]+(?:\.\d+)?)\s*'+currency+r'\b|\b'+currency+r'\s*([\d,]+(?:\.\d+)?)',statement,re.I)
+                if len({(a or b).replace(',','') for a,b in amounts})>1:
+                    continue
+            if all(field_value_supported(k,v,statement) for k,v in value.items()
+                   if k not in metadata|{'type'} and v not in (None,'',[],{})):
+                return True
+        return False
+    if name == 'passport_validity_requirement':
+        from app.passport_validity import passport_validity_rule_errors
+        if passport_validity_rule_errors(value) or not isinstance(value, dict):
+            return False
+        if re.search(r'\b(?:not|no|if|unless|except)\b|provided that|only when|residen',low):
+            return False
+        if not re.search(r'passport|travel document', low):
+            return False
+        kind = value.get('kind')
+        if kind == 'valid_through_departure':
+            return bool(re.search(r'valid.{0,50}(?:entire|full|duration of|period of|throughout).{0,25}stay|valid.{0,45}(?:until|through).{0,20}(?:departure|end of.{0,10}stay)', low)) and not re.search(r'\bmonths?\b|application',low)
+        if kind == 'valid_on_arrival':
+            return bool(re.search(r'valid.{0,30}(?:on|at).{0,10}(?:arrival|entry)',low)) and not re.search(r'\bmonths?\b|application',low)
+        anchor = 'arrival|entry' if kind == 'months_after_arrival' else 'departure|end of.{0,10}stay'
+        return bool(re.search(r'(?<!\d)' + str(value['months']) + r'\s+months?.{0,35}(?:after|from|beyond).{0,25}(?:' + anchor + ')',low)) and 'application' not in low
     if isinstance(value, dict):
         if "amount" in value and "currency" in value:
-            amount, currency = str(value["amount"]), str(value["currency"]).casefold()
-            amount_pattern = r"(?<![\d.])" + re.escape(amount) + r"(?![\d.])"
-            if not re.search(r"(?:" + amount_pattern + r"\s*" + re.escape(currency) + r"\b|\b" + re.escape(currency) + r"\s*" + amount_pattern + r")", low):
+            from decimal import Decimal, InvalidOperation
+            currency = str(value['currency']).casefold()
+            monetary = re.sub(r'\bCAN\s*\$|\$\s*CAN\b|\bCanadian dollars?\b', 'CAD ', low, flags=re.I) if currency == 'cad' else low
+            monetary = re.sub(r'(?<![\d,])\d{1,3}(?:,\d{3})+(?:\.\d+)?(?![\d,])', lambda m:m.group().replace(',', ''), monetary)
+            number = r'(?<![\d.,-])(\d+(?:\.\d+)?)(?!\d|[.,]\d)'
+            matches = re.finditer(r'(?:' + number + r'\s*' + re.escape(currency) + r'\b|\b' + re.escape(currency) + r'\s*' + number + r')', monetary, re.I)
+            try:
+                expected = Decimal(str(value['amount']))
+                supported = expected.is_finite() and any(Decimal(m.group(1) or m.group(2)) == expected for m in matches)
+            except (InvalidOperation, ValueError, TypeError):
+                supported = False
+            if not supported:
                 return False
+            return all(field_value_supported(k, v, text) for k, v in value.items()
+                       if k not in {'amount', 'currency'} and v not in (None, '', [], {}))
         return all(field_value_supported(k, v, text) for k, v in value.items() if v not in (None, "", [], {})) and any(v not in (None, "", [], {}) for v in value.values())
     if isinstance(value, list):
         return bool(value) and all(field_value_supported(name, item, text) for item in value)
