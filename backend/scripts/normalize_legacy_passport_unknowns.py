@@ -118,8 +118,9 @@ def normalize(database, *, apply=False, backup=None, now=None):
                 if result.rowcount != 1:
                     raise RuntimeError("Integrity issue changed during repair; transaction rolled back")
                 closed.append(issue["id"])
-            changes = {FIELD: {"before": EMPTY, "after": None},
-                       "corrected_integrity_issue_ids": closed}
+            # DatabaseChangeLog has one {from, to} diff per field. Resolution
+            # metadata belongs to audit detail, not this consumer contract.
+            changes = {FIELD: {"from": EMPTY, "to": None}}
             note = "Representation-only repair: empty legacy passport contract is unknown; no policy, source verification, freshness or release was added."
             db.execute("""INSERT INTO database_change_log
                 (id,cache_key,route,action,origin,changes,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)""",

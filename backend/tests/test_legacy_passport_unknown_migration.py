@@ -85,7 +85,12 @@ def test_repair_backs_up_logs_and_preserves_source_holds_provenance_and_history(
     assert len(corrected) == 2
     assert all(json.loads(r["proposal"])["historical_read"] == "keep" for r in corrected)
     assert all(r["status"] == "open" for r in issues if r not in corrected)
-    assert len(rows(database, "database_change_log")) == 3
+    log = rows(database, "database_change_log")
+    assert len(log) == 3
+    repairs = [entry for entry in log if entry["origin"] == mod.ORIGIN]
+    assert len(repairs) == 2
+    assert all(json.loads(entry["changes"]) == {mod.FIELD: {"from": mod.EMPTY, "to": None}}
+               for entry in repairs)
     assert len(rows(database, "audit_events")) == 2
     again = mod.normalize(database, apply=True, backup=tmp_path / "unused-backup.db")
     assert not again["applied"] and again["normalized"] == 0
