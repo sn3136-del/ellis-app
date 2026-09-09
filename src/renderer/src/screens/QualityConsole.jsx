@@ -1453,6 +1453,9 @@ function NextSweepCountdown({ at, summary, t }) {
               <div>{t('ops.fresh.runReads')
                 .replace('{read}', runCount('read')).replace('{sources}', runCount('source_reads'))
                 .replace('{insufficient}', runCount('insufficient_evidence'))}</div>
+              <div>{t('ops.fresh.runComparisons')
+                .replace('{new}', runCount('model_comparisons'))
+                .replace('{reused}', runCount('model_comparisons_reused'))}</div>
               <div>{t('ops.fresh.runFailures')
                 .replace('{fetch}', runCount('source_fetch_failures')).replace('{provider}', runCount('provider_failed'))
                 .replace('{missing}', runCount('no_official_source'))}</div>

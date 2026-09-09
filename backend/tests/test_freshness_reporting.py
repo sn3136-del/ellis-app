@@ -44,12 +44,14 @@ def test_dead_sweep_process_cannot_remain_running(monkeypatch):
     from app.visa_snapshot import freshness
     data = {'running': True, 'state': 'running', 'process_id': 43210,
         'updated_at': datetime.now(timezone.utc).isoformat(), 'finished_at': None,
-        'attempted': 7, 'last_error': {'message': 'private log'}, 'secret': 'private'}
+        'attempted': 7, 'model_comparisons': 2, 'model_comparisons_reused': 5,
+        'last_error': {'message': 'private log'}, 'secret': 'private'}
     monkeypatch.setattr(freshness, 'read_sweep_status', lambda: data)
     monkeypatch.setattr(main.os, 'kill', lambda *_: (_ for _ in ()).throw(ProcessLookupError()))
     result = main._last_sweep_status()
     assert result['running'] is False and result['state'] == 'interrupted'
     assert result['finished_at'] is None and result['attempted'] == 7
+    assert result['model_comparisons'] == 2 and result['model_comparisons_reused'] == 5
     assert 'last_error' not in result and 'secret' not in result and 'process_id' not in result
     assert data['running'] is True  # read-only reporting, no fabricated completion write
 
@@ -125,6 +127,8 @@ def test_api_verdict_only_read_exposes_unverified_details_without_renewal(client
         'field_sources': {'disposition': {'source_url': url, 'checked_at': at, 'quote': quote,
             'provider_payload': 'private'}, 'government_fee': {'quote': 'unsupported fee'}},
         'source_checks': [{'source_url': url, 'outcome': 'checked', 'at': at,
+            'comparison_reused': True, 'model_compared_at': '2026-09-09T00:00:00Z',
+            'source_read_at': at, 'revalidated_at': at,
             'verified_fields': ['disposition'], 'provider_response': 'private'}]}
     row = KimiRouteGuidanceCache(cache_key=kimi_primary.cache_key(route), route=route,
         guidance={'disposition': 'VISA_REQUIRED', 'government_fee': {'amount': 20, 'currency': 'USD'},
@@ -146,6 +150,10 @@ def test_api_verdict_only_read_exposes_unverified_details_without_renewal(client
         assert actual['unchecked_sources'] == check['unchecked_sources']
         assert actual['field_sources'] == {'disposition': {'source_url': url, 'checked_at': at, 'quote': quote}}
         assert actual['source_checks'][0]['verified_fields'] == ['disposition']
+        assert actual['source_checks'][0]['comparison_reused'] is True
+        assert actual['source_checks'][0]['model_compared_at'] == '2026-09-09T00:00:00Z'
+        assert actual['source_checks'][0]['source_read_at'] == at
+        assert actual['source_checks'][0]['revalidated_at'] == at
         assert 'provider_response' not in actual['source_checks'][0]
     finally:
         db.delete(row); db.commit()
