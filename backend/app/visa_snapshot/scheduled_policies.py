@@ -123,6 +123,10 @@ def _parse_rows(raw):
     return rows
 
 
+class PolicyStoreUnavailable(ValueError):
+    """An unreadable policy store is not an empty, successfully read schedule."""
+
+
 def _load():
     try:
         stat = POLICIES.stat()
@@ -132,7 +136,7 @@ def _load():
         rows = _parse_rows(json.loads(POLICIES.read_text(encoding="utf-8")))
     except (OSError, ValueError, TypeError) as exc:
         log.error("scheduled policy store rejected: %s", exc)
-        return []
+        raise PolicyStoreUnavailable("scheduled policy store could not be validated") from exc
     _CACHE.update(version=version, rows=rows)
     return rows
 
@@ -279,7 +283,32 @@ def apply(guidance, provenance, route):
           "destination": (route or {}).get("destination_country"),
           "travel_purpose": (route or {}).get("travel_purpose", "tourism"),
           "travel_document_type": (route or {}).get("travel_document_type", "ordinary_passport")}
-    policies = [p for p in _load() if _key(p["route"]) == _key(rt)]
+    try:
+        loaded = _load()
+    except PolicyStoreUnavailable:
+        # Without a valid store its route scope is unknown, including at cold
+        # start. Do not silently publish a cached rule that may be superseded.
+        # Preserve claims and evidence for QC; the shared reader withholds the
+        # unresolved answer until the store is readable again.
+        g = deepcopy(guidance)
+        previous = g.get("scheduled_policy_conflict")
+        if isinstance(previous, dict) and previous.get("reason") == "scheduled_policy_store_unavailable":
+            previous = previous.get("prior_conflict")
+        g["scheduled_policy_conflict"] = {
+            "reason": "scheduled_policy_store_unavailable",
+            "fields": ["scheduled_policy"], "date_used": selected.isoformat(),
+        }
+        if previous:
+            g["scheduled_policy_conflict"]["prior_conflict"] = previous
+        return g, provenance
+    marker = guidance.get("scheduled_policy_conflict")
+    if isinstance(marker, dict) and marker.get("reason") == "scheduled_policy_store_unavailable":
+        guidance = deepcopy(guidance)
+        if marker.get("prior_conflict"):
+            guidance["scheduled_policy_conflict"] = deepcopy(marker["prior_conflict"])
+        else:
+            guidance.pop("scheduled_policy_conflict")
+    policies = [p for p in loaded if _key(p["route"]) == _key(rt)]
     applicable = [p for p in policies if _date(p["effective_from"]) <= selected and
                   (not p.get("effective_to") or selected <= _date(p["effective_to"]))]
     if not applicable:

@@ -145,7 +145,9 @@ def serve_time_invariants(g: dict | None) -> list[str]:
             problems.append(f"{field} must be a list")
     forms = [str(f).lower() for f in (g.get("forms") or [])] if isinstance(g.get("forms"), (list, tuple)) else []
     if g.get("scheduled_policy_conflict"):
-        problems.append("scheduled_policy conflicts with protected verified fields")
+        problems.append("scheduled_policy has unresolved policy or entry-condition conflicts")
+    if g.get("source_verification_store_unavailable"):
+        problems.append("source verification store is unavailable; verified corrections cannot be safely applied")
     if g.get("policy_interval_conflict"):
         problems.append("policy interval is invalid or does not cover the selected travel date")
     if disp == "VISA_EXEMPT":

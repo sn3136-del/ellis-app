@@ -132,4 +132,5 @@ def test_invalid_store_cannot_keep_applying_previously_loaded_policy(tmp_path, m
     monkeypatch.setattr(sp, "POLICIES", path)
     assert len(sp._load()) == 18
     path.write_text("not json")
-    assert sp._load() == []
+    with pytest.raises(sp.PolicyStoreUnavailable):
+        sp._load()
