@@ -201,6 +201,7 @@ class _VerificationTable(dict):
 REVIEWED_OVERLAY_NAMES = (
     "reviewed_schengen_overlay_2026_09_09.json",
     "reviewed_australia_overlay_2026_09_09.json",
+    "reviewed_japan_supported_overlay_2026_09_09.json",
 )
 
 
