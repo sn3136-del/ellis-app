@@ -1980,12 +1980,16 @@ def test_conflicting_verified_product_is_preserved_and_held(tmp_path, monkeypatc
     assert merged["disposition"] == "VISA_EXEMPT"
     assert [p["type"] for p in merged["visa_products"]] == [
         "Visa-free entry, 45 days", "90-day single-entry tourist e-Visa"]
-    assert any("priced visa products" in p for p in kimi_primary.serve_time_invariants(merged))
+    # A verified free lane beside an optional priced e-visa is a correct
+    # answer (the exemption is real, the e-visa is for longer stays), so the
+    # serve gate no longer holds it. A visa-free verdict whose every product
+    # costs money is still a contradiction, tested separately.
+    assert kimi_primary.serve_time_invariants(merged) == []
     out = kimi_primary.apply_verified_overrides(
         kimi_primary._result("KIMI_PRIMARY", merged, cached=True, stale=False),
         {"passport_nationality": "GBR", "destination_country": "VNM",
          "travel_purpose": "tourism"})
-    assert out["review_required"] is True
+    assert out["review_required"] is False
     # The model's 25 USD fee is an application-only leftover: dropped, or
     # zero, never a positive amount under a visa-free verdict.
     assert (merged.get("government_fee") or {}).get("amount") in (None, 0)
@@ -2056,7 +2060,7 @@ def test_a_self_contradicting_answer_is_held_until_a_person_verifies_it(db, tmp_
     kimi_primary.set_provider(single_pass(shape))
     g = kimi_primary.get_route_guidance(db, ROUTE)
     assert g["status"] == "KIMI_UNCERTAIN"
-    assert any("priced visa products" in c for c in g["contradictions"])
+    assert any("every listed visa product is priced" in c for c in g["contradictions"])
     assert g["review_required"] is True
     assert g["held"] == kimi_primary.hold_enabled()
     vo.reload()
@@ -2147,6 +2151,8 @@ def test_a_stale_row_is_never_regenerated_from_memory(db, tmp_path, monkeypatch,
             scoped.setattr(freshness, "_PROVIDER", no_model)
             kimi_primary.set_provider(no_model)
             vo.reload()
+            # Per-row unreadable tickets are opt-in since 2026-09-09 (they flooded the queue).
+            monkeypatch.setenv('ELLIS_FILE_UNREADABLE_ISSUES', '1')
             for attempt in range(2):
                 kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
                 db.expire_all()
@@ -2264,3 +2270,39 @@ def test_a_legacy_stopover_copy_cannot_replace_the_canonical_answer(db):
     assert g["review_required"] is False
     assert g["guidance"]["disposition"] == "VISA_EXEMPT"
     assert g["guidance"]["transit_requirement"]["required"] is None
+
+
+def test_a_visa_free_route_may_offer_an_optional_priced_visa_beside_its_free_lane():
+    """Spain to Vietnam: 45 days visa-free, with an e-visa on offer for longer
+    stays. That is one free lane plus an option, not a contradiction. A
+    visa-free verdict whose every product costs money still is one."""
+    inv = kimi_primary.serve_time_invariants
+    free = {"type": "Visa exemption", "entry": "multiple", "validity": "per entry", "max_stay_days": 45,
+            "fee": {"amount": 0, "currency": None}, "notes": "No visa needed"}
+    evisa = {"type": "E-visa single entry", "entry": "single", "validity": "90 days", "max_stay_days": 90,
+             "fee": {"amount": 25, "currency": "USD"}, "notes": "For stays beyond 45 days"}
+    base = {"disposition": "VISA_EXEMPT", "requirement_detail": "unconditional_visa_free",
+            "government_fee": {"amount": 0, "currency": None}, "application_channel": "not_required"}
+    assert inv(dict(base, visa_products=[free, evisa])) == []
+    assert any("every listed visa product is priced" in p for p in inv(dict(base, visa_products=[evisa])))
+
+
+def test_a_free_permit_on_arrival_is_not_a_visa_application():
+    inv = kimi_primary.serve_time_invariants
+    base = {"disposition": "VISA_EXEMPT", "requirement_detail": "conditional_visa_free",
+            "government_fee": {"amount": 0, "currency": None}}
+    assert inv(dict(base, application_channel="on_arrival")) == []
+    assert inv(dict(base, application_channel="online_portal")) == []
+    assert any("application_channel is on_arrival" in p
+               for p in inv(dict(base, application_channel="on_arrival",
+                                 government_fee={"amount": 20, "currency": "USD"})))
+    assert any("application_channel is embassy_or_consulate" in p
+               for p in inv(dict(base, application_channel="embassy_or_consulate")))
+
+
+def test_an_esta_is_applied_for_online_never_not_required():
+    inv = kimi_primary.serve_time_invariants
+    esta = {"disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED", "requirement_detail": "eta_electronic_authorization",
+            "government_fee": {"amount": 40.27, "currency": "USD"}}
+    assert inv(dict(esta, application_channel="online_portal")) == []
+    assert any("application_channel is not_required" in p for p in inv(dict(esta, application_channel="not_required")))
