@@ -476,3 +476,37 @@ test('renderer isolates legacy checks from entry facts and preserves existing st
   assert.match(source, /itemsOf\(g\.required_documents\)/)
   assert.match(source, /itemsOf\(g\.submission_process\)/)
 })
+
+import { entryInstructionTexts, publishedEntryInstructions } from '../../src/renderer/src/lib/entryInstructions.js'
+
+const AIR = 'For international arrivals by air, the health declaration is mandatory before immigration clearance. Complete it before boarding, as requested; the form can be completed 24 hours before arrival. Land/sea scope has not been established.'
+const LAND = 'Air and sea arrivals use All Indonesia. Land arrivals use ECD Bea Cukai. Follow the applicable declaration instructions at https://beacukai.go.id/ecd.'
+
+test('route instructions preserve mode, mandatory/requested timing and exact URLs', () => {
+  for (const text of [AIR, LAND, '陆路旅客按海关规定提交；不把提前窗口改成截止期限。']) {
+    assert.deepEqual(publishedEntryInstructions({entry_requirements:text}), {route:[text], products:[]})
+  }
+})
+test('equal product instructions are shown once while differing product scope remains named', () => {
+  const input={entry_requirements:AIR,visa_products:[
+    {type:'e-Visa',entry_requirements:AIR},
+    {type:'Border permission',entry_requirements:LAND},
+    {type:'Unreviewed alternative'},
+  ]}
+  const before=structuredClone(input)
+  assert.deepEqual(publishedEntryInstructions(input),{route:[AIR],products:[{index:1,name:'Border permission',texts:[LAND]}]})
+  assert.deepEqual(input,before)
+})
+test('product rules are not copied to the default or a sibling when route prose is absent', () => {
+  assert.deepEqual(publishedEntryInstructions({visa_products:[{type:'A',entry_requirements:LAND},{type:'B'}]}),
+    {route:[],products:[{index:0,name:'A',texts:[LAND]}]})
+})
+test('missing held guidance and malformed values cannot create new instructions', () => {
+  for(const value of [null,undefined,{},true,42]) assert.deepEqual(publishedEntryInstructions(value),{route:[],products:[]})
+  assert.deepEqual(entryInstructionTexts([null,false,{},'  ',AIR]),[AIR])
+  assert.deepEqual(publishedEntryInstructions({entry_requirements:{required:false},visa_products:{type:'A'}}),{route:[],products:[]})
+})
+test('condition lists retain order and partial overlap is not mistaken for equivalent product scope', () => {
+  assert.deepEqual(publishedEntryInstructions({entry_requirements:[AIR],visa_products:[{type:'Permit',entry_requirements:[AIR,LAND]}]}),
+    {route:[AIR],products:[{index:0,name:'Permit',texts:[AIR,LAND]}]})
+})

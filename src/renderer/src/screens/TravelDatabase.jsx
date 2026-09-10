@@ -17,6 +17,7 @@ import { newSession } from '../lib/visaSession.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { publishedStayText } from '../lib/publishedStay.js'
 import { checkRequirements } from '../lib/checkRequirements.js'
+import { entryInstructionTexts, publishedEntryInstructions } from '../lib/entryInstructions.js'
 import { arrivalCardLines } from '../lib/arrivalCard.js'
 import { parseDatabaseRouteHash, databaseRouteHash } from '../lib/databaseRoute.js'
 import { applicationLane, applicationStepLinkIndex } from '../lib/applicationLane.js'
@@ -772,6 +773,7 @@ export default function TravelDatabase({ onBack }) {
     const products = (g.visa_products || []).filter((x) => x && typeof x === 'object')
     const texts = [...new Set([
       asText(g.visa_category), asText(g.permitted_stay),
+      ...entryInstructionTexts(g.entry_requirements),
       asText(g.processing_time), asText(g.passport_validity),
       asText(g.photo_requirements), asText(g.onward_travel_evidence),
       asText(g.accommodation_evidence), asText(g.financial_evidence),
@@ -788,7 +790,8 @@ export default function TravelDatabase({ onBack }) {
       // The visa-type table is the reader's decision surface; it must switch
       // languages with everything else (it previously stayed English).
       ...products.flatMap((vp) => [asText(vp.type), asText(vp.validity), asText(vp.permitted_stay),
-                                   asText(vp.notes), asText(vp.entry)]),
+                                   asText(vp.notes), asText(vp.entry),
+                                   ...entryInstructionTexts(vp.entry_requirements)]),
       ...itemsOf(result?.apply_steps),
       ...itemsOf(g.required_documents), ...itemsOf(g.forms),
       ...itemsOf(g.account_registration_steps), ...itemsOf(g.payment_process),
@@ -1117,6 +1120,10 @@ export default function TravelDatabase({ onBack }) {
   const yesNo = (v) => v === true ? [t('db.required'), 'yes']
     : v === false ? [t('db.notRequired'), 'no'] : null
   const processChecks = checkRequirements(g)
+  const entryInstructions = publishedEntryInstructions(g)
+  const entryInstructionWeight = [...entryInstructions.route,
+    ...entryInstructions.products.flatMap((product) => product.texts)]
+    .reduce((sum, text) => sum + Math.max(1, Math.ceil(text.length / 70)), 0)
   const entryFacts = g ? [
     [t('db.insurance'), yesNo(g.insurance_required)],
   ].filter(([, v]) => v) : []
@@ -1766,11 +1773,25 @@ export default function TravelDatabase({ onBack }) {
                   </Section>
                 ) })
               }
-              if (entryFacts.length > 0 || arrivalLines.length > 0 || health.length > 0) {
+              if (entryFacts.length > 0 || arrivalLines.length > 0 || health.length > 0 || entryInstructionWeight > 0) {
                 cards.push({ key: 'entry',
                   weight: entryFacts.length + arrivalLines.length
-                          + health.length + 1, node: (
+                          + health.length + entryInstructionWeight + 1, node: (
                   <Section title={t('db.entry')} accent={BLUE} key="entry">
+                    {entryInstructions.route.length > 0 && (
+                      <div data-testid="database-entry-instructions">
+                        <Bullets items={entryInstructions.route.map(T)} />
+                      </div>
+                    )}
+                    {entryInstructions.products.map((product) => (
+                      <div key={product.index} style={{ marginTop: 12 }}
+                           data-testid="database-product-entry-instructions">
+                        <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                          {T(product.name) || t('db.valueUnknown')}
+                        </div>
+                        <Bullets items={product.texts.map(T)} />
+                      </div>
+                    ))}
                     {entryFacts.map(([l, [v, tone]]) => <Fact key={l} label={l} value={v} pill={tone} />)}
                     {arrivalLines.length > 0 ? (
                       <Fact label={t('db.arrivalCard')} value={arrivalLines.join('. ')} />
