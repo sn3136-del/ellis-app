@@ -143,7 +143,10 @@ def test_unreviewed_visa_plan_stays_unknown_and_keeps_confirmation_boundary(db):
                                "notes": None}],
                arrival_card=None)
     kimi_primary.set_provider(single_pass(ans))
-    g = kimi_primary.get_route_guidance(db, dict(ROUTE, destination_country="CHN"))
+    # USA to China now carries a reviewed New COVA sequence that applies to
+    # the request-time route shape, so an unreviewed answer is exercised on a
+    # destination with no US-passport override instead.
+    g = kimi_primary.get_route_guidance(db, dict(ROUTE, destination_country="ALB"))
     assert g["status"] == "KIMI_PRIMARY"
     assert g["irreversible_requires_confirmation"] is True
     assert g['workflow_plan'] == []

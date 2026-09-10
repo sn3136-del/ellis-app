@@ -449,9 +449,23 @@ def _digest(value):
  try:return hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False,separators=(',',':'),allow_nan=False).encode()).hexdigest()
  except (TypeError,ValueError):return None
 
+IDENTITY=('passport_nationality','destination_country','travel_purpose','travel_document_type','lawful_country_of_residence')
+
+def route_in_scope(route):
+ """The reviewed sequence covers the exact identity and US residence. A
+ request-time route also carries derived keys (a purpose-derived visa
+ category, the default consular jurisdiction, a travel date) that do not
+ change the procedure; a specific mission district or a transit itinerary
+ might, so those keep the sequence off."""
+ if not isinstance(route,dict) or any(route.get(k)!=ROUTE[k] for k in IDENTITY):return False
+ if route.get('visa_category') not in (None,'tourist_visa'):return False
+ if route.get('consular_jurisdiction') not in (None,'default'):return False
+ if route.get('transit_countries'):return False
+ return True
+
 def steps(guidance,route,provenance):
  if not all(isinstance(x,dict) for x in (guidance,route,provenance)):return []
- if any(route.get(k)!=v for k,v in ROUTE.items()):return []
+ if not route_in_scope(route):return []
  if guidance.get('disposition')!='VISA_REQUIRED' or guidance.get('requirement_detail')!='paper_visa':return []
  if not isinstance(provenance.get('fields'),list) or not set(VALUES)<=set(provenance['fields']):return []
  own=provenance.get('field_provenance')

@@ -130,10 +130,17 @@ def test_order_needs_all_own_proofs(field):
  p=preview();fp=deepcopy(p['source_provenance']);fp['field_provenance'][field]['quote']='Unreviewed'
  assert steps(p['guidance'],p['route'],fp)==[]
 
-@pytest.mark.parametrize('field,value',[('passport_nationality','CAN'),('lawful_country_of_residence','CAN'),('destination_country','HKG'),('travel_purpose','business'),('travel_document_type','diplomatic_passport'),('arrival_date','2025-01-01'),('consular_jurisdiction','San Francisco'),('transit_countries',['JPN'])])
+@pytest.mark.parametrize('field,value',[('passport_nationality','CAN'),('lawful_country_of_residence','CAN'),('destination_country','HKG'),('travel_purpose','business'),('travel_document_type','diplomatic_passport'),('visa_category','business_visa'),('consular_jurisdiction','San Francisco'),('transit_countries',['JPN'])])
 def test_ordered_scope_is_exact(field,value):
  p=preview();route=dict(p['route']);route[field]=value
  assert steps(p['guidance'],route,p['source_provenance'])==[]
+
+@pytest.mark.parametrize('field,value',[('arrival_date','2026-12-01'),('visa_category','tourist_visa'),('consular_jurisdiction','default'),('transit_countries',[]),('departure_city','Boston')])
+def test_request_time_route_keys_keep_the_sequence(field,value):
+ from app.visa_snapshot.reviewed_usa_china_workflow import route_in_scope, ROUTE
+ route=dict(ROUTE);route[field]=value
+ assert route_in_scope(route)
+ assert not route_in_scope(dict(ROUTE,consular_jurisdiction='San Francisco'))
 
 @pytest.mark.parametrize('field,value',[('forms',{'form':'fake'}),('forms',['good',3]),('route_workflow_type','not_a_workflow'),('route_workflow_type',42)])
 def test_new_override_shape_guards(field,value):
