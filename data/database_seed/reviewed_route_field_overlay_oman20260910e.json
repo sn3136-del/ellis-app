@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "entries": [
+    {
+      "fields": {
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "conditional_visa_free",
+        "visa_category": "Visa-free entry up to 14 days",
+        "permitted_stay": "Up to 14 days, which cannot be extended or converted",
+        "permitted_stay_days": 14,
+        "application_channel": "not_required",
+        "application_channel_detail": "No visa is needed for stays up to 14 days with a return ticket, confirmed hotel booking, health insurance and sufficient funds. For longer stays apply on the Royal Oman Police eVisa portal before travel.",
+        "government_fee": {
+          "amount": 0,
+          "currency": null
+        },
+        "official_portal_url": "https://evisa.rop.gov.om/",
+        "visa_products": [
+          {
+            "type": "Visa-free entry",
+            "entry": "single",
+            "validity": "on arrival",
+            "max_stay_days": 14,
+            "fee": {
+              "amount": 0,
+              "currency": null
+            },
+            "notes": "Return ticket, confirmed hotel reservation, health insurance and sufficient funds are required."
+          },
+          {
+            "type": "Sponsored tourist visa, 30 days",
+            "entry": "single",
+            "validity": "30 days, extendable once",
+            "max_stay_days": 30,
+            "fee": {
+              "amount": 20,
+              "currency": "OMR"
+            },
+            "notes": "Sponsored by a licensed Omani tourism company."
+          },
+          {
+            "type": "One year tourist visit visa",
+            "entry": "multiple",
+            "validity": "One year",
+            "max_stay_days": null,
+            "fee": {
+              "amount": 50,
+              "currency": "OMR"
+            },
+            "notes": null
+          }
+        ],
+        "exceptions": [
+          "The 14 day visa-free stay cannot be extended or converted. For longer tourism apply for an eVisa before travel",
+          "The visa-free period was 10 days until 14 May 2025 and is 14 days from 15 May 2025"
+        ],
+        "unpublished_fields": [],
+        "confidence": "high",
+        "corroborating_sources": [
+          {
+            "url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+            "quote": "The person will be allowed to stay in the Sultanate for a period of (14) days, which cannot be extended or transferred to any type of residence visa"
+          }
+        ],
+        "required_documents": [
+          "Passport valid for no less than six (6) months",
+          "Return ticket",
+          "Confirmed hotel reservation",
+          "Health insurance",
+          "Sufficient funds to cover the stay in Oman"
+        ],
+        "onward_travel_evidence": "Return ticket",
+        "accommodation_evidence": "Confirmed hotel reservation"
+      },
+      "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+      "verified_at": "2026-09-01",
+      "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+      "verifier": "ai",
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "visa_category": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "permitted_stay": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "application_channel": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "government_fee": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "official_portal_url": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "visa_products": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "exceptions": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "unpublished_fields": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "confidence": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "required_documents": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "HKSAR ordinary passport visitor; Oman first-group 14-day visa exemption. These are cumulative entry requirements. Do not substitute onward ticket for return ticket or host invitation for confirmed hotel reservation. Second-group foreign visa/residence prerequisites do not apply to this first-group nationality. Passport clock is not changed by this patch.",
+          "source_id": "oman-mfa-entry-20260910",
+          "additional_quotes": [
+            "The visitor must hold a passport valid for no less than six (6) months.",
+            "China (includes Hong Kong and Macau)"
+          ],
+          "status": "reviewed",
+          "verification_scope": "route_entry_document_fields_only",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "OMN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "He must have a return ticket, a confirmed hotel reservation, health insurance, and a sum of money that will enable him to bear the burden of living during his stay in the Sultanate."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "HKSAR ordinary passport visitor; Oman first-group 14-day visa exemption. These are cumulative entry requirements. Do not substitute onward ticket for return ticket or host invitation for confirmed hotel reservation. Second-group foreign visa/residence prerequisites do not apply to this first-group nationality. Passport clock is not changed by this patch.",
+          "source_id": "oman-mfa-entry-20260910",
+          "additional_quotes": [
+            "China (includes Hong Kong and Macau)"
+          ],
+          "status": "reviewed",
+          "verification_scope": "route_entry_document_fields_only",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "OMN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "He must have a return ticket, a confirmed hotel reservation, health insurance, and a sum of money that will enable him to bear the burden of living during his stay in the Sultanate."
+        },
+        "accommodation_evidence": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "HKSAR ordinary passport visitor; Oman first-group 14-day visa exemption. These are cumulative entry requirements. Do not substitute onward ticket for return ticket or host invitation for confirmed hotel reservation. Second-group foreign visa/residence prerequisites do not apply to this first-group nationality. Passport clock is not changed by this patch.",
+          "source_id": "oman-mfa-entry-20260910",
+          "additional_quotes": [
+            "China (includes Hong Kong and Macau)"
+          ],
+          "status": "reviewed",
+          "verification_scope": "route_entry_document_fields_only",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "OMN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "He must have a return ticket, a confirmed hotel reservation, health insurance, and a sum of money that will enable him to bear the burden of living during his stay in the Sultanate."
+        }
+      },
+      "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa.",
+      "route": {
+        "nationality": "HKG",
+        "destination": "OMN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "oman-ancillary-conditions-20260910e",
+      "partial_review": true,
+      "field_review_scope": "route_entry_document_fields_only"
+    }
+  ],
+  "review_id": "oman-ancillary-conditions-20260910e",
+  "review_scope": "route_entry_document_fields_only",
+  "status": "not_installed",
+  "preflight": [
+    {
+      "cache_key": "HKG|HKG|OMN|tourism|default|unknown|v6",
+      "changed_fields": [
+        "accommodation_evidence",
+        "onward_travel_evidence",
+        "required_documents"
+      ],
+      "new_verdict_reviews": 0,
+      "new_product_reviews": 0,
+      "new_release": false,
+      "new_grounded_check": false,
+      "renew_fresh_until": false,
+      "retained_integrity_issues": []
+    }
+  ],
+  "contract": "Recheck exact route, raw, merged, source provenance, ordered seed and operator CAS immediately before installation. No product/verdict review, release, TTL, issue or operator changes."
+}

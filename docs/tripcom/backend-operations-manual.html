@@ -15,7 +15,7 @@
 <p>恢复时先停止服务并保留当前状态，按该版本的恢复流程还原已验证的备份，再检查数据库完整性、公开页面及质控功能，然后恢复服务。合同恢复目标为不超过 1 小时，是否达标须由带日期和计时记录的完整恢复演练证明。systemd 自动重启进程有帮助，但不是灾难恢复验收证明。2026-09-10 实际数据库备份与还原用时 0.708 秒，23,834,624 字节、99 张表、949 条线路表记录，完整性正常；每日任务已更新。该演练不包含主机、应用、配置、密钥、DNS 或异机副本可靠性，不能证明完整服务恢复达标。</p>
 <h2>质控台与数据解读</h2>
 <p>浏览器打开 https://ellis-visa.com/#ops。记录页面提供可组合的抽查筛选（支持名称、代码与中文）、逐条 25 字段清单、置信度与信源支持标识、问题标记、可追踪纠错队列、变更记录、时效信息及双工作表 Excel 导出。</p>
-<p>质控保留全部产品供检查。产品 held 与线路 route_held 分别计数；部分发布的线路可以提供有证据的默认免签答案，同时拦截独立且未核实的可选签证。对客页面明确提示，并排除未核实的替代产品主张；不得为了发布而丢失入境条件。部分发布不等于 100% 产品覆盖。</p>
+<p>质控保留全部产品供检查。产品 held 与线路 route_held 分别计数；部分发布的线路可以提供有证据的默认免签或需预先申请的电子签答案，同时拦截独立且未核实的可选签证。对客页面明确提示，并排除未核实的替代产品主张；不得为了发布而丢失费用、申请期限或入境条件。部分发布不等于 100% 产品覆盖。</p>
 <p>当前置信度显示为 High（高）与 Low（低）两级。人工或 AI 审核身份保留在来源证据中；是否可以对客展示，由原有证据和冲突控制单独决定。详细定义见本次更新的数据口径手册。</p>
 <p>info_validity 仅表示政策已公布的截止日期；未知日期留空。freshness_valid_until 单独表示内部复核期限。用户已同意：全部 25 字段中，有记录的不适用与未公布状态计作完整；未知、无证据或待审核仍不完整。2026-09-10 02:29 UTC 快照的记录状态完整度为 81.9521%，日常可填写 20 字段为 87.32%；全部 25 字段非空诊断为 72.9718%。这些指标不证明政策准确率。</p>
 <p>本次版本替换旧版双语 HTML/PDF 手册。旧版 PASS 标记、示例可用率、或未计时的恢复描述，不得用作当前验收证据。</p>
@@ -40,4 +40,4 @@
 <h2>Security posture</h2>
 <p>UFW allows 22/80/443 only. Backend binds loopback; only Caddy is exposed. Secrets ship encrypted (backend/secrets.enc, AES-256-CBC) and are decrypted on the machine at deploy time; backend/.env never enters git.</p>
 <h2>Route and product publication</h2>
-<p>QC keeps every product available for inspection. Product held and route_held are distinct: a partial route can publish its supported exemption while a separate optional visa remains withheld. The public page labels this state and excludes unsupported alternative claims from its answer and chat. Conditions cannot be discarded to make a route publishable. Report default availability, fully released routes and held products separately; partial publication is not 100% product coverage.</p></section><footer>Source: BACKEND_OPERATING_MANUAL.md · SHA-256 170d901d71745f4ff81140137f53c76b077899080bcef547869a96e704242ef3<br>Generated from the current source manual; no acceptance certification.</footer></main></body></html>
+<p>QC keeps every product available for inspection. Product held and route_held are distinct: a partial route can publish a supported exemption or required e-visa while separate optional products remain withheld. The public page labels this state and excludes unsupported alternative claims from its answer and chat. Fees, filing deadlines and required conditions cannot be discarded to make a route publishable. Report default availability, fully released routes and held products separately; partial publication is not 100% product coverage.</p></section><footer>Source: BACKEND_OPERATING_MANUAL.md · SHA-256 c11231763d2707034de77453de65d932f69a93ef0d99c16f2f6cbab597e7ab5d<br>Generated from the current source manual; no acceptance certification.</footer></main></body></html>

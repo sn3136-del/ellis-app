@@ -1,0 +1,594 @@
+{
+  "schema_version": 1,
+  "kind": "route_fields_exact_layers",
+  "specification": {
+    "schema_version": 1,
+    "kind": "detached_route_field_correction_specification",
+    "status": "EVIDENCE READY; NOT A REGISTERABLE OVERLAY; no writes or gate changes",
+    "id": "oman-ancillary-conditions-20260910e",
+    "cache_key": "HKG|HKG|OMN|tourism|default|unknown|v6",
+    "captured_at": "2026-09-10T04:14:05.317328+00:00",
+    "route": {
+      "passport_nationality": "HKG",
+      "lawful_country_of_residence": "HKG",
+      "destination_country": "OMN",
+      "visa_category": "tourist_visa",
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null
+    },
+    "sources": [
+      {
+        "id": "oman-mfa-entry-20260910",
+        "url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+        "checked_at": "2026-09-10",
+        "reading_method": "fresh web open/find; rendered lines transcribed verbatim from retained raw tool output",
+        "published_last_updated": "2026-01-16",
+        "text": "cite0†Image: Image†mlzlkxvcvliz.i.optimole.com L1: \n  * cite1†E-services†eservices.fm.gov.om L3:   * cite2†Open data L4: \ncite3†Home L6:   * Ministry\n\nPolicy\n\nTrade\n\nAbout Oman\n\nNews\n\nCitizens\n\nVisitors\n# Entry visas\n\nVisa applications for Oman are available online.\n\nIn line with national efforts to promote and ease services for tourists visiting Oman, visitors from more than 100 countries and regions are exempt from entry visas for stays up to 14 days.\n\nThe countries covered by this exemption are divided into two groups.\n\n   First group\n\nAlbania\n\nAndorra\n\nArgentina\n\nArmenia\n\nAustralia\n\nAustria\n\nBelarus\n\nBelgium\n\nBolivia\n\nBosnia and Herzegovina\n\nBrazil\n\nBrunei Darussalam\n\nBulgaria\n\nCanada\n\nChile\nChina (includes Hong Kong and Macau)\n\nColombia\n\nCroatia\n\nCyprus\n\nCzech Republic\n\nDenmark\n\nEcuador\n\nEstonia\n\nFinland\n\nFrance\n\nFrench Guinea\n\nGeorgia\n\nGermany\n\nGreece\n\nHungary\n\nIceland\n\nIndonesia\n\nIran\n\nIreland\n\nItaly\n\nJapan\n\nKazakhstan\n\nLatvia\n\nLebanon\n\nLiechtenstein\n\nLithuania\n\nLuxembourg\n\nMacedonia\n\nMalaysia\n\nMalta\n\nMauritius\n\nMoldova\n\nMonaco\n\nNetherlands\n\nNew Zealand\n\nNorway\n\nParaguay\n\nPhilippines\n\nPoland\n\nPortugal\n\nRomania\n\nRussia\n\nSan Marino\n\nSerbia\n\nSeychelles\n\nSingapore\n\nSlovakia\n\nSlovenia\nSouth Africa\n\nSouth Korea\n\nSpain\n\nSuriname\n\nSweden\n\nSwitzerland\n\nThailand\n\nTurkey\n\nUkraine\n\nUnited Kingdom\n\nUnited States\n\nUruguay\n\nUzbekistan\n\nVatican\n\nVenezuela\n\n   Second group\n\nAlgeria\n\nAzerbaijan\n\nBhutan\n\nCosta Rica\n\nCuba\n\nEgypt\n\nEl Salvador\n\nGuatemala\n\nHonduras\n\nIndia\n\nJordan\n\nKyrgyzstan\n\nLaos\n\nMaldive Islands\n\nMauritania\n\nMexico\n\nMorocco\n\nNicaragua\n\nPanama\n\nPeru\n\nTajikistan\n\nTunisia\n\nTurkmenistan\n\nVietnam\n\n   Full text of the regulations\nControls to facilitate the entry of foreigners into the Sultanate without a visa:\n  1. The visitor must hold a passport valid for no less than six (6) months.\n  2. He must have a return ticket, a confirmed hotel reservation, health insurance, and a sum of money that will enable him to bear the burden of living during his stay in the Sultanate.\n  3. To obtain this facility, citizens of the second list countries are required to be either residents or have a valid entry visa for one of the following countries (the United States of America, Canada, Australia, the United Kingdom, Schengen Agreement countries, Japan), or to be residents of one of the countries The Gulf Cooperation Council and its profession are among the professions that benefit from the resident visa.\n  4. The person will be allowed to stay in the Sultanate for a period of (14) days, which cannot be extended or transferred to any type of residence visa.\n  5. The husband, wife, and children benefit from this facility, even if they are not nationals of the country.\nCitizens of GCC countries (the Kingdom of Bahrain, the State of Kuwait, the State of Qatar, the Kingdom of Saudi Arabia and the United Arab Emirates) do not require visas to enter Oman.\n\nThe process of obtaining a visa for visitors to Oman is managed by the Royal Oman Police (ROP).\n\nCitizens of other nationalities can establish their visa options via the ROP’s eVisa website by clicking cite4†here†evisa.rop.gov.om .\nYou can apply for a visa via the ROP’s eVisa website by clicking cite5†here†evisa.rop.gov.om .\nThis website will guide you through the process of applying online for an appropriate visa to enter Oman. There are four video guides to help you complete the online visa application process, which you can find by scrolling down the home page of the ROP’s eVisa website.\n\nThere are several different types of visa for visitors to Oman. For those coming to Oman as tourists, the Tourist Visit Visa (Unsponsored) will usually be appropriate. For others, a different type of visa may be needed.\nFor more information about the types of visa for visitors to Oman please click cite6†here†evisa.rop.gov.om .\nFor more information on the Online Visa Application service you can also visit the general ROP website cite7†here†www.rop.gov.om .\n\nIf you have any questions about the visa process you can contact the eVisa Call centre:\n\n+968 2429 0942\n+968 2429 0826\n\nInfo-OmaneVisa@rop.gov.om\n### In this section\n\n  * cite8†Travel advice for visitors L261:   * cite9†Entry visas L262:   * cite10†Consular services for visitors L263:   * cite11†Tourism information L264:   * cite12†Business information L265: \nLast updated on January 16, 2026\n\n[Input: Search]\n\n[Input: Search]\n\n▸Ministry\n  * cite13†About us L274:     * cite14†← Back L275:     * cite15†About the Ministry L276:     * cite16†The role of the Ministry L277:     * cite17†Key figures L278:     * cite18†Diplomatic Academy L279:     * cite19†The Diplomatic Club L280:     * cite20†Careers and Recruitment L281:     * cite21†History of the Foreign Ministry L282:   * cite22†Embassies L283:     * cite14†← Back L284:     * cite23†Overview L285:     * cite24†Embassies and Consulates abroad L286:     * cite25†Foreign embassies and consulates in Oman L287:   * cite14†Decrees L288:     * cite14†← Back L289:     * cite26†Royal Decrees and laws L290:   * cite27†Media L291:     * cite14†← Back L292:     * cite28†Downloads L293:   * cite29†Contact us L294: ▸Policy\n\n  * cite30†Foreign policy L297:   * cite31†Principles L298:   * cite32†Multilateral relations L299:   * cite33†Human trafficking L300:   * cite34†Agreements L301: \n▸Trade\n\n  * cite35†Opportunities for trade L305:   * cite36†Key contacts for trade L306:   * cite37†Other trade organisations L307: \n▸About Oman\n  * cite14†State L310:     * cite14†← Back L311:     * cite38†Head of State L312:     * cite39†Flag, Emblem and National Anthem L313:     * cite40†Key facts L314:     * cite41†Map of the Sultanate of Oman L315:     * cite42†Geography L316:     * cite43†Economy L317:     * cite44†Religious freedom L318:     * cite45†History L319:     * cite46†Oman by region L320:   * cite14†Government L321:     * cite14†← Back L322:     * cite47†The Basic Statute of the State L323:     * cite48†Council of Ministers L324:     * cite49†Ministers’ profiles L325:   * cite50†Legislature L326:     * cite14†← Back L327:     * cite51†Introduction to legislature L328:     * cite52†Majlis A’Dawla L329:     * cite53†Majlis A’Shura L330:     * cite54†Other elected representation L331: ▸News\n\n  * cite55†News L334:   * cite56†News + L335:   * cite57†Mission News L336:   * cite58†Statements L337:   * cite59†Speeches L338:   * cite60†Videos L339: \n▸Citizens\n\n  * cite61†Travel advice for Omani citizens and residents L343:   * cite62†Oman FM smartphone app L344:   * cite63†Attestation of documents L345:   * cite64†Social security for Omanis abroad L346:   * cite65†Passport problems L347:   * cite66†Schengen visa L348:   * cite67†Visa requirements L349:   * cite68†Consular services L350: \n▸Visitors\n  * cite8†Travel advice for visitors L353:   * cite9†Entry visas L354:   * cite10†Consular services for visitors L355:   * cite11†Tourism information L356:   * cite12†Business information L357: \ncite14†Open data cite1†E-services†eservices.fm.gov.om ",
+        "sha256": "5496501ee4d6f07d20f1cdc358a7fefcea69a9c9ff74a4be081321166be18b3e"
+      }
+    ],
+    "changes": [
+      {
+        "field": "required_documents",
+        "old_raw": [
+          "valid HKSAR ordinary passport (valid for at least 6 months)",
+          "return/onward ticket",
+          "confirmed accommodation",
+          "travel health insurance",
+          "proof of sufficient funds"
+        ],
+        "old_merged": [
+          "valid HKSAR ordinary passport (valid for at least 6 months)",
+          "return/onward ticket",
+          "confirmed accommodation",
+          "travel health insurance",
+          "proof of sufficient funds"
+        ],
+        "new": [
+          "Passport valid for no less than six (6) months",
+          "Return ticket",
+          "Confirmed hotel reservation",
+          "Health insurance",
+          "Sufficient funds to cover the stay in Oman"
+        ],
+        "proof": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "scope_note": "HKSAR ordinary passport visitor; Oman first-group 14-day visa exemption. These are cumulative entry requirements. Do not substitute onward ticket for return ticket or host invitation for confirmed hotel reservation. Second-group foreign visa/residence prerequisites do not apply to this first-group nationality. Passport clock is not changed by this patch.",
+          "evidence": [
+            {
+              "source_id": "oman-mfa-entry-20260910",
+              "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+              "quote": "He must have a return ticket, a confirmed hotel reservation, health insurance, and a sum of money that will enable him to bear the burden of living during his stay in the Sultanate."
+            },
+            {
+              "source_id": "oman-mfa-entry-20260910",
+              "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+              "quote": "The visitor must hold a passport valid for no less than six (6) months."
+            },
+            {
+              "source_id": "oman-mfa-entry-20260910",
+              "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+              "quote": "China (includes Hong Kong and Macau)"
+            }
+          ]
+        }
+      },
+      {
+        "field": "onward_travel_evidence",
+        "old_raw": "confirmed return/onward ticket",
+        "old_merged": "confirmed return/onward ticket",
+        "new": "Return ticket",
+        "proof": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "scope_note": "HKSAR ordinary passport visitor; Oman first-group 14-day visa exemption. These are cumulative entry requirements. Do not substitute onward ticket for return ticket or host invitation for confirmed hotel reservation. Second-group foreign visa/residence prerequisites do not apply to this first-group nationality. Passport clock is not changed by this patch.",
+          "evidence": [
+            {
+              "source_id": "oman-mfa-entry-20260910",
+              "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+              "quote": "He must have a return ticket, a confirmed hotel reservation, health insurance, and a sum of money that will enable him to bear the burden of living during his stay in the Sultanate."
+            },
+            {
+              "source_id": "oman-mfa-entry-20260910",
+              "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+              "quote": "China (includes Hong Kong and Macau)"
+            }
+          ]
+        }
+      },
+      {
+        "field": "accommodation_evidence",
+        "old_raw": "confirmed hotel booking or host invitation",
+        "old_merged": "confirmed hotel booking or host invitation",
+        "new": "Confirmed hotel reservation",
+        "proof": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "scope_note": "HKSAR ordinary passport visitor; Oman first-group 14-day visa exemption. These are cumulative entry requirements. Do not substitute onward ticket for return ticket or host invitation for confirmed hotel reservation. Second-group foreign visa/residence prerequisites do not apply to this first-group nationality. Passport clock is not changed by this patch.",
+          "evidence": [
+            {
+              "source_id": "oman-mfa-entry-20260910",
+              "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+              "quote": "He must have a return ticket, a confirmed hotel reservation, health insurance, and a sum of money that will enable him to bear the burden of living during his stay in the Sultanate."
+            },
+            {
+              "source_id": "oman-mfa-entry-20260910",
+              "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+              "quote": "China (includes Hong Kong and Macau)"
+            }
+          ]
+        }
+      }
+    ],
+    "baseline_sha256": {
+      "route": "57662d318d0de44a190d77a4a77d2ed40086afd1a52665ed1594d5573560a2c3",
+      "raw_guidance": "2b0bfe19c1f68737becf5db49b1a50ca7ea145da95345cb59b29bc56c2ce2c2a",
+      "merged_guidance": "ca6ec6c3e5978b85cbcf5d82b55431d01840f2b3277f2771677223a047b083a7",
+      "source_provenance": "e8a7245247068a189d2eb670d32d8e8747cb164b59afb5700414e5f0428057d0",
+      "seed_entries": "4488e58c4f190c2c9a99d8ec4bcfc325eec60a798aab6d90018f20d1ba14d4dc",
+      "operator_entries": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "baseline_file_sha256": "299224dd0304578c4f4369bf28589c92862b2df586dd85138b545af507924feb",
+    "preservation_requirements": [
+      "All unrelated raw, merged, seed and operator facts",
+      "All visa products and their current holds",
+      "Disposition and requirement_detail",
+      "Current verdict provenance, product source-verdict status, confidence and verdict review dates",
+      "Existing policy interval or expiry including unresolved history"
+    ],
+    "integration_limit": "The current general converter rewrites route verdict provenance and requires separate full current reviews of optional paid products. This source only supports the visa-free ancillary correction. No legitimate full product reviews were completed, and paid products must not be deleted. A narrow route-field-only patch path is needed to preserve the stated scope."
+  },
+  "cache_key": "HKG|HKG|OMN|tourism|default|unknown|v6",
+  "baseline": {
+    "route": {
+      "passport_nationality": "HKG",
+      "lawful_country_of_residence": "HKG",
+      "destination_country": "OMN",
+      "visa_category": "tourist_visa",
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null
+    },
+    "raw_guidance": {
+      "disposition": "VISA_EXEMPT",
+      "visa_category": "Visa-free entry up to 14 days",
+      "permitted_stay": "Up to 14 days, which cannot be extended or converted",
+      "passport_validity": "6 months beyond arrival",
+      "required_documents": [
+        "valid HKSAR ordinary passport (valid for at least 6 months)",
+        "return/onward ticket",
+        "confirmed accommodation",
+        "travel health insurance",
+        "proof of sufficient funds"
+      ],
+      "application_channel": "not_required",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://evisa.rop.gov.om/",
+      "photo_requirements": "not required for the visa-free route; digital passport photo required if applying for an eVisa",
+      "biometrics_required": false,
+      "interview_required": false,
+      "appointment_required": false,
+      "onward_travel_evidence": "confirmed return/onward ticket",
+      "accommodation_evidence": "confirmed hotel booking or host invitation",
+      "financial_evidence": "proof of sufficient funds for the stay",
+      "insurance_required": true,
+      "exceptions": [
+        "The 14 day visa-free stay cannot be extended or converted. For longer tourism apply for an eVisa before travel",
+        "The visa-free period was 10 days until 14 May 2025 and is 14 days from 15 May 2025"
+      ],
+      "uncertainty": [
+        {
+          "field": "visa_exemption_status",
+          "reason": "Oman announced a 14-day visa-free entry list covering 103 nationalities; the exact current list and any post-cutoff changes should be confirmed with Omani authorities."
+        },
+        {
+          "field": "eVisa_products_and_fees",
+          "reason": "eVisa product durations and fees are recalled from the Royal Oman Police portal; verify current fees and availability if applying for a stay beyond 14 days."
+        },
+        {
+          "field": "health_insurance_requirement",
+          "reason": "Travel health insurance is reported as a condition of the 14-day visa-free entry; confirm current mandatory status before departure."
+        },
+        {
+          "field": "yellow_fever_trigger_countries",
+          "reason": "Full official list of yellow-fever trigger countries not verified; check WHO/Omani guidance if recent travel to endemic areas applies."
+        }
+      ],
+      "confidence": "high",
+      "permitted_stay_days": 14,
+      "passport_validity_requirement": {
+        "kind": "months_after_arrival",
+        "months": 6
+      },
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "health_requirements": [
+        {
+          "name": "Yellow fever vaccination certificate",
+          "applicability": "conditional",
+          "trigger_countries": [],
+          "trigger": "arrival within 6 days after staying in or transiting a yellow-fever risk country",
+          "question": "Have you stayed in or transited a yellow-fever endemic country in the past 6 days?"
+        }
+      ],
+      "visa_products": [
+        {
+          "type": "Visa-free entry",
+          "entry": "single",
+          "validity": "on arrival",
+          "max_stay_days": 14,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "Return ticket, confirmed hotel reservation, health insurance and sufficient funds are required."
+        },
+        {
+          "type": "Sponsored tourist visa, 30 days",
+          "entry": "single",
+          "validity": "30 days, extendable once",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 20,
+            "currency": "OMR"
+          },
+          "notes": "Sponsored by a licensed Omani tourism company."
+        },
+        {
+          "type": "One year tourist visit visa",
+          "entry": "multiple",
+          "validity": "One year",
+          "max_stay_days": null,
+          "fee": {
+            "amount": 50,
+            "currency": "OMR"
+          },
+          "notes": null
+        }
+      ],
+      "application_channel_detail": "No visa is needed for stays up to 14 days with a return ticket, confirmed hotel booking, health insurance and sufficient funds. For longer stays apply on the Royal Oman Police eVisa portal before travel.",
+      "requirement_detail": "conditional_visa_free",
+      "transit_requirement": {
+        "required": null,
+        "note": null
+      },
+      "processing_time": "Not applicable (no visa)",
+      "route_workflow_type": "visa_exempt_preparation"
+    },
+    "merged_guidance": {
+      "disposition": "VISA_EXEMPT",
+      "visa_category": "Visa-free entry up to 14 days",
+      "permitted_stay": "Up to 14 days, which cannot be extended or converted",
+      "passport_validity": "6 months beyond arrival",
+      "required_documents": [
+        "valid HKSAR ordinary passport (valid for at least 6 months)",
+        "return/onward ticket",
+        "confirmed accommodation",
+        "travel health insurance",
+        "proof of sufficient funds"
+      ],
+      "application_channel": "not_required",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://evisa.rop.gov.om/",
+      "photo_requirements": "not required for the visa-free route; digital passport photo required if applying for an eVisa",
+      "biometrics_required": false,
+      "interview_required": false,
+      "appointment_required": false,
+      "onward_travel_evidence": "confirmed return/onward ticket",
+      "accommodation_evidence": "confirmed hotel booking or host invitation",
+      "financial_evidence": "proof of sufficient funds for the stay",
+      "insurance_required": true,
+      "exceptions": [
+        "The 14 day visa-free stay cannot be extended or converted. For longer tourism apply for an eVisa before travel",
+        "The visa-free period was 10 days until 14 May 2025 and is 14 days from 15 May 2025"
+      ],
+      "uncertainty": [
+        {
+          "field": "visa_exemption_status",
+          "reason": "Oman announced a 14-day visa-free entry list covering 103 nationalities; the exact current list and any post-cutoff changes should be confirmed with Omani authorities."
+        },
+        {
+          "field": "eVisa_products_and_fees",
+          "reason": "eVisa product durations and fees are recalled from the Royal Oman Police portal; verify current fees and availability if applying for a stay beyond 14 days."
+        },
+        {
+          "field": "health_insurance_requirement",
+          "reason": "Travel health insurance is reported as a condition of the 14-day visa-free entry; confirm current mandatory status before departure."
+        },
+        {
+          "field": "yellow_fever_trigger_countries",
+          "reason": "Full official list of yellow-fever trigger countries not verified; check WHO/Omani guidance if recent travel to endemic areas applies."
+        }
+      ],
+      "confidence": "high",
+      "permitted_stay_days": 14,
+      "passport_validity_requirement": {
+        "kind": "months_after_arrival",
+        "months": 6
+      },
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "health_requirements": [
+        {
+          "name": "Yellow fever vaccination certificate",
+          "applicability": "conditional",
+          "trigger_countries": [],
+          "trigger": "arrival within 6 days after staying in or transiting a yellow-fever risk country",
+          "question": "Have you stayed in or transited a yellow-fever endemic country in the past 6 days?"
+        }
+      ],
+      "visa_products": [
+        {
+          "type": "Visa-free entry",
+          "entry": "single",
+          "validity": "on arrival",
+          "max_stay_days": 14,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "Return ticket, confirmed hotel reservation, health insurance and sufficient funds are required."
+        },
+        {
+          "type": "Sponsored tourist visa, 30 days",
+          "entry": "single",
+          "validity": "30 days, extendable once",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 20,
+            "currency": "OMR"
+          },
+          "notes": "Sponsored by a licensed Omani tourism company."
+        },
+        {
+          "type": "One year tourist visit visa",
+          "entry": "multiple",
+          "validity": "One year",
+          "max_stay_days": null,
+          "fee": {
+            "amount": 50,
+            "currency": "OMR"
+          },
+          "notes": null
+        }
+      ],
+      "application_channel_detail": "No visa is needed for stays up to 14 days with a return ticket, confirmed hotel booking, health insurance and sufficient funds. For longer stays apply on the Royal Oman Police eVisa portal before travel.",
+      "requirement_detail": "conditional_visa_free",
+      "transit_requirement": {
+        "required": null,
+        "note": null
+      },
+      "unpublished_fields": [],
+      "corroborating_sources": [
+        {
+          "url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "quote": "The person will be allowed to stay in the Sultanate for a period of (14) days, which cannot be extended or transferred to any type of residence visa"
+        }
+      ]
+    },
+    "source_provenance": {
+      "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+      "verified_at": "2026-09-01",
+      "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+      "verifier": "ai",
+      "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa.",
+      "fields": [
+        "application_channel",
+        "application_channel_detail",
+        "confidence",
+        "corroborating_sources",
+        "disposition",
+        "exceptions",
+        "government_fee",
+        "official_portal_url",
+        "permitted_stay",
+        "permitted_stay_days",
+        "requirement_detail",
+        "unpublished_fields",
+        "visa_category",
+        "visa_products"
+      ],
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "visa_category": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "permitted_stay": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "application_channel": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "government_fee": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "official_portal_url": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "visa_products": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "exceptions": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "unpublished_fields": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "confidence": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        }
+      }
+    },
+    "seed_entries": [
+      {
+        "route": {
+          "nationality": "HKG",
+          "destination": "OMN",
+          "travel_purpose": "tourism"
+        },
+        "verified_at": "2026-09-01",
+        "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+        "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+        "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa.",
+        "fields": {
+          "disposition": "VISA_EXEMPT",
+          "requirement_detail": "conditional_visa_free",
+          "visa_category": "Visa-free entry up to 14 days",
+          "permitted_stay": "Up to 14 days, which cannot be extended or converted",
+          "permitted_stay_days": 14,
+          "application_channel": "not_required",
+          "application_channel_detail": "No visa is needed for stays up to 14 days with a return ticket, confirmed hotel booking, health insurance and sufficient funds. For longer stays apply on the Royal Oman Police eVisa portal before travel.",
+          "government_fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "official_portal_url": "https://evisa.rop.gov.om/",
+          "visa_products": [
+            {
+              "type": "Visa-free entry",
+              "entry": "single",
+              "validity": "on arrival",
+              "max_stay_days": 14,
+              "fee": {
+                "amount": 0,
+                "currency": null
+              },
+              "notes": "Return ticket, confirmed hotel reservation, health insurance and sufficient funds are required."
+            },
+            {
+              "type": "Sponsored tourist visa, 30 days",
+              "entry": "single",
+              "validity": "30 days, extendable once",
+              "max_stay_days": 30,
+              "fee": {
+                "amount": 20,
+                "currency": "OMR"
+              },
+              "notes": "Sponsored by a licensed Omani tourism company."
+            },
+            {
+              "type": "One year tourist visit visa",
+              "entry": "multiple",
+              "validity": "One year",
+              "max_stay_days": null,
+              "fee": {
+                "amount": 50,
+                "currency": "OMR"
+              },
+              "notes": null
+            }
+          ],
+          "exceptions": [
+            "The 14 day visa-free stay cannot be extended or converted. For longer tourism apply for an eVisa before travel",
+            "The visa-free period was 10 days until 14 May 2025 and is 14 days from 15 May 2025"
+          ],
+          "unpublished_fields": [],
+          "confidence": "high",
+          "corroborating_sources": [
+            {
+              "url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+              "quote": "The person will be allowed to stay in the Sultanate for a period of (14) days, which cannot be extended or transferred to any type of residence visa"
+            }
+          ]
+        }
+      }
+    ],
+    "operator_entries": []
+  },
+  "baseline_sha256": {
+    "route": "57662d318d0de44a190d77a4a77d2ed40086afd1a52665ed1594d5573560a2c3",
+    "raw_guidance": "2b0bfe19c1f68737becf5db49b1a50ca7ea145da95345cb59b29bc56c2ce2c2a",
+    "merged_guidance": "ca6ec6c3e5978b85cbcf5d82b55431d01840f2b3277f2771677223a047b083a7",
+    "source_provenance": "e8a7245247068a189d2eb670d32d8e8747cb164b59afb5700414e5f0428057d0",
+    "seed_entries": "4488e58c4f190c2c9a99d8ec4bcfc325eec60a798aab6d90018f20d1ba14d4dc",
+    "operator_entries": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "status": "detached; requires exact-layer preflight before installation"
+}

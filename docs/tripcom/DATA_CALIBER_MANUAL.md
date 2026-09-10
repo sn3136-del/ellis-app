@@ -88,9 +88,9 @@ remains auditable through source and per-field provenance.
 Source labels, completeness and link coverage are separate measures.
 Completeness-only Low does not create a hold. QC retains every product and its
 evidence. Product held and default route_held are distinct. A current, supported
-exemption may publish while an unsupported optional product remains withheld,
+exemption or required e-visa may publish while optional products stay withheld,
 if no route conflict or prior hold remains. The traveler sees a partial-publication
-notice and supported guidance. Entry conditions cannot be discarded to permit
+notice and supported guidance. Fees, filing deadlines and entry conditions must survive
 publication. Reports distinguish default availability from full product coverage.
 Source disputes, pending detail, stale readers and invalid policy dates remain blocked.
 

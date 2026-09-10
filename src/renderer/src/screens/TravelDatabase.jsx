@@ -1555,14 +1555,15 @@ export default function TravelDatabase({ onBack }) {
                 as the reference it actually is. */}
             {(() => {
               const channelText = T(humanizeEnum(g.application_channel))
+              const referenceUrl = nothingToApplyFor
+                ? (g.source_url || g.official_portal_url) : g.official_portal_url
               return (
                 <Tile label={nothingToApplyFor ? t('db.sourceTile') : t('db.channel')}
-                      value={g.official_portal_url
-                        ? (siteLabel(g.official_portal_url) || channelText)
-                        : channelText}
-                      sub={g.official_portal_url && !nothingToApplyFor
-                        ? channelText : null}
-                      href={g.official_portal_url || undefined} />
+                      value={referenceUrl
+                        ? (siteLabel(referenceUrl) || t('db.sourceTile'))
+                        : (nothingToApplyFor ? null : channelText)}
+                      sub={referenceUrl && !nothingToApplyFor ? channelText : null}
+                      href={referenceUrl || undefined} />
               )
             })()}
           </div>
@@ -1681,28 +1682,26 @@ export default function TravelDatabase({ onBack }) {
                         {T(asText(vp.type))}
                         {vp.entry ? <span style={{ color: GRAY, fontWeight: 400 }}>
                           {' · ' + T(asText(vp.entry))}</span> : null}
+                        {T(asText(vp.notes)) && (
+                          <div style={{ color: GRAY, fontSize: 12, fontWeight: 400,
+                                        marginTop: 3, lineHeight: 1.45 }}>
+                            {T(asText(vp.notes))}
+                          </div>
+                        )}
                       </div>
-                      {/* Validity always says something true. A bare dot left
-                          a reader guessing whether we had failed to find it,
-                          when for an exemption there is no visa to have one
-                          and for a Schengen visa the consulate decides it. */}
+                      {/* Missing product facts remain unknown. Conditions such
+                          as passport validity are never displayed as a stay. */}
                       <div style={{ color: T(asText(vp.validity)) ? NAVY : '#7A8798',
                                     fontStyle: T(asText(vp.validity)) ? 'normal' : 'italic' }}>
                         {T(asText(vp.validity))
                           || (/exempt|visa-free|no visa/i.test(String(vp.type || ''))
                                 ? t('db.val.na')
-                                : t('db.val.consulate'))}
+                                : t('db.valueUnknown'))}
                       </div>
                       <div style={{ color: NAVY }}>
                         {vp.max_stay_days
                           ? t('db.upToDays', { n: vp.max_stay_days })
-                          : (T(asText(vp.notes)) ? '' : '·')}
-                        {T(asText(vp.notes)) && (
-                          <div style={{ color: GRAY, fontSize: 12,
-                                        marginTop: 3, lineHeight: 1.45 }}>
-                            {T(asText(vp.notes))}
-                          </div>
-                        )}
+                          : (T(asText(vp.permitted_stay)) || t('db.valueUnknown'))}
                       </div>
                       <div style={{ color: NAVY, fontWeight: 600 }}>
                         {feeText(vp.fee, t) || '·'}</div>
