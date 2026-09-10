@@ -132,8 +132,9 @@ def _proof(name, value, proof, sources, route, today):
         raise ValueError('source_url must match its provenance source')
     if proof['verified_at'] != source['checked_at']:
         raise ValueError(name + ' review date must match its source read')
-    if not evidence.jurisdiction_matches(source['url'], route['destination_country']):
-        raise ValueError(name + ' source is not the destination authority')
+    from app.visa_snapshot.reviewed_social_authority import source_applicable
+    if not source_applicable(proof, source, sources, route, field=name, value=value):
+        raise ValueError(name + ' source lacks reviewed authority for this route and field')
     quote = proof.get('quote')
     if not isinstance(quote, str) or not quote.strip() or not evidence.quote_in_text(quote, source['text']):
         raise ValueError(name + ' quote is absent from the captured source text')
@@ -192,8 +193,13 @@ def _validate_entry(entry, sources, today):
     json.dumps(guidance, allow_nan=False)
     if set(guidance) - overrides.OVERRIDABLE:
         raise ValueError('guidance contains unsupported fields')
-    if guidance.get('disposition') not in kp.DISPOSITIONS or not _official(guidance.get('source_url')):
-        raise ValueError('guidance needs an explicit disposition and official source')
+    from app.visa_snapshot.reviewed_social_authority import source_applicable
+    source_proof = provenance.get('source_url') or {}
+    source = sources.get(source_proof.get('source_id')) or {}
+    if (guidance.get('disposition') not in kp.DISPOSITIONS or not (
+            _official(guidance.get('source_url')) or source_applicable(
+                source_proof, source, sources, route, field='source_url', value=guidance.get('source_url')))):
+        raise ValueError('guidance needs an explicit disposition and applicable official source')
     if str(guidance.get('confidence') or '').lower() not in {'', 'low', 'medium'}:
         raise ValueError('imported AI review cannot claim High confidence')
     if not any(guidance.get(field) not in UNKNOWN for field in CONSEQUENTIAL):
@@ -209,6 +215,13 @@ def _validate_entry(entry, sources, today):
             continue
         _proof(name, value, provenance.get(name), sources, route, today)
     disposition_proof = provenance['disposition']
+    from app.visa_snapshot.reviewed_social_authority import binding_for
+    social = binding_for(disposition_proof, route)
+    if social and (entry.get('expected_absent') is not True
+            or entry.get('policy_valid_from') != social['binding']['effective_from']
+            or disposition_proof.get('effective_from') != social['binding']['effective_from']
+            or entry.get('policy_valid_through') is not None):
+        raise ValueError('reviewed social route needs exact absence and current policy-start contracts')
     condition_scope = validate_route_evidence(disposition_proof, sources[disposition_proof['source_id']],
         sources, route, guidance['disposition'], policy_date=today.isoformat())
     condition_check = guidance_conditions_preserved(condition_scope, guidance)
@@ -256,6 +269,7 @@ def _validate_entry(entry, sources, today):
             'field_provenance': deepcopy(provenance),
             'policy_valid_from': entry.get('policy_valid_from'), 'policy_valid_through': entry.get('policy_valid_through'),
             'preview_grades': sorted({r.get('confidence_level') for r in records}),
+            'expected_absent': entry.get('expected_absent') is True,
             'source_ids': _referenced_source_ids(provenance, sources)}
 
 
@@ -267,10 +281,11 @@ def _manifest(path, today):
     _date(data.get('reviewed_at'), 'manifest reviewed_at', today=today)
     if not isinstance(data.get('routes'), list) or not data['routes'] or not isinstance(data.get('sources'), list):
         raise ValueError('manifest needs nonempty routes and source evidence')
+    from app.visa_snapshot.reviewed_social_authority import capture_matches
     sources = {}
     for source in data['sources']:
         if (not isinstance(source, dict) or not isinstance(source.get('id'), str) or not source['id']
-                or source['id'] in sources or not _official(source.get('url'))
+                or source['id'] in sources or not (_official(source.get('url')) or capture_matches(source))
                 or not isinstance(source.get('text'), str) or not source['text'].strip()
                 or source.get('reading_method') not in METHODS):
             raise ValueError('invalid, duplicate or unofficial captured source')
@@ -309,6 +324,8 @@ def materialize(database, *, manifest, apply=False, backup=None, now=None):
         for entry in entries:
             key = entry['cache_key']
             action = 'existing' if key in keys else 'insert'
+            if action == 'existing' and entry.get('expected_absent'):
+                invalid.append({'cache_key': key, 'reason': 'expected canonical absence changed'})
             legacy = [old for old in keys if old != key and kp.canonical_key(old) == key]
             if action == 'insert' and legacy:
                 action = 'invalid_legacy_orphan'
@@ -328,6 +345,8 @@ def materialize(database, *, manifest, apply=False, backup=None, now=None):
             return report
         if not apply:
             return report
+        from scripts.prepare_reviewed_social_route import validate_materialization_cas, assert_materialization_files_unchanged
+        social_cas = validate_materialization_cas(data, entries, db)
         with backup.open('xb'):
             pass
         with sqlite3.connect(database.as_uri() + '?mode=ro', uri=True) as snapshot:
@@ -361,6 +380,7 @@ def materialize(database, *, manifest, apply=False, backup=None, now=None):
                  'Added absent canonical route from AI-reviewed manifest ' + data['id'][:200]
                  + '; initial official-source check is due. No operator release or grounded-check stamp was created.', stamp, stamp))
             report['inserted'] += 1
+        assert_materialization_files_unchanged(social_cas)
         db.commit()
         report['applied'], report['backup'] = True, str(backup)
         return report

@@ -277,6 +277,7 @@ def _read_verification_store(path, kind, *, required=False, reviewed=False, erro
         data = json.loads(path.read_text(encoding="utf-8"))
         if reviewed:
             from .evidence_validator import jurisdiction_matches
+            from .reviewed_social_authority import entry_supported
             if (not isinstance(data, dict) or data.get('schema_version') != 1
                     or data.get('kind') != 'reviewed_overlay_conversion'
                     or not isinstance(data.get('entries'), list)):
@@ -288,8 +289,9 @@ def _read_verification_store(path, kind, *, required=False, reviewed=False, erro
                 if (not isinstance(row, dict) or not isinstance(row.get('route'), dict)
                         or not row['route'].get('nationality') or not row['route'].get('destination')
                         or not row.get('verified_at') or not row.get('fields')
-                        or not is_government_host(hostname(str(row.get('source_url') or '')))
-                        or not jurisdiction_matches(str(row.get('source_url') or ''), row['route']['destination'])
+                        or not ((is_government_host(hostname(str(row.get('source_url') or '')))
+                            and jurisdiction_matches(str(row.get('source_url') or ''), row['route']['destination']))
+                            or entry_supported(row))
                         or _field_errors(row['fields'])):
                     raise ValueError('invalid reviewed overlay entry')
         else:
@@ -431,7 +433,8 @@ def _provenance(entry: dict) -> dict:
     # A verification timestamp is not the interval in which the rule applies.
     # Preserve explicit policy bounds even when malformed: the common reader
     # must hold an invalid interval rather than silently remove its limit.
-    for key in ("effective_from", "effective_to", "policy_interval_evidence", "source_id",
+    for key in ("authority_binding_id", "authority_binding_sha256", "authority_linking_source_id", "authority_image_source_id", "quote_sha256",
+                "effective_from", "effective_to", "policy_interval_evidence", "source_id",
                 "source_table", "source_closed_list", "source_eu_citizen", "source_country_section",
                 "supporting_sources", "supporting_evidence", "additional_quotes",
                 "status", "verification_scope", "verified_elements", "retained_unverified_elements",
@@ -455,8 +458,10 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             continue
         if not url or not when or not isinstance(fields, dict) or not fields:
             continue
-        if not is_government_host(hostname(url)):
-            continue          # an override must cite an official source
+        from .reviewed_social_authority import entry_supported, binding_for
+        social_entry = entry_supported(r)
+        if not is_government_host(hostname(url)) and not social_entry:
+            continue          # an override must cite applicable official evidence
         if r.get("verifier", "ai") not in ("human", "ai", "public"):
             continue
         clean = _normalise_legacy_shapes({k: v for k, v in fields.items() if k in OVERRIDABLE})
@@ -485,7 +490,8 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
                     clean.pop(k, None)
         for k in _URL_FIELDS:
             v = str(clean.get(k) or "").strip()
-            if v and not is_government_host(hostname(v)):
+            if v and not is_government_host(hostname(v)) and not (
+                    k == 'source_url' and social_entry and v == url):
                 clean.pop(k, None)
         for k in _CUSTOMER_TEXT:
             if k in clean and _reads_like_review(clean[k]):
@@ -512,7 +518,8 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
                                 "verified_by": "", "note": str(p.get("reason") or p.get("note") or "Unknown")}
                 continue
             if (isinstance(p, dict) and p.get("verified_at") and
-                    is_government_host(hostname(str(p.get("source_url") or ""))) and
+                    (is_government_host(hostname(str(p.get("source_url") or "")))
+                     or social_entry and binding_for(p, route, field=k, value=clean[k])) and
                     p.get("verifier", "ai") in ("human", "ai", "public")):
                 per_field[k] = _provenance(p)
             else:

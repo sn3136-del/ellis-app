@@ -1,0 +1,124 @@
+{
+  "captured_at": "2026-09-10T05:06:18.066329+00:00",
+  "layers": [
+    {
+      "cache_key": "IDN|IDN|VNM|tourism|default|unknown|v6",
+      "route": {
+        "passport_nationality": "IDN",
+        "lawful_country_of_residence": "IDN",
+        "destination_country": "VNM",
+        "visa_category": "tourist_visa",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport",
+        "arrival_date": null,
+        "consular_jurisdiction": null,
+        "transit_countries": null
+      },
+      "raw_row_present": false,
+      "canonical_alias_keys": [],
+      "raw_guidance": null,
+      "raw_metadata": null,
+      "merged_guidance": null,
+      "source_provenance": null,
+      "seed_entries": [
+        {
+          "route": {
+            "nationality": "IDN",
+            "destination": "VNM",
+            "travel_purpose": "tourism"
+          },
+          "verified_at": "2026-08-25",
+          "verified_by": "Ellis source audit",
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+          "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Plan a trip of 14 days or less: Vietnam's Foreign Ministry list (last updated 14/3/2025) still shows 30 days, but the reported 15 July 2026 cut to 14 days is what airlines are checking, so anything longer needs a Vietnamese visa. Official text: 14 days for Diplomatic and Official passport/30 days for Ordinary Passport",
+          "fields": {
+            "disposition": "VISA_EXEMPT",
+            "requirement_detail": "unconditional_visa_free",
+            "permitted_stay": "Vietnam's own published list still says 30 days; an official Indonesian Embassy Hanoi advisory says 14 days from 15 July 2026 and no Vietnamese government page confirms either way",
+            "permitted_stay_days": 14,
+            "visa_products": [],
+            "government_fee": {
+              "amount": 0,
+              "currency": null
+            }
+          }
+        }
+      ],
+      "operator_entries": [],
+      "prospective_empty_base_overlay_probe": {
+        "guidance": {
+          "disposition": "VISA_EXEMPT",
+          "requirement_detail": "unconditional_visa_free",
+          "permitted_stay": "Vietnam's own published list still says 30 days; an official Indonesian Embassy Hanoi advisory says 14 days from 15 July 2026 and no Vietnamese government page confirms either way",
+          "permitted_stay_days": 14,
+          "visa_products": [],
+          "government_fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "appointment_required": false,
+          "interview_required": false
+        },
+        "provenance": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+          "verified_at": "2026-08-25",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Plan a trip of 14 days or less: Vietnam's Foreign Ministry list (last updated 14/3/2025) still shows 30 days, but the reported 15 July 2026 cut to 14 days is what airlines are checking, so anything longer needs a Vietnamese visa. Official text: 14 days for Diplomatic and Official passport/30 days for Ordina",
+          "fields": [
+            "disposition",
+            "government_fee",
+            "permitted_stay",
+            "permitted_stay_days",
+            "requirement_detail",
+            "visa_products"
+          ],
+          "field_provenance": {
+            "disposition": {
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+              "verified_at": "2026-08-25",
+              "verified_by": "Ellis source audit",
+              "verifier": "ai",
+              "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Plan a trip of 14 days or less: Vietnam's Foreign Ministry list (last updated 14/3/2025) still shows 30 days, but the reported 15 July 2026 cut to 14 days is what airlines are checking, so anything longer needs a Vietnamese visa. Official text: 14 days for Diplomatic and Official passport/30 days for Ordina"
+            },
+            "requirement_detail": {
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+              "verified_at": "2026-08-25",
+              "verified_by": "Ellis source audit",
+              "verifier": "ai",
+              "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Plan a trip of 14 days or less: Vietnam's Foreign Ministry list (last updated 14/3/2025) still shows 30 days, but the reported 15 July 2026 cut to 14 days is what airlines are checking, so anything longer needs a Vietnamese visa. Official text: 14 days for Diplomatic and Official passport/30 days for Ordina"
+            },
+            "permitted_stay": {
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+              "verified_at": "2026-08-25",
+              "verified_by": "Ellis source audit",
+              "verifier": "ai",
+              "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Plan a trip of 14 days or less: Vietnam's Foreign Ministry list (last updated 14/3/2025) still shows 30 days, but the reported 15 July 2026 cut to 14 days is what airlines are checking, so anything longer needs a Vietnamese visa. Official text: 14 days for Diplomatic and Official passport/30 days for Ordina"
+            },
+            "permitted_stay_days": {
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+              "verified_at": "2026-08-25",
+              "verified_by": "Ellis source audit",
+              "verifier": "ai",
+              "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Plan a trip of 14 days or less: Vietnam's Foreign Ministry list (last updated 14/3/2025) still shows 30 days, but the reported 15 July 2026 cut to 14 days is what airlines are checking, so anything longer needs a Vietnamese visa. Official text: 14 days for Diplomatic and Official passport/30 days for Ordina"
+            },
+            "visa_products": {
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+              "verified_at": "2026-08-25",
+              "verified_by": "Ellis source audit",
+              "verifier": "ai",
+              "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Plan a trip of 14 days or less: Vietnam's Foreign Ministry list (last updated 14/3/2025) still shows 30 days, but the reported 15 July 2026 cut to 14 days is what airlines are checking, so anything longer needs a Vietnamese visa. Official text: 14 days for Diplomatic and Official passport/30 days for Ordina"
+            },
+            "government_fee": {
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+              "verified_at": "2026-08-25",
+              "verified_by": "Ellis source audit",
+              "verifier": "ai",
+              "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Plan a trip of 14 days or less: Vietnam's Foreign Ministry list (last updated 14/3/2025) still shows 30 days, but the reported 15 July 2026 cut to 14 days is what airlines are checking, so anything longer needs a Vietnamese visa. Official text: 14 days for Diplomatic and Official passport/30 days for Ordina"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

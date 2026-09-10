@@ -18,6 +18,14 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
     gc = out.get("grounded_check")
     gc = gc if isinstance(gc, dict) else {}
     problems = kimi_primary.serve_time_invariants(out["guidance"])
+    from .reviewed_social_authority import registered_reference, guidance_supported
+    provenance = out.get("source_verified") or {}
+    social_claim = (registered_reference(out["guidance"].get("source_url"))
+                    or isinstance(provenance, dict) and bool(provenance.get("authority_binding_id")))
+    if social_claim and not guidance_supported(out["guidance"], provenance, route):
+        # Scope/date/capture failures are hard conflicts. Neither a manual
+        # release nor disabling the ordinary low-evidence hold can bypass them.
+        problems.append("social_authority_scope_or_policy_conflict")
     disputed = list(gc.get("disputed_fields") or [])
     if db is not None:
         from . import freshness

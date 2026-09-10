@@ -440,7 +440,8 @@ def validate_route_evidence(proof, source, sources, route, disposition, *, polic
             return result
         if not isinstance(quote, str) or not quote.strip() or not _quote_in_source(quote, source.get('text', '')):
             return result
-        if not evidence.source_is_official(source['url']) or not evidence.jurisdiction_matches(source['url'], route['destination_country']):
+        from .reviewed_social_authority import source_applicable
+        if not source_applicable(proof, source, sources, route, field='disposition', value=disposition):
             return result
         contracts = {key for key in CONTRACTS if key in proof}
         if len(contracts) > 1:

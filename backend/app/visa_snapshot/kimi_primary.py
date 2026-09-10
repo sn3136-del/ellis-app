@@ -747,7 +747,9 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     for k in ("official_portal_url", "source_url"):
         u = clean.get(k)
         if isinstance(u, str) and u.startswith("http"):
-            if not is_government_host(urlparse(u).hostname or ""):
+            from .reviewed_social_authority import registered_reference
+            if not is_government_host(urlparse(u).hostname or "") and not (
+                    k == "source_url" and registered_reference(u)):
                 clean[k] = None
     wt = str(clean.get("route_workflow_type") or "").strip().lower()
     if wt not in WORKFLOW_TYPES:

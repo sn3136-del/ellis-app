@@ -620,7 +620,8 @@ def verdict_provenance_supported(provenance: dict | None) -> bool:
     fields = provenance.get("fields")
     if not isinstance(fields, (list, tuple, set, dict)) or "disposition" not in fields:
         return False
-    if not is_government_host(hostname(str(provenance.get("source_url") or ""))):
+    from .reviewed_social_authority import binding_for
+    if not is_government_host(hostname(str(provenance.get("source_url") or ""))) and not binding_for(provenance):
         return False
     note = provenance.get("note")
     raw_date = provenance.get("verified_at")
@@ -705,7 +706,8 @@ def _confidence(guidance: dict, provenance: dict | None,
         return "Low"
     from .authority import hostname, is_government_host
     source = (provenance or {}).get("source_url") or guidance.get("source_url") or guidance.get("official_portal_url")
-    if not is_government_host(hostname(str(source or ""))):
+    from .reviewed_social_authority import binding_for
+    if not is_government_host(hostname(str(source or ""))) and not binding_for(provenance):
         return "Low"
     if verdict_provenance_supported(provenance) or grounded_ok:
         return "High"
@@ -1493,6 +1495,12 @@ def records_for_route(route: dict, guidance: dict,
     yields a single route-level record. ``valid_until`` is the cache's
     freshness deadline, never evidence of the policy's expiry date."""
     g = dict(guidance or {})
+    from .reviewed_social_authority import guidance_supported
+    bound_social = bool(isinstance(provenance, dict) and provenance.get('authority_binding_id'))
+    if bound_social and not guidance_supported(g, provenance, route):
+        provenance = None
+        grounded_ok = False
+        disputed_fields = list(disputed_fields or []) + ['social_authority_scope']
     disposition = str(g.get("disposition") or "").upper()
     # The on-arrival subtype defines the category even for historical rows
     # that used the broad VISA_REQUIRED enum.
@@ -1635,6 +1643,9 @@ def records_for_route(route: dict, guidance: dict,
             _set_validity(row, n, unit, g.get("validity"))
             amt, cur = _fee({}, g)
             row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
+        if bound_social and disposition == "VISA_EXEMPT" and not exempt_conflict:
+            # Visa exemption implies no visa fee, not a US-dollar tariff.
+            row["visa_fee_currency"] = None
         row["visa_fee_qualifier"] = _fee_qualifier({}, g)
         row["application_method"] = _method_for_detail(
             row.get("visa_requirement_detail"), method, row, method_from_channel)

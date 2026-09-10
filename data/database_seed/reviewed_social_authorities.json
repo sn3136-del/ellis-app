@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "bindings": [
+    {
+      "binding": {
+        "schema_version": 1,
+        "id": "idn-hanoi-vnm-waiver-20260715",
+        "authority_kind": "origin_government_mission",
+        "owner_country": "IDN",
+        "mission_country": "VNM",
+        "account_url": "https://www.instagram.com/indonesiahanoi/",
+        "official_linking_source_id": "idn-hanoi-government-account-link",
+        "official_linking_source_url": "https://kemlu.go.id/id/hanoi/pelayanan-perwakilan/standar-pelayanan",
+        "official_linking_capture_sha256": "cf5f1a6c23b590fa69c5487860696bcb672ab9e0c32ef7c54d87e6dc10fe9f55",
+        "post_source_id": "idn-hanoi-vnm-waiver-caption",
+        "post_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "post_capture_sha256": "5e3b44f40fe23c08e3b9bb86ee2490b45bf94cbf33a28db94e0554f76e9cdaec",
+        "author_capture_sha256": "c9884584bf33f86de2d54077bc27f5b5b8b02ff3406fcbded35858d64af256cf",
+        "image_source_id": "idn-hanoi-vnm-waiver-image2",
+        "image_url": "https://www.instagram.com/p/Dab9NF9IILJ/?img_index=2",
+        "image_capture_sha256": "b3c702f2596260532e6106ecf14b8e14ff30b853ac8b2b184bafa52c40112bf1",
+        "scope": {
+          "passport_nationality": "IDN",
+          "destination_country": "VNM",
+          "travel_document_type": "ordinary_passport",
+          "travel_purpose": "tourism"
+        },
+        "effective_from": "2026-07-15",
+        "allowed_fact_fields": [
+          "disposition",
+          "permitted_stay_days",
+          "permitted_stay",
+          "exceptions",
+          "policy_valid_from"
+        ],
+        "policy_attribution": "Embassy of the Republic of Indonesia in Hanoi (official Indonesian government account); no direct Vietnamese statutory amendment verified",
+        "registration_status": "AI-reviewed exact source binding; active only in a deployment that installs this registry",
+        "approved_guidance_sha256": "288b7bda0cf4c61e5e21e3c30272475ccdfc7dd6f757f5be8477916e97849b5d"
+      },
+      "captures": [
+        {
+          "id": "idn-hanoi-government-account-link",
+          "url": "https://kemlu.go.id/id/hanoi/pelayanan-perwakilan/standar-pelayanan",
+          "checked_at": "2026-09-10",
+          "reading_method": "fetched_text",
+          "capture_kind": "browser_accessibility_excerpt",
+          "text": "AXWebArea Hanoi, URL: kemlu.go.id/id/hanoi/pelayanan-perwakilan/standar-pelayanan\n3 link Description: KEDUTAAN BESAR REPUBLIK INDONESIA DI HANOI, REPUBLIK SOSIALIS VIET NAM, Value: kemlu.go.id/id/hanoi\n7 link instagram.com/indonesiahanoi/\n71 text hanoi.kbri@kemlu.go.id\n76 text © Copyright 2026 Kementerian Luar Negeri Republik Indonesia.",
+          "links": [
+            {
+              "href": "https://www.instagram.com/indonesiahanoi/",
+              "relationship": "direct official-page account backlink",
+              "observed_ax_node": 7
+            }
+          ],
+          "owner_title": "KEDUTAAN BESAR REPUBLIK INDONESIA DI HANOI, REPUBLIK SOSIALIS VIET NAM",
+          "verification_limit": "The ordinary web reader returned0lines; source was read after JavaScript rendering in Chrome tab899925090. AX excerpt preserves observed link href, not invented HTML.",
+          "sha256": "cf5f1a6c23b590fa69c5487860696bcb672ab9e0c32ef7c54d87e6dc10fe9f55"
+        },
+        {
+          "id": "idn-hanoi-vnm-waiver-caption",
+          "url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+          "checked_at": "2026-09-10",
+          "reading_method": "fetched_text",
+          "capture_kind": "browser_accessibility_policy_excerpt",
+          "text": "The Embassy of the Republic of Indonesia in Hanoi informs Indonesian citizens that, effective 15 July 2026, Vietnam has revised its visa exemption policy.\nIndonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports.\nPlease note: Travelers intending to stay longer than 14 days or visit Vietnam for other purposes must obtain an appropriate visa in accordance with Vietnamese regulations.",
+          "published_at": null,
+          "observed_publication_label": "July 5; caption shows Edited and9w. Policy operative year2026 is explicit in image, caption and embassy reply. Do not treat edited post timestamp as independently established exact publication timestamp.",
+          "author_account_url": "https://www.instagram.com/indonesiahanoi/",
+          "author_capture_text": "Browser tab: 899925089, Title: Instagram, URL: https://www.instagram.com/p/Dab9NF9IILJ/\n27 link Description: indonesiahanoi, Value: instagram.com/indonesiahanoi/\n28 image Verified\n35 text Edited •\n36 text 9w\n208 link Description: July 5, Value: instagram.com/indonesiahanoi/p/Dab9NF9IILJ/",
+          "author_capture_sha256": "c9884584bf33f86de2d54077bc27f5b5b8b02ff3406fcbded35858d64af256cf",
+          "verification_limit": "Official account ownership established by separate government backlink. Policy date explicit; exact post publication timestamp not independently established.",
+          "sha256": "5e3b44f40fe23c08e3b9bb86ee2490b45bf94cbf33a28db94e0554f76e9cdaec"
+        },
+        {
+          "id": "idn-hanoi-vnm-waiver-image2",
+          "url": "https://www.instagram.com/p/Dab9NF9IILJ/?img_index=2",
+          "checked_at": "2026-09-10",
+          "reading_method": "visual_official_document",
+          "capture_kind": "manual_visual_transcription",
+          "text": "Effective 15 July 2026,\nVietnam’s visa exemption for\nIndonesian ordinary\npassport holders has been\nrevised from 30 days to 14\ndays.\nVisa-free stay: up to 14\ndays (tourism & family\nvisits only)\nFor stays exceeding 14\ndays or other travel\npurposes, a valid\nVietnamese visa is required.",
+          "published_at": null,
+          "parent_post_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+          "author_account_url": "https://www.instagram.com/indonesiahanoi/",
+          "author_capture_sha256": "c9884584bf33f86de2d54077bc27f5b5b8b02ff3406fcbded35858d64af256cf",
+          "verification_limit": "Read directly from screenshot returned by getAXStateAndScreenshot after clicking observed Next button20. Line breaks reflect visible image; curly apostrophe transcription is typographic. Image is an embassy notice, not a photographed Vietnamese legal instrument.",
+          "sha256": "b3c702f2596260532e6106ecf14b8e14ff30b853ac8b2b184bafa52c40112bf1"
+        }
+      ],
+      "approved_guidance": {
+        "disposition": "VISA_EXEMPT",
+        "permitted_stay_days": 14,
+        "permitted_stay": "Up to 14 days for tourism.",
+        "exceptions": [
+          "Travelers intending to stay longer than 14 days or visit Vietnam for other purposes must obtain an appropriate visa in accordance with Vietnamese regulations."
+        ],
+        "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "confidence": "low",
+        "visa_products": []
+      }
+    }
+  ]
+}
