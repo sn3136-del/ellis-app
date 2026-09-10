@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "review_id": "field-corrections-korea20260910",
+  "entries": [
+    {
+      "fields": {
+        "disposition": "VISA_REQUIRED",
+        "requirement_detail": "paper_visa",
+        "visa_category": "Short-term tourist visa (C-3-9)",
+        "application_channel": "embassy_consulate",
+        "application_channel_detail": "Follow the responsible Korean mission or its designated visa application centre for the tourist visa application.",
+        "government_fee": null,
+        "official_portal_url": "https://www.visa.go.kr/",
+        "visa_products": [
+          {
+            "type": "Short-term tourist visa (C-3-9)",
+            "requirement_detail": "paper_visa",
+            "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+            "source_quote": "Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9)",
+            "verified_at": "2026-09-09",
+            "verifier": "ai",
+            "entry": null,
+            "validity": null,
+            "max_stay_days": null,
+            "fee": null,
+            "application_channel": "embassy_consulate",
+            "application_channel_detail": "Follow the responsible Korean mission or its designated visa application centre for the tourist visa application.",
+            "required_documents": null,
+            "processing_time": null,
+            "notes": "The issued visa sets entries, validity and permitted stay. Current fees depend on the responsible submission office and visa type."
+          }
+        ],
+        "exceptions": [
+          "A qualifying direct international arrival to Jeju, without transit through another part of Korea, may use the separate Jeju visa-free scheme. The nationality exclusions and itinerary conditions must be met.",
+          "The temporary K-ETA waiver does not apply to Indonesian nationality.",
+          "From 28 May through 31 December 2026, Indonesian tour groups of at least 3 people recruited by a designated Indonesian travel agency may qualify for visa-free travel throughout Korea for up to 15 days. The linked Korean agency must submit the group list for Ministry of Justice pre-screening and approval. Approved travelers must hold valid passports and enter and leave together on the same flight or vessel. This scheme does not grant visa-free entry to independent tourists."
+        ],
+        "permitted_stay_days": null,
+        "permitted_stay": null,
+        "processing_time": null,
+        "required_documents": null,
+        "entry_requirements": "An ordinary Indonesian tourist must obtain the appropriate visa before travel unless a specific visa-free entry scheme applies.",
+        "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+        "corroborating_sources": [
+          {
+            "url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+            "quote": "If your country is not listed, you must apply for a visa to enter Korea.",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.k-eta.go.kr/portal/guide/viewetaalification.do",
+            "quote": "You can apply for K-ETA if you hold a passport from countries or regions listed below.",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://overseas.mofa.go.kr/jp-hiroshima-ko/brd/m_1675/view.do?seq=1286996",
+            "quote": "2026. 1. 1.부터 2026. 12. 31.까지 일본을 포함한 아래 22개 국가∙지역에 대해서 한시적으로 전자여행허가제(K-ETA) 적용을 면제 하기로 하였습니다.",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.mofa.go.kr/sg-en/brd/m_2435/view.do?seq=761394",
+            "quote": "Foreigners from visa-required countries who will be taking a direct flight from overseas to Jeju Island without stopping over at any other parts of Korea.",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+            "quote": "Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9)",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.moj.go.kr/bbs/immigration/214/606932/artclView.do",
+            "quote": "3인 이상 단체관광객 대상, 5월 28일부터 12월 31일까지 시범 시행",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://mojhome.moj.go.kr/bbs/immigration/214/495139/download.do",
+            "quote": "관광·통과(B-2), 15일",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "passport_validity_requirement": {
+          "kind": "valid_through_departure",
+          "months": null
+        },
+        "passport_validity": "Valid at entry and throughout the authorised stay. Korean immigration law publishes no minimum remaining validity for entry. Separately, the Korean Embassy in Jakarta accepts the visa application only if the passport has at least 6 months of validity left on the submission date (rule in force since 3 November 2014, with a discretionary exception for urgent humanitarian entry)."
+      },
+      "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+      "verified_at": "2026-09-09",
+      "verified_by": "Ellis official-source audit",
+      "verifier": "ai",
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "visa_category": {
+          "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9) Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "application_channel": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "government_fee": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "official_portal_url": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "visa_products": {
+          "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9) Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "exceptions": {
+          "source_url": "https://www.moj.go.kr/bbs/immigration/214/606932/artclView.do",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Approved Indonesian groups of 3+ only, 28 May–31 December 2026, up to 15 days throughout Korea. The linked official attachment describes designated travel agencies, MOJ pre-screening and same flight/vessel entry and exit. The separate Jeju source remains in corroborating_sources. This does not change the independent-tourist default."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "permitted_stay": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "processing_time": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "required_documents": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "entry_requirements": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions."
+        },
+        "source_url": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Fresh official MOFA and K-ETA nationality list establish the independent-tourist default; MOJ 27 May 2026 release and its attachment establish the separate 15-day approved-group exception."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=160&PARENT_ID=135",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Indonesian ordinary passport, tourism, entry into Korea. The Immigration Act (Article 12(3)1, KLRI English) makes a valid passport and visa the entry condition, the Korea Immigration Service says an expired passport bars entry and that a stay is granted or extended only within the passport validity, and no Korea-based authority publishes a minimum number of months beyond entry. The rule kind is th",
+          "source_id": "kr_hikorea_entry_requirements",
+          "supporting_evidence": [
+            {
+              "source_id": "kr_kis_stay_within_passport_validity",
+              "source_url": "https://www.immigration.go.kr/bbs/immigration/214/549288/artclView.do",
+              "quote": "국내 체류외국인, 여권 유효기간 내에서만 체류기간이 연장됩니다."
+            },
+            {
+              "source_id": "kr_immigration_act_klri",
+              "source_url": "https://elaw.klri.re.kr/eng_mobile/viewer.do?hseq=61640&type=part&key=7",
+              "quote": "His or her passport and the visa shall be valid: Provided, That the visa requirement shall be met only in cases required by this Act;"
+            }
+          ],
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "IDN",
+            "destination_country": "KOR",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "유효한 여권 등 (선원의 경우에는 여권 및 선원신분증명서) - 유효기간이 만료된 여권일 경우 입국할 수 없습니다."
+        },
+        "passport_validity": {
+          "source_url": "https://overseas.mofa.go.kr/id-ko/brd/m_2860/view.do?seq=1103573",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Indonesian ordinary passport, tourism. Customer-facing statement combining the entry rule (passport must be valid at entry and through the authorised stay, no minimum months published by Korean immigration law) with the separately labelled application-stage condition published by the Korean Embassy in Jakarta in Korean and Indonesian: the C-3 visa application is accepted only when the passport has",
+          "source_id": "kr_embassy_jakarta_visa_passport_ko",
+          "supporting_evidence": [
+            {
+              "source_id": "kr_embassy_jakarta_visa_passport_id",
+              "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2707/view.do?seq=714848",
+              "quote": "Masa Berlaku Paspor untuk Proses Visa adalah Paling Minimal 6 bulan. Hal ini Efektif diberlakukan mulai tanggal 3 November 2014."
+            },
+            {
+              "source_id": "kr_hikorea_entry_requirements",
+              "source_url": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=160&PARENT_ID=135",
+              "quote": "유효한 여권 등 (선원의 경우에는 여권 및 선원신분증명서) - 유효기간이 만료된 여권일 경우 입국할 수 없습니다."
+            },
+            {
+              "source_id": "kr_kis_stay_within_passport_validity",
+              "source_url": "https://www.immigration.go.kr/bbs/immigration/214/549288/artclView.do",
+              "quote": "국내 체류외국인, 여권 유효기간 내에서만 체류기간이 연장됩니다."
+            },
+            {
+              "source_id": "kr_immigration_act_klri",
+              "source_url": "https://elaw.klri.re.kr/eng_mobile/viewer.do?hseq=61640&type=part&key=7",
+              "quote": "His or her passport and the visa shall be valid: Provided, That the visa requirement shall be met only in cases required by this Act;"
+            }
+          ],
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "IDN",
+            "destination_country": "KOR",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "기존 여권잔여 유효기간이 6개월 이상인 경우에만 접수 - 인도적인 사유로 긴급히 국내에 입국할 필요성이 인정되는 경우에는 예외 ㅇ 시행일 : 2014.11.03.부"
+        }
+      },
+      "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions.",
+      "route": {
+        "nationality": "IDN",
+        "destination": "KOR",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "field-corrections-korea20260910",
+      "field_review_scope": "reviewed_route_field_corrections"
+    }
+  ],
+  "status": "detached; exact-layer preflight required"
+}

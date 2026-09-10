@@ -18,11 +18,14 @@ from scripts.prepare_reviewed_product_patch import PatchRejected, digest
 
 KIND = 'reviewed_field_corrections'
 SCOPE = 'reviewed_route_field_corrections'
-ALLOWED_FIELDS = frozenset({'health_requirements', 'passport_validity', 'arrival_card'})
+ALLOWED_FIELDS = frozenset({'health_requirements', 'passport_validity', 'passport_validity_requirement', 'arrival_card'})
 # Columns of the projected product records that these route fields feed.
 RECORD_COLUMNS_MAY_CHANGE = frozenset({'entry_requirements', 'special_conditions', 'required_documents',
                                        'completeness', 'field_status'})
 ARRIVAL_KEYS = frozenset({'required', 'name', 'url', 'submission_window', 'notes'})
+_SIX_MONTHS = r'six \(?6?\)? ?months|6 months|6개월|6 bulan|six bulan'
+_VALID_PASSPORT = r'shall be valid|valid passport|passport[^.]{0,40}\bvalid\b|유효한 여권|유효기간|passport[^.]{0,40}(?:valid|validity)'
+_NUMBER_WORDS = {1: 'one', 2: 'two', 3: 'three', 6: 'six', 12: 'twelve'}
 
 
 def _passages(proof):
@@ -42,10 +45,27 @@ def _check_value(field, value, proof):
     elif field == 'passport_validity':
         if not isinstance(value, str) or not value.strip():
             raise PatchRejected('passport_validity: a non-empty statement is required')
-        if not re.search(r'six \(?6?\)? ?months|6 months', passages, re.I) or not re.search(r'entry|arrival', passages, re.I):
-            raise PatchRejected('passport_validity: the quote does not state the six-month entry rule')
+        six = re.search(_SIX_MONTHS, passages, re.I)
+        validity = re.search(_VALID_PASSPORT, passages, re.I)
+        if not ((six and re.search(r'entry|arrival|application|접수|visa', passages, re.I))
+                or (validity and re.search(r'entry|enter|arrival|stay|입국|체류', passages, re.I))):
+            raise PatchRejected('passport_validity: the quotes state neither a months rule nor a validity-at-entry rule')
         if re.search(r'\bmore than\b', value, re.I) and not re.search(r'\bmore than\b', passages, re.I):
             raise PatchRejected('passport_validity: the value is stricter than its quote')
+        if re.search(r'6 months|six months', value, re.I) and not six:
+            raise PatchRejected('passport_validity: the value states six months but no quote does')
+    elif field == 'passport_validity_requirement':
+        from app.passport_validity import passport_validity_rule_errors
+        if not isinstance(value, dict) or passport_validity_rule_errors(value) or value.get('kind') is None:
+            raise PatchRejected('passport_validity_requirement: an explicit rule of a known kind is required')
+        kind = value['kind']
+        if kind in ('valid_on_arrival', 'valid_through_departure'):
+            if not re.search(_VALID_PASSPORT, passages, re.I) or not re.search(r'entry|enter|arrival|stay|입국|체류', passages, re.I):
+                raise PatchRejected('passport_validity_requirement: the quotes do not state a validity-at-entry or through-stay rule')
+        else:
+            months = value.get('months')
+            if not re.search(rf'\b{months}\b|{_NUMBER_WORDS.get(months, "")}', passages, re.I) or not re.search(r'months?|개월|bulan', passages, re.I):
+                raise PatchRejected('passport_validity_requirement: the months figure is not on the quoted page')
     elif field == 'arrival_card':
         if not isinstance(value, dict) or set(value) != ARRIVAL_KEYS or value['required'] is not True:
             raise PatchRejected('arrival_card: expected a required filing with name, url, window and notes')

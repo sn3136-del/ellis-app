@@ -1,0 +1,842 @@
+{
+  "schema_version": 1,
+  "kind": "field_corrections_exact_layers",
+  "specification": {
+    "schema_version": 1,
+    "kind": "reviewed_field_corrections",
+    "id": "field-corrections-korea20260910",
+    "sources": [
+      {
+        "id": "kr_immigration_act_klri",
+        "url": "https://elaw.klri.re.kr/eng_mobile/viewer.do?hseq=61640&type=part&key=7",
+        "checked_at": "2026-09-10",
+        "reading_method": "httpx_text",
+        "text": "Statutes of the Republic of Korea\nLaw Viewer\nBack Home\nIMMIGRATION ACT\nWholly Amended by Act No. 4522, Dec. 8, 1992\nAmended by Act No. 4592, Dec. 10, 1993\nAct No. 4796, Dec. 22, 1994\nAct No. 5176, Dec. 12, 1996\nAct No. 5434, Dec. 13, 1997\nAct No. 5755, Feb. 5, 1999\nAct No. 6540, Dec. 29, 2001\nAct No. 6745, Dec. 5, 2002\nAct No. 7034, Dec. 31, 2003\nAct No. 7406, Mar. 24, 2005\nAct No. 7655, Aug. 4, 2005\nAct No. 8726, Dec. 21, 2007\nAct No. 9142, Dec. 19, 2008\nAct No. 9847, Dec. 29, 2009\nAct No. 10282, May 14, 2010\nAct No. 10465, Mar. 29, 2011\nAct No. 10545, Apr. 5, 2011\nAct No. 10863, Jul. 18, 2011\nAct No. 11224, Jan. 26, 2012\nAct No. 11298, Feb. 10, 2012\nAct No. 11690, Mar. 23, 2013\nAct No. 12195, Jan. 7, 2014\nAct No. 12421, Mar. 18, 2014\nAct No. 12782, Oct. 15, 2014\nAct No. 12893, Dec. 30, 2014\nAct No. 12960, Jan. 6, 2015\nAct No. 13426, Jul. 24, 2015\nAct No. 13440, Jul. 24, 2015\nAct No. 14106, Mar. 29, 2016\nAct No. 14585, Mar. 14, 2017\nAct No. 15159, Dec. 12, 2017\nAct No. 15492, Mar. 20, 2018\nAct No. 16344, Apr. 23, 2019\nAct No. 16921, Feb. 4, 2020\nAct No. 17089, Mar. 24, 2020\nAct No. 17365, Jun. 9, 2020\nAct No. 17509, Oct. 20, 2020\nAct No. 17934, Mar. 16, 2021\nAct No. 18295, Jul. 13, 2021\nAct No. 18397, Aug. 17, 2021\nAct No. 18798, Feb. 3, 2022\nAct No. 19070, Dec. 13, 2022\nCHAPTER I GENERAL PROVISIONS\nArticle 1 (Purpose)\nThe purpose of this Act is to provide for matters concerning safe border controls through the immigration control of all nationals and aliens who enter or depart from the Republic of Korea, control over the stay of aliens in the Republic of Korea, and social integration, etc. <Amended on Jan. 26, 2012; Mar. 20, 2018>\n[This Article Wholly Amended on May 14, 2010]\nArticle 2 (Definitions)\nThe terms used in this Act are defined as follows: <Amended on Feb. 10, 2012; Mar. 18, 2014; Mar. 20, 2018; Jun. 9, 2020; Aug. 17, 2021>\n1. | The term \"national\" means a national of the Republic of Korea;\n2. | The term \"alien\" means any person who is not a national of the Republic of Korea;\n3. | The term \"refugee\" means a refugee defined in subparagraph 1 of Article 2 of the Refugee Act;\n4. | The term \"passport\" means a passport or refugee travel document issued by the Government of the Republic of Korea, any foreign government or competent international organization, or any other document substituting the passport, which are deemed valid by the Government of the Republic of Korea;\n5. | The term \"seafarers’ identity document\" means a document issued by the Government of the Republic of Korea or a foreign government, which certifies that its holder is a seafarer;\n6. | The term \"port of entry and departure\" means a harbor, airport or other places prescribed by Presidential Decree in the Republic of Korea, through which any person may enter or depart from the Republic of Korea;\n7. | The term \"head of an overseas diplomatic mission\" means an ambassador, minister, consul-general or consul of the Republic of Korea residing in a foreign country, or the head of an organization carrying out consular affairs;\n8. | The term \"ship, etc.\" means any ship, airplane, train, automobile and other means of transportation which transport persons or things between the Republic of Korea and any area outside the Republic of Korea;\n9. | The term \"crew\" means any person who is engaged in any capacity on board a ship, etc.;\n10. | The term \"forwarding agent\" means any person who operates any business using a ship, etc., and a person who executes any transaction belonging to the business of the said person on behalf of him or her;\n10-2. | The term “Regional Immigration Service” means a government office and an immigration detention center established by region pursuant to any statute to perform affairs for controlling immigration and the stay of aliens;\n11. | The term \"detention\" means an immigration control official’s enforcement activities taking into custody or impounding a person having reasonable grounds to be suspected of falling under persons subject to deportation under the subparagraphs of Article 46 (1) at an immigration detention unit, immigration detention center or other place designated by the Minister of Justice;\n12. | The term \"immigration detention unit\" means a place provided at a Regional Immigration Service for the purpose of detaining aliens under this Act;\n13. | The term \"immigration detention center\" means facilities established at a Regional Immigration Service for the purpose of detaining aliens under this Act, and prescribed by Presidential Decree;\n14. | The term \"immigration offender\" means any person deemed to have committed any of the offenses prescribed in Articles 93-2, 93-3, 94 through 99, 99-2, 99-3 and 100;\n15. | The term \"biometrics information\" means personal information, such as the fingerprint, face, iris, and palm vein of a person, which is used for verifying the identity of the person for the duties performed pursuant to this Act.\n16. | The term \"departure waiting room\" means a facility that the head of a Regional Immigration Service installs at a port of entry and departure to allow an alien falling under any subparagraph of Article 76 (1) to wait until his or her departure, in order to ensure the humanitarian treatment and smooth check-in of such alien and the safety in a security zone.\n[This Article Wholly Amended on May 14, 2010]\nCHAPTER II NATIONALS’ ENTRY INTO AND DEPARTURE FROM THE REPUBLIC OF KOREA\nArticle 3 (Nationals’ Departure from the Republic of Korea)\n(1) | A national who intends to depart from the Republic of Korea to an area outside the Republic of Korea (hereinafter referred to as \"departure\") shall hold a valid passport and undergo a departure inspection conducted by an immigration control official at the port of entry and departure from which he or she departs: Provided, That if the national cannot depart from a port of entry and departure due to extenuating circumstances, he or she may depart after undergoing a departure inspection conducted by an immigration control official at a place, other than a port of entry and departure, with permission from the head of the competent Regional Immigration Service. <Amended on Mar. 18, 2014>\n(2) | A departure inspection using an informatization device may substitute for a departure inspection under paragraph (1), as prescribed by Presidential Decree.\n(3) | The Minister of Justice may collect nationals' biometrics information or request a related administrative agency to submit nationals' biometrics information held by the administrative agency, if necessary for departure inspections. <Newly Inserted on Mar. 29, 2016; Jun. 9, 2020>\n(4) | Upon receipt of a request for cooperation under paragraph (3), no related administrative agency shall reject the request without justifiable ground. <Newly Inserted on Mar. 29, 2016>\n(5) | Immigration control officials may utilize the biometrics information collected or submitted under paragraph (3) for departure inspections. <Newly Inserted on Mar. 29, 2016; Jun. 9, 2020>\n(6) | The Minister of Justice shall manage the biometrics information collected or submitted under paragraph (3) in accordance with the Personal Information Protection Act. <Newly Inserted on Mar. 29, 2016; Jun. 9, 2020>\n[This Article Wholly Amended on May 14, 2010]\nArticle 4 (Prohibition of Departure)\n(1) | The Minister of Justice may prohibit a national from departing from the Republic of Korea for a prescribed period not exceeding six months if the national is: <Amended on Jul. 18, 2011; Jul. 13, 2021>\n1. | A person pending in a criminal trial;\n2. | A person whose imprisonment with or without labor has not completed;\n3. | A person who fails to pay a fine or surcharge of at least the amount prescribed by Presidential Decree;\n4. | A person who fails to pay national taxes, customs or local taxes of at least the amount prescribed by Presidential Decree by the deadline for payment without good cause;\n5. | A person who undergoes deliberations and decisions by the Deliberative Committee on Payment of Child Support among obligors for child support under Article 21-4 (1) of the Act on Enforcing and Supporting Child Support Payment;\n6. | A person equivalent to those referred to in subparagraphs 1 through 5, whose departure is determined inappropriate by Ordinance of the Ministry of Justice, as he or she is likely to harm the national interest, public security or economic order of the Republic of Korea.\n(2) | The Minister of Justice may prohibit a person from departing from the Republic of Korea for a prescribed period not exceeding one month, if his or her departure from the Republic of Korea is deemed inappropriate for criminal investigations: Provided, That any of the following persons shall be prohibited from departing from the Republic of Korea for the period prescribed in each subparagraph: <Newly Inserted on Jul. 18, 2011; Mar. 16, 2021>\n1. | A person in respect whom it has been determined to stay prosecution or investigation (limited to suspects) due to his or her unknown whereabouts, or a person in whose case it is impracticable to proceed with investigations due to special reasons, such as flight: Within three months;\n2. | A person in respect whom it has been determined to stay prosecution or investigation (limited to suspects) and an arrest warrant or bench warrant has been issued: Within the period of validity of the warrant.\n(3) | The head of a central administrative agency or the head of a relevant agency determined by the Minister of Justice may request the Minister of Justice to prohibit a national’s departure from the Republic of Korea, when he or she deems that the national falls under any subparagraph of paragraph (1) or (2) in connection with the affairs under his or her jurisdiction. <Amended on Jul. 18, 2011>\n(4) | In conducting a departure inspection, no immigration control official shall permit any person whose departure is prohibited under paragraph (1) or (2), to depart from the Republic of Korea. <Amended on Jul. 18, 2011>\n(5) | Except as provided in paragraphs (1) through (4), matters necessary in relation to the period of and procedures for prohibition of departure shall be prescribed by Presidential Decree. <Amended on Jul. 18, 2011>\n[This Article Wholly Amended on May 14, 2010]\nArticle 4-2 (Extensions of Period of Prohibition of Departure)\n(1) | The Minister of Justice may extend the period of prohibition of departure, when deemed necessary to continue to prohibit departure.\n(2) | The head of an agency who has requested prohibition of departure under Article 4 (3) shall request an extension of the period of prohibition of departure to the Minister of Justice no later than three days prior to the expiration of such period if it is necessary to continue to prohibit departure in excess of the initial period of prohibition. <Amended on Jul. 18, 2011>\n(3) | Except as otherwise provided in paragraphs (1) and (2), matters necessary in relation to procedures for extending the period of prohibition of departure shall be prescribed by Presidential Decree.\n[This Article Wholly Amended on May 14, 2010]\nArticle 4-3 (Revocation of Prohibition of Departure)\n(1) | The Minster of Justice shall revoke prohibition of departure immediately, when the grounds for prohibition of departure cease to exist or prohibition of departure is deemed unnecessary.\n(2) | The head of an agency who has requested prohibition of departure under Article 4 (3) shall immediately request the Minster of Justice to revoke the prohibition of departure when the grounds for prohibition of departure cease to exist. <Amended on Jul. 18, 2011>\n(3) | Except as otherwise expressly provided for in paragraphs (1) and (2), matters necessary in relation to procedures for revoking prohibition of departure shall be prescribed by Presidential Decree.\n[This Article Wholly Amended on May 14, 2010]\nArticle 4-4 (Notice of Decision on Prohibition of Departure)\n(1) | The Minister of Justice shall immediately give written notice stating the grounds for, and period of, departure prohibition and other matters to the person concerned when he or she prohibits such person’s departure under Article 4 (1) or (2), or extends the period of prohibition of departure under Article 4-2 (1). <Amended on Jul. 18, 2011>\n(2) | The Minister of Justice shall immediately give notice to the person concerned when he or she revokes prohibition of departure under Article 4-3 (1).\n(3) | Notwithstanding paragraph (1), the Minister of Justice need not give written notice under paragraph (1) in any of the following circumstances: <Amended on Jul. 18, 2011; Dec. 30, 2014>\n1. | Where such notice may substantially and obviously harm the national security of the Republic of Korea or public interests;\n2. | Where such notice may substantially and obviously interfere with a criminal investigation: Provided, That where the total period of prohibition of departure from the Republic of Korea, including an extension, exceeds three months, the Minister of Justice shall give notice to the person concerned;\n3. | Where the whereabouts of the person prohibited from departing the Republic of Korea is unknown.\n[This Article Wholly Amended on May 14, 2010]\nArticle 4-5 (Filing Objections to Decisions on Prohibition of Departure)\n(1) | A person whose departure is prohibited under Article 4 (1) or (2), or whose period of prohibition of departure is extended under Article 4-2 (1) may file an objection to the decision on prohibition of departure or an extension of the period of prohibition of departure with the Minister of Justice, within 10 days of receiving a notice thereof or becoming aware of such fact. <Amended on Jul. 18, 2011>\n(2) | The Minster of Justice shall decide the validity of an objection filed under paragraph (1) within 15 days from the filing date of such objection: Provided, That the term may be extended only once by up to 15 days, in exceptional circumstances.\n(3) | The Minister of Justice shall immediately revoke prohibition of departure or withdraw an extension of such prohibition where an objection filed under paragraph (1) is deemed reasonable, and the Minister shall dismiss the objection and give written notice stating the grounds therefor to the person concerned if such objection is deemed groundless.\n[This Article Wholly Amended on May 14, 2010]\nArticle 4-6 (Emergency Prohibition of Departure from the Republic of Korea)\n(1) | Where an investigative agency has reasonable grounds to suspect that a person has committed a crime subject to death penalty, imprisonment with labor for an indefinite term or imprisonment of at least three years with or without labor, and there is an urgent need in any of the following circumstances, the investigative agency may request an immigration control official conducting departure inspections to prohibit the person from departing from the Republic of Korea, notwithstanding Article 4 (3):\n1. | Where a suspect is likely to destroy evidence;\n2. | Where a suspect has fled or is likely to flee.\n(2) | Upon receipt of a request prohibiting a person from departing from the Republic of Korea under paragraph (1), no immigration control official shall permit the person to depart from the Republic of Korea when conducting a departure inspection.\n(3) | An investigative agency shall lodge a request for approval with the Minister of Justice within six hours of making a request for emergency prohibition of departure from the Republic of Korea pursuant to paragraph (1). In such cases, such request shall be accompanied by a written opinion on examination signed by a public prosecutor and a report on the emergency prohibition of departure from the Republic of Korea stating the short summary of a crime, grounds for the emergency prohibition of departure from the Republic of Korea. <Amended on Oct. 20, 2020>\n(4) | Where an investigative agency fails to lodge a request for approval for emergency prohibition of departure from the Republic of Korea under paragraph (3), the Minister of Justice shall revoke the prohibition of departure from the Republic of Korea in force at the request made by the investigative agency under paragraph (1). The same shall also apply where the investigative agency fails to obtain approval for emergency prohibition of departure from the Republic of Korea from the Minister of Justice within 12 hours of lodging a request for approval.\n(5) | Where the prohibition of departure from the Republic of Korea is revoked pursuant to paragraph (4), no investigative agency shall re-request the emergency prohibition of departure from the Republic of Korea based on the same crime.\n(6) | Procedures for requesting the emergency prohibition of departure from the Republic of Korea, preparation of reports thereon and other necessary matters shall be prescribed by Presidential Decree.\n[This Article Newly Inserted on Jul. 18, 2011]\nArticle 5 (Custody of Nationals’ Passport)\nIf an immigration control official finds a national in possession of a forged or counterfeited passport or seafarers’ identity document, he or she may withdraw and take custody thereof.\n[This Article Wholly Amended on Dec. 30, 2014]\nArticle 6 (Nationals’ Entry into the Republic of Korea)\n(1) | A national who intends to enter the Republic of Korea from an area outside the Republic of Korea (hereinafter referred to as \"entry\") shall hold a valid passport and undergo an entry inspection conducted by an immigration control official at the port of entry and departure through which he or she enters the Republic of Korea: Provided, That if the national cannot enter the Republic of Korea through a port of entry and departure due to extenuating circumstances, he or she may enter after undergoing an entry inspection conducted by an immigration control official at a place, other than a port of entry and departure, with permission from the head of the competent Regional Immigration Service. <Amended on Mar. 18, 2014>\n(2) | If a national intends to enter the Republic of Korea without a valid passport as he or she has lost it or for any other reason, an immigration control official may permit the national to enter after verification.\n(3) | An entry inspection under paragraph (1) may be substituted by an entry inspection using an informatization device, as prescribed by Presidential Decree.\n(4) | The Minister of Justice may collect nationals' biometrics information or request a related administrative agency to submit nationals' biometrics information held by the administrative agency, if necessary for entry inspections. <Newly Inserted on Mar. 29, 2016; Jun. 9, 2020>\n(5) | Upon receipt of a request for cooperation under paragraph (4), no related administrative agency shall reject the request without justifiable ground. <Newly Inserted on Mar. 29, 2016>\n(6) | Immigration control officials may utilize the biometrics information collected or submitted under paragraph (4) for entry inspections. <Newly Inserted on Mar. 29, 2016; Jun. 9, 2020>\n(7) | The Minister of Justice shall manage the biometrics information collected or submitted under paragraph (4) in accordance with the Personal Information Protection Act. <Newly Inserted on Mar. 29, 2016; Jun. 9, 2020>\n[This Article Wholly Amended on May 14, 2010]\nCHAPTER III ENTRY AND LANDING OF ALIENS\nSECTION 1 Entry of Aliens\nArticle 7 (Entry of Aliens)\n(1) | When an alien enters the Republic of Korea, he or she shall hold a valid passport and a visa issued by the Minister of Justice.\n(2) | Notwithstanding paragraph (1), any of the following aliens may enter the Republic of Korea without a visa:\n1. | A person who has obtained permission to reenter or is exempted from permission of reentry enters the Republic of Korea before the period of such permission or exemption expires;\n2. | A person who is a national of a country which has entered into the Visa Exemption Agreement with the Republic of Korea and eligible for a visa exemption under such Visa Exemption Agreement;\n3. | A person who enters the Republic of Korea for international friendship, sightseeing or in the interests of the Republic of Korea, etc., with entry permission he or she has obtained otherwise, as prescribed by Presidential Decree;\n4. | A person who departed from the Republic of Korea with a refuge travel document issued, and enters the Republic of Korea before the effective period of such certificate expires.\n(3) | The Minister of Justice may temporarily suspend the application of the Visa Exemption Agreement to persons who fall under paragraph (2) 2 where deemed necessary for maintaining public order or in the interests of the Republic of Korea.\n(4) | Notwithstanding paragraph (1), any national of a country which has no diplomatic relationship with the Republic of Korea, or of a country designated by the Minister of Justice through consultation with the Minister of Alien Affairs, may enter the Republic of Korea with an alien entry permit issued by the head of an overseas diplomatic mission or the head of a Regional Immigration Service, as prescribed by Presidential Decree. <Amended on Mar. 23, 2013; Mar. 18, 2014>\n[This Article Wholly Amended on May 14, 2010]\nArticle 7-2 (Prohibition of False Invitations)\nNo one shall engage in any of the following conduct to enable an alien to enter the Republic of Korea:\n1. | Inviting an alien by illegal means, such as making a false statement or providing a false reference, or assisting such invitation;\n2. | Falsely applying for a visa or a visa issuance certificate, or assisting such application.\n[This Article Wholly Amended on May 14, 2010]\nArticle 7-3 (Prior Permission for Travel)\n(1) | If deemed necessary for the maintenance of public order or the interests of the State, the Minister of Justice may allow any of the following aliens to obtain permission prior to his or her entry into the Republic of Korea (hereinafter referred to as \"prior permission for travel\"):\n1. | An alien who falls under Article 7 (2) 2 or 3;\n2. | An alien who may enter the Republic of Korea without a visa under other statutes.\n(2) | When an alien who has obtained prior permission for travel shall hold a prior permit for travel when entering the Republic of Korea.\n(3) | The criteria, procedures, and methods for issuing a prior permit for travel shall be prescribed by Ordinance of the Ministry of Justice.\n[This Article Newly Inserted on Feb. 4, 2020]\nArticle 8 (Visas)\n(1) | A visa referred to in Article 7 shall be categorized as a single-entry visa valid for only one entry into the Republic of Korea and a multiple-entry visa valid for at least two entries.\n(2) | The Minister of Justice may delegate his or her authority to issue visas to the heads of overseas diplomatic missions, as prescribed by Presidential Decree.\n(3) | Criteria and procedures for the issuance of visas shall be prescribed by Ordinance of the Ministry of Justice.\n[This Article Wholly Amended on May 14, 2010]\nArticle 9 (Visa Issuance Certificates)\n(1) | The Minister of Justice may issue a visa issuance certificate to an alien who intends to enter the Republic of Korea, upon application of the alien, before issuing a visa under Article 7 (1), if deemed particularly necessary.\n(2) | An application for a visa issuance certificate under paragraph (1) may be filed by any person who intends to invite an alien to the Republic of Korea on behalf of the alien.\n(3) | Eligibility, criteria and procedures for the issuance of visa issuance certificates under paragraph (1) shall be prescribed by Ordinance of the Ministry of Justice.\n[This Article Wholly Amended on May 14, 2010]\nArticle 10 (Statuses of Stay)\nEvery alien who intends to enter the Republic of Korea shall be granted a status of stay falling under any of the following subparagraphs:\n1. | Standard status of stay: a status of stay by which a period of stay in the Republic of Korea is limited pursuant to this Act;\n2. | Status of permanent residency: a status of stay by which permanent residency in the Republic of Korea is permitted.\n[This Article Wholly Amended on Mar. 20, 2018]\nArticle 10-2 (Standard Status of Stay)\n(1) | The standard status of stay under subparagraph 1 of Article 10 (hereinafter referred to as “standard status of stay”) shall be classified as follows:\n1. | Status of short-term stay: a status of stay by which it is permitted to stay in the Republic of Korea for not more than 90 days (where a period of stay exceeds 90 days pursuant to a visa exemption agreement or the reciprocity, such period of stay) for the purpose of tourism, visit, etc.;\n2. | Status of long-term stay: a status of stay by which it is permitted to stay in the Republic of Korea within a maximum period exceeding 90 days prescribed by Ordinance of the Ministry of Justice for the purpose of study, training, investment, presence for business, marriage, etc.\n(2) | Types of status of short-term stay and status of long-term stay under paragraph (1), persons eligible for any type of status of stay or extent of activities under such status shall be prescribed by Presidential Decree in consideration of the purpose of stay, whether employment activities are permissible, etc.\n[This Article Newly Inserted on Mar. 20, 2018]\nArticle 10-3 (Status of Permanent Residency)\n(1) | Limitations on the extent of activities and the period of stay shall not apply to an alien granted the status of permanent residency under subparagraph 2 of Article 10 (hereinafter referred to as “status of permanent residency”).\n(2) | Persons who intend to acquire the status of permanent residency shall be persons eligible for the status of permanent residency prescribed by Presidential Decree and meet each of the following requirements:\n1. | He or she shall be of good conduct, such as observing the Acts and subordinate statutes of the Republic of Korea;\n2. | He or she shall be able to make a living, relying on the income, assets, etc. of his or her own or of a family member with whom he or she share livelihood;\n3. | He or she shall have basic knowledge necessary to continuously live as a national of the Republic of Korea, such as Korean language capability and the understanding of Korean society and culture.\n(3) | Notwithstanding paragraph (2) 2 and 3, the Minister of Justice shall wholly or partially alleviate or exempt the requirements referred to in paragraph (2) 2 and 3 for the persons prescribed by Presidential Decree, such as those rendering distinguished services to the Republic of Korea, those with excellent capabilities in a specific field, including science, management, education, culture and arts, and athletics, and those making investment of a certain amount or more in the Republic of Korea.\n(4) | Matters necessary for the standards, extent, etc. of the requirements under each subparagraph of paragraph (2) shall be prescribed by Ordinance of the Ministry of Justice.\n[This Article Newly Inserted on Mar. 20, 2018]\nArticle 11 (Prohibition of Entry)\n(1) | The Minister of Justice may prohibit an alien from entering the Republic of Korea if the alien is: <Amended on Jan. 6, 2015>\n1. | A patient with an infectious disease, an addict to narcotics, or a person deemed likely to pose a threat to public health;\n2. | A person who intends to enter the Republic of Korea unlawfully, carrying a firearm, knife, sword, explosives, etc. specified in the Act on the Safety Management of Guns, Swords and Explosives;\n3. | A person deemed highly likely to engage in any conduct harming the interests or public security of the Republic of Korea;\n4. | A person deemed highly likely to engage in any conduct disturbing economic or social order or good morals;\n5. | A mentally disabled person who is void of a capacity of discriminating sense and has no person to assist his or her stay in the Republic of Korea, a person who cannot afford expenses incurred in relation to his or her stay in the Republic of Korea, and a person in need of relief;\n6. | A person for whom five years have not elapsed after departure from the Republic of Korea under a deportation order;\n7. | A person who took part in the slaughter or cruel treatment of people on the grounds of race, ethnicity, religion, nationality, political opinion, etc. under an instruction from, or in liaison with, any of the following governments during the period from August 29, 1910 to August 15, 1945:\n(a) | The Japanese government;\n(b) | Any government in alliance with the Japanese government;\n(c) | Any government on which the Japanese government exercised predominant influence;\n8. | A person equivalent to those referred to in subparagraphs 1 through 7 whose entry into the Republic of Korea is deemed inappropriate by the Minister of Justice.\n(2) | If the home country of an alien who intends to enter the Republic of Korea refuses the entry of a Korean national for any reason, other than those referred to in the subparagraphs of paragraph (1), the Minister of Justice may refuse the entry of such alien for the same reason.\n[This Article Wholly Amended on May 14, 2010]\nArticle 12 (Entry Inspections)\n(1) | Every alien who intends to enter the Republic of Korea shall submit his or her passport and entry form to an immigration control official for an entry inspection at a port of entry and departure, as prescribed by Presidential Decree. <Amended on Jun. 9, 2020>\n(2) | The proviso of Article 6 (1) and paragraph (3) of that Article shall apply mutatis mutandis to paragraph (1).\n(3) | In conducting an entry inspection, an immigration control official shall grant entry permission to an alien after examining whether the alien satisfies the following requirements that: <Amended on Feb. 4, 2020>\n1. | His or her passport and the visa shall be valid: Provided, That the visa requirement shall be met only in cases required by this Act;\n1-2. | His or her prior permit for travel referred to in Article 7-3 (2) shall be valid;\n2. | The purpose of his or her entry shall comply with the status of stay;\n3. | The period of stay shall have been determined, as prescribed by Ordinance of the Ministry of Justice;\n4. | He or she shall not be subject to prohibition or refusal of entry under Article 11.\n(4) | If an alien fails to prove that he or she satisfies the requirements provided for in the subparagraphs of paragraph (3), an immigration control official may refuse his or her entry into the Republic of Korea.\n(5) | Upon granting entry permission to an alien falling under Article 7 (2) 2 or 3, an immigration control official shall grant the status of stay to the alien and determine the period of stay, as prescribed by Presidential Decree.\n(6) | An immigration control official may enter ships, etc. for the purpose of conducting inspections under paragraph (1) or (2).\n[This Article Wholly Amended on May 14, 2010]\nArticle 12-2 (Provision of Biometrics Information at Time of Entry)\n(1) | Every alien who intends to enter the Republic of Korea shall provide his or her biometrics information in the manner prescribed by Ordinance of the Ministry of Justice and follow the procedures for verifying his or her identity when undergoing an entry inspection pursuant to Article 12: Provided, That this shall not apply to any of the following persons: <Amended on Jun. 9, 2020>\n1. | A person under 17 years of age;\n2. | A person who enters the Republic of Korea to perform the affairs of a foreign government or international organization, and his or her accompanying family;\n3. | A person prescribed by Presidential Decree as needing to be exempted from provision of his or her biometrics information, in light of the promotion of friendly relationship and cultural exchange with a foreign country, facilitation of economic activities, the interests of the Republic of Korea, etc.\n(2) | When an alien refuses to provide his or her biometrics information pursuant to the main clause of paragraph (1), an immigration control official may refuse the alien’s entry into the Republic of Korea. <Amended on Jun. 9, 2020>\n(3) | The Minister of Justice may request relevant administrative agencies to submit an alien’s biometrics information retained by them, if necessary for conducting entry inspections. <Amended on Jun. 9, 2020>\n(4) | No relevant administrative agency in receipt of a request for cooperation under paragraph (3) shall refuse such request without good cause.\n(5) | An immigration control official may use the biometrics information provided or submitted under paragraph (1) or (3) for entry inspections. <Amended on Jun. 9, 2020>\n(6) | The Minister of Justice shall keep and manage the biometrics information provided or submitted under paragraph (1) or (3), as prescribed by the Personal Information Protection Act. <Amended on Mar. 29, 2011; Jun. 9, 2020>\n[This Article Newly Inserted on May 14, 2010]\n[Title Amended on Jun. 9, 2020]\n[Previous Article 12-2 moved to Article 12-3 <May 14, 2010>]\nArticle 12-3 (Bans on Provision of Ships, etc.)\n(1) | No person shall engage in any of the following conduct for the purpose of illegally allowing any alien to enter or depart from the Republic of Korea or having any alien illegally enter other country via the Republic of Korea:\n1. | Providing a ship, etc., passport, visa, boarding pass, or other document or any materials usable for entry into or departure from the Republic of Korea;\n2. | Arranging the conduct referred to in subparagraph 1.\n(2) | No person shall engage in any of the following conduct in respect of an alien who has illegally entered the Republic of Korea:\n1. | Harboring or allowing the alien to escape from the Republic of Korea, or providing a means of transportation for such purposes;\n2. | Arranging the conduct referred to in subparagraph 1.\n[This Article Wholly Amended on May 14, 2010]\n[Moved from Article 12-2; previous Article 12-3 moved to Article 12-4 <May 14, 2010>]\nArticle 12-4 (Custody of Alien’s Passport)\n(1) | Article 5 shall apply mutatis mutandis to forged or counterfeited passports or seafarers’ identity documents of aliens. <Amended on Dec. 30, 2014>\n(2) | If an immigration control official finds the passport or seafarers’ identity document of an immigration offender who is currently under investigation for a violation of this Act, and subject to deportation under Article 46, he or she may withdraw and take custody thereof.\n[This Article Wholly Amended on May 14, 2010]\n[Moved from Article 12-3 <May 14, 2010>]\nArticle 13 (Conditional Entry Permission)\n(1) | The head of a Regional Immigration Service may grant conditional entry permission to any of the following aliens, as prescribed by Presidential Decree: <Amended on Mar. 18, 2014>\n1. | A person who fails to meet any of the requirements provided for in Article 12 (3) 1 due to extenuating circumstances but is deemed able to meet such requirements within a specified period;\n2. | A person who is suspected of falling under any subparagraph of Article 11 (1), or of failing to meet any of the requirements provided for in Article 12 (3) 2, and is thus deemed to be subject to a special inspection;\n3. | Any other person whose case is deemed, by the head of the Regional Immigration Service, to require conditional entry permission for any reasons other than those provided for in subparagraphs 1 and 2.\n(2) | In granting conditional entry permission under paragraph (1), the head of a Regional Immigration Service shall issue a conditional entry permit to an alien. In such cases, the head of a Regional Immigration Service shall restrict his or her residence, and impose obligation to comply with requests to appear, and impose necessary conditions on the permit and may require the alien to deposit a bond not exceeding ten million won, where deemed necessary. <Amended on Mar. 18, 2014>\n(3) | If an alien granted conditional entry permission under paragraph (1) violates any of the conditions for such permission, the head of the competent Regional Immigration Service may transfer the deposited bond, in whole or in part, to the fund of the National Treasury. <Amended on Mar. 18, 2014>\n(4) | The deposit and return of bonds and procedures for the transfer of such bonds to the fund of the National Treasury under paragraphs (2) and (3) shall be prescribed by Presidential Decree.\n[This Article Wholly Amended on May 14, 2010]\nSECTION 2 Landing of Aliens\nArticle 14 (Landing Permission for Crew)\n(1) | An immigration control official may permit the landing of any of the following alien crew members for up to 15 days if an application for landing is filed by the captain of the ship, etc., the forwarding agent or the principal: Provided, That this shall not apply to an alien crew member falling under any subparagraph of Article 11 (1):\n1. | An alien crew member who intends to land for the purpose of recreation, etc. while the ship, etc. on which he or she serves moors at any port of entry and departure in the Republic of Korea;\n2. | An alien crew member who intends to transfer to a ship, etc. scheduled to enter any port of entry and departure in the Republic of Korea or to a ship, etc. which moors thereat.\n(2) | Upon receipt of an application filed under paragraph (1), an immigration control official shall verify the following documents: Provided, That where any agreement, etc. with foreign countries stipulates that a seafarers’ identity document may substitute for a passport, the immigration control official may verify a seafarers’ identity document, in lieu of a passport: <Amended on Jun. 9, 2020>\n1. | A passport or seafarers’ identity document, where an alien crew member referred to in paragraph (1) 1 is a seafarer;\n2. | A passport and a document prescribed by Presidential Decree, where an alien crew member referred to in paragraph (1) 2 is a seafarer: Provided, That where such member falls under Article 7 (2) 3, the immigration control official shall verify his or her passport;\n3. | A passport in the case of other alien crew members.\n(3) | When an immigration control official grants permission under paragraph (1), he or she shall issue a crewman’s landing permit. In such cases, he or she may impose necessary conditions, such as the period permitted for landing, restrictions on districts within which a crew member can move, etc. on the crew landing permit.\n(4) | Notwithstanding the latter part of paragraph (3), Article 12 shall apply mutatis mutandis to landing permission for crew member falling under paragraph (1) 2.\n(5) | The head of a Regional Immigration Service may extend the period of landing permission for alien crew granted landing permission, where deemed necessary. <Amended on Mar. 18, 2014>\n(6) | Crew landing permits issued under paragraph (3) may be continuously used in any other port of entry and departure in the Republic of Korea until the relevant ship, etc. finally departs from the Republic of Korea.\n(7) | Article 12-2 shall apply mutatis mutandis to fingerprinting and photographing of alien crew: Provided, That this shall not apply where the crew is a seafarer and it is impracticable for him or her to be fingerprinted and photographed in following the procedures for obtaining landing permission.\n[This Article Wholly Amended on May 14, 2010]\nArticle 14-2 (Landing Permission for Tourism)\n(1) | Where the captain of a ship or the forwarding agent applies for landing permission for alien passengers on board the ship prescribed by Ordinance of the Ministry of Justice from among passenger ships making a tour and operating internationally in the seas of the Republic of Korea and foreign countries for the purpose of tourism, an immigration control official may grant landing permission for tourism to such alien passengers for up to three days: Provided, That this shall not apply to alien passengers falling under any of the subparagraphs of Article 11 (1).\n(2) | Upon receipt of an application for landing permission filed under paragraph (1), an immigration control official shall verify following documents:\n1. | Passports of alien passengers;\n2. | A list of alien passengers;\n3. | Other documents prescribed by Ordinance of the",
+        "sha256": "40c1879d4ce8390c685672fb76abc6e75de42828331a0f68931c11c608e60448"
+      },
+      {
+        "id": "kr_hikorea_entry_requirements",
+        "url": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=160&PARENT_ID=135",
+        "checked_at": "2026-09-10",
+        "reading_method": "httpx_text",
+        "text": "출입국/체류 상세 < 하이코리아\n본문 바로가기\n이 누리집은 대한민국 공식 전자정부 누리집입니다. ..\n로그인\n회원가입\n이용안내\n고객센터\n한국어\nENGLISH\n中文\n통합검색\n검색\n통합검색 닫기\nHi Korea\n민원신청\n전자민원\n방문예약\n출입국민원 대행기관 이용\n출입국우대카드(기관담당자전용)\n온라인 상륙허가\n정보조회\n민원신청결과\n전자민원\n방문예약\n사증발급인정서\n난민 이의신청\n기타 조회 서비스\n관할 출입국.외국인관서 조회\n등록증 · 거소증 유효확인\n등록증·거소증 분실(철회) 신고\n외국인 취업 및 고용가능여부 조회\n출입국민원 대행기관 조회\n법무부지정 의료기관 조회\n체류만료일조회\n육아도우미 교육수료자 조회\n통합고용변동 민원조회\n전자민원 허가서 발급 확인\n출국금지 여부 조회\n(한국인 전용)\n국적심사 진행상황 조회\n자동출입국심사\nSES 안내\nSmart Entry Service란?\n이용대상\nSES Auto-gate 이용방법\nSES 등록센터 및 이용가능 공항\n자동출입국심사 상호이용\n한·미국(SeS-GE)\n한-홍콩(SES-e-Channel)\n한-마카오(SES-APC)\n한-대만(SES-e-Gate)\n한-독일(SES-EasyPASS)\n정보광장\n비자내비게이터(맞춤형\n체류가이드)\n동포 맞춤형 길라잡이\n체류자격별 안내메뉴얼\n한국생활 길잡이\n출입국/체류안내\n국적/귀화안내\n사회통합\n기술창업이민\n투자이민\n투자지원\n고용지원\n출입국관련 법령지침정보\n빅데이터 분석·시각화\n뉴스·공지\n공지사항\n보도자료\n자료실\n민원서식\n뉴스레터\n하이코리아에서는\n편리한 민원신청을 위해\n온라인으로 신청하실 수 있는 서비스를 제공하고 있습니다.\n출입국/체류안내\n초청/사증(VISA)\n사증\n사증발급인정서\n사증발급인정서 신청결과조회\n국제 결혼안내프로그램\n출입국심사\n국민출입국심사\n외국인출입국심사\n남북한왕래\n승무원출입국심사/상륙허가\n선박 등의 장 및 운수업자의 책임\n출입국우대카드\n외국인의 체류\n체류일반\n외국인등록\n체류기간\n연장\n체류자격변경\n체류자격외활동\n근무처변경/추가\n체류자격부여\n재입국허가(복수)\n각종신고의무\n국적/귀화\n국적민원 접수장소\n귀화(일반,간이,특별)\n국적회복\n국적판정\n국적취득\n국적 선택의무/선택절차/이탈절차/보유상실\n국적선택명령/국적상실결정/외국국적포기의무\n국적법 질의응답\n종합평가 및 면접심사\n국적증서수여식\n기초 법 제도 및 질서\n법과 질서\n재외동포\n거소신고의의/절차\n재외동포 활동범위\n지원부서 안내\n동포관련 사이트\n동포 맞춤형 길라잡이\n난민인정\n개요\n난민신청 및 심사절차\n체류/취업\n처우\n출입국사범/보호\n출입국사범 의미/조사\n출입국사범 심사결정\n출입국사범 보호\n증명발급\n증명발급\n알기쉬운 출입국 안내\n관광, 통과, 각종행사, 회의참가 등\n친척 방문, 가족 동거, 거주, 동반, 재외동포 등\n사업의 목적\n학업의 목적\n취업의 목적\n기타 목적\n계절근로자 제도\n개요\n배정 현황 및 참여 광역 지방정부 연락처\n개인정보 수집·이용안내\n홈 출입국/체류안내\n외국인출입국심사\n외국인 입국심사 및 입국요건 외국인 무사증 입국 외국인 출국심사\n외국인 입국심사 및 입국요건\n외국인 입국심사\n외국인 입국심사는 출입국관리행정의 특징인 외국인 입국허가 여부에 대한 국가의 고유한 주권행사입니다.\n외국인 입국심사시 국가 이익보호에 최우선을 두고 있으며, 위·변조여권 소지자 등 불법입국 기도자와 입국금지자의 입국을 저지합니다.\n여권 위·변조, 입국목적 불분명, 초청자 불분명 등 불법적인 방법으로 한국으로 입국을 시도하는 외국인에 대해 입국을 거부할 수 있습니다.\n외국인 입국요건\n유효한 여권 등 (선원의 경우에는 여권 및 선원신분증명서)\n- 유효기간이 만료된 여권일 경우 입국할 수 없습니다.\n유효한 사증\n- 사증발급 유효기간내에 입국하여야 하며, 발급받은 사증과 방문목적이 일치하지 않을 경우 입국이 거부될 수 있습니다.\n입국금지 사유에 해당되지 않아야 함\n-국제테러분자, 과거 한국 불법체류자 등의 사유로 입국금지 되어있는 경우 입국할 수 없습니다.\n< 작성일 : 2013.01.01 >\n인쇄하기\nTOP\n개인정보처리방침\n웹접근성정책\n원격접속\n관련사이트\n지역/지방정부\n1345 (국번없이) (FAX) 02-2650-4550 (FAX민원) 1577-1346 (해외문의) +82-2-1345, +82-2-6908-1345~6\n페이스북\n다운로드\n아크로벳 다운로드 엑셀 다운로드 한글 다운로드 워드 다운로드\n주소 : 경기도 과천시 관문로 47 정부과천청사 1동 ( 외국인종합안내센터 : 국번없이 1345 )\nCopyright ⓒ 2020 HI KOREA. All rights Reserved.",
+        "sha256": "adc82ff71c8497e1d71fd277598a3441203281abfa0d80f44f3d1efb3e7b07db"
+      },
+      {
+        "id": "kr_kis_stay_within_passport_validity",
+        "url": "https://www.immigration.go.kr/bbs/immigration/214/549288/artclView.do",
+        "checked_at": "2026-09-10",
+        "reading_method": "httpx_text",
+        "text": "법무부\n국내 체류외국인, 여권 유효기간 내에서만 체류기간이 연장됩니다.\n작성일\n2021.06.29\n조회수\n19396\n공공누리\n4유형\n전화번호\n02-2110-4058\n담당부서\n체류관리과\n국내 체류외국인, 여권 유효기간 내에서만 체류기간이 연장됩니다.\n- 외국인 체류허가 기간 부여기준 변경 -\n법무부(장관 박범계)는 2021.7.1.(목)부터 외국인의 국내 체류허가 시 여권 유효기간 범위 내에서 체류기간을 부여할 예정입니다.\n그간 출입국·외국인관서 민원실 혼잡도 완화 및 민원인 편의를 위하여 여권 유효기간 만료일을 초과하여 체류기간을 부여하고 이후에 여권을 갱신하도록 하였으나, 외국인이 여권을 갱신하지 않고 출입국을 하려다 불편함을 겪거나 갱신 후 신고 소홀로 과태료를 부과 받는 등 문제가 있어 여권의 유효기간과 체류기간이 일치하도록 한 것입니다.\n다만, 코로나19 팬데믹으로 인하여 해외 이동이 자유롭지 못하고, 국내에서 여권을 재발급 받는 것이 여의치 않은 외국인들의 사정을 감안하여 제도 시행 후 일정 기간 동안 경과 규정을 두어 민원 불편을 최소화할 예정입니다.\n[첨부참조]\n첨부파일\n[보도자료]국내 체류외국인, 여권 유효기간 내에서만 체류기간이 연장됩니다.hwp 바로보기\n이전글\n법무부장관, 부평 미얀마인 밀집지역 방문 2021-05-28 17:06:29.0\n다음글\n법무부 출입국‧외국인정책본부장 인사 2021-07-02 13:52:49.0\nOPEN공공누리 공공저작물자유이용 허락 출처표시\n법무부의 해당 저작물은 \"공공누리 1유형(출처표시)\" 조건에 따라 누구나 이용할 수 있습니다.\nOPEN공공누리 공공저작물자유이용 허락 출처표시, 상업용금지\n법무부의 해당 저작물은 \"공공누리 2유형(출처표시)\" 조건에 따라 누구나 이용할 수 있습니다.\nOPEN공공누리 공공저작물자유이용 허락 출처표시, 변경금지\n법무부의 해당 저작물은 \"공공누리 3유형(출처표시)\" 조건에 따라 누구나 이용할 수 있습니다.\nOPEN공공누리 공공저작물자유이용 허락 출처표시, 상업용금지, 변경금지\n법무부의 해당 저작물은 \"공공누리 4유형(출처표시)\" 조건에 따라 누구나 이용할 수 있습니다.",
+        "sha256": "7fd58303bce5670227310bed39076fa521386ec580d0daae0fddc4a68a697bd0"
+      },
+      {
+        "id": "kr_embassy_jakarta_visa_passport_ko",
+        "url": "https://overseas.mofa.go.kr/id-ko/brd/m_2860/view.do?seq=1103573",
+        "checked_at": "2026-09-10",
+        "reading_method": "httpx_text",
+        "text": "사증발급 시 여권 잔여유효기간(6개월) 설정 알림 상세보기|일반사항 | 주인도네시아 대한민국 대사관\n바로가기 메뉴 본문 바로가기 주메뉴 바로가기\n이 누리집은 대한민국 공식 전자정부 누리집입니다.\n외교부\n청와대\nRSS\n인도네시아 내 공관\n공관 소셜미디어\nfacebook\nX\ninstagram\nyoutube\nKOREAN\nKOREAN\nBahasa Indonesia\n주인도네시아 대한민국 대사관\n팝업\nKOREAN\nBahasa Indonesia\n공관소개\n공관장 인사\n주요업무\n주소 및 연락처\n영사\n해외여행안전정보\n민원실 소개\n여권\n재외국민등록/해외이주신고\n병역\n가족관계\n국적\n사증\n일반사항\n구비서류\n공증(영사확인 등)\n기타업무\n재외선거\n뉴스\n공지사항\n새소식\n공관장 활동사항\n안전공지 / 스캠\n정책\n인도네시아 개관\n인도네시아 정세\n한국과의 관계\n경제\n경제 동향\n주요동향\n인프라시장 동향\n한국 세정 안내\n인도네시아 세정 안내\n한국 관세 및 FTA 안내\n인도네시아 관세 및 FTA\n노동·취업 시장과 정보\n우리기업지원활동\n사이버기업서비스\n통상환경(제도,법률)정보\n현지진출방문정보\n상품산업정보\n전자민원\n국민신문고\n양식다운로드\n공통민원서식\n공관별민원서식\n재외공관민원조회\n각종 양식 다운로드\n병역업무 민원서식\n공증/영사확인업무 민원서식\n재외국민등록업무 민원서식\n공동인증서업무 민원서식\n가족관계등록업무 민원서식\n여권업무 민원서식\n기업지원헬프데스크\n정보마당\n교육정보\n문화정보\n안전여행 및 생활 정보\n주요웹사이트\n입국사증 및 입국절차\n수출수주알리미\n검색창 열기\n검색 입력 폼\n검색\n사이트맵 열기\n외교부\n청와대\n공관소개\n공관장 인사\n주요업무\n주소 및 연락처\n영사\n해외여행안전정보\n민원실 소개\n여권\n재외국민등록/해외이주신고\n병역\n가족관계\n국적\n사증\n일반사항\n구비서류\n공증(영사확인 등)\n기타업무\n재외선거\n뉴스\n공지사항\n새소식\n공관장 활동사항\n안전공지 / 스캠\n정책\n인도네시아 개관\n인도네시아 정세\n한국과의 관계\n경제\n경제 동향\n주요동향\n인프라시장 동향\n한국 세정 안내\n인도네시아 세정 안내\n한국 관세 및 FTA 안내\n인도네시아 관세 및 FTA\n노동·취업 시장과 정보\n우리기업지원활동\n사이버기업서비스\n통상환경(제도,법률)정보\n현지진출방문정보\n상품산업정보\n전자민원\n국민신문고\n양식다운로드\n공통민원서식\n공관별민원서식\n재외공관민원조회\n각종 양식 다운로드\n병역업무 민원서식\n공증/영사확인업무 민원서식\n재외국민등록업무 민원서식\n공동인증서업무 민원서식\n가족관계등록업무 민원서식\n여권업무 민원서식\n기업지원헬프데스크\n정보마당\n교육정보\n문화정보\n안전여행 및 생활 정보\n주요웹사이트\n입국사증 및 입국절차\n수출수주알리미\n공관 소셜미디어\n사이트맵 닫기\n영사\n해외여행안전정보\n민원실 소개\n여권\n재외국민등록/해외이주신고\n병역\n가족관계\n국적\n사증\n일반사항\n구비서류\n공증(영사확인 등)\n기타업무\n재외선거\n일반사항\n영사\n사증\n일반사항\n글자크기 글자확대 글자축소\nSNS 공유\n인쇄하기\n사증발급 시 여권 잔여유효기간(6개월) 설정 알림\n작성자\n주인도네시아대사관\n작성일\n2014-10-20\n법무부는 재외공관 사증발급 시 여권의 잔여유효기간에 대한 통일된 업무처리 기준을 마련하여 시행예정인 바,\n아래 내용을 참고하여 사증 접수 시 차질이 없도록 하시기 바랍니다.\n- 아 래 -\nㅇ 사증발급시 여권잔여 유효기간\n- 기존 여권잔여 유효기간이 6개월 이상인 경우에만 접수\n- 인도적인 사유로 긴급히 국내에 입국할 필요성이 인정되는 경우에는 예외\nㅇ 시행일 : 2014.11.03.부\n목록\n이전 글 항공권 예약 여부와 상관없이 비자신청이 가능합니다 다음 글 '외국인 무사증 입국허가제도' 개정 알림\n주인도네시아 대한민국 대사관\n주소 : Jalan Jenderal Gatot Subroto Kav. 57 Jakarta Selatan 12950\n전화번호: 국제전화번호 넣으신후+62-21-2967-2555 (대표), +62-811-852-446 (비상연락처)\n개인정보처리방침\n저작권정책\n뷰어프로그램\n텍스트 모드 OFF\nCopyright © Ministry of Foreign Affairs. All Rights Reserved.\n이전 자동재생 정지 다음\n일주일간 이 창 닫기 팝업 닫기\n팝업버튼 닫기 POPUP",
+        "sha256": "35535a8f541d15a388950e59492c1cc774df9f817afcbd1273314e259a50ca5b"
+      },
+      {
+        "id": "kr_embassy_jakarta_visa_passport_id",
+        "url": "https://overseas.mofa.go.kr/id-id/brd/m_2707/view.do?seq=714848",
+        "checked_at": "2026-09-10",
+        "reading_method": "httpx_text",
+        "text": "Untuk Proses Visa Korea Masa Berlaku Paspor Minimal 6 Bulan 상세보기|Pengumuman Kedubes | Kedutaan Besar Republik Korea untuk Republik Indonesia\n바로가기 메뉴 본문 바로가기 주메뉴 바로가기\nMOFA\nPresidential Office\nSNS Kedubes\nX\nfacebook\ninstagram\nyoutube\nBahasa Indonesia\nBahasa Indonesia\nBahasa Korea\nKedutaan Besar Republik Korea untuk Republik Indonesia\nPOPUP\nBahasa Indonesia\nBahasa Korea\nTentang Kedubes\nSambutan dari Duta Besar\nKegiatan Kedubes\nPengumuman Kedubes\nLokasi dan Kontak\nJam Operasi\nKonsulat / Visa\nPengumuman\nPersyaratan Dokumen\nInformasi Kepabeanan\nHubungan Bilateral\nHubungan Politik / Diplomatik\nSejarah Hubungan Diplomatik\nHubungan Ekonomi\nPerdagangan dan Investasi\nKerjasama Pembangunan\nHubungan Sosial / Kebudayaan\nTentang Korea\nAbout Korea\nAbout Korea\n검색창 열기\n검색 입력 폼\n검색\n사이트맵 열기\nMOFA\nPresidential Office\nTentang Kedubes\nSambutan dari Duta Besar\nKegiatan Kedubes\nPengumuman Kedubes\nLokasi dan Kontak\nJam Operasi\nKonsulat / Visa\nPengumuman\nPersyaratan Dokumen\nInformasi Kepabeanan\nHubungan Bilateral\nHubungan Politik / Diplomatik\nSejarah Hubungan Diplomatik\nHubungan Ekonomi\nPerdagangan dan Investasi\nKerjasama Pembangunan\nHubungan Sosial / Kebudayaan\nTentang Korea\nAbout Korea\nAbout Korea\nSNS Kedubes\n사이트맵 닫기\nTentang Kedubes\nSambutan dari Duta Besar\nKegiatan Kedubes\nPengumuman Kedubes\nLokasi dan Kontak\nJam Operasi\nPengumuman Kedubes\nTentang Kedubes\nPengumuman Kedubes\nFont Size size up size down\nSNS 공유\n인쇄하기\nUntuk Proses Visa Korea Masa Berlaku Paspor Minimal 6 Bulan\nDATE\n2014-10-27\nKedutaan Besar Repubil Korea dengan ini memberitahukan\nMasa Berlaku Paspor untuk Proses Visa adalah Paling Minimal 6 bulan.\nHal ini Efektif diberlakukan mulai tanggal 3 November 2014.\nList\nPrev Pengumuman mengenai KGSP Next The Academy of Korean Studies Admission Guide\nKedutaan Besar Republik Korea untuk Republik Indonesia\nAddress : Jl. Jendral Gatot Subroto Kav.57 Jakarta 12950\nTel : 62-21-2967-2555 | Hari Senin~Hari Kamis - 09:00~12:00, 13:00~17:00 / Hari Jumat - 09:00~11:30, 13:00~17:00\nPrivacy Guidelines\nContact Us\nCopyright © Ministry of Foreign Affairs. All Rights Reserved.\n이전 자동재생 정지 다음\nClose this window for a Week Close popup\n팝업버튼 닫기 POPUP",
+        "sha256": "6327c70a3d204d5c25ad4cfd1bb8559afb27f4fde2a0d3ddc5d69d6c67209450"
+      }
+    ],
+    "routes": [
+      {
+        "cache_key": "IDN|IDN|KOR|tourism|default|unknown|v6",
+        "route": {
+          "passport_nationality": "IDN",
+          "lawful_country_of_residence": "IDN",
+          "destination_country": "KOR",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
+        "baseline_sha256": {
+          "route": "97234a2d38337727a9dcbc0f44a0a4ea08c244ea4b949145ae66c4db0f350917",
+          "raw_guidance": "4dd358cacd03c50218fdcd536f9173176e51bbec1d9a83473249f190e3e3c777",
+          "merged_guidance": "5b58c90073fc465e1ccca15ce67b1080eca9abb68f60c39242f3a6a9008184bb",
+          "source_provenance": "f50411d45037fed0191d0aa27ba9d3ea0c9f742f0713e7e13c1a44a80dbe76f1",
+          "seed_entries": "6573a2efcab4b1c6cd1f4df2f7d5b16812c174f3ccbe85a15c05ad3abb56e020",
+          "operator_entries": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "changes": [
+          {
+            "field": "passport_validity_requirement",
+            "old_merged": null,
+            "new": {
+              "kind": "valid_through_departure",
+              "months": null
+            },
+            "proof": {
+              "status": "reviewed",
+              "verifier": "ai",
+              "verified_at": "2026-09-10",
+              "scope_note": "Indonesian ordinary passport, tourism, entry into Korea. The Immigration Act (Article 12(3)1, KLRI English) makes a valid passport and visa the entry condition, the Korea Immigration Service says an expired passport bars entry and that a stay is granted or extended only within the passport validity, and no Korea-based authority publishes a minimum number of months beyond entry. The rule kind is therefore valid through the authorised stay (valid_through_departure) with no months figure. The six-month figure is an application acceptance standard of the Ministry of Justice for overseas missions (Jakarta notice, effective 3 November 2014), not an entry rule, and is kept out of this structured entry field.",
+              "evidence": [
+                {
+                  "source_id": "kr_hikorea_entry_requirements",
+                  "source_url": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=160&PARENT_ID=135",
+                  "quote": "유효한 여권 등 (선원의 경우에는 여권 및 선원신분증명서) - 유효기간이 만료된 여권일 경우 입국할 수 없습니다."
+                },
+                {
+                  "source_id": "kr_kis_stay_within_passport_validity",
+                  "source_url": "https://www.immigration.go.kr/bbs/immigration/214/549288/artclView.do",
+                  "quote": "국내 체류외국인, 여권 유효기간 내에서만 체류기간이 연장됩니다."
+                },
+                {
+                  "source_id": "kr_immigration_act_klri",
+                  "source_url": "https://elaw.klri.re.kr/eng_mobile/viewer.do?hseq=61640&type=part&key=7",
+                  "quote": "His or her passport and the visa shall be valid: Provided, That the visa requirement shall be met only in cases required by this Act;"
+                }
+              ]
+            }
+          },
+          {
+            "field": "passport_validity",
+            "old_merged": "Official Korean consular guidance conflicts on remaining passport validity at entry. Confirm the applicable requirement before travel; visa-application requirements are separate.",
+            "new": "Valid at entry and throughout the authorised stay. Korean immigration law publishes no minimum remaining validity for entry. Separately, the Korean Embassy in Jakarta accepts the visa application only if the passport has at least 6 months of validity left on the submission date (rule in force since 3 November 2014, with a discretionary exception for urgent humanitarian entry).",
+            "proof": {
+              "status": "reviewed",
+              "verifier": "ai",
+              "verified_at": "2026-09-10",
+              "scope_note": "Indonesian ordinary passport, tourism. Customer-facing statement combining the entry rule (passport must be valid at entry and through the authorised stay, no minimum months published by Korean immigration law) with the separately labelled application-stage condition published by the Korean Embassy in Jakarta in Korean and Indonesian: the C-3 visa application is accepted only when the passport has at least six months of validity left on the submission date, from 3 November 2014, with a discretionary exception for urgent humanitarian entry. Earlier conflicting mission wording (six months at entry) is not supported by any Korea-based authority text and is dropped.",
+              "evidence": [
+                {
+                  "source_id": "kr_embassy_jakarta_visa_passport_ko",
+                  "source_url": "https://overseas.mofa.go.kr/id-ko/brd/m_2860/view.do?seq=1103573",
+                  "quote": "기존 여권잔여 유효기간이 6개월 이상인 경우에만 접수 - 인도적인 사유로 긴급히 국내에 입국할 필요성이 인정되는 경우에는 예외 ㅇ 시행일 : 2014.11.03.부"
+                },
+                {
+                  "source_id": "kr_embassy_jakarta_visa_passport_id",
+                  "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2707/view.do?seq=714848",
+                  "quote": "Masa Berlaku Paspor untuk Proses Visa adalah Paling Minimal 6 bulan. Hal ini Efektif diberlakukan mulai tanggal 3 November 2014."
+                },
+                {
+                  "source_id": "kr_hikorea_entry_requirements",
+                  "source_url": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=160&PARENT_ID=135",
+                  "quote": "유효한 여권 등 (선원의 경우에는 여권 및 선원신분증명서) - 유효기간이 만료된 여권일 경우 입국할 수 없습니다."
+                },
+                {
+                  "source_id": "kr_kis_stay_within_passport_validity",
+                  "source_url": "https://www.immigration.go.kr/bbs/immigration/214/549288/artclView.do",
+                  "quote": "국내 체류외국인, 여권 유효기간 내에서만 체류기간이 연장됩니다."
+                },
+                {
+                  "source_id": "kr_immigration_act_klri",
+                  "source_url": "https://elaw.klri.re.kr/eng_mobile/viewer.do?hseq=61640&type=part&key=7",
+                  "quote": "His or her passport and the visa shall be valid: Provided, That the visa requirement shall be met only in cases required by this Act;"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "routes": [
+    {
+      "cache_key": "IDN|IDN|KOR|tourism|default|unknown|v6",
+      "baseline": {
+        "route": {
+          "passport_nationality": "IDN",
+          "lawful_country_of_residence": "IDN",
+          "destination_country": "KOR",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
+        "raw_guidance": {
+          "disposition": "VISA_REQUIRED",
+          "visa_category": "C-3 (Short-term General) / C-3-9 Tourist",
+          "permitted_stay": "Up to 90 days; final duration granted at consular discretion",
+          "passport_validity": "Valid at least 6 months beyond intended departure from Korea",
+          "required_documents": "Valid passport, completed visa application form, recent passport photo, flight reservation, hotel booking, bank statements, employment/business proof, travel itinerary",
+          "application_channel": "authorised_agent",
+          "government_fee": {
+            "amount": null,
+            "currency": null
+          },
+          "processing_time": "About 5 to 10 working days after agency submission; can vary",
+          "forms": [
+            "Korea Visa Portal visa application form (Form No. 17), printed and signed by the applicant",
+            "One recent passport-size photo attached to the form"
+          ],
+          "official_portal_url": null,
+          "photo_requirements": "One colour passport photo, 35 mm x 45 mm, white background, taken within the last 6 months; face clearly visible, no head covering unless religious",
+          "biometrics_required": false,
+          "interview_required": false,
+          "appointment_required": false,
+          "account_registration_steps": [
+            "Applicants do not register their own online account; the embassy-designated travel agent creates and submits the application through the Korea Visa Portal on the applicant's behalf"
+          ],
+          "payment_process": [
+            "Pay the official consular visa fee and the travel-agency service fee directly to the designated agency",
+            "The agency remits the consular fee according to embassy instructions"
+          ],
+          "submission_process": [
+            "Submit the passport and supporting documents to a Korean Embassy/Consulate-designated travel agency in Indonesia",
+            "The agency checks the file and lodges it at the embassy/consulate",
+            "Collect the passport and visa from the agency once notified"
+          ],
+          "onward_travel_evidence": "Confirmed round-trip flight reservation matching the intended stay",
+          "accommodation_evidence": "Hotel bookings for the entire stay, or a host invitation letter with copies of the host's Korean resident registration/ID card",
+          "financial_evidence": "Bank statements or savings passbook for the last 3 months and proof of regular income or employment; sponsor documents may be accepted if applicable",
+          "insurance_required": false,
+          "exceptions": [
+            "K-ETA is not required because the traveller will hold a C-3 visa",
+            "Group tourists visiting only Jeju-do under a registered tour programme may be visa-exempt for up to 5 days; this does not apply to ordinary mainland tourism",
+            "Individual travellers arriving directly at Jeju International Airport and remaining only on Jeju Island may enter visa-free for up to 30 days; a C-3 visa is required for mainland Korea or other purposes",
+            "Applicants with valid visas from the US, Canada, Australia, New Zealand or 32 European countries, or prior OECD travel, may qualify for simplified documentation or multiple-entry consideration"
+          ],
+          "uncertainty": [
+            {
+              "field": "application_channel",
+              "reason": "Korean Embassy in Indonesia may allow limited direct filing or change designated-agent rules; current exact channel not confirmed"
+            },
+            {
+              "field": "government_fee",
+              "reason": "Korean visa fees vary by reciprocity; exact IDN tourist-visa fee not confirmed"
+            },
+            {
+              "field": "official_portal_url",
+              "reason": "No confirmed official government URL for this specific nationality-route and visa type"
+            },
+            {
+              "field": "visa_category",
+              "reason": "Precise subcategory label (C-3 general vs C-3-9 tourist) not confirmed for this route"
+            },
+            {
+              "field": "permitted_stay_days",
+              "reason": "Maximum stay is typically up to 90 days but actual days are stamped at entry based on visa issued"
+            }
+          ],
+          "confidence": "low",
+          "permitted_stay_days": 90,
+          "passport_validity_requirement": {
+            "kind": "months_after_departure",
+            "months": 6
+          },
+          "arrival_card": {
+            "required": true,
+            "name": "Foreigner Entry/Departure Card (Arrival Card)",
+            "submission_window": "Completed and submitted at the Korean port of entry"
+          },
+          "health_requirements": [
+            {
+              "name": "Yellow fever vaccination certificate",
+              "applicability": "conditional",
+              "trigger_countries": [],
+              "trigger": "Arrival in Korea within 6 days after staying in a country with risk of yellow fever transmission",
+              "question": "Have you stayed in a yellow-fever-affected country in the 6 days before arriving in Korea?"
+            }
+          ],
+          "route_workflow_type": "embassy_submission",
+          "visa_products": [
+            {
+              "type": "Single-entry C-3-9 tourist visa",
+              "entry": "single",
+              "validity": "3 months from issue",
+              "max_stay_days": 90,
+              "fee": {
+                "amount": null,
+                "currency": null
+              },
+              "notes": "Standard tourist visa; max stay up to 90 days, final duration granted at consular discretion"
+            },
+            {
+              "type": "Double-entry C-3-9 tourist visa",
+              "entry": "multiple",
+              "validity": "6 months from issue",
+              "max_stay_days": 90,
+              "fee": {
+                "amount": null,
+                "currency": null
+              },
+              "notes": "Available when the itinerary justifies two entries"
+            },
+            {
+              "type": "Multiple-entry C-3-9 tourist visa",
+              "entry": "multiple",
+              "validity": "1 year from issue",
+              "max_stay_days": 90,
+              "fee": {
+                "amount": null,
+                "currency": null
+              },
+              "notes": "Requires qualifying conditions such as prior travel record, income proof, or OECD travel; consular discretion"
+            }
+          ],
+          "application_channel_detail": "Indonesian ordinary-passport holders generally lodge short-term tourist-visa applications through travel agencies designated by the Korean Embassy in Indonesia. Direct individual filing at the embassy is usually not accepted.",
+          "requirement_detail": "paper_visa",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          }
+        },
+        "merged_guidance": {
+          "disposition": "VISA_REQUIRED",
+          "visa_category": "Short-term tourist visa (C-3-9)",
+          "permitted_stay": null,
+          "passport_validity": "Official Korean consular guidance conflicts on remaining passport validity at entry. Confirm the applicable requirement before travel; visa-application requirements are separate.",
+          "required_documents": null,
+          "application_channel": "embassy_consulate",
+          "government_fee": null,
+          "processing_time": null,
+          "forms": [
+            "Korea Visa Portal visa application form (Form No. 17), printed and signed by the applicant",
+            "One recent passport-size photo attached to the form"
+          ],
+          "official_portal_url": "https://www.visa.go.kr/",
+          "photo_requirements": "One colour passport photo, 35 mm x 45 mm, white background, taken within the last 6 months; face clearly visible, no head covering unless religious",
+          "biometrics_required": false,
+          "interview_required": false,
+          "appointment_required": false,
+          "account_registration_steps": [
+            "Applicants do not register their own online account; the embassy-designated travel agent creates and submits the application through the Korea Visa Portal on the applicant's behalf"
+          ],
+          "payment_process": [
+            "Pay the official consular visa fee and the travel-agency service fee directly to the designated agency",
+            "The agency remits the consular fee according to embassy instructions"
+          ],
+          "submission_process": [
+            "Submit the passport and supporting documents to a Korean Embassy/Consulate-designated travel agency in Indonesia",
+            "The agency checks the file and lodges it at the embassy/consulate",
+            "Collect the passport and visa from the agency once notified"
+          ],
+          "onward_travel_evidence": "Confirmed round-trip flight reservation matching the intended stay",
+          "accommodation_evidence": "Hotel bookings for the entire stay, or a host invitation letter with copies of the host's Korean resident registration/ID card",
+          "financial_evidence": "Bank statements or savings passbook for the last 3 months and proof of regular income or employment; sponsor documents may be accepted if applicable",
+          "insurance_required": false,
+          "exceptions": [
+            "A qualifying direct international arrival to Jeju, without transit through another part of Korea, may use the separate Jeju visa-free scheme. The nationality exclusions and itinerary conditions must be met.",
+            "The temporary K-ETA waiver does not apply to Indonesian nationality.",
+            "From 28 May through 31 December 2026, Indonesian tour groups of at least 3 people recruited by a designated Indonesian travel agency may qualify for visa-free travel throughout Korea for up to 15 days. The linked Korean agency must submit the group list for Ministry of Justice pre-screening and approval. Approved travelers must hold valid passports and enter and leave together on the same flight or vessel. This scheme does not grant visa-free entry to independent tourists."
+          ],
+          "uncertainty": [
+            {
+              "field": "application_channel",
+              "reason": "Korean Embassy in Indonesia may allow limited direct filing or change designated-agent rules; current exact channel not confirmed"
+            },
+            {
+              "field": "government_fee",
+              "reason": "Korean visa fees vary by reciprocity; exact IDN tourist-visa fee not confirmed"
+            },
+            {
+              "field": "official_portal_url",
+              "reason": "No confirmed official government URL for this specific nationality-route and visa type"
+            },
+            {
+              "field": "visa_category",
+              "reason": "Precise subcategory label (C-3 general vs C-3-9 tourist) not confirmed for this route"
+            },
+            {
+              "field": "permitted_stay_days",
+              "reason": "Maximum stay is typically up to 90 days but actual days are stamped at entry based on visa issued"
+            }
+          ],
+          "confidence": "low",
+          "permitted_stay_days": null,
+          "passport_validity_requirement": null,
+          "arrival_card": {
+            "required": true,
+            "name": "Foreigner Entry/Departure Card (Arrival Card)",
+            "submission_window": "Completed and submitted at the Korean port of entry"
+          },
+          "health_requirements": [
+            {
+              "name": "Yellow fever vaccination certificate",
+              "applicability": "conditional",
+              "trigger_countries": [],
+              "trigger": "Arrival in Korea within 6 days after staying in a country with risk of yellow fever transmission",
+              "question": "Have you stayed in a yellow-fever-affected country in the 6 days before arriving in Korea?"
+            }
+          ],
+          "route_workflow_type": "embassy_submission",
+          "visa_products": [
+            {
+              "type": "Short-term tourist visa (C-3-9)",
+              "requirement_detail": "paper_visa",
+              "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+              "source_quote": "Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9)",
+              "verified_at": "2026-09-09",
+              "verifier": "ai",
+              "entry": null,
+              "validity": null,
+              "max_stay_days": null,
+              "fee": null,
+              "application_channel": "embassy_consulate",
+              "application_channel_detail": "Follow the responsible Korean mission or its designated visa application centre for the tourist visa application.",
+              "required_documents": null,
+              "processing_time": null,
+              "notes": "The issued visa sets entries, validity and permitted stay. Current fees depend on the responsible submission office and visa type."
+            }
+          ],
+          "application_channel_detail": "Follow the responsible Korean mission or its designated visa application centre for the tourist visa application.",
+          "requirement_detail": "paper_visa",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          },
+          "entry_requirements": "An ordinary Indonesian tourist must obtain the appropriate visa before travel unless a specific visa-free entry scheme applies.",
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "corroborating_sources": [
+            {
+              "url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "quote": "If your country is not listed, you must apply for a visa to enter Korea.",
+              "checked_at": "2026-09-09"
+            },
+            {
+              "url": "https://www.k-eta.go.kr/portal/guide/viewetaalification.do",
+              "quote": "You can apply for K-ETA if you hold a passport from countries or regions listed below.",
+              "checked_at": "2026-09-09"
+            },
+            {
+              "url": "https://overseas.mofa.go.kr/jp-hiroshima-ko/brd/m_1675/view.do?seq=1286996",
+              "quote": "2026. 1. 1.부터 2026. 12. 31.까지 일본을 포함한 아래 22개 국가∙지역에 대해서 한시적으로 전자여행허가제(K-ETA) 적용을 면제 하기로 하였습니다.",
+              "checked_at": "2026-09-09"
+            },
+            {
+              "url": "https://www.mofa.go.kr/sg-en/brd/m_2435/view.do?seq=761394",
+              "quote": "Foreigners from visa-required countries who will be taking a direct flight from overseas to Jeju Island without stopping over at any other parts of Korea.",
+              "checked_at": "2026-09-09"
+            },
+            {
+              "url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+              "quote": "Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9)",
+              "checked_at": "2026-09-09"
+            },
+            {
+              "url": "https://www.moj.go.kr/bbs/immigration/214/606932/artclView.do",
+              "quote": "3인 이상 단체관광객 대상, 5월 28일부터 12월 31일까지 시범 시행",
+              "checked_at": "2026-09-09"
+            },
+            {
+              "url": "https://mojhome.moj.go.kr/bbs/immigration/214/495139/download.do",
+              "quote": "관광·통과(B-2), 15일",
+              "checked_at": "2026-09-09"
+            }
+          ]
+        },
+        "source_provenance": {
+          "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions.",
+          "fields": [
+            "application_channel",
+            "application_channel_detail",
+            "corroborating_sources",
+            "disposition",
+            "entry_requirements",
+            "exceptions",
+            "government_fee",
+            "official_portal_url",
+            "passport_validity",
+            "passport_validity_requirement",
+            "permitted_stay",
+            "permitted_stay_days",
+            "processing_time",
+            "required_documents",
+            "requirement_detail",
+            "source_url",
+            "visa_category",
+            "visa_products"
+          ],
+          "field_provenance": {
+            "disposition": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions."
+            },
+            "requirement_detail": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "visa_category": {
+              "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9) Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "application_channel": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "application_channel_detail": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "government_fee": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "official_portal_url": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "visa_products": {
+              "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9) Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "exceptions": {
+              "source_url": "https://www.moj.go.kr/bbs/immigration/214/606932/artclView.do",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Approved Indonesian groups of 3+ only, 28 May–31 December 2026, up to 15 days throughout Korea. The linked official attachment describes designated travel agencies, MOJ pre-screening and same flight/vessel entry and exit. The separate Jeju source remains in corroborating_sources. This does not change the independent-tourist default."
+            },
+            "permitted_stay_days": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "permitted_stay": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "processing_time": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "required_documents": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "entry_requirements": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions."
+            },
+            "source_url": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+            },
+            "corroborating_sources": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Fresh official MOFA and K-ETA nationality list establish the independent-tourist default; MOJ 27 May 2026 release and its attachment establish the separate 15-day approved-group exception."
+            },
+            "passport_validity_requirement": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "",
+              "verifier": "ai",
+              "note": "Official Korean consular sources conflict on passport validity at entry; neither establishes six months after departure. This correction removes the unsupported field and preserves the review hold.",
+              "supporting_evidence": [
+                {
+                  "source_id": "korea_russian_entry_rule",
+                  "source_url": "https://overseas.mofa.go.kr/ru-stpetersburg-ru/brd/m_7886/view.do?seq=759306",
+                  "quote": "Для въезда на территорию Республики Корея иностранный гражданин должен иметь: действующий заграничный паспорт (срок действия паспорта не менее 6 месяцев к моменту въезда)"
+                }
+              ],
+              "quote": "There is no specific requirement for remaining passport validity for entry into Korea. You may travel as long as your passport is valid for the entire duration of your stay."
+            },
+            "passport_validity": {
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "verified_at": "2026-09-09",
+              "verified_by": "",
+              "verifier": "ai",
+              "note": "Official Korean consular sources conflict on passport validity at entry; neither establishes six months after departure. This correction removes the unsupported field and preserves the review hold.",
+              "supporting_evidence": [
+                {
+                  "source_id": "korea_russian_entry_rule",
+                  "source_url": "https://overseas.mofa.go.kr/ru-stpetersburg-ru/brd/m_7886/view.do?seq=759306",
+                  "quote": "Для въезда на территорию Республики Корея иностранный гражданин должен иметь: действующий заграничный паспорт (срок действия паспорта не менее 6 месяцев к моменту въезда)"
+                }
+              ],
+              "quote": "There is no specific requirement for remaining passport validity for entry into Korea. You may travel as long as your passport is valid for the entire duration of your stay."
+            }
+          }
+        },
+        "seed_entries": [
+          {
+            "route": {
+              "nationality": "IDN",
+              "destination": "KOR",
+              "travel_purpose": "tourism"
+            },
+            "verified_at": "2026-09-09",
+            "verified_by": "Ellis official-source audit",
+            "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+            "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions.",
+            "fields": {
+              "disposition": "VISA_REQUIRED",
+              "requirement_detail": "paper_visa",
+              "visa_category": "Short-term tourist visa (C-3-9)",
+              "application_channel": "embassy_consulate",
+              "application_channel_detail": "Follow the responsible Korean mission or its designated visa application centre for the tourist visa application.",
+              "government_fee": null,
+              "official_portal_url": "https://www.visa.go.kr/",
+              "visa_products": [
+                {
+                  "type": "Short-term tourist visa (C-3-9)",
+                  "requirement_detail": "paper_visa",
+                  "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+                  "source_quote": "Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9)",
+                  "verified_at": "2026-09-09",
+                  "verifier": "ai",
+                  "entry": null,
+                  "validity": null,
+                  "max_stay_days": null,
+                  "fee": null,
+                  "application_channel": "embassy_consulate",
+                  "application_channel_detail": "Follow the responsible Korean mission or its designated visa application centre for the tourist visa application.",
+                  "required_documents": null,
+                  "processing_time": null,
+                  "notes": "The issued visa sets entries, validity and permitted stay. Current fees depend on the responsible submission office and visa type."
+                }
+              ],
+              "exceptions": [
+                "A qualifying direct international arrival to Jeju, without transit through another part of Korea, may use the separate Jeju visa-free scheme. The nationality exclusions and itinerary conditions must be met.",
+                "The temporary K-ETA waiver does not apply to Indonesian nationality.",
+                "From 28 May through 31 December 2026, Indonesian tour groups of at least 3 people recruited by a designated Indonesian travel agency may qualify for visa-free travel throughout Korea for up to 15 days. The linked Korean agency must submit the group list for Ministry of Justice pre-screening and approval. Approved travelers must hold valid passports and enter and leave together on the same flight or vessel. This scheme does not grant visa-free entry to independent tourists."
+              ],
+              "permitted_stay_days": null,
+              "permitted_stay": null,
+              "processing_time": null,
+              "required_documents": null,
+              "entry_requirements": "An ordinary Indonesian tourist must obtain the appropriate visa before travel unless a specific visa-free entry scheme applies.",
+              "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+              "corroborating_sources": [
+                {
+                  "url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                  "quote": "If your country is not listed, you must apply for a visa to enter Korea.",
+                  "checked_at": "2026-09-09"
+                },
+                {
+                  "url": "https://www.k-eta.go.kr/portal/guide/viewetaalification.do",
+                  "quote": "You can apply for K-ETA if you hold a passport from countries or regions listed below.",
+                  "checked_at": "2026-09-09"
+                },
+                {
+                  "url": "https://overseas.mofa.go.kr/jp-hiroshima-ko/brd/m_1675/view.do?seq=1286996",
+                  "quote": "2026. 1. 1.부터 2026. 12. 31.까지 일본을 포함한 아래 22개 국가∙지역에 대해서 한시적으로 전자여행허가제(K-ETA) 적용을 면제 하기로 하였습니다.",
+                  "checked_at": "2026-09-09"
+                },
+                {
+                  "url": "https://www.mofa.go.kr/sg-en/brd/m_2435/view.do?seq=761394",
+                  "quote": "Foreigners from visa-required countries who will be taking a direct flight from overseas to Jeju Island without stopping over at any other parts of Korea.",
+                  "checked_at": "2026-09-09"
+                },
+                {
+                  "url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+                  "quote": "Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9)",
+                  "checked_at": "2026-09-09"
+                },
+                {
+                  "url": "https://www.moj.go.kr/bbs/immigration/214/606932/artclView.do",
+                  "quote": "3인 이상 단체관광객 대상, 5월 28일부터 12월 31일까지 시범 시행",
+                  "checked_at": "2026-09-09"
+                },
+                {
+                  "url": "https://mojhome.moj.go.kr/bbs/immigration/214/495139/download.do",
+                  "quote": "관광·통과(B-2), 15일",
+                  "checked_at": "2026-09-09"
+                }
+              ],
+              "passport_validity_requirement": null,
+              "passport_validity": "Official Korean consular guidance conflicts on remaining passport validity at entry. Confirm the applicable requirement before travel; visa-application requirements are separate."
+            },
+            "field_provenance": {
+              "disposition": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions."
+              },
+              "requirement_detail": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "visa_category": {
+                "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9) Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "application_channel": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "application_channel_detail": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "government_fee": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "official_portal_url": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "visa_products": {
+                "source_url": "https://overseas.mofa.go.kr/id-id/brd/m_2711/view.do?seq=678856",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Visa Kunjungan Wisata dan Wisata Keluarga (C-3-9) Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "exceptions": {
+                "source_url": "https://www.moj.go.kr/bbs/immigration/214/606932/artclView.do",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Approved Indonesian groups of 3+ only, 28 May–31 December 2026, up to 15 days throughout Korea. The linked official attachment describes designated travel agencies, MOJ pre-screening and same flight/vessel entry and exit. The separate Jeju source remains in corroborating_sources. This does not change the independent-tourist default."
+              },
+              "permitted_stay_days": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "permitted_stay": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "processing_time": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "required_documents": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "entry_requirements": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Official MOFA rule: If your country is not listed, you must apply for a visa to enter Korea. The complete current K-ETA nationality list excludes Indonesia. Ordinary independent tourism requires a visa; separate approved-group (28 May–31 December 2026), Jeju and transit exceptions require their own conditions."
+              },
+              "source_url": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: If your country is not listed, you must apply for a visa to enter Korea. Scope: Indonesia is absent from the complete K-ETA eligibility list. This is the ordinary independent-tourist default; special Jeju or transit eligibility is conditional. Old 2015 consular fee numbers are not promoted."
+              },
+              "corroborating_sources": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Fresh official MOFA and K-ETA nationality list establish the independent-tourist default; MOJ 27 May 2026 release and its attachment establish the separate 15-day approved-group exception."
+              },
+              "passport_validity_requirement": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "quote": "There is no specific requirement for remaining passport validity for entry into Korea. You may travel as long as your passport is valid for the entire duration of your stay.",
+                "note": "Official Korean consular sources conflict on passport validity at entry; neither establishes six months after departure. This correction removes the unsupported field and preserves the review hold.",
+                "supporting_evidence": [
+                  {
+                    "source_id": "korea_russian_entry_rule",
+                    "source_url": "https://overseas.mofa.go.kr/ru-stpetersburg-ru/brd/m_7886/view.do?seq=759306",
+                    "quote": "Для въезда на территорию Республики Корея иностранный гражданин должен иметь: действующий заграничный паспорт (срок действия паспорта не менее 6 месяцев к моменту въезда)"
+                  }
+                ]
+              },
+              "passport_validity": {
+                "source_url": "https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "quote": "There is no specific requirement for remaining passport validity for entry into Korea. You may travel as long as your passport is valid for the entire duration of your stay.",
+                "note": "Official Korean consular sources conflict on passport validity at entry; neither establishes six months after departure. This correction removes the unsupported field and preserves the review hold.",
+                "supporting_evidence": [
+                  {
+                    "source_id": "korea_russian_entry_rule",
+                    "source_url": "https://overseas.mofa.go.kr/ru-stpetersburg-ru/brd/m_7886/view.do?seq=759306",
+                    "quote": "Для въезда на территорию Республики Корея иностранный гражданин должен иметь: действующий заграничный паспорт (срок действия паспорта не менее 6 месяцев к моменту въезда)"
+                  }
+                ]
+              }
+            },
+            "verifier": "ai"
+          }
+        ],
+        "operator_entries": []
+      }
+    }
+  ]
+}
