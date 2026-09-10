@@ -66,7 +66,14 @@ def test_ancillary_australia_entry_does_not_verify_or_release_its_visa_verdict(c
     assert held['held']
 
 
-def test_new_arrival_proof_does_not_relabel_usa_sibling_fields(current_seed):
+def test_new_arrival_proof_does_not_relabel_usa_sibling_fields(current_seed, monkeypatch):
+    # Isolate the arrival-only revision. The later independent BOCA review
+    # legitimately corrects USA eligibility/passport fields with its own proof.
+    listed = vo._listed_reviewed_overlay_names()
+    monkeypatch.setattr(vo, '_listed_reviewed_overlay_names', lambda: [
+        name for name in listed
+        if name != 'reviewed_indonesia_taiwan_overlay_20260910.json'])
+    vo.reload()
     hit = vo.find(route('USA'))
     assert 'disposition' not in hit['fields']
     assert hit['field_provenance']['arrival_card']['verified_at'] == '2026-09-09'
@@ -82,3 +89,14 @@ def test_non_tourism_and_diplomatic_routes_do_not_inherit_tourist_card(current_s
             hit = vo.find(route(nat, *context))
             assert not hit or (hit.get('field_provenance', {}).get('arrival_card', {})
                               .get('source_url') != URL)
+
+
+def test_later_boca_review_keeps_twac_proof_separate(current_seed):
+    hit = vo.find(route('USA'))
+    proofs = hit['field_provenance']
+    assert proofs['arrival_card']['source_url'] == URL
+    assert proofs['arrival_card']['verified_at'] == '2026-09-09'
+    for field in ('disposition', 'passport_validity_requirement', 'required_documents'):
+        assert proofs[field]['source_url'] == 'https://www.boca.gov.tw/cp-149-4486-7785a-2.html'
+        assert proofs[field]['verified_at'] == '2026-09-10'
+        assert proofs[field]['source_url'] != proofs['arrival_card']['source_url']

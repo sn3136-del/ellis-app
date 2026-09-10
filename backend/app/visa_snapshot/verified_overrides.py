@@ -1068,6 +1068,8 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     merged = reconcile(route, merged, provenance)
     from .reviewed_japan_warning_resolution import reconcile as reconcile_japan
     merged = reconcile_japan(route, merged, provenance)
+    from .reviewed_japan_station_warnings import reconcile as reconcile_japan_station
+    merged = reconcile_japan_station(route, merged, provenance)
     from .reviewed_hkg_mainland_warning_resolution import reconcile as reconcile_permit
     merged = reconcile_permit(route, merged, provenance)
     result, provenance = scheduled_policies.apply(merged, provenance, route)

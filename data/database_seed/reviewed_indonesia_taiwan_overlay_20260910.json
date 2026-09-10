@@ -1,0 +1,1388 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "review_id": "us-hk-indonesia-taiwan-20260910",
+  "entries": [
+    {
+      "fields": {
+        "arrival_card": {
+          "required": true,
+          "name": "Indonesia arrival declarations (by mode of entry)",
+          "url": "https://beacukai.go.id/ecd",
+          "submission_window": "For air/sea arrivals, All Indonesia can be completed from 3 days before arrival or upon landing. Follow the official customs instructions for land arrivals.",
+          "notes": "Air/sea arrivals: All Indonesia at https://allindonesia.imigrasi.go.id/. Land arrivals: ECD Bea Cukai at https://ecd.beacukai.go.id/. The applicable declaration system depends on the crossing; All Indonesia integrates customs where implemented. These are arrival declarations, separate from visa eligibility."
+        },
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "visa_category": "A1 - Visa Exemption Tourism",
+        "permitted_stay": "Up to 30 days; not extendable",
+        "permitted_stay_days": 30,
+        "passport_validity": "Passport valid for at least 6 months upon arrival",
+        "passport_validity_requirement": {
+          "kind": "months_after_arrival",
+          "months": 6
+        },
+        "required_documents": [
+          "Passport valid for at least 6 months upon arrival",
+          "Outbound ticket from Indonesia"
+        ],
+        "onward_travel_evidence": "Present an outbound ticket from Indonesia upon arrival",
+        "financial_evidence": "Have sufficient living expenses while in Indonesia.",
+        "accommodation_evidence": null,
+        "entry_requirements": "For air and sea arrivals, complete the All Indonesia arrival declaration at https://allindonesia.imigrasi.go.id/. It integrates immigration, customs, health and quarantine declarations and can be completed from 3 days before arrival or upon landing. For land arrivals, Indonesian Customs directs travellers to the electronic customs declaration at https://ecd.beacukai.go.id/. Follow the declaration system required at your crossing; All Indonesia replaces the separate customs declaration where that system is implemented. Arrival declarations do not replace the applicable visa or exemption."
+      },
+      "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/",
+      "verified_at": "2026-08-22",
+      "verified_by": "Ellis source audit",
+      "verifier": "ai",
+      "field_provenance": {
+        "arrival_card": {
+          "source_url": "https://beacukai.go.id/ecd",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "customs",
+          "supporting_evidence": [
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+            },
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+            },
+            {
+              "source_id": "arrival",
+              "source_url": "https://evisa.imigrasi.go.id/",
+              "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+        },
+        "disposition": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "supporting_evidence": [
+            {
+              "source_id": "bvk_voa",
+              "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+              "quote": "Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+        },
+        "requirement_detail": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "supporting_evidence": [
+            {
+              "source_id": "bvk_voa",
+              "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+              "quote": "Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+        },
+        "visa_category": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "supporting_evidence": [
+            {
+              "source_id": "bvk_voa",
+              "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+              "quote": "Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+        },
+        "permitted_stay": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Type of Visa A1 - 30 Days\nUp to 30 days (not-extendable)"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "additional_quotes": [
+            "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Type of Visa A1 - 30 Days\nUp to 30 days (not-extendable)"
+        },
+        "passport_validity": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "required_documents": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "financial_evidence": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Have sufficient living expenses while in Indonesia."
+        },
+        "accommodation_evidence": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "The reviewed A1/B1 arrival-document list does not establish a mandatory hotel booking or host-address document. This review does not certify absence of every possible request.",
+          "status": "unknown"
+        },
+        "entry_requirements": {
+          "source_url": "https://beacukai.go.id/ecd",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "customs",
+          "supporting_evidence": [
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+            },
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+            },
+            {
+              "source_id": "arrival",
+              "source_url": "https://evisa.imigrasi.go.id/",
+              "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+        }
+      },
+      "note": "Source recorded: HKSAR passport holders are on Indonesia's visa-exempt list.",
+      "route": {
+        "nationality": "HKG",
+        "destination": "IDN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "us-hk-indonesia-taiwan-20260910",
+      "partial_review": true
+    },
+    {
+      "fields": {
+        "disposition": "VISA_ON_ARRIVAL",
+        "requirement_detail": "evisa_on_arrival",
+        "visa_category": "Visa on Arrival (index B1)",
+        "permitted_stay": "Up to 30 days; extendable once for another 30 days",
+        "permitted_stay_days": 30,
+        "application_channel": "online_portal",
+        "application_channel_detail": "Buy the e-VOA online before departure, or the visa on arrival at the airport counter. There is no visa-free entry for US nationals.",
+        "official_portal_url": "https://evisa.imigrasi.go.id/",
+        "government_fee": {
+          "amount": 500000,
+          "currency": "IDR"
+        },
+        "visa_products": [
+          {
+            "type": "e-VOA (bought online before departure)",
+            "entry": "single",
+            "validity": "90 days to use",
+            "max_stay_days": 30,
+            "fee": {
+              "amount": 500000,
+              "currency": "IDR"
+            },
+            "notes": "Extendable once for a further 30 days.",
+            "disposition": "VISA_ON_ARRIVAL",
+            "requirement_detail": "evisa_on_arrival",
+            "entry_requirements": "For air and sea arrivals, complete the All Indonesia arrival declaration at https://allindonesia.imigrasi.go.id/. It integrates immigration, customs, health and quarantine declarations and can be completed from 3 days before arrival or upon landing. For land arrivals, Indonesian Customs directs travellers to the electronic customs declaration at https://ecd.beacukai.go.id/. Follow the declaration system required at your crossing; All Indonesia replaces the separate customs declaration where that system is implemented. Arrival declarations do not replace the applicable visa or exemption.",
+            "field_provenance": {
+              "disposition": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "e-VOA (bought online before departure)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "requirement_detail": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "e-VOA (bought online before departure)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "max_stay_days": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "e-VOA (bought online before departure)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "additional_quotes": [
+                  "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+                ]
+              },
+              "fee": {
+                "source_id": "jakarta_b1",
+                "source_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/visa-republik-indonesia",
+                "quote": "Biaya visa B1 Rp500.000",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "e-VOA (bought online before departure)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                }
+              },
+              "notes": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "e-VOA (bought online before departure)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                }
+              },
+              "entry_requirements": {
+                "source_id": "customs",
+                "source_url": "https://beacukai.go.id/ecd",
+                "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia.",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "e-VOA (bought online before departure)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "batam",
+                    "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                    "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+                  },
+                  {
+                    "source_id": "batam",
+                    "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                    "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+                  },
+                  {
+                    "source_id": "arrival",
+                    "source_url": "https://evisa.imigrasi.go.id/",
+                    "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+                  }
+                ]
+              },
+              "validity": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Visa Validity\n90 day",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "e-VOA (bought online before departure)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                }
+              },
+              "source_url": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "e-VOA (bought online before departure)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "source_quote": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "e-VOA (bought online before departure)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              }
+            },
+            "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+            "source_quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+          },
+          {
+            "type": "Visa on Arrival (bought at the airport)",
+            "entry": "single",
+            "validity": "on arrival",
+            "max_stay_days": 30,
+            "fee": {
+              "amount": 500000,
+              "currency": "IDR"
+            },
+            "notes": "Extendable once for a further 30 days.",
+            "disposition": "VISA_ON_ARRIVAL",
+            "requirement_detail": "evisa_on_arrival",
+            "entry_requirements": "For air and sea arrivals, complete the All Indonesia arrival declaration at https://allindonesia.imigrasi.go.id/. It integrates immigration, customs, health and quarantine declarations and can be completed from 3 days before arrival or upon landing. For land arrivals, Indonesian Customs directs travellers to the electronic customs declaration at https://ecd.beacukai.go.id/. Follow the declaration system required at your crossing; All Indonesia replaces the separate customs declaration where that system is implemented. Arrival declarations do not replace the applicable visa or exemption.",
+            "field_provenance": {
+              "disposition": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa on Arrival (bought at the airport)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "requirement_detail": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa on Arrival (bought at the airport)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "max_stay_days": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa on Arrival (bought at the airport)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "additional_quotes": [
+                  "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+                ]
+              },
+              "fee": {
+                "source_id": "jakarta_b1",
+                "source_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/visa-republik-indonesia",
+                "quote": "Biaya visa B1 Rp500.000",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa on Arrival (bought at the airport)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                }
+              },
+              "notes": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa on Arrival (bought at the airport)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                }
+              },
+              "entry_requirements": {
+                "source_id": "customs",
+                "source_url": "https://beacukai.go.id/ecd",
+                "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia.",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa on Arrival (bought at the airport)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "batam",
+                    "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                    "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+                  },
+                  {
+                    "source_id": "batam",
+                    "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                    "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+                  },
+                  {
+                    "source_id": "arrival",
+                    "source_url": "https://evisa.imigrasi.go.id/",
+                    "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+                  }
+                ]
+              },
+              "source_url": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa on Arrival (bought at the airport)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "source_quote": {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)",
+                "verified_at": "2026-09-10",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "IDN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa on Arrival (bought at the airport)",
+                  "disposition": "VISA_ON_ARRIVAL",
+                  "requirement_detail": "evisa_on_arrival"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              }
+            },
+            "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+            "source_quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+          }
+        ],
+        "submission_process": [
+          "Buy the e-VOA online before departure, or pay at the visa-on-arrival counter",
+          "Present the e-VOA or receipt at immigration on arrival",
+          "Extend once in country if staying beyond 30 days"
+        ],
+        "arrival_card": {
+          "required": true,
+          "name": "Indonesia arrival declarations (by mode of entry)",
+          "url": "https://beacukai.go.id/ecd",
+          "submission_window": "For air/sea arrivals, All Indonesia can be completed from 3 days before arrival or upon landing. Follow the official customs instructions for land arrivals.",
+          "notes": "Air/sea arrivals: All Indonesia at https://allindonesia.imigrasi.go.id/. Land arrivals: ECD Bea Cukai at https://ecd.beacukai.go.id/. The applicable declaration system depends on the crossing; All Indonesia integrates customs where implemented. These are arrival declarations, separate from visa eligibility."
+        },
+        "passport_validity": "Passport valid for at least 6 months upon arrival",
+        "passport_validity_requirement": {
+          "kind": "months_after_arrival",
+          "months": 6
+        },
+        "required_documents": [
+          "Passport valid for at least 6 months upon arrival",
+          "Outbound ticket from Indonesia"
+        ],
+        "onward_travel_evidence": "Present an outbound ticket from Indonesia upon arrival",
+        "financial_evidence": "Have sufficient living expenses while in Indonesia.",
+        "accommodation_evidence": null,
+        "entry_requirements": "For air and sea arrivals, complete the All Indonesia arrival declaration at https://allindonesia.imigrasi.go.id/. It integrates immigration, customs, health and quarantine declarations and can be completed from 3 days before arrival or upon landing. For land arrivals, Indonesian Customs directs travellers to the electronic customs declaration at https://ecd.beacukai.go.id/. Follow the declaration system required at your crossing; All Indonesia replaces the separate customs declaration where that system is implemented. Arrival declarations do not replace the applicable visa or exemption."
+      },
+      "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+      "verified_at": "2026-08-28",
+      "verified_by": "Ellis source audit (adjudication)",
+      "verifier": "ai",
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "supporting_evidence": [
+            {
+              "source_id": "bvk_voa",
+              "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+              "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+        },
+        "requirement_detail": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "supporting_evidence": [
+            {
+              "source_id": "bvk_voa",
+              "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+              "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+        },
+        "visa_category": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "supporting_evidence": [
+            {
+              "source_id": "bvk_voa",
+              "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+              "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+        },
+        "permitted_stay": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "additional_quotes": [
+            "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)"
+        },
+        "application_channel": {
+          "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (adjudication)",
+          "verifier": "ai",
+          "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (adjudication)",
+          "verifier": "ai",
+          "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+        },
+        "official_portal_url": {
+          "source_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/visa-republik-indonesia",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "jakarta_b1",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Bagi pemegang e-VoA (visa kunjungan saat kedatangan elektronik), perpanjangan izin tinggal dapat dilakukan secara online melalui evisa.imigrasi.go.id . Bagi pemegang VoA nonelektronik, perpanjangan izin tinggal dapat dilakukan di kantor imigrasi terdekat dari domisili anda."
+        },
+        "government_fee": {
+          "source_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/visa-republik-indonesia",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "jakarta_b1",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Biaya visa B1 Rp500.000"
+        },
+        "visa_products": {
+          "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (adjudication)",
+          "verifier": "ai",
+          "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+        },
+        "submission_process": {
+          "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (adjudication)",
+          "verifier": "ai",
+          "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+        },
+        "arrival_card": {
+          "source_url": "https://beacukai.go.id/ecd",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "customs",
+          "supporting_evidence": [
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+            },
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+            },
+            {
+              "source_id": "arrival",
+              "source_url": "https://evisa.imigrasi.go.id/",
+              "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+        },
+        "passport_validity": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "required_documents": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "financial_evidence": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Have sufficient living expenses while in Indonesia."
+        },
+        "accommodation_evidence": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "The reviewed A1/B1 arrival-document list does not establish a mandatory hotel booking or host-address document. This review does not certify absence of every possible request.",
+          "status": "unknown"
+        },
+        "entry_requirements": {
+          "source_url": "https://beacukai.go.id/ecd",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "customs",
+          "supporting_evidence": [
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+            },
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+            },
+            {
+              "source_id": "arrival",
+              "source_url": "https://evisa.imigrasi.go.id/",
+              "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+        }
+      },
+      "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong.",
+      "route": {
+        "nationality": "USA",
+        "destination": "IDN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "us-hk-indonesia-taiwan-20260910",
+      "partial_review": true
+    },
+    {
+      "fields": {
+        "arrival_card": {
+          "required": true,
+          "name": "Taiwan Arrival Card (TWAC)",
+          "url": "https://twac.immigration.gov.tw/",
+          "fee_amount": 0,
+          "fee_currency": null,
+          "submission_window": "Within 7 days before arrival",
+          "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+        },
+        "official_portal_url": "https://twac.immigration.gov.tw/",
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "visa_category": "Visa-exempt visitor entry",
+        "permitted_stay": "Up to 90 days, starting the day after arrival; not extendable under this ordinary US visitor exemption",
+        "permitted_stay_days": 90,
+        "passport_validity": "US passport valid for the intended period of stay",
+        "passport_validity_requirement": {
+          "kind": "valid_through_departure",
+          "months": 0
+        },
+        "required_documents": [
+          "US passport valid for the intended period of stay",
+          "Confirmed return or onward air/sea ticket, next-destination visa where required, and a confirmed departure-flight seat"
+        ],
+        "onward_travel_evidence": "Confirmed return or onward air/sea ticket; hold a visa for the next destination where required and a confirmed departure-flight seat.",
+        "financial_evidence": null,
+        "accommodation_evidence": null
+      },
+      "source_url": "https://www.immigration.gov.tw/",
+      "verified_at": "2026-08-22",
+      "verified_by": "Ellis source audit",
+      "verifier": "ai",
+      "field_provenance": {
+        "arrival_card": {
+          "source_url": "https://twac.immigration.gov.tw/",
+          "verified_at": "2026-09-09",
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified.",
+          "source_id": "twac",
+          "supporting_sources": [
+            {
+              "id": "twac",
+              "url": "https://twac.immigration.gov.tw/"
+            }
+          ],
+          "additional_quotes": [
+            "Submission is Free.",
+            "Complete and submit within 7 days before arrival."
+          ],
+          "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\"."
+        },
+        "official_portal_url": {
+          "source_url": "https://www.immigration.gov.tw/",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Visa-free is correct; the online arrival card is the pre-arrival step and was unrecorded."
+        },
+        "disposition": {
+          "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "boca",
+          "additional_quotes": [
+            "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "boca",
+          "additional_quotes": [
+            "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+        },
+        "visa_category": {
+          "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "boca",
+          "additional_quotes": [
+            "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+        },
+        "permitted_stay": {
+          "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "boca",
+          "additional_quotes": [
+            "The duration of stay starts from the day after arrival and is not extendable. Foreign visitors must depart by the end of the said duration."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "boca",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+        },
+        "passport_validity": {
+          "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "boca",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "boca",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+        },
+        "required_documents": {
+          "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "boca",
+          "additional_quotes": [
+            "A confirmed return air/sea ticket or air/sea ticket and a visa for the next destination, and a confirmed seat reservation for departure flight."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "boca",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "A confirmed return air/sea ticket or air/sea ticket and a visa for the next destination, and a confirmed seat reservation for departure flight."
+        },
+        "financial_evidence": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "The BOCA page states additional funds documents for Brunei, Philippines and Thailand, not the US ordinary-passport exemption; no universal US funds-document requirement was established in this review.",
+          "status": "unknown"
+        },
+        "accommodation_evidence": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "The BOCA page states additional hotel/host documents for Brunei, Philippines and Thailand, not the US ordinary-passport exemption; no universal US accommodation-document requirement was established in this review.",
+          "status": "unknown"
+        }
+      },
+      "note": "Visa-free is correct; the online arrival card is the pre-arrival step and was unrecorded.",
+      "route": {
+        "nationality": "USA",
+        "destination": "TWN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "us-hk-indonesia-taiwan-20260910",
+      "partial_review": true
+    }
+  ],
+  "status": "detached; exact-layer deployment preflight required"
+}

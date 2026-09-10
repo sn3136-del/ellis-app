@@ -48,7 +48,12 @@ def reconcile(route,guidance,provenance):
         root=vo.OVERRIDES.parent
         if sum(p.resolve()==(root/OVERLAY).resolve() for p in vo._reviewed_overlay_paths())!=1:return guidance
         expected,resolved=_rebuilt((root/MANIFEST).read_text(),(root/OVERLAY).read_text())
-        if route!=expected['route'] or provenance!=expected['source_verified']:return guidance
+        expected_route=deepcopy(expected['route'])
+        # The cached-reader wrapper omits a null transit container. Preserve
+        # every other route/context comparison and reject actual transit lists.
+        if 'transit_countries' in expected_route and expected_route['transit_countries'] is None and 'transit_countries' not in route:
+            expected_route.pop('transit_countries',None)
+        if route!=expected_route or provenance!=expected['source_verified']:return guidance
         if {k:v for k,v in guidance.items() if k!='uncertainty'}!={k:v for k,v in expected['guidance'].items() if k!='uncertainty'}:return guidance
         warnings=guidance.get('uncertainty')
         if not isinstance(warnings,list):return guidance

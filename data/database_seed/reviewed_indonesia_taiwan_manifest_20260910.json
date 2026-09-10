@@ -1,0 +1,1904 @@
+{
+  "schema_version": 1,
+  "kind": "indonesia_taiwan_fields_exact_layers",
+  "specification": {
+    "schema_version": 1,
+    "kind": "reviewed_indonesia_taiwan_fields",
+    "id": "us-hk-indonesia-taiwan-20260910",
+    "sources": [
+      {
+        "id": "bvk_voa",
+        "url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+        "text": "Layanan WNA - Kantor Imigrasi Ngurah Rai Kantor Imigrasi Kelas I TPI Khusus Ngurah Rai Kamis, 10 September 2026 BERANDA INFORMASI LAYANAN Layanan WNI Layanan WNA Anak Berkewarganegaraan Ganda Biaya Keimigrasian TENTANG KAMI Profil Kantor Imigrasi Sejarah Imigrasi Struktur Organisasi Tugas dan Fungsi Visi dan Misi INFORMASI PUBLIK Berita dan Siaran Pers Majalah GARDA Buletin Imigrasi INOVASI LAYANAN One Click Access ZONA INTEGRITAS Daftar Isian Pelaksanaan Anggaran (DIPA) Indikator Kinerja Utama Laporan Kinerja Instansi Pemerintah (LKjIP) Maklumat Pelayanan Perjanjian Kinerja Rencana Strategis SOP Pelayanan Standar Pelayanan Surat Keputusan Survei IKM ID EN ID No Result View All Result Imigrasi Ngurah Rai No Result View All Result Layanan Warga Negara Asing Home Layanan WNA VISA DAN IZIN TINGGAL Definisi Visa dan Izin Tinggal Bebas Visa Kunjungan Visa Kunjungan Visa Kunjungan Saat Kedatangan (Visa on Arrival) Visa Tinggal Terbatas Tempat Pemeriksaan Imigrasi Definisi Visa dan Izin Tinggal Setiap orang asing yang masuk Indonesia wajib memiliki visa yang sah dan masih berlaku, kecuali ditentukan lain berdasarkan UU Keimigrasian dan perjanjian internasional. Visa adalah keterangan tertulis, baik secara manual maupun elektronik yang diberikan oleh pejabat yang berwenang untuk melakukan perjalanan ke wilayah Indonesia dan menjadi dasar untuk pemberian izin tinggal. Izin Tinggal adalah izin yang diberikan kepada Orang Asing oleh Pejabat Imigrasi atau pejabat dinas luar negeri untuk berada di Wilayah Indonesia. Bebas Visa Kunjungan Bebas Visa kunjungan (BVK) diberikan kepada Orang Asing warga negara dari negara, pemerintah wilayah administratif khusus suatu negara, dan entitas tertentu subjek bebas Visa kunjungan yang ditetapkan berdasarkan peraturan perundang-undangan untuk tinggal di Wilayah Indonesia. Pemegang BVK diberikan izin tinggal di Wilayah Indonesia paling lama 30 (tiga puluh) hari dan tidak dapat diperpanjang. Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru Berlaku efektif sejak tanggal 12 Agustus 2025 Pukul 00.00 WIB dan akan dievaluasi lebih lanjut. Visa Kunjungan Informasi terkait jenis Visa Kunjungan dapat ditemukan pada tautan berikut: https://imigrasi.go.id/wna/permohonan-visa-republik-indonesia Visa Kunjungan Saat Kedatangan (Visa on Arrival) Visa Kunjungan Saat Kedatangan (VKSK)/ Visa on Arrival (VoA) diberikan kepada Orang Asing warga negara dari negara, pemerintah wilayah administratif khusus suatu negara, dan entitas tertentu subjek Visa Kunjungan Saat Kedatangan untuk tinggal di Wilayah Indonesia. Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi. Visa Kunjungan Saat Kedatangan diberikan izin untuk tinggal di Wilayah Indonesia selama 30 (tiga puluh) hari dan dapat diperpanjang 1 (satu) kali pada Kantor Imigrasi sesuai tempat tinggal orang asing. Subjek Visa Kunjungan Saat Kedatangan / Visa on Arrival (VOA) (Berdasarkan Keputusan Menteri Hukum dan HAM Nomor M.HH-02.GR.01.06 Tahun 2024) : 1. Afrika Selatan 2. Albania 3. Amerika Serikat 4. Andorra 5. Arab Saudi 6. Argentina 7. Armenia 8. Australia 9. Austria 10. Azerbaijan 11. Bahrain 12. Belanda 13. Belarus 14. Belgia 15. Brazil 16. Brunei Darussalam 17. Bosnia Herzegovina 18. Bulgaria 19. Ceko 20. Chile 21. Denmark 22. Ekuador 23. Estonia 24. Filipina 25. Finlandia 26. Guatemala 27. Hongkong 28. Hungaria 29. India 30. Inggris 31. Irlandia 32. Italia 33. Islandia 34. Jepang 35. Jerman 36. Kamboja 37. Kanada 38. Kazakhstan 39. Kenya 40. Kolombia 41. Korea Selatan 42. Kroasia 43. Kuwait 44. Laos 45. Latvia 46. Liechtenstein 47. Lithuania 48. Luksemburg 49. Maladewa 50. Malaysia 51. Malta 52. Maroko 53. Mauritius 54. Meksiko 55. Mesir 56. Monako 57. Mongolia 58. Mozambik 59. Myanmar 60. Norwegia 61. Oman 62. Palestina 63. Papua Nugini 64. Perancis 65. Peru 66. Polandia 67. Portugal 68. Qatar 69. Rumania 70. Rusia 71. Rwanda 72. Selandia Baru 73. Serbia 74. Seychelles 75. Singapura 76. Siprus 77. Slovakia 78. Slovenia 79. Spanyol 80. Suriname 81. Swedia 82. Swiss 83. Taiwan 84. Tanzania 85. Thailand 86. Timor Leste 87. Tiongkok 88. Tunisia 89. Turki 90. Uni Emirat Arab 91. Uzbekistan 92. Ukraina 93. Vatikan 94. Venezuela 95. Vietnam 96. Yordania 97. Yunani (Efektif mulai 9 Januari 2024 dan akan dievaluasi kembali) Visa Tinggal Terbatas Informasi terkait jenis Visa Tinggal Terbatas dapat ditemukan pada tautan berikut: https://imigrasi.go.id/wna/permohonan-visa-republik-indonesia Tempat Pemeriksaan Imigrasi Tempat Pemeriksaan Imigrasi yang ditunjuk untuk melakukan pemberian Bebas Visa Kunjungan Khusus Wisata berdasarkan Surat Edaran (SE) Direktur Jenderal Imigrasi Nomor IMI-0133.GR.01.01 Tahun 2023 sebagai berikut : TPI Bandar Udara : 1. Halim Perdana Kusuma, Jakarta Timur, DKI Jakarta 2. Hang Nadim, Batam, Kepulauan Riau 3. Juanda, Surabaya, Jawa Timur 4. Kertajati, Cirebon, Jawa Barat 5. Kualanamu, Medan, Sumatera Utara 6. Minangkabau, Padang, Sumatera Barat 7. Ngurah Rai, Ngurah Rai, Bali 8. Sam Ratulangi, Manado, Sulawesi Utara 9. Sentani, Jayapura, Papua 10. Soekarno Hatta, Soekarno-Hatta, DKI Jakarta 11. Sultan Aji Muhammad Sulaiman, Balikpapan, Kalimantan Timur 12. Sultan Hasanuddin, Makassar, Sulawesi Selatan 13. Sultan Iskandar Muda, Banda Aceh, Aceh 14. Sultan Syarif Kasim II, Pekanbaru, Riau 15. Yogyakarta, Yogyakarta, Daerah Istimewa Yogyakarta 16. Zainuddin Abdul Madjid, Mataram, Nusa Tenggara Barat TPI Pelabuhan Laut: 1. Achmad Yani, Ternate, Maluku Utara 2. Amamapare, Mimika, Papua 3. Anggrek, Gorontalo, Gorontalo 4. Bagan Siapi-Api, Bagan Siapi-Api, Riau 5. Bandar Bentan Telani Lagoi, Tanjung Uban, Kepulauan Riau 6. Bandar Seri Udana Lobam, Tanjung Uban, Kepulauan Riau 7. Bandar Sri Setia Raja, Bengkalis, Riau 8. Batam Centre, Batam, Kepulauan Riau 9. Batu Ampar, Batam, Kepulauan Riau 10. Belakang Padang, Belakang Padang, Kepulauan Riau 11. Belawan Belawan Sumatera Utara 12. Benete, Sumbawa Besar, Nusa Tenggara Barat 13. Benoa, Denpasar, Bali 14. Biak, Biak, Papua 15. Boom Baru, Palembang, Sumatera Selatan 16. Celukan Bawang, Singaraja, Bali 17. Cirebon, Cirebon, Jawa Barat 18. Citra Tri Tunas, Batam, Kepulauan Riau 19. Ciwandan, Cilegon, Banten 20. Dumai, Dumai, Riau 21. Dwi Kora, Pontianak, Kalimantan Barat 22. Garongkong, Parepare, Sulawesi Selatan 23. Gunung Sitoli, Sibolga, Sumatera Utara 24. Jambi, Jambi, Jambi 25. Jayapura, Jayapura, Papua 26. Kabil, Batam, Kepulauan Riau 27. Kendari, Kendari, Sulawesi Tenggara 28. Kota Baru, Batulicin, Kalimantan Selatan 29. Kuala Enok, Tembilahan, Riau 30. Kuala Langsa, Langsa, Aceh 31. Kuala Tanjung, Tanjung Balai Asahan, Sumatera Utara 32. Kuala Tungkal, Kuala Tungkal, Jambi 33. Kumai, Sampit, Kalimantan Tengah 34. Labuan Bajo, Labuan Bajo, Nusa Tenggara Timur 35. Lauren Say, Maumere, Nusa Tenggara Timur 36. Lembar, Mataram, Nusa Tenggara Barat 37. Lhokseumawe, Lhokseumawe, Aceh 38. Malahayati, Banda Aceh, Aceh 39. Malundung, Tarakan, Kalimantan Timur 40. Manado, Manado, Sulawesi Utara 41. Marina Ancol, Jakarta Utara, DKI Jakarta 42. Marina Teluk Senimba, Batam, Kepulauan Riau 43. Merauke, Merauke, Papua 44. Muara Sabak, Kuala Tungkal, Jambi 45. Nongsa Terminal Bahari, Batam, Kepulauan Riau 46. Nusantara, Tahuna, Sulawesi Utara 47. Nusantara Pare Pare, Pare Pare, Sulawesi Selatan 48. Padang Bai, Singaraja, Bali 49. Panarukan, Jember, Jawa Timur 50. Pangkal Balam, Pangkal Pinang, Bangka Belitung 51. Panjang, Bandar Lampung, Lampung 52. Pantoloan, Palu, Sulawesi Tengah 53. Pasuruan, Malang, Jawa Timur 54. Patimban, Bandung, Jawa Barat 55. Probolinggo, Malang, Jawa Timur 56. Pulau Baai, Bengkulu, Bengkulu 57. Sabang, Sabang, Aceh 58. Samarinda, Samarinda, Kalimantan Timur 59. Sampit, Sampit, Kalimantan Tengah 60. Samudera, Bitung, Sulawesi Utara 61. Saumlaki, Tual, Maluku 62. Sekupang, Batam, Kepulauan Riau 63. Selat Lampa, Ranai, Kepulauan Riau 64. Semayang, Balikpapan, Kalimantan Timur 65. Siak Sri Indapura, Siak, Riau 66. Sibolga, Sibolga, Sumatera Utara 67. Sintete, Sambas, Kalimantan Barat 68. Soekarno-Hatta, Makassar, Sulawesi Selatan 69. Sorong, Sorong, Papua 70. Sri Bayintan, Tanjung Pinang, Kepulauan Riau 71. Sri Bintan Pura, Tanjung Pinang, Kepulauan Riau 72. Sunda Kelapa, Jakarta Utara, DKI Jakarta 73. Sungai Guntung, Tembilahan, Riau 74. Sungai Pakning, Bengkalis, Riau 75. Taboneo, Banjarmasin, Kalimantan Selatan 76. Tanjung Balai Karimun, Tanjung Balai Karimun, Kepulauan Riau 77. Tanjung Emas, Semarang, Jawa Tengah 78. Tanjung Gudangg, Pangkal Pinang, Bangka Belitung 79. Tanjung Harapan, Selat Panjang, Riau 80. Tanjung Intan, Cilacap, Jawa Tengah 81. Tanjung Kalian, Pangkal Pinang, Bangka Belitung 82. Tanjung Medang, Bengkalis, Riau 83. Tanjung Pandan, Tanjung Pandan, Bangka Belitung 84. Tanjung Perak, Tanjung Perak, Jawa Timur 85. Tanjung Priok, Tanjung Priok, DKI Jakarta 86. Tanjung Uban, Tanjung Uban, Kepulauan Riau 87. Tanjung Wangi, Jember, Jawa Timur 88. Tarempa, Tarempa, Kepulauan Riau 89. Teluk Bayur, Padang, Sumatera Barat 90. Teluk Nibung, Tanjung Balai Asahan, Sumatera Utara 91. Tembilahan, Tembilahan, Riau 92. Tenau, Kupang, Nusa Tenggara Timur 93. Tri Sakti, Banjarmasin, Kalimantan Selatan 94. Tual, Tual, Maluku 95. Yos Sudarso, Ambon, Maluku Tempat Pemeriksaan Imigrasi Pos Lintas Batas 1. Aruk, Sambas, Kalimantan Barat 2. Entikong, Entikong, Kalimantan Barat 3. Marore, Tahuna, Sulawesi Utara 4. Miangas, Tahuna, Sulawesi Utara 5. Mota’ain, Atambua, Nusa Tenggara Timur 6. Motamasin, Atambua, Nusa Tenggara Timur 7. Nanga Badau, Putussibau, Kalimantan Barat 8. Serasan, Ranai, Kepulauan Riau 9. Skouw, Jayapura, Papua 10. Sota, Merauke, Papua 11. Tunon Taka, Nunukan, Kalimantan Utara 12. Wini, Atambua, Nusa Tenggara Timur Tempat Pemeriksaan Imigrasi yang ditunjuk untuk melakukan pemberian Bebas Visa Kunjungan Saat Kedatangan Khusus Wisata / Visa on Arrival (VOA) / Electronic Visa on Arrival (E-VOA) berdasarkan Surat Edaran (SE) Direktur Jenderal Imigrasi Nomor IMI-0133.GR.01.01 Tahun 2023 sebagai berikut : TPI Bandar Udara : 1. Halim Perdana Kusuma, Jakarta Timur, DKI Jakarta 2. Hang Nadim, Batam, Kepulauan Riau 3. Juanda, Surabaya, Jawa Timur 4. Kertajati, Cirebon, Jawa Barat 5. Kualanamu, Medan, Sumatera Utara 6. Minangkabau, Padang, Sumatera Barat 7. Ngurah Rai, Ngurah Rai, Bali 8. Sam Ratulangi, Manado, Sulawesi Utara 9. Sentani, Jayapura, Papua 10. Soekarno Hatta, Soekarno-Hatta, DKI Jakarta 11. Sultan Aji Muhammad Sulaiman, Balikpapan, Kalimantan Timur 12. Sultan Hasanuddin, Makassar, Sulawesi Selatan 13. Sultan Iskandar Muda, Banda Aceh, Aceh 14. Sultan Syarif Kasim II, Pekanbaru, Riau 15. Yogyakarta, Yogyakarta, Daerah Istimewa Yogyakarta 16. Zainuddin Abdul Madjid, Mataram, Nusa Tenggara Barat TPI Pelabuhan Laut: 1. Achmad Yani, Ternate, Maluku Utara 2. Amamapare, Mimika, Papua 3. Anggrek, Gorontalo, Gorontalo 4. Bagan Siapi-Api, Bagan Siapi-Api, Riau 5. Bandar Bentan Telani Lagoi, Tanjung Uban, Kepulauan Riau 6. Bandar Seri Udana Lobam, Tanjung Uban, Kepulauan Riau 7. Bandar Sri Setia Raja, Bengkalis, Riau 8. Batam Centre, Batam, Kepulauan Riau 9. Batu Ampar, Batam, Kepulauan Riau 10. Belakang Padang, Belakang Padang, Kepulauan Riau 11. Belawan Belawan Sumatera Utara 12. Benete, Sumbawa Besar, Nusa Tenggara Barat 13. Benoa, Denpasar, Bali 14. Biak, Biak, Papua 15. Boom Baru, Palembang, Sumatera Selatan 16. Celukan Bawang, Singaraja, Bali 17. Cirebon, Cirebon, Jawa Barat 18. Citra Tri Tunas, Batam, Kepulauan Riau 19. Ciwandan, Cilegon, Banten 20. Dumai, Dumai, Riau 21. Dwi Kora, Pontianak, Kalimantan Barat 22. Garongkong, Parepare, Sulawesi Selatan 23. Gunung Sitoli, Sibolga, Sumatera Utara 24. Jambi, Jambi, Jambi 25. Jayapura, Jayapura, Papua 26. Kabil, Batam, Kepulauan Riau 27. Kendari, Kendari, Sulawesi Tenggara 28. Kota Baru, Batulicin, Kalimantan Selatan 29. Kuala Enok, Tembilahan, Riau 30. Kuala Langsa, Langsa, Aceh 31. Kuala Tanjung, Tanjung Balai Asahan, Sumatera Utara 32. Kuala Tungkal, Kuala Tungkal, Jambi 33. Kumai, Sampit, Kalimantan Tengah 34. Labuan Bajo, Labuan Bajo, Nusa Tenggara Timur 35. Lauren Say, Maumere, Nusa Tenggara Timur 36. Lembar, Mataram, Nusa Tenggara Barat 37. Lhokseumawe, Lhokseumawe, Aceh 38. Malahayati, Banda Aceh, Aceh 39. Malundung, Tarakan, Kalimantan Timur 40. Manado, Manado, Sulawesi Utara 41. Marina Ancol, Jakarta Utara, DKI Jakarta 42. Marina Teluk Senimba, Batam, Kepulauan Riau 43. Merauke, Merauke, Papua 44. Muara Sabak, Kuala Tungkal, Jambi 45. Nongsa Terminal Bahari, Batam, Kepulauan Riau 46. Nusantara, Tahuna, Sulawesi Utara 47. Nusantara Pare Pare, Pare Pare, Sulawesi Selatan 48. Padang Bai, Singaraja, Bali 49. Panarukan, Jember, Jawa Timur 50. Pangkal Balam, Pangkal Pinang, Bangka Belitung 51. Panjang, Bandar Lampung, Lampung 52. Pantoloan, Palu, Sulawesi Tengah 53. Pasuruan, Malang, Jawa Timur 54. Patimban, Bandung, Jawa Barat 55. Probolinggo, Malang, Jawa Timur 56. Pulau Baai, Bengkulu, Bengkulu 57. Sabang, Sabang, Aceh 58. Samarinda, Samarinda, Kalimantan Timur 59. Sampit, Sampit, Kalimantan Tengah 60. Samudera, Bitung, Sulawesi Utara 61. Saumlaki, Tual, Maluku 62. Sekupang, Batam, Kepulauan Riau 63. Selat Lampa, Ranai, Kepulauan Riau 64. Semayang, Balikpapan, Kalimantan Timur 65. Siak Sri Indapura, Siak, Riau 66. Sibolga, Sibolga, Sumatera Utara 67. Sintete, Sambas, Kalimantan Barat 68. Soekarno-Hatta, Makassar, Sulawesi Selatan 69. Sorong, Sorong, Papua 70. Sri Bayintan, Tanjung Pinang, Kepulauan Riau 71. Sri Bintan Pura, Tanjung Pinang, Kepulauan Riau 72. Sunda Kelapa, Jakarta Utara, DKI Jakarta 73. Sungai Guntung, Tembilahan, Riau 74. Sungai Pakning, Bengkalis, Riau 75. Taboneo, Banjarmasin, Kalimantan Selatan 76. Tanjung Balai Karimun, Tanjung Balai Karimun, Kepulauan Riau 77. Tanjung Emas, Semarang, Jawa Tengah 78. Tanjung Gudangg, Pangkal Pinang, Bangka Belitung 79. Tanjung Harapan, Selat Panjang, Riau 80. Tanjung Intan, Cilacap, Jawa Tengah 81. Tanjung Kalian, Pangkal Pinang, Bangka Belitung 82. Tanjung Medang, Bengkalis, Riau 83. Tanjung Pandan, Tanjung Pandan, Bangka Belitung 84. Tanjung Perak, Tanjung Perak, Jawa Timur 85. Tanjung Priok, Tanjung Priok, DKI Jakarta 86. Tanjung Uban, Tanjung Uban, Kepulauan Riau 87. Tanjung Wangi, Jember, Jawa Timur 88. Tarempa, Tarempa, Kepulauan Riau 89. Teluk Bayur, Padang, Sumatera Barat 90. Teluk Nibung, Tanjung Balai Asahan, Sumatera Utara 91. Tembilahan, Tembilahan, Riau 92. Tenau, Kupang, Nusa Tenggara Timur 93. Tri Sakti, Banjarmasin, Kalimantan Selatan 94. Tual, Tual, Maluku 95. Yos Sudarso, Ambon, Maluku Tempat Pemeriksaan Imigrasi Pos Lintas Batas 1. Aruk, Sambas, Kalimantan Barat 2. Entikong, Entikong, Kalimantan Barat 3. Jagoi Babang, Singkawang, Kalimantan Barat 4. Nanga Badau, Putussibau, Kalimantan Barat 5. Mota’ain, Atambua, Nusa Tenggara Timur 6. Motamasin, Atambua, Nusa Tenggara Timur 7. Tunon Taka, Nunukan, Kalimantan Utara 8. Wini, Atambua, Nusa Tenggara Timur 9. Skouw, Jayapura, Papua Mulai berlaku efektif sejak 19 April 2023 pukul 00.00 WIB dan akan dievaluasi lebih lanjut. Lakukan perpanjangan izin tinggal sebelum masa izin tinggal berakhir agar tidak dikenai denda overstay. IZIN TINGGAL KUNJUNGAN Perpanjangan Visa Kunjungan Saat Kedatangan Perpanjangan Izin Tinggal Kunjungan Alih Status Izin Tinggal Kunjungan Ke Izin Tinggal Terbatas Perpanjangan Visa Kunjungan Saat Kedatangan sample of E-VOA Manual VOA Syarat Perpanjangan Visa Kunjungan Saat Kedatangan (VOA) : Paspor Kebangsaan atau Dokumen Perjalanan yang sah dan masih berlaku (di atas 6 bulan); Scan berwarna tiket untuk kembali ke negara asal atau meneruskan ke negara lain Alur Permohonan Perpanjangan VOA : E VOA extension steps: 1. Visit https://evisa.imigrasi.go.id/web/applications/stay-permit/claim 2. Apply and update your address with the address details of your accommodation for next 5 days (make sure the postal code is correct), upload files asked by system once again: update your address with the address details of your accommodation for next 5 days (make sure the postal code is correct) since within 3 days after making payment you have to come to immigration office whose working area covers the postal code that you put 3. Make payment  >>> can be paid in cash in any local bank and indomaret 4. You will get email for photo and interview session 5. Come to related immigration office for photo and interview session Manual VOA extension steps: 1. Sign-in to your account 2. Claim your stay permit first on >>> https://evisa.imigrasi.go.id/web/applications/stay-permit/claim 3. Fill the data and update your address with the address details of your accommodation for next 5 days (make sure the postal code is correct), upload files asked by system once again: update your address with the address details of your accommodation for next 5 days (make sure the postal code is correct) since within 3 days after making payment you have to come to immigration office whose working area covers the postal code that you put 4. After this done, there will be your name on the list, on the right side there will be “action” button. Click “action” and then “extend” 5. Make payment  >>> can be paid in cash in any local bank and indomaret 6. You will get email for photo and interview session 7. Come to related immigration office for photo and interview session Biaya : Rp 500.000,- per permohonan Biaya Denda Overstay Rp 1.000.000,- per hari Permohonan perpanjangan VOA paling cepat diajukan 14 hari sebelum masa berlaku izin tinggal habis Untuk cara pembayaran “Indonesian Payment Method”, pembayaran dapat dilakukan secara tunai di bank terdekat atau di Kantor Pos Indonesia Permohonan perpanjangan VOA paling cepat 14 hari setelah kedatangan dan paling lambat 7 hari sebelum masa izin tinggal berakhir. Perpanjangan Izin Tinggal Kunjungan Persyaratan untuk izin tinggal kunjungan mungkin berbeda-beda tergantung pada jenis visa (indeks visa) dan jenis sponsor. Silahkan hubungi kami untuk informasi lebih lanjut Alih Status Izin Tinggal Kunjungan Ke Izin Tinggal Terbatas Persyaratan Alih Status ITK ke ITAS : PERSYARATAN UMUM Surat Permohonan dari penjamin Surat Pernyataan dan Jaminan Bermaterai dari Penjamin KTP Penjamin ITK Yang Masih Berlaku Paspor Kebangsaan Yang Sah Dan Masih Berlaku PERSYARATAN TAMBAHAN Tenaga Kerja Asing (TKA) RPTKA Notifikasi DPKK Bukti Bayar DPKK IMTA Akta Notaris Perusahaan NPWP Perusahaan NIB Perusahaan SK Kemenkum Perusahaan Investor/ PMA Rekening Koran Perusahaan 2 Bulan Terakhir Akta Notaris Perusahaan NPWP Perusahaan NIB Perusahaan SK Kemenkum Perusahaan Jumlah Saham WNA Min. 10 Milyar Rupiah Profil Perusahaan Terbaru (Diunduh Menjelang Pengajuan Permohonan) Lansia/ Retirement Bukti Tunjangan Atau Penghasilan 3000 USD Atau Setara Per Bulan (Berupa Rekening Koran 3 Bulan Terakhir) Akta Notaris Perusahaan NPWP Perusahaan NIB Perusahaan SK Kemenkum Perusahaan Penyatuan Keluarga (Suami/ istri WNI) Kartu Keluarga Suami/Istri WNI Akta Perkawinan Atau Buku Nikah Yang Telah Disahkan Oleh Perwakilan Ri Atau Kementerian Luar Negeri RI Bagi Perkawinan Yang Telah Dilangsungkan Diluar Negeri Bukti Pendaftaran Perkawinan Pada Dinas Kependudukan Dan Pencatatan Sipil Surat Keterangan Domisili Jika Alamat KTP Tidak di Area Kerja Kanim Anak WNA pemegang ITAS (ITAS family dependent) Akta kelahiran yang bersangkutan dalam versi bahasa asli Akta kelahiran yang bersangkutan yang telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris Akta perkawinan orang tua dalam versi bahasa asli Akta perkawinan orang tua yang telah telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris ITAS ayah/ibu yang masih berlaku Paspor ayah/ibu Dokumen persyaratan lainnya sesuai dengan jenis ITAS ayah/ibu Istri/Suami WNA pemegang ITAS (ITAS family dependent) Akta perkawinan dalam versi bahasa asli Akta perkawinan yang telah telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris ITAS suami/istri yang masih berlaku Paspor suami/istri Dokumen persyaratan lainnya sesuai dengan jenis ITAS suami/istri Rohaniawan Surat rekomendasi dari Kementerian Agama RPTKA IMTA Akta yayasan NPWP yayasan NIB yayasan SK Kemenkum Yayasan Remote Worker Surat kontrak kerja yang menyatakan WNA bersedia bekerja secara remote Bukti penghasilan 60.000 USD setahun / 5000 USD per bulan Akta notaris perusahaan (jika diajukan oleh penjamin perusahaan) NPWP perusahaan (jika diajukan oleh penjamin perusahaan) NIB perusahaan (jika diajukan oleh penjamin perusahaan) SK kemenkum perusahaan (jika diajukan oleh penjamin perusahaan) Pelajar Surat pernyataan dari sekolah Akta pendirian sekolah / yayasan NPWP sekolah/ yayasan NIB sekolah/ yayasan Persetujuan mendikbud/ izin operasional sekolah dari mendikbud SK Kumham sekolah / yayasan Eks WNI Fotocopy kutipan akta perkawinan atau buku nikah yang telah disahkan oleh perwakilan RI atau kementerian luar negeri RI bagi perkawinan yang telah dilangsungkan diluar negeri Fotocopy kutipan akta perkawinan atau buku nikah yang telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah Bukti dokumen yang menyatakan pernah menjadi warga negara indonesia (paspor republik indonesia/KTP/akta lahir) Surat keterangan domisili Alur Layanan Alih Status ITK – ITAS Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi dan pengambilan foto Verifikasi permohonan oleh Direktorat Jenderal Imigrasi Penerbitan Catatan: Permohonan Alih Status dapat diajukan paling lambat 30 (tiga puluh) hari sebelum izin tinggal kunjungan berakhir. Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan IZIN TINGGAL TERBATAS (ITAS) Pemberian/Perpanjangan ITAS Alih Status ke ITAP Exit Permit Only (EPO) / ERP Tidak Kembali Mutasi Alamat Mutasi Paspor Pemberian/Perpanjangan ITAS Persyaratan Umum Pemberian/Perpanjangan Izin Tinggal Terbatas PERSYARATAN UMUM Surat Permohonan dari penjamin Surat Pernyataan dan Jaminan Bermaterai dari Penjamin KTP Penjamin ITK Yang Masih Berlaku (untuk alih status ITK ke ITAS) ITAS Yang Masih Berlaku (Untuk Perpanjangan) Paspor Kebangsaan Yang Sah Dan Masih Berlaku Persyaratan Khusus Persyaratan Khusus Pemberian Izin Tinggal Terbatas Permohonan diajukan oleh penjamin dengan melampirkan persyaratan umum dan melampirkan persyaratan berikut bagi: Tenaga Kerja Asing (TKA) RPTKA Notifikasi DPKK Bukti Bayar DPKK IMTA Akta Notaris Perusahaan NPWP Perusahaan NIB Perusahaan SK Kemenkum Perusahaan Investor/ PMA Rekening Koran Perusahaan 2 Bulan Terakhir Akta Notaris Perusahaan NPWP Perusahaan NIB Perusahaan SK Kemenkum Perusahaan Jumlah Saham WNA Min. 10 Milyar Rupiah Profil Perusahaan Terbaru (Diunduh Menjelang Pengajuan Permohonan) Lansia/ Retirement Bukti Tunjangan Atau Penghasilan 3000 USD Atau Setara Per Bulan (Berupa Rekening Koran 3 Bulan Terakhir) Akta Notaris Perusahaan NPWP Perusahaan NIB Perusahaan SK Kemenkum Perusahaan Penyatuan Keluarga (Suami/ istri WNI) Kartu Keluarga Suami/Istri WNI Akta Perkawinan Atau Buku Nikah Yang Telah Disahkan Oleh Perwakilan Ri Atau Kementerian Luar Negeri RI Bagi Perkawinan Yang Telah Dilangsungkan Diluar Negeri Bukti Pendaftaran Perkawinan Pada Dinas Kependudukan Dan Pencatatan Sipil Surat Keterangan Domisili Jika Alamat KTP Tidak di Area Kerja Kanim Anak WNA pemegang ITAS (ITAS family dependent) Akta kelahiran yang bersangkutan dalam versi bahasa asli Akta kelahiran yang bersangkutan yang telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris Akta perkawinan orang tua dalam versi bahasa asli Akta perkawinan orang tua yang telah telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris ITAS ayah/ibu yang masih berlaku Paspor ayah/ibu Dokumen persyaratan lainnya sesuai dengan jenis ITAS ayah/ibu Bukti lapor lahir dari imigrasi untuk anak yang lahir di Indonesia Istri/Suami WNA pemegang ITAS (ITAS family dependent) Akta perkawinan dalam versi bahasa asli Akta perkawinan yang telah telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris ITAS suami/istri yang masih berlaku Paspor suami/istri Dokumen persyaratan lainnya sesuai dengan jenis ITAS suami/istri Rohaniawan Surat rekomendasi dari Kementerian Agama RPTKA IMTA Akta yayasan NPWP yayasan NIB yayasan SK Kemenkum Yayasan Remote Worker Surat kontrak kerja yang menyatakan WNA bersedia bekerja secara remote Bukti penghasilan 60.000 USD setahun / 5000 USD per bulan Akta notaris perusahaan (jika diajukan oleh penjamin perusahaan) NPWP perusahaan (jika diajukan oleh penjamin perusahaan) NIB perusahaan (jika diajukan oleh penjamin perusahaan) SK kemenkum perusahaan (jika diajukan oleh penjamin perusahaan) Pelajar Surat pernyataan dari sekolah Akta pendirian sekolah / yayasan NPWP sekolah/ yayasan NIB sekolah/ yayasan Persetujuan mendikbud/ izin operasional sekolah dari mendikbud SK Kumham sekolah / yayasan Eks WNI Fotocopy kutipan akta perkawinan atau buku nikah yang telah disahkan oleh perwakilan RI atau kementerian luar negeri RI bagi perkawinan yang telah dilangsungkan diluar negeri Fotocopy kutipan akta perkawinan atau buku nikah yang telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah Bukti dokumen yang menyatakan pernah menjadi warga negara indonesia (paspor republik indonesia/ktp/akta lahir) Surat keterangan domisili Alur Layanan Perpanjangan ITAS 1 Tahun Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi dan pengambilan foto Penerbitan Alur Layanan Perpanjangan ITAS 2 Tahun Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi dan pengambilan foto Verifikasi permohonan oleh Direktorat Jenderal Imigrasi Penerbitan Alih Status ke ITAP Alih Status Izin Tinggal Terbatas (ITAS) ke Izin Tinggal Tetap (ITAP) Ketentuan Alih Status Ketentuan Alih Status dari ITAS ke ITAP Alih Status Izin Tinggal Terbatas menjadi Izin Tinggal Tetap diberikan kepada orang asing sebagai : 1). Rohaniawan; 2). Pekerja; 3). Investor; 4). Wisatawan lanjut usia mancanegara; 5). Menggabungkan diri dengan suami atau istri pemegang Izin Tinggal Tetap; 6). Menggabungkan diri dengan orang tua pemegang Izin Tinggal Tetap bagi anak yang berusia di bawah 18 (delapan belas) tahun dan belum kawin; 7). Eks warga negara Indonesia. Alih status Izin Tinggal terbatas menjadi Izin Tinggal Tetap juga dapat diberikan kepada Orang Asing: 1). Orang Asing yang menggabungkan diri dengan suami atau istri warga negara Indonesia yang usia perkawinannya telah mencapai paling singkat 2 (dua) tahun; 2). Orang Asing yang menggabungkan diri dengan ayah dan/atau ibu bagi anak berkewarganegaraan asing yang mempunyai hubungan hukum kekeluargaan dengan ayah dan/atau ibu warga negara Indonesia; 3). Anak yang berusia di bawah 18 (delapan belas) tahun dan belum kawin dari Orang Asing yang kawin secara sah dengan warga negara Indonesia. Persyaratan Umum Persyaratan Umum Alih Status ITAS ke ITAP : Surat Permohonan dari penjamin Surat Pernyataan dan Jaminan Bermaterai dari Penjamin KTP Penjamin ITK Yang Masih Berlaku Paspor Kebangsaan Yang Sah Dan Masih Berlaku Persyaratan Tambahan Persyaratan Tambahan Alih Status ITAS ke ITAP : Persyaratan Tambahan diperlukan bagi ITAS dengan Kategori: Tenaga Kerja Asing (TKA) RPTKA Notifikasi DPKK Bukti Bayar DPKK IMTA Akta Notaris Perusahaan NPWP Perusahaan NIB Perusahaan SK Kemenkum Perusahaan Investor/ PMA Rekening Koran Perusahaan 2 Bulan Terakhir Akta Notaris Perusahaan NPWP Perusahaan NIB Perusahaan SK Kemenkum Perusahaan Jumlah Saham WNA Min. 10 Milyar Rupiah Profil Perusahaan Terbaru (Diunduh Menjelang Pengajuan Permohonan) Lansia/ Retirement Bukti Tunjangan Atau Penghasilan 3000 USD Atau Setara Per Bulan (Berupa Rekening Koran 3 Bulan Terakhir) Akta Notaris Perusahaan NPWP Perusahaan NIB Perusahaan SK Kemenkum Perusahaan Penyatuan Keluarga (Suami/ istri WNI) Kartu Keluarga Suami/Istri WNI Akta Perkawinan Atau Buku Nikah Yang Telah Disahkan Oleh Perwakilan Ri Atau Kementerian Luar Negeri RI Bagi Perkawinan Yang Telah Dilangsungkan Diluar Negeri Bukti Pendaftaran Perkawinan Pada Dinas Kependudukan Dan Pencatatan Sipil Surat Keterangan Domisili Jika Alamat KTP Tidak di Area Kerja Kanim Anak WNA pemegang ITAS (ITAS family dependent) Akta kelahiran yang bersangkutan dalam versi bahasa asli Akta kelahiran yang bersangkutan yang telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris Akta perkawinan orang tua dalam versi bahasa asli Akta perkawinan orang tua yang telah telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris ITAS ayah/ibu yang masih berlaku Paspor ayah/ibu Dokumen persyaratan lainnya sesuai dengan jenis ITAS ayah/ibu Istri/Suami WNA pemegang ITAS (ITAS family dependent) Akta perkawinan dalam versi bahasa asli Akta perkawinan yang telah telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris ITAS suami/istri yang masih berlaku Paspor suami/istri Dokumen persyaratan lainnya sesuai dengan jenis ITAS suami/istri Rohaniawan Surat rekomendasi dari Kementerian Agama RPTKA IMTA Akta yayasan NPWP yayasan NIB yayasan SK Kemenkum Yayasan Remote Worker Surat kontrak kerja yang menyatakan WNA bersedia bekerja secara remote Bukti penghasilan 60.000 USD setahun / 5000 USD per bulan Akta notaris perusahaan (jika diajukan oleh penjamin perusahaan) NPWP perusahaan (jika diajukan oleh penjamin perusahaan) NIB perusahaan (jika diajukan oleh penjamin perusahaan) SK kemenkum perusahaan (jika diajukan oleh penjamin perusahaan) Pelajar Surat pernyataan dari sekolah Akta pendirian sekolah / yayasan NPWP sekolah/ yayasan NIB sekolah/ yayasan Persetujuan mendikbud/ izin operasional sekolah dari mendikbud SK Kumham sekolah / yayasan Eks WNI Fotocopy kutipan akta perkawinan atau buku nikah yang telah disahkan oleh perwakilan RI atau kementerian luar negeri RI bagi perkawinan yang telah dilangsungkan diluar negeri Fotocopy kutipan akta perkawinan atau buku nikah yang telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah Bukti dokumen yang menyatakan pernah menjadi warga negara indonesia (paspor republik indonesia/KTP/akta lahir) Surat keterangan domisili Alur Layanan Alih Status Alur Layanan Alih Status ITK – ITAS Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi dan pengambilan foto Verifikasi permohonan oleh Direktorat Jenderal Imigrasi Penerbitan Catatan: Permohonan Alih Status dapat diajukan paling lambat 30 (tiga puluh) hari sebelum izin tinggal kunjungan berakhir Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Exit Permit Only (EPO) / ERP Tidak Kembali PERSYARATAN EXIT PERMIT ONLY (EPO) Surat permohonan dari sponsor Kartu identitas sponsor (KTP) Halaman biodata paspor WNA Halaman izin tinggal terakhir ITAS / ITAP E-Visa Tiket keberangkatan Bukti pembayaran untuk tiket keberangkatan Akte nikah/ buku nikah (untuk pemegang izin tinggal penyatuan keluarga) Akta kelahiran (untuk anak-anak dari pemegang izin tinggal penyatuan keluarga) Halaman biodata paspor suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) ITAS/ITAP suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) Pemberitahuan RPTKA (bagi pemegang izin tinggal terbatas untuk bekerja) DPKK (untuk pemegang izin tinggal bekerja) SK Kumham, NIB dan NPWP Perusahaan (untuk pemegang izin tinggal investor) Kontrak kerja (untuk pemegang izin tinggal remote worker) ALUR LAYANAN EXIT PERMIT ONLY (EPO) Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi Penerbitan Catatan: Permohonan EPO diajukan sebelum izin tinggal berakhir Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan PERSYARATAN ERP TIDAK KEMBALI Surat permohonan dari sponsor Kartu identitas sponsor (KTP) Halaman biodata paspor WNA Halaman izin tinggal terakhir ITAS / ITAP E Visa Tiket keberangkatan Stempel keberangkatan Akte nikah/ buku nikah (untuk pemegang izin tinggal penyatuan keluarga) Akta kelahiran (untuk anak-anak dari pemegang izin tinggal penyatuan keluarga) Halaman biodata paspor suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) ITAS/ITAP suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) Pemberitahuan RPTKA (bagi pemegang izin tinggal terbatas untuk bekerja) DPKK (untuk pemegang izin tinggal bekerja) SK Kumham, NIB dan NPWP Perusahaan (untuk pemegang izin tinggal investor) Kontrak kerja (untuk pemegang izin tinggal remote worker) ALUR LAYANAN ERP TIDAK KEMBALI / TERMINATE STAY PERMIT Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi Penerbitan Catatan: Permohonan ERP TIDAK KEMBALI / TERMINATE STAY PERMIT diajukan sebelum izin tinggal berakhir Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Mutasi Alamat Persyaratan Mutasi Alamat Surat permohonan dari sponsor (jika perubahan alamat antar kantor imigrasi, 2 surat permohonan harus dibuat (ke kantor imigrasi asal dan surat permohonan ke kantor imigrasi tujuan)) Kartu identitas sponsor (KTP) Halaman biodata paspor WNA Halaman izin tinggal terakhir ITAS / ITAP E-Visa Surat keterangan domisili minimal dari Banjar atau Kelurahan Akte nikah/ buku nikah (untuk pemegang izin tinggal penyatuan keluarga) Akta kelahiran (untuk anak dari pemegang izin tinggal penyatuan keluarga) Halaman biodata paspor suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) ITAS/ITAP suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) Surat keterangan domisili suami/istri WNI minimal dari Banjar atau Kelurahan Alur Layanan Mutasi Alamat Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan dan mengisi data Alamat baru Verifikasi permohonan oleh kantor imigrasi Penerbitan Catatan: Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Mutasi Paspor Persyaratan Mutasi Paspor Surat permohonan dari sponsor Kartu identitas sponsor Halaman biodata paspor lama Halaman izin tinggal terakhir di paspor lama Halaman biodata paspor baru ITAS / ITAP E-Visa Akte nikah/ buku nikah (untuk pemegang izin tinggal penyatuan keluarga) Akta kelahiran (untuk anak-anak dari pemegang izin tinggal penyatuan keluarga) Halaman biodata paspor suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) ITAS/ITAP suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) Alur Layanan Mutasi Paspor Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan dan mengisi data no paspor baru dan masa berlaku paspor baru Verifikasi permohonan oleh kantor imigrasi Penerbitan Catatan: Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan IZIN TINGGAL TETAP (ITAP) Pemberian/Perpanjangan ITAP Exit Permit Only (EPO) / ERP Tidak Kembali Mutasi Alamat Mutasi Paspor Multiple Re-Entry Permit (MREP) Pemberian/Perpanjangan ITAP Izin Tinggal Tetap adalah izin yang diberikan kepada orang asing tertentu untuk bertempat tinggal dan menetap di wilayah Indonesia sebagai penduduk Indonesia. Ketentuan Pemberian/Perpanjangan Izin Tinggal Tetap Izin Tinggal Tetap dapat diberikan kepada: Orang Asing pemegang Izin Tinggal terbatas sebagai rohaniawan, pekerja, investor, dan lanjut usia, keluarga karena perkawinan campuran, rumah kedua, Orang Asing eks warga negara Indonesia; Suami, istri, dan/atau anak dari Orang Asing pemegang Izin Tinggal Tetap; Izin Tinggal Tetap bagi Orang Asing sebagaimana dimaksud pada poin 1 diberikan melalui alih status. Permohonan alih status diajukan paling lambat 30 (tiga puluh) hari sebelum izin tinggalnya berakhir. Izin Tinggal Tetap yang diberikan kepada Orang Asing sebagaimana dimaksud pada point 1, juga dapat diberikan kepada: Eks subyek anak berkewarganegaraan ganda Republik Indonesia yang memilih kewarganegaraan asing; Anak yang lahir di Indonesia dari Orang Asing pemegang Izin Tinggal Tetap; Warga negara Indonesia yang kehilangan kewarganegaraan Indonesia di Wilayah Indonesia. Izin Tinggal Tetap bagi Orang Asing sebagaimana dimaksud pada poin 2 diberikan secara langsung tanpa melalui alih status. Persyaratan Umum Pemberian/Perpanjangan ITAP Surat permohonan dari penjamin Surat pernyataan dan jaminan bermaterai dari penjamin Surat pernyataan integrasi bermaterai KTP penjamin Kitap yang masih berlaku (untuk perpanjangan) Kitas perpanjangan ke 1 sampai terakhir (untuk alih status) Paspor kebangsaan yang sah dan masih berlaku Persyaratan Tambahan TKA RPTKA Notifikasi DPKK Bukti bayar DPKK IMTA Akta notaris perusahaan NPWP perusahaan NIB perusahaan SK Kemenkum Perusahaan *Catatan: hanya untuk pimpinan tertinggi Perusahaan INVESTOR Rekening koran perusahaan 2 bulan terakhir Akta notaris perusahaan NPWP perusahaan NIB perusahaan SK KEMENKUM perusahaan Jumlah saham WNA Min 15 Milyar Rupiah Profil perusahaan terbaru (diunduh menjelang pengajuan permohonan) LANSIA Bukti tunjangan atau penghasilan 3000 USD atau setara per bulan (berupa rekening koran 3 bulan terakhir) Akta notaris perusahaan NPWP perusahaan NIB perusahaan SK Kemenkum Perusahaan PENYATUAN KELUARGA (SUAMI/ ISTRI WNI) Kartu Keluarga Suami/Istri WNI Akta Perkawinan Atau Buku Nikah Yang Telah Disahkan Oleh Perwakilan Ri Atau Kementerian Luar Negeri RI Bagi Perkawinan Yang Telah Dilangsungkan Diluar Negeri Bukti Pendaftaran Perkawinan Pada Dinas Kependudukan Dan Pencatatan Sipil Surat Keterangan Domisili Jika Alamat KTP Tidak di Area Kerja Kanim ANAK WNA ORANG TUA PEMEGANG ITAP (ITAP FAMILY DEPENDENT) Akta kelahiran yang bersangkutan dalam versi bahasa asli Akta kelahiran yang bersangkutan yang telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris Akta perkawinan orang tua dalam versi bahasa asli Akta perkawinan orang tua yang telah telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris ITAP ayah/ibu yang masih berlaku Paspor ayah/ibu Dokumen persyaratan lainnya sesuai dengan jenis ITAP ayah/ibu Bukti lapor lahir dari imigrasi untuk anak yang lahir di Indonesia ISTRI/SUAMI WNA PEMEGANG ITAP (ITAP FAMILY DEPENDENT) Akta perkawinan dalam versi bahasa asli Akta perkawinan yang telah telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah, kecuali bahasa inggris ITAP suami/istri yang masih berlaku Paspor suami/istri Dokumen persyaratan lainnya sesuai dengan jenis ITAP suami/istri ROHANIWAN Surat rekomendasi dari Kementerian Agama RPTKA IMTA Akta yayasan NPWP yayasan NIB yayasan SK Kemenkum yayasan Eks WNI Fotocopy kutipan akta perkawinan atau buku nikah yang telah disahkan oleh perwakilan RI atau kementerian luar negeri RI bagi perkawinan yang telah dilangsungkan diluar negeri Fotocopy kutipan akta perkawinan atau buku nikah yang telah diterjemahkan dalam bahasa indonesia oleh penerjemah tersumpah Bukti dokumen yang menyatakan pernah menjadi warga negara indonesia (paspor republik indonesia/KTP/akta lahir) Surat keterangan domisili Alur Layanan Alih Status ITAS – ITAP Pembuatan akun penjamin Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi dan pengambilan foto Verifikasi permohonan oleh Direktorat Jenderal Imigrasi Penerbitan Alur Layanan Perpanjangan ITAP Permanen Pembuatan akun penjamin Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi dan pengambilan foto Verifikasi permohonan oleh Direktorat Jenderal Imigrasi Penerbitan Catatan: Permohonan Alih Status ITAS ke ITAP dapat diajukan paling lambat 30 (tiga puluh) hari sebelum izin tinggal terbatas berakhir Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Exit Permit Only (EPO) / ERP Tidak Kembali PERSYARATAN EXIT PERMIT ONLY (EPO) Surat permohonan dari sponsor Kartu identitas sponsor (KTP) Halaman biodata paspor WNA Halaman izin tinggal terakhir ITAS / ITAP E-Visa Tiket keberangkatan Bukti pembayaran untuk tiket keberangkatan Akte nikah/ buku nikah (untuk pemegang izin tinggal penyatuan keluarga) Akta kelahiran (untuk anak-anak dari pemegang izin tinggal penyatuan keluarga) Halaman biodata paspor suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) ITAS/ITAP suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) Pemberitahuan RPTKA (bagi pemegang izin tinggal terbatas untuk bekerja) DPKK (untuk pemegang izin tinggal bekerja) SK Kumham, NIB dan NPWP Perusahaan (untuk pemegang izin tinggal investor) Kontrak kerja (untuk pemegang izin tinggal remote worker) ALUR LAYANAN EXIT PERMIT ONLY (EPO) Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi Penerbitan Catatan: Permohonan EPO diajukan sebelum izin tinggal berakhir Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan PERSYARATAN ERP TIDAK KEMBALI Surat permohonan dari sponsor Kartu identitas sponsor (KTP) Halaman biodata paspor WNA Halaman izin tinggal terakhir ITAS / ITAP E Visa Tiket keberangkatan Stempel keberangkatan Akte nikah/ buku nikah (untuk pemegang izin tinggal penyatuan keluarga) Akta kelahiran (untuk anak-anak dari pemegang izin tinggal penyatuan keluarga) Halaman biodata paspor suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) ITAS/ITAP suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) Pemberitahuan RPTKA (bagi pemegang izin tinggal terbatas untuk bekerja) DPKK (untuk pemegang izin tinggal bekerja) SK Kumham, NIB dan NPWP Perusahaan (untuk pemegang izin tinggal investor) Kontrak kerja (untuk pemegang izin tinggal remote worker) ALUR LAYANAN ERP TIDAK KEMBALI / TERMINATE STAY PERMIT Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Pembayaran Verifikasi permohonan oleh kantor imigrasi Penerbitan Catatan: Permohonan ERP TIDAK KEMBALI / TERMINATE STAY PERMIT diajukan sebelum izin tinggal berakhir Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Mutasi Alamat Persyaratan Mutasi Alamat Surat permohonan dari sponsor (jika perubahan alamat antar kantor imigrasi, 2 surat permohonan harus dibuat (ke kantor imigrasi asal dan surat permohonan ke kantor imigrasi tujuan)) Kartu identitas sponsor (KTP) Halaman biodata paspor WNA Halaman izin tinggal terakhir ITAS / ITAP E-Visa Surat keterangan domisili minimal dari Banjar atau Kelurahan Akte nikah/ buku nikah (untuk pemegang izin tinggal penyatuan keluarga) Akta kelahiran (untuk anak dari pemegang izin tinggal penyatuan keluarga) Halaman biodata paspor suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) ITAS/ITAP suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) Surat keterangan domisili suami/istri WNI minimal dari Banjar atau Kelurahan Alur Layanan Mutasi Alamat Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan dan mengisi data Alamat baru Verifikasi permohonan oleh kantor imigrasi Penerbitan Catatan: Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Mutasi Paspor Persyaratan Mutasi Paspor Surat permohonan dari sponsor Kartu identitas sponsor Halaman biodata paspor lama Halaman izin tinggal terakhir di paspor lama Halaman biodata paspor baru ITAS / ITAP E-Visa Akte nikah/ buku nikah (untuk pemegang izin tinggal penyatuan keluarga) Akta kelahiran (untuk anak-anak dari pemegang izin tinggal penyatuan keluarga) Halaman biodata paspor suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) ITAS/ITAP suami/istri/orang tua (untuk pemegang izin tinggal penyatuan keluarga) Alur Layanan Mutasi Paspor Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan dan mengisi data no paspor baru dan masa berlaku paspor baru Verifikasi permohonan oleh kantor imigrasi Penerbitan Catatan: Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Multiple Re-Entry Permit (MREP) Persyaratan MERP Paspor WNA KITAP WNA E-KTP WNA E-KTP penjamin Surat domisili penjamin jika KTP penjamin luar Bali Surat permohonan dari penjamin. Untuk ITAP investor, TKA dan Lansia surat permohonan wajib dengan kop Perusahaan dan stempel basah Perusahaan Buku nikah/ Akta perkawinan yang diterbitkan oleh Disdukcapil setempat (untuk ITAP penyatuan keluarga dengan penjamin suami/istri WNI/ orang tua WNI) Akte kelahiran dan Buku nikah/ Akta perkawinan (untuk ITAP penyatuan keluarga dengan penjamin orang tua WNI) IMTA dan RPTKA untuk ITAP TKA NIB, NPWP, SK Kumham , Akta notaris pendirian Perusahaan untuk ITAP investor dan Tenaga Kerja Catatan: Pengajuan permohonan secara online di https://evisa.imigrasi.go.id/ melalui akun penjamin yang sesuai Semua berkas yang diunggah adalah scan berkas asli berwarna Setelah mengajukan dan pembayaran, WNA dan penjamin wajib datang ke kantor imigrasi untuk verifikasi berkas asli di hari kerja dan jam kerja antara jam 08.00-11.00 PELAPORAN STATUS SIPIL ORANG ASING Pelaporan Anak Dari Orang Asing Yang Lahir Di Indonesia Pelaporan Orang Asing Yang Melakukan Perceraian Pelaporan Orang Asing Yang Meninggal Dunia Pelaporan Perubahan Kewarganegaraan Tetap Asing Pelaporan Anak Dari Orang Asing Yang Lahir Di Indonesia Persyaratan: Surat permohonan dari penjamin Kartu identitas (KTP) dari penjamin Halaman sampul dan biodata paspor bayi Halaman biodata paspor orang tua Izin tinggal orang tua Akta nikah orang tua (jika menikah secara resmi) Akta kelahiran bayi dari Catatan Sipil Catatan: Permohonan diajukan paling lambat 90 (sembilan puluh) hari sejak kelahiran Jika melewati 90 maka akan ada proses BAP (Berita Acara Pemeriksaan) Setelah lapor lahir terbit, wajib mengajukan permohonan izin tinggal untuk bayi Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Foto yang diunggah adalah foto paspor bayi dan foto bayi Alur Layanan Lapor Lahir: Pembuatan akun penjamin ( https://evisa.imigrasi.go.id/ ) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Verifikasi permohonan oleh kantor imigrasi Penerbitan Pelaporan Orang Asing Yang Melakukan Perceraian Persyaratan: Surat permohonan dari penjamin Kartu identitas (KTP) penjamin Halaman biodata paspor Halaman izin tinggal terakhir ITAP E-Visa Akta nikah Akta Perceraian Catatan: Permohonan diajukan paling lambat 60 (enam puluh) hari sejak perceraian Semua berkas yang diunggah adalah scan berkas asli berwarna Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Alur Layanan Lapor cerai: Pembuatan akun penjamin ( https://evisa.imigrasi.go.id/ ) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Verifikasi permohonan oleh kantor imigrasi Penerbitan Pelaporan Orang Asing Yang Meninggal Dunia Persyaratan Lapor Kematian: Surat permohonan dari penjamin Kartu identitas (KTP) penjamin Halaman biodata paspor Halaman izin tinggal terakhir di paspor ITAS / ITAP Akta kematian dari catatan sipil Alur Layanan Lapor kematian: Pembuatan akun penjamin (https://evisa.imigrasi.go.id/) Pengajuan permohonan melalui akun penjamin yang sesuai Mengunggah berkas persyaratan Verifikasi permohonan oleh kantor imigrasi Penerbitan Catatan: Permohonan diajukan paling lambat 60 (enam puluh) hari sejak tanggal kematian Semua berkas yang diunggah adalah scan berkas asli berwarna • Jika status permohonan “Pending” atau “Reject”, silahkan klik no registrasi untuk mengetahui alasan Pelaporan Perubahan Kewarganegaraan Tetap Asing Melampirkan peryaratan umum, juga melampirkan: 1). Surat keterangan kewarganegaraan dari perwakilan negara asing yang ada di Indonesia. Kantor Imigrasi Ngurah Rai Kementerian Imigrasi dan Pemasyarakatan Republik Indonesia Kontak Kami WhatsApp (+62) 81236956667 Email kanim_ngurahrai@imigrasi.go.id Alamat Jl. Raya Taman Jimbaran No.1, Jimbaran, Kec. Kuta Selatan, Kab. Badung, Bali 80361 Jam Layanan Senin – Kamis 08.00 – 16.00 WITA Istirahat 12.00 – 13.00 WITA Jumat 08.00 – 16.30 WITA Istirahat 12.00 – 13.30 WITA Layanan Spesifik Layanan Paspor Indonesia 08.00 – 15.00 WITA Perpanjangan Izin Tinggal 08.00 – 12.00 WITA Pengambilan Paspor WNI 10.00 – 12.00 & 13.00 – 15.00 WITA Pengambilan Paspor WNA 10.00 – 14.00 WITA Layanan Foto Asing 08.00 – 15.00 WITA Nomor Antrean Foto Izin Tinggal Sebelum pukul 11.00 WITA Media Sosial Instagram @imngurahrai Facebook X @imngurahrai TikTok @imngurahrai © 2026 - Dikelola oleh Tim TIK Kantor Imigrasi Kelas I Khusus TPI Ngurah Rai. Beranda Kontak Sitemap No Result View All Result BERANDA INFORMASI LAYANAN Layanan WNI Layanan WNA Anak Berkewarganegaraan Ganda Biaya Keimigrasian TENTANG KAMI Profil Kantor Imigrasi Sejarah Imigrasi Struktur Organisasi Tugas dan Fungsi Visi dan Misi INFORMASI PUBLIK Berita dan Siaran Pers Majalah GARDA Buletin Imigrasi INOVASI LAYANAN One Click Access ZONA INTEGRITAS Daftar Isian Pelaksanaan Anggaran (DIPA) Indikator Kinerja Utama Laporan Kinerja Instansi Pemerintah (LKjIP) Maklumat Pelayanan Perjanjian Kinerja Rencana Strategis SOP Pelayanan Standar Pelayanan Surat Keputusan Survei IKM © 2026 - Dikelola oleh Tim TIK Kantor Imigrasi Kelas I Khusus TPI Ngurah Rai.",
+        "sha256": "8e4e16f8c8195e1d5a29af53a45e981358c5ac26b30412acb997110a2c84d7d3",
+        "checked_at": "2026-09-10",
+        "capture_method": "HTTP 200 full body; stdlib HTMLParser visible-text extraction",
+        "http_body_sha256": "cf89fa6927a1771ccdaf086bbccfce5e3e625e51f5fc839b6b7bdf8d98b76f23"
+      },
+      {
+        "id": "jakarta_b1",
+        "url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/visa-republik-indonesia",
+        "text": "Kantor Imigrasi Kelas I Non TPI Jakarta Pusat - Home V2 Langsung ke Konten Utama Beranda Profil Sejarah Kantor Tugas Pokok dan Fungsi Visi Misi dan Tata Nilai Kepala Kantor dari Masa ke Masa Sambutan Kepala Satuan Kerja Stuktur Organisasi Kepala Kantor Profil Pejabat Lapor Si Mayor Si Mayor Smile Layanan Warga Negara Indonesia (WNI) Paspor Baru Penggantian Paspor Ubah Data Paspor Warga Negara Asing (WNA) Daftar Subjek VoA, BVK & Calling Visa Izin Tinggal Keimigrasian Visa Republik Indonesia Biaya Keimigrasian Daftar Tarif PNBP Keimigrasian Info Publik Berita Zona Integritas Laporan Kinerja Instansi Pemerintah Rencana Strategis DIPA Perjanjian Kinerja SK Tim Pengelola Faqs FAQ Cari Informasi ID Indonesian English 中文 (Mandarin) العربية (Arab) 日本語 (Jepang) 한국어 (Korea) Cari Informasi Temukan informasi yang Anda butuhkan Cari Sekarang Saran Pencarian: Berita Terbaru Layanan Paspor Jam Pelayanan FAQ Tekan ESC untuk menutup Warga Negara Asing (WNA) Visa Republik Indonesia B1 Visa Saat Kedatangan (Wisata) D1 Visa Wisata C1 Visa Wisata C6B Visa Program Sukarelawan Bebas Visa Kunjungan untuk Bisnis, Rapat, dan Pembelian Barang (Indeks A2) Bebas Visa Kunjungan untuk Menjalani Pengobatan (Indeks A3) Bebas Visa Kunjungan untuk Nakhoda, Awak Kapal, Tenaga Ahli yang Akan Beroperasi di Perairan Indonesia Dengan visa B1, anda dapat berwisata, mengunjungi keluarga, menghadiri pertemuan, insentif, konvensi, dan pameran atau acara sejenis lainnya, serta transit di Indonesia untuk ke negara lain. Jenis visa Visa B1 merupakan Visa Kunjungan Saat Kedatangan ( Visa on Arrival ) bagi Daftar Subjek Visa on Arrival untuk satu kali masuk ke Indonesia dengan izin tinggal pertama kali maksimal 30 hari, dihitung sejak tanggal kedatangan. Izin Tinggal ini dapat diperpanjang satu kali dan dapat dialihkan menjadi izin tinggal lain melalui mekanisme bridging visa. Masa tinggal Anda dapat tinggal di Indonesia maksimal 30 hari, dihitung sejak tanggal kedatangan. Anda dapat memperpanjang izin tinggal ini satu kali hingga (keseluruhan masa tinggal) maksimal 60 hari. Bagi pemegang e-VoA (visa kunjungan saat kedatangan elektronik), perpanjangan izin tinggal dapat dilakukan secara online melalui evisa.imigrasi.go.id . Bagi pemegang VoA nonelektronik, perpanjangan izin tinggal dapat dilakukan di kantor imigrasi terdekat dari domisili anda. Biaya (PNBP) Biaya visa B1 Rp500.000 Biaya Verifikasi I/II Rp 0 Pembayaran Visa Kunjungan Saat Kedatangan elektronik (e-VoA): pembayaran digital dengan kartu debit/kredit Pembayaran Visa Kunjungan Saat Kedatangan nonelektronik: Konter bank yang ditunjuk pada area pemeriksaan imigrasi Penjamin (Sponsor) Anda tidak membutuhkan penjamin/sponsor untuk mengajukan visa ini. Pengajuan visa Permohonan dan Pembayaran Pra Kedatangan Orang asing dari negara subjek visa kunjungan saat kedatangan harus: mengajukan permohonan melalui evisa.imigrasi.go.id atau dapat melalui indonesiavoa.vfsevisa.id mengisi formulir dan mengunggah berkas secara elektronik, antara lain: a.  halaman biodata paspor yang sah dan masih berlaku paling singkat 6 bulan sebelum masa berlakunya habis b.  pasfoto berwarna terbaru (setahun terakhir). Detail c.  tiket kembali atau tiket terusan ke negara lain, kecuali bagi awak alat angkut yang akan singgah untuk bergabung dengan kapalnya dan  melanjutkan perjalanan ke negara lain membayar menggunakan metode pembayaran digital melalui kartu debit/kredit mengecek dalam akun evisa dan email, karena visa kunjungan saat kedatangan elektronik akan dikirimkan oleh sistem dalam waktu 1x24 jam. Permohonan Pra Kedatangan dan Pembayaran Saat Kedatangan Orang asing dari negara subjek visa kunjungan saat kedatangan harus: mengajukan permohonan melalui evisa.imigrasi.go.id mengisi formulir dan mengunggah berkas secara elektronik, antara lain: a. halaman biodata paspor yang sah dan masih berlaku paling singkat 6 bulan sebelum masa berlakunya habis b. pasfoto berwarna terbaru (setahun terakhir). Detail c. tiket kembali atau tiket terusan ke negara lain, kecuali bagi awak alat angkut yang akan singgah untuk bergabung dengan kapalnya dan  melanjutkan perjalanan ke negara lain membayar menggunakan metode pembayaran digital melalui kartu debit/kredit mengambil visa kunjungan saat kedatangan elektronik di konter visa. Permohonan dan Pembayaran Saat Kedatangan Orang asing dari negara subjek visa kunjungan saat kedatangan akan: melakukan pembayaran Visa Kunjungan Saat Kedatangan di konter Bank yang ditunjuk pada area imigrasi bandar udara/pelabuhan dengan menunjukkan paspor yang sah dan masih berlaku paling singkat 6 bulan sebelum masa berlakunya habis kepada petugas memperoleh Vaucer Visa, kertas sekuriti sebagai tanda  bukti pembayaran Visa kunjungan saat kedatangan menunjukkan Vaucer Visa kepada petugas imigrasi pada konter Visa Kunjungan Saat Kedatangan memperoleh stiker Visa Kunjungan Saat Kedatangan yang ditempelkan pada paspor serta tanda masuk elektronik. Ketentuan lain Orang Asing tanpa kewarganegaraan dan Orang Asing pemegang dokumen perjalanan (bukan paspor kebangsaan) berupa paspor sementara, paspor darurat, titre du voyage, certificate of identity, laissez passer , atau dokumen sejenis lainnya tidak diizinkan mengajukan visa kunjungan saat kedatangan. Masa berlaku visa kunjungan saat kedatangan elektronik (e-voa) adalah 90 hari sejak diterbitkan. Jika tidak digunakan dalam jangka waktu tersebut, Orang Asing harus mengajukan visa baru untuk dapat masuk ke Indonesia. Visa kunjungan saat kedatangan nonelektronik langsung digunakan setelah terbit Harap diperhatikan bahwa masa berlaku visa berbeda dengan masa tinggal, silakan periksa visa Anda untuk informasi tentang lama izin tinggal. Orang Asing dengan izin tinggal dari Visa B1 dilarang menjual barang atau jasa atau menerima imbalan, upah, atau sejenisnya atas kerja/usahanya dari perorangan atau korporasi di Indonesia. Dasar hukum Peraturan Menteri Hukum dan HAM RI Nomor 28 Tahun 2019 tentang Tarif PNBP di Lngkungan Kementerian Hukum dan HAM Peraturan Menteri Hukum dan HAM RI Nomor 22 Tahun 2023 tentang Visa dan Izin Tinggal Peraturan Menteri Hukum dan HAM RI Nomor 18 Tahun 2024 tentang Visa dan Izin Tinggal Keputusan Menteri Hukum dan HAM RI Nomor M.HH-02.GR.01.04 Tahun 2023 tentang Klasifikasi Visa Peraturan Menteri Keuangan RI Nomor 9/PMK.02/2022 tentang Jenis dan Tarif PNBP Kebutuhan Mendesak atas Pelayanan Keimigrasian yang berlaku pada Kemenkumham RI Peraturan Menteri Keuangan RI Nomor 82 Tahun 2023 tentang Jenis dan Tarif atas Jenis PNBP Kebutuhan Mendesak atas Pelayanan Golden Visa yang berlaku pada Kemenkumham RI Ajukan Permohonan Visa Alamat Jl. Merpati No.3 Blok B12, Gn. Sahari Utara, Kec. Kemayoran, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10720 Kontak Kami Email: kanim_jakpus@imigrasi.go.id Telepon: 0216541213 Jam layanan Senin - Jumat 08.00 - 16.00 WIB Sabtu - Minggu Tutup © Copyright 2025, Kantor Imigrasi Kelas I Non TPI Jakarta Pusat Menu Aksesibilitas (CTRL+U) ID Bahasa Indonesia (Indonesian) Profil Aksesibilitas Gangguan Motorik Netra Total Buta Warna Df Disleksia Gangguan Pengelihatan Kognitif & Pembelajaran Kejang dan Epilepsi ADHD Moda Suara A + Perbesar Teks A - Perkecil Teks Kejenuhan Kontras+ Sembunyikan Gambar Rata Tulisan Df Ramah Disleksia Tinggi Garis Animasi Dijeda Kursor Spasi Teks Garis Bawahi Tautan Keterangan Alat Reset Semua Pengaturan Panduan Aksesibilitas",
+        "sha256": "f75862070984f3d8c66d29dd157a8ca862e109eac46fe4140a3b40344f4f6bf4",
+        "checked_at": "2026-09-10",
+        "capture_method": "HTTP 200 full body; stdlib HTMLParser visible-text extraction",
+        "http_body_sha256": "dbbdbc008c1f79b2975389bc524fd69d7c6d15b87407ee21e80922fbfe44f5da"
+      },
+      {
+        "id": "boca",
+        "url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+        "text": "Bureau of Consular Affairs, Ministry of Foreign Affairs, Republic of China(Taiwan)-Visa-Exempt Entry Go to main content area ::: Home Sitemap Bilingual Glossary 中文版 字級大小： Ａ Ａ - Ａ + search Full site search Popular keywords： Visa Passport Your browser does not seem to support JavaScript syntax, but it does not matter, it\n          does not affect the presentation of the content. Passport Apply for a Passport(Taiwan) Apply for a Passport(Abroad) Passport Photos Application Directions for a Second ROC Passport Applying for Past Passport Records Passport FAQs Application Forms Passport Act and Regulations ePassport Project Operating Directions for Issuance of Entry Permits Country Signing CA (CSCA) Information Visa General Information On-line Application Forms (not applicable to Hong Kong, Macau and PRC passport holders) Visa-Exempt Entry, Landing Visa and eVisa Visitor Visas Resident Visas Study in Taiwan Southeast Asian Countries Working Holidays Scheme Entrepreneur Employment-Seeking Visa FAQs Authentication Document Authentication in ROC(Taiwan) Document Authentication Services Authentication of domestic documents Authentication of foreign documents Authentication Regulations Consular District Application Forms Authentication FAQs E-register Online Application Form System for Document Authentication (Only for BOCA or MOFA’s branch offices) Online Service On-line Application Forms(not applicable to Hong Kong,Macau and PRC passport holders) Authentication-Application Progress Authentication-Verification of Authentication Online Application Form System for Document Authentication (Only for BOCA or MOFA’s branch offices) News & Events Our Locations Embassies and Missions About Us Organizational Structure Director General ::: 分享鈕 Line Travel Emergency Guidance APP Contact us Youtube RSS Home Visa Visa-Exempt Entry, Landing Visa and eVisa Visa-Exempt Entry facebook twitter line Print Go Back ( alt + ← Go Back) Created：2026-07-17 Data Source：Bureau Of Consular Affairs Counter：1693406 Updated：2026-07-17 Visa-Exempt Entry Type Visa-Exempt Entry Foreign nationals eligible for visa-exempt entry Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*. Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 30 days: Belize*, Malaysia, Saint Kitts and Nevis*, Saint Lucia*, Saint Vincent and the Grenadines, and Singapore. Nationals of Honduras*, except those holding diplomatic or official/service passports, are eligible for the visa-exemption program, with a duration of stay of up to 90 days. Nationals of Dominican Republic, except those holding diplomatic or official/service passports, are eligible for the visa-exemption program, with a duration of stay of up to 30 days. Nationals of Oman are eligible for the visa-exemption program, with a duration of stay of up to 14 days. Nationals of the Kingdom of Thailand (effective until July 31, 2027), except those holding diplomatic or official/service passports, are eligible for the visa-exemption program, with a duration of stay of up to 14 days. Nationals of Brunei (effective until July 31, 2027), except those holding diplomatic or official/ service passports, are eligible for the visa-exemption program, with a duration of stay of up to 14 days. In addition, those holding a Brunei Certificate of Identity are eligible for the visa-exemption program, with a duration of stay of up to 14 days. Nationals of the Philippines (effective until July 31, 2027), except those holding diplomatic or official/service passports, are eligible for the visa-exemption program, with a duration of stay of up to 14 days. Requirements A passport with remaining validity of at least six months as of the date of entry Visa-exempt entry only applies to foreign visitors holding formal passports (i.e., ordinary, official/service and diplomatic passports). Those holding emergency, temporary, or other informal passports or travel documents are ineligible, with the exception of those holding a Brunei Certificate of Identity. Holders of Belize, Eswatini, Saint Kitts and Nevis, Saint Lucia, and Tuvalu passports with place of birth recorded on the passport data page as Afghanistan, Iran, Iraq, Libya, Nigeria, Pakistan, the People's Republic of China, Syria, and Yemen are ineligible for the visa exemption. Holders of Honduran passports with place of birth recorded on the passport data page as the People's Republic of China are also ineligible for the visa exemption. A national of the Republic of the Marshall Islands shall mean any person who holds the nationality of the Republic of the Marshall Islands and is confined to the following categories：(1) a person who acquired the citizenship of the Trust Territory of the Pacific Islands at birth before the effective date of the Constitution of the Republic of the Marshall Islands, and has become and remains a citizen of the Republic of the Marshall Islands; or (2) a person who acquired the citizenship of the Republic of the Marshall Islands at birth, on or after the effective date of the Constitution of the Republic of the Marshall Islands. USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry. Japan nationals who possess a passport valid for the intended period of stay are eligible for visa-exempt entry. Holders of emergency or temporary passport, except those from the United States of America, should apply for a visa at a Taiwan (ROC) overseas mission, or a landing visa after arriving in the Taiwan (ROC). Only the United Kingdom passport holders with British Citizen status are eligible for visa-exempt entry. A confirmed return air/sea ticket or air/sea ticket and a visa for the next destination, and a confirmed seat reservation for departure flight. Not determined by immigration officers at ports of entry in Taiwan (ROC) to be otherwise ineligible. Holders of Brunei, Philippines and Thailand passports must have proof of accommodation (hotel) booking, host/sponsor's contact information and sufficient travel funds. Brunei, Philippines and Thailand vessel/aircraft crew members or service personnel intending to board to report for duty are ineligible for the visa-exempt entry. Duration of stay The duration of stay starts from the day after arrival and is not extendable. Foreign visitors must depart by the end of the said duration. Please click here for information on penalties for overstay. Visa-exempt entry cannot be converted to visa-based stay, unless any of the following applies: In the event of situations that prevent them from leaving Taiwan (ROC), such as severe acute illness, natural disaster, or other force majeure. White-collar professionals who have obtained (i) a work permit granted for a period under 6 months within their permitted duration of stay, or (ii) a work permit for fulfilling contract purpose issued before or within 30 days of their entry (Brunei, North Macedonia, Philippines and Thailand are not included) may apply for a work visa. *All applications shall be submitted within 8 working days before their permitted duration of stay expires. *In accordance with National Immigration Agency (NIA) regulations, those foreigners who come to Taiwan (ROC) to engage in contracting work for more than 6 months, enter Taiwan (ROC) under a visa-exemption program, and plan to apply for an alien residence certificate from the Immigration Agency, Ministry of the Interior, are required to simultaneously submit applications for visitor and resident visas to this Bureau or the Central, Southern, Eastern, and Yunjianan Offices of the Ministry of Foreign Affairs. *Those foreigners who obtain work permits (exclude fulfilling contract purpose) granted for a period over 6 months shall apply for residency directly to the National Immigration Agency in accordance with the Act for the Recruitment and Employment of Foreign Professionals. Canadian and UK passport holders are eligible for the visa-exemption program with a duration of stay of 90 days which is extendable up to 180 days, please refer to the Notice for British & Canadian Passport Holders Who Enter Taiwan (ROC) Visa-Free and Apply for an Extension of Stay . The visa-exemption trial program for nationals of Russia expired (effective until July 31, 2022). (Extension of the trial program is under evaluation.) If Omani passport holders plan to stay in Taiwan (ROC) for more than 14 days, they may apply for an eVisa. For further requirements and additional information, please visit our website at https://visawebapp.boca.gov.tw/BOCA_EVISA/MRV04FORM.do. Ports of entry Taiwan Taoyuan International Airport, Taipei Songshan Airport, Taichung International Airport, Chiayi Airport, Tainan Airport, Kaohsiung International Airport, Taitung Airport, Hualien Airport, Kinmen Airport, Magong Airport, Keelung Harbor, Taipei Harbor, Taichung Harbor, Kaohsiung Harbor, Hualien Harbor, Shuitou Harbor, and Fu'ao Harbor. Remarks: Those who have entered Taiwan (ROC) visa-free for purposes that do not require a permit—such as engaging in tourism, visiting friends or relatives, attending social events, conducting business, attending exhibitions, and engaging in fact-finding missions or international exchanges—who then intend to engage in activities that, according to the laws and regulations of relevant agencies, do require a permit must still obtain such a permit. Those who intend to enter Taiwan (ROC) for purposes that require qualifications, such as religious work, must obtain a visa from a Taiwan (ROC) overseas mission before entering Taiwan (ROC). According to Article 14 of the Regulations for Exit of Draftees, a draftee who has maintained his household registration in Taiwan (ROC) must enter into and depart from Taiwan (ROC) with his Taiwan (ROC) passport; a person who is subject to conscription and enters into Taiwan (ROC) with a foreign passport will be restricted from departing Taiwan (ROC). Within seven days prior to arriving in Taiwan (ROC), please complete an online immigration arrival card ( https://twac.immigration.gov.tw ) on the website of the National Immigration Agency. For conscription law, please visit the following website: http://www.immigration.gov.tw Close Passport Apply for a Passport(Taiwan) Apply for a Passport(Abroad) Passport Photos Application Directions for a Second ROC Passport Applying for Past Passport Records Passport FAQs Application Forms Passport Act and Regulations ePassport Project Operating Directions for Issuance of Entry Permits Country Signing CA (CSCA) Information Visa General Information On-line Application Forms (not applicable to Hong Kong, Macau and PRC passport holders) Visa-Exempt Entry, Landing Visa and eVisa Visitor Visas Resident Visas Study in Taiwan Southeast Asian Countries Working Holidays Scheme Entrepreneur Employment-Seeking Visa FAQs Authentication Document Authentication in ROC(Taiwan) Document Authentication Services Authentication of domestic documents Authentication of foreign documents Authentication Regulations Consular District Application Forms Authentication FAQs E-register Online Service On-line Application Forms(not applicable to Hong Kong,Macau and PRC passport holders) Authentication-Application Progress Authentication-Verification of Authentication News & Events Our Locations Embassies and Missions About Us Organizational Structure Director General Deputy Director General Deputy Director General Certificate Revocation Lists(CRLs) ::: Address：3-5F, 2-2, Sec.1, Jinan Rd., Zhongzheng Dist., Taipei City 100219, Taiwan（R.O.C.） TEL：(+886) 2-2343-2888 Our Location： Boca Taipei Headquarter Central Taiwan Office Southwestern Taiwan Office Southern Taiwan Office Eastern Taiwan Office Taoyuan Airport Office Updated Date： 2022-06-21 Counter： 46476653 Privacy Protection and Information Security Policies Government Website Open Information Announcement Go Top",
+        "sha256": "b06df9093023f6712f3caec3f2946d3edaead539bc7131513c6c6685d4b03f92",
+        "checked_at": "2026-09-10",
+        "capture_method": "HTTP 200 full body; stdlib HTMLParser visible-text extraction",
+        "http_body_sha256": "3e2a0d81bd6929a00d8105f0491064acb378d5aad05c4b5524ad958a6ed734b6"
+      },
+      {
+        "id": "customs",
+        "url": "https://beacukai.go.id/ecd",
+        "text": "Electronic Customs Declaration (E-CD) - Bea Cukai Indonesia Beranda Tentang Profil Organisasi Profil Pejabat Daftar Kantor Bea Cukai Tim Khusus Bea Cukai Layanan shop Impor Barang Penumpang Impor Untuk Dipakai Impor Sementara Pemeriksaan Pabean Barang Kiriman Barang Pindahan Barang Pekerja Migran Indonesia office Fasilitas Mitra Utama Kepabeanan Authorized Economic Operator Tempat Penimbunan Berikat Kemudahan Impor Tujuan Ekspor Pertambangan Pembebasan Bea Masuk office Kawasan Khusus Free Trade Zone Kawasan Ekonomi Khusus office Ekspor Tata Laksana Ekspor Klinik Ekspor customer-support Cukai Sekilas Cukai Fasilitas Pembebasan Cukai Pengajuan NPPBKC Tarif Cukai Hasil Tembakau Tarif Cukai EA, MMEA, dan KMEA Pita Cukai office Keberatan dan Banding Keberatan Penetapan Banding Keputusan Keberatan customer-support Registrasi Kepabeanan Informasi shop PPID Halaman Utama Tugas, Fungsi, dan Kewenangan Regulasi PPID Profil PPID Permintaan Informasi Informasi Publik Wajib Berkala Informasi Publik Wajib Serta Merta Informasi Publik Tersedia Setiap Saat Statistik Layanan Informasi Publik Komitmen Ramah Kelompok Rentan customer-support Statistik Penerimaan Data Penindakan Data Pengaduan Sebaran Pegawai DJBC Statistik Penanganan Perkara customer-support Maklumat Pelayanan customer-support Konsultasi Publik atas Peraturan Direktori shop Aplikasi Layanan Electronic Customs Declaration (ECD) CEISA 4.0 Keberatan Banding Vessel Declaration Mobile Beacukai office Kerjasama Internasional Free Trade Agreement ASEAN Tariff Finder Asia-Pacific Economic Cooperation Trade Repository customer-support Referensi Undang-Undang Pabean Undang-Undang Cukai Buku Tarif Kepabeanan Indonesia (BTKI) 2022 Larangan Pembatasan Standar Pelayanan Kurs Bea Cukai customer-support Website Satuan Kerja FAQ Pilih Bahasa English Bahasa Indonesia Bahasa Melayu Japanese Korean Chinese Simplified Chinese Traditional Arabic French German Spanish Italian Russian Portuguese Thai Vietnamese Kontak Kami Electronic Customs Declaration (Indonesia E-CD) Pengisian dilakukan secara elektronik, gratis, tidak dipungut biaya, hanya melalui: Buka E-CD Kewajiban Pemberitahuan Barang Customs Declaration adalah pemberitahuan pabean atas impor barang yang dibawa penumpang atau awak sarana pengangkut. Demi kenyamanan dan kelancaran perjalanan Anda, setiap penumpang baik Warga Negara Indonesia (WNI) maupun Warga Negara Asing (WNA) yang memasuki atau meninggalkan wilayah Indonesia wajib menyampaikan daftar barang bawaan melalui formulir pemberitahuan pabean digital. Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Isilah Sebelum Kedatangan ke Indonesia Dengan pengisian secara daring sebelum tiba di lokasi, Anda tidak perlu lagi mengantre untuk mengisi formulir fisik. Pastikan Anda menyimpan kode QR yang didapat setelah pengisian untuk dipindai oleh petugas di terminal kedatangan atau keberangkatan. FAQ Yang sering ditanyakan terkait Customs Declaration: Apa itu Customs Declaration? Customs Declaration merupakan salah satu bentuk dokumen pemberitahuan pabean. Dokumen ini digunakan sebagai pemberitahuan resmi yang menjelaskan barang impor yang dibawa oleh penumpang atau awak sarana pengangkut. Siapa yang wajib menyampaikan Customs Declaration? Secara umum Customs Declaration dibuat dan disampaikan oleh setiap penumpang dan awak sarana pengangkut yang datang dari luar negeri. Mengapa wajib membuat dan menyampaikan Customs Declaration? Sebagai bentuk pemenuhan kewajiban kepabeanan atas pembawaan barang dari luar negeri, Customs Declaration wajib disampaikan kepada petugas di pintu masuk kedatangan internasional. Membuat dan menyampaikan Customs Declaration berarti secara formal anda menyampaikan daftar barang bawaan anda guna pemeriksaan kepabeanan lebih lanjut. Di sisi lain, tidak membuat dan/atau menyampaikan Customs Declaration dengan tidak benar mungkin dapat menyebabkan anda menjalani pemeriksaan kepabeanan secara lebih detail. Bagaimana membuat Customs Declaration? Indonesia telah menerapkan pemberitahan Customs Declaration secara elektronik (Electronic Customs Declaration [ECD]). Anda dapat membuat dokumen Customs Declaration melalui tautan ecd.beacukai.go.id . Untuk kemudahan anda, pengisian ECD dapat dilakukan sejak 2 (dua) hari sebelum tanggal kedatangan anda di Indonesia hingga sesaat sebelum melalui pemeriksaan kepabeanan. Apa yang perlu anda siapkan sebelum mengisi Customs Declaration? Sebelum membuat dokumen Customs Declaration, siapkan beberapa dokumen berikut ini: data diri anda (Passport); data penerbangan anda; Daftar barang yang akan anda bawa. Bagaimana mengetahui status pengajuan Customs Declaration? Setelah anda mengirimkan pemberitahuan Customs Declaration, anda akan mendapatkan tanda terima berupa QR Code. Anda dapat menyimpan QR Code tersebut pada tempat yang aman. Pemberitahuan juga akan dikirimkan ke e-mail yang anda gunakan pada saat pendaftaran. Apa yang harus saya lakukan setelah mendapat QR Code? Setelah mendapat QR Code , anda perlu menunjukkan kepada petugas kepabeanan di terminal kedatangan internasional di Indonesia yang anda tuju. Beberapa terminal kedatangan telah dilengkapi konter otomatis. Selain menyerahkan/ menunjukkan langsung kepada petugas kami, anda dapat memindai QR Code melalui mesin pemindai otomatis yang tersedia di terminal kedatangan. FAQ dan Info Selengkapnya Silakan akses mengenai pertanyaan atau informasi lainnya: Klik Di Sini Peta Situs | Hubungi Kami Website Resmi Direktorat Jenderal Bea dan Cukai Kantor Pusat DJBC, Jalan Ahmad Yani (By Pass), Rawamangun, Pulogadung, Jakarta Timur, 13230 Fax 021-489508, Telepon 021-489509 Media Sosial Instagram X (Twitter) Facebook Tik Tok Bantuan Kontak Kami CEISA Care Pengaduan Peraturan Legal Syarat dan Ketentuan Kebijakan Privasi Disclaimer Hak Cipta © 2025 - Build 1.8.8_06022026_13:30",
+        "sha256": "c1b8d9eae3f774d63d422a753f1c9f5e2fbbed67a93068ac696818bb605a656f",
+        "checked_at": "2026-09-10",
+        "capture_method": "HTTP 200 full body; stdlib HTMLParser visible-text extraction",
+        "http_body_sha256": "35a5a765014066ce67d53fedf8a143776e281d13e418ac8b86f703935c1a42eb"
+      },
+      {
+        "id": "batam",
+        "url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+        "text": "Arrival Passengers At Three International Airports And Ports In Batam Are Required To Declare Their Arrival Through The All Indonesia Application | Website Kantor Imigrasi Kelas I Khusus TPI Batam Jl. Engku Putri No.3, Batam - 29461 0811 700 2019 BERANDA PROFIL Sejarah Kemenimipas Sejarah Imigrasi Sejarah Imigrasi Batam Visi & Misi Imigrasi Perintah Harian Direktur Jenderal Imigrasi Tugas & Fungsi Direktorat Jenderal Imigrasi Tugas & Fungsi Imigrasi Batam Struktur Organisasi Keimigrasian Batam Pimpinan Imigrasi Batam dari masa ke masa Catur Tertib Pegawai Negeri Sipil Panca Bhakti Insan Imigrasi Core Value PRIMA Mars Imigrasi Logo Imigrasi PRODUK HUKUM Produk Hukum Perjanjian Kinerja 2025 SOPAP Undang - Undang Perpu Peraturan Presiden Instruksi Presiden Keputusan Presiden Peraturan Menteri Keputusan Menteri Peraturan Dirjen Surat Keputusan Bersama Sekretaris Jenderal Keputusan Dirjen Juklak Dirjenim Instruksi Dirjenim Barang Milik Negara Peraturan Menteri PAN RB Peraturan Pemerintah Peraturan Menteri Keuangan Instruksi Menteri Direktur Jendral Imigrasi Surat Dinas BERITA Berita Utama Siaran Pers INFO PUBLIK Agenda Kegiatan Daftar Isian Pelaksanaan Anggaran (DIPA) Download Area Galeri Foto Hasil Survey IIP Hail Survey SKM dan SPAK Laporan Tahunan Laporan Bulanan Laporan Kinerja Instansi Pemerintah (LKIP) Rencana Strategis Perjanjian Kinerja Laporan Realisasi Anggaran Pedoman Pengelolaan Sistem Informasi Pelayanan Publik (SIPP) Standar Pelayanan Kantor Imigrasi Batam Tata Cara Menggunakan Aplikasi M-Paspor Tarif PNBP Layanan Keimigrasian Biaya dan Cara Pembayaran Paspor Tata Cara Berpakaian ke Kantor Imigrasi INOVASI LAYANAN PUBLIKASI FAQ Paspor MAJALAH HUBUNGI KAMI Direktorat Jenderal Imigrasi Kanwil Direktorat Jenderal Imigrasi Kepri Kantor Imigrasi Batam Tempat Pemeriksaan Imigrasi Unit Layanan Paspor (ULP) IMMIGRATION LOUNGE POLLUX MALL BATAM Hotline Pengaduan Pelanggaran Orang Asing (WNA) Berita Berita Utama Arrival Passengers At Three International Airports And Ports In Batam Are Required To Declare Their Arrival Through The All Indonesia Application Senin, 01 September 2025 Dibaca: 9549 kali Link Halaman: Beranda / Berita / 2025 / 09 / Arrival Passengers At Three International Airports And Ports In Batam Are Required To Declare Their Arrival Through The All Indonesia Application JAKARTA – Starting Monday, September 1, 2025, international flight passengers at Soekarno-Hatta Airport in Tangerang, Juanda Airport in Surabaya, and I Gusti Ngurah Rai Airport in Bali, as well as international ports in Batam, are required to fill out an arrival declaration via the All Indonesia Application. Simultaneously, the application's trial will be expanded to all airports for all airlines, as well as international ports and borders. The All Indonesia Application was created to simplify the international passenger arrival declaration process while also providing a smoother, faster, and safer travel experience. Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing. Filling out the arrival declaration via All Indonesia is free of charge. Acting Director-General of Immigration, Yuldi Yusman, stated that the application's presence is a tangible manifestation of Indonesia's commitment to providing friendly and efficient digital public services. \"All Indonesia is a step forward in creating efficient public services. With this application, the arrival process at airports or ports is not only shorter and safer but also friendly for all passengers—both individuals and groups—including the elderly, people with disabilities, and children. Indonesia wants to provide the best experience from the first step that foreign tourists and Indonesian citizens take upon returning to Indonesia. Therefore, we have integrated the arrival card into this system,\" he explained. Welcoming this initiative to merge passenger declarations, the Director-General of Customs and Excise, Lt. Gen. (Ret.) Djaka Budhi Utama, stated that the Ministry of Finance, through Customs, is ready to continue and improve synergy and collaboration with all relevant stakeholders so that this initiative can run optimally and provide real benefits to the community. \"This breakthrough is important in providing convenience for public services that focus not only on the smooth movement of people entering Indonesian territory but also on the speed of goods flow,\" he said. With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system. Regarding the integration of health declarations in the All Indonesia Application, the Ministry of Health can detect potential risks of infectious diseases that could cause outbreaks early on, allowing for a quick response at the country's entry points. This is an important part of the national early warning system built to maintain the health of the entire community. The All Indonesia declaration must also be filled out by passengers bringing animal, fish, plant, and derivative products. This is an important step to prevent the spread of pests and diseases. The single All Indonesia declaration makes it easier for passengers to report their belongings for quarantine inspection, making supervision more effective while ensuring national food security and economic protection are maintained. The passenger declaration form can be accessed via the website allindonesia.imigrasi.go.id or by downloading the application from the Google Play Store (Android) and App Store (iOS). \"We urge all international flight passengers, both Indonesian and foreign citizens, to report their arrival through this application. This application is not just about convenience; it's about protecting our country. Every piece of data you provide is key to ensuring the security, health, and integrity of our borders,\" concluded Yuldi. Kategori: Berita Utama Siaran Pers Berita Terkait Imigrasi Batam Perkuat Pelayanan dan Pengawasan Keimigrasian Sepanjang Agustus 2026 04 September 2026 Immigration Goes to School, Imigrasi Batam Kenalkan Dunia Keimigrasian dan Layanan Paspor kepada Siswa SMA Negeri 3 Batam 11 Agustus 2026 Semarak HUT ke-81 RI, Imigrasi Batam Gelar Layanan Paspor Merdeka 08 Agustus 2026 Imigrasi Batam Kembali Layani Permohonan Paspor di Akhir Pekan 01 Agustus 2026 Dukung Investasi di KEK Tanjung Sauh, Imigrasi Batam Uji Coba Layanan Keimigrasian melalui ULTIMA I'M SEZ 30 Juli 2026 Semua Berita PROFIL PRODUK HUKUM BERITA LAYANAN PUBLIK INFO PUBLIK Jl. Engku Putri No.3, Batam - 29461 Telepon : (0778) 462069 E-mail : kanim_batam@imigrasi.go.id Whatsapp : 081-1700-2019 Layanan Pengaduan : 081-1700-2019 IKUTI KAMI Copyright © 2023 - Kantor Imigrasi Kelas I Khusus TPI Batam",
+        "sha256": "800ba17cfcc6bc5532c326582cd4f2481d593631fb951b4d345e0c1a8beaf4b0",
+        "checked_at": "2026-09-10",
+        "capture_method": "HTTP 200 full body; stdlib HTMLParser visible-text extraction",
+        "http_body_sha256": "0a0dbf26d387c658457c71171f2ea04ee0ee0ead2383c2372a6c8ff68c1673b3"
+      },
+      {
+        "id": "selector",
+        "url": "https://evisa.imigrasi.go.id/web/visa-selection",
+        "text": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)\nType of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)\nCost\nRp500.000\nPerforming activities related to tourism, and visiting friends or family;\nHave sufficient living expenses while in Indonesia.\nPresent the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia.\nVisa Validity\n90 day\nYou are prohibited from selling goods or services.\nYou are prohibited from receiving rewards or wages from individuals or companies in Indonesia.\nHONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism\nType of Visa A1 - 30 Days\nUp to 30 days (not-extendable)\nCost\n-\nPerforming activities related to tourism, and visiting friends or family;\nHave sufficient living expenses while in Indonesia.\nPresent the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia.\nVisa Validity\n-\nYou are prohibited from selling goods or services.\nYou are prohibited from receiving rewards or wages from individuals or companies in Indonesia.",
+        "sha256": "6f98881cd62ceb179169d86f9f1918495e7b344ffa06fe40b8f032f7b25c9289",
+        "checked_at": "2026-09-10",
+        "capture_method": "Fresh Chrome accessible UI: selected exact country, General/Family/Social, Tourism/Family Visit/Transit, permission product, then Detail & Apply modal. No final Apply link clicked and no application submitted.",
+        "capture_transcription_sha256": "18888c1ac4503e72804402476991484a32727ca59df572d96ffe6092e40acb75",
+        "published_at": null
+      },
+      {
+        "id": "arrival",
+        "url": "https://evisa.imigrasi.go.id/",
+        "text": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/",
+        "sha256": "0b23b3e9125236657fc7e26c53c8914e2109a48dc7eeedc9c78b6d9c6246a9b1",
+        "checked_at": "2026-09-10",
+        "capture_method": "Fresh Chrome homepage visible announcement and destination link; HTTP request separately returned empty 202",
+        "published_at": null
+      }
+    ],
+    "routes": [
+      {
+        "cache_key": "HKG|HKG|IDN|tourism|default|unknown|v6",
+        "route": {
+          "passport_nationality": "HKG",
+          "lawful_country_of_residence": "HKG",
+          "destination_country": "IDN",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
+        "baseline_sha256": {
+          "route": "48de104aa078e60667e9bdb975856d4b2d8d26af3d39386807527de77ef337d3",
+          "raw_guidance": "258fde1056ca10f23077d39a4926ab05c6d1baba0ce7235d80bc7304e0110653",
+          "merged_guidance": "85236fe64395234ca683b31407579e7d6fff23b312af4e00bd1ac5b40b019dcf",
+          "source_provenance": "a4c6a955c6992cb3635049285064c773c8bb15f9443d8916fc25124f2f865efa",
+          "seed_entries": "16e364c10c436188c292db709d484dfcf18a2c51ca6c5c542d957de3bc4a10eb",
+          "operator_entries": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "changes": [
+          {
+            "field": "disposition",
+            "old_raw": "VISA_EXEMPT",
+            "old_merged": "VISA_EXEMPT",
+            "new": "VISA_EXEMPT",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+              },
+              {
+                "source_id": "bvk_voa",
+                "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                "quote": "Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru"
+              }
+            ]
+          },
+          {
+            "field": "requirement_detail",
+            "old_raw": "unconditional_visa_free",
+            "old_merged": "unconditional_visa_free",
+            "new": "unconditional_visa_free",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+              },
+              {
+                "source_id": "bvk_voa",
+                "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                "quote": "Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru"
+              }
+            ]
+          },
+          {
+            "field": "visa_category",
+            "old_raw": "Tourist",
+            "old_merged": null,
+            "new": "A1 - Visa Exemption Tourism",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+              },
+              {
+                "source_id": "bvk_voa",
+                "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                "quote": "Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru"
+              }
+            ]
+          },
+          {
+            "field": "permitted_stay",
+            "old_raw": "30 days",
+            "old_merged": "30 days",
+            "new": "Up to 30 days; not extendable",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Type of Visa A1 - 30 Days\nUp to 30 days (not-extendable)"
+              }
+            ]
+          },
+          {
+            "field": "permitted_stay_days",
+            "old_raw": 30,
+            "old_merged": 30,
+            "new": 30,
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Type of Visa A1 - 30 Days\nUp to 30 days (not-extendable)"
+              },
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+              }
+            ]
+          },
+          {
+            "field": "passport_validity",
+            "old_raw": "6 months beyond arrival",
+            "old_merged": "6 months beyond arrival",
+            "new": "Passport valid for at least 6 months upon arrival",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "passport_validity_requirement",
+            "old_raw": {
+              "kind": "months_after_arrival",
+              "months": 6
+            },
+            "old_merged": {
+              "kind": "months_after_arrival",
+              "months": 6
+            },
+            "new": {
+              "kind": "months_after_arrival",
+              "months": 6
+            },
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "required_documents",
+            "old_raw": [
+              "HKSAR ordinary passport valid at least 6 months",
+              "Return or onward travel ticket",
+              "Proof of accommodation",
+              "Proof of sufficient funds"
+            ],
+            "old_merged": [
+              "HKSAR ordinary passport valid at least 6 months",
+              "Return or onward travel ticket",
+              "Proof of accommodation",
+              "Proof of sufficient funds"
+            ],
+            "new": [
+              "Passport valid for at least 6 months upon arrival",
+              "Outbound ticket from Indonesia"
+            ],
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "onward_travel_evidence",
+            "old_raw": "Return or onward ticket required",
+            "old_merged": "Return or onward ticket required",
+            "new": "Present an outbound ticket from Indonesia upon arrival",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "financial_evidence",
+            "old_raw": "Proof of sufficient funds recommended",
+            "old_merged": "Proof of sufficient funds recommended",
+            "new": "Have sufficient living expenses while in Indonesia.",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Have sufficient living expenses while in Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "accommodation_evidence",
+            "old_raw": "Proof of accommodation recommended",
+            "old_merged": "Proof of accommodation recommended",
+            "new": null,
+            "evidence": [],
+            "unknown_reason": "The reviewed A1/B1 arrival-document list does not establish a mandatory hotel booking or host-address document. This review does not certify absence of every possible request."
+          },
+          {
+            "field": "arrival_card",
+            "old_raw": {
+              "required": true,
+              "name": "Electronic Customs Declaration (e-CD)",
+              "submission_window": "within 3 days before arrival"
+            },
+            "old_merged": {
+              "required": false,
+              "name": null,
+              "submission_window": null
+            },
+            "new": {
+              "required": true,
+              "name": "Indonesia arrival declarations (by mode of entry)",
+              "url": "https://beacukai.go.id/ecd",
+              "submission_window": "For air/sea arrivals, All Indonesia can be completed from 3 days before arrival or upon landing. Follow the official customs instructions for land arrivals.",
+              "notes": "Air/sea arrivals: All Indonesia at https://allindonesia.imigrasi.go.id/. Land arrivals: ECD Bea Cukai at https://ecd.beacukai.go.id/. The applicable declaration system depends on the crossing; All Indonesia integrates customs where implemented. These are arrival declarations, separate from visa eligibility."
+            },
+            "evidence": [
+              {
+                "source_id": "customs",
+                "source_url": "https://beacukai.go.id/ecd",
+                "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+              },
+              {
+                "source_id": "batam",
+                "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+              },
+              {
+                "source_id": "batam",
+                "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+              },
+              {
+                "source_id": "arrival",
+                "source_url": "https://evisa.imigrasi.go.id/",
+                "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+              }
+            ]
+          },
+          {
+            "field": "entry_requirements",
+            "old_raw": null,
+            "old_merged": null,
+            "new": "For air and sea arrivals, complete the All Indonesia arrival declaration at https://allindonesia.imigrasi.go.id/. It integrates immigration, customs, health and quarantine declarations and can be completed from 3 days before arrival or upon landing. For land arrivals, Indonesian Customs directs travellers to the electronic customs declaration at https://ecd.beacukai.go.id/. Follow the declaration system required at your crossing; All Indonesia replaces the separate customs declaration where that system is implemented. Arrival declarations do not replace the applicable visa or exemption.",
+            "evidence": [
+              {
+                "source_id": "customs",
+                "source_url": "https://beacukai.go.id/ecd",
+                "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+              },
+              {
+                "source_id": "batam",
+                "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+              },
+              {
+                "source_id": "batam",
+                "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+              },
+              {
+                "source_id": "arrival",
+                "source_url": "https://evisa.imigrasi.go.id/",
+                "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+              }
+            ]
+          }
+        ],
+        "product_changes": [],
+        "form_migration": {
+          "old": [
+            "Electronic Customs Declaration (e-CD)"
+          ],
+          "new": null,
+          "representation": "The reviewed entry_requirements and arrival_card retain mode-specific customs obligations; raw forms/history remain unchanged."
+        }
+      },
+      {
+        "cache_key": "USA|USA|IDN|tourism|default|unknown|v6",
+        "route": {
+          "passport_nationality": "USA",
+          "lawful_country_of_residence": "USA",
+          "destination_country": "IDN",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
+        "baseline_sha256": {
+          "route": "6914e706958671cdbc9528e57fbcd2e10d8bbfda09ca7d524b0a44934eb21c6d",
+          "raw_guidance": "9fa449e4898cf8fcb26801834e00202807de3fe78433feec822c97cd404dd4c4",
+          "merged_guidance": "60de5fef9452b6ffac2df45babf0c6fb0f55e4110114dbc594747b08012e0d9f",
+          "source_provenance": "26d66519e496377cd0548e23018033fd20d3d1810c9b73591c4a5df249039f26",
+          "seed_entries": "41599323e95b32178d96d15ce54152f3e31774093c17ba32aa3fa91239921d8b",
+          "operator_entries": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "changes": [
+          {
+            "field": "disposition",
+            "old_raw": "VISA_REQUIRED",
+            "old_merged": "VISA_ON_ARRIVAL",
+            "new": "VISA_ON_ARRIVAL",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+              },
+              {
+                "source_id": "bvk_voa",
+                "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+              }
+            ]
+          },
+          {
+            "field": "requirement_detail",
+            "old_raw": "evisa",
+            "old_merged": "evisa_on_arrival",
+            "new": "evisa_on_arrival",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+              },
+              {
+                "source_id": "bvk_voa",
+                "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+              }
+            ]
+          },
+          {
+            "field": "visa_category",
+            "old_raw": "Tourist e-VOA/VoA",
+            "old_merged": "Visa on Arrival (index B1)",
+            "new": "Visa on Arrival (index B1)",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+              },
+              {
+                "source_id": "bvk_voa",
+                "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+              }
+            ]
+          },
+          {
+            "field": "permitted_stay",
+            "old_raw": "30 days; extendable once for another 30 days",
+            "old_merged": "30 days on arrival, extendable once to a total of 60 days",
+            "new": "Up to 30 days; extendable once for another 30 days",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)"
+              }
+            ]
+          },
+          {
+            "field": "permitted_stay_days",
+            "old_raw": 30,
+            "old_merged": 30,
+            "new": 30,
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)"
+              },
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+              }
+            ]
+          },
+          {
+            "field": "passport_validity",
+            "old_raw": "Valid at least 6 months beyond arrival",
+            "old_merged": "Valid at least 6 months beyond arrival",
+            "new": "Passport valid for at least 6 months upon arrival",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "passport_validity_requirement",
+            "old_raw": {
+              "kind": "months_after_arrival",
+              "months": 6
+            },
+            "old_merged": {
+              "kind": "months_after_arrival",
+              "months": 6
+            },
+            "new": {
+              "kind": "months_after_arrival",
+              "months": 6
+            },
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "required_documents",
+            "old_raw": "Passport, passport photo, return/onward ticket, accommodation proof, proof of funds, email address",
+            "old_merged": null,
+            "new": [
+              "Passport valid for at least 6 months upon arrival",
+              "Outbound ticket from Indonesia"
+            ],
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "onward_travel_evidence",
+            "old_raw": "Confirmed return or onward travel ticket departing Indonesia within the permitted stay",
+            "old_merged": "Confirmed return or onward travel ticket departing Indonesia within the permitted stay",
+            "new": "Present an outbound ticket from Indonesia upon arrival",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "financial_evidence",
+            "old_raw": "Evidence of sufficient funds for the stay, e.g. recent bank statement or credit card",
+            "old_merged": "Evidence of sufficient funds for the stay, e.g. recent bank statement or credit card",
+            "new": "Have sufficient living expenses while in Indonesia.",
+            "evidence": [
+              {
+                "source_id": "selector",
+                "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                "quote": "Have sufficient living expenses while in Indonesia."
+              }
+            ]
+          },
+          {
+            "field": "accommodation_evidence",
+            "old_raw": "Proof of accommodation such as a hotel booking or host address in Indonesia",
+            "old_merged": "Proof of accommodation such as a hotel booking or host address in Indonesia",
+            "new": null,
+            "evidence": [],
+            "unknown_reason": "The reviewed A1/B1 arrival-document list does not establish a mandatory hotel booking or host-address document. This review does not certify absence of every possible request."
+          },
+          {
+            "field": "arrival_card",
+            "old_raw": {
+              "required": true,
+              "name": "Electronic Customs Declaration (e-CD)",
+              "submission_window": "Within 3 days before arrival or on arrival"
+            },
+            "old_merged": {
+              "required": false,
+              "name": null,
+              "submission_window": null
+            },
+            "new": {
+              "required": true,
+              "name": "Indonesia arrival declarations (by mode of entry)",
+              "url": "https://beacukai.go.id/ecd",
+              "submission_window": "For air/sea arrivals, All Indonesia can be completed from 3 days before arrival or upon landing. Follow the official customs instructions for land arrivals.",
+              "notes": "Air/sea arrivals: All Indonesia at https://allindonesia.imigrasi.go.id/. Land arrivals: ECD Bea Cukai at https://ecd.beacukai.go.id/. The applicable declaration system depends on the crossing; All Indonesia integrates customs where implemented. These are arrival declarations, separate from visa eligibility."
+            },
+            "evidence": [
+              {
+                "source_id": "customs",
+                "source_url": "https://beacukai.go.id/ecd",
+                "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+              },
+              {
+                "source_id": "batam",
+                "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+              },
+              {
+                "source_id": "batam",
+                "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+              },
+              {
+                "source_id": "arrival",
+                "source_url": "https://evisa.imigrasi.go.id/",
+                "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+              }
+            ]
+          },
+          {
+            "field": "entry_requirements",
+            "old_raw": null,
+            "old_merged": null,
+            "new": "For air and sea arrivals, complete the All Indonesia arrival declaration at https://allindonesia.imigrasi.go.id/. It integrates immigration, customs, health and quarantine declarations and can be completed from 3 days before arrival or upon landing. For land arrivals, Indonesian Customs directs travellers to the electronic customs declaration at https://ecd.beacukai.go.id/. Follow the declaration system required at your crossing; All Indonesia replaces the separate customs declaration where that system is implemented. Arrival declarations do not replace the applicable visa or exemption.",
+            "evidence": [
+              {
+                "source_id": "customs",
+                "source_url": "https://beacukai.go.id/ecd",
+                "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+              },
+              {
+                "source_id": "batam",
+                "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+              },
+              {
+                "source_id": "batam",
+                "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+              },
+              {
+                "source_id": "arrival",
+                "source_url": "https://evisa.imigrasi.go.id/",
+                "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+              }
+            ]
+          },
+          {
+            "field": "government_fee",
+            "old_raw": {
+              "amount": 500000,
+              "currency": "IDR"
+            },
+            "old_merged": {
+              "amount": 500000,
+              "currency": "IDR"
+            },
+            "new": {
+              "amount": 500000,
+              "currency": "IDR"
+            },
+            "evidence": [
+              {
+                "source_id": "jakarta_b1",
+                "source_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/visa-republik-indonesia",
+                "quote": "Biaya visa B1 Rp500.000"
+              }
+            ]
+          },
+          {
+            "field": "official_portal_url",
+            "old_raw": null,
+            "old_merged": "https://evisa.imigrasi.go.id/",
+            "new": "https://evisa.imigrasi.go.id/",
+            "evidence": [
+              {
+                "source_id": "jakarta_b1",
+                "source_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/visa-republik-indonesia",
+                "quote": "Bagi pemegang e-VoA (visa kunjungan saat kedatangan elektronik), perpanjangan izin tinggal dapat dilakukan secara online melalui evisa.imigrasi.go.id . Bagi pemegang VoA nonelektronik, perpanjangan izin tinggal dapat dilakukan di kantor imigrasi terdekat dari domisili anda."
+              }
+            ]
+          }
+        ],
+        "product_changes": [
+          {
+            "type": "e-VOA (bought online before departure)",
+            "changes": {
+              "disposition": {
+                "new": "VISA_ON_ARRIVAL",
+                "evidence": [
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+                  },
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "requirement_detail": {
+                "new": "evisa_on_arrival",
+                "evidence": [
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+                  },
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "max_stay_days": {
+                "new": 30,
+                "evidence": [
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)"
+                  },
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+                  }
+                ]
+              },
+              "fee": {
+                "new": {
+                  "amount": 500000,
+                  "currency": "IDR"
+                },
+                "evidence": [
+                  {
+                    "source_id": "jakarta_b1",
+                    "source_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/visa-republik-indonesia",
+                    "quote": "Biaya visa B1 Rp500.000"
+                  }
+                ]
+              },
+              "notes": {
+                "new": "Extendable once for a further 30 days.",
+                "evidence": [
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)"
+                  }
+                ]
+              },
+              "entry_requirements": {
+                "new": "For air and sea arrivals, complete the All Indonesia arrival declaration at https://allindonesia.imigrasi.go.id/. It integrates immigration, customs, health and quarantine declarations and can be completed from 3 days before arrival or upon landing. For land arrivals, Indonesian Customs directs travellers to the electronic customs declaration at https://ecd.beacukai.go.id/. Follow the declaration system required at your crossing; All Indonesia replaces the separate customs declaration where that system is implemented. Arrival declarations do not replace the applicable visa or exemption.",
+                "evidence": [
+                  {
+                    "source_id": "customs",
+                    "source_url": "https://beacukai.go.id/ecd",
+                    "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+                  },
+                  {
+                    "source_id": "batam",
+                    "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                    "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+                  },
+                  {
+                    "source_id": "batam",
+                    "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                    "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+                  },
+                  {
+                    "source_id": "arrival",
+                    "source_url": "https://evisa.imigrasi.go.id/",
+                    "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+                  }
+                ]
+              },
+              "validity": {
+                "new": "90 days to use",
+                "evidence": [
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "Visa Validity\n90 day"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "Visa on Arrival (bought at the airport)",
+            "changes": {
+              "disposition": {
+                "new": "VISA_ON_ARRIVAL",
+                "evidence": [
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+                  },
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "requirement_detail": {
+                "new": "evisa_on_arrival",
+                "evidence": [
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+                  },
+                  {
+                    "source_id": "bvk_voa",
+                    "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+                    "quote": "Permohonan Visa Kunjungan Saat Kedatangan (VoA) diajukan oleh Orang Asing saat kedatangan di Tempat Pemeriksaan Imigrasi (TPI) tertentu. Biaya Visa Kunjungan Saat Kedatangan sebesar Rp 500.000,- dibayarkan pada konter bank yang ada pada Tempat Pemeriksaan Imigrasi."
+                  }
+                ]
+              },
+              "max_stay_days": {
+                "new": 30,
+                "evidence": [
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)"
+                  },
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "UNITED STATES OF AMERICA\nTourism, Family Visit, and Transit\nB1 - Tourist (Visa On Arrival)"
+                  }
+                ]
+              },
+              "fee": {
+                "new": {
+                  "amount": 500000,
+                  "currency": "IDR"
+                },
+                "evidence": [
+                  {
+                    "source_id": "jakarta_b1",
+                    "source_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/visa-republik-indonesia",
+                    "quote": "Biaya visa B1 Rp500.000"
+                  }
+                ]
+              },
+              "notes": {
+                "new": "Extendable once for a further 30 days.",
+                "evidence": [
+                  {
+                    "source_id": "selector",
+                    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+                    "quote": "Type of Visa B1 - 30 Days\nUp to 30 days (extendable for another 30 days)"
+                  }
+                ]
+              },
+              "entry_requirements": {
+                "new": "For air and sea arrivals, complete the All Indonesia arrival declaration at https://allindonesia.imigrasi.go.id/. It integrates immigration, customs, health and quarantine declarations and can be completed from 3 days before arrival or upon landing. For land arrivals, Indonesian Customs directs travellers to the electronic customs declaration at https://ecd.beacukai.go.id/. Follow the declaration system required at your crossing; All Indonesia replaces the separate customs declaration where that system is implemented. Arrival declarations do not replace the applicable visa or exemption.",
+                "evidence": [
+                  {
+                    "source_id": "customs",
+                    "source_url": "https://beacukai.go.id/ecd",
+                    "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+                  },
+                  {
+                    "source_id": "batam",
+                    "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                    "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+                  },
+                  {
+                    "source_id": "batam",
+                    "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+                    "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+                  },
+                  {
+                    "source_id": "arrival",
+                    "source_url": "https://evisa.imigrasi.go.id/",
+                    "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "form_migration": null
+      },
+      {
+        "cache_key": "USA|USA|TWN|tourism|default|unknown|v6",
+        "route": {
+          "passport_nationality": "USA",
+          "lawful_country_of_residence": "USA",
+          "destination_country": "TWN",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
+        "baseline_sha256": {
+          "route": "37460670568b83c529f28334b66525a345dbc1d9edaca2adee5f2e62cab96616",
+          "raw_guidance": "1dea642b174435201b990091cf2113fbd0add7589596384d6de2be5909fd20ca",
+          "merged_guidance": "0bfe6288c6e0302be48b7e34a13541e43204b29d6a42248e9f883398d9cbe17b",
+          "source_provenance": "2e99a2bbda724aa233aec8336b1f06311a5cba73a5af32d7100db4ad12cc5efd",
+          "seed_entries": "31e8d440563d211d23a79d4f7fb4bf8609bac88a3d0cc0929c736e3a9dc038c8",
+          "operator_entries": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "changes": [
+          {
+            "field": "disposition",
+            "old_raw": "VISA_EXEMPT",
+            "old_merged": "VISA_EXEMPT",
+            "new": "VISA_EXEMPT",
+            "evidence": [
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+              },
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+              }
+            ]
+          },
+          {
+            "field": "requirement_detail",
+            "old_raw": "unconditional_visa_free",
+            "old_merged": "unconditional_visa_free",
+            "new": "unconditional_visa_free",
+            "evidence": [
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+              },
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+              }
+            ]
+          },
+          {
+            "field": "visa_category",
+            "old_raw": "Tourist (visa-exempt)",
+            "old_merged": null,
+            "new": "Visa-exempt visitor entry",
+            "evidence": [
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+              },
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+              }
+            ]
+          },
+          {
+            "field": "permitted_stay",
+            "old_raw": "90 days",
+            "old_merged": "90 days",
+            "new": "Up to 90 days, starting the day after arrival; not extendable under this ordinary US visitor exemption",
+            "evidence": [
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+              },
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "The duration of stay starts from the day after arrival and is not extendable. Foreign visitors must depart by the end of the said duration."
+              }
+            ]
+          },
+          {
+            "field": "permitted_stay_days",
+            "old_raw": 90,
+            "old_merged": 90,
+            "new": 90,
+            "evidence": [
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*."
+              }
+            ]
+          },
+          {
+            "field": "passport_validity",
+            "old_raw": "6 months beyond date of entry",
+            "old_merged": "6 months beyond date of entry",
+            "new": "US passport valid for the intended period of stay",
+            "evidence": [
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+              }
+            ]
+          },
+          {
+            "field": "passport_validity_requirement",
+            "old_raw": {
+              "kind": "months_after_arrival",
+              "months": 6
+            },
+            "old_merged": {
+              "kind": "months_after_arrival",
+              "months": 6
+            },
+            "new": {
+              "kind": "valid_through_departure",
+              "months": 0
+            },
+            "evidence": [
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+              }
+            ]
+          },
+          {
+            "field": "required_documents",
+            "old_raw": [
+              "Valid U.S. ordinary passport",
+              "Return or onward ticket",
+              "Proof of sufficient funds",
+              "Proof of accommodation if requested"
+            ],
+            "old_merged": [
+              "Valid U.S. ordinary passport",
+              "Return or onward ticket",
+              "Proof of sufficient funds",
+              "Proof of accommodation if requested"
+            ],
+            "new": [
+              "US passport valid for the intended period of stay",
+              "Confirmed return or onward air/sea ticket, next-destination visa where required, and a confirmed departure-flight seat"
+            ],
+            "evidence": [
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "USA nationals who possess a passport, including an emergency passports, valid for the intended period of stay are eligible for visa-exempt entry."
+              },
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "A confirmed return air/sea ticket or air/sea ticket and a visa for the next destination, and a confirmed seat reservation for departure flight."
+              }
+            ]
+          },
+          {
+            "field": "onward_travel_evidence",
+            "old_raw": "Required",
+            "old_merged": "Required",
+            "new": "Confirmed return or onward air/sea ticket; hold a visa for the next destination where required and a confirmed departure-flight seat.",
+            "evidence": [
+              {
+                "source_id": "boca",
+                "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                "quote": "A confirmed return air/sea ticket or air/sea ticket and a visa for the next destination, and a confirmed seat reservation for departure flight."
+              }
+            ]
+          },
+          {
+            "field": "financial_evidence",
+            "old_raw": "Sufficient funds required",
+            "old_merged": "Sufficient funds required",
+            "new": null,
+            "evidence": [],
+            "unknown_reason": "The BOCA page states additional funds documents for Brunei, Philippines and Thailand, not the US ordinary-passport exemption; no universal US funds-document requirement was established in this review."
+          },
+          {
+            "field": "accommodation_evidence",
+            "old_raw": "May be requested",
+            "old_merged": "May be requested",
+            "new": null,
+            "evidence": [],
+            "unknown_reason": "The BOCA page states additional hotel/host documents for Brunei, Philippines and Thailand, not the US ordinary-passport exemption; no universal US accommodation-document requirement was established in this review."
+          }
+        ],
+        "product_changes": [],
+        "form_migration": null
+      }
+    ]
+  },
+  "routes": [
+    {
+      "cache_key": "HKG|HKG|IDN|tourism|default|unknown|v6",
+      "baseline": {
+        "route": {
+          "passport_nationality": "HKG",
+          "lawful_country_of_residence": "HKG",
+          "destination_country": "IDN",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
+        "raw_guidance": {
+          "disposition": "VISA_EXEMPT",
+          "visa_category": "Tourist",
+          "permitted_stay": "30 days",
+          "passport_validity": "6 months beyond arrival",
+          "required_documents": [
+            "HKSAR ordinary passport valid at least 6 months",
+            "Return or onward travel ticket",
+            "Proof of accommodation",
+            "Proof of sufficient funds"
+          ],
+          "application_channel": "not_required",
+          "government_fee": {
+            "amount": null,
+            "currency": null
+          },
+          "processing_time": "Not applicable",
+          "forms": [
+            "Electronic Customs Declaration (e-CD)"
+          ],
+          "official_portal_url": null,
+          "photo_requirements": null,
+          "biometrics_required": false,
+          "interview_required": false,
+          "appointment_required": false,
+          "account_registration_steps": [],
+          "payment_process": [],
+          "submission_process": [
+            "No advance submission; present documents at Indonesian immigration on arrival"
+          ],
+          "onward_travel_evidence": "Return or onward ticket required",
+          "accommodation_evidence": "Proof of accommodation recommended",
+          "financial_evidence": "Proof of sufficient funds recommended",
+          "insurance_required": false,
+          "exceptions": [
+            "Visa-free entry is non-extendable and cannot be converted to another visa type",
+            "Stays over 30 days require a Visa on Arrival, e-VOA or advance visit visa",
+            "Passport type must be HKSAR ordinary; BN(O) and other travel documents may have different rules"
+          ],
+          "uncertainty": [
+            {
+              "field": "source_url",
+              "reason": "No specific official page URL was provided; the visa-free policy for HKSAR passport holders is published by Indonesian immigration but a single source URL was not verified."
+            },
+            {
+              "field": "visa_products[2].fee",
+              "reason": "Advance B211A visit visa fee for HKSAR passport holders was not confirmed."
+            }
+          ],
+          "confidence": "high",
+          "permitted_stay_days": 30,
+          "passport_validity_requirement": {
+            "kind": "months_after_arrival",
+            "months": 6
+          },
+          "arrival_card": {
+            "required": true,
+            "name": "Electronic Customs Declaration (e-CD)",
+            "submission_window": "within 3 days before arrival"
+          },
+          "health_requirements": [
+            {
+              "name": "Yellow fever vaccination certificate",
+              "applicability": "conditional",
+              "trigger_countries": [],
+              "trigger": "Arrival from, or transit over 12 hours in, a yellow-fever endemic country within the past 6 days",
+              "question": "Have you been in a yellow-fever endemic country within the past 6 days?"
+            }
+          ],
+          "route_workflow_type": "visa_exempt_preparation",
+          "visa_products": [
+            {
+              "type": "Visa-exempt tourist entry",
+              "entry": "single",
+              "validity": "30 days",
+              "max_stay_days": 30,
+              "fee": {
+                "amount": null,
+                "currency": null
+              },
+              "notes": "Non-extendable; return/onward ticket required"
+            },
+            {
+              "type": "Visa on Arrival / e-VOA tourist",
+              "entry": "single",
+              "validity": "30 days",
+              "max_stay_days": 30,
+              "fee": {
+                "amount": 500000,
+                "currency": "IDR"
+              },
+              "notes": "Fee IDR 500,000; extendable once for another 30 days"
+            },
+            {
+              "type": "B211A Visit Visa (tourism/social)",
+              "entry": "single",
+              "validity": "60 days (90-day entry validity)",
+              "max_stay_days": 60,
+              "fee": {
+                "amount": null,
+                "currency": null
+              },
+              "notes": "Apply in advance; extendable; fee varies by nationality"
+            }
+          ],
+          "application_channel_detail": "No application needed; eligible travellers are processed on arrival at Indonesian immigration.",
+          "requirement_detail": "unconditional_visa_free",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          }
+        },
+        "merged_guidance": {
+          "disposition": "VISA_EXEMPT",
+          "permitted_stay": "30 days",
+          "passport_validity": "6 months beyond arrival",
+          "required_documents": [
+            "HKSAR ordinary passport valid at least 6 months",
+            "Return or onward travel ticket",
+            "Proof of accommodation",
+            "Proof of sufficient funds"
+          ],
+          "forms": [
+            "Electronic Customs Declaration (e-CD)"
+          ],
+          "photo_requirements": null,
+          "biometrics_required": false,
+          "interview_required": false,
+          "appointment_required": false,
+          "onward_travel_evidence": "Return or onward ticket required",
+          "accommodation_evidence": "Proof of accommodation recommended",
+          "financial_evidence": "Proof of sufficient funds recommended",
+          "insurance_required": false,
+          "exceptions": [
+            "Visa-free entry is non-extendable and cannot be converted to another visa type",
+            "Stays over 30 days require a Visa on Arrival, e-VOA or advance visit visa",
+            "Passport type must be HKSAR ordinary; BN(O) and other travel documents may have different rules"
+          ],
+          "uncertainty": [
+            {
+              "field": "source_url",
+              "reason": "No specific official page URL was provided; the visa-free policy for HKSAR passport holders is published by Indonesian immigration but a single source URL was not verified."
+            },
+            {
+              "field": "visa_products[2].fee",
+              "reason": "Advance B211A visit visa fee for HKSAR passport holders was not confirmed."
+            }
+          ],
+          "confidence": "high",
+          "permitted_stay_days": 30,
+          "passport_validity_requirement": {
+            "kind": "months_after_arrival",
+            "months": 6
+          },
+          "arrival_card": {
+            "required": false,
+            "name": null,
+            "submission_window": null
+          },
+          "health_requirements": [
+            {
+              "name": "Yellow fever vaccination certificate",
+              "applicability": "conditional",
+              "trigger_countries": [],
+              "trigger": "Arrival from, or transit over 12 hours in, a yellow-fever endemic country within the past 6 days",
+              "question": "Have you been in a yellow-fever endemic country within the past 6 days?"
+            }
+          ],
+          "requirement_detail": "unconditional_visa_free",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          }
+        },
+        "source_provenance": {
+          "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Source recorded: HKSAR passport holders are on Indonesia's visa-exempt list.",
+          "fields": [
+            "arrival_card"
+          ],
+          "field_provenance": {
+            "arrival_card": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/",
+              "verified_at": "2026-08-22",
+              "verified_by": "Ellis source audit",
+              "verifier": "ai",
+              "note": "Source recorded: HKSAR passport holders are on Indonesia's visa-exempt list."
+            }
+          }
+        },
+        "seed_entries": [
+          {
+            "route": {
+              "nationality": "HKG",
+              "destination": "IDN",
+              "travel_purpose": "tourism"
+            },
+            "verified_at": "2026-08-22",
+            "verified_by": "Ellis source audit",
+            "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/",
+            "note": "Source recorded: HKSAR passport holders are on Indonesia's visa-exempt list.",
+            "fields": {
+              "arrival_card": {
+                "required": false,
+                "name": null,
+                "submission_window": null
+              }
+            }
+          }
+        ],
+        "operator_entries": []
+      }
+    },
+    {
+      "cache_key": "USA|USA|IDN|tourism|default|unknown|v6",
+      "baseline": {
+        "route": {
+          "passport_nationality": "USA",
+          "lawful_country_of_residence": "USA",
+          "destination_country": "IDN",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
+        "raw_guidance": {
+          "disposition": "VISA_REQUIRED",
+          "visa_category": "Tourist e-VOA/VoA",
+          "permitted_stay": "30 days; extendable once for another 30 days",
+          "passport_validity": "Valid at least 6 months beyond arrival",
+          "required_documents": "Passport, passport photo, return/onward ticket, accommodation proof, proof of funds, email address",
+          "application_channel": "online_portal",
+          "government_fee": {
+            "amount": 500000,
+            "currency": "IDR"
+          },
+          "processing_time": "2–5 business days",
+          "forms": [
+            "Online e-VOA/VoA tourist application form completed on the official Indonesian e-visa portal"
+          ],
+          "official_portal_url": null,
+          "photo_requirements": "Recent colour digital passport-style photo with a plain white background; exact dimensions specified by the portal",
+          "biometrics_required": false,
+          "interview_required": false,
+          "appointment_required": false,
+          "account_registration_steps": [
+            "Create a user account on the official Indonesian e-visa/Molina portal using a valid email address"
+          ],
+          "payment_process": [
+            "Pay the IDR 500,000 government fee online via credit/debit card or other accepted method before the e-VOA is issued"
+          ],
+          "submission_process": [
+            "Complete the online application form",
+            "Upload passport biodata page and digital photo",
+            "Pay the fee online",
+            "Download and print the approved e-VOA",
+            "Present passport and printed e-VOA at Indonesian immigration on arrival"
+          ],
+          "onward_travel_evidence": "Confirmed return or onward travel ticket departing Indonesia within the permitted stay",
+          "accommodation_evidence": "Proof of accommodation such as a hotel booking or host address in Indonesia",
+          "financial_evidence": "Evidence of sufficient funds for the stay, e.g. recent bank statement or credit card",
+          "insurance_required": false,
+          "exceptions": [
+            "Stay may be extended once for up to 30 days at an immigration office before the initial 30-day period expires",
+            "Visa on Arrival is an alternative at eligible ports of entry for the same IDR 500,000 fee"
+          ],
+          "uncertainty": [
+            {
+              "field": "disposition/permitted_stay/government_fee",
+              "reason": "Indonesia has repeatedly changed its visa-free, VoA and e-VOA policies for U.S. travelers; confirm the current rule before September 2026 travel"
+            },
+            {
+              "field": "official_portal_url",
+              "reason": "Exact current e-VOA application portal URL may have been updated"
+            }
+          ],
+          "confidence": "low",
+          "permitted_stay_days": 30,
+          "passport_validity_requirement": {
+            "kind": "months_after_arrival",
+            "months": 6
+          },
+          "arrival_card": {
+            "required": true,
+            "name": "Electronic Customs Declaration (e-CD)",
+            "submission_window": "Within 3 days before arrival or on arrival"
+          },
+          "health_requirements": [],
+          "route_workflow_type": "evisa_portal",
+          "visa_products": [
+            {
+              "type": "e-VOA (Electronic Visa on Arrival) - tourist",
+              "entry": "single",
+              "validity": "30 days",
+              "max_stay_days": 30,
+              "fee": {
+                "amount": 500000,
+                "currency": "IDR"
+              },
+              "notes": "Apply online before travel; extendable once for another 30 days at an immigration office"
+            },
+            {
+              "type": "VoA (Visa on Arrival) - tourist",
+              "entry": "single",
+              "validity": "30 days",
+              "max_stay_days": 30,
+              "fee": {
+                "amount": 500000,
+                "currency": "IDR"
+              },
+              "notes": "Available at designated Indonesian airports/seaports; extendable once for another 30 days"
+            }
+          ],
+          "application_channel_detail": "U.S. tourists may apply in advance through Indonesia's official e-VOA/e-Visa portal. A Visa on Arrival is also available at designated Indonesian immigration checkpoints.",
+          "source_url": "https://www.imigrasi.go.id/en/e-visa/",
+          "requirement_detail": "evisa",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          }
+        },
+        "merged_guidance": {
+          "disposition": "VISA_ON_ARRIVAL",
+          "visa_category": "Visa on Arrival (index B1)",
+          "permitted_stay": "30 days on arrival, extendable once to a total of 60 days",
+          "passport_validity": "Valid at least 6 months beyond arrival",
+          "application_channel": "online_portal",
+          "government_fee": {
+            "amount": 500000,
+            "currency": "IDR"
+          },
+          "official_portal_url": "https://evisa.imigrasi.go.id/",
+          "submission_process": [
+            "Buy the e-VOA online before departure, or pay at the visa-on-arrival counter",
+            "Present the e-VOA or receipt at immigration on arrival",
+            "Extend once in country if staying beyond 30 days"
+          ],
+          "onward_travel_evidence": "Confirmed return or onward travel ticket departing Indonesia within the permitted stay",
+          "accommodation_evidence": "Proof of accommodation such as a hotel booking or host address in Indonesia",
+          "financial_evidence": "Evidence of sufficient funds for the stay, e.g. recent bank statement or credit card",
+          "insurance_required": false,
+          "uncertainty": [
+            {
+              "field": "disposition/permitted_stay/government_fee",
+              "reason": "Indonesia has repeatedly changed its visa-free, VoA and e-VOA policies for U.S. travelers; confirm the current rule before September 2026 travel"
+            },
+            {
+              "field": "official_portal_url",
+              "reason": "Exact current e-VOA application portal URL may have been updated"
+            }
+          ],
+          "confidence": "low",
+          "permitted_stay_days": 30,
+          "passport_validity_requirement": {
+            "kind": "months_after_arrival",
+            "months": 6
+          },
+          "arrival_card": {
+            "required": false,
+            "name": null,
+            "submission_window": null
+          },
+          "health_requirements": [],
+          "visa_products": [
+            {
+              "type": "e-VOA (bought online before departure)",
+              "entry": "single",
+              "validity": "90 days to use",
+              "max_stay_days": 30,
+              "fee": {
+                "amount": 500000,
+                "currency": "IDR"
+              },
+              "notes": "Extendable once for a further 30 days."
+            },
+            {
+              "type": "Visa on Arrival (bought at the airport)",
+              "entry": "single",
+              "validity": "on arrival",
+              "max_stay_days": 30,
+              "fee": {
+                "amount": 500000,
+                "currency": "IDR"
+              },
+              "notes": "Extendable once for a further 30 days."
+            }
+          ],
+          "application_channel_detail": "Buy the e-VOA online before departure, or the visa on arrival at the airport counter. There is no visa-free entry for US nationals.",
+          "requirement_detail": "evisa_on_arrival",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          },
+          "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival"
+        },
+        "source_provenance": {
+          "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (adjudication)",
+          "verifier": "ai",
+          "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong.",
+          "fields": [
+            "application_channel",
+            "application_channel_detail",
+            "arrival_card",
+            "disposition",
+            "government_fee",
+            "official_portal_url",
+            "permitted_stay",
+            "permitted_stay_days",
+            "requirement_detail",
+            "submission_process",
+            "visa_category",
+            "visa_products"
+          ],
+          "field_provenance": {
+            "disposition": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "requirement_detail": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "visa_category": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "permitted_stay": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "permitted_stay_days": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "application_channel": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "application_channel_detail": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "official_portal_url": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "government_fee": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "visa_products": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "submission_process": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            },
+            "arrival_card": {
+              "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+              "verified_at": "2026-08-28",
+              "verified_by": "Ellis source audit (adjudication)",
+              "verifier": "ai",
+              "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong."
+            }
+          }
+        },
+        "seed_entries": [
+          {
+            "route": {
+              "nationality": "USA",
+              "destination": "IDN",
+              "travel_purpose": "tourism"
+            },
+            "verified_at": "2026-08-28",
+            "verified_by": "Ellis source audit (adjudication)",
+            "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+            "note": "This is exactly the page Ellis cites, and 'Amerika Serikat' (United States) is on it. The page's active tab is the VoA subject list (the other tabs are Bebas Visa Kunjungan and Calling Visa). US nationals buy the B1 VoA at the border for IDR 500,000, or pre-buy the identical e-VOA online. VISA_REQUIRED is wrong.",
+            "fields": {
+              "disposition": "VISA_ON_ARRIVAL",
+              "requirement_detail": "evisa_on_arrival",
+              "visa_category": "Visa on Arrival (index B1)",
+              "permitted_stay": "30 days on arrival, extendable once to a total of 60 days",
+              "permitted_stay_days": 30,
+              "application_channel": "online_portal",
+              "application_channel_detail": "Buy the e-VOA online before departure, or the visa on arrival at the airport counter. There is no visa-free entry for US nationals.",
+              "official_portal_url": "https://evisa.imigrasi.go.id/",
+              "government_fee": {
+                "amount": 500000,
+                "currency": "IDR"
+              },
+              "visa_products": [
+                {
+                  "type": "e-VOA (bought online before departure)",
+                  "entry": "single",
+                  "validity": "90 days to use",
+                  "max_stay_days": 30,
+                  "fee": {
+                    "amount": 500000,
+                    "currency": "IDR"
+                  },
+                  "notes": "Extendable once for a further 30 days."
+                },
+                {
+                  "type": "Visa on Arrival (bought at the airport)",
+                  "entry": "single",
+                  "validity": "on arrival",
+                  "max_stay_days": 30,
+                  "fee": {
+                    "amount": 500000,
+                    "currency": "IDR"
+                  },
+                  "notes": "Extendable once for a further 30 days."
+                }
+              ],
+              "submission_process": [
+                "Buy the e-VOA online before departure, or pay at the visa-on-arrival counter",
+                "Present the e-VOA or receipt at immigration on arrival",
+                "Extend once in country if staying beyond 30 days"
+              ],
+              "arrival_card": {
+                "required": false,
+                "name": null,
+                "submission_window": null
+              }
+            }
+          }
+        ],
+        "operator_entries": []
+      }
+    },
+    {
+      "cache_key": "USA|USA|TWN|tourism|default|unknown|v6",
+      "baseline": {
+        "route": {
+          "passport_nationality": "USA",
+          "lawful_country_of_residence": "USA",
+          "destination_country": "TWN",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null
+        },
+        "raw_guidance": {
+          "disposition": "VISA_EXEMPT",
+          "visa_category": "Tourist (visa-exempt)",
+          "permitted_stay": "90 days",
+          "passport_validity": "6 months beyond date of entry",
+          "required_documents": [
+            "Valid U.S. ordinary passport",
+            "Return or onward ticket",
+            "Proof of sufficient funds",
+            "Proof of accommodation if requested"
+          ],
+          "application_channel": "not_required",
+          "government_fee": {
+            "amount": null,
+            "currency": null
+          },
+          "processing_time": "Not applicable",
+          "forms": [],
+          "official_portal_url": null,
+          "photo_requirements": null,
+          "biometrics_required": false,
+          "interview_required": false,
+          "appointment_required": false,
+          "account_registration_steps": [],
+          "payment_process": [],
+          "submission_process": [
+            "No advance visa submission required",
+            "Present passport at Taiwan immigration"
+          ],
+          "onward_travel_evidence": "Required",
+          "accommodation_evidence": "May be requested",
+          "financial_evidence": "Sufficient funds required",
+          "insurance_required": false,
+          "exceptions": [
+            "Stays over 90 days require a visa or residence permit",
+            "Immigration may collect fingerprints and photo at entry",
+            "Entry is at discretion of immigration officials"
+          ],
+          "uncertainty": [
+            {
+              "field": "visa_products.visitor_visa_fee_and_variants",
+              "reason": "Official consular fees and all visitor-visa validity options for U.S. nationals applying for tourism were not verified from the cited source."
+            },
+            {
+              "field": "arrival_card.submission_window",
+              "reason": "Exact online submission window and whether online filing is mandatory or optional were not confirmed from the cited source."
+            }
+          ],
+          "confidence": "high",
+          "permitted_stay_days": 90,
+          "passport_validity_requirement": {
+            "kind": "months_after_arrival",
+            "months": 6
+          },
+          "arrival_card": {
+            "required": true,
+            "name": "Arrival/landing card (paper or online)",
+            "submission_window": "At immigration or online before arrival"
+          },
+          "health_requirements": [],
+          "route_workflow_type": "visa_exempt_preparation",
+          "visa_products": [
+            {
+              "type": "Visa-exempt tourist entry",
+              "entry": "single",
+              "validity": "90 days per entry",
+              "max_stay_days": 90,
+              "fee": {
+                "amount": null,
+                "currency": null
+              },
+              "notes": "Ordinary U.S. passport; 6-month validity; onward ticket required"
+            },
+            {
+              "type": "Visitor Visa (paper)",
+              "entry": "single",
+              "validity": "3 months from issue",
+              "max_stay_days": 90,
+              "fee": {
+                "amount": null,
+                "currency": null
+              },
+              "notes": "For tourism when visa-exempt criteria are not met or a longer stay is needed"
+            }
+          ],
+          "application_channel_detail": "No visa application is needed; U.S. citizens travel visa-exempt and present a passport at a Taiwan port of entry.",
+          "source_url": "https://www.boca.gov.tw/np-137-2.html",
+          "requirement_detail": "unconditional_visa_free",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          }
+        },
+        "merged_guidance": {
+          "disposition": "VISA_EXEMPT",
+          "permitted_stay": "90 days",
+          "passport_validity": "6 months beyond date of entry",
+          "required_documents": [
+            "Valid U.S. ordinary passport",
+            "Return or onward ticket",
+            "Proof of sufficient funds",
+            "Proof of accommodation if requested"
+          ],
+          "forms": [],
+          "official_portal_url": "https://twac.immigration.gov.tw/",
+          "photo_requirements": null,
+          "biometrics_required": false,
+          "interview_required": false,
+          "appointment_required": false,
+          "onward_travel_evidence": "Required",
+          "accommodation_evidence": "May be requested",
+          "financial_evidence": "Sufficient funds required",
+          "insurance_required": false,
+          "exceptions": [
+            "Stays over 90 days require a visa or residence permit",
+            "Immigration may collect fingerprints and photo at entry",
+            "Entry is at discretion of immigration officials"
+          ],
+          "uncertainty": [
+            {
+              "field": "visa_products.visitor_visa_fee_and_variants",
+              "reason": "Official consular fees and all visitor-visa validity options for U.S. nationals applying for tourism were not verified from the cited source."
+            },
+            {
+              "field": "arrival_card.submission_window",
+              "reason": "Exact online submission window and whether online filing is mandatory or optional were not confirmed from the cited source."
+            }
+          ],
+          "confidence": "high",
+          "permitted_stay_days": 90,
+          "passport_validity_requirement": {
+            "kind": "months_after_arrival",
+            "months": 6
+          },
+          "arrival_card": {
+            "required": true,
+            "name": "Taiwan Arrival Card (TWAC)",
+            "url": "https://twac.immigration.gov.tw/",
+            "fee_amount": 0,
+            "fee_currency": null,
+            "submission_window": "Within 7 days before arrival",
+            "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+          },
+          "health_requirements": [],
+          "source_url": "https://www.boca.gov.tw/np-137-2.html",
+          "requirement_detail": "unconditional_visa_free",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          }
+        },
+        "source_provenance": {
+          "source_url": "https://www.immigration.gov.tw/",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Visa-free is correct; the online arrival card is the pre-arrival step and was unrecorded.",
+          "fields": [
+            "arrival_card",
+            "official_portal_url"
+          ],
+          "field_provenance": {
+            "arrival_card": {
+              "source_url": "https://twac.immigration.gov.tw/",
+              "verified_at": "2026-09-09",
+              "verified_by": "",
+              "verifier": "ai",
+              "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified.",
+              "source_id": "twac",
+              "supporting_sources": [
+                {
+                  "id": "twac",
+                  "url": "https://twac.immigration.gov.tw/"
+                }
+              ],
+              "additional_quotes": [
+                "Submission is Free.",
+                "Complete and submit within 7 days before arrival."
+              ],
+              "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\"."
+            },
+            "official_portal_url": {
+              "source_url": "https://www.immigration.gov.tw/",
+              "verified_at": "2026-08-22",
+              "verified_by": "Ellis source audit",
+              "verifier": "ai",
+              "note": "Visa-free is correct; the online arrival card is the pre-arrival step and was unrecorded."
+            }
+          }
+        },
+        "seed_entries": [
+          {
+            "route": {
+              "nationality": "USA",
+              "destination": "TWN",
+              "travel_purpose": "tourism"
+            },
+            "verified_at": "2026-08-22",
+            "verified_by": "Ellis source audit",
+            "source_url": "https://www.immigration.gov.tw/",
+            "note": "Visa-free is correct; the online arrival card is the pre-arrival step and was unrecorded.",
+            "fields": {
+              "arrival_card": {
+                "required": true,
+                "name": "Taiwan Arrival Card (TWAC)",
+                "url": "https://twac.immigration.gov.tw/",
+                "fee_amount": 0,
+                "fee_currency": null,
+                "submission_window": "Within 7 days before arrival",
+                "notes": "Foreign nationals without an Alien Resident Certificate, Resident Visa or Diplomatic ID card must submit. Holders of those documents are excluded from this filing category. Submission is free; this arrival declaration is not a visa or entry permit."
+              },
+              "official_portal_url": "https://twac.immigration.gov.tw/"
+            },
+            "field_provenance": {
+              "arrival_card": {
+                "verifier": "ai",
+                "verified_at": "2026-09-09",
+                "source_id": "twac",
+                "source_url": "https://twac.immigration.gov.tw/",
+                "quote": "Foreign nationals without \"Alien Resident Certificate\", \"Resident Visa\", or \"Diplomatic ID card\".",
+                "additional_quotes": [
+                  "Submission is Free.",
+                  "Complete and submit within 7 days before arrival."
+                ],
+                "supporting_sources": [
+                  {
+                    "id": "twac",
+                    "url": "https://twac.immigration.gov.tw/"
+                  }
+                ],
+                "note": "Fresh official arrival-card page read for this field only. Resident-document and permit-category exclusions remain explicit; no other field or visa verdict is reverified."
+              }
+            }
+          }
+        ],
+        "operator_entries": []
+      }
+    }
+  ]
+}
