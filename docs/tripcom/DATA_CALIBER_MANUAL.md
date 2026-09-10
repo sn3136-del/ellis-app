@@ -18,6 +18,25 @@ special_conditions; they are not multiplied by 30 or 365. Hour-based validity
 converts to days only for exact multiples of 24. Otherwise numeric fields remain
 null and exact text is retained. Processing estimates are not guarantees.
 
+Dictionary field 24, `info_validity`, is only the policy's explicitly recorded
+published end date. If no end date is known it stays null; an internal cache
+deadline must never fill this field. Product-specific policy dates take
+precedence, and a separate permission cannot inherit another permission's
+expiry. `freshness_valid_until` is separate metadata for the internal recheck
+deadline. Neither that deadline nor a successful refresh extends the policy.
+Reviewed disposition provenance can also supply its `effective_to` policy date,
+using the bound's own official-jurisdiction source, verification date and exact
+quoted date. An inherited `policy_interval_evidence` notice retains its original
+evidence; bare interval dates or unrelated field dates do not fill this column.
+
+The API's `acceptance_summary` exposes both literal 25-field formulas: filled
+cells / all 25 cells, and records with all 25 non-null / all records. No blank
+exclusions apply to those metrics. The operational fillable metric separately
+excludes explicitly not-applicable and source-confirmed not-published fields.
+The export splits item 5 into requirement and subcategory, producing 26 columns;
+the subcategory does not become a 26th contractual field. The offline acceptance
+auditor validates the exact dictionary and the API's declared complete row count.
+
 An ETA, an advance visa and a visa on arrival are different permission types.
 An electronic visa is still a visa. Alternate products keep their own fees,
 validity, documents and procedure. ETA procedure cannot become an alternate
@@ -35,15 +54,17 @@ The records expose source_check separately from confidence:
 | reference | A source link exists, but required verdict evidence is absent. |
 | unchecked | No source link is available. |
 
-High requires explicit human verdict verification, complete required fields,
-and no unresolved dispute or contradiction. AI verification cannot confer High.
-Medium requires recorded verdict evidence or an effective automated verdict
-check and may have field gaps. A URL alone cannot establish Medium, including
-for a productless exemption. Low includes missing verdict evidence, invalid or
-absent provenance dates or notes, nonofficial-only evidence, and unresolved
-disputes or contradictions.
+The configured display has two grades, High and Low. Complete official-source
+checked records with supported required values and no unresolved dispute can
+be High. Accepted AI and human source checks use the same grade; authorship
+remains explicit in provenance. Missing evidence, field gaps, public edits,
+invalid provenance and disputes remain Low. A model's self-rating or an
+official URL alone is never verification. There is no current Medium output.
+Trip.com's written standard describes a three-level ladder; the configured
+binary display must not be described as an unchanged implementation of that
+ladder or evidence of contractual acceptance.
 
-A fresh automated check can support Medium when historical human provenance
+A fresh automated check can support a grade when historical human provenance
 is incomplete; it cannot retrospectively establish human verification.
 At grading time, imported manual notes are checked for substantive text,
 official source and valid nonfuture date. The grader does not reinterpret
@@ -52,7 +73,10 @@ remains auditable through source and per-field provenance.
 
 Source labels describe evidence, while completeness and link coverage are
 separate measurements. Each record's held and review_required flags describe
-the entire canonical route, including its other products.
+the entire canonical route, including its other products. Display grade and
+publication are separate: a completeness-only Low does not itself create a
+new hold. The existing source/conflict gate and explicit route hold metadata
+govern publication; the binary relabeling did not change those gates.
 
 ## Evidence contract and corrections
 
@@ -97,6 +121,18 @@ freshness. A completed sweep does not establish that every field is accurate.
 The console reports the actual timer and durable worker status, including
 unfinished attempts, partial checks, unreadable sources and errors. A missing
 timer or dead worker cannot be displayed as a confirmed upcoming/completed run.
+
+The monthly report currently archives the operational fillable-field metric.
+For formal acceptance retain the full timestamped records snapshot and its
+literal25 audit as well; the operational metric is not a substitute.
+
+## Historical documentation
+
+The September 3 HTML/PDF data-caliber documents and `requirement-ledger.html`
+retain earlier warranty-date and three-tier descriptions. They are historical
+and must be regenerated/reviewed before being delivered as current acceptance
+materials. This Markdown manual and the exported field dictionary describe the
+current explicit-policy-date semantics.
 
 ## Reader and saved-workflow gates
 

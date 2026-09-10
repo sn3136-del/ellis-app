@@ -14,6 +14,9 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from app.visa_snapshot.tstation import CONTRACT_FIELDS, FIELD_ORDER
+
 STATIONS = ('HKG', 'TWN', 'JPN', 'KOR', 'USA', 'THA', 'SGP', 'MYS', 'GBR',
             'RUS', 'AUS', 'IDN', 'PHL', 'FRA', 'VNM', 'ESP', 'IND', 'CAN')
 SUPPORTED = {'human-quote', 'ai-quote', 'grounded-consistent'}
@@ -33,10 +36,29 @@ def audit(payload):
     rows = payload['records']
     fields = payload['fields']
     required = payload['required_fields']
-    contract_fields = [f for f in fields if f != 'visa_requirement_detail']
-    if not fields or not set(required) <= set(fields):
+    # A truncated caller-supplied schema must not shrink the contractual
+    # denominator. Field 5 may be split into primary/subcategory for export;
+    # either shape must still contain every exact numbered dictionary name.
+    if (not isinstance(fields, list) or not all(isinstance(f, str) for f in fields)
+            or len(fields) != len(set(fields))
+            or set(fields) not in (set(CONTRACT_FIELDS), set(FIELD_ORDER))):
+        raise ValueError('The snapshot must contain the exact 25-field contract dictionary, without duplicates')
+    contract_fields = list(CONTRACT_FIELDS)
+    if (not isinstance(required, list) or not required
+            or not all(isinstance(f, str) for f in required)
+            or len(required) != len(set(required)) or not set(required) <= set(fields)):
         raise ValueError('Missing or inconsistent field dictionary')
-    if payload.get('total', len(rows)) != len(rows):
+    if not isinstance(rows, list) or not all(isinstance(r, dict) for r in rows):
+        raise ValueError('Malformed snapshot records')
+    # /database/records supplies summary.total. Older snapshots may provide
+    # total at the top level. Require a count and check every supplied one.
+    totals = [payload['total']] if 'total' in payload else []
+    if 'summary' in payload:
+        summary = payload['summary']
+        if not isinstance(summary, dict) or 'total' not in summary:
+            raise ValueError('Missing snapshot summary total')
+        totals.append(summary['total'])
+    if not totals or any(type(n) is not int or n != len(rows) for n in totals):
         raise ValueError('A paginated or incomplete snapshot cannot certify full coverage')
     counts = Counter(r.get('confidence_level') for r in rows)
     linked = sum(populated(r.get('source_url')) for r in rows)

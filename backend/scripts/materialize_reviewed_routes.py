@@ -245,8 +245,12 @@ def _validate_entry(entry, sources, today):
     if any(not equivalent(name, value) for name, value in guidance.items()):
         raise ValueError('existing overlay changes a reviewed field; correct the overlay explicitly first')
     records = tstation.records_for_route(route, merged, existing_provenance, grounded_ok=False)
-    if not records or any(r.get('confidence_level') == 'High' for r in records):
-        raise ValueError('import cannot claim a High-grade or empty served record')
+    # An imported self-rating is rejected above. The shared projection can
+    # legitimately derive High from already reviewed, complete official
+    # evidence (including a published policy interval). Do not reject that
+    # evidence-based grade merely because its reviewer was AI.
+    if not records:
+        raise ValueError('import cannot produce an empty served record')
     return {'cache_key': kp.cache_key(route), 'route': route, 'guidance': deepcopy(guidance),
             'missing_fields': missing, 'status': kp.STATUS_UNCERTAIN if missing else kp.STATUS_PRIMARY,
             'field_provenance': deepcopy(provenance),

@@ -82,6 +82,17 @@ def test_all_reviewed_fields_survive_the_real_overlay_before_materialization():
     assert len(entries) == 17
 
 
+def test_shared_evidence_grade_does_not_allow_an_imported_high_self_rating():
+    data = json.loads(MANIFEST.read_text())
+    source_table = {s['id']: s for s in data['sources']}
+    row = _rows()['TWN']
+    accepted = importer._validate_entry(row, source_table, date(2026, 9, 9))
+    assert accepted['preview_grades'] == ['High']
+    row['guidance']['confidence'] = 'High'
+    with pytest.raises(ValueError, match='cannot claim High'):
+        importer._validate_entry(row, source_table, date(2026, 9, 9))
+
+
 @pytest.mark.parametrize('nationality', sorted(STATIONS))
 def test_all_seventeen_map_a_single_exempt_baseline_and_separate_arrival_registration(nationality):
     entry = _rows()[nationality]

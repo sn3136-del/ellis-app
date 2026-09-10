@@ -167,6 +167,67 @@ def test_a_visa_free_verdict_keeps_only_a_free_entry_product():
     assert reports[0]['removed_products'][0]['type'] == 'Single-entry tourist e-visa'
 
 
+def optional_visa_batch():
+    """Synthetic policy fixture: short visits exempt; longer visits need a visa."""
+    b = batch()
+    exempt = 'Holders of a Hong Kong SAR passport do not require a visa for stays of up to 30 days.'
+    longer = 'Holders of a Hong Kong SAR passport must obtain a visa for stays longer than 30 days.'
+    text = TEXT.replace('Holders of a Hong Kong SAR passport must obtain a visa before travel.', longer)
+    b['sources'] = [source(text + ' ' + exempt + ' Entry is free of charge for exempt visitors.')]
+    row = b['rows'][0]
+    row['verdict'] = {'disposition': 'VISA_EXEMPT', 'requirement_detail': 'unconditional_visa_free', 'proof': proof(exempt)}
+    row['route_fields'] = {'permitted_stay_days': 30, 'permitted_stay': 'Up to 30 days',
+                           'government_fee': {'amount': 0, 'currency': None}}
+    row['route_field_proofs'] = {'permitted_stay_days': proof('do not require a visa for stays of up to 30 days'),
+                                'government_fee': proof('Entry is free of charge for exempt visitors.')}
+    row['products'][0]['proofs']['disposition'] = proof(longer)
+    row['products'].append({'action': 'add', 'current_name': None,
+        'product': {'type': 'Visa-free entry', 'disposition': 'VISA_EXEMPT',
+                    'requirement_detail': 'unconditional_visa_free', 'entry': None,
+                    'validity': None, 'max_stay_days': 30, 'fee': {'amount': 0, 'currency': None}},
+        'proofs': {'max_stay_days': proof('do not require a visa for stays of up to 30 days'),
+                   'fee': proof('Entry is free of charge for exempt visitors.')}})
+    return b
+
+
+def test_a_reviewed_optional_paid_visa_survives_beside_its_reviewed_exemption_lane():
+    b = optional_visa_batch()
+    overlay, reports = convert(build_manifest(b, [layer()]), [layer()])
+    entry = overlay['entries'][0]
+    products = entry['fields']['visa_products']
+    assert [p['type'] for p in products] == [PRODUCT['type'], 'Visa-free entry']
+    assert [p['disposition'] for p in products] == ['VISA_REQUIRED', 'VISA_EXEMPT']
+    assert products[0]['fee'] == {'amount': 25, 'currency': 'USD'}
+    assert 'longer than 30 days' in products[0]['field_provenance']['disposition']['quote']
+    assert reports[0]['removed_products'] == []
+    parsed = vo._parse_rows([entry], {})[vo._key('HKG', 'VNM', 'tourism', 'ordinary_passport')]
+    guidance, _ = vo.merge_verified_fields(layer()['raw_guidance'], parsed['fields'], source_url=entry['source_url'])
+    from app.visa_snapshot.kimi_primary import serve_time_invariants
+    assert serve_time_invariants(guidance) == []
+    assert len(guidance['visa_products']) == 2
+
+
+@pytest.mark.parametrize('mutation', ['no_free_lane', 'unreviewed_free_lane', 'no_paid_verdict', 'wrong_paid_quote', 'wrong_fee'])
+def test_optional_visa_products_cannot_bypass_independent_evidence(mutation):
+    b = optional_visa_batch()
+    current = layer()
+    row = b['rows'][0]
+    if mutation == 'no_free_lane':
+        row['products'].pop()
+    elif mutation == 'unreviewed_free_lane':
+        free = row['products'].pop()['product']
+        current['raw_guidance']['visa_products'].append(deepcopy(free))
+        current['merged_guidance']['visa_products'].append(deepcopy(free))
+    elif mutation == 'no_paid_verdict':
+        row['products'][0]['proofs'].pop('disposition')
+    elif mutation == 'wrong_paid_quote':
+        row['products'][0]['proofs']['disposition'] = proof('Nationals of Japan do not require a visa for stays of up to 45 days.')
+    else:
+        row['products'][0]['proofs']['fee'] = proof('Your application will be processed in 3 working days')
+    with pytest.raises(PatchRejected):
+        convert(build_manifest(b, [current]), [current])
+
+
 def test_a_listed_general_overlay_is_loaded_with_the_reviewed_gates(tmp_path, monkeypatch):
     """General batches register through reviewed_overlays.json beside the seed,
     not through code edits. A listed file still has to pass the reviewed

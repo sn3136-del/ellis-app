@@ -79,7 +79,8 @@ def test_visa_free_yields_one_clean_record_and_human_check_is_high():
     route = {"passport_nationality": "SGP", "destination_country": "CHN",
              "travel_purpose": "tourism"}
     g = {"disposition": "VISA_EXEMPT", "permitted_stay": "30 days",
-         "permitted_stay_days": 30, "confidence": "high"}
+         "permitted_stay_days": 30, "confidence": "high",
+         "policy_valid_until": "2026-12-31"}
     prov = {"source_url": "https://cs.mfa.gov.cn/x", "verified_at": "2026-08-22",
             "verified_by": "Ellis operator", "verifier": "human",
             "fields": ["disposition", "permitted_stay_days"], "note": "Official page confirms the exemption."}

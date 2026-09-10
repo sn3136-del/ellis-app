@@ -125,6 +125,9 @@ Reply STRICT JSON:
 Rules: if the page does not mention a field, it is NOT a contradiction — leave
 it alone. Never invent a fee, date or URL the page does not state. If the page
 is irrelevant or unreadable, say page_relevant false and change nothing.
+An explicit warning that official guidance conflicts is not a settled fact
+contradicted by one page. Preserve that warning; a single source cannot
+adjudicate a disagreement between official sources or verify the warning away.
 When in doubt about whether the page speaks for THIS nationality, say
 page_is_nationality_specific false and correct nothing nationality-specific."""
 
@@ -465,7 +468,57 @@ def _source_authority_matches(url: str, route: dict) -> bool:
             jurisdiction_matches(url, route.get("passport_nationality", "")))
 
 
-def _file_dispute(db, row, route, guidance, fields, evidence, source_url, when):
+def _source_conflict_fields(guidance):
+    """Explicit unresolved warnings await adjudication, never auto-selection.
+
+    Recognize the stored warning itself, not a provider's unsupported claim
+    that a field is disputed. Ordinary requirements and historical statements
+    saying a conflict was resolved do not match this narrow warning form.
+    """
+    warning = re.compile(
+        r"^\s*(?:unresolved\s*[:–—-]?\s*)?(?:"
+        r"(?:official|consular)\b[^.!?;\n]{0,80}\b(?:guidance|sources?|instructions?)\s+"
+        r"(?:(?:currently|still)\s+)?conflicts?\b|"
+        r"conflicting\s+(?:official|consular)\b[^.!?;\n]{0,60}\b(?:guidance|sources?|instructions?)\b)", re.I)
+    return {key for key, value in guidance.items() if key in OVERRIDABLE
+            and isinstance(value, str) and warning.search(value)
+            and not re.search(r"\b(?:resolved|superseded)\b", value, re.I)}
+
+
+def _proposal_identity(proposal):
+    """Only an unchanged finding inherits an operator's dismissal.
+
+    Read timestamps and HTML whitespace change on ordinary rechecks. The
+    source, quoted claim, current value and any conflicting readings do not
+    get ignored: a change to any of them is a new finding.
+    """
+    if not isinstance(proposal, dict) or not isinstance(proposal.get("fields"), dict):
+        return None
+    fields = proposal["fields"]
+    if not fields or not proposal.get("source_url") or any(
+            not isinstance(v, dict) or not {"page_says", "record_holds", "quote"} <= set(v)
+            for v in fields.values()):
+        return None
+
+    def normalize(value):
+        if isinstance(value, str):
+            return " ".join(value.split())
+        if isinstance(value, dict):
+            return {k: normalize(v) for k, v in value.items()}
+        if isinstance(value, list):
+            return [normalize(v) for v in value]
+        return value
+
+    try:
+        return json.dumps(normalize({k: proposal.get(k) for k in
+            ("source_url", "fields", "conflicting_evidence")}),
+            sort_keys=True, ensure_ascii=False, allow_nan=False)
+    except (TypeError, ValueError):
+        return None
+
+
+def _file_dispute(db, row, route, guidance, fields, evidence, source_url, when,
+                  *, conflicting_evidence=None):
     if not fields:
         return
     field_key = ",".join(sorted(fields))[:64]
@@ -473,14 +526,27 @@ def _file_dispute(db, row, route, guidance, fields, evidence, source_url, when):
                 "fields": {k: {"page_says": v, "record_holds": guidance.get(k),
                                "quote": str(evidence.get(k) or "")}
                            for k, v in sorted(fields.items())}}
+    if conflicting_evidence:
+        proposal["conflicting_evidence"] = conflicting_evidence
     note = (f"Automatic source check against {source_url}: " + "; ".join(
         f"{k}: page says {json.dumps(v, ensure_ascii=False)[:120]} "
         f"(quote: {str(evidence.get(k) or '')[:160]})" for k, v in sorted(fields.items())))[:1000]
-    existing = db.execute(select(DatabaseIssueReport).where(
+    candidates = db.execute(select(DatabaseIssueReport).where(
         DatabaseIssueReport.cache_key == row.cache_key,
         DatabaseIssueReport.reported_by == "freshness_monitor",
         DatabaseIssueReport.field == field_key,
-        DatabaseIssueReport.status.in_(("open", "acknowledged")))).scalars().first()
+        DatabaseIssueReport.status.in_(("open", "acknowledged", "dismissed")))).scalars().all()
+    identity = _proposal_identity(proposal)
+    if identity is not None and any(issue.status == "dismissed" and
+            _proposal_identity(issue.proposal) == identity for issue in candidates):
+        return
+    # A second official page must not replace the evidence from the first.
+    # Match the full field set too: the display key is truncated to 64 chars.
+    existing = next((issue for issue in candidates if issue.status != "dismissed"
+        and isinstance(issue.proposal, dict)
+        and issue.proposal.get("source_url") == source_url
+        and isinstance(issue.proposal.get("fields"), dict)
+        and set(issue.proposal["fields"]) == set(fields)), None)
     if existing is not None:
         existing.note, existing.proposal = note, proposal
     else:
@@ -516,6 +582,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     route, original = dict(row.route or {}), dict(row.guidance or {})
     override = verified_overrides.find(route)
     guidance, provenance = verified_overrides.apply(dict(original), route)
+    unresolved_fields = _source_conflict_fields(guidance)
     old_comparisons = (row.verification or {}).get('comparison_cache')
     reviewed_fields, catalog = proof_helpers.reviewed_evidence(override, row.verification)
     source_override = dict(override or {}, supporting_sources=[{'id':k,'url':v} for k,v in catalog.items()])
@@ -531,6 +598,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     when = today or _now().isoformat()
     if not sources:
         if not _commit_recheck(db, row, {"at": when, "outcome": "no_official_source",
+                "disputed_fields": sorted(unresolved_fields),
                 "note": "the answer names no government page to check"},
                 expected_guidance=original, expected_route=route):
             return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": []}
@@ -565,11 +633,15 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             return
         if not isinstance(answer, dict): answer = {}
         quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text, route)
+        awaiting_adjudication = {k: {"value": v, "quote": evidence[k]}
+                                for k, v in quoted.items() if k in unresolved_fields}
+        quoted = {k: v for k, v in quoted.items() if k not in unresolved_fields}
         unquoted_all.update(unquoted)
         check = {'source_url': fr.final_url, 'outcome': 'page_not_relevant', 'at': when,
             'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
             'comparison_reused': reused, 'content_hash': fr.content_hash, 'verified_fields': [],
             'unquoted_fields': unquoted,
+            'awaiting_adjudication': awaiting_adjudication,
             'proposed_fields': {k: {'value': v, 'quote': evidence[k]} for k, v in quoted.items()}}
         source_checks.append(check)
         candidates.append((fr, answer, quoted, evidence, check))
@@ -685,6 +757,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         else:
             outcome = "provider_error" if any(s["outcome"] == "provider_error" for s in source_checks) else ("page_not_relevant" if tried else "fetch_failed")
         entry = {"at": when, "outcome": outcome, "sources": sources,
+                 "disputed_fields": sorted(unresolved_fields),
                  "sources_tried": tried, "irrelevant_sources": irrelevant,
                  "source_reads": len(tried),
                  "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
@@ -715,13 +788,31 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         scoped_readings.append((fr,answer,{k:v for k,v in quoted.items() if k not in rejected},evidence,check))
     readings = scoped_readings
 
-    proposed, evidence, field_sources, conflicts = {}, {}, {}, set()
+    proposed, conflicts, observations = {}, set(), []
     unquoted = sorted(unquoted_all)
     for fr, answer, quoted, quotes, check in readings:
         for key, value in quoted.items():
             if key in proposed and proposed[key] != value:
                 conflicts.add(key)
-            proposed[key], evidence[key], field_sources[key] = value, quotes[key], fr.final_url
+            proposed[key] = value
+            observations.append({"field": key, "source_url": fr.final_url,
+                                 "value": value, "quote": quotes[key]})
+    # A page confirming the current value is evidence too. Comparing only
+    # corrected_fields silently chose another page's correction over that
+    # reading, even when both quoted contradictory official figures.
+    for fr, answer, quoted, quotes, check in readings:
+        allowed = set(check.get("allowed_fields", proposed)) - set(check.get("unscoped_program_fields", []))
+        for key in (set(proposed) & allowed) - set(quoted):
+            value, quote = guidance.get(key), quotes.get(key)
+            if (value not in (None, "", [], {}) and isinstance(quote, str)
+                    and quote_in_text(quote, captures[fr.final_url]["text"])
+                    and field_value_supported(key, value, quote)
+                    and proof_helpers.field_scope_matches_route(key, quote, route)
+                    and proof_helpers.field_program_matches(key, quote, guidance)):
+                observations.append({"field": key, "source_url": fr.final_url,
+                                     "value": value, "quote": quote})
+                if proposed[key] != value:
+                    conflicts.add(key)
     # The source read can take a minute. Refresh both the row and the override,
     # and refuse to overwrite any field changed during that time.
     db.refresh(row)
@@ -735,6 +826,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     protected = set((override or {}).get("fields") or {})
     current = dict(row.guidance or {})
     seen, _ = verified_overrides.apply(dict(current), route)
+    unresolved_fields = _source_conflict_fields(seen)
     disputed, applied = {}, {}
     for k, v in proposed.items():
         if k in conflicts or conflicts & {"disposition", "requirement_detail"}:
@@ -760,12 +852,15 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         else:
             row.guidance = candidate  # only page corrections, never override copies
             seen = merged
-    for source_url in {field_sources.get(k, page.final_url) for k in disputed}:
-        own_disputes = {k: v for k, v in disputed.items() if field_sources.get(k, page.final_url) == source_url}
-        _file_dispute(db, row, route, seen, own_disputes, evidence, source_url, when)
+    conflicting_evidence = sorted((item for item in observations if item["field"] in conflicts),
+                                 key=lambda item: (item["field"], item["source_url"]))
+    for fr, _, quoted, quotes, _ in readings:
+        own_disputes = {k: v for k, v in quoted.items() if k in disputed}
+        _file_dispute(db, row, route, seen, own_disputes, quotes, fr.final_url, when,
+                      conflicting_evidence=conflicting_evidence)
     remaining_contradictions = kimi_primary.serve_time_invariants(seen)
     consistent = (all(answer.get("consistent") is True for _, answer, _, _, _ in readings) and not proposed and not unquoted
-                  and not disputed and fallback is None and not remaining_contradictions)
+                  and not disputed and not unresolved_fields and fallback is None and not remaining_contradictions)
     # Verifying the verdict does not verify every accompanying fee, duration,
     # document and condition. Renew the whole row only with explicit evidence
     # for every substantive populated field; existing old provenance does not
@@ -794,7 +889,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                             and proof_helpers.field_scope_matches_route(k,quotes[k],route)
                             and proof_helpers.field_program_matches(k,quotes[k],seen)}
         supported_fields.discard('disposition')
-        for key in (substantive & allowed) - {'disposition'}:
+        supported_fields.difference_update(unresolved_fields)
+        for key in (substantive & allowed) - {'disposition'} - unresolved_fields:
             reviewed = proof_helpers.reviewed_field_quote(key, seen[key], reviewed_fields,
                                                          source, fresh_sources, route)
             if reviewed and proof_helpers.field_program_matches(key,reviewed[0],seen):
@@ -826,7 +922,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     unverified_fields = sorted(substantive - verified_fields)
     unchecked_sources = [u for u in all_sources if u not in visited]
     failed_sources = any(c["outcome"] in {"fetch_failed", "provider_error"} for c in source_checks)
-    renewed = (not (disputed or unquoted or fallback or remaining_contradictions or row.missing_fields
+    renewed = (not (disputed or unresolved_fields or unquoted or fallback or remaining_contradictions or row.missing_fields
                     or unverified_fields or unchecked_sources or failed_sources
                     or active_disputed_fields(db, row.cache_key)) and (consistent or bool(applied)))
     entry = {"at": when, "outcome": "checked", "evidence_contract": EVIDENCE_CONTRACT,
@@ -834,7 +930,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                  "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
                  "source_url": page.final_url,
                  "content_hash": page.content_hash, "consistent": consistent,
-                 "changed_fields": sorted(applied), "disputed_fields": sorted(disputed),
+                 "changed_fields": sorted(applied), "disputed_fields": sorted(set(disputed) | unresolved_fields),
+                 "awaiting_adjudication_fields": sorted(unresolved_fields),
                  "unquoted_fields": unquoted, "irrelevant_sources": irrelevant,
                  "verified_fields": sorted(verified_fields), "unverified_fields": unverified_fields,
                  "field_sources": verified_field_sources, "source_checks": source_checks,
@@ -850,7 +947,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                else kimi_primary.UNCERTAIN_TTL_DAYS)
         fresh_until = _now() + timedelta(days=ttl)
     snapshots = []
-    if not (proposed or disputed or unquoted or fallback or remaining_contradictions):
+    if not (proposed or disputed or unresolved_fields or unquoted or fallback or remaining_contradictions):
         for fr, answer, _, _, check in readings:
             snapshot = comparison_reuse.snapshot(answer=answer, check=check,
                 signature=comparison_context.get(fr.final_url), dependency_digest=dependency_digest,
@@ -875,7 +972,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     return {"outcome": "checked", "route_key": row.cache_key, "consistent": consistent,
             "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
             **model_counts,
-            "changed": sorted(applied), "disputed": sorted(disputed),
+            "changed": sorted(applied), "disputed": sorted(set(disputed) | unresolved_fields),
             "generic_skipped": sorted(fallback[1]) if fallback else [],
             "unquoted_fields": unquoted, "source_url": page.final_url}
 
@@ -987,6 +1084,7 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
     override = verified_overrides.find(route)
     if override:
         guidance, _ = verified_overrides.apply(guidance, route)
+    unresolved_fields = _source_conflict_fields(guidance)
     when = _now().isoformat()
     outcome = "page_unreachable"
     proposal = None
@@ -1076,9 +1174,11 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
             quoted={k:v for k,v in quoted.items() if k not in {'government_fee','processing_time'} or k in program_fields}
             if requested in {'government_fee','processing_time'} and requested not in program_fields:
                 continue
+        awaiting_adjudication = {k: {"value": v, "quote": evidence[k]}
+                                for k, v in quoted.items() if k in unresolved_fields}
         fields = {k: {"page_says": v, "record_holds": guidance.get(k),
-                      "quote": evidence[k]} for k, v in quoted.items()}
-        confirmed = ((allowed is None or requested in allowed) and (requested == "disposition" or
+                      "quote": evidence[k]} for k, v in quoted.items() if k not in unresolved_fields}
+        confirmed = (requested not in unresolved_fields and (allowed is None or requested in allowed) and (requested == "disposition" or
                      isinstance(evidence.get(requested), str)
                      and quote_in_text(evidence[requested], fr.content_text)
                      and field_value_supported(requested, guidance.get(requested), evidence[requested])
@@ -1087,10 +1187,11 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
                     "checked_at": when,
                     "consistent": confirmed and raw.get("consistent") is True and not fields and not unquoted,
                     "verified_fields": [requested] if confirmed else [],
+                    "awaiting_adjudication": awaiting_adjudication,
                     "unquoted_fields": unquoted, "fields": fields,
                     "note": str(raw.get("note") or "")[:200],
                     "proposed_by": "ellis-ai"}
-        if fields or confirmed:
+        if fields or confirmed or requested in awaiting_adjudication:
             break  # a proposal cites this exact source; no mixed-source claims
     issue.proposal = proposal or {"outcome": outcome, "checked_at": when}
     db.commit()

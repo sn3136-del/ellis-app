@@ -125,9 +125,10 @@ FIELD_DESCRIPTIONS = {
     "data_source": "Information source website / organization",
     "source_url": "Specific page link",
     "collected_at": "Data collection date",
-    "info_validity": "Policy validity period until. Where the policy carries no "
-                     "published end date, this is the date Ellis warrants the row "
-                     "to and rechecks it against its official page",
+    "info_validity": "Published policy validity end date, when known. "
+                     "Blank when no policy end date is available; the separate "
+                     "freshness_valid_until metadata is an internal recheck deadline, "
+                     "not the policy's expiry date",
     "confidence_level": "High / Low",
 }
 
@@ -616,6 +617,57 @@ def verdict_provenance_supported(provenance: dict | None) -> bool:
         return checked <= datetime.now(timezone.utc)
     except ValueError:
         return False
+
+
+def _reviewed_policy_end(provenance: dict | None, route: dict) -> str | None:
+    """Project a quoted verdict-policy bound, not an ancillary/refresh date.
+
+    A later verdict recheck can retain an earlier interval notice. Its bound
+    keeps its own official source, quote and verification date; the newer
+    recheck's timestamp does not renew or replace that notice.
+    """
+    from .policy_intervals import _date
+    from .evidence_validator import jurisdiction_matches, quote_in_text
+    if not isinstance(provenance, dict):
+        return None
+    field_proofs = provenance.get("field_provenance")
+    field_proofs = field_proofs if isinstance(field_proofs, dict) else {}
+    claimed = provenance.get("fields")
+    claimed = claimed if isinstance(claimed, (list, tuple, set, dict)) else ()
+    proof = field_proofs.get("disposition")
+    if not isinstance(proof, dict):
+        if "disposition" in field_proofs or "disposition" not in claimed:
+            return None
+        proof = provenance
+    end = _date(proof.get("effective_to"))
+    start = _date(proof.get("effective_from"))
+    if (not end or (proof.get("effective_from") is not None and not start)
+            or (start and end < start)):
+        return None
+    if not verdict_provenance_supported(dict(proof, fields=["disposition"])):
+        return None
+    bounds = proof.get("policy_interval_evidence")
+    bounds = bounds if isinstance(bounds, dict) else {}
+    evidence = bounds.get("effective_to", proof)
+    if not isinstance(evidence, dict) or evidence.get("verifier") not in ("ai", "human"):
+        return None
+    if evidence.get("effective_to") not in (None, end.isoformat()):
+        return None
+    quotes = evidence.get("quotes")
+    quotes = quotes if isinstance(quotes, dict) else {}
+    quote = quotes.get("effective_to") or evidence.get("quote")
+    if not isinstance(quote, str) or not quote.strip():
+        return None
+    candidate = dict(evidence, fields=["disposition"], note=evidence.get("note") or quote)
+    if (not verdict_provenance_supported(candidate)
+            or not jurisdiction_matches(str(evidence.get("source_url") or ""),
+                                        route.get("destination_country", ""))):
+        return None
+    forms = (end.isoformat(), f"{end.day} {end.strftime('%B')} {end.year}",
+             f"{end.strftime('%B')} {end.day}, {end.year}",
+             f"{end.day:02d} {end.strftime('%B')} {end.year}",
+             f"{end.year}年{end.month}月{end.day}日")
+    return end.isoformat() if any(quote_in_text(value, quote) for value in forms) else None
 
 
 def _confidence(guidance: dict, provenance: dict | None,
@@ -1120,6 +1172,42 @@ def _explicit_product_verdict_provenance(product: dict, route: dict) -> tuple[bo
     return True, candidate if verdict_provenance_supported(candidate) else None
 
 
+def _product_field_reference(product: dict, route: dict) -> str | None:
+    """Locate a product-owned field citation without crediting its verdict.
+
+    A fee or validity review can supply a useful source link even while the
+    product's nationality eligibility remains unchecked. Parent citations,
+    unscoped legacy notes and another product's proof cannot supply it.
+    """
+    proofs = product.get("field_provenance")
+    if not isinstance(proofs, dict):
+        return None
+    from .authority import hostname, is_government_host
+    from .evidence_validator import jurisdiction_matches
+    expected = dict(route, travel_document_type=route.get("travel_document_type") or "ordinary_passport")
+    for field in ("fee", "validity", "max_stay_days", "entry"):
+        proof = proofs.get(field)
+        if (not isinstance(proof, dict) or proof.get("status") not in ("reviewed", "verified")
+                or proof.get("verifier") not in ("ai", "human")
+                or not isinstance(proof.get("quote"), str) or not proof["quote"].strip()
+                or product.get(field) in (None, "", {})):
+            continue
+        subject = proof.get("subject")
+        if not isinstance(subject, dict) or subject.get("product_type") != product.get("type"):
+            continue
+        if any(key not in subject or subject[key] != expected.get(key) for key in
+               ("passport_nationality", "destination_country", "travel_purpose", "travel_document_type")):
+            continue
+        if any(key not in subject or subject[key] != product.get(key) for key in
+               ("disposition", "requirement_detail")):
+            continue
+        url = proof.get("source_url")
+        if (isinstance(url, str) and is_government_host(hostname(url))
+                and jurisdiction_matches(url, expected.get("destination_country", ""))):
+            return url
+    return None
+
+
 def _separate_product_method(product: dict, detail: str, guidance: dict) -> str | None:
     explicit = (_method_for_channel(product.get("application_channel"))
                 or _method_from_detail(product))
@@ -1340,7 +1428,8 @@ def records_for_route(route: dict, guidance: dict,
                       grounded_fields: list | None = None) -> list[dict]:
     """The route's answer as T-Station 25-field records, one per visa
     product; a product-less route (visa-free, or detail still filling)
-    yields a single route-level record."""
+    yields a single route-level record. ``valid_until`` is the cache's
+    freshness deadline, never evidence of the policy's expiry date."""
     g = dict(guidance or {})
     disposition = str(g.get("disposition") or "").upper()
     # The on-arrival subtype defines the category even for historical rows
@@ -1426,11 +1515,11 @@ def records_for_route(route: dict, guidance: dict,
         "source_url": _headline_source(g, provenance),
         "collected_at": ((provenance or {}).get("verified_at")
                          or (collected_at or "")[:10]) or None,
-        # The date until which the pipeline actively stands behind this
-        # answer: the policy's own end date when known, else the freshness
-        # window that triggers the next official-source recheck.
-        "info_validity": g.get("policy_valid_until")
-                         or ((valid_until or "")[:10] or None),
+        # Dictionary field 24 is the policy's own published end date.
+        # A cache TTL schedules rechecking; it cannot fill a missing policy
+        # fact or make a record appear contractually complete.
+        "info_validity": g.get("policy_valid_until") or _reviewed_policy_end(provenance, route),
+        "freshness_valid_until": valid_until or None,
         "confidence_level": _confidence(g, provenance, grounded_ok),
         # §4.2.1's cross-validation, bound one URL at a time. This sits
         # ALONGSIDE the 25 fields rather than inside them: field 22 is a
@@ -1540,6 +1629,12 @@ def records_for_route(route: dict, guidance: dict,
                                         fields=["disposition", "visa_products"])
                     row["_product_source_verified"] = row["_prov"]
                     row["data_source"] = product_prov.get("verified_by") or "Ellis product source check"
+        # A product may have a different policy interval from the route's
+        # default permission. An explicitly unknown product date also must
+        # not inherit the route date. Separate permission families already
+        # clear the parent's date above.
+        if "policy_valid_until" in p:
+            row["info_validity"] = p.get("policy_valid_until") or None
         _product_fields(row, p)
         if not separate_permission and p.get("source_url"):
             from .authority import hostname, is_government_host
@@ -1569,6 +1664,15 @@ def records_for_route(route: dict, guidance: dict,
             row["data_source"] = (own_review.get("verified_by") or "Ellis product visa requirement source review") if own_review else "Ellis product information (reference only)"
             if own_review:
                 row["source_url"] = own_review["source_url"]
+            if "policy_valid_until" not in p:
+                row["info_validity"] = _reviewed_policy_end(own_review, route)
+        if separate_permission and not row.get("source_url"):
+            reference_url = _product_field_reference(p, route)
+            if reference_url:
+                # Link presence does not verify eligibility, fill review
+                # dates, or inherit any of the parent permission's credit.
+                row["source_url"] = reference_url
+                row["data_source"] = "Ellis product field source (reference only)"
         exemption_lane = requirement == "Conditional" and _product_is_exemption(p)
         if exemption_lane:
             # The lane is the route's own kind of exemption (transit-only or

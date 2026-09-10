@@ -444,6 +444,55 @@ def _proof_for(proof, route, field, product=None):
     return field_provenance(proof, route, field, product)
 
 
+def _reviewed_optional_products(products, specs, verdict, sources, route):
+    """An exemption can coexist with a separately reviewed paid visa option.
+
+    Do not silently delete optional products to make a route pass integrity
+    checks. A paid option needs its own current review (not the route's free
+    verdict), and a real reviewed exemption product must remain beside it.
+    Previously stored or failed proofs cannot establish either lane.
+    """
+    def paid(product):
+        amount = (product.get('fee') or {}).get('amount')
+        return isinstance(amount, (int, float)) and not isinstance(amount, bool) and amount > 0
+
+    if not any(paid(p) for p in products):
+        return
+    reviewed = {s['product']['type']: s for s in specs
+                if s.get('action') != 'remove' and s.get('product')}
+
+    def check(product, *, exemption=False):
+        spec = reviewed.get(product.get('type'))
+        if spec is None:
+            raise PatchRejected('Optional paid products and their exemption lane need an explicit current product review')
+        proofs = spec.get('proofs') or {}
+        decision = proofs.get('disposition')
+        if exemption and decision is None:
+            decision = verdict['proof']
+        if _check_proof(decision, sources, route, 'disposition', product.get('disposition'), product=product) is None:
+            raise PatchRejected('An optional product needs its own reviewed verdict')
+        for field in PRODUCT_PROOF_FIELDS[1:]:
+            value = product.get(field)
+            empty = value in (None, '', {}) or (isinstance(value, dict) and all(v is None for v in value.values()))
+            if not empty and _check_proof(proofs.get(field), sources, route, field, value, product=product) is None:
+                raise PatchRejected('An optional product value needs its own reviewed proof: ' + field)
+
+    free_lanes = [p for p in products
+                  if p.get('disposition') == 'VISA_EXEMPT'
+                  and p.get('requirement_detail') == verdict['requirement_detail']
+                  and not paid(p)]
+    if not free_lanes:
+        raise PatchRejected('Optional paid visa products require an explicit reviewed exemption lane')
+    # A named zero-fee model product is not evidence for the free lane.
+    for product in free_lanes:
+        check(product, exemption=True)
+    for product in products:
+        if paid(product):
+            if product.get('disposition') == 'VISA_EXEMPT':
+                raise PatchRejected('A paid product cannot itself claim visa exemption')
+            check(product)
+
+
 def convert(manifest, current_layers):
     """Return the overlay candidate and a per-route report."""
     from app.visa_snapshot import verified_overrides as vo
@@ -568,7 +617,7 @@ def convert(manifest, current_layers):
                 unsupported.append(name)
                 final.append(deepcopy(product))
         if fields['disposition'] == 'VISA_EXEMPT':
-            final = [p for p in final if (p.get('fee') or {}).get('amount') in (None, 0)]
+            _reviewed_optional_products(final, row.get('products') or [], verdict, sources, route)
         fields['visa_products'] = final
         fields['unpublished_fields'] = sorted(unpublished)
         fields['source_url'] = vproof['source_url']

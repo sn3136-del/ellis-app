@@ -9,6 +9,8 @@ ROUTE = {"passport_nationality": "ZZZ", "destination_country": "JPN",
          "travel_purpose": "tourism"}
 FREE = {"disposition": "VISA_EXEMPT", "permitted_stay": "30 days",
         "permitted_stay_days": 30, "confidence": "high",
+        # A complete test record needs a policy date, not the cache TTL.
+        "policy_valid_until": "2026-12-31",
         "source_url": "https://www.mofa.go.jp/visa/"}
 PROV = {"source_url": "https://www.mofa.go.jp/visa/", "verified_at": "2026-09-09",
         "verified_by": "Operator", "verifier": "human", "fields": ["disposition", "permitted_stay_days"],
