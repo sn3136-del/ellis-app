@@ -281,12 +281,44 @@ def field_proof(route, product=None):
             'steps':deepcopy(STEPS)}}
 
 
+def route_in_scope(route, reviewed):
+    """The reviewed sequence was bound to a verbatim copy of the stored route,
+    whose None slots (no travel date, no consular district) and purpose-derived
+    visa category do not describe the procedure. A live lookup carries a
+    travel date, the purpose-derived category and, for some countries, a
+    consular district, so those keys are compared by meaning: any travel date
+    is fine, the category must be the one the purpose derives (or absent), a
+    consular district must be absent or the default, and an empty transit
+    list equals none. Every other reviewed key must match exactly."""
+    from .kimi_primary import category_for_purpose
+    for k,v in reviewed.items():
+        got=route.get(k)
+        if k=='arrival_date':
+            continue
+        if k=='consular_jurisdiction':
+            if got not in (None,'default'):
+                return False
+            continue
+        if k=='visa_category':
+            allowed={None,v,category_for_purpose(route.get('travel_purpose'))}
+            if got not in allowed:
+                return False
+            continue
+        if k=='transit_countries':
+            if got not in (None,[]):
+                return False
+            continue
+        if got!=v:
+            return False
+    return True
+
+
 def ordered_instructions(guidance, route=None, provenance=None, *, product=None):
     """Return a complete reviewed sequence, or [] without inventing one."""
     if not isinstance(guidance,dict) or not isinstance(route,dict):
         return []
     scope=SUBJECTS.get(route.get('passport_nationality'))
-    if (not scope or any(route.get(k)!=v for k,v in scope['route'].items())
+    if (not scope or not route_in_scope(route, scope['route'])
             or route.get('travel_document_type') not in (None, 'ordinary_passport')
             or route.get('transit_countries') not in (None, [])):
         return []

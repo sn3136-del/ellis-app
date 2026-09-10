@@ -74,7 +74,7 @@ def test_six_defaults_and_sixty_products_have_own_order(previews):
 @pytest.mark.parametrize('kind',['no_route','country','residence','purpose','document','transit','category','proof','order','fee','no_proof','map','fields','sibling','date'])
 def test_unbound_scope_or_raw_claim_never_ordered(previews,kind):
  v=deepcopy(next(v for v in previews if v['route']['passport_nationality']=='IDN'));r,g,p=v['route'],v['guidance'],v['source_provenance']
- edits={'country':('destination_country','JPN'),'residence':('lawful_country_of_residence','JPN'),'purpose':('travel_purpose','business'),'document':('travel_document_type','diplomatic_passport'),'transit':('transit_countries',['JPN']),'category':('visa_category','work'),'date':('arrival_date','2026-10-01')}
+ edits={'country':('destination_country','JPN'),'residence':('lawful_country_of_residence','JPN'),'purpose':('travel_purpose','business'),'document':('travel_document_type','diplomatic_passport'),'transit':('transit_countries',['JPN']),'category':('visa_category','work'),'district':('consular_jurisdiction','San Francisco')}
  if kind=='no_route':r=None
  elif kind in edits:r[edits[kind][0]]=edits[kind][1]
  elif kind=='proof':p['field_provenance']['submission_process']['quote']='Pay an agent.'
@@ -150,3 +150,14 @@ def test_actual_reader_order_and_unchanged_database(data,previews,stores,monkeyp
     assert [s['step'] for s in out['workflow_plan']]==['submission','appointment_booking','attend_appointment','track_status']
     assert out['guidance']['visa_products']==expected[l['cache_key']]['guidance']['visa_products']
   assert snapshot()==before
+
+
+@pytest.mark.parametrize('field,value',[('arrival_date','2026-10-01'),('consular_jurisdiction','default'),('visa_category','tourist_visa'),('transit_countries',[])])
+def test_request_time_route_keys_keep_the_uk_order(previews,field,value):
+ from app.visa_snapshot.ordered_application_instructions import ordered_instructions,route_in_scope,SUBJECTS
+ for p in previews:
+  if not SUBJECTS[p['route']['passport_nationality']]['default']:continue
+  route=dict(p['route']);route[field]=value
+  assert route_in_scope(route,SUBJECTS[route['passport_nationality']]['route'])
+  assert ordered_instructions(p['guidance'],route,p['source_provenance'])
+ assert not route_in_scope(dict(previews[0]['route'],consular_jurisdiction='San Francisco'),SUBJECTS[previews[0]['route']['passport_nationality']]['route'])
