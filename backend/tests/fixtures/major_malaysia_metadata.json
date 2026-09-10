@@ -1,0 +1,155 @@
+{
+  "captured_at": "2026-09-10T06:30:46.938982+00:00",
+  "read_only": true,
+  "rows": [
+    {
+      "id": "2e49a2013de248bfb3c33a01bfe105b6",
+      "cache_key": "HKG|HKG|MYS|tourism|default|unknown|v6",
+      "route": {
+        "passport_nationality": "HKG",
+        "lawful_country_of_residence": "HKG",
+        "destination_country": "MYS",
+        "visa_category": "tourist_visa",
+        "travel_purpose": "tourism",
+        "arrival_date": null,
+        "consular_jurisdiction": null,
+        "travel_document_type": "ordinary_passport",
+        "transit_countries": null
+      },
+      "status": "KIMI_PRIMARY",
+      "missing_fields": [],
+      "contradictions": [],
+      "model": "kimi-k2.7-code-highspeed",
+      "verification": {
+        "passes": 1,
+        "label": "Kimi route decision",
+        "grounded_check": {
+          "at": "2026-09-10T00:59:33.423678+00:00",
+          "outcome": "page_not_relevant",
+          "sources": [
+            "https://imigresen-online.imi.gov.my/mdac/main",
+            "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/"
+          ],
+          "sources_tried": [
+            "https://imigresen-online.imi.gov.my/mdac/main",
+            "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/"
+          ],
+          "irrelevant_sources": [
+            "https://imigresen-online.imi.gov.my/mdac/main",
+            "https://imigresen-online.imi.gov.my/mdac/main",
+            "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/"
+          ],
+          "source_reads": 2,
+          "source_fetch_failures": 0,
+          "unquoted_fields": [],
+          "source_checks": [
+            {
+              "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+              "outcome": "page_not_relevant",
+              "at": "2026-09-10T00:59:33.423678+00:00"
+            },
+            {
+              "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+              "outcome": "page_not_relevant",
+              "at": "2026-09-10T00:59:33.423678+00:00",
+              "source_read_at": "2026-09-10T00:59:38+00:00",
+              "model_compared_at": "2026-09-10T00:59:38.476559+00:00",
+              "comparison_reused": false,
+              "content_hash": "94c2a236656a844f985528ef28bb4fe60980789b470d9e5e94b061554df948a8",
+              "verified_fields": [],
+              "unquoted_fields": [],
+              "proposed_fields": {}
+            }
+          ],
+          "source_cursor": 0,
+          "unchecked_sources": [],
+          "model_comparisons": 1,
+          "model_comparisons_reused": 0
+        },
+        "superseded_check": {
+          "at": "2026-09-07T18:49:14.110876+00:00",
+          "outcome": "checked",
+          "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+          "content_hash": "d2ccd47dd28487e1eeabae02679075acfedee87d4951da8907c44efec9d6c36f",
+          "consistent": true,
+          "changed_fields": [],
+          "disputed_fields": [],
+          "generic_page_skipped": [],
+          "note": "The MDAC page confirms MDAC is required for foreign visitors but does not address Hong Kong visa-free stay length or fees, so no stored fields are contradicted."
+        },
+        "last_source_read_at": "2026-09-10T00:59:33.423678+00:00"
+      },
+      "generated_at": "2026-08-28 21:27:03.561686",
+      "fresh_until": "2026-09-21 18:49:39.099869",
+      "created_at": "2026-08-28 21:27:03.564304",
+      "updated_at": "2026-09-10 00:59:56.547835",
+      "raw_source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/"
+    },
+    {
+      "id": "a7b3f9d23f044c0ca0078dd0ff8a27a0",
+      "cache_key": "USA|USA|MYS|tourism|default|unknown|v6",
+      "route": {
+        "passport_nationality": "USA",
+        "lawful_country_of_residence": "USA",
+        "destination_country": "MYS",
+        "visa_category": "tourist_visa",
+        "travel_purpose": "tourism",
+        "arrival_date": null,
+        "consular_jurisdiction": null
+      },
+      "status": "KIMI_PRIMARY",
+      "missing_fields": [],
+      "contradictions": [],
+      "model": "kimi-k2.7-code-highspeed",
+      "verification": {
+        "passes": 1,
+        "label": "Kimi route decision",
+        "grounded_check": {
+          "at": "2026-09-10T02:03:21.778624+00:00",
+          "outcome": "page_not_relevant",
+          "sources": [
+            "https://imigresen-online.imi.gov.my/mdac/main"
+          ],
+          "sources_tried": [
+            "https://imigresen-online.imi.gov.my/mdac/main"
+          ],
+          "irrelevant_sources": [
+            "https://imigresen-online.imi.gov.my/mdac/main",
+            "https://imigresen-online.imi.gov.my/mdac/main"
+          ],
+          "source_reads": 1,
+          "source_fetch_failures": 0,
+          "unquoted_fields": [],
+          "source_checks": [
+            {
+              "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+              "outcome": "page_not_relevant",
+              "at": "2026-09-10T02:03:21.778624+00:00"
+            }
+          ],
+          "source_cursor": 0,
+          "unchecked_sources": [],
+          "model_comparisons": 0,
+          "model_comparisons_reused": 0
+        },
+        "superseded_check": {
+          "at": "2026-09-09T06:40:58.670640+00:00",
+          "outcome": "checked",
+          "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+          "content_hash": "32cf6fcf49c4af319d64a43c25f48fa9f08d0b6e7e32d89a5f01f080bfd110e5",
+          "consistent": true,
+          "changed_fields": [],
+          "disputed_fields": [],
+          "generic_page_skipped": [],
+          "note": "Page confirms MDAC applies to U.S. visitors but does not state any facts that contradict the stored answer."
+        },
+        "last_source_read_at": "2026-09-10T02:03:21.778624+00:00"
+      },
+      "generated_at": "2026-08-22 02:21:43.376595",
+      "fresh_until": "2026-09-23 06:41:05.181343",
+      "created_at": "2026-08-30 15:03:34.941645",
+      "updated_at": "2026-09-10 02:03:23.176142",
+      "raw_source_url": null
+    }
+  ]
+}

@@ -85,7 +85,7 @@ OVERRIDABLE = frozenset({
     # A mandatory pre-arrival filing (Malaysia's MDAC, the SG Arrival Card) is
     # the difference between boarding and not boarding, so a verified fact
     # must be able to correct it.
-    "arrival_card",
+    "arrival_card", "health_requirements",
     # These existing normalized workflow fields also render on the traveller
     # page; a scoped correction must reach them as well as the channel label.
     "account_registration_steps", "payment_process", "submission_process",
@@ -389,6 +389,8 @@ def _field_errors(fields: dict) -> list[str]:
             errors.append(f"{key} must be an array of strings or null")
     if fields.get("photo_requirements") is not None and not isinstance(fields["photo_requirements"], str):
         errors.append("photo_requirements must be a string or null")
+    from .reviewed_japan_warning_resolution import health_shape_errors
+    errors.extend(health_shape_errors(fields.get("health_requirements")))
     from ..passport_validity import passport_validity_rule_errors
     errors.extend(passport_validity_rule_errors(fields.get("passport_validity_requirement")))
     if verdict is not None and verdict not in DISPOSITIONS:
@@ -501,7 +503,7 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
                     clean.pop(k, None)
             for k in _BOOLEAN_FIELDS + ("passport_validity_requirement",
                                        "account_registration_steps", "payment_process",
-                                       "submission_process", "photo_requirements"):
+                                       "submission_process", "photo_requirements", "health_requirements"):
                 if any(e.startswith(k) for e in errors):
                     clean.pop(k, None)
         for k in _URL_FIELDS:
@@ -1056,6 +1058,8 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
                       field_provenance=field_provenance)
     from .reviewed_condition_resolution import reconcile
     merged = reconcile(route, merged, provenance)
+    from .reviewed_japan_warning_resolution import reconcile as reconcile_japan
+    merged = reconcile_japan(route, merged, provenance)
     result, provenance = scheduled_policies.apply(merged, provenance, route)
     result = policy_intervals.annotate(annotate(result, route), provenance, route)
     return _finalize_guidance(result, provenance), provenance

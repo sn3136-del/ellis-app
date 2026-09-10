@@ -1,0 +1,767 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "review_id": "major-malaysia-fields-20260910",
+  "entries": [
+    {
+      "fields": {
+        "arrival_card": {
+          "required": true,
+          "name": "Malaysia Digital Arrival Card (MDAC)",
+          "submission_window": "Submit before arrival; your arrival must be within 3 days including the date of submission."
+        },
+        "application_channel_detail": "No visa application is required for a tourism visit of up to 90 days. Complete MDAC before arrival unless covered by an official MDAC exemption; arrival must be within 3 days including submission day.",
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "permitted_stay": "90 days",
+        "permitted_stay_days": 90,
+        "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+        "passport_validity": "More than 6 months from entry into Malaysia",
+        "required_documents": [
+          "Passport valid for more than 6 months from entry into Malaysia",
+          "Valid return ticket or onward ticket to the next destination country",
+          "Proof of sufficient funds for the stay",
+          "Proof of accommodation booking or confirmed lodging for the full stay",
+          "Completed Malaysia Digital Arrival Card (MDAC), unless covered by an official exemption"
+        ],
+        "onward_travel_evidence": "A valid return ticket to the home country or an onward ticket to the next destination country is required.",
+        "accommodation_evidence": "Proof of accommodation booking or confirmed lodging arrangements for the full stay is required.",
+        "financial_evidence": "Proof of sufficient funds for the stay is required.",
+        "insurance_required": false,
+        "exceptions": [
+          "Holders of diplomatic/official passports may have separate arrangements",
+          "For this ordinary-passport tourist route, complete MDAC unless you hold Malaysian permanent residence or a Malaysian long-term pass. Diplomatic and official passports have a separate exemption. The published MDAC exemption list does not contain a child-under-three exemption.",
+          "HKSAR passport holders must select Hong Kong as their nationality when completing MDAC."
+        ],
+        "photo_requirements": null,
+        "biometrics_required": null,
+        "passport_validity_requirement": null
+      },
+      "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+      "verified_at": "2026-09-10",
+      "verified_by": "Ellis AI official-source field review",
+      "verifier": "ai",
+      "field_provenance": {
+        "arrival_card": {
+          "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "mdac_scope",
+          "supporting_evidence": [
+            {
+              "source_id": "mdac_window",
+              "source_url": "https://imigresen-online.imi.gov.my/mdac/register",
+              "quote": "Please note that your trip must be within 3 days (including the date of submission)"
+            }
+          ],
+          "additional_quotes": [
+            "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "supporting_evidence": [
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+            },
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+            },
+            {
+              "source_id": "mdac_window",
+              "source_url": "https://imigresen-online.imi.gov.my/mdac/register",
+              "quote": "Please note that your trip must be within 3 days (including the date of submission)"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "disposition": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "requirement_detail": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "permitted_stay": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "source_url": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "passport_validity": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Passport MUST remain valid for more than 6 months from the entry date into Malaysia."
+        },
+        "required_documents": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "supporting_evidence": [
+            {
+              "source_id": "entry_pdf",
+              "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+              "quote": "Every visitor is also required to prove the financial ability to declare himself in Malaysia along with a fixed return ticket to return to his home country or to another country."
+            },
+            {
+              "source_id": "entry_tourists",
+              "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+              "quote": "Possess a valid return ticket to their home country or an onward ticket to a next destination country."
+            },
+            {
+              "source_id": "entry_tourists",
+              "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+              "quote": "Possess proof of accommodation booking or confirmed lodging arrangements for the duration of the stay in Malaysia."
+            },
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+            },
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Passport MUST remain valid for more than 6 months from the entry date into Malaysia."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_tourists",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Possess a valid return ticket to their home country or an onward ticket to a next destination country."
+        },
+        "accommodation_evidence": {
+          "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_tourists",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Possess proof of accommodation booking or confirmed lodging arrangements for the duration of the stay in Malaysia."
+        },
+        "financial_evidence": {
+          "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_pdf",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Every visitor is also required to prove the financial ability to declare himself in Malaysia along with a fixed return ticket to return to his home country or to another country."
+        },
+        "insurance_required": {
+          "source_url": "https://www.tourism.gov.my/media/view/malaysia-relaxes-covid-19-testing-rules-travel-insurance-for-inbound-travellers",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "insurance",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Travel insurance will also not be a prerequisite for foreigners entering the country."
+        },
+        "exceptions": {
+          "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "mdac_scope",
+          "supporting_evidence": [
+            {
+              "source_id": "hkg_exemption",
+              "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+              "quote": "Hong Kong and Macao passport holders are required to select “Hong Kong” or “Macao” as their nationality during MDAC registration to ensure the correct visa-free period is granted."
+            }
+          ],
+          "additional_quotes": [
+            "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+          ],
+          "status": "partial",
+          "verification_scope": "changed_elements_only",
+          "verified_elements": [
+            "For this ordinary-passport tourist route, complete MDAC unless you hold Malaysian permanent residence or a Malaysian long-term pass. Diplomatic and official passports have a separate exemption. The published MDAC exemption list does not contain a child-under-three exemption.",
+            "HKSAR passport holders must select Hong Kong as their nationality when completing MDAC."
+          ],
+          "retained_unverified_elements": [
+            "Holders of diplomatic/official passports may have separate arrangements"
+          ],
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+        },
+        "photo_requirements": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "No standalone photo requirement for this visa-exempt MDAC route was established by the reviewed official sources. Visa-application photo instructions are not evidence for an exempt visit.",
+          "status": "unknown",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          }
+        },
+        "biometrics_required": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "These sources do not settle whether this visitor must give biometrics at immigration. A visa exemption does not prove that border biometrics are unnecessary.",
+          "status": "unknown",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          }
+        },
+        "passport_validity_requirement": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "The HKSAR-specific consulate instruction says more than six months from entry. The current typed rule cannot express a strict greater-than boundary; the exact sourced text is retained.",
+          "status": "unknown",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          }
+        }
+      },
+      "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+      "route": {
+        "nationality": "HKG",
+        "destination": "MYS",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "major-malaysia-fields-20260910"
+    },
+    {
+      "fields": {
+        "arrival_card": {
+          "required": true,
+          "name": "Malaysia Digital Arrival Card (MDAC)",
+          "submission_window": "Submit before arrival; your arrival must be within 3 days including the date of submission."
+        },
+        "application_channel_detail": "No visa application is required for a tourism visit of up to 90 days. Complete MDAC before arrival unless covered by an official MDAC exemption; arrival must be within 3 days including submission day.",
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "permitted_stay": "90 days",
+        "permitted_stay_days": 90,
+        "source_url": "https://www.kln.gov.my/web/usa_los-angeles/post/visa-application-for-refugee-and-re-entry-permit-travel-document",
+        "passport_validity": "6 months beyond date of entry",
+        "required_documents": [
+          "Passport valid for six months or more from entry into Malaysia",
+          "Valid return ticket or onward ticket to the next destination country",
+          "Proof of sufficient funds for the stay",
+          "Proof of accommodation booking or confirmed lodging for the full stay",
+          "Completed Malaysia Digital Arrival Card (MDAC), unless covered by an official exemption"
+        ],
+        "onward_travel_evidence": "A valid return ticket to the home country or an onward ticket to the next destination country is required.",
+        "accommodation_evidence": "Proof of accommodation booking or confirmed lodging arrangements for the full stay is required.",
+        "financial_evidence": "Proof of sufficient funds for the stay is required.",
+        "insurance_required": false,
+        "exceptions": [
+          "Extensions of the Short Term Social Visit Pass may be considered for special circumstances such as illness, accident or war in the home country. Supporting evidence and a confirmed ticket to the home country or a third country are required.",
+          "Entry is at the discretion of Malaysian immigration officers",
+          "For this ordinary-passport tourist route, complete MDAC unless you hold Malaysian permanent residence or a Malaysian long-term pass. Diplomatic and official passports have a separate exemption. The published MDAC exemption list does not contain a child-under-three exemption."
+        ],
+        "photo_requirements": null,
+        "biometrics_required": null
+      },
+      "source_url": "https://www.kln.gov.my/web/usa_los-angeles/post/visa-application-for-refugee-and-re-entry-permit-travel-document",
+      "verified_at": "2026-09-10",
+      "verified_by": "Ellis AI official-source field review",
+      "verifier": "ai",
+      "field_provenance": {
+        "arrival_card": {
+          "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "mdac_scope",
+          "supporting_evidence": [
+            {
+              "source_id": "mdac_window",
+              "source_url": "https://imigresen-online.imi.gov.my/mdac/register",
+              "quote": "Please note that your trip must be within 3 days (including the date of submission)"
+            }
+          ],
+          "additional_quotes": [
+            "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.kln.gov.my/web/usa_los-angeles/post/visa-application-for-refugee-and-re-entry-permit-travel-document",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "usa_exemption",
+          "supporting_evidence": [
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+            },
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+            },
+            {
+              "source_id": "mdac_window",
+              "source_url": "https://imigresen-online.imi.gov.my/mdac/register",
+              "quote": "Please note that your trip must be within 3 days (including the date of submission)"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "American citizens do not require a visa to visit Malaysia for business or social reasons if their stay in Malaysia is 90 days or less."
+        },
+        "disposition": {
+          "source_url": "https://www.kln.gov.my/web/usa_los-angeles/post/visa-application-for-refugee-and-re-entry-permit-travel-document",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "usa_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "American citizens do not require a visa to visit Malaysia for business or social reasons if their stay in Malaysia is 90 days or less."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.kln.gov.my/web/usa_los-angeles/post/visa-application-for-refugee-and-re-entry-permit-travel-document",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "usa_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "American citizens do not require a visa to visit Malaysia for business or social reasons if their stay in Malaysia is 90 days or less."
+        },
+        "permitted_stay": {
+          "source_url": "https://www.kln.gov.my/web/usa_los-angeles/post/visa-application-for-refugee-and-re-entry-permit-travel-document",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "usa_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "American citizens do not require a visa to visit Malaysia for business or social reasons if their stay in Malaysia is 90 days or less."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.kln.gov.my/web/usa_los-angeles/post/visa-application-for-refugee-and-re-entry-permit-travel-document",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "usa_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "American citizens do not require a visa to visit Malaysia for business or social reasons if their stay in Malaysia is 90 days or less."
+        },
+        "source_url": {
+          "source_url": "https://www.kln.gov.my/web/usa_los-angeles/post/visa-application-for-refugee-and-re-entry-permit-travel-document",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "usa_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "American citizens do not require a visa to visit Malaysia for business or social reasons if their stay in Malaysia is 90 days or less."
+        },
+        "passport_validity": {
+          "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_pdf",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Documents must be valid for six months or more from the date of entry into Malaysia."
+        },
+        "required_documents": {
+          "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_pdf",
+          "supporting_evidence": [
+            {
+              "source_id": "entry_tourists",
+              "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+              "quote": "Possess a valid return ticket to their home country or an onward ticket to a next destination country."
+            },
+            {
+              "source_id": "entry_tourists",
+              "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+              "quote": "Possess proof of accommodation booking or confirmed lodging arrangements for the duration of the stay in Malaysia."
+            },
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+            },
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+            }
+          ],
+          "additional_quotes": [
+            "Every visitor is also required to prove the financial ability to declare himself in Malaysia along with a fixed return ticket to return to his home country or to another country."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Documents must be valid for six months or more from the date of entry into Malaysia."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_tourists",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Possess a valid return ticket to their home country or an onward ticket to a next destination country."
+        },
+        "accommodation_evidence": {
+          "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_tourists",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Possess proof of accommodation booking or confirmed lodging arrangements for the duration of the stay in Malaysia."
+        },
+        "financial_evidence": {
+          "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_pdf",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Every visitor is also required to prove the financial ability to declare himself in Malaysia along with a fixed return ticket to return to his home country or to another country."
+        },
+        "insurance_required": {
+          "source_url": "https://www.tourism.gov.my/media/view/malaysia-relaxes-covid-19-testing-rules-travel-insurance-for-inbound-travellers",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "insurance",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Travel insurance will also not be a prerequisite for foreigners entering the country."
+        },
+        "exceptions": {
+          "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "mdac_scope",
+          "supporting_evidence": [
+            {
+              "source_id": "extension",
+              "source_url": "https://www.imi.gov.my/index.php/en/main-services/pass/visitor-pass/social-visit-pass/short-term-social-visit-pass/",
+              "quote": "An Extension may be given on Special consideration e.g. due to illness, accident, war in home country etc. The visitor must furnish evidence, and also present a confirmed return ticket to their home country or third country."
+            }
+          ],
+          "additional_quotes": [
+            "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+          ],
+          "status": "partial",
+          "verification_scope": "changed_elements_only",
+          "verified_elements": [
+            "Extensions of the Short Term Social Visit Pass may be considered for special circumstances such as illness, accident or war in the home country. Supporting evidence and a confirmed ticket to the home country or a third country are required.",
+            "For this ordinary-passport tourist route, complete MDAC unless you hold Malaysian permanent residence or a Malaysian long-term pass. Diplomatic and official passports have a separate exemption. The published MDAC exemption list does not contain a child-under-three exemption."
+          ],
+          "retained_unverified_elements": [
+            "Entry is at the discretion of Malaysian immigration officers"
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+        },
+        "photo_requirements": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "No standalone photo requirement for this visa-exempt MDAC route was established by the reviewed official sources. Visa-application photo instructions are not evidence for an exempt visit.",
+          "status": "unknown",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          }
+        },
+        "biometrics_required": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "These sources do not settle whether this visitor must give biometrics at immigration. A visa exemption does not prove that border biometrics are unnecessary.",
+          "status": "unknown",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          }
+        }
+      },
+      "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+      "route": {
+        "nationality": "USA",
+        "destination": "MYS",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "major-malaysia-fields-20260910"
+    }
+  ],
+  "status": "detached; exact-layer preflight required"
+}

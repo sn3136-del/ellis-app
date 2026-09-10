@@ -135,6 +135,60 @@ def field_program_matches(name, quote, guidance):
     return True
 
 
+
+def field_workflow_matches(name, quote, guidance, route, *, confirmation=False):
+    """A consular appointment is not an entry condition for an exempt visit.
+
+    This gate only scopes the route-level appointment field for a currently
+    no-application exemption. Other products and genuine changes to the
+    default verdict use the existing proof/dispute path. A rejected passage
+    remains a failed source check; it neither changes policy nor renews TTL.
+    """
+    if (name != 'appointment_required'
+            or guidance.get('disposition') != 'VISA_EXEMPT'
+            or guidance.get('application_channel') not in {'none', 'not_required'}):
+        return True
+    if not isinstance(quote, str):
+        return False
+    # A heading elsewhere on the page cannot lend scope to its footer. The
+    # appointment and exempt journey must be in the same bounded clause.
+    for clause in re.split(r'[.!?;\n]+', quote):
+        if len(clause) > 650 or not re.search(r'\bappointments?\b', clause, re.I):
+            continue
+        if not re.search(r'\bvisa[- ](?:free|exempt)\b|\bvisa exemption\b', clause, re.I):
+            continue
+        # These are separate applications, not the default short exempt visit.
+        if re.search(r'\b(?:certificate|extension|renewal|longer stays?|'
+                     r'employment|work visa|student visa|unlike|except|excluding|optional|choose|choosing|'
+                     r'consular visa|tourist visa|paper visa|visa applicants?|applying for (?:a )?visa|'
+                     r'consular services?|legali[sz]ation|attestation|notari[sz]ation|residence visa|resident visa|'
+                     r'applying for (?:a )?residence permit)\b', clause, re.I):
+            continue
+        if not re.search(r'\b(?:travel(?:l)?ers?|visitors?|tourists?|citizens?|nationals?|'
+                         r'passport holders?|entry|travel|visits?)\b', clause, re.I):
+            continue
+        entry = re.search(r'\b(?:before|prior to) (?:entry|arrival|travel)\b|'
+                          r'\b(?:for|to) (?:visa[- ]free )?entry\b|\badmission\b', clause, re.I)
+        if not entry:
+            continue
+        # An independent service/activity is the purpose of the
+        # appointment, not an admission rule ("before travel for a museum
+        # visit"). Retain actual journey purposes and entry conditions.
+        purposes = re.findall(r'\bfor\s+(?:(?:a|an|the)\s+)?([^,]+)', clause, re.I)
+        if any(not re.match(r'(?:tourism|business|leisure|holidays?|family visits?|tourist visits?|'
+                            r'entry|entering|arrival|admission|travel|appointments?|'
+                            r'visa[- ](?:free|exempt))\b', purpose, re.I) for purpose in purposes):
+            continue
+        # A scoped conditional rule may need adjudication, but cannot prove
+        # an unconditional stored Boolean. The full quote stays in the issue.
+        if confirmation and re.search(r'\b(?:who|if|when|unless|only|provided|subject to)\b', clause, re.I):
+            continue
+        # Reuse the explicit nationality/document/purpose exclusions. The
+        # legacy helper's visa_products branch performs those scope checks.
+        if field_scope_matches_route('visa_products', clause, route):
+            return True
+    return False
+
 def needs_program_scope(guidance):
     return guidance.get('disposition') == 'ELECTRONIC_AUTHORIZATION_REQUIRED'
 

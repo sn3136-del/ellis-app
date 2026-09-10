@@ -90,6 +90,18 @@ answer saying THIS nationality must use an accredited agency, and a generic
 the applicant's country) and states the rule for them. When the page is
 generic, treat those fields as unaddressed and leave them alone.
 
+APPLICATION WORKFLOW. Route fields describe the default entry product, not
+all optional products on the page. An embassy's office hours or appointment
+notice for consular visa applicants does not contradict appointment_required
+false for a visa-free, no-application visit. Quote an appointment rule that
+explicitly applies to the default exempt journey; otherwise leave that field
+unaddressed. A genuine changed entry condition or changed default visa verdict
+must still be reported with its own scoped evidence. Empty workflow values
+(null, empty text or empty lists) are missing extraction, not a claim that old
+instructions were withdrawn. Report an actual changed rule with its value and
+quote instead. The legacy online_application channel and online_portal describe
+the same filing channel; a spelling change alone is not a policy conflict.
+
 MONEY, VALIDITY AND STAY ARE THE HIGHEST-VALUE CHECKS. Government fees and
 validity periods change by law and the stored answer's figure may predate the
 change: a 2026 audit found a stored GBP 10 where the page said GBP 20, a
@@ -397,6 +409,30 @@ def _enum_proposal_errors(raw: dict) -> list[str]:
                   and not (isinstance(fields[k], str) and fields[k] in allowed))
 
 
+
+def _empty_workflow_proposal_errors(raw):
+    # Missing extraction is not an official claim that a published workflow
+    # ceased to exist. Report explicit changes under their actual value;
+    # empty readings remain failed checks, never route-policy disputes.
+    fields = raw.get('corrected_fields')
+    workflow = {'application_channel', 'application_channel_detail',
+                'account_registration_steps', 'payment_process',
+                'submission_process', 'appointment_required'}
+    if not isinstance(fields, dict):
+        return []
+    return sorted(k for k, v in fields.items() if k in workflow and
+                  (v is None or isinstance(v, (str, list, dict)) and not v))
+
+
+def _equivalent_workflow_aliases(guidance, quoted, evidence):
+    # One observed legacy spelling, not a policy change. Do not normalize raw
+    # storage or grant verification/TTL credit as a side effect of comparison.
+    if (guidance.get('application_channel') == 'online_application'
+            and quoted.get('application_channel') == 'online_portal'):
+        return {'application_channel': {'record_holds': 'online_application',
+            'value': 'online_portal', 'quote': evidence.get('application_channel')}}
+    return {}
+
 def _quoted_proposals(raw: dict, text: str, route: dict | None = None) -> tuple[dict, dict, list[str]]:
     fields = raw.get("corrected_fields") or {}
     evidence = raw.get("evidence") or {}
@@ -406,10 +442,11 @@ def _quoted_proposals(raw: dict, text: str, route: dict | None = None) -> tuple[
         evidence = {}
     quoted, unquoted = {}, []
     invalid_enums = set(_enum_proposal_errors(raw))
+    empty_workflow = set(_empty_workflow_proposal_errors(raw))
     for k, v in fields.items():
         if k not in OVERRIDABLE:
             continue
-        if k in invalid_enums:
+        if k in invalid_enums or k in empty_workflow:
             unquoted.append(k)
             continue
         if k == 'passport_validity_requirement':
@@ -660,15 +697,30 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         if not isinstance(answer, dict): answer = {}
         quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text, route)
         invalid_enums = _enum_proposal_errors(answer)
+        empty_workflow = _empty_workflow_proposal_errors(answer)
+        equivalent = _equivalent_workflow_aliases(guidance, quoted, evidence)
+        quoted = {k:v for k,v in quoted.items() if k not in equivalent}
+        workflow_candidate = dict(guidance, **({"disposition": quoted["disposition"]}
+            if "disposition" in quoted else {}))
+        workflow_rejected = {k: {'value': quoted.get(k, guidance.get(k)), 'quote': q}
+            for k, q in evidence.items() if not proof_helpers.field_workflow_matches(
+                k, q, workflow_candidate, route)}
+        quoted = {k: v for k, v in quoted.items() if k not in workflow_rejected}
         awaiting_adjudication = {k: {"value": v, "quote": evidence[k]}
                                 for k, v in quoted.items() if k in unresolved_fields}
         quoted = {k: v for k, v in quoted.items() if k not in unresolved_fields}
         unquoted_all.update(unquoted)
-        check = {'source_url': fr.final_url, 'outcome': 'validation_error' if invalid_enums else 'page_not_relevant', 'at': when,
+        check = {'source_url': fr.final_url, 'outcome': 'validation_error' if invalid_enums or empty_workflow or equivalent or workflow_rejected else 'page_not_relevant', 'at': when,
             'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
             'comparison_reused': reused, 'content_hash': fr.content_hash, 'verified_fields': [],
             'unquoted_fields': unquoted,
-            'validation_errors': [f'invalid enum proposal: {k}' for k in invalid_enums],
+            'validation_errors': ([f'invalid enum proposal: {k}' for k in invalid_enums]
+                + [f'unscoped default workflow evidence: {k}' for k in sorted(workflow_rejected)]
+                + [f'empty workflow proposal: {k}' for k in empty_workflow]
+                + [f'legacy workflow alias requires normalization: {k}' for k in sorted(equivalent)]),
+            'empty_workflow_fields': {k: {'value': (answer.get('corrected_fields') or {}).get(k), 'quote': evidence.get(k)} for k in empty_workflow},
+            'equivalent_legacy_fields': equivalent,
+            'rejected_workflow_fields': workflow_rejected,
             'awaiting_adjudication': awaiting_adjudication,
             'proposed_fields': {k: {'value': v, 'quote': evidence[k]} for k, v in quoted.items()}}
         source_checks.append(check)
@@ -842,7 +894,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                     and quote_in_text(quote, captures[fr.final_url]["text"])
                     and field_value_supported(key, value, quote)
                     and proof_helpers.field_scope_matches_route(key, quote, route)
-                    and proof_helpers.field_program_matches(key, quote, guidance)):
+                    and proof_helpers.field_program_matches(key, quote, guidance)
+                    and proof_helpers.field_workflow_matches(key, quote, guidance, route, confirmation=True)):
                 observations.append({"field": key, "source_url": fr.final_url,
                                      "value": value, "quote": quote})
                 if proposed[key] != value:
@@ -868,7 +921,12 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             continue
         if v == seen.get(k):
             continue
-        if k in protected or k in conflicts or v in (None, "", [], {}) or current.get(k) != original.get(k):
+        workflow_change = (k == 'appointment_required' and seen.get('disposition') == 'VISA_EXEMPT'
+                           and seen.get('application_channel') in {'none', 'not_required'})
+        if workflow_change or k in protected or k in conflicts or v in (None, "", [], {}) or current.get(k) != original.get(k):
+            # Changing a no-application visit into an appointment workflow
+            # needs review even when the old Boolean lacked an override.
+            # A conditional entry quote must never become an unqualified fact.
             disputed[k] = v
         else:
             applied[k] = v
@@ -921,13 +979,15 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                             and quote_in_text(quotes[k], source['text'])
                             and field_value_supported(k, seen[k], quotes[k])
                             and proof_helpers.field_scope_matches_route(k,quotes[k],route)
-                            and proof_helpers.field_program_matches(k,quotes[k],seen)}
+                            and proof_helpers.field_program_matches(k,quotes[k],seen)
+                            and proof_helpers.field_workflow_matches(k,quotes[k],seen,route,confirmation=True)}
         supported_fields.discard('disposition')
         supported_fields.difference_update(unresolved_fields)
         for key in (substantive & allowed) - {'disposition'} - unresolved_fields:
             reviewed = proof_helpers.reviewed_field_quote(key, seen[key], reviewed_fields,
                                                          source, fresh_sources, route)
-            if reviewed and proof_helpers.field_program_matches(key,reviewed[0],seen):
+            if (reviewed and proof_helpers.field_program_matches(key,reviewed[0],seen)
+                    and proof_helpers.field_workflow_matches(key,reviewed[0],seen,route,confirmation=True)):
                 supported_fields.add(key)
                 verified_field_sources[key] = {'source_url':fr.final_url, 'checked_at':when,
                     'quote':reviewed[0], 'supporting_evidence':reviewed[1]}
@@ -1127,6 +1187,7 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
     reviewed_fields, catalog = proof_helpers.reviewed_evidence(override, row.verification)
     source_override = dict(override or {}, supporting_sources=[{'id':k,'url':v} for k,v in catalog.items()])
     captures, candidates = {}, []
+    workflow_rejections = []
     deadline = time.monotonic() + ROUTE_BUDGET_SECONDS
     requested = {"visa_requirement": "disposition", "visa_fee_amount": "government_fee",
                  "visa_fee_currency": "government_fee", "visa_type": "visa_category",
@@ -1177,6 +1238,21 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
             outcome = "provider_error"
             continue
         quoted, evidence, unquoted = _quoted_proposals(raw, fr.content_text, route)
+        empty_workflow = _empty_workflow_proposal_errors(raw)
+        equivalent = _equivalent_workflow_aliases(guidance, quoted, evidence)
+        if empty_workflow or equivalent:
+            workflow_rejections.append({'source_url': fr.final_url,
+                'empty_fields': {k: {'value': (raw.get('corrected_fields') or {}).get(k), 'quote': evidence.get(k)} for k in empty_workflow},
+                'equivalent_legacy_fields': equivalent})
+        quoted = {k:v for k,v in quoted.items() if k not in equivalent}
+        workflow_candidate = dict(guidance, **({"disposition": quoted["disposition"]}
+            if "disposition" in quoted else {}))
+        rejected = {k: {'value': quoted.get(k, guidance.get(k)), 'quote': q}
+            for k, q in evidence.items() if not proof_helpers.field_workflow_matches(
+                k, q, workflow_candidate, route)}
+        if rejected:
+            workflow_rejections.append({'source_url': fr.final_url, 'fields': rejected})
+        quoted = {k:v for k,v in quoted.items() if k not in rejected}
         candidates.append((fr,raw,quoted,evidence,unquoted))
     fresh_sources = proof_helpers.source_map(captures,catalog)
     applicable, route_results, deferred = [], [], []
@@ -1218,7 +1294,8 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
                      isinstance(evidence.get(requested), str)
                      and quote_in_text(evidence[requested], fr.content_text)
                      and field_value_supported(requested, guidance.get(requested), evidence[requested])
-                     and proof_helpers.field_scope_matches_route(requested,evidence[requested],route)))
+                     and proof_helpers.field_scope_matches_route(requested,evidence[requested],route)
+                     and proof_helpers.field_workflow_matches(requested,evidence[requested],effective_candidate,route,confirmation=True)))
         proposal = {"outcome": "checked", "source_url": fr.final_url,
                     "checked_at": when,
                     "consistent": confirmed and raw.get("consistent") is True and not fields and not unquoted,
@@ -1229,6 +1306,12 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
                     "proposed_by": "ellis-ai"}
         if fields or confirmed or requested in awaiting_adjudication:
             break  # a proposal cites this exact source; no mixed-source claims
+    if workflow_rejections:
+        if not proposal or not (proposal.get('fields') or proposal.get('verified_fields')
+                                or proposal.get('awaiting_adjudication')):
+            proposal = {'outcome': 'validation_error', 'checked_at': when, 'consistent': False,
+                        'verified_fields': [], 'fields': {}}
+        proposal['rejected_workflow_fields'] = workflow_rejections
     issue.proposal = proposal or {"outcome": outcome, "checked_at": when}
     db.commit()
     return issue.proposal

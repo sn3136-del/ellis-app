@@ -497,6 +497,11 @@ def _set_stay(row: dict, text, days=None) -> None:
     calendar = unit in ("Month", "Year") or bool(_CALENDAR_MEASURE.search(raw))
     if raw:
         row["max_stay_text"] = raw
+    # An e-Pass assigns this traveller's stay. A later sentence may name a
+    # nationality's visa-free planning limit; it is not the individual grant.
+    if re.search(r'\bstay\s+(?:is\s+)?(?:determined|set)\s+by\s+(?:the\s+)?(?:duration\s+of\s+(?:the\s+)?)?(?:e[- ]?pass|visit pass)\b', raw, re.I):
+        row["max_stay_duration"], row["max_stay_unit"] = None, None
+        return
     scoped_days = _day_stay_with_separate_calendar_context(raw, days) if calendar else None
     if scoped_days is not None:
         row["max_stay_duration"], row["max_stay_unit"] = scoped_days, "Day"

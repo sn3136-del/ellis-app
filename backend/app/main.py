@@ -454,6 +454,7 @@ class DatabaseIssueUpdateIn(BaseModel):
     """An operator moving a flagged issue along."""
     status: str = ""          # acknowledged | corrected | dismissed
     resolution: str = ""
+    expected_issue_sha256: str | None = None
 
 
 # open -> acknowledged -> corrected | dismissed. An issue never silently
@@ -487,6 +488,8 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     row = db.get(DatabaseIssueReport, issue_id)
     if row is None:
         raise HTTPException(404, "no such issue")
+    from .visa_snapshot.issue_revision import check_revision, save_revision
+    original_revision = check_revision(row, body.expected_issue_sha256)
     if status in ("corrected", "dismissed") and not (body.resolution or "").strip():
         raise HTTPException(422, "say what was corrected, or why this is "
                                  "being dismissed")
@@ -544,7 +547,8 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
         row.published_at = now
     # The sourced edit has already changed the served projection in place.
     # Retain the raw row, its provenance and all existing references.
-    db.commit()
+    save_revision(db, row, original_revision)
+    # audit.record commits this same transaction, so status and audit persist together.
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_issue_" + status,
                  detail={"issue_id": issue_id}, actor=p.user_id)
@@ -1317,6 +1321,7 @@ def travel_database_issues(db=Depends(get_session),
     """The operator queue: what readers flagged, oldest first."""
     from sqlalchemy import select as _select
     from .visa_snapshot.models import DatabaseIssueReport
+    from .visa_snapshot.issue_revision import snapshot, revision_sha256
     require_quality_control(p)
     # NOT filtered by org. The Database is one shared knowledge base: a report
     # is feedback about a public government fact, carries no applicant data by
@@ -1331,6 +1336,7 @@ def travel_database_issues(db=Depends(get_session),
     # closure nobody can attribute is not traceable, which is the whole point
     # of the requirement.
     return {"issues": [{"id": r.id, "route": r.route, "field": r.field,
+                        "revision_sha256": revision_sha256(snapshot(r)),
                         "note": r.note, "status": r.status,
                         "resolution": r.resolution,
                         "reported_by": r.reported_by,

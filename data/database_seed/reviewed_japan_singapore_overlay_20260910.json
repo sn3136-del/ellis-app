@@ -1,0 +1,944 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "review_id": "japan-singapore-ordinary-tourism-20260910",
+  "entries": [
+    {
+      "fields": {
+        "government_fee": null,
+        "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "permitted_stay": "90 days",
+        "permitted_stay_days": 90,
+        "visa_products": [],
+        "arrival_card": {
+          "required": true,
+          "name": "Disembarkation card and customs declaration",
+          "submission_window": "Submit at immigration and customs on arrival. Visit Japan Web is the recommended online option; paper forms remain accepted."
+        },
+        "corroborating_sources": [
+          {
+            "url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+            "quote": "紙媒体の「外国人入国記録」を提出してください。",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.customs.go.jp/english/passenger/declaration/declaration_app.html",
+            "quote": "The existing paper version of the Customs Declaration Form can still be used",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "exceptions": [
+          "This route covers an ordinary HKSAR passport. Japan also exempts BNO passport holders who have the right of residence in Hong Kong; a BNO passport is not excluded categorically.",
+          "Maximum stay is 90 days; paid work is not permitted",
+          "Extension of stay is generally not allowed under visa-free entry",
+          "Japan’s Ministry of Justice stated on 28 August 2026 that preparations are for JESTA introduction during fiscal year 2028. That planned system is not a current 2026 application step."
+        ],
+        "passport_validity": "Valid for the duration of stay",
+        "passport_validity_requirement": {
+          "kind": "valid_through_departure",
+          "months": null
+        }
+      },
+      "source_url": "https://www.mofa.go.jp/mofaj/toko/visa/tetsuzuki/pagew_000001_02672.html",
+      "verified_at": "2026-09-01",
+      "verified_by": "Ellis source audit (validity and jurisdiction)",
+      "verifier": "ai",
+      "field_provenance": {
+        "government_fee": {
+          "source_url": "https://www.mofa.go.jp/mofaj/toko/visa/tetsuzuki/pagew_000001_02672.html",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | MOFA Japan visa exemption page: HKSAR passport holders are visa exempt for 90 days; the tourist visa products apply to mainland Chinese passports, not HKSAR"
+        },
+        "consular_jurisdiction": {
+          "source_url": "https://www.mofa.go.jp/mofaj/toko/visa/tetsuzuki/pagew_000001_02672.html",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | MOFA Japan visa exemption page: HKSAR passport holders are visa exempt for 90 days; the tourist visa products apply to mainland Chinese passports, not HKSAR"
+        },
+        "disposition": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "jpn_mofa",
+          "supporting_evidence": [
+            {
+              "source_id": "jpn_hongkong",
+              "source_url": "https://www.hk.emb-japan.go.jp/itpr_en/visa_Q_A.html",
+              "quote": "Please note that the Government of Japan requires a foreign national or citizen of the countries & territories with visa exemption, e.g. Hong Kong Special Administrative Region passport, Macau Special Administrative Region passport, British National Overseas passport w ith the right of residence in Hong Kong etc., to present a valid passport when entering and departing from Japan. There is not a “six months’ validity requirement” for foreign passports."
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "(Note 5) For citizens of Hong Kong, visas are not required only for holders of Special Administrative Region (SAR) passport issued by the Hong Kong SAR of the People’s Republic of China or British National Overseas (BNO) passports who have the right of residence in Hong Kong."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary HKSAR passport scope is already selected in the route. BNO residence qualification is stated separately; this is not a promise of landing permission and does not extend the rule to HKDI.",
+          "source_id": "jpn_mofa",
+          "supporting_evidence": [
+            {
+              "source_id": "jpn_hongkong",
+              "source_url": "https://www.hk.emb-japan.go.jp/itpr_en/visa_Q_A.html",
+              "quote": "Please note that the Government of Japan requires a foreign national or citizen of the countries & territories with visa exemption, e.g. Hong Kong Special Administrative Region passport, Macau Special Administrative Region passport, British National Overseas passport w ith the right of residence in Hong Kong etc., to present a valid passport when entering and departing from Japan. There is not a “six months’ validity requirement” for foreign passports."
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "(Note 5) For citizens of Hong Kong, visas are not required only for holders of Special Administrative Region (SAR) passport issued by the Hong Kong SAR of the People’s Republic of China or British National Overseas (BNO) passports who have the right of residence in Hong Kong."
+        },
+        "permitted_stay": {
+          "source_url": "https://www.mofa.go.jp/mofaj/toko/visa/tetsuzuki/pagew_000001_02672.html",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | MOFA Japan visa exemption page: HKSAR passport holders are visa exempt for 90 days; the tourist visa products apply to mainland Chinese passports, not HKSAR"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.mofa.go.jp/mofaj/toko/visa/tetsuzuki/pagew_000001_02672.html",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | MOFA Japan visa exemption page: HKSAR passport holders are visa exempt for 90 days; the tourist visa products apply to mainland Chinese passports, not HKSAR"
+        },
+        "visa_products": {
+          "source_url": "https://www.mofa.go.jp/mofaj/toko/visa/tetsuzuki/pagew_000001_02672.html",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | MOFA Japan visa exemption page: HKSAR passport holders are visa exempt for 90 days; the tourist visa products apply to mainland Chinese passports, not HKSAR"
+        },
+        "arrival_card": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: New foreign visitor entry only: required forms, optional digital submission. This field does not establish passport acceptance or visa eligibility."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: Add current arrival-form evidence without changing unrelated visa or passport eligibility."
+        },
+        "exceptions": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "jpn_mofa",
+          "supporting_evidence": [
+            {
+              "source_id": "jpn_jesta",
+              "source_url": "https://www.moj.go.jp/hisho/kouhou/hisho08_00982.html",
+              "quote": "ＪＥＳＴＡの２０２８年度中の導入に向けた準備作業"
+            }
+          ],
+          "status": "partial",
+          "verification_scope": "changed_elements_only",
+          "verified_elements": [
+            "This route covers an ordinary HKSAR passport. Japan also exempts BNO passport holders who have the right of residence in Hong Kong; a BNO passport is not excluded categorically.",
+            "Japan’s Ministry of Justice stated on 28 August 2026 that preparations are for JESTA introduction during fiscal year 2028. That planned system is not a current 2026 application step."
+          ],
+          "retained_unverified_elements": [
+            "Maximum stay is 90 days; paid work is not permitted",
+            "Extension of stay is generally not allowed under visa-free entry"
+          ],
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "(Note 5) For citizens of Hong Kong, visas are not required only for holders of Special Administrative Region (SAR) passport issued by the Hong Kong SAR of the People’s Republic of China or British National Overseas (BNO) passports who have the right of residence in Hong Kong."
+        },
+        "passport_validity": {
+          "source_url": "https://www.hk.emb-japan.go.jp/itpr_en/visa_Q_A.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "jpn_hongkong",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Please note that the Government of Japan requires a foreign national or citizen of the countries & territories with visa exemption, e.g. Hong Kong Special Administrative Region passport, Macau Special Administrative Region passport, British National Overseas passport w ith the right of residence in Hong Kong etc., to present a valid passport when entering and departing from Japan. There is not a “six months’ validity requirement” for foreign passports."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://www.hk.emb-japan.go.jp/itpr_en/visa_Q_A.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "jpn_hongkong",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Please note that the Government of Japan requires a foreign national or citizen of the countries & territories with visa exemption, e.g. Hong Kong Special Administrative Region passport, Macau Special Administrative Region passport, British National Overseas passport w ith the right of residence in Hong Kong etc., to present a valid passport when entering and departing from Japan. There is not a “six months’ validity requirement” for foreign passports."
+        }
+      },
+      "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | MOFA Japan visa exemption page: HKSAR passport holders are visa exempt for 90 days; the tourist visa products apply to mainland Chinese passports, not HKSAR",
+      "route": {
+        "nationality": "HKG",
+        "destination": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "japan-singapore-ordinary-tourism-20260910",
+      "partial_review": true
+    },
+    {
+      "fields": {
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "government_fee": {
+          "amount": 0,
+          "currency": "USD"
+        },
+        "exceptions": [
+          "Hong Kong Documents of Identity require a visa; this exemption applies to HKSAR passports.",
+          "The actual permitted stay and last permitted day are stated on the e-Pass issued at entry.",
+          "The SG Arrival Card is required within 3 days including arrival day, is free to submit and is not a visa.",
+          "Biometrics, such as fingerprints, facial or iris information, must be presented during immigration clearance; failure to comply may lead to denied entry.",
+          "A Visit Pass extension may be requested online for a stay beyond the granted period and is subject to approval."
+        ],
+        "visa_products": [
+          {
+            "type": "Visa exemption (visa-free entry)",
+            "entry": null,
+            "validity": null,
+            "max_stay_days": null,
+            "fee": {
+              "amount": 0,
+              "currency": "USD"
+            },
+            "notes": "Hong Kong SAR passport holders do not need an entry visa. ICA does not publish a fixed stay entitlement: the period of stay is determined by the Visit Pass (e-Pass) issued at the checkpoint upon entry. SG Arrival Card required; Hong Kong Document of Identity holders need a visa."
+          }
+        ],
+        "permitted_stay": "Actual permitted stay is determined by the e-Pass issued at entry. The Singapore Consulate-General in Hong Kong publishes visa-free social visits of up to 30 days for HKSAR passports. Depart by the last day stated on your e-Pass.",
+        "permitted_stay_days": null,
+        "passport_validity": "Passport must have at least 6 months of validity when entering Singapore.",
+        "passport_validity_requirement": {
+          "kind": "months_after_arrival",
+          "months": 6
+        },
+        "required_documents": [
+          "Individually issued passport with at least 6 months of validity on entry",
+          "Proof of onward travel (tickets and any applicable onward visa)",
+          "Sufficient cash for the stay",
+          "SG Arrival Card with electronic health declaration, submitted within 3 days including arrival day"
+        ],
+        "onward_travel_evidence": "Short-term visitors should have proof of onward travel, including tickets and any applicable onward visa.",
+        "financial_evidence": "Short-term visitors should have sufficient cash for their stay.",
+        "accommodation_evidence": null,
+        "biometrics_required": null,
+        "arrival_card": {
+          "required": true,
+          "name": "SG Arrival Card with Electronic Health Declaration",
+          "submission_window": "Submit within 3 days including the day of arrival, via ICA’s SGAC e-Service or MyICA Mobile app. Submission is free; the SG Arrival Card is not a visa."
+        },
+        "health_requirements": [
+          {
+            "name": "Yellow fever vaccination",
+            "applicability": "conditional",
+            "trigger_countries": [],
+            "trigger": "Travel in a yellow-fever risk country during the 6 days before arrival, including airport transit there lasting more than 12 hours",
+            "question": "During the 6 days before arrival, have you visited a yellow-fever risk country or spent more than 12 hours in airport transit there?"
+          }
+        ]
+      },
+      "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+      "verified_at": "2026-08-29",
+      "verified_by": "Ellis source audit",
+      "verifier": "ai",
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://hongkong.mfa.gov.sg/consular-services/visa-information/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_hongkong",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Hong Kong SAR and Macao SAR passports holders do not require a visa to enter Singapore for business or social visit purpose for up to 30 days."
+        },
+        "requirement_detail": {
+          "source_url": "https://hongkong.mfa.gov.sg/consular-services/visa-information/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_hongkong",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Hong Kong SAR and Macao SAR passports holders do not require a visa to enter Singapore for business or social visit purpose for up to 30 days."
+        },
+        "government_fee": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Verified on ICA's official visa requirements page (loaded twice: via fetch for the full list, via browser for the notes; page last updated 25 June 2026). The visa-required list of ~40 countries/documents does NOT include Hong Kong SAR passports - the only Hong Kong entry is 'A Document of Identity issued by Hong Kong Special Administrative Region', which does require a visa. So HKSAR ordinary pass"
+        },
+        "exceptions": {
+          "source_url": "https://hongkong.mfa.gov.sg/consular-services/visa-information/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_hongkong",
+          "supporting_evidence": [
+            {
+              "source_id": "sg_visa",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+              "quote": "The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit Pass issued to you in the form of electronic visit pass (e-Pass) at the checkpoint upon entry."
+            },
+            {
+              "source_id": "sg_arrival",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+              "quote": "You are required to submit the SGAC\nwithin three (3) days\n(including the day of arrival)\nbefore arrival in Singapore"
+            },
+            {
+              "source_id": "sg_arrival",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+              "quote": "SGAC submission is free of charge."
+            },
+            {
+              "source_id": "sg_arrival",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+              "quote": "The SG Arrival Card is not a visa."
+            },
+            {
+              "source_id": "sg_entry",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+              "quote": "You are required to present your biometrics (e.g. fingerprints, facial and iris) during immigration clearance. Travellers who fail to comply may be denied entry into Singapore."
+            },
+            {
+              "source_id": "sg_entry",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+              "quote": "Visitors who wish to stay beyond the period of stay granted can apply for a\nVisit Pass extension\nonline using the\ne-Service\n. Applications are subject to approval."
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The visa requirement is only necessary for HKSAR Document of Identity (DOI) holders as HKSAR passports and HKSAR DOIs are different sets of travel documents."
+        },
+        "visa_products": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Verified on ICA's official visa requirements page (loaded twice: via fetch for the full list, via browser for the notes; page last updated 25 June 2026). The visa-required list of ~40 countries/documents does NOT include Hong Kong SAR passports - the only Hong Kong entry is 'A Document of Identity issued by Hong Kong Special Administrative Region', which does require a visa. So HKSAR ordinary pass"
+        },
+        "permitted_stay": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_visa",
+          "supporting_evidence": [
+            {
+              "source_id": "sg_hongkong",
+              "source_url": "https://hongkong.mfa.gov.sg/consular-services/visa-information/",
+              "quote": "Hong Kong SAR and Macao SAR passports holders do not require a visa to enter Singapore for business or social visit purpose for up to 30 days."
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit Pass issued to you in the form of electronic visit pass (e-Pass) at the checkpoint upon entry."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "The individual allowed stay is assigned on the e-Pass; the separately attributed visa-free planning limit remains in the text. This null is not Not published or Not applicable.",
+          "source_id": "sg_visa",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit Pass issued to you in the form of electronic visit pass (e-Pass) at the checkpoint upon entry."
+        },
+        "passport_validity": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months."
+        },
+        "required_documents": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "supporting_evidence": [
+            {
+              "source_id": "sg_arrival",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+              "quote": "You are required to submit the SGAC\nwithin three (3) days\n(including the day of arrival)\nbefore arrival in Singapore"
+            }
+          ],
+          "additional_quotes": [
+            "All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months.",
+            "Short-Term travellers should have sufficient cash and proof of onward travel (tickets, visas), and ensure that you do not stay beyond your Visit Pass validity; which is different from Visa validity period."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "All travellers, regardless of age, must hold a valid individually-issued travel document as collective travel documents are not accepted; and"
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Short-Term travellers should have sufficient cash and proof of onward travel (tickets, visas), and ensure that you do not stay beyond your Visit Pass validity; which is different from Visa validity period."
+        },
+        "financial_evidence": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Short-Term travellers should have sufficient cash and proof of onward travel (tickets, visas), and ensure that you do not stay beyond your Visit Pass validity; which is different from Visa validity period."
+        },
+        "accommodation_evidence": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "No source reviewed here establishes a mandatory accommodation booking or an immigration request rule for these visa-exempt passport routes. Any SGAC address question is a different requirement; no Not published credit is claimed.",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "No source reviewed here establishes a mandatory accommodation booking or an immigration request rule for these visa-exempt passport routes. Any SGAC address question is a different requirement; no Not published credit is claimed."
+        },
+        "biometrics_required": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "The existing Boolean did not distinguish a visa-application biometric step from border immigration biometrics. The reviewed mandatory border rule is now explicit in exceptions; no blanket biometric exemption is asserted.",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "The existing Boolean did not distinguish a visa-application biometric step from border immigration biometrics. The reviewed mandatory border rule is now explicit in exceptions; no blanket biometric exemption is asserted."
+        },
+        "arrival_card": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_arrival",
+          "additional_quotes": [
+            "You can submit the SGAC via:\nSGAC e-Service\n(submit online here)\n; or\nMyICA Mobile application",
+            "SGAC submission is free of charge.",
+            "The SG Arrival Card is not a visa."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "You are required to submit the SGAC\nwithin three (3) days\n(including the day of arrival)\nbefore arrival in Singapore"
+        },
+        "health_requirements": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "partial",
+          "verification_scope": "changed_elements_only",
+          "verified_elements": [
+            {
+              "name": "Yellow fever vaccination",
+              "applicability": "conditional",
+              "trigger_countries": [],
+              "trigger": "Travel in a yellow-fever risk country during the 6 days before arrival, including airport transit there lasting more than 12 hours",
+              "question": "During the 6 days before arrival, have you visited a yellow-fever risk country or spent more than 12 hours in airport transit there?"
+            }
+          ],
+          "retained_unverified_elements": [],
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "All Travellers, including Singapore residents, with recent travel to countries with risk of yellow fever transmission (regardless of area, city or region) in the past six days prior to arrival in Singapore must produce a valid yellow fever vaccination certificate to the ICA officer upon arrival in Singapore. This requirement also applies to travellers who spent more than 12 hours in airport transit in these countries with risk of yellow fever transmission."
+        }
+      },
+      "note": "Verified on ICA's official visa requirements page (loaded twice: via fetch for the full list, via browser for the notes; page last updated 25 June 2026). The visa-required list of ~40 countries/documents does NOT include Hong Kong SAR passports - the only Hong Kong entry is 'A Document of Identity issued by Hong Kong Special Administrative Region', which does require a visa. So HKSAR ordinary pass",
+      "route": {
+        "nationality": "HKG",
+        "destination": "SGP",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "japan-singapore-ordinary-tourism-20260910",
+      "partial_review": true
+    },
+    {
+      "fields": {
+        "arrival_card": {
+          "required": true,
+          "name": "SG Arrival Card with Electronic Health Declaration",
+          "submission_window": "Submit within 3 days including the day of arrival, via ICA’s SGAC e-Service or MyICA Mobile app. Submission is free; the SG Arrival Card is not a visa."
+        },
+        "application_channel_detail": "No visa is needed, but the SG Arrival Card with the electronic health declaration must be submitted before arrival.",
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "permitted_stay": "Actual permitted stay is determined by the e-Pass issued at entry. The US State Department advises that US tourists do not need a visa for visits of 90 days or less; this is origin-country advice, not an individual Singapore pass grant. Depart by the last day stated on your e-Pass.",
+        "permitted_stay_days": null,
+        "passport_validity": "Passport must have at least 6 months of validity when entering Singapore.",
+        "passport_validity_requirement": {
+          "kind": "months_after_arrival",
+          "months": 6
+        },
+        "required_documents": [
+          "Individually issued passport with at least 6 months of validity on entry",
+          "Proof of onward travel (tickets and any applicable onward visa)",
+          "Sufficient cash for the stay",
+          "SG Arrival Card with electronic health declaration, submitted within 3 days including arrival day"
+        ],
+        "onward_travel_evidence": "Short-term visitors should have proof of onward travel, including tickets and any applicable onward visa.",
+        "financial_evidence": "Short-term visitors should have sufficient cash for their stay.",
+        "accommodation_evidence": null,
+        "biometrics_required": null,
+        "exceptions": [
+          "The actual permitted stay and last permitted day are stated on the e-Pass issued at entry.",
+          "The SG Arrival Card is required within 3 days including arrival day, is free to submit and is not a visa.",
+          "Biometrics, such as fingerprints, facial or iris information, must be presented during immigration clearance; failure to comply may lead to denied entry.",
+          "A Visit Pass extension may be requested online for a stay beyond the granted period and is subject to approval."
+        ],
+        "health_requirements": [
+          {
+            "name": "Yellow fever vaccination",
+            "applicability": "conditional",
+            "trigger_countries": [],
+            "trigger": "Travel in a yellow-fever risk country during the 6 days before arrival, including airport transit there lasting more than 12 hours",
+            "question": "During the 6 days before arrival, have you visited a yellow-fever risk country or spent more than 12 hours in airport transit there?"
+          },
+          {
+            "name": "COVID-19 measures",
+            "applicability": "not_applicable",
+            "trigger_countries": [],
+            "trigger": null,
+            "question": null
+          }
+        ]
+      },
+      "source_url": "https://eservices.ica.gov.sg/sgarrivalcard/",
+      "verified_at": "2026-08-22",
+      "verified_by": "Ellis source audit",
+      "verifier": "ai",
+      "field_provenance": {
+        "arrival_card": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_arrival",
+          "additional_quotes": [
+            "You can submit the SGAC via:\nSGAC e-Service\n(submit online here)\n; or\nMyICA Mobile application",
+            "SGAC submission is free of charge.",
+            "The SG Arrival Card is not a visa."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "You are required to submit the SGAC\nwithin three (3) days\n(including the day of arrival)\nbefore arrival in Singapore"
+        },
+        "application_channel_detail": {
+          "source_url": "https://eservices.ica.gov.sg/sgarrivalcard/",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Visa-free is correct, but every traveller must submit the SG Arrival Card before arrival and the model reported nothing to submit."
+        },
+        "disposition": {
+          "source_url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_washington",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "US Passport Holders (regular, official and diplomatic) do not require a visa to enter Singapore for business or for social visit purposes. They must, however, meet the entry requirements as mentioned above."
+        },
+        "requirement_detail": {
+          "source_url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_washington",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "US Passport Holders (regular, official and diplomatic) do not require a visa to enter Singapore for business or for social visit purposes. They must, however, meet the entry requirements as mentioned above."
+        },
+        "permitted_stay": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_visa",
+          "supporting_evidence": [
+            {
+              "source_id": "sg_washington",
+              "source_url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
+              "quote": "US Passport Holders (regular, official and diplomatic) do not require a visa to enter Singapore for business or for social visit purposes. They must, however, meet the entry requirements as mentioned above."
+            },
+            {
+              "source_id": "us_state_sgp",
+              "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/singapore.html",
+              "quote": "No visa is required for 90 days or less."
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit Pass issued to you in the form of electronic visit pass (e-Pass) at the checkpoint upon entry."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "The individual allowed stay is assigned on the e-Pass; the separately attributed visa-free planning limit remains in the text. This null is not Not published or Not applicable.",
+          "source_id": "sg_visa",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit Pass issued to you in the form of electronic visit pass (e-Pass) at the checkpoint upon entry."
+        },
+        "passport_validity": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months."
+        },
+        "required_documents": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "supporting_evidence": [
+            {
+              "source_id": "sg_arrival",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+              "quote": "You are required to submit the SGAC\nwithin three (3) days\n(including the day of arrival)\nbefore arrival in Singapore"
+            }
+          ],
+          "additional_quotes": [
+            "All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months.",
+            "Short-Term travellers should have sufficient cash and proof of onward travel (tickets, visas), and ensure that you do not stay beyond your Visit Pass validity; which is different from Visa validity period."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "All travellers, regardless of age, must hold a valid individually-issued travel document as collective travel documents are not accepted; and"
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Short-Term travellers should have sufficient cash and proof of onward travel (tickets, visas), and ensure that you do not stay beyond your Visit Pass validity; which is different from Visa validity period."
+        },
+        "financial_evidence": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Short-Term travellers should have sufficient cash and proof of onward travel (tickets, visas), and ensure that you do not stay beyond your Visit Pass validity; which is different from Visa validity period."
+        },
+        "accommodation_evidence": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "No source reviewed here establishes a mandatory accommodation booking or an immigration request rule for these visa-exempt passport routes. Any SGAC address question is a different requirement; no Not published credit is claimed.",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "No source reviewed here establishes a mandatory accommodation booking or an immigration request rule for these visa-exempt passport routes. Any SGAC address question is a different requirement; no Not published credit is claimed."
+        },
+        "biometrics_required": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "The existing Boolean did not distinguish a visa-application biometric step from border immigration biometrics. The reviewed mandatory border rule is now explicit in exceptions; no blanket biometric exemption is asserted.",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "The existing Boolean did not distinguish a visa-application biometric step from border immigration biometrics. The reviewed mandatory border rule is now explicit in exceptions; no blanket biometric exemption is asserted."
+        },
+        "exceptions": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_visa",
+          "supporting_evidence": [
+            {
+              "source_id": "sg_arrival",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+              "quote": "You are required to submit the SGAC\nwithin three (3) days\n(including the day of arrival)\nbefore arrival in Singapore"
+            },
+            {
+              "source_id": "sg_arrival",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+              "quote": "SGAC submission is free of charge."
+            },
+            {
+              "source_id": "sg_arrival",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+              "quote": "The SG Arrival Card is not a visa."
+            },
+            {
+              "source_id": "sg_entry",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+              "quote": "You are required to present your biometrics (e.g. fingerprints, facial and iris) during immigration clearance. Travellers who fail to comply may be denied entry into Singapore."
+            },
+            {
+              "source_id": "sg_entry",
+              "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+              "quote": "Visitors who wish to stay beyond the period of stay granted can apply for a\nVisit Pass extension\nonline using the\ne-Service\n. Applications are subject to approval."
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit Pass issued to you in the form of electronic visit pass (e-Pass) at the checkpoint upon entry."
+        },
+        "health_requirements": {
+          "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-tourism field; each cited source retains its own government ownership. No other fact, product, policy expiry or freshness claim is reviewed.",
+          "source_id": "sg_entry",
+          "status": "partial",
+          "verification_scope": "changed_elements_only",
+          "verified_elements": [
+            {
+              "name": "Yellow fever vaccination",
+              "applicability": "conditional",
+              "trigger_countries": [],
+              "trigger": "Travel in a yellow-fever risk country during the 6 days before arrival, including airport transit there lasting more than 12 hours",
+              "question": "During the 6 days before arrival, have you visited a yellow-fever risk country or spent more than 12 hours in airport transit there?"
+            }
+          ],
+          "retained_unverified_elements": [
+            {
+              "name": "COVID-19 measures",
+              "applicability": "not_applicable",
+              "trigger_countries": [],
+              "trigger": null,
+              "question": null
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "SGP",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "All Travellers, including Singapore residents, with recent travel to countries with risk of yellow fever transmission (regardless of area, city or region) in the past six days prior to arrival in Singapore must produce a valid yellow fever vaccination certificate to the ICA officer upon arrival in Singapore. This requirement also applies to travellers who spent more than 12 hours in airport transit in these countries with risk of yellow fever transmission."
+        }
+      },
+      "note": "Visa-free is correct, but every traveller must submit the SG Arrival Card before arrival and the model reported nothing to submit.",
+      "route": {
+        "nationality": "USA",
+        "destination": "SGP",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "japan-singapore-ordinary-tourism-20260910",
+      "partial_review": true
+    }
+  ],
+  "status": "detached; exact-layer deployment preflight required"
+}
