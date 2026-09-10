@@ -60,11 +60,11 @@ def test_the_25_field_record_speaks_their_dictionary_exactly():
     # an audit of every such record found 19 of 21 wrong (superseded fees,
     # products the destination does not issue, visas demanded of exempt
     # travellers). Once the official page has been read and agrees, the same
-    # answer is Medium.
+    # answer can be High once its required fields are complete and checked.
     assert r["confidence_level"] == "Low"
     ok = tstation.records_for_route(route, ANSWER, None, "2026-08-27T00:00:00",
                                     grounded_ok=True)
-    assert ok[0]["confidence_level"] == "Medium"
+    assert ok[0]["confidence_level"] == "Low"  # Verdict-only grounding cannot certify all filled fields.
     bare = {k: v for k, v in ANSWER.items()
             if k not in ("source_url", "official_portal_url")}
     low = tstation.records_for_route(route, bare, None, "2026-08-27T00:00:00")
@@ -82,7 +82,7 @@ def test_visa_free_yields_one_clean_record_and_human_check_is_high():
          "permitted_stay_days": 30, "confidence": "high"}
     prov = {"source_url": "https://cs.mfa.gov.cn/x", "verified_at": "2026-08-22",
             "verified_by": "Ellis operator", "verifier": "human",
-            "fields": ["disposition"], "note": "Official page confirms the exemption."}
+            "fields": ["disposition", "permitted_stay_days"], "note": "Official page confirms the exemption."}
     rows = tstation.records_for_route(route, g, prov,
                                       valid_until="2026-11-20T00:00:00")
     assert len(rows) == 1

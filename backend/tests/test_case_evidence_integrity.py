@@ -189,11 +189,11 @@ def test_gate_does_not_reclassify_cases_without_saved_route_guidance(db, isolate
     assert ensure_current_case_guidance(db, SimpleNamespace(id="no-route-case"), for_filing=True) is None
 
 
-@pytest.mark.parametrize("verified_fields,expected_grade", [
-    (["government_fee"], "Low"), (["disposition"], "Medium"),
+@pytest.mark.parametrize("verified_fields,verdict_supported", [
+    (["government_fee"], False), (["disposition"], True),
 ])
 def test_lookup_records_and_freshness_share_the_verdict_evidence_contract(
-        client, db, isolated, monkeypatch, verified_fields, expected_grade):
+        client, db, isolated, monkeypatch, verified_fields, verdict_supported):
     from app.visa_snapshot.models import KimiRouteGuidanceCache
     from app.visa_snapshot.freshness import EVIDENCE_CONTRACT
     route = dict(ANSWERS, passport_nationality="ISL", passport_issuing_country="ISL",
@@ -219,11 +219,11 @@ def test_lookup_records_and_freshness_share_the_verdict_evidence_contract(
                          params={"nationality": "ISL", "destination": "NRU"}).json()["records"]
     freshness = client.get("/database/freshness", headers=admin).json()
     record = next(r for r in freshness["answers"] if r["cache_key"] == key)
-    assert records and {r["confidence_level"] for r in records} == {expected_grade}
-    assert bool(lookup["held"]) == (expected_grade == "Low")
-    assert record["grounded"] == (expected_grade == "Medium")
+    assert records and {r["confidence_level"] for r in records} == {"Low"}  # Partial field verification is Low under binary grading.
+    assert bool(lookup["held"]) == (not verdict_supported)
+    assert record["grounded"] == verdict_supported
     assert {r["source_check"] for r in records} == {
-        "reference" if expected_grade == "Low" else "grounded-consistent"}
+        "reference" if not verdict_supported else "grounded-consistent"}
 
 
 @pytest.mark.parametrize("verification,held", [
@@ -262,7 +262,7 @@ def test_each_product_exposes_the_whole_routes_held_status(client, db, isolated,
         params={"nationality": "USA", "destination": "SGP"}).json()["records"]
     lookup = client.post("/database/lookup", headers=HEADERS,
                          json={"nationality": "USA", "destination": "SGP"}).json()
-    assert {r["confidence_level"] for r in records} == {"Medium", "Low"}
+    assert {r["confidence_level"] for r in records} == {"Low"}
     assert lookup["held"] == held
     assert (lookup["guidance"] is None) == held
     assert all(r["held"] == held and r["review_required"] == held for r in records)

@@ -94,7 +94,7 @@ def test_malaysian_russia_correction_exposes_only_supported_products(monkeypatch
            "government_fee": {"amount": 0, "currency": None}, "visa_products": [], "confidence": "high"}
     out = kp.apply_verified_overrides(kp._result(kp.STATUS_PRIMARY, raw, cached=True, stale=False), rt)
     out = apply_records_hold(rt, out)
-    assert not out["held"]
+    assert not out["held"]  # Binary grading preserves the existing source/conflict release boundary.
     g = out["guidance"]
     assert g["disposition"] == "VISA_REQUIRED" and g["requirement_detail"] == "evisa"
     assert g["permitted_stay_days"] == 30
@@ -187,3 +187,42 @@ def test_operator_cannot_authorise_eta_for_certificate_of_identity(monkeypatch, 
         assert path.read_bytes() == before
     finally:
         vo.reload()
+
+
+@pytest.mark.parametrize('detail', [None, 'unconditional_visa_free', 'eta_electronic_authorization'])
+def test_indonesian_korea_independent_tourism_cannot_be_visa_free_or_keta(monkeypatch, detail):
+    monkeypatch.setattr(vo, 'find', lambda _: None)
+    g = {'disposition': 'VISA_EXEMPT', 'requirement_detail': detail,
+         'permitted_stay_days': 90, 'government_fee': {'amount': 0, 'currency': 'USD'},
+         'confidence': 'high', 'source_url': 'https://www.k-eta.go.kr/'}
+    rt = route('IDN', 'KOR')
+    out = kp.apply_verified_overrides(kp._result(kp.STATUS_PRIMARY, g,
+        cached=True, stale=False, released=True), rt)
+    assert out['held'] and out['review_required']
+    assert any('Indonesian ordinary-passport' in s for s in out['contradictions'])
+
+
+def test_indonesia_korea_guard_keeps_c39_and_conditional_exemptions_distinct():
+    rt = route('IDN', 'KOR')
+    visa = {'disposition': 'VISA_REQUIRED', 'requirement_detail': 'paper_visa',
+            'visa_category': 'Short-term tourist visa (C-3-9)'}
+    assert not pe.issues(visa, rt)
+    for detail in ('conditional_visa_free', 'transit_visa_free'):
+        assert not pe.issues({'disposition': 'CONDITIONAL', 'requirement_detail': detail}, rt)
+    assert pe.issues(dict(visa, visa_products=[{'type': 'K-ETA'}]), rt)
+    assert not pe.issues({'disposition': 'VISA_EXEMPT'}, route('MYS', 'KOR'))
+    assert not pe.issues({'disposition': 'VISA_EXEMPT'}, route('IDN', 'KOR', 'diplomatic_passport'))
+
+
+def test_shipped_indonesia_korea_rule_replaces_old_visa_free_answer(monkeypatch):
+    monkeypatch.setenv('ELLIS_OPERATOR_OVERRIDES', '/nonexistent/indonesia-regression.json')
+    vo.reload()
+    old = {'disposition': 'VISA_EXEMPT', 'permitted_stay_days': 90, 'confidence': 'high'}
+    for extra in ({}, {'arrival_date': '2026-12-01'}, {'lawful_country_of_residence': 'SGP'}):
+        rt = dict(route('IDN', 'KOR'), **extra)
+        out = kp.apply_verified_overrides(kp._result(kp.STATUS_PRIMARY, old,
+            cached=True, stale=False), rt)
+        assert out['guidance']['disposition'] == 'VISA_REQUIRED'
+        assert 'C-3-9' in out['guidance']['visa_category']
+        assert 'independent tourists' in ' '.join(out['guidance']['exceptions'])
+    vo.reload()

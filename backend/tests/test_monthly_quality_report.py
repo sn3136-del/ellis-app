@@ -26,7 +26,7 @@ def payload():
     return {'fields': ['visa_requirement', 'visa_fee'],
         'required_fields': ['visa_requirement', 'visa_fee'],
         'records': [row('pending-review', 'unchecked', True, 'Low'),
-                    row('filled', 'ai-quote', False, 'Medium')],
+                    row('filled', 'ai-quote', False, 'High')],
         'summary': {'total': 2, 'source_coverage': 0.5}}
 
 
@@ -38,7 +38,7 @@ def config(token='private-' + 's' * 48):
 def test_counts_pending_separately_and_links_never_equal_source_evidence(report):
     out = report.quality_metrics(payload(), datetime(2026, 9, 9, tzinfo=timezone.utc))
     assert out['field_completeness_pct'] == 75
-    assert out['record_completeness_pct'] == out['medium_plus_pct'] == 50
+    assert out['record_completeness_pct'] == out['high_confidence_pct'] == 50
     assert out['source_link_coverage_pct'] == 100 and out['source_coverage_pct'] == 50
     assert out['held_records'] == out['pending_review_records'] == 1
     assert out['field_counts']['filled'] == 3 and out['field_counts']['pending-review'] == 1

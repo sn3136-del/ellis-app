@@ -55,7 +55,7 @@ def test_thai_tourism_is_visitor_600_and_does_not_inherit_eta_machinery(shipped)
     assert records[0]['visa_requirement'] == 'Visa Required in Advance'
     assert records[0]['visa_fee_amount'] == 250 and records[0]['visa_fee_qualifier'] == 'from'
     assert records[0]['max_stay_duration'] is None and '3 months' in records[0]['max_stay_text']
-    assert records[0]['confidence_level'] == 'Medium'
+    assert records[0]['confidence_level'] == 'Low'  # Required field verification is incomplete.
 
 def test_indonesian_independent_tourist_is_not_blanket_visa_free(shipped):
     raw = dict(disposition='VISA_EXEMPT',requirement_detail='unconditional_visa_free',

@@ -1447,7 +1447,7 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
         }, db)
         for rec in tstation.records_for_route(route, g, prov, collected, until,
                                               grounded_ok=_grounded,
-                                              disputed_fields=_disputed_now):
+                                              disputed_fields=_disputed_now, grounded_fields=_gc.get("verified_fields")):
             if not rec.get("source_url") and not rec.get("_separate_permission"):
                 # The destination's browser-verified official portal is the
                 # official reference page for a record whose answer carries
@@ -1593,7 +1593,6 @@ def travel_database_records(nationality: str = "", destination: str = "",
             "summary": {"total": len(rows), "complete": complete,
                         "completeness_rate": round(complete / len(rows), 4) if rows else None,
                         "high": sum(1 for r in rows if r.get("confidence_level") == "High"),
-                        "medium": sum(1 for r in rows if r.get("confidence_level") == "Medium"),
                         "low": sum(1 for r in rows if r.get("confidence_level") == "Low"),
                         "source_coverage": round(sum(1 for r in rows if r.get("_source_check") in ("human-quote", "ai-quote", "grounded-consistent")) / len(rows), 4) if rows else None,
                         "source_link_coverage": round(sum(1 for r in rows if r.get("source_url")) / len(rows), 4) if rows else None,

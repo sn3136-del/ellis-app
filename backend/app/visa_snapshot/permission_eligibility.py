@@ -56,6 +56,30 @@ def issues(guidance: dict, route: dict) -> list[str]:
     products = guidance.get("visa_products")
     products = products if isinstance(products, list) else []
     out = []
+    # Indonesia is absent from the Ministry of Justice's K-ETA eligibility
+    # list. Independent tourists use C-3-9; approved group/Jeju/transit
+    # schemes are conditional exceptions, never unconditional 90-day entry.
+    # Keep this negative check scoped to the reviewed ordinary-passport
+    # tourism case; do not infer rules for diplomatic or other documents.
+    if (destination == "KOR" and nationality == "IDN" and
+            document in {"ordinary_passport", "ordinary", "passport"} and
+            str(route.get("travel_purpose") or "tourism").lower() == "tourism"):
+        names = " ".join(str(guidance.get(k) or "") for k in ("visa_category", "visa_label", "name"))
+        keta = (guidance.get("disposition") == "ELECTRONIC_AUTHORIZATION_REQUIRED" or
+                guidance.get("requirement_detail") == "eta_electronic_authorization" or
+                bool(re.search(r"\bk[ -]?eta\b", names, re.I)) or any(
+                    isinstance(p, dict) and (
+                        p.get("requirement_detail") == "eta_electronic_authorization" or
+                        bool(re.search(r"\bk[ -]?eta\b", str(p.get("type") or ""), re.I)))
+                    for p in products))
+        unconditional = (guidance.get("disposition") == "VISA_EXEMPT" and
+                         guidance.get("requirement_detail") not in {
+                             "conditional_visa_free", "transit_visa_free"})
+        if keta or unconditional:
+            out.append("product eligibility: Indonesian ordinary-passport independent tourism to Korea "
+                       "requires a visa; Indonesia is not K-ETA eligible. Jeju, transit and approved-group "
+                       "exemptions require their separate conditions (official list checked 2026-09-09: "
+                       "https://www.k-eta.go.kr/portal/guide/viewetaalification.do)")
     for program in PROGRAMS:
         if program.destination != destination:
             continue

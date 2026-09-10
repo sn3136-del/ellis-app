@@ -66,7 +66,7 @@ def quality_metrics(payload: dict, at: datetime) -> dict:
                 or not isinstance(row.get('review_required'), bool)):
             raise ValueError('A record has incomplete quality metadata')
         grade = str(row.get('confidence_level') or '').lower()
-        if grade not in {'high', 'medium', 'low'}:
+        if grade not in {'high', 'low'}:
             raise ValueError('A record has an unknown confidence level')
         all_counts.update(statuses[f] for f in fields)
         required_counts.update(statuses[f] for f in required)
@@ -93,7 +93,7 @@ def quality_metrics(payload: dict, at: datetime) -> dict:
     return {'at': at.astimezone(timezone.utc).isoformat(), 'records': total,
         'field_completeness_pct': pct(required_counts['filled'], required_denominator),
         'record_completeness_pct': pct(complete, total),
-        'medium_plus_pct': pct(confidence['high'] + confidence['medium'], total),
+        'high_confidence_pct': pct(confidence['high'], total),
         'source_coverage_pct': pct(source_checked, total),
         'source_link_coverage_pct': pct(source_links, total),
         'source_checked_records': source_checked, 'source_linked_records': source_links,
@@ -101,7 +101,7 @@ def quality_metrics(payload: dict, at: datetime) -> dict:
         'pending_review_records': pending_records,
         'field_counts': {s: all_counts[s] for s in STATES},
         'required_field_counts': {s: required_counts[s] for s in STATES},
-        'confidence_counts': {s: confidence[s] for s in ('high', 'medium', 'low')},
+        'confidence_counts': {s: confidence[s] for s in ('high', 'low')},
         'scope': 'Snapshot of records/products, not unique routes. Completeness counts filled applicable '
             'required fields; pending review is not filled. Source coverage counts supported visa-verdict '
             'evidence, not bare links. These metrics do not certify every detail or current policy accuracy.'}

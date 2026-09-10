@@ -1639,7 +1639,7 @@ def _transit_checks(db, route: dict, stopovers: list[str]) -> list[dict]:
             checks.append(check)
             continue
         if (not (verified_verdict or grounded) or disputed or problems or not records or
-                any(r.get("confidence_level") == "Low" for r in records)):
+                any(r.get("_evidence_low", r.get("confidence_level") == "Low") for r in records)):
             checks.append(check)
             continue
         source = (prov or {}).get("source_url") or gc.get("source_url")

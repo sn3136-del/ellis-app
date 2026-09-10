@@ -25,13 +25,13 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
     rows = tstation.records_for_route(
         route, out["guidance"], out.get("source_verified") or None,
         grounded_ok=grounded_verdict_supported(gc),
-        disputed_fields=disputed + problems)
+        disputed_fields=disputed + problems, grounded_fields=gc.get("verified_fields"))
     # An operator release cannot make a self-contradiction or a later
     # official-page dispute safe. All product rows count, not just the first.
     conflict = bool(problems or disputed or any(
         "no visa_products were listed" not in issue
         for issue in (out.get("contradictions") or [])))
-    low = any(r.get("confidence_level") == "Low" for r in rows)
+    low = any(r.get("_evidence_low", r.get("confidence_level") == "Low") for r in rows)
     pending = bool(out.get("detail_pending"))
     if conflict or pending or (low and not out.get("operator_released")):
         out["review_required"] = True

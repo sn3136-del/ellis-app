@@ -143,7 +143,7 @@ const RED = '#c62828'
 const BG = '#f6f8fb'
 const BORDER = '#e8edf4'
 
-const CONF_COLOR = { High: GREEN, Medium: AMBER, Low: RED }
+const CONF_COLOR = { High: GREEN, Low: RED }
 const PURPOSES = ['tourism', 'business', 'family_visit', 'study', 'work',
                   'transit', 'other']
 const PURPOSE_KEY = { tourism: 'db.purpose.tourism', business: 'db.purpose.business',
@@ -510,7 +510,7 @@ function RecoveredRecord({ rec, t }) {
     {history.map((row, i) => <details key={i}>
       <summary style={{ cursor: 'pointer', padding: '8px 0' }}>{row.visa_type_name}</summary>
       <dl style={{ fontSize: 12, overflowWrap: 'anywhere' }}>
-        {Object.entries(row).filter(([, value]) => value != null && value !== '').map(([field, value]) =>
+        {Object.entries(row).filter(([field, value]) => field !== 'confidence_level' && value != null && value !== '').map(([field, value]) =>
           <div key={field} style={{ marginBottom: 8 }}>
             <dt style={{ color: GRAY }}>{fx(t, field)}</dt>
             <dd style={{ marginLeft: 0 }}>{/^https?:\/\//.test(String(value))
@@ -693,7 +693,7 @@ function siteOf(url) {
   try { return new URL(url).hostname.replace(/^www\./, '') } catch { return url }
 }
 
-const CONF_RANK = { High: 3, Medium: 2, Low: 1 }
+const CONF_RANK = { High: 2, Low: 1 }
 const CHECK_RANK = { 'human-quote': 4, 'grounded-consistent': 3, 'ai-quote': 2,
                      reference: 1, unchecked: 0 }
 
@@ -2392,7 +2392,7 @@ function QualityWorkspace() {
         online_portal: t('ops.ch.online'), visa_center: t('ops.ch.center'),
       },
       confidence: {
-        high: t('ops.conf.high'), medium: t('ops.conf.medium'),
+        high: t('ops.conf.high'),
         low: t('ops.conf.low'),
       },
       visa_category: {
@@ -2660,7 +2660,6 @@ function QualityWorkspace() {
     if (!data?.summary) return null
     const t0 = filtered
     const high = t0.filter((r) => r.confidence_level === 'High').length
-    const medium = t0.filter((r) => r.confidence_level === 'Medium').length
     const low = t0.filter((r) => r.confidence_level === 'Low').length
     const complete = t0.filter((r) => r.completeness === 1).length
     // The standard defines completeness twice: section 6.1 counts filled
@@ -2698,7 +2697,7 @@ function QualityWorkspace() {
              record_completeness: t0.length ? complete / t0.length : null,
              source_coverage: t0.length ? src / t0.length : null,
              sourced: src,
-             substantiated: sub, high, medium, low }
+             substantiated: sub, high, low }
   }, [data, filtered])
   const records = filtered
   // Counts the FILTERED view, so picking High shows the High-only numbers.
@@ -2847,7 +2846,6 @@ function QualityWorkspace() {
                       style={{ ...input, color: filters.confidence ? NAVY : GRAY }}>
                 <option value="">{t('ops.anyConfidence')}</option>
                 <option value="High">{t('ops.conf.high')}</option>
-                <option value="Medium">{t('ops.conf.medium')}</option>
                 <option value="Low">{t('ops.conf.low')}</option>
               </select>
               </F>

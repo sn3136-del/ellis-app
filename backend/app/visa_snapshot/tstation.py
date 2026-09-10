@@ -128,7 +128,7 @@ FIELD_DESCRIPTIONS = {
     "info_validity": "Policy validity period until. Where the policy carries no "
                      "published end date, this is the date Ellis warrants the row "
                      "to and rechecks it against its official page",
-    "confidence_level": "High / Medium / Low",
+    "confidence_level": "High / Low",
 }
 
 _DISPOSITION_TO_REQUIREMENT = {
@@ -621,45 +621,25 @@ def verdict_provenance_supported(provenance: dict | None) -> bool:
 def _confidence(guidance: dict, provenance: dict | None,
                 grounded_ok: bool = False, *, complete: bool = True,
                 disputed: bool = False) -> str:
-    """The spec's own ladder: High is a single official source, complete, no
-    conflict (here: a person verified it against a named page). Medium is
-    official-source-backed but with gaps. Low is conflicting or NON-OFFICIAL
-    ONLY, which by definition includes an answer carrying no source URL at
-    all: the model's memory alone is not an official source.
+    """Two grades: complete official-source-checked records are High.
 
-    Every verdict needs an actual source check, including a productless
-    exemption. A URL attached to an unread claim is not a source."""
-    if disputed:
+    AI and human source checks use the same grade. Authorship stays in the
+    provenance; public edits, missing evidence, gaps and disputes remain Low.
+    A model's self-rating or an official URL alone is never verification.
+    """
+    if disputed or not complete:
         return "Low"
     if isinstance(provenance, dict) and (provenance.get("verifier") == "public" or
             any(isinstance(proof, dict) and proof.get("verifier") == "public"
                 for proof in (provenance.get("field_provenance") or {}).values())):
         return "Low"
     from .authority import hostname, is_government_host
-    fields = set((provenance or {}).get("fields") or [])
-    if provenance and "disposition" in fields:
-        # Their §4.2.3 ladder: High is a single official source, complete, and
-        # free of conflict. Provenance for an ancillary field cannot verify
-        # the verdict, and an AI source check cannot claim human authorship.
-        human = provenance.get("verifier", "ai") == "human"
-        official = is_government_host(hostname(str(provenance.get("source_url") or "")))
-        if not official:
-            return "Low"
-        evidence = verdict_provenance_supported(provenance)
-        if not evidence:
-            # A new automated source check can establish the verdict but
-            # cannot manufacture the missing human verification record.
-            return "Medium" if grounded_ok else "Low"
-        return "High" if human and complete else "Medium"
-    source = guidance.get("source_url") or guidance.get("official_portal_url")
+    source = (provenance or {}).get("source_url") or guidance.get("source_url") or guidance.get("official_portal_url")
     if not is_government_host(hostname(str(source or ""))):
         return "Low"
-    c = str(guidance.get("confidence") or "").lower()
-    if c == "low":
-        return "Low"
-    if not grounded_ok:
-        return "Low"
-    return "Medium"
+    if verdict_provenance_supported(provenance) or grounded_ok:
+        return "High"
+    return "Low"
 
 
 def _clean_text(v):
@@ -1281,11 +1261,41 @@ def _names_something_to_file(row: dict) -> bool:
     return bool(_FILINGS.search(text))
 
 
+def _required_values_supported(row: dict, g: dict, checked: set[str]) -> bool:
+    """A checked verdict cannot certify unrelated filled product fields."""
+    products = g.get("visa_products")
+    product = next((p for p in products if isinstance(p, dict) and
+                    p.get("type") == row.get("visa_type_name")), {}) if isinstance(products, list) else {}
+    # A separated product is passed as its own guidance dictionary.
+    if g.get("type") == row.get("visa_type_name"):
+        product = g
+    product_checked = "visa_products" in checked
+    def own(field):
+        return product_checked and product.get(field) not in (None, "", [], {})
+    exempt = row.get("visa_requirement") == "Visa-free"
+    stay_checked = bool(checked & {"permitted_stay", "permitted_stay_days"}) or own("max_stay_days") or own("permitted_stay")
+    checks = {
+        "visa_type_name": (exempt and "disposition" in checked) or "visa_category" in checked or product_checked,
+        "max_stay_duration": stay_checked,
+        "validity_duration": (stay_checked if exempt else own("validity") or "validity" in checked),
+        "entries": (exempt and "disposition" in checked) or own("entry") or product_checked,
+        "visa_fee_amount": (exempt and "disposition" in checked) or "government_fee" in checked or own("fee"),
+        "application_method": ("application_channel" in checked or own("application_channel") or
+                               own("application_channel_detail") or
+                               ("requirement_detail" in checked and row.get("visa_requirement_detail") in
+                                {"eVisa", "ETA Electronic Authorization", "Paper Visa on Arrival", "eVisa on Arrival"})),
+        "required_documents": ("required_documents" in checked or own("required_documents") or
+                               (exempt and row.get("required_documents") == "Valid passport" and "disposition" in checked)),
+    }
+    statuses = field_status(row)
+    return all(supported for field, supported in checks.items() if statuses.get(field) == "filled")
+
+
 def _regrade(row: dict, g: dict, disputed: list | None,
              unpublished: set | None = None) -> dict:
     """Apply their §4.2.3 ladder to the finished row.
 
-    High means a single official source, complete, and free of conflict. Only
+    High means official-source checked, complete, and free of conflict. Only
     the first of those is knowable before the row exists, which is why a
     record missing a required field, or carrying one its own official page
     disputes, was still being shown as High.
@@ -1295,6 +1305,9 @@ def _regrade(row: dict, g: dict, disputed: list | None,
         # No path emits this any more. Kept so a stale row can never say it.
         row["application_method"] = None
     prov, grounded = row.pop("_prov", None), row.pop("_grounded", False)
+    checked = set(row.pop("_grade_checked_fields", ()))
+    if verdict_provenance_supported(prov):
+        checked.update((prov or {}).get("fields") or ())
     timing = row.pop("_processing_note", None)
     if (timing and row.get("visa_requirement") != "Visa-free"
             and row.get("visa_requirement_detail") not in _VISA_FREE_DETAILS):
@@ -1305,8 +1318,15 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     st = field_status(row, unpublished)
     complete = not any(v == "missing" for v in st.values())
     conflicted = bool(disputed)
+    # Keep the pre-existing source/conflict publication boundary separate
+    # from the requested binary display grade. Missing fields never become
+    # invented values, but relabeling Medium must not create a new hold.
+    row["_evidence_low"] = _confidence(g, prov, grounded, complete=True,
+                                       disputed=conflicted) == "Low"
+    if not (prov and "disposition" in (prov.get("fields") or ())):
+        row["_evidence_low"] = row["_evidence_low"] or str(g.get("confidence") or "").lower() == "low"
     row["confidence_level"] = _confidence(g, prov,
-                                          grounded, complete=complete,
+                                          grounded, complete=complete and _required_values_supported(row, g, checked),
                                           disputed=conflicted)
     return row
 
@@ -1316,7 +1336,8 @@ def records_for_route(route: dict, guidance: dict,
                       collected_at: str | None = None,
                       valid_until: str | None = None,
                       grounded_ok: bool = False,
-                      disputed_fields: list | None = None) -> list[dict]:
+                      disputed_fields: list | None = None,
+                      grounded_fields: list | None = None) -> list[dict]:
     """The route's answer as T-Station 25-field records, one per visa
     product; a product-less route (visa-free, or detail still filling)
     yields a single route-level record."""
@@ -1418,6 +1439,8 @@ def records_for_route(route: dict, guidance: dict,
         # the second and third page a route was checked against.
         "corroborating_sources": _corroborating(g),
         "_prov": provenance, "_grounded": grounded_ok,
+        "_grade_checked_fields": sorted((set((provenance or {}).get("fields") or ()) if verdict_provenance_supported(provenance) else set()) |
+                                        (set(grounded_fields or ()) if grounded_ok else set())),
         "_disputed_fields": sorted(set(disputed_fields)),
         "_unpublished": sorted(_unpub),
     }
@@ -1497,6 +1520,7 @@ def records_for_route(route: dict, guidance: dict,
             product_unpublished = set(p.get("unpublished_fields") or [])
             row["_unpublished"] = sorted(product_unpublished)
             row["_prov"], row["_grounded"] = None, False
+            row["_grade_checked_fields"] = []
             row["_separate_permission"] = True
             row["_product_source_verified"] = None
             row["corroborating_sources"] = []
