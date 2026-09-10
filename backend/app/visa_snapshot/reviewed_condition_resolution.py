@@ -122,7 +122,8 @@ def _receipt_valid(db, row, current):
         return False
     expected = dict(hashes, contract=manifest['kind'], cache_key=row.cache_key,
                     row_id=row.id, generation=before['generated_at'],
-                    raw_sha256=_digest(row.guidance), prior_metadata_sha256=_digest(before))
+                    raw_sha256=_digest(row.guidance), route_sha256=_digest(row.route),
+                    prior_metadata_sha256=_digest(before))
     if set(receipt) != set(expected) | {'audit_id'} or any(receipt[k] != v for k, v in expected.items()):
         return False
     event = db.get(AuditEvent, receipt['audit_id'])
@@ -281,7 +282,7 @@ def resolve_pending(db, *, manifest_sha256, overlay_sha256, release_id):
     audit_id = uuid4().hex
     receipt = dict(current[3], contract=manifest['kind'], cache_key=row.cache_key, row_id=row.id,
                    generation=before['generated_at'], raw_sha256=_digest(row.guidance),
-                   prior_metadata_sha256=_digest(before), audit_id=audit_id)
+                   route_sha256=_digest(row.route), prior_metadata_sha256=_digest(before), audit_id=audit_id)
     verification = dict(deepcopy(row.verification), detail_pending=False, **{RECEIPT: receipt})
     clauses = _cas_clauses(db, row) + [~select(DatabaseIssueReport.id).where(
         DatabaseIssueReport.cache_key == row.cache_key,
@@ -336,7 +337,8 @@ check: restoring an owned pending hold does not require serving its claims.
     if (not isinstance(receipt, dict) or receipt.get('audit_id') != audit_id or row is None
             or receipt.get('row_id') != row.id or receipt.get('cache_key') != row.cache_key
             or receipt.get('generation') != pending_metadata(row)['generated_at']
-            or receipt.get('raw_sha256') != _digest(row.guidance)):
+            or receipt.get('raw_sha256') != _digest(row.guidance)
+            or receipt.get('route_sha256') != _digest(row.route)):
         raise ResolutionRejected('Rollback does not own this current raw generation')
     ver = row.verification if isinstance(row.verification, dict) else {}
     prior = db.scalars(select(AuditEvent).where(AuditEvent.action == ROLLBACK_ACTION,

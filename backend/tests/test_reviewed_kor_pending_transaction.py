@@ -232,11 +232,12 @@ def test_failed_rollback_audit_keeps_resolution_intact(installed, monkeypatch):
     assert len(list(db.scalars(select(AuditEvent)))) == 1
 
 
-@pytest.mark.parametrize('mutation', ['new_raw', 'new_generation', 'new_pending', 'different_receipt', 'wrong_actor'])
+@pytest.mark.parametrize('mutation', ['new_raw', 'new_route', 'new_generation', 'new_pending', 'different_receipt', 'wrong_actor'])
 def test_rollback_cannot_overwrite_newer_or_unowned_state(installed, mutation):
     _, _, _, _, db, row = installed
     original_id = row.verification[r.RECEIPT]['audit_id']
     if mutation == 'new_raw': row.guidance = dict(row.guidance, insurance_required=True)
+    elif mutation == 'new_route': row.route = dict(row.route, travel_document_type='diplomatic_passport')
     elif mutation == 'new_generation': row.generated_at = datetime(2026, 9, 10, 9)
     elif mutation == 'new_pending': row.verification = dict(row.verification, detail_pending=True)
     elif mutation == 'different_receipt': row.verification = dict(row.verification, **{r.RECEIPT: {'audit_id': 'another'}})
