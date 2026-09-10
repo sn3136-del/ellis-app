@@ -1,115 +1,67 @@
-<title>Ellis Data Caliber Specification</title>
-<style>
-@page{size:A4;margin:11mm 13mm 9mm 13mm}
-  :root{
-    --paper:#FBFBF8; --ink:#1C2B4A; --muted:#5B6478; --line:#E5E4DC;
-    --card:#FFFFFF; --accent:#175CD3; --soft:#F0F4FA; --good:#0A8A4A;
-    --warn:#B26A00; --bad:#C62828;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
-      --card:#171F33; --soft:#1C2740;
-    }
-  }
-  :root[data-theme="dark"]{
-    --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
-    --card:#171F33; --soft:#1C2740;
-  }
-  @media print{ :root{ --paper:#FFFFFF; } }
-  body{background:var(--paper); color:var(--ink); margin:0;
-       font-family:-apple-system,"Helvetica Neue",system-ui,sans-serif; line-height:1.6;}
-  main{max-width:920px; margin:0 auto; padding:44px 22px 80px;}
-  h1{font-size:1.9rem; margin:0 0 6px; text-wrap:balance;}
-  .sub{color:var(--muted); margin:0 0 30px; font-size:.95rem;}
-  h2{font-size:1.22rem; margin:34px 0 4px; padding-top:16px; border-top:1px solid var(--line); break-after:avoid;}
-  p{margin:8px 0; max-width:76ch;}
-  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:.86rem;}
-  th,td{border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top;}
-  th{background:var(--soft); font-weight:700;}
-  tr{break-inside:avoid;}
-  .tablewrap{overflow-x:auto;}
-  code{background:var(--soft); border-radius:6px; padding:1px 6px;
-       font-family:ui-monospace,Menlo,monospace; font-size:.85em;}
-  .req{color:var(--good); font-weight:700;}
-  .opt{color:var(--warn); font-weight:700;}
-  .note{background:var(--soft); border-left:3px solid var(--accent); border-radius:8px;
-        padding:10px 14px; margin:12px 0; font-size:.92rem; break-inside:avoid;}
-  footer{margin-top:44px; color:var(--muted); font-size:.8rem; border-top:1px solid var(--line); padding-top:14px;}
-</style>
-<main>
-<h1>Ellis Data Caliber Specification</h1>
-<p class="sub">Version 3 September 2026 · Deliverable No. 10 · The same calibers govern the live pages and the Excel export</p>
-
-<h2>1. The 25-field dictionary</h2>
-<p>One record is one visa product for one passport, destination, purpose and document type. A route with several products yields several records. The export and the pages share one field set plus one refinement column. Twenty fields are required and five are provided if available, as the requirements specification states.</p>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Data Caliber Manual — T-Station Visa Information Base</title><style>body{margin:0;background:#edf2f8;color:#17263c;font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC",sans-serif}main{max-width:940px;margin:32px auto;padding:44px 54px;background:white;border:1px solid #dbe3ec;border-radius:12px}h1{font-size:34px;line-height:1.2;margin:0 0 16px;color:#133d66}h2{font-size:23px;margin:32px 0 12px;padding-top:14px;border-top:1px solid #dbe3ec;color:#133d66}p,li{margin:10px 0}table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}th,td{border:1px solid #dbe3ec;padding:9px 12px;vertical-align:top;text-align:left;overflow-wrap:anywhere}th{background:#edf3f8}code{font:13px/1.5 ui-monospace,Menlo,monospace;background:#f1f5f9;padding:1px 4px;overflow-wrap:anywhere}.meta{color:#596d83;font-size:13px}.notice{padding:14px 18px;background:#fff6e7;border-left:4px solid #c48628;border-radius:4px;margin:20px 0}.language{padding-top:28px;margin-top:40px;border-top:3px solid #1a5a85}.tablewrap{overflow-x:auto}footer{margin-top:36px;border-top:1px solid #dbe3ec;padding-top:14px;color:#596d83;font-size:12px}@media(max-width:700px){main{margin:0;border:0;border-radius:0;padding:24px}h1{font-size:29px}table{font-size:12px}}@media print{body{background:white}main{border:0;margin:0;padding:0;max-width:none}h2{break-after:avoid}tr{break-inside:avoid}.language{break-before:page}a{color:inherit}}</style></head><body><main><p class="meta">ELLIS · Deliverable No. 10 · Revised 2026-09-09</p><div class="notice">Implementation guidance only. Current completeness, accuracy, operational SLA and final acceptance require measured evidence.</div><h1>Data Caliber Manual - T-Station Visa Information Base</h1>
+<p>Current implementation rules, revised 2026-09-09. This document describes the verification and serving contract. The requested 100% coverage and completeness are targets to be demonstrated, not achieved claims; treatment of supported N/A or unpublished statuses for formal acceptance remains to be agreed. It does not certify that every stored field has been verified or that every official page is readable.</p>
+<h2>Route identity and record projection</h2>
+<p>One canonical decision covers each nationality, destination, travel purpose and travel document. Residence, itinerary and travel dates do not create another model verdict. Residence still matters for explicitly scoped consular fees and procedure. Evidenced effective-date rules determine dated policy changes.</p>
+<p>The mapper in backend/app/visa_snapshot/tstation.py projects the agreed field dictionary, with one record per visa product. Missing facts remain missing. Calendar months and years preserve exact wording in max_stay_text and exported special_conditions; they are not multiplied by 30 or 365. Hour-based validity converts to days only for exact multiples of 24. Otherwise numeric fields remain null and exact text is retained. Processing estimates are not guarantees.</p>
+<p>Dictionary field 24, <code>info_validity</code>, is only the policy&#x27;s explicitly recorded published end date. If no end date is known it stays null; an internal cache deadline must never fill this field. Product-specific policy dates take precedence, and a separate permission cannot inherit another permission&#x27;s expiry. <code>freshness_valid_until</code> is separate metadata for the internal recheck deadline. Neither that deadline nor a successful refresh extends the policy. Reviewed disposition provenance can also supply its <code>effective_to</code> policy date, using the bound&#x27;s own official-jurisdiction source, verification date and exact quoted date. An inherited <code>policy_interval_evidence</code> notice retains its original evidence; bare interval dates or unrelated field dates do not fill this column.</p>
+<p>The API&#x27;s <code>acceptance_summary</code> exposes both literal 25-field formulas: filled cells / all 25 cells, and records with all 25 non-null / all records. No blank exclusions apply to those metrics. The operational fillable metric separately excludes explicitly not-applicable and source-confirmed not-published fields. The export splits item 5 into requirement and subcategory, producing 26 columns; the subcategory does not become a 26th contractual field. The offline acceptance auditor validates the exact dictionary and the API&#x27;s declared complete row count.</p>
+<p>An ETA, an advance visa and a visa on arrival are different permission types. An electronic visa is still a visa. Alternate products keep their own fees, validity, documents and procedure. ETA procedure cannot become an alternate visa&#x27;s facts. Electronic and paper visa procedures are isolated when different.</p>
+<h2>Source verification and confidence</h2>
+<p>The records expose source_check separately from confidence:</p>
 <div class="tablewrap"><table>
-<tr><th>#</th><th>Field</th><th>Required</th><th>Caliber</th></tr>
-<tr><td>1</td><td><code>travel_document_type</code></td><td class="req">Required</td><td>The document held, one of 13 types: ordinary passport, diplomatic passport, service passport, official ordinary passport, PRC travel document, temporary passport, emergency passport, child passport, alien's passport, stateless travel document, laissez-passer, identity certificate, refugee travel document.</td></tr>
-<tr><td>2</td><td><code>travel_document_country</code></td><td class="req">Required</td><td>Issuing country, ISO alpha-3.</td></tr>
-<tr><td>3</td><td><code>destination_country</code></td><td class="req">Required</td><td>Destination country or territory, ISO alpha-3.</td></tr>
-<tr><td>4</td><td><code>travel_purpose</code></td><td class="req">Required</td><td>Tourism, business, family visit, study, work, transit, other.</td></tr>
-<tr><td>5</td><td><code>visa_requirement</code></td><td class="req">Required</td><td>Top-level class: visa-free, visa on arrival, visa required in advance. About 181 records use a fourth value, Conditional. See section 5.</td></tr>
-<tr><td>5a</td><td><code>visa_requirement_detail</code></td><td class="opt">Extra</td><td>Refinement nested under the top-level class. Visa-free: unconditional, conditional, transit. On arrival: electronic on arrival, paper on arrival. In advance: eVisa, paper visa, electronic travel authorization. A test guarantees that every detail belongs to its parent class.</td></tr>
-<tr><td>6</td><td><code>visa_type_name</code></td><td class="req">Required</td><td>The destination's product name for this purpose, in official naming.</td></tr>
-<tr><td>7</td><td><code>validity_duration</code></td><td class="req">Required</td><td>How long the visa is valid once granted, as a number. Where the government only says "at the mission's discretion", the record says so.</td></tr>
-<tr><td>8</td><td><code>validity_unit</code></td><td class="req">Required</td><td>Days, months, years, or indefinite.</td></tr>
-<tr><td>9</td><td><code>max_stay_duration</code></td><td class="req">Required</td><td>Longest stay per entry, as a number.</td></tr>
-<tr><td>10</td><td><code>max_stay_unit</code></td><td class="req">Required</td><td>Hours or days.</td></tr>
-<tr><td>11</td><td><code>entries</code></td><td class="req">Required</td><td>Single, multiple, or unlimited. Where the issuing authority decides case by case, the record says so.</td></tr>
-<tr><td>12</td><td><code>processing_min_days</code></td><td class="opt">If available</td><td>Shortest time from submission to decision, as a number.</td></tr>
-<tr><td>13</td><td><code>processing_unit</code></td><td class="opt">If available</td><td>Working days or calendar days.</td></tr>
-<tr><td>14</td><td><code>visa_fee_amount</code></td><td class="req">Required</td><td>The official visa fee only, charged by the mission. Agency service fees are excluded and disclosed separately in the application channel note.</td></tr>
-<tr><td>15</td><td><code>visa_fee_currency</code></td><td class="req">Required</td><td>ISO 4217 currency code.</td></tr>
-<tr><td>16</td><td><code>application_method</code></td><td class="req">Required</td><td>Embassy or consulate, online, through an appointed agent, on arrival, or in person at the issuing government office for a domestic permit such as the mainland Exit-Entry Permit for Hong Kong. "Other" is never used. An appointed agent is named only where the destination mandates one, for example Chinese citizens applying for Japan.</td></tr>
-<tr><td>17</td><td><code>required_documents</code></td><td class="req">Required</td><td>The core document categories, comma separated.</td></tr>
-<tr><td>18</td><td><code>consulate_district</code></td><td class="opt">If available</td><td>The consular district mapping, where the destination divides applicants by residence.</td></tr>
-<tr><td>19</td><td><code>entry_requirements</code></td><td class="opt">If available</td><td>Entry conditions beyond the visa, for example a return ticket or an arrival card.</td></tr>
-<tr><td>20</td><td><code>special_conditions</code></td><td class="opt">If available</td><td>Special policies or limits, for example regional exemptions, transit exemptions, or exemption for holders of a third-country visa.</td></tr>
-<tr><td>21</td><td><code>data_source</code></td><td class="req">Required</td><td>Name of the issuing institution.</td></tr>
-<tr><td>22</td><td><code>source_url</code></td><td class="req">Required</td><td>The specific official page. The code enforces a government domain, so a non-official link cannot be written. Where several sources are cross-checked, each carries its own URL and all are shown on the record.</td></tr>
-<tr><td>23</td><td><code>collected_at</code></td><td class="req">Required</td><td>The date the answer was produced or last refreshed.</td></tr>
-<tr><td>24</td><td><code>info_validity</code></td><td class="req">Required</td><td>See section 5. Current caliber: the date until which Ellis guarantees the answer. Where a policy carries its own end date, that date governs.</td></tr>
-<tr><td>25</td><td><code>confidence_level</code></td><td class="req">Required</td><td>High, medium, or low. See section 4.</td></tr>
+<tr><th>Source check</th><th>Meaning</th></tr>
+<tr><td>human-quote</td><td>Explicit human verdict provenance, official source, substantive note and actual verification date.</td></tr>
+<tr><td>ai-quote</td><td>Recorded verdict evidence attributed to an AI check. Missing historical verifier identity defaults to AI.</td></tr>
+<tr><td>grounded-consistent</td><td>A successful current evidence-contract check was consistent and explicitly verified disposition.</td></tr>
+<tr><td>reference</td><td>A source link exists, but required verdict evidence is absent.</td></tr>
+<tr><td>unchecked</td><td>No source link is available.</td></tr>
 </table></div>
-
-<h2>2. The three kinds of blank</h2>
-<p>A blank cell is never ambiguous. It is one of three kinds, stated on screen and in the export:</p>
+<p>The configured display has two grades, High and Low. Complete official-source checked records with supported required values and no unresolved dispute can be High. Accepted AI and human source checks use the same grade; authorship remains explicit in provenance. Missing evidence, field gaps, public edits, invalid provenance and disputes remain Low. A model&#x27;s self-rating or an official URL alone is never verification. There is no current Medium output. Trip.com&#x27;s written standard describes a three-level ladder; the configured binary display must not be described as an unchanged implementation of that ladder or evidence of contractual acceptance.</p>
+<p>A fresh automated check can support a grade when historical human provenance is incomplete; it cannot retrospectively establish human verification. At grading time, imported manual notes are checked for substantive text, official source and valid nonfuture date. The grader does not reinterpret every multilingual note&#x27;s semantic relevance. The operator&#x27;s factual judgment remains auditable through source and per-field provenance.</p>
+<p>Source labels describe evidence, while completeness and link coverage are separate measurements. Each record&#x27;s held and review_required flags describe the entire canonical route, including its other products. Display grade and publication are separate: a completeness-only Low does not itself create a new hold. The existing source/conflict gate and explicit route hold metadata govern publication; the binary relabeling did not change those gates.</p>
+<h2>Evidence contract and corrections</h2>
+<p>An automated verdict check counts only under the current evidence contract (version 2), after a successful route-supported read with disposition in verified_fields. Legacy consistent flags and ancillary-only checks cannot verify a verdict.</p>
+<p>Fetched evidence must match nationality, purpose, document and effective period. Corrections require a quote present in the source and support for the exact field value. A number elsewhere on a page, another nationality&#x27;s table row or an ETA eligibility page alone is insufficient proof. Ambiguous tables and unsupported claims remain for review. Shared authority rules check official domains and jurisdiction; commercial pages are not official verification.</p>
+<p>Overrides validate vocabulary and shapes. Fees/products need a verified verdict or detail. Invalid historical machinery is quarantined with diagnostics while independently valid ancillary facts can survive. Per-field provenance retains human or AI authorship. A narrow correction does not verify unrelated fields or sibling products.</p>
+<h2>Freshness and unresolved fields</h2>
+<p>The systemd timer starts a cycle every six hours. Four workers check canonical routes independently, with a 75-second route budget and a five-hour cycle budget. The 5,000-row selection cap exceeds the current inventory; work that cannot be attempted before the deadline stays visible in the backlog. A 15-minute duplicate-attempt window prevents immediate repeats without skipping routes checked late in the previous six-hour cycle. Source rotation covers supporting fee and detail pages as well as the headline source.</p>
+<p>Scheduled and on-access checks attempt to read official sources. A failed read is a failed attempt, not new verification, and can preserve an earlier effective check. A later readable but irrelevant page cannot perpetuate an unsupported source claim.</p>
+<p>Whole-row freshness extension requires support for all populated substantive fields and no outstanding disputes, unsupported proposals or unread required sources. Verifying the verdict alone cannot renew fees, stays and products. Operator reporting distinguishes attempts, successful reads, field coverage and freshness. A completed sweep does not establish that every field is accurate. The console reports the actual timer and durable worker status, including unfinished attempts, partial checks, unreadable sources and errors. A missing timer or dead worker cannot be displayed as a confirmed upcoming/completed run.</p>
+<p>The monthly report currently archives the operational fillable-field metric. For formal acceptance retain the full timestamped records snapshot and its literal25 audit as well; the operational metric is not a substitute.</p>
+<h2>Historical documentation</h2>
+<p>This revision replaces the September 3 HTML/PDF warranty-date and three-tier descriptions. <code>requirement-ledger.html</code> and historical acceptance archives remain dated historical materials until rechecked. This revision follows the current Markdown manual and exported field dictionary for explicit-policy-date semantics.</p>
+<h2>Reader and saved-workflow gates</h2>
+<p>Lookup, questions, comparisons, intake and dataset grading share the verdict evidence rule. Held responses retain only identity and safe status metadata; guidance, workflow steps, provenance notes and other claim-bearing containers are removed. Held and comparison replies use deterministic prose so old conversation history cannot restore withdrawn claims. Independently verified special-policy notices retain their own scope.</p>
+<p>Saved routed cases use the current canonical cached answer when available, apply the same gate and refresh their verdict, continuation kind and checklist. Uploaded documents and submission bindings are preserved. A new hold blocks document-stage completion, application start, service transitions and appointment packets. Visa-on-arrival cases can complete preparation but cannot start an advance visa filing. Cases outside the route-guidance workflow retain their separate rules.</p>
+<p>An operator release cannot override a material contradiction, pending detail stage or active source dispute. Low-confidence display follows the configured hold policy, which production must keep enabled. Corrections and saved-case requirement updates are recorded for review.</p>
+<h2>Appendix: exact field dictionary</h2>
+<p>The operational required/if-available column describes the implementation. Formal literal25 acceptance metrics count every numbered field; no field is silently waived.</p>
 <div class="tablewrap"><table>
-<tr><th>Kind</th><th>Display</th><th>Counted in the completeness denominator</th></tr>
-<tr><td>Not published</td><td>"Not publicly available". The official page was checked and publishes no value for this item.</td><td>Excluded from the fillable caliber</td></tr>
-<tr><td>Does not apply</td><td>"Does not apply to this route". For example, a visa-free route has no visa validity.</td><td>Excluded from the fillable caliber</td></tr>
-<tr><td>Missing</td><td>"missing". Research not yet complete. This is open work.</td><td>Counted, and lowers completeness</td></tr>
-</table></div>
-
-<h2>3. Completeness calibers</h2>
-<p>Completeness is stated two ways, and both are shown on the completeness tile.</p>
-<p>First, the cell caliber of section 6.1: filled cells over required cells. The fillable reading excludes not-published and does-not-apply cells and shows how many were excluded. The literal reading counts every cell.</p>
-<p>Second, the record caliber of section 4.2.2: records with all 25 fields filled divided by all records.</p>
-<p>The gap is structural: a correct visa-free record cannot fill fee or validity, and section 4.2.1 forbids inventing what no government publishes. Which caliber governs acceptance is for the joint meeting.</p>
-
-<h2>4. The confidence ladder</h2>
-<div class="tablewrap"><table>
-<tr><th>Grade</th><th>Rule (per 4.2.3)</th><th>Handling</th></tr>
-<tr><td>High</td><td>A person verified the record against a named official page, and the record is complete with no conflicts.</td><td>Shown</td></tr>
-<tr><td>Medium</td><td>Backed by an official source, with a few fields still to fill, or fields the government does not publish.</td><td>Shown, with the source attached</td></tr>
-<tr><td>Low</td><td>Sources conflict, or only non-official sources exist, or a specific product and fee is claimed without a read of the official page.</td><td>Held. Readers see "We are checking this route" until an operator confirms it</td></tr>
-</table></div>
-<p>Grading is automatic. A hold is released only by a fact verified against an official source or by an audited operator release.</p>
-
-<h2>5. Calibers awaiting a joint ruling</h2>
-<p>Three calibers need the joint meeting's ruling:</p>
-<p>First, <code>info_validity</code>. The dictionary reads it as the policy's own end date, which most governments do not publish. Where a policy has an end date it is used (the Korea group exemption to 31 December 2026). Otherwise it is the date by which Ellis must re-check the answer, and the export says so.</p>
-<p>Second, the fourth value of <code>visa_requirement</code>, Conditional. About 181 records depend on the traveler's own circumstances, such as holding a valid third-country visa. They can be folded into the "visa-free, conditional" detail. The migration script is ready.</p>
-<p>Third, the completeness caliber, see section 3.</p>
-
-<h2>6. Special policy notes</h2>
-<p>Regional and transit exemptions live as standalone notes bound to an official URL: Hainan's 30-day exemption for 61 nationalities, China's 240-hour transit exemption, and the Korea group-tour and Jeju policies. Notes appear beside relevant routes, on the display pages and in the AI Q&amp;A, with a covered-or-not line whenever the nationality is known.</p>
-
-<h2>7. Export caliber</h2>
-<p>The export is an .xlsx workbook: a data sheet with field names in the first row and a field description sheet with each caliber and the UTC snapshot time. It is the online data through the same code path, with no row cap.</p>
-
-<div class="note">Any caliber change updates this document and the export's description sheet before it takes effect.</div>
-
-<footer>Ellis Intelligence, Inc. · Data Caliber Specification · 3 September 2026</footer>
-</main>
+<tr><th>#</th><th>Field / export key</th><th>Operational status</th><th>Definition</th></tr>
+<tr><td>1</td><td>travel_document_type</td><td>Required</td><td>Type of travel document held</td></tr>
+<tr><td>2</td><td>travel_document_country</td><td>Required</td><td>Document issuing country (applicant nationality)</td></tr>
+<tr><td>3</td><td>destination_country</td><td>Required</td><td>Visa destination</td></tr>
+<tr><td>4</td><td>travel_purpose</td><td>Required</td><td>User&#x27;s travel purpose</td></tr>
+<tr><td>5</td><td>visa_requirement</td><td>Required</td><td>Visa-free / Visa on Arrival / Visa Required in Advance</td></tr>
+<tr><td>5a</td><td>visa_requirement_detail</td><td>Item 5 subcategory</td><td>Field 5&#x27;s subcategory: Unconditional / Conditional / Transit Visa-free, eVisa or Paper Visa on Arrival, eVisa / Paper Visa / ETA Electronic Authorization</td></tr>
+<tr><td>6</td><td>visa_type_name</td><td>Required</td><td>Visa type name for this purpose and destination</td></tr>
+<tr><td>7</td><td>validity_duration</td><td>Required</td><td>How long the visa is valid after approval (number)</td></tr>
+<tr><td>8</td><td>validity_unit</td><td>Required</td><td>Day / Month / Year / Long-term Valid</td></tr>
+<tr><td>9</td><td>max_stay_duration</td><td>Required</td><td>Maximum length of stay per entry (number)</td></tr>
+<tr><td>10</td><td>max_stay_unit</td><td>Required</td><td>Hour / Day</td></tr>
+<tr><td>11</td><td>entries</td><td>Required</td><td>Single / Multiple / Unlimited</td></tr>
+<tr><td>12</td><td>processing_min_days</td><td>If available</td><td>Shortest time from submission to visa issuance</td></tr>
+<tr><td>13</td><td>processing_unit</td><td>If available</td><td>Working Day / Calendar Day</td></tr>
+<tr><td>14</td><td>visa_fee_amount</td><td>Required</td><td>Official visa fee amount (consular fee only)</td></tr>
+<tr><td>15</td><td>visa_fee_currency</td><td>Required</td><td>ISO 4217 currency code</td></tr>
+<tr><td>16</td><td>application_method</td><td>Required</td><td>Embassy Submission / Online Application / Agency Service / On-arrival Processing / Government Office Submission</td></tr>
+<tr><td>17</td><td>required_documents</td><td>Required</td><td>Core document checklist, comma separated</td></tr>
+<tr><td>18</td><td>consulate_district</td><td>If available</td><td>Consulate district divisions, if any</td></tr>
+<tr><td>19</td><td>entry_requirements</td><td>If available</td><td>Other entry requirements besides the visa</td></tr>
+<tr><td>20</td><td>special_conditions</td><td>If available</td><td>Special policies or restrictions</td></tr>
+<tr><td>21</td><td>data_source</td><td>Required</td><td>Information source website / organization</td></tr>
+<tr><td>22</td><td>source_url</td><td>Required</td><td>Specific page link</td></tr>
+<tr><td>23</td><td>collected_at</td><td>Required</td><td>Data collection date</td></tr>
+<tr><td>24</td><td>info_validity</td><td>Required</td><td>Published policy validity end date, when known. Blank when no policy end date is available; the separate freshness_valid_until metadata is an internal recheck deadline, not the policy&#x27;s expiry date</td></tr>
+<tr><td>25</td><td>confidence_level</td><td>Required</td><td>High / Low</td></tr>
+</table></div><footer>Source: DATA_CALIBER_MANUAL.md · SHA-256 194d87b819911a4903766a3fd6bb1b4ce3e9293928a57c73b8d94026f0e43a30<br>Generated from the current source manual; no acceptance certification.</footer></main></body></html>

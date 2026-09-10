@@ -1,127 +1,137 @@
-<title>Ellis 数据口径说明</title>
-<style>
-  :root{
-    --paper:#FBFBF8; --ink:#1C2B4A; --muted:#5B6478; --line:#E5E4DC;
-    --card:#FFFFFF; --accent:#175CD3; --soft:#F0F4FA; --good:#0A8A4A;
-    --warn:#B26A00; --bad:#C62828;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
-      --card:#171F33; --soft:#1C2740;
-    }
-  }
-  :root[data-theme="dark"]{
-    --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
-    --card:#171F33; --soft:#1C2740;
-  }
-  body{background:var(--paper); color:var(--ink); margin:0;
-       font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
-       line-height:1.65;}
-  main{max-width:920px; margin:0 auto; padding:48px 22px 90px;}
-  h1{font-size:1.9rem; margin:0 0 6px; text-wrap:balance;}
-  .sub{color:var(--muted); margin:0 0 34px; font-size:.95rem;}
-  h2{font-size:1.25rem; margin:40px 0 4px; padding-top:18px;
-     border-top:1px solid var(--line);}
-  h2 .en{display:block; font-size:.85rem; color:var(--muted); font-weight:600;}
-  p{margin:8px 0; max-width:74ch;}
-  p.en{color:var(--muted); font-size:.92rem;}
-  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:.86rem;}
-  th,td{border:1px solid var(--line); padding:6px 9px; text-align:left;
-        vertical-align:top;}
-  th{background:var(--soft); font-weight:700;}
-  .tablewrap{overflow-x:auto;}
-  code{background:var(--soft); border-radius:6px; padding:1px 6px;
-     font-family:ui-monospace,Menlo,monospace; font-size:.85em;}
-  .req{color:var(--good); font-weight:700;}
-  .opt{color:var(--warn); font-weight:700;}
-  .note{background:var(--soft); border-left:3px solid var(--accent);
-        border-radius:8px; padding:10px 14px; margin:12px 0; font-size:.92rem;}
-  footer{margin-top:50px; color:var(--muted); font-size:.8rem;
-         border-top:1px solid var(--line); padding-top:14px;}
-</style>
-<main>
-<h1>Ellis 数据口径说明</h1>
-<p class="sub">Ellis Data Caliber Specification · 版本 2026-09-01 · 交付物清单第10项 Deliverable No. 10 · 与线上及导出口径一致</p>
-
-<h2>1. 字段字典 <span class="en">The 25 field dictionary</span></h2>
-<p>每条记录对应一个「护照 × 目的地 × 出行目的 × 证件类型」组合下的一个签证产品。同一线路有多个产品时输出多条记录。导出与在线展示使用同一字段集，另附一列一级分类的细化子类。必填字段20个，如有则提供5个，与需求规格一致。</p>
-<p class="en">One record is one visa product for one passport by destination by purpose by document combination. A route with several products yields several records. Twenty fields are required and five are provide-if-available, matching the requirements specification.</p>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ellis 签证信息库数据口径手册</title><style>body{margin:0;background:#edf2f8;color:#17263c;font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC",sans-serif}main{max-width:940px;margin:32px auto;padding:44px 54px;background:white;border:1px solid #dbe3ec;border-radius:12px}h1{font-size:34px;line-height:1.2;margin:0 0 16px;color:#133d66}h2{font-size:23px;margin:32px 0 12px;padding-top:14px;border-top:1px solid #dbe3ec;color:#133d66}p,li{margin:10px 0}table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}th,td{border:1px solid #dbe3ec;padding:9px 12px;vertical-align:top;text-align:left;overflow-wrap:anywhere}th{background:#edf3f8}code{font:13px/1.5 ui-monospace,Menlo,monospace;background:#f1f5f9;padding:1px 4px;overflow-wrap:anywhere}.meta{color:#596d83;font-size:13px}.notice{padding:14px 18px;background:#fff6e7;border-left:4px solid #c48628;border-radius:4px;margin:20px 0}.language{padding-top:28px;margin-top:40px;border-top:3px solid #1a5a85}.tablewrap{overflow-x:auto}footer{margin-top:36px;border-top:1px solid #dbe3ec;padding-top:14px;color:#596d83;font-size:12px}@media(max-width:700px){main{margin:0;border:0;border-radius:0;padding:24px}h1{font-size:29px}table{font-size:12px}}@media print{body{background:white}main{border:0;margin:0;padding:0;max-width:none}h2{break-after:avoid}tr{break-inside:avoid}.language{break-before:page}a{color:inherit}}</style></head><body><main><p class="meta">ELLIS · Deliverable No. 10 · Revised 2026-09-09</p><div class="notice">本手册说明当前实现。完整度、准确率、运行时效及最终验收须以实际测量和签署材料证明。</div><h1>Ellis 签证信息库数据口径手册</h1>
+<p>本手册依据当前实现更新，说明核验与展示契约。它不证明每个已存字段均已核实，也不证明每个官方页面都可读取。100% 覆盖与完整度是待验证的目标，不能以生成默认值、排除未知值或改写统计分母来宣称完成。</p>
+<h2>线路身份与记录投影</h2>
+<p>每个国籍、目的地、出行目的与旅行证件组合只有一个规范判断。居住地、行程和出行日期不会另行生成模型结论；居住地仍影响有明确适用范围的领区费用和流程。具有证据的生效日期规则决定分时政策。</p>
+<p>backend/app/visa_snapshot/tstation.py 将内部资料转换为约定字段字典，每个签证产品一条记录。缺失事实保持缺失。以日历月或年表述的停留时间保留在 max_stay_text 与导出的 special_conditions 中，不乘以 30 或 365。以小时表述的有效期仅在能被 24 整除时换算为天；否则数值保持空值并保留原文。处理时长估计不等于保证。</p>
+<p>第 24 字段 info_validity 仅表示明确记录、已公布的政策截止日期。未知时留空，内部缓存期限不能填入该字段。产品自身的政策日期优先；不同许可不得继承彼此的截止日期。freshness_valid_until 是单独的内部复核期限，更新缓存或成功复核不会延长政策。</p>
+<p>已审核的签证结论证据也可提供 effective_to：须使用该日期界限自身的官方管辖信源、实际核验日期和包含准确日期的引文。继承的 policy_interval_evidence 保留原始证据。没有引文的区间日期、或其他字段的日期，不能填入政策有效期。</p>
+<p>API 的 acceptance_summary 同时报告两种全部 25 字段口径：已填写字段数除以全部 25 字段数；25 字段全部非空的记录数除以记录总数。这两种严格指标不排除空值。日常可填写指标另行排除明确不适用和经信源确认未公布的字段。这是当前实现说明，并不表示验收方已批准将这些状态计作完整。</p>
+<p>导出把第 5 项拆成一级要求与细化子类，共 26 列；子类不构成第 26 个合同字段。离线验收审计器核对准确字段字典和 API 声明的完整记录数。</p>
+<p>ETA、提前签证与落地签属于不同许可类型。电子签证仍然是签证。各替代产品保留自己的费用、有效期、材料与办理流程。ETA 流程不能作为另一签证产品的事实；电子签与纸质签不同的流程保持独立。</p>
+<h2>来源核验与置信度</h2>
+<p>记录单独展示 source_check，不能与置信度混为一谈。</p>
 <div class="tablewrap"><table>
-<tr><th>#</th><th>字段 Field</th><th>必填</th><th>口径 Caliber</th></tr>
-<tr><td>1</td><td><code>travel_document_type</code></td><td class="req">必填</td><td>所持证件类型，13种枚举（普通护照、外交护照、公务护照、公务普通护照、旅行证、临时护照、紧急护照、儿童护照、外国人护照、无国籍人旅行证、联合国通行证、身份证明书、难民旅行证）。</td></tr>
-<tr><td>2</td><td><code>travel_document_country</code></td><td class="req">必填</td><td>证件签发国，ISO alpha-3。</td></tr>
-<tr><td>3</td><td><code>destination_country</code></td><td class="req">必填</td><td>目的地国家或地区，ISO alpha-3。</td></tr>
-<tr><td>4</td><td><code>travel_purpose</code></td><td class="req">必填</td><td>旅游、商务、探亲、留学、工作、过境、其他。</td></tr>
-<tr><td>5</td><td><code>visa_requirement</code></td><td class="req">必填</td><td>一级分类：免签、落地签、需提前办理。现另有约146条记录使用第四值 Conditional，见第5节待决口径。</td></tr>
-<tr><td>—</td><td><code>visa_requirement_detail</code></td><td class="opt">附加</td><td>细化子类，嵌套于一级分类之下：免签→无条件免签、有条件免签、过境免签。落地签→落地电子签、落地纸质签。需提前办理→eVisa电子签、纸质签证、ETA电子授权。系统保证子类必属其一级分类，有专项测试守护。</td></tr>
-<tr><td>6</td><td><code>visa_type_name</code></td><td class="req">必填</td><td>该目的地对该目的的签证产品名称，使用官方命名。</td></tr>
-<tr><td>7</td><td><code>validity_duration</code></td><td class="req">必填</td><td>获批后有效时长的数值。官方仅表述「由使领馆决定」时如实标注。</td></tr>
-<tr><td>8</td><td><code>validity_unit</code></td><td class="req">必填</td><td>天、月、年、长期有效。</td></tr>
-<tr><td>9</td><td><code>max_stay_duration</code></td><td class="req">必填</td><td>单次入境最长停留数值。</td></tr>
-<tr><td>10</td><td><code>max_stay_unit</code></td><td class="req">必填</td><td>小时、天。</td></tr>
-<tr><td>11</td><td><code>entries</code></td><td class="req">必填</td><td>单次、多次、不限。由签发机关按个案决定时如实标注。</td></tr>
-<tr><td>12</td><td><code>processing_min_days</code></td><td class="opt">如有</td><td>从递交到出签的最短时长数值。</td></tr>
-<tr><td>13</td><td><code>processing_unit</code></td><td class="opt">如有</td><td>工作日、自然日。</td></tr>
-<tr><td>14</td><td><code>visa_fee_amount</code></td><td class="req">必填</td><td>官方签证费，仅使领馆费用，不含代办服务费。代办费单独在申请渠道说明中披露。</td></tr>
-<tr><td>15</td><td><code>visa_fee_currency</code></td><td class="req">必填</td><td>ISO 4217 币种代码。</td></tr>
-<tr><td>16</td><td><code>application_method</code></td><td class="req">必填</td><td>使馆递交、在线申请、代理代办、落地办理。不使用「其他」。仅限指定代办时明确写出，例如中国公民赴日签证。</td></tr>
-<tr><td>17</td><td><code>required_documents</code></td><td class="req">必填</td><td>核心材料大类清单，英文逗号分隔。</td></tr>
-<tr><td>18</td><td><code>consulate_district</code></td><td class="opt">如有</td><td>目的地有领区划分时列出对应关系。</td></tr>
-<tr><td>19</td><td><code>entry_requirements</code></td><td class="opt">如有</td><td>签证之外的入境要求，例如回程机票、入境卡。</td></tr>
-<tr><td>20</td><td><code>special_conditions</code></td><td class="opt">如有</td><td>特殊政策或限制，例如区域性免签、过境免签、持第三国签证免签。</td></tr>
-<tr><td>21</td><td><code>data_source</code></td><td class="req">必填</td><td>信息来源机构名称。</td></tr>
-<tr><td>22</td><td><code>source_url</code></td><td class="req">必填</td><td>具体官方页面链接。系统在代码层强制政府域名，非官方链接无法写入。多源交叉验证时每条来源逐条绑定URL，随记录展示。</td></tr>
-<tr><td>23</td><td><code>collected_at</code></td><td class="req">必填</td><td>该答案生成或最近刷新的日期。</td></tr>
-<tr><td>24</td><td><code>info_validity</code></td><td class="req">必填</td><td>见第5节。当前口径为 Ellis 对该答案的担保日期。政策自带截止日的以政策为准。</td></tr>
-<tr><td>25</td><td><code>confidence_level</code></td><td class="req">必填</td><td>高、中、低，见第4节。</td></tr>
+<tr><th>来源标识</th><th>含义</th></tr>
+<tr><td>human-quote</td><td>明确的人工作出结论的证据，具官方来源、实质性说明及实际核验日期。</td></tr>
+<tr><td>ai-quote</td><td>归属于 AI 核验的已记录结论证据；历史记录缺少核验者身份时默认 AI。</td></tr>
+<tr><td>grounded-consistent</td><td>按当前证据契约完成的有效核验，且明确核实 disposition。</td></tr>
+<tr><td>reference</td><td>已有来源链接，但缺少必要的结论证据。</td></tr>
+<tr><td>unchecked</td><td>没有可用的来源链接。</td></tr>
 </table></div>
-
-<h2>2. 三种空值 <span class="en">The three kinds of blank</span></h2>
-<p>空格不允许含糊。每个未填单元格必须属于以下三类之一，界面与导出都注明原因：</p>
-<p class="en">A blank cell always states its reason, on screen and in the export:</p>
+<p>当前配置只输出 High 与 Low 两级。必需值有支持证据、可填写字段完整且没有未解决争议的官方核验记录可以为 High。符合要求的 AI 与人工信源核验采用同一等级规则，作者身份仍明确保留。证据缺失、字段缺口、公众编辑、不合法证据或争议为 Low。模型自报高置信度或仅附官方 URL，不构成核验。</p>
+<p>当前不输出 Medium。Trip.com 书面标准采用三级体系；不能将当前二级显示说成与该三级体系完全相同，也不能据此宣称合同验收通过。</p>
+<p>历史人工证据不完整时，新的自动核验可提供等级支持，但不能追溯证明曾经有人工核验。评分时检查导入人工说明是否有实质文字、官方信源，以及真实且非未来的日期；评分器不重新解释每条多语言说明的语义相关性。运营判断可通过来源与逐字段证据追溯。</p>
+<p>来源标识反映证据；完整度与链接覆盖率是独立指标。held 与 review_required 描述整条规范线路及其全部产品。显示等级和发布控制相互独立：仅因完整度不足而为 Low，不会自行新增拦截；原有来源、冲突控制和明确线路拦截状态决定发布。</p>
+<h2>证据契约与修正</h2>
+<p>自动结论核验须符合当前第 2 版证据契约：成功读取适用于该线路的来源，并在 verified_fields 中明确包含 disposition。旧版一致性标记或仅核实附属字段，不能核实签证结论。</p>
+<p>提取证据须匹配国籍、出行目的、证件与政策适用时间。修正必须引用来源中实际存在的文字，并支持准确字段值。页面其他位置的数字、其他国籍的表格行、或仅证明 ETA 名单的页面，不能证明无关事实。模糊表格与缺乏支持的主张保留复核。共享管辖规则核验官方域名与所属国家；商业页面不能作为官方核验。</p>
+<p>覆盖记录验证字段词汇和数据结构。费用和产品信息须有经核实的签证结论或类型支持。不安全的历史办理内容隔离并保留诊断，独立有效的附属信息可以保留。逐字段证据保留 AI 或人工身份。狭窄范围的修正不会核实无关字段或其他产品。</p>
+<h2>时效与未解决字段</h2>
+<p>systemd 定时器每 6 小时开始一轮任务。4 个工作进程独立检查规范线路，每条线路预算 75 秒，每轮预算 5 小时；每轮选择上限 5,000 条。未能在预算内尝试的记录继续显示在积压清单。15 分钟重复尝试窗口避免立即重试，也不会跳过上一轮末尾才核验的线路。来源轮换覆盖费用与细节页以及主要来源。</p>
+<p>计划任务和访问触发任务都会尝试读取官方来源。读取失败是一次失败尝试，不是新核验，并可保留之前的有效核验。但后来可读取而不相关的页面不能延续缺乏支持的来源结论。</p>
+<p>只有全部已填实质字段得到支持，且没有未解决争议、不受支持的修正建议或未读取的必需来源，才可延长整条记录的新鲜度。仅核实签证结论不能更新费用、停留或产品的核验期限。后台分别显示尝试、读取成功、字段覆盖和新鲜度。完成一轮任务不代表每个字段都准确。</p>
+<p>质控台显示实际定时器及持久化任务状态，包括未完成尝试、部分核验、不可读取来源与错误。定时器缺失或工作进程停止时，不可显示为已确认的即将执行或已完成任务。</p>
+<p>月度报告当前保存日常可填写字段指标。正式验收还须保存完整且带时间戳的记录快照及全部 25 字段的严格审计结果，日常指标不能替代正式指标。</p>
+<h2>当前版本与历史材料</h2>
+<p>本次 HTML/PDF 手册替换 9 月 3 日关于保证期限和三级显示的旧说明。requirement-ledger.html 和历史验收档案仍是有日期的历史材料；除非重新核查，不应作为当前验收结论。本版本与当前 Markdown 手册和导出字典的政策日期语义一致。</p>
+<h2>读取与已保存流程的控制</h2>
+<p>查询、问答、比较、申请资料录入和数据集评分共用签证结论证据规则。拦截结果仅保留身份和安全状态信息；移除指导内容、流程步骤、证据说明等承载主张的内容。拦截与比较答复使用确定性文本，避免历史对话恢复已撤回主张。独立核实的特殊政策说明保留自身范围。</p>
+<p>已有线路申请事项使用当前规范缓存答案，应用同样的控制，并刷新结论、后续流程类型与清单。上传材料与提交绑定保持不变。新的拦截阻止材料阶段完成、申请启动、服务转换与预约材料包。落地签事项可完成准备，但不能启动提前签证申请。线路指导之外的事项遵循其独立规则。</p>
+<p>运营释放不能绕过实质矛盾、待补细节阶段或尚未解决的来源争议。原有低证据展示控制在生产中应保持开启。修正及已保存事项的签证要求变化均留有记录以供复核。</p>
+<h2>附录：字段字典</h2>
+<p>“必填 / 如有则提供”描述日常实现。正式全部 25 字段指标包含所有编号字段，不默默豁免任何字段；是否将有证据的不适用状态计作完整，仍待明确。</p>
 <div class="tablewrap"><table>
-<tr><th>类别</th><th>显示 Display</th><th>计入完整度分母</th></tr>
-<tr><td>官方未公布</td><td>Not publicly available。已核对官方页面，该项无公布值。</td><td>不计入可填口径 Excluded from fillable</td></tr>
-<tr><td>不适用</td><td>Does not apply to this route。例如免签线路没有签证有效期。</td><td>不计入可填口径 Excluded from fillable</td></tr>
-<tr><td>缺失</td><td>missing。尚未完成研究，属于待补工作。</td><td>计入，拉低完整度 Counted against completeness</td></tr>
-</table></div>
-
-<h2>3. 完整度口径 <span class="en">Completeness calibers</span></h2>
-<p>验收文件对完整度有两种表述，两者都被计算并展示：</p>
-<p class="en">The acceptance documents state completeness two ways. Both are computed and shown:</p>
-<p>其一，6.1节格计口径：已填单元格 ÷ 必填单元格。质控台完整度卡片以「可填」读数为主展示（分母剔除官方未公布与不适用，剔除数量同时展示，可审计），并同列字面读数。</p>
-<p>其二，4.2.2节条计口径：25字段全满记录数 ÷ 记录总数。该读数在质控台完整度卡片并列展示。</p>
-<p>两种口径的差异是结构性的：一条完全正确的免签记录永远填不满全部25字段，因为签证费、有效期等对它不适用，而4.2.1禁止编造官方未公布的值。以哪个口径为验收判据，留待双方会议确认。</p>
-<p class="en">The gap between the two is structural: a perfectly correct visa-free record can never fill all 25 fields, because fee and validity do not apply to it and 4.2.1 prohibits inventing what no government publishes. Which caliber governs acceptance is a decision for the joint meeting.</p>
-
-<h2>4. 置信度分级 <span class="en">The confidence ladder</span></h2>
+<tr><th>#</th><th>字段 / 导出名称</th><th>日常口径</th><th>定义</th></tr>
+<tr><td>1</td><td>travel_document_type</td><td>必填</td><td>旅行证件类型</td></tr>
+<tr><td>2</td><td>travel_document_country</td><td>必填</td><td>证件签发国或国籍</td></tr>
+<tr><td>3</td><td>destination_country</td><td>必填</td><td>目的地国家或地区</td></tr>
+<tr><td>4</td><td>travel_purpose</td><td>必填</td><td>出行目的</td></tr>
+<tr><td>5</td><td>visa_requirement</td><td>必填</td><td>签证一级要求</td></tr>
+<tr><td>5a</td><td>visa_requirement_detail</td><td>第 5 项子类</td><td>第 5 项的细化子类</td></tr>
+<tr><td>6</td><td>visa_type_name</td><td>必填</td><td>签证产品名称</td></tr>
+<tr><td>7</td><td>validity_duration</td><td>必填</td><td>签证有效期数值</td></tr>
+<tr><td>8</td><td>validity_unit</td><td>必填</td><td>有效期单位</td></tr>
+<tr><td>9</td><td>max_stay_duration</td><td>必填</td><td>每次入境最长停留数值</td></tr>
+<tr><td>10</td><td>max_stay_unit</td><td>必填</td><td>停留单位</td></tr>
+<tr><td>11</td><td>entries</td><td>必填</td><td>入境次数</td></tr>
+<tr><td>12</td><td>processing_min_days</td><td>如有则提供</td><td>最短办理时长</td></tr>
+<tr><td>13</td><td>processing_unit</td><td>如有则提供</td><td>办理时长单位</td></tr>
+<tr><td>14</td><td>visa_fee_amount</td><td>必填</td><td>官方签证费金额</td></tr>
+<tr><td>15</td><td>visa_fee_currency</td><td>必填</td><td>费用币种</td></tr>
+<tr><td>16</td><td>application_method</td><td>必填</td><td>申请渠道</td></tr>
+<tr><td>17</td><td>required_documents</td><td>必填</td><td>核心材料清单</td></tr>
+<tr><td>18</td><td>consulate_district</td><td>如有则提供</td><td>领区信息</td></tr>
+<tr><td>19</td><td>entry_requirements</td><td>如有则提供</td><td>签证以外的入境要求</td></tr>
+<tr><td>20</td><td>special_conditions</td><td>如有则提供</td><td>特殊政策与限制条件</td></tr>
+<tr><td>21</td><td>data_source</td><td>必填</td><td>来源机构或网站</td></tr>
+<tr><td>22</td><td>source_url</td><td>必填</td><td>具体来源页面</td></tr>
+<tr><td>23</td><td>collected_at</td><td>必填</td><td>采集日期</td></tr>
+<tr><td>24</td><td>info_validity</td><td>必填</td><td>已公布的政策截止日期；未知留空</td></tr>
+<tr><td>25</td><td>confidence_level</td><td>必填</td><td>当前为 High / Low；证据身份另列</td></tr>
+</table></div><section class="language" lang="en"><h1>Data Caliber Manual - T-Station Visa Information Base</h1>
+<p>Current implementation rules, revised 2026-09-09. This document describes the verification and serving contract. The requested 100% coverage and completeness are targets to be demonstrated, not achieved claims; treatment of supported N/A or unpublished statuses for formal acceptance remains to be agreed. It does not certify that every stored field has been verified or that every official page is readable.</p>
+<h2>Route identity and record projection</h2>
+<p>One canonical decision covers each nationality, destination, travel purpose and travel document. Residence, itinerary and travel dates do not create another model verdict. Residence still matters for explicitly scoped consular fees and procedure. Evidenced effective-date rules determine dated policy changes.</p>
+<p>The mapper in backend/app/visa_snapshot/tstation.py projects the agreed field dictionary, with one record per visa product. Missing facts remain missing. Calendar months and years preserve exact wording in max_stay_text and exported special_conditions; they are not multiplied by 30 or 365. Hour-based validity converts to days only for exact multiples of 24. Otherwise numeric fields remain null and exact text is retained. Processing estimates are not guarantees.</p>
+<p>Dictionary field 24, <code>info_validity</code>, is only the policy&#x27;s explicitly recorded published end date. If no end date is known it stays null; an internal cache deadline must never fill this field. Product-specific policy dates take precedence, and a separate permission cannot inherit another permission&#x27;s expiry. <code>freshness_valid_until</code> is separate metadata for the internal recheck deadline. Neither that deadline nor a successful refresh extends the policy. Reviewed disposition provenance can also supply its <code>effective_to</code> policy date, using the bound&#x27;s own official-jurisdiction source, verification date and exact quoted date. An inherited <code>policy_interval_evidence</code> notice retains its original evidence; bare interval dates or unrelated field dates do not fill this column.</p>
+<p>The API&#x27;s <code>acceptance_summary</code> exposes both literal 25-field formulas: filled cells / all 25 cells, and records with all 25 non-null / all records. No blank exclusions apply to those metrics. The operational fillable metric separately excludes explicitly not-applicable and source-confirmed not-published fields. The export splits item 5 into requirement and subcategory, producing 26 columns; the subcategory does not become a 26th contractual field. The offline acceptance auditor validates the exact dictionary and the API&#x27;s declared complete row count.</p>
+<p>An ETA, an advance visa and a visa on arrival are different permission types. An electronic visa is still a visa. Alternate products keep their own fees, validity, documents and procedure. ETA procedure cannot become an alternate visa&#x27;s facts. Electronic and paper visa procedures are isolated when different.</p>
+<h2>Source verification and confidence</h2>
+<p>The records expose source_check separately from confidence:</p>
 <div class="tablewrap"><table>
-<tr><th>等级</th><th>判定（与4.2.3一致）</th><th>处理</th></tr>
-<tr><td>高 High</td><td>人工对照指定官方页面核验且记录完整、无冲突。</td><td>直接展示</td></tr>
-<tr><td>中 Medium</td><td>有官方信源支撑但个别字段待补，或人工核验后仍有字段官方未公布。</td><td>展示并附来源</td></tr>
-<tr><td>低 Low</td><td>多源冲突，或仅非官方来源，或声称具体产品与费用但尚未对照官方页面读校。</td><td>拦截。读者看到「正在核对该线路」，经运营确认后展示</td></tr>
+<tr><th>Source check</th><th>Meaning</th></tr>
+<tr><td>human-quote</td><td>Explicit human verdict provenance, official source, substantive note and actual verification date.</td></tr>
+<tr><td>ai-quote</td><td>Recorded verdict evidence attributed to an AI check. Missing historical verifier identity defaults to AI.</td></tr>
+<tr><td>grounded-consistent</td><td>A successful current evidence-contract check was consistent and explicitly verified disposition.</td></tr>
+<tr><td>reference</td><td>A source link exists, but required verdict evidence is absent.</td></tr>
+<tr><td>unchecked</td><td>No source link is available.</td></tr>
 </table></div>
-<p>分级由系统按上表自动标注。放行低置信度答案的唯一途径是写入经官方来源核验的事实或运营留痕放行，两者都可审计。</p>
-<p class="en">Grading is automatic. The only ways out of a hold are source-verified facts or an audited operator release.</p>
-
-<h2>5. 待决口径 <span class="en">Calibers awaiting a joint ruling</span></h2>
-<p>以下三项在数据中如实标注，最终判据请会议确认：</p>
-<p class="en">Three calibers are declared in the data and need the joint meeting's ruling:</p>
-<p>其一，<code>info_validity</code>。字典定义为「政策本身的有效期至」，但绝大多数国家不公布政策截止日。当前口径：政策公布截止日的用截止日（例如韩国团队免签至2026-12-31），其余为 Ellis 的担保日期，即时效监控要求重新核验的日期。导出中已声明。</p>
-<p>其二，<code>visa_requirement</code> 第四值 Conditional。约146条记录的要求确实取决于旅客个人条件（例如持有效第三国签证则免签）。可并入「免签→有条件免签」子类，迁移脚本已备好，等待确认后执行。</p>
-<p>其三，完整度判据，见第3节。</p>
-
-<h2>6. 特殊政策注记 <span class="en">Special policy notes</span></h2>
-<p>区域性免签与过境免签不属于单一线路判定，以独立注记承载：海南61国30天入境免签、中国240小时过境免签、韩国对中国团队游客免签及济州政策。注记逐条绑定官方来源URL并经交叉核验，在查询器、展示页与AI问答中随相关线路与提问出现，并对已知国籍明确说明是否适用。</p>
-<p class="en">Regional and transit policies live as standalone notes, each bound to an official source URL, surfacing beside relevant routes and questions with a decisive covered-or-not line for a known nationality.</p>
-
-<h2>7. 导出口径 <span class="en">Export caliber</span></h2>
-<p>导出文件为 .xlsx，两张工作表：数据表首行为字段名，字段说明表标注每字段口径与快照时间（UTC）。导出内容即在线内容，同一代码路径生成，无单独离线库。单次导出无行数上限。</p>
-<p class="en">The export is the online data through the same code path, two sheets, stamped with the UTC snapshot time, with no row cap.</p>
-
-<div class="note">本说明与线上行为同源维护。任何口径调整都会先更新本文件与导出内的字段说明表，再生效。<br>
-This specification is maintained alongside the code. A caliber change updates this document and the export's field description sheet before it takes effect.</div>
-
-<footer>Ellis · 数据口径说明 · 2026-09-01</footer>
-</main>
+<p>The configured display has two grades, High and Low. Complete official-source checked records with supported required values and no unresolved dispute can be High. Accepted AI and human source checks use the same grade; authorship remains explicit in provenance. Missing evidence, field gaps, public edits, invalid provenance and disputes remain Low. A model&#x27;s self-rating or an official URL alone is never verification. There is no current Medium output. Trip.com&#x27;s written standard describes a three-level ladder; the configured binary display must not be described as an unchanged implementation of that ladder or evidence of contractual acceptance.</p>
+<p>A fresh automated check can support a grade when historical human provenance is incomplete; it cannot retrospectively establish human verification. At grading time, imported manual notes are checked for substantive text, official source and valid nonfuture date. The grader does not reinterpret every multilingual note&#x27;s semantic relevance. The operator&#x27;s factual judgment remains auditable through source and per-field provenance.</p>
+<p>Source labels describe evidence, while completeness and link coverage are separate measurements. Each record&#x27;s held and review_required flags describe the entire canonical route, including its other products. Display grade and publication are separate: a completeness-only Low does not itself create a new hold. The existing source/conflict gate and explicit route hold metadata govern publication; the binary relabeling did not change those gates.</p>
+<h2>Evidence contract and corrections</h2>
+<p>An automated verdict check counts only under the current evidence contract (version 2), after a successful route-supported read with disposition in verified_fields. Legacy consistent flags and ancillary-only checks cannot verify a verdict.</p>
+<p>Fetched evidence must match nationality, purpose, document and effective period. Corrections require a quote present in the source and support for the exact field value. A number elsewhere on a page, another nationality&#x27;s table row or an ETA eligibility page alone is insufficient proof. Ambiguous tables and unsupported claims remain for review. Shared authority rules check official domains and jurisdiction; commercial pages are not official verification.</p>
+<p>Overrides validate vocabulary and shapes. Fees/products need a verified verdict or detail. Invalid historical machinery is quarantined with diagnostics while independently valid ancillary facts can survive. Per-field provenance retains human or AI authorship. A narrow correction does not verify unrelated fields or sibling products.</p>
+<h2>Freshness and unresolved fields</h2>
+<p>The systemd timer starts a cycle every six hours. Four workers check canonical routes independently, with a 75-second route budget and a five-hour cycle budget. The 5,000-row selection cap exceeds the current inventory; work that cannot be attempted before the deadline stays visible in the backlog. A 15-minute duplicate-attempt window prevents immediate repeats without skipping routes checked late in the previous six-hour cycle. Source rotation covers supporting fee and detail pages as well as the headline source.</p>
+<p>Scheduled and on-access checks attempt to read official sources. A failed read is a failed attempt, not new verification, and can preserve an earlier effective check. A later readable but irrelevant page cannot perpetuate an unsupported source claim.</p>
+<p>Whole-row freshness extension requires support for all populated substantive fields and no outstanding disputes, unsupported proposals or unread required sources. Verifying the verdict alone cannot renew fees, stays and products. Operator reporting distinguishes attempts, successful reads, field coverage and freshness. A completed sweep does not establish that every field is accurate. The console reports the actual timer and durable worker status, including unfinished attempts, partial checks, unreadable sources and errors. A missing timer or dead worker cannot be displayed as a confirmed upcoming/completed run.</p>
+<p>The monthly report currently archives the operational fillable-field metric. For formal acceptance retain the full timestamped records snapshot and its literal25 audit as well; the operational metric is not a substitute.</p>
+<h2>Historical documentation</h2>
+<p>This revision replaces the September 3 HTML/PDF warranty-date and three-tier descriptions. <code>requirement-ledger.html</code> and historical acceptance archives remain dated historical materials until rechecked. This revision follows the current Markdown manual and exported field dictionary for explicit-policy-date semantics.</p>
+<h2>Reader and saved-workflow gates</h2>
+<p>Lookup, questions, comparisons, intake and dataset grading share the verdict evidence rule. Held responses retain only identity and safe status metadata; guidance, workflow steps, provenance notes and other claim-bearing containers are removed. Held and comparison replies use deterministic prose so old conversation history cannot restore withdrawn claims. Independently verified special-policy notices retain their own scope.</p>
+<p>Saved routed cases use the current canonical cached answer when available, apply the same gate and refresh their verdict, continuation kind and checklist. Uploaded documents and submission bindings are preserved. A new hold blocks document-stage completion, application start, service transitions and appointment packets. Visa-on-arrival cases can complete preparation but cannot start an advance visa filing. Cases outside the route-guidance workflow retain their separate rules.</p>
+<p>An operator release cannot override a material contradiction, pending detail stage or active source dispute. Low-confidence display follows the configured hold policy, which production must keep enabled. Corrections and saved-case requirement updates are recorded for review.</p>
+<h2>Appendix: exact field dictionary</h2>
+<p>The operational required/if-available column describes the implementation. Formal literal25 acceptance metrics count every numbered field; no field is silently waived.</p>
+<div class="tablewrap"><table>
+<tr><th>#</th><th>Field / export key</th><th>Operational status</th><th>Definition</th></tr>
+<tr><td>1</td><td>travel_document_type</td><td>Required</td><td>Type of travel document held</td></tr>
+<tr><td>2</td><td>travel_document_country</td><td>Required</td><td>Document issuing country (applicant nationality)</td></tr>
+<tr><td>3</td><td>destination_country</td><td>Required</td><td>Visa destination</td></tr>
+<tr><td>4</td><td>travel_purpose</td><td>Required</td><td>User&#x27;s travel purpose</td></tr>
+<tr><td>5</td><td>visa_requirement</td><td>Required</td><td>Visa-free / Visa on Arrival / Visa Required in Advance</td></tr>
+<tr><td>5a</td><td>visa_requirement_detail</td><td>Item 5 subcategory</td><td>Field 5&#x27;s subcategory: Unconditional / Conditional / Transit Visa-free, eVisa or Paper Visa on Arrival, eVisa / Paper Visa / ETA Electronic Authorization</td></tr>
+<tr><td>6</td><td>visa_type_name</td><td>Required</td><td>Visa type name for this purpose and destination</td></tr>
+<tr><td>7</td><td>validity_duration</td><td>Required</td><td>How long the visa is valid after approval (number)</td></tr>
+<tr><td>8</td><td>validity_unit</td><td>Required</td><td>Day / Month / Year / Long-term Valid</td></tr>
+<tr><td>9</td><td>max_stay_duration</td><td>Required</td><td>Maximum length of stay per entry (number)</td></tr>
+<tr><td>10</td><td>max_stay_unit</td><td>Required</td><td>Hour / Day</td></tr>
+<tr><td>11</td><td>entries</td><td>Required</td><td>Single / Multiple / Unlimited</td></tr>
+<tr><td>12</td><td>processing_min_days</td><td>If available</td><td>Shortest time from submission to visa issuance</td></tr>
+<tr><td>13</td><td>processing_unit</td><td>If available</td><td>Working Day / Calendar Day</td></tr>
+<tr><td>14</td><td>visa_fee_amount</td><td>Required</td><td>Official visa fee amount (consular fee only)</td></tr>
+<tr><td>15</td><td>visa_fee_currency</td><td>Required</td><td>ISO 4217 currency code</td></tr>
+<tr><td>16</td><td>application_method</td><td>Required</td><td>Embassy Submission / Online Application / Agency Service / On-arrival Processing / Government Office Submission</td></tr>
+<tr><td>17</td><td>required_documents</td><td>Required</td><td>Core document checklist, comma separated</td></tr>
+<tr><td>18</td><td>consulate_district</td><td>If available</td><td>Consulate district divisions, if any</td></tr>
+<tr><td>19</td><td>entry_requirements</td><td>If available</td><td>Other entry requirements besides the visa</td></tr>
+<tr><td>20</td><td>special_conditions</td><td>If available</td><td>Special policies or restrictions</td></tr>
+<tr><td>21</td><td>data_source</td><td>Required</td><td>Information source website / organization</td></tr>
+<tr><td>22</td><td>source_url</td><td>Required</td><td>Specific page link</td></tr>
+<tr><td>23</td><td>collected_at</td><td>Required</td><td>Data collection date</td></tr>
+<tr><td>24</td><td>info_validity</td><td>Required</td><td>Published policy validity end date, when known. Blank when no policy end date is available; the separate freshness_valid_until metadata is an internal recheck deadline, not the policy&#x27;s expiry date</td></tr>
+<tr><td>25</td><td>confidence_level</td><td>Required</td><td>High / Low</td></tr>
+</table></div></section><footer>Source: DATA_CALIBER_MANUAL.md · SHA-256 194d87b819911a4903766a3fd6bb1b4ce3e9293928a57c73b8d94026f0e43a30<br>Generated from the current source manual; no acceptance certification.</footer></main></body></html>

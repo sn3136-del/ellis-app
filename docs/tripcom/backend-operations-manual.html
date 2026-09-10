@@ -1,130 +1,40 @@
-<title>Ellis 后台操作手册</title>
-<style>
-  :root{
-    --paper:#FBFBF8; --ink:#1C2B4A; --muted:#5B6478; --line:#E5E4DC;
-    --card:#FFFFFF; --accent:#175CD3; --soft:#F0F4FA; --good:#0A8A4A;
-    --warn:#B26A00; --bad:#C62828;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
-      --card:#171F33; --soft:#1C2740;
-    }
-  }
-  :root[data-theme="dark"]{
-    --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
-    --card:#171F33; --soft:#1C2740;
-  }
-  body{background:var(--paper); color:var(--ink); margin:0;
-       font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
-       line-height:1.65;}
-  main{max-width:880px; margin:0 auto; padding:48px 22px 90px;}
-  h1{font-size:1.9rem; margin:0 0 6px; text-wrap:balance;}
-  .sub{color:var(--muted); margin:0 0 34px; font-size:.95rem;}
-  h2{font-size:1.25rem; margin:40px 0 4px; padding-top:18px;
-     border-top:1px solid var(--line);}
-  h2 .en{display:block; font-size:.85rem; color:var(--muted); font-weight:600;}
-  h3{font-size:1.02rem; margin:20px 0 4px;}
-  p{margin:8px 0; max-width:72ch;}
-  p.en{color:var(--muted); font-size:.92rem;}
-  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:.9rem;}
-  th,td{border:1px solid var(--line); padding:7px 10px; text-align:left;
-        vertical-align:top;}
-  th{background:var(--soft); font-weight:700;}
-  .tablewrap{overflow-x:auto;}
-  code,.k{background:var(--soft); border-radius:6px; padding:1px 6px;
-     font-family:ui-monospace,Menlo,monospace; font-size:.85em;}
-  .step{display:flex; gap:10px; margin:6px 0;}
-  .step b{color:var(--accent); flex-shrink:0;}
-  .tag{display:inline-block; border-radius:999px; padding:1px 10px;
-       font-size:.78rem; font-weight:700; margin-right:6px;}
-  .tag.g{background:#e7f5ec; color:var(--good);}
-  .tag.a{background:#fbf1e2; color:var(--warn);}
-  .tag.r{background:#fdecec; color:var(--bad);}
-  .note{background:var(--soft); border-left:3px solid var(--accent);
-        border-radius:8px; padding:10px 14px; margin:12px 0; font-size:.92rem;}
-  footer{margin-top:50px; color:var(--muted); font-size:.8rem;
-         border-top:1px solid var(--line); padding-top:14px;}
-</style>
-<main>
-<h1>Ellis 信息质量管控后台 操作手册</h1>
-<p class="sub">Ellis Information Quality Control Backend, Operations Manual · 版本 2026-09-01 · 交付物清单第10项 Deliverable No. 10</p>
-
-<h2>1. 访问方式 <span class="en">Access</span></h2>
-<p>浏览器打开 <code>https://ellis-visa.com</code>，点击右上角「质控台」进入后台。无需安装，无需配置，无需申请账号。测试权限已预置。</p>
-<p class="en">Open <code>https://ellis-visa.com</code> in a browser and press "Quality console" in the header. No install, no setup, no account application. Test access is preconfigured.</p>
-<p>右上角地球图标可切换语言：English、简体中文、繁體中文。界面与数据说明同步切换。</p>
-<p class="en">The globe icon switches the language: English, Simplified Chinese, Traditional Chinese.</p>
-
-<h2>2. Records 记录抽查 <span class="en">Multi-dimensional spot check</span></h2>
-<p>Records 页承载全量抽查。筛选条件可任意组合：</p>
-<p class="en">The Records tab carries the full spot check. Filters combine freely:</p>
-<div class="tablewrap"><table>
-<tr><th>筛选 Filter</th><th>说明 What it does</th></tr>
-<tr><td>护照 Passport</td><td>站点维度。输入国名、中文名或代码，例如 China、中国、CHN、CN。<br>The station dimension. Type a name in either script or a code.</td></tr>
-<tr><td>目的地 Destination</td><td>同上。输入 KOR 或 South Korea 只会返回韩国记录。<br>Same input rules. Typing KOR or South Korea returns only South Korea records.</td></tr>
-<tr><td>目的 Purpose</td><td>旅游、商务、探亲、留学、工作、过境、其他。</td></tr>
-<tr><td>签证要求 Visa requirement</td><td>免签、落地签、需提前办理等一级分类。</td></tr>
-<tr><td>置信度 Confidence</td><td>高、中、低。</td></tr>
-<tr><td>签证类型 Visa type</td><td>按类型名称包含匹配，例如 tourist。</td></tr>
-<tr><td>证件类型 Passport type</td><td>普通护照、外交护照等13种。</td></tr>
-<tr><td>缺失字段 Missing field</td><td>只看某字段仍缺失的记录，用于补齐工作。</td></tr>
-</table></div>
-<p>四个指标卡实时反映当前筛选结果：记录数、完整度、信源覆盖率、置信度分布。完整度卡片同时给出两种口径：可填口径（分母剔除「不适用」与「官方未公布」）和字面口径（25必填字段的原始计数）。</p>
-<p class="en">The four tiles follow the current filter: record count, completeness, source coverage, confidence split. The completeness tile shows both calibers: fillable (excluding does-not-apply and not-published cells) and the literal count over required cells.</p>
-<p>点击任意行展开完整25字段记录。每个字段带状态标记：</p>
-<p class="en">Click a row to expand the full 25-field record. Every field carries a status:</p>
-<p><span class="tag g">已填 filled</span><span class="tag a">官方未公布 not published</span><span class="tag a">不适用 does not apply</span><span class="tag r">缺失 missing</span></p>
-<p>展开卡底部是「标记问题」表单：选择字段、写明疑点、提交。提交即进入纠错队列。</p>
-<p class="en">The flag form at the bottom of the card files a field-level issue straight into the correction queue.</p>
-
-<h2>2b. 新增线路与编辑字段 <span class="en">Adding routes and editing fields</span></h2>
-<p>Records 页的「新增线路」卡片提供两种方式：</p>
-<p class="en">The Add a route card on the Records tab offers two ways in:</p>
-<div class="step"><b>1</b><span>用 Ellis AI 添加。选护照、目的地、目的与证件，点一次按钮。Ellis 即时作答并对照该线路的官方页面核验，结果直接进入记录列表；低置信度答案先拦截，核对后展示。<br>Add with Ellis AI. Pick the route and press once: Ellis answers it and checks the official pages in the same move. A low-confidence answer is held until checked.</span></div>
-<div class="step"><b>2</b><span>人工录入。切换「手动填写」，运营逐项输入费用、停留、办理时长、材料等字段，必须附官方来源网址与说明。保存后立即对读者生效，来源标注为携程运营。<br>Manual entry. Switch to manual and type the fields yourself. An official source URL and a note are required; it serves immediately with Trip.com operations as the provenance.</span></div>
-<p>展开任意记录可用三个按钮：「编辑字段」打开覆盖全部可编辑字段的表单（判定下拉、当前签证行的效期/次数/费用、费用与停留、申请方式、入境卡、官方未公布勾选），预填当前值，只写入改动项；「从官方来源刷新」让 Ellis 当场重读官方页面，信息一致时明确告知「仍是最新，无需刷新」，有差异时按页面修正并留痕；「标记」提交人工质疑后，Ellis 会自动去读官方页面，并把核对结果作为修正建议放入纠错队列，运营可一键接受（写入带来源的修正，读者立即看到）或拒绝。</p>
-<p class="en">Every expanded record has three buttons. Edit fields opens a form covering every editable field (verdict dropdowns, this visa row's validity, entries and fee, money and stay, how to apply, arrival card, and not-published checkboxes), prefilled with current values and writing only what changed. Refresh from source has Ellis re-read the official page on the spot: when nothing changed it says so plainly, and differences are corrected from the page with the change logged. Flag files a human report, after which Ellis reads the official page itself and places what it found in the Correction queue as a proposal the operator can accept in one click (a sourced correction the next reader sees immediately) or decline.</p>
-
-<h2>3. Correction queue 纠错队列 <span class="en">The five-stage loop</span></h2>
-<p>每条问题沿验收标准4.1.2的五个阶段推进，每个阶段一个按钮，顺序不可跳过：</p>
-<p class="en">Every issue walks the five stages of standard 4.1.2, one button per stage, no skipping:</p>
-<div class="step"><b>1</b><span>标记 open。读者或运营在记录上发起。<br>A reader or operator flags a field.</span></div>
-<div class="step"><b>2</b><span>已通知信息方 acknowledged。记录信息提供方已获知。<br>The information provider has been told.</span></div>
-<div class="step"><b>3</b><span>已修正 corrected。写明修正内容后提交。旧答案立即从服务中撤下。<br>The fix is written and the old answer is withdrawn at once.</span></div>
-<div class="step"><b>4</b><span>已复核 reviewed。必须由修正人以外的运营复核，系统强制。<br>A second operator reviews. The system enforces the separation.</span></div>
-<div class="step"><b>5</b><span>发布上线 published。修正后的答案对读者生效。<br>The corrected answer goes live.</span></div>
-<p>任一阶段可选择「不处理 dismissed」，但必须写明原因。整个闭环目标不超过48小时，每个阶段的时间戳都被记录，可导出核验。</p>
-<p class="en">Dismissal needs a written reason at any stage. The end-to-end target is 48 hours and every stage is timestamped.</p>
-
-<h2>4. Change log 变更记录 <span class="en">Add, modify, delete</span></h2>
-<p>每次影响读者可见内容的更新自动写入变更记录，区分新增、修改、删除三类，修改类带逐字段前后对照。答案因纠错被撤下时会写入删除记录。支持全文搜索，覆盖全部历史。</p>
-<p class="en">Every reader-visible update writes a change entry: add, modify or delete, with field-level diffs. Withdrawing an answer through the correction loop writes a delete entry. Search runs over the full history.</p>
-
-<h2>5. AI 问答抽查 <span class="en">Sampling the assistant</span></h2>
-<p>AI 问答页列出智能助手实际回答过的每一次交互：问题原文、读取的线路、给出的答案、引用来源。运营对每条可作裁定：</p>
-<p class="en">The AI Q&amp;A tab lists every exchange the assistant actually served: the question, the route it was read as, the answer and the cited source. Each exchange takes a ruling:</p>
-<p><span class="tag g">正确 correct</span> 记录复核人与时间。<br>
-<span class="tag r">有误 wrong</span> 必须写明问题所在，系统自动就该线路立一条纠错队列问题，走完整闭环。</p>
-<p class="en">Ruling an answer wrong requires a written reason and files a tracked issue on the answered route automatically.</p>
-
-<h2>6. Freshness 时效监控 <span class="en">The freshness monitor</span></h2>
-<p>系统定期重读官方页面。与记录一致则重新盖章。与人工核验事实不一致时不会自动改写，而是生成一条争议，附页面原文、当前记录值与引文，等待人工裁定。裁定后走纠错队列发布。页面上方的可用性卡片展示当月按分钟计的在线率。</p>
-<p class="en">Official pages are re-read on a schedule. Agreement restamps the record. Disagreement with a human-verified fact files a dispute with the page quote for a human ruling instead of overwriting. The availability tile shows the month's per-minute uptime.</p>
-
-<p>Ellis 每 48 小时内自动将每条已提供的答案与其官方页面重新核对一次（系统定时任务，最久未核对优先）。Freshness 页顶部显示「下一次全量数据刷新」倒计时，读取的是定时任务本身的下次运行时间，不是估算。</p>
-<p class="en">Ellis automatically re-reads every served answer against its official page at least every 48 hours (a scheduled sweep, oldest first). The Freshness tab opens with a countdown to the next full refresh, read from the sweep timer itself rather than estimated.</p>
-<h2>7. 批量导出 <span class="en">Batch export</span></h2>
-<p>Records 页的「导出 Excel」按当前筛选条件导出 .xlsx。文件含两张工作表：数据表（25字段+来源+置信度）与字段说明表。字段说明表首行标注快照时间（UTC）。导出无行数上限，工作簿构建在12,000行实测1.2秒。</p>
-<p class="en">Export Excel follows the active filters. Two sheets: data (25 fields plus sources plus confidence) and field descriptions, stamped with the UTC snapshot time. No row cap exists in code. Workbook build measured 1.2 seconds at 12,000 rows.</p>
-
-<h2>8. 低置信度拦截与放行 <span class="en">Holds and release</span></h2>
-<p>按4.2.3分级为「低」的答案不对读者展示，读者只会看到「正在核对该线路」。放行有两条路：一是研究后写入经官方来源核验的事实（推荐），二是运营在核对官方页面后手动放行。两条路都会留下可审计的记录。</p>
-<p class="en">A Low-graded answer is withheld and the reader sees "We are checking this route". Release happens by writing source-verified facts (preferred) or by an audited manual release after checking the official page.</p>
-
-<h2>9. 深链 <span class="en">Deep links</span></h2>
-<p>数据库每条线路有稳定链接，形如 <code>#database/CHN/JPN/tourism</code>。链接可直接分享，打开即达对应记录页。</p>
-<p class="en">Every route has a stable deep link that opens the record page directly.</p>
-
-<footer>Ellis · 后台操作手册 · 2026-09-01 · 本手册与线上版本同步维护</footer>
-</main>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ellis 信息质量管控后台操作手册</title><style>body{margin:0;background:#edf2f8;color:#17263c;font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC",sans-serif}main{max-width:940px;margin:32px auto;padding:44px 54px;background:white;border:1px solid #dbe3ec;border-radius:12px}h1{font-size:34px;line-height:1.2;margin:0 0 16px;color:#133d66}h2{font-size:23px;margin:32px 0 12px;padding-top:14px;border-top:1px solid #dbe3ec;color:#133d66}p,li{margin:10px 0}table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}th,td{border:1px solid #dbe3ec;padding:9px 12px;vertical-align:top;text-align:left;overflow-wrap:anywhere}th{background:#edf3f8}code{font:13px/1.5 ui-monospace,Menlo,monospace;background:#f1f5f9;padding:1px 4px;overflow-wrap:anywhere}.meta{color:#596d83;font-size:13px}.notice{padding:14px 18px;background:#fff6e7;border-left:4px solid #c48628;border-radius:4px;margin:20px 0}.language{padding-top:28px;margin-top:40px;border-top:3px solid #1a5a85}.tablewrap{overflow-x:auto}footer{margin-top:36px;border-top:1px solid #dbe3ec;padding-top:14px;color:#596d83;font-size:12px}@media(max-width:700px){main{margin:0;border:0;border-radius:0;padding:24px}h1{font-size:29px}table{font-size:12px}}@media print{body{background:white}main{border:0;margin:0;padding:0;max-width:none}h2{break-after:avoid}tr{break-inside:avoid}.language{break-before:page}a{color:inherit}}</style></head><body><main><p class="meta">ELLIS · Deliverable No. 10 · Revised 2026-09-09</p><div class="notice">本手册说明当前实现。完整度、准确率、运行时效及最终验收须以实际测量和签署材料证明。</div><h1>Ellis 信息质量管控后台操作手册</h1>
+<p>本手册记录当前实现及操作要求，不代表全部数据已经核实或项目验收已经通过。</p>
+<h2>系统结构</h2>
+<p>生产架构使用 Hetzner CX23（Falkenstein），由 Caddy 为 ellis-visa.com 终止 TLS，并提供 /opt/ellis/src/renderer/dist 中的静态应用。/api/* 请求转发到本机 127.0.0.1:8000 的 FastAPI 服务（systemd 服务名 ellis-backend）。SQLite 数据库路径为 /var/lib/ellis/ellis.db。</p>
+<h2>日常运行与发布</h2>
+<ul>
+<li>状态检查：systemctl status ellis-backend caddy。</li>
+<li>后端日志：journalctl -u ellis-backend -f；边缘代理日志：journalctl -u caddy。</li>
+<li>发布应使用经过测试、按提交与产物校验和固定的版本。更新前核实当前数据库备份，保留上一版本，并记录版本号、迁移步骤和回滚流程。重启后检查后台接口、公开应用与质控台。</li>
+<li>健康检查地址：https://ellis-visa.com/api/health。</li>
+</ul>
+<h2>数据保护与恢复</h2>
+<p>每日必须进行完整数据库备份。backend/scripts/backup_database.py 使用 SQLite 在线备份接口，包含已提交的 WAL 内容；对备份执行完整性校验后，才以原子方式发布权限为 0600 的私有文件。每日执行脚本沿用 /var/backups/ellis/ellis-&lt;weekday&gt;.db 路径。</p>
+<p>SQLite 备份失败时，不得退回到复制运行中的数据库文件。应记录备份成功与失败，核查线上每日任务及实际产物；任务存在不代表备份成功。应保存已验证的异机副本，以支持主机丢失后的恢复。此机制只备份数据库；发布产物、配置与必要的外部存储须分别安排恢复。</p>
+<p>恢复时先停止服务并保留当前状态，按该版本的恢复流程还原已验证的备份，再检查数据库完整性、公开页面及质控功能，然后恢复服务。合同恢复目标为不超过 1 小时，是否达标须由带日期和计时记录的完整恢复演练证明。systemd 自动重启进程有帮助，但不是灾难恢复验收证明。</p>
+<h2>质控台与数据解读</h2>
+<p>浏览器打开 https://ellis-visa.com/#ops。记录页面提供可组合的抽查筛选（支持名称、代码与中文）、逐条 25 字段清单、置信度与信源支持标识、问题标记、可追踪纠错队列、变更记录、时效信息及双工作表 Excel 导出。</p>
+<p>当前置信度显示为 High（高）与 Low（低）两级。人工或 AI 审核身份保留在来源证据中；是否可以对客展示，由原有证据和冲突控制单独决定。详细定义见本次更新的数据口径手册。</p>
+<p>info_validity 仅表示政策已公布的截止日期；未知日期留空。freshness_valid_until 单独表示系统内部复核期限。正式验收时应同时查看全部 25 字段的严格指标和日常可填写字段指标。</p>
+<p>本次版本替换旧版双语 HTML/PDF 手册。旧版 PASS 标记、示例可用率、或未计时的恢复描述，不得用作当前验收证据。</p>
+<h2>安全边界</h2>
+<p>UFW 仅开放 22/80/443 端口；后端仅绑定本机回环地址，由 Caddy 对外提供服务。部署资料中的密钥以 backend/secrets.enc 加密保存（AES-256-CBC），并在部署主机解密；backend/.env 不进入 Git。手册不包含凭据。</p><section class="language" lang="en"><h1>Backend Operating Manual - ellis-visa.com</h1>
+<h2>Topology</h2>
+<p>Hetzner CX23 (Falkenstein). Caddy terminates TLS for ellis-visa.com and serves the static app from /opt/ellis/src/renderer/dist; /api/* is proxied to the FastAPI backend (systemd unit ellis-backend) on 127.0.0.1:8000. Data: SQLite at /var/lib/ellis/ellis.db.</p>
+<h2>Routine operations</h2>
+<ul>
+<li>Status: systemctl status ellis-backend caddy</li>
+<li>Logs: journalctl -u ellis-backend -f (backend), -u caddy (edge)</li>
+<li>Deploy a tested release pinned to its commit and artifact checksum. Verify the current database backup and retain the previous release before updating. Record the release identifier, migration steps and rollback procedure; smoke test the backend, public application and quality console after restarting.</li>
+<li>Health: GET https://ellis-visa.com/api/health</li>
+</ul>
+<h2>Data protection</h2>
+<p>Daily full database backup is required. <code>backend/scripts/backup_database.py</code> uses SQLite&#x27;s online backup mechanism to include committed WAL content, validates the destination database and atomically publishes a private (mode 0600) file only after a successful integrity check. The daily wrapper retains the existing <code>/var/backups/ellis/ellis-&lt;weekday&gt;.db</code> paths. Never fall back to copying a live database file when SQLite backup fails. Record successful backups and failures; verify the deployed daily wrapper and its actual output, rather than inferring success from a schedule&#x27;s existence. Keep a verified off-host copy for host-loss recovery. This is a database backup; release artifacts, configuration and necessary external storage require their own recovery arrangements.</p>
+<p>For restore, stop the service, preserve the current state, restore the verified backup using the release-specific runbook, and check database integrity and public/quality behavior before reopening service. The contractual recovery target is at most one hour; a dated timed full recovery exercise is required to prove it. systemd process restart is useful but is not a disaster-recovery test.</p>
+<h2>Quality-control backend</h2>
+<p>https://ellis-visa.com/#ops - records with combined spot-check filters (names, codes and Chinese accepted), per-record 25-field checklists, confidence and source-substantiation chips, one-click error flagging into the tracked correction queue, the change log, freshness, and the two-sheet Excel export.</p>
+<p>The current confidence display is binary High/Low, with AI/human authorship kept in source provenance and publication controlled separately by the existing evidence/conflict gates. See <code>DATA_CALIBER_MANUAL.md</code> for precise definitions. <code>info_validity</code> is the published policy end date only; unknown dates remain blank. <code>freshness_valid_until</code> is separate internal review-deadline metadata. Use literal25 acceptance metrics alongside the operational fillable metric.</p>
+<p>This revision replaces the earlier bilingual HTML/PDF operation/caliber manuals. Old PASS labels, sample availability percentages, or unmeasured recovery claims are not current acceptance evidence.</p>
+<h2>Security posture</h2>
+<p>UFW allows 22/80/443 only. Backend binds loopback; only Caddy is exposed. Secrets ship encrypted (backend/secrets.enc, AES-256-CBC) and are decrypted on the machine at deploy time; backend/.env never enters git.</p></section><footer>Source: BACKEND_OPERATING_MANUAL.md · SHA-256 e7b714b61fbdf30c59abbf1312c804d48d55f00824628b2170621d60efb2e622<br>Generated from the current source manual; no acceptance certification.</footer></main></body></html>

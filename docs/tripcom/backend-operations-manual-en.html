@@ -1,112 +1,19 @@
-<title>Ellis Backend Operations Manual</title>
-<style>
-@page{size:A4;margin:11mm 13mm 9mm 13mm}
-  :root{
-    --paper:#FBFBF8; --ink:#1C2B4A; --muted:#5B6478; --line:#E5E4DC;
-    --card:#FFFFFF; --accent:#175CD3; --soft:#F0F4FA; --good:#0A8A4A;
-    --warn:#B26A00; --bad:#C62828;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
-      --card:#171F33; --soft:#1C2740;
-    }
-  }
-  :root[data-theme="dark"]{
-    --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
-    --card:#171F33; --soft:#1C2740;
-  }
-  @media print{ :root{ --paper:#FFFFFF; } }
-  body{background:var(--paper); color:var(--ink); margin:0;
-       font-family:-apple-system,"Helvetica Neue",system-ui,sans-serif; line-height:1.6;}
-  main{max-width:880px; margin:0 auto; padding:44px 22px 80px;}
-  h1{font-size:1.9rem; margin:0 0 6px; text-wrap:balance;}
-  .sub{color:var(--muted); margin:0 0 30px; font-size:.95rem;}
-  h2{font-size:1.22rem; margin:34px 0 4px; padding-top:16px; border-top:1px solid var(--line); break-after:avoid;}
-  p{margin:8px 0; max-width:74ch;}
-  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:.9rem;}
-  th,td{border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top;}
-  th{background:var(--soft); font-weight:700;}
-  tr{break-inside:avoid;}
-  .tablewrap{overflow-x:auto;}
-  code{background:var(--soft); border-radius:6px; padding:1px 6px;
-       font-family:ui-monospace,Menlo,monospace; font-size:.85em;}
-  .step{display:flex; gap:10px; margin:6px 0; max-width:74ch;}
-  .step b{color:var(--accent); flex-shrink:0;}
-  .tag{display:inline-block; border-radius:999px; padding:1px 10px; font-size:.78rem; font-weight:700; margin-right:6px;}
-  .tag.g{background:#e7f5ec; color:var(--good);}
-  .tag.a{background:#fbf1e2; color:var(--warn);}
-  .tag.r{background:#fdecec; color:var(--bad);}
-  .note{background:var(--soft); border-left:3px solid var(--accent); border-radius:8px;
-        padding:10px 14px; margin:12px 0; font-size:.92rem; break-inside:avoid;}
-  footer{margin-top:44px; color:var(--muted); font-size:.8rem; border-top:1px solid var(--line); padding-top:14px;}
-</style>
-<main>
-<h1>Ellis Information Quality Control Backend: Operations Manual</h1>
-<p class="sub">Version 3 September 2026 · Deliverable No. 10 · Maintained in step with the live system at ellis-visa.com</p>
-
-<h2>1. Access</h2>
-<p>Open <a href="https://ellis-visa.com">ellis-visa.com</a> and press "Quality console". No install, no account application. Test access is preconfigured.</p>
-<p>The globe icon switches the interface and the data descriptions between English, Simplified Chinese and Traditional Chinese.</p>
-
-<h2>2. Records: the multi-dimensional spot check</h2>
-<p>The Records tab carries the full spot check. Filters combine freely:</p>
-<div class="tablewrap"><table>
-<tr><th>Filter</th><th>What it does</th></tr>
-<tr><td>Passport</td><td>The station dimension. Type a country name or a code, for example China, CHN or CN. Chinese names work too.</td></tr>
-<tr><td>Destination</td><td>Same input rules. Typing KOR or South Korea returns only South Korea records.</td></tr>
-<tr><td>Purpose</td><td>Tourism, business, family visit, study, work, transit, other.</td></tr>
-<tr><td>Visa requirement</td><td>The top-level class: visa-free, on arrival, required in advance, conditional.</td></tr>
-<tr><td>Confidence</td><td>High, medium, low.</td></tr>
-<tr><td>Visa type</td><td>Substring match on the product name, for example "tourist".</td></tr>
-<tr><td>Passport type</td><td>The 13 travel document types, from ordinary to diplomatic passports.</td></tr>
-<tr><td>Missing field</td><td>Shows only records where a given field is still missing. Used for gap-filling work.</td></tr>
-</table></div>
-<p>Four tiles follow the filter: record count, completeness (fillable and literal), source coverage and the confidence split.</p>
-<p>Click a row to expand the full 25-field record. Every field carries a status:</p>
-<p><span class="tag g">filled</span><span class="tag a">not published</span><span class="tag a">does not apply</span><span class="tag r">missing</span></p>
-<p>The flag form on the card files a field-level issue into the correction queue.</p>
-
-<h2>3. Adding routes and editing fields</h2>
-<p>The "Add a route" card on the Records tab offers two ways in:</p>
-<div class="step"><b>1</b><span><b>Add with Ellis AI.</b> Pick passport, destination, purpose and document type and press once. Ellis answers the route and checks it against official pages. A low-confidence answer is held until checked.</span></div>
-<div class="step"><b>2</b><span><b>Manual entry.</b> Type the fields yourself. An official source URL and a short note are required. The record serves at once, with "Trip.com operations" as its provenance.</span></div>
-<p>Every expanded record has three buttons:</p>
-<div class="step"><b>Edit fields</b><span>opens a prefilled form for every editable field and writes only what changed.</span></div>
-<div class="step"><b>Refresh from source</b><span>re-reads the official page now. It says plainly when nothing changed, and otherwise corrects the record and logs the quote.</span></div>
-<div class="step"><b>Flag</b><span>files a report. Ellis reads the page and places a proposal in the queue, which an operator accepts or declines in one click.</span></div>
-
-<h2>4. Correction queue: the five-stage loop</h2>
-<p>Every issue walks the five stages of standard 4.1.2, one button per stage, in order, with no skipping:</p>
-<div class="step"><b>1</b><span>Open. A reader or an operator flags a field on a record.</span></div>
-<div class="step"><b>2</b><span>Acknowledged. The information provider has been told.</span></div>
-<div class="step"><b>3</b><span>Corrected. The fix is written and the old answer is withdrawn from service at once.</span></div>
-<div class="step"><b>4</b><span>Reviewed. A second operator reviews. The system enforces that the reviewer is not the corrector.</span></div>
-<div class="step"><b>5</b><span>Published. The corrected answer goes live for readers.</span></div>
-<p>Dismissal needs a written reason. The end-to-end target is 48 hours and every stage is timestamped and exportable.</p>
-
-<h2>5. Change log: add, modify, delete</h2>
-<p>Every change readers can see writes an entry classed add, modify or delete, with before and after values. Search covers the full history.</p>
-<p>Each entry is also pushed as JSON to a webhook URL when one is configured, so a Slack, Teams or Feishu channel or an email bridge hears about it at once.</p>
-
-<h2>6. AI Q&amp;A: sampling the assistant</h2>
-<p>The AI Q&amp;A tab lists every exchange served: question, route read, answer and source. Each takes a ruling:</p>
-<p><span class="tag g">correct</span> records the reviewer and the time.<br>
-<span class="tag r">wrong</span> requires a written reason and automatically files a tracked issue on the answered route, which then walks the full correction loop.</p>
-
-<h2>7. Freshness: the automatic re-check</h2>
-<p>The sweep runs every six hours and re-reads every record whose last check is more than 40 hours old, oldest and never-checked first, so no record passes 48 hours unchecked. Any record can also be re-read on demand with Refresh from source.</p>
-<p>A page that agrees restamps the record. A page that differs from a machine-held value corrects it, with the quote saved. A page that differs from a human-verified fact files a dispute for a person and changes nothing.</p>
-<p>The Freshness tab shows the countdown to the next run, read from the scheduler itself, and the share of records attempted in the last 48 hours. A site that blocks robots counts as attempted, keeps its last good read, and is listed for a person.</p>
-
-<h2>8. Batch export</h2>
-<p>"Export Excel" on the Records tab exports an .xlsx following the active filters: a data sheet (25 fields, sources, confidence) and a field description sheet stamped with the UTC snapshot time. No row cap. A 12,000-row workbook builds in 1.2 seconds.</p>
-
-<h2>9. Holds and release</h2>
-<p>A Low answer (standard 4.2.3) is never shown. Readers see "We are checking this route". It is released by writing a fact verified against an official source, or by an audited operator release.</p>
-
-<h2>10. Deep links</h2>
-<p>Every route has a stable link such as #database/CHN/JPN/tourism that opens the record page.</p>
-
-<footer>Ellis Intelligence, Inc. · Backend Operations Manual · 3 September 2026 · Maintained in step with the live system</footer>
-</main>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Backend Operating Manual — ellis-visa.com</title><style>body{margin:0;background:#edf2f8;color:#17263c;font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC",sans-serif}main{max-width:940px;margin:32px auto;padding:44px 54px;background:white;border:1px solid #dbe3ec;border-radius:12px}h1{font-size:34px;line-height:1.2;margin:0 0 16px;color:#133d66}h2{font-size:23px;margin:32px 0 12px;padding-top:14px;border-top:1px solid #dbe3ec;color:#133d66}p,li{margin:10px 0}table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}th,td{border:1px solid #dbe3ec;padding:9px 12px;vertical-align:top;text-align:left;overflow-wrap:anywhere}th{background:#edf3f8}code{font:13px/1.5 ui-monospace,Menlo,monospace;background:#f1f5f9;padding:1px 4px;overflow-wrap:anywhere}.meta{color:#596d83;font-size:13px}.notice{padding:14px 18px;background:#fff6e7;border-left:4px solid #c48628;border-radius:4px;margin:20px 0}.language{padding-top:28px;margin-top:40px;border-top:3px solid #1a5a85}.tablewrap{overflow-x:auto}footer{margin-top:36px;border-top:1px solid #dbe3ec;padding-top:14px;color:#596d83;font-size:12px}@media(max-width:700px){main{margin:0;border:0;border-radius:0;padding:24px}h1{font-size:29px}table{font-size:12px}}@media print{body{background:white}main{border:0;margin:0;padding:0;max-width:none}h2{break-after:avoid}tr{break-inside:avoid}.language{break-before:page}a{color:inherit}}</style></head><body><main><p class="meta">ELLIS · Deliverable No. 10 · Revised 2026-09-09</p><div class="notice">Implementation guidance only. Current completeness, accuracy, operational SLA and final acceptance require measured evidence.</div><h1>Backend Operating Manual - ellis-visa.com</h1>
+<h2>Topology</h2>
+<p>Hetzner CX23 (Falkenstein). Caddy terminates TLS for ellis-visa.com and serves the static app from /opt/ellis/src/renderer/dist; /api/* is proxied to the FastAPI backend (systemd unit ellis-backend) on 127.0.0.1:8000. Data: SQLite at /var/lib/ellis/ellis.db.</p>
+<h2>Routine operations</h2>
+<ul>
+<li>Status: systemctl status ellis-backend caddy</li>
+<li>Logs: journalctl -u ellis-backend -f (backend), -u caddy (edge)</li>
+<li>Deploy a tested release pinned to its commit and artifact checksum. Verify the current database backup and retain the previous release before updating. Record the release identifier, migration steps and rollback procedure; smoke test the backend, public application and quality console after restarting.</li>
+<li>Health: GET https://ellis-visa.com/api/health</li>
+</ul>
+<h2>Data protection</h2>
+<p>Daily full database backup is required. <code>backend/scripts/backup_database.py</code> uses SQLite&#x27;s online backup mechanism to include committed WAL content, validates the destination database and atomically publishes a private (mode 0600) file only after a successful integrity check. The daily wrapper retains the existing <code>/var/backups/ellis/ellis-&lt;weekday&gt;.db</code> paths. Never fall back to copying a live database file when SQLite backup fails. Record successful backups and failures; verify the deployed daily wrapper and its actual output, rather than inferring success from a schedule&#x27;s existence. Keep a verified off-host copy for host-loss recovery. This is a database backup; release artifacts, configuration and necessary external storage require their own recovery arrangements.</p>
+<p>For restore, stop the service, preserve the current state, restore the verified backup using the release-specific runbook, and check database integrity and public/quality behavior before reopening service. The contractual recovery target is at most one hour; a dated timed full recovery exercise is required to prove it. systemd process restart is useful but is not a disaster-recovery test.</p>
+<h2>Quality-control backend</h2>
+<p>https://ellis-visa.com/#ops - records with combined spot-check filters (names, codes and Chinese accepted), per-record 25-field checklists, confidence and source-substantiation chips, one-click error flagging into the tracked correction queue, the change log, freshness, and the two-sheet Excel export.</p>
+<p>The current confidence display is binary High/Low, with AI/human authorship kept in source provenance and publication controlled separately by the existing evidence/conflict gates. See <code>DATA_CALIBER_MANUAL.md</code> for precise definitions. <code>info_validity</code> is the published policy end date only; unknown dates remain blank. <code>freshness_valid_until</code> is separate internal review-deadline metadata. Use literal25 acceptance metrics alongside the operational fillable metric.</p>
+<p>This revision replaces the earlier bilingual HTML/PDF operation/caliber manuals. Old PASS labels, sample availability percentages, or unmeasured recovery claims are not current acceptance evidence.</p>
+<h2>Security posture</h2>
+<p>UFW allows 22/80/443 only. Backend binds loopback; only Caddy is exposed. Secrets ship encrypted (backend/secrets.enc, AES-256-CBC) and are decrypted on the machine at deploy time; backend/.env never enters git.</p><footer>Source: BACKEND_OPERATING_MANUAL.md · SHA-256 e7b714b61fbdf30c59abbf1312c804d48d55f00824628b2170621d60efb2e622<br>Generated from the current source manual; no acceptance certification.</footer></main></body></html>
