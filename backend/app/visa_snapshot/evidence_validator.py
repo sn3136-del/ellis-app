@@ -23,6 +23,15 @@ import unicodedata
 from .authority import hostname, is_government_host, registrable_domain
 from .authority_ownership import government_owner
 
+# Shared with detached reviewed-batch validation so a fallback cannot turn an
+# explicitly denied exemption back into a positive visa-free decision.
+NEGATED_VISA_EXEMPTION = (
+    r"\bnot (?:visa[- ]free|visa[- ]exempt|exempt(?:ed)? from (?:a |the )?visa)|"
+    r"\b(?:not|never) (?:eligible|entitled|qualified) (?:for|to) visa[- ]free|"
+    r"visa[- ](?:free|exempt)(?: entry| access| travel)? (?:is|are) not "
+    r"(?:available|permitted|allowed|possible|applicable|offered|granted|provided)\b"
+)
+
 # Disposition -> (positive support patterns, negative/contradiction patterns).
 # Multilingual (English / Simplified Chinese / Spanish). A page "supports" a
 # disposition when a positive pattern matches AND no negative pattern matches.
@@ -48,8 +57,8 @@ _DISPOSITION_SUPPORT = {
         r"no necesita(n)? visa|not require a visa|may enter.*without a visa",
         # NOT tourism-relevant visa-free: transit-only exemptions (e.g. China's
         # visa-free transit) do not make a TOURIST route visa-free.
-        r"must (obtain|apply for) a visa|visa is required|需要签证|requiere visa|"
-        r"transit|过境|tr[aá]nsito",
+        r"must (obtain|apply for) a visa|(?<!no )visa is required|需要签证|requiere visa|"
+        r"transit|过境|tr[aá]nsito|" + NEGATED_VISA_EXEMPTION,
     ),
     "EVISA_REQUIRED": (
         # Must be an e-VISA specifically — never a mere "electronic form" (e.g.
@@ -83,7 +92,7 @@ _NATIONALITY_NAMES = {
     # matches "赴美国" ("traveling TO the US") in news headlines, which is a
     # destination mention, not the applicant's nationality.
     "USA": ("united states", "u.s.", "u.s.a", " us ", "us citizen", "us national",
-            "u.s. citizen", "american citizen", "americans", "estados unidos",
+            "u.s. citizen", "american citizen", "american citizens", "americans", "estados unidos",
             "estadounidense", "美国公民", "美国护照", "美国国民", "美籍"),
     "CHN": ("china", "chinese", "中国"), "MEX": ("mexico", "méxico", "mexican"),
     "GBR": ("united kingdom", "british", "u.k."), "CAN": ("canada", "canadian"),

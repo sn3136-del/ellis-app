@@ -350,7 +350,7 @@ def _decision_supported(value, evidence_quotes, nat):
     in the evidence (in the rule sentence, or as its own list line beside the
     rule sentence) and a sentence of the evidence must state the rule without
     flipping it in the same sentence."""
-    from app.visa_snapshot.evidence_validator import supports_disposition
+    from app.visa_snapshot.evidence_validator import supports_disposition, NEGATED_VISA_EXEMPTION
     passages = '\n'.join(evidence_quotes)
     aliases = _aliases(nat)
     low = _norm(passages)
@@ -364,6 +364,8 @@ def _decision_supported(value, evidence_quotes, nat):
     positive, negative = _VERDICT_RULES.get(value, (None, None))
     if not positive:
         return False
+    if value == 'VISA_EXEMPT':
+        negative = '(?:' + negative + ')|(?:' + NEGATED_VISA_EXEMPTION + ')'
     listed = any(_list_line(q, aliases) for q in evidence_quotes)
     for sentence in re.split(r'(?<=[.;!?])\s+|\n+', passages):
         sl = _norm(sentence)

@@ -70,8 +70,15 @@ def test_internal_serialized_and_acceptance_auditor_use_the_same_disposition():
     assert result['documented_completed_cells']==internal['documented_completed_cells']
     assert result['documented_disposition_cells']==internal['documented_disposition_cells']
     assert result['contract_field_completeness_percent']==pytest.approx(100*internal['field_completeness_rate'])
-    baseline=t.acceptance_summary([dict(row,_source_check='reference')])
-    assert internal['documented_completed_cells']==baseline['documented_completed_cells']+1
+    reference=dict(row,_source_check='reference')
+    baseline=t.acceptance_summary([reference])
+    # The later pure-exemption projection also documents the four visa-only
+    # cells as inapplicable; neither check invents a literal value.
+    expected_new_na={'consulate_district','validity_duration','validity_unit','entries','visa_fee_currency'}
+    before_status=t.field_status(reference);after_status=t.field_status(row)
+    assert {f for f in t.FIELD_ORDER if before_status[f]!=after_status[f]}==expected_new_na
+    assert all(after_status[f]=='not-applicable' for f in expected_new_na)
+    assert internal['documented_completed_cells']==baseline['documented_completed_cells']+len(expected_new_na)
     assert internal['filled_cells']==baseline['filled_cells']
     assert internal['complete_records']==baseline['complete_records']==0
     assert internal['documented_complete_records']==baseline['documented_complete_records']==0

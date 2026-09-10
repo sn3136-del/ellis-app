@@ -1,0 +1,273 @@
+{
+  "route": {
+    "passport_nationality": "IDN",
+    "passport_issuing_country": "IDN",
+    "destination_country": "VNM",
+    "travel_purpose": "tourism",
+    "travel_document_type": "ordinary_passport"
+  },
+  "merged_guidance": {
+    "disposition": "VISA_EXEMPT",
+    "permitted_stay_days": 14,
+    "permitted_stay": "Up to 14 days for tourism.",
+    "exceptions": [
+      "Travelers intending to stay longer than 14 days or visit Vietnam for other purposes must obtain an appropriate visa in accordance with Vietnamese regulations."
+    ],
+    "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+    "confidence": "low",
+    "visa_products": [],
+    "appointment_required": false,
+    "interview_required": false
+  },
+  "source_verified": {
+    "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+    "verified_at": "2026-09-10",
+    "verified_by": "",
+    "verifier": "ai",
+    "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+    "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+    "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+    "authority_linking_source_id": "idn-hanoi-government-account-link",
+    "authority_image_source_id": "idn-hanoi-vnm-waiver-image2",
+    "quote_sha256": "a64f69f11cd67d1bbda7e740d645c54aa3089dd1e20ae1a2f9fe05f423d587f9",
+    "effective_from": "2026-07-15",
+    "policy_interval_evidence": {
+      "effective_from": {
+        "verifier": "ai",
+        "verified_at": "2026-09-10",
+        "source_id": "idn-hanoi-vnm-waiver-caption",
+        "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "quote": "The Embassy of the Republic of Indonesia in Hanoi informs Indonesian citizens that, effective 15 July 2026, Vietnam has revised its visa exemption policy.",
+        "quote_sha256": "81b3e612c4f86dcc02a6398e799ee663284fd7a7ee8f2b2018482bc1e2143a50",
+        "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+        "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+        "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+        "subject": {
+          "passport_nationality": "IDN",
+          "destination_country": "VNM",
+          "travel_document_type": "ordinary_passport",
+          "travel_purpose": "tourism"
+        }
+      }
+    },
+    "source_id": "idn-hanoi-vnm-waiver-caption",
+    "subject": {
+      "passport_nationality": "IDN",
+      "destination_country": "VNM",
+      "travel_document_type": "ordinary_passport",
+      "travel_purpose": "tourism"
+    },
+    "quote": "Indonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports.",
+    "fields": [
+      "confidence",
+      "disposition",
+      "exceptions",
+      "permitted_stay",
+      "permitted_stay_days",
+      "source_url",
+      "visa_products"
+    ],
+    "field_provenance": {
+      "disposition": {
+        "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "verified_at": "2026-09-10",
+        "verified_by": "",
+        "verifier": "ai",
+        "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+        "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+        "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+        "authority_linking_source_id": "idn-hanoi-government-account-link",
+        "authority_image_source_id": "idn-hanoi-vnm-waiver-image2",
+        "quote_sha256": "a64f69f11cd67d1bbda7e740d645c54aa3089dd1e20ae1a2f9fe05f423d587f9",
+        "effective_from": "2026-07-15",
+        "policy_interval_evidence": {
+          "effective_from": {
+            "verifier": "ai",
+            "verified_at": "2026-09-10",
+            "source_id": "idn-hanoi-vnm-waiver-caption",
+            "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+            "quote": "The Embassy of the Republic of Indonesia in Hanoi informs Indonesian citizens that, effective 15 July 2026, Vietnam has revised its visa exemption policy.",
+            "quote_sha256": "81b3e612c4f86dcc02a6398e799ee663284fd7a7ee8f2b2018482bc1e2143a50",
+            "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+            "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+            "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+            "subject": {
+              "passport_nationality": "IDN",
+              "destination_country": "VNM",
+              "travel_document_type": "ordinary_passport",
+              "travel_purpose": "tourism"
+            }
+          }
+        },
+        "source_id": "idn-hanoi-vnm-waiver-caption",
+        "subject": {
+          "passport_nationality": "IDN",
+          "destination_country": "VNM",
+          "travel_document_type": "ordinary_passport",
+          "travel_purpose": "tourism"
+        },
+        "quote": "Indonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports."
+      },
+      "permitted_stay_days": {
+        "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "verified_at": "2026-09-10",
+        "verified_by": "",
+        "verifier": "ai",
+        "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+        "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+        "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+        "authority_linking_source_id": "idn-hanoi-government-account-link",
+        "authority_image_source_id": "idn-hanoi-vnm-waiver-image2",
+        "quote_sha256": "a64f69f11cd67d1bbda7e740d645c54aa3089dd1e20ae1a2f9fe05f423d587f9",
+        "source_id": "idn-hanoi-vnm-waiver-caption",
+        "subject": {
+          "passport_nationality": "IDN",
+          "destination_country": "VNM",
+          "travel_document_type": "ordinary_passport",
+          "travel_purpose": "tourism"
+        },
+        "quote": "Indonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports."
+      },
+      "permitted_stay": {
+        "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "verified_at": "2026-09-10",
+        "verified_by": "",
+        "verifier": "ai",
+        "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+        "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+        "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+        "authority_linking_source_id": "idn-hanoi-government-account-link",
+        "authority_image_source_id": "idn-hanoi-vnm-waiver-image2",
+        "quote_sha256": "a64f69f11cd67d1bbda7e740d645c54aa3089dd1e20ae1a2f9fe05f423d587f9",
+        "source_id": "idn-hanoi-vnm-waiver-caption",
+        "subject": {
+          "passport_nationality": "IDN",
+          "destination_country": "VNM",
+          "travel_document_type": "ordinary_passport",
+          "travel_purpose": "tourism"
+        },
+        "quote": "Indonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports."
+      },
+      "exceptions": {
+        "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "verified_at": "2026-09-10",
+        "verified_by": "",
+        "verifier": "ai",
+        "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+        "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+        "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+        "authority_linking_source_id": "idn-hanoi-government-account-link",
+        "authority_image_source_id": "idn-hanoi-vnm-waiver-image2",
+        "quote_sha256": "ca44f5460a32387578484b78589b95a8e0ffd94bb4f1d89c670e8310bda2f9bb",
+        "source_id": "idn-hanoi-vnm-waiver-caption",
+        "subject": {
+          "passport_nationality": "IDN",
+          "destination_country": "VNM",
+          "travel_document_type": "ordinary_passport",
+          "travel_purpose": "tourism"
+        },
+        "quote": "Please note: Travelers intending to stay longer than 14 days or visit Vietnam for other purposes must obtain an appropriate visa in accordance with Vietnamese regulations."
+      },
+      "source_url": {
+        "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "verified_at": "2026-09-10",
+        "verified_by": "",
+        "verifier": "ai",
+        "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+        "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+        "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+        "authority_linking_source_id": "idn-hanoi-government-account-link",
+        "authority_image_source_id": "idn-hanoi-vnm-waiver-image2",
+        "quote_sha256": "a64f69f11cd67d1bbda7e740d645c54aa3089dd1e20ae1a2f9fe05f423d587f9",
+        "source_id": "idn-hanoi-vnm-waiver-caption",
+        "subject": {
+          "passport_nationality": "IDN",
+          "destination_country": "VNM",
+          "travel_document_type": "ordinary_passport",
+          "travel_purpose": "tourism"
+        },
+        "quote": "Indonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports."
+      },
+      "confidence": {
+        "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "verified_at": "2026-09-10",
+        "verified_by": "Ellis AI official embassy source review",
+        "verifier": "ai",
+        "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+        "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+        "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+        "authority_linking_source_id": "idn-hanoi-government-account-link",
+        "authority_image_source_id": "idn-hanoi-vnm-waiver-image2",
+        "quote_sha256": "a64f69f11cd67d1bbda7e740d645c54aa3089dd1e20ae1a2f9fe05f423d587f9",
+        "effective_from": "2026-07-15",
+        "policy_interval_evidence": {
+          "effective_from": {
+            "verifier": "ai",
+            "verified_at": "2026-09-10",
+            "source_id": "idn-hanoi-vnm-waiver-caption",
+            "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+            "quote": "The Embassy of the Republic of Indonesia in Hanoi informs Indonesian citizens that, effective 15 July 2026, Vietnam has revised its visa exemption policy.",
+            "quote_sha256": "81b3e612c4f86dcc02a6398e799ee663284fd7a7ee8f2b2018482bc1e2143a50",
+            "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+            "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+            "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+            "subject": {
+              "passport_nationality": "IDN",
+              "destination_country": "VNM",
+              "travel_document_type": "ordinary_passport",
+              "travel_purpose": "tourism"
+            }
+          }
+        },
+        "source_id": "idn-hanoi-vnm-waiver-caption",
+        "subject": {
+          "passport_nationality": "IDN",
+          "destination_country": "VNM",
+          "travel_document_type": "ordinary_passport",
+          "travel_purpose": "tourism"
+        },
+        "quote": "Indonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports."
+      },
+      "visa_products": {
+        "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+        "verified_at": "2026-09-10",
+        "verified_by": "Ellis AI official embassy source review",
+        "verifier": "ai",
+        "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+        "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+        "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+        "authority_linking_source_id": "idn-hanoi-government-account-link",
+        "authority_image_source_id": "idn-hanoi-vnm-waiver-image2",
+        "quote_sha256": "a64f69f11cd67d1bbda7e740d645c54aa3089dd1e20ae1a2f9fe05f423d587f9",
+        "effective_from": "2026-07-15",
+        "policy_interval_evidence": {
+          "effective_from": {
+            "verifier": "ai",
+            "verified_at": "2026-09-10",
+            "source_id": "idn-hanoi-vnm-waiver-caption",
+            "source_url": "https://www.instagram.com/p/Dab9NF9IILJ/",
+            "quote": "The Embassy of the Republic of Indonesia in Hanoi informs Indonesian citizens that, effective 15 July 2026, Vietnam has revised its visa exemption policy.",
+            "quote_sha256": "81b3e612c4f86dcc02a6398e799ee663284fd7a7ee8f2b2018482bc1e2143a50",
+            "note": "Indonesian ordinary passport tourism in Vietnam; current embassy instruction applies from15July2026. Morethan14days requires the appropriate visa. Official origin-government mission attribution; legalinstrumentnotdirectlyverified. No ancillary entry/document/fee facts are reviewed.",
+            "authority_binding_id": "idn-hanoi-vnm-waiver-20260715",
+            "authority_binding_sha256": "d73b40f32c76cb7e8e65cc9462bab6028b4dde6d358cd3f478c52fac0a55fdc3",
+            "subject": {
+              "passport_nationality": "IDN",
+              "destination_country": "VNM",
+              "travel_document_type": "ordinary_passport",
+              "travel_purpose": "tourism"
+            }
+          }
+        },
+        "source_id": "idn-hanoi-vnm-waiver-caption",
+        "subject": {
+          "passport_nationality": "IDN",
+          "destination_country": "VNM",
+          "travel_document_type": "ordinary_passport",
+          "travel_purpose": "tourism"
+        },
+        "quote": "Indonesian ordinary passport holders are now eligible for visa-free entry for up to 14 days only, for tourism and family visits, in line with the ASEAN Framework on Visa Exemption for Holders of Ordinary Passports."
+      }
+    }
+  }
+}

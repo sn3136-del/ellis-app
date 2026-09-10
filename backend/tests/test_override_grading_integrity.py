@@ -11,9 +11,12 @@ FREE = {"disposition": "VISA_EXEMPT", "permitted_stay": "30 days",
         "permitted_stay_days": 30, "confidence": "high",
         # A complete test record needs a policy date, not the cache TTL.
         "policy_valid_until": "2026-12-31",
+        # Passport requirements must be supplied and checked independently
+        # of the exemption, rather than fabricated by the projection.
+        "required_documents": ["Valid passport"],
         "source_url": "https://www.mofa.go.jp/visa/"}
 PROV = {"source_url": "https://www.mofa.go.jp/visa/", "verified_at": "2026-09-09",
-        "verified_by": "Operator", "verifier": "human", "fields": ["disposition", "permitted_stay_days"],
+        "verified_by": "Operator", "verifier": "human", "fields": ["disposition", "permitted_stay_days", "required_documents"],
         "note": "Official page: passport holders are exempt for 30 days."}
 
 
@@ -47,7 +50,7 @@ def test_high_allows_ai_with_evidence_and_complete_record():
     assert record(prov=dict(PROV, fields=["arrival_card"]))["confidence_level"] != "High"
     assert record(prov=dict(PROV, note=""))["confidence_level"] == "Low"
     assert record(prov=dict(PROV, source_url="https://blog.example.com/"))["confidence_level"] == "Low"
-    assert record(prov=dict(PROV, note=""), grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days"])["confidence_level"] == "High"
+    assert record(prov=dict(PROV, note=""), grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == "High"
     assert record(g={k: v for k, v in FREE.items() if not k.startswith("permitted_stay")})["confidence_level"] == "Low"
 
 
@@ -60,7 +63,7 @@ def test_high_allows_ai_with_evidence_and_complete_record():
 def test_imported_verdict_provenance_requires_note_and_actual_verification_date(patch):
     prov = dict(PROV, **patch)
     assert record(prov=prov)["confidence_level"] == "Low"
-    assert record(prov=prov, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days"])["confidence_level"] == ("Low" if patch.get("verified_at", "present") in (None, "") else "High")
+    assert record(prov=prov, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == ("Low" if patch.get("verified_at", "present") in (None, "") else "High")
 
 
 @pytest.mark.parametrize("field", ["permitted_stay_days", "arrival_card", "official_portal_url",
@@ -76,7 +79,7 @@ def test_model_only_source_label_does_not_claim_verification():
 def test_official_homepage_alone_cannot_verify_a_productless_exemption():
     g = dict(FREE, source_url="https://www.mofa.go.jp/", visa_products=[])
     assert record(g, prov=None)["confidence_level"] == "Low"
-    assert record(g, prov=None, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days"])["confidence_level"] == "Low"  # Collection date is still missing.
+    assert record(g, prov=None, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == "Low"  # Collection date is still missing.
     assert record(g, prov=dict(PROV, verifier="ai"))["confidence_level"] == "High"
 
 
@@ -242,7 +245,7 @@ def test_optional_visitor_visas_never_inherit_eta_procedures_or_evidence():
             {"type": "Electronic Travel Authorisation (ETA)", "fee": {"amount": 20, "currency": "GBP"}},
             {"type": "Standard Visitor visa (6 months)", "fee": {"amount": 135, "currency": "GBP"}},
             {"type": "Long-term Standard Visitor (2 years)", "fee": {"amount": 506, "currency": "GBP"}}])
-    rows = tstation.records_for_route(ROUTE, g, PROV, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days"])
+    rows = tstation.records_for_route(ROUTE, g, PROV, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])
     assert len(rows) == 3
     assert rows[0]["visa_requirement_detail"] == "ETA Electronic Authorization"
     assert rows[0]["processing_min_days"] == 3
@@ -362,7 +365,7 @@ def test_authorisation_exemption_text_never_creates_a_requirement():
     g = dict(FREE, application_channel_detail="No eTA required",
              exceptions=["US citizens are exempt from Canada's eTA requirement for air travel."])
     assert not tstation._files_something_online(g)
-    assert "approved travel authorisation" not in tstation._entry_requirements(g)
+    assert "approved travel authorisation" not in (tstation._entry_requirements(g) or "")
 
 
 @pytest.mark.parametrize("text", ["Up to 6 months", "Usually six calendar months, decided on arrival", "Up to 1 year"])
@@ -447,7 +450,7 @@ def test_binary_grading_requires_support_for_filled_values_not_just_verdict():
     assert record(prov=dict(PROV, verifier='ai'))['confidence_level'] == 'High'
     assert record(prov=dict(PROV, fields=['disposition']))['confidence_level'] == 'Low'
     assert record(prov=None, grounded_ok=True, collected_at='2026-09-09',
-                  grounded_fields=['disposition', 'permitted_stay_days'])['confidence_level'] == 'High'
+                  grounded_fields=['disposition', 'permitted_stay_days', 'required_documents'])['confidence_level'] == 'High'
     assert record(prov=None, grounded_ok=True, collected_at='2026-09-09',
                   grounded_fields=['disposition'])['confidence_level'] == 'Low'
     for verifier in ('ai', 'human', 'public'):

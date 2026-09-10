@@ -790,10 +790,8 @@ def _entry_requirements(g: dict) -> str | None:
     route with none of them still returns None rather than filler.
     """
     parts: list[str] = []
-    # On a visa-free route this field is the whole answer to "so what DO I
-    # need?". Lead with the filing that decides whether they board, and when
-    # there is none, say so outright rather than leaving a reader to infer it
-    # from an absence.
+    # Lead with a separately stated arrival filing. A visa exemption alone
+    # does not establish that all travel authorisations are also waived.
     if str(g.get("disposition") or "").upper() == "VISA_EXEMPT":
         ac = g.get("arrival_card")
         if isinstance(ac, dict) and ac.get("required"):
@@ -804,9 +802,9 @@ def _entry_requirements(g: dict) -> str | None:
         elif _files_something_online(g):
             parts.append("No visa. You must still hold an approved travel "
                          "authorisation before boarding")
-        else:
-            parts.append("No visa and no travel authorisation. Travel on a "
-                         "valid passport")
+        # An exemption alone proves neither the absence of a separate
+        # travel authorisation nor a passport-validity rule. Additional
+        # entry information remains empty until the guidance supplies it.
     pv = g.get("passport_validity")
     if isinstance(pv, str) and pv.strip():
         parts.append(f"Passport: {pv.strip().rstrip('.')}")
@@ -1436,8 +1434,7 @@ def _required_values_supported(row: dict, g: dict, checked: set[str]) -> bool:
                                own("application_channel_detail") or
                                ("requirement_detail" in checked and row.get("visa_requirement_detail") in
                                 {"eVisa", "ETA Electronic Authorization", "Paper Visa on Arrival", "eVisa on Arrival"})),
-        "required_documents": ("required_documents" in checked or own("required_documents") or
-                               (exempt and row.get("required_documents") == "Valid passport" and "disposition" in checked)),
+        "required_documents": "required_documents" in checked or own("required_documents"),
     }
     statuses = field_status(row)
     return all(supported for field, supported in checks.items() if statuses.get(field) == "filled")
@@ -1460,6 +1457,13 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     checked = set(row.pop("_grade_checked_fields", ()))
     if verdict_provenance_supported(prov):
         checked.update((prov or {}).get("fields") or ())
+    row["_reviewed_pure_exemption"] = bool(
+        row.get("visa_requirement") == "Visa-free"
+        and row.get("visa_requirement_detail") == "Unconditional Visa-free"
+        and row.get("application_method") in (None, "", [])
+        and not disputed
+        and (verdict_provenance_supported(prov) or grounded)
+        and "disposition" in checked)
     timing = row.pop("_processing_note", None)
     if (timing and row.get("visa_requirement") != "Visa-free"
             and row.get("visa_requirement_detail") not in _VISA_FREE_DETAILS):
@@ -1623,17 +1627,24 @@ def records_for_route(route: dict, guidance: dict,
         if disposition == "VISA_EXEMPT":
             row["visa_type_name"] = (g.get("visa_category") or
                                      "Requirement under review") if exempt_conflict else "No visa needed"
-            if not row["required_documents"]:
+            pure_exemption = (row.get("visa_requirement_detail") == "Unconditional Visa-free"
+                              and row.get("application_method") in (None, "", []))
+            if not pure_exemption and not row["required_documents"]:
                 row["required_documents"] = "Valid passport"
             _set_stay(row, g.get("permitted_stay"), g.get("permitted_stay_days"))
-            n, unit = row["max_stay_duration"], row["max_stay_unit"]
-            # The stay may legitimately be in hours (a transit exemption),
-            # but their validity_unit enum has no Hour: route it through the
-            # same conversion the product rows use.
-            _set_validity(row, n, unit, g.get("permitted_stay"))
-            row["entries"] = "Unlimited"
+            # No visa was issued: its permitted stay cannot become a visa
+            # validity window or a promise of unlimited readmission. Leave
+            # those cells empty even while a disputed route is visible in QC.
+            # Other permission families retain their existing projection;
+            # this change is scoped to a plain exemption with no filing.
+            if not pure_exemption:
+                _set_validity(row, row["max_stay_duration"], row["max_stay_unit"], g.get("permitted_stay"))
+                row["entries"] = "Unlimited"
+            fee = g.get("government_fee")
+            explicit_currency = (fee.get("currency") if isinstance(fee, dict)
+                                 and isinstance(fee.get("currency"), str) else None)
             row["visa_fee_amount"], row["visa_fee_currency"] = (
-                _fee({}, g) if exempt_conflict else (0, "USD"))
+                _fee({}, g) if exempt_conflict else (0, explicit_currency if pure_exemption else "USD"))
         else:
             row["visa_type_name"] = g.get("visa_category") or None
             _set_stay(row, g.get("permitted_stay"), g.get("permitted_stay_days"))
@@ -1829,6 +1840,18 @@ def records_for_route(route: dict, guidance: dict,
         else:
             row["application_method"] = _method_for_detail(
                 row["visa_requirement_detail"], method, row, method_from_channel)
+        if (row.get("visa_requirement") == "Visa-free"
+                and row.get("visa_requirement_detail") == "Unconditional Visa-free"
+                and row.get("application_method") in (None, "", [])
+                and row.get("visa_fee_amount") == 0):
+            # The shared fee parser historically supplies USD for a zero
+            # amount. A plain exemption has no visa tariff currency; keep
+            # an explicit currency if supplied, but never add one. Optional
+            # paid products and nonzero contradictory fees keep their values.
+            stated_fee = p.get("fee") if isinstance(p.get("fee"), dict) else None
+            stated_fee = stated_fee or product_g.get("government_fee")
+            if not isinstance(stated_fee, dict) or not stated_fee.get("currency"):
+                row["visa_fee_currency"] = None
         rows.append(_regrade({k: _clean_text(v) for k, v in row.items()}, product_g,
                              disputed_fields, product_unpublished))
     return rows
@@ -1880,6 +1903,24 @@ def _no_consular_application(row: dict) -> bool:
             and row.get("application_method") in (None, "", []))
 
 
+def _reviewed_no_visa_product(row: dict) -> bool:
+    """An evidenced published exemption has no visa validity or entry count.
+
+    The private marker supports the pre-publication grading pass. Exported
+    rows must carry actual publication/source metadata; an unchecked label,
+    held answer or open field dispute creates no new completion credit.
+    """
+    if (row.get("visa_requirement") != "Visa-free"
+            or row.get("visa_requirement_detail") != "Unconditional Visa-free"
+            or row.get("application_method") not in (None, "", [])
+            or row.get("_disputed_fields") or row.get("_disputed")
+            or row.get("_contradictions") or row.get("contradictions")):
+        return False
+    if any(k in row for k in ("_held", "held", "_route_held", "route_held")):
+        return _no_consular_application(row)
+    return row.get("_reviewed_pure_exemption") is True
+
+
 def field_status(row: dict, unpublished: set | None = None) -> dict:
     """Their per-field checklist verdict, with the three kinds of blank kept apart.
 
@@ -1901,6 +1942,13 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
         elif f in unpublished:
             out[f] = "not-published"
         elif f == "application_method" and no_application:
+            out[f] = "not-applicable"
+        elif (exempt and row.get("visa_requirement_detail") == "Unconditional Visa-free"
+              and row.get("application_method") in (None, "", [])
+              and f in {"validity_duration", "validity_unit", "entries"}):
+            out[f] = "not-applicable" if _reviewed_no_visa_product(row) else "missing"
+        elif (f == "visa_fee_currency" and row.get("visa_fee_amount") == 0
+              and _reviewed_no_visa_product(row)):
             out[f] = "not-applicable"
         elif exempt and f in _NOT_APPLICABLE_WHEN_EXEMPT:
             out[f] = "not-applicable"

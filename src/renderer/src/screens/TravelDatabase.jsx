@@ -17,6 +17,7 @@ import { newSession } from '../lib/visaSession.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { arrivalCardLines } from '../lib/arrivalCard.js'
 import { parseDatabaseRouteHash, databaseRouteHash } from '../lib/databaseRoute.js'
+import { applicationLane, applicationStepLinkIndex } from '../lib/applicationLane.js'
 
 const NAVY = 'var(--trip-navy, #0f294d)'
 const GRAY = 'var(--trip-gray, #64748b)'
@@ -1106,11 +1107,10 @@ export default function TravelDatabase({ onBack }) {
         : [...itemsOf(g.account_registration_steps),
            ...itemsOf(g.payment_process),
            ...itemsOf(g.submission_process)].slice(0, 5))
-  // The official-portal link rides ON the step it belongs to.
-  const portalStepIndex = g?.official_portal_url
-    ? applySteps.findIndex((x) =>
-        /register|portal|online|website|e-?visa|application form|apply/i.test(x))
-    : -1
+  // Every application surface shares the same source-backed lane. An ETA
+  // guide opens app instructions; it never implies initial ImmiAccount filing.
+  const application = applicationLane(g)
+  const portalStepIndex = applicationStepLinkIndex(applySteps, application)
 
   const yesNo = (v) => v === true ? [t('db.required'), 'yes']
     : v === false ? [t('db.notRequired'), 'no'] : null
@@ -1554,6 +1554,12 @@ export default function TravelDatabase({ onBack }) {
                 and answers itself. The page still shows the official page,
                 as the reference it actually is. */}
             {(() => {
+              if (application.kind === 'australian_eta_app') {
+                return <Tile label={t('db.channel')}
+                             value={t(application.linkKey)}
+                             sub={t(application.channelKey)}
+                             href={application.href} />
+              }
               const channelText = T(humanizeEnum(g.application_channel))
               const referenceUrl = nothingToApplyFor
                 ? (g.source_url || g.official_portal_url) : g.official_portal_url
@@ -1775,7 +1781,7 @@ export default function TravelDatabase({ onBack }) {
               }
               if (itemsOf(g.forms).length > 0 || g.official_portal_url) {
                 cards.push({ key: 'forms', weight: itemsOf(g.forms).length + 2, node: (
-                  <Section title={t('db.formsPortal')} accent={BLUE} key="forms">
+                  <Section title={t(application.sectionKey)} accent={BLUE} key="forms">
                     <Bullets items={itemsOf(g.forms).map(T)} />
                     {g.official_portal_url && (
                       <a href={g.official_portal_url} target="_blank" rel="noreferrer"
@@ -1784,7 +1790,7 @@ export default function TravelDatabase({ onBack }) {
                                   fontSize: 13.5, fontWeight: 700,
                                   padding: '9px 16px', borderRadius: 999,
                                   background: 'rgba(40,125,250,0.08)' }}>
-                        {t('db.portalStart')} ↗
+                        {t(application.linkKey)} ↗
                       </a>
                     )}
                   </Section>
@@ -1837,7 +1843,7 @@ export default function TravelDatabase({ onBack }) {
                                       display: 'inline-block',
                                       padding: '8px 6px',
                                       margin: '-8px 0 -8px 8px' }}>
-                            {t('db.portalInline')} ↗
+                            {t(application.inlineKey)} ↗
                           </a>
                         )}
                       </span>
@@ -1849,7 +1855,7 @@ export default function TravelDatabase({ onBack }) {
                      style={{ display: 'inline-block', marginTop: 6, color: BLUE,
                               fontSize: 13.5, fontWeight: 700,
                               padding: '10px 10px 10px 0' }}>
-                    {t('db.portalStart')} ↗
+                    {t(application.linkKey)} ↗
                   </a>
                 )}
               </Section>

@@ -9,6 +9,72 @@ import {
 } from '../../src/renderer/src/lib/visaSession.js'
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
 import { arrivalCardLines } from '../../src/renderer/src/lib/arrivalCard.js'
+import { applicationLane, applicationStepLinkIndex } from '../../src/renderer/src/lib/applicationLane.js'
+import { t as translate, SUPPORTED } from '../../src/renderer/src/lib/i18n.js'
+
+const ETA_APP = {
+  disposition: 'ELECTRONIC_AUTHORIZATION_REQUIRED',
+  requirement_detail: 'eta_electronic_authorization',
+  application_channel: 'online_portal',
+  official_portal_url: 'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601#HowTo',
+  application_channel_detail: 'Apply using the Australian ETA app, outside Australia. Initial ETA applications are not filed through the ordinary ImmiAccount web form.',
+}
+
+test('ETA601 app guidance has one honest presentation for tile, forms and step links', () => {
+  const before = structuredClone(ETA_APP)
+  const lane = applicationLane(ETA_APP)
+  assert.equal(lane.kind, 'australian_eta_app')
+  assert.equal(lane.href, ETA_APP.official_portal_url)
+  assert.equal(lane.linkKey, lane.inlineKey)
+  assert.equal(translate('en', lane.channelKey), 'Apply using the Australian ETA app')
+  assert.match(translate('en', lane.linkKey), /instructions/)
+  assert.doesNotMatch(JSON.stringify(lane), /appstore|apps\.apple|play\.google|immiaccount/i)
+  assert.deepEqual(ETA_APP, before) // presentation does not alter eligibility
+})
+
+test('all three locales describe an app and an instruction link, not web filing', () => {
+  const lane = applicationLane(ETA_APP)
+  for (const lang of SUPPORTED) {
+    assert.match(translate(lang, lane.sectionKey), /ETA/)
+    assert.match(translate(lang, lane.linkKey), /instructions|指南|指引/)
+    assert.match(translate(lang, lane.channelKey), /app|应用|應用程式/)
+    assert.notEqual(translate(lang, lane.linkKey), translate(lang, 'db.portalStart'))
+  }
+})
+
+test('the ETA reference belongs to the app instruction, not a later conditional ImmiAccount request', () => {
+  const lane = applicationLane(ETA_APP)
+  assert.equal(applicationStepLinkIndex([
+    'Download and open the official Australian ETA app.',
+    'If requested after submitting, provide further information through ImmiAccount.',
+  ], lane), 0)
+  assert.equal(applicationStepLinkIndex(['If requested, respond online in ImmiAccount.'], lane), -1)
+})
+
+test('Visitor600 genuine web applications keep their own website and filing label', () => {
+  const g = {...ETA_APP, disposition:'VISA_REQUIRED', requirement_detail:'evisa',
+    visa_category:'Visitor (subclass 600)', official_portal_url:'https://online.immi.gov.au/lusc/login',
+    application_channel_detail:'Apply online through ImmiAccount. Thai passport holders cannot use the Australian ETA app.'}
+  const lane = applicationLane(g)
+  assert.equal(lane.kind, 'standard')
+  assert.equal(lane.href, g.official_portal_url)
+  assert.equal(lane.linkKey, 'db.portalStart')
+  assert.equal(applicationStepLinkIndex(['Create an ImmiAccount online.'], lane), 0)
+})
+
+for (const [name, change] of [
+  ['optional mention', {application_channel_detail:'You may use the Australian ETA app for other products.'}],
+  ['missing required instruction', {application_channel_detail:null}],
+  ['visa-free verdict', {disposition:'VISA_EXEMPT'}],
+  ['different product subtype', {requirement_detail:'evisa'}],
+  ['Canada ETA', {official_portal_url:'https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html'}],
+  ['Visitor600 reference', {official_portal_url:'https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600'}],
+  ['lookalike host', {official_portal_url:'https://immi.homeaffairs.gov.au.example.com/visas/getting-a-visa/visa-listing/electronic-travel-authority-601'}],
+  ['insecure reference', {official_portal_url:ETA_APP.official_portal_url.replace('https:', 'http:')}],
+  ['credentials in reference', {official_portal_url:ETA_APP.official_portal_url.replace('https://', 'https://user@')}],
+]) test(`app presentation does not infer an ETA lane from ${name}`, () => {
+  assert.equal(applicationLane({...ETA_APP, ...change}).kind, 'standard')
+})
 
 test('arrival filing preserves conditions and exclusions when required is unknown', () => {
   const card={required:null,name:'TWAC',submission_window:'Within7 days',
