@@ -1504,33 +1504,9 @@ def _names_something_to_file(row: dict) -> bool:
     return bool(_FILINGS.search(text))
 
 
-def _required_values_supported(row: dict, g: dict, checked: set[str]) -> bool:
-    """A checked verdict cannot certify unrelated filled product fields."""
-    products = g.get("visa_products")
-    product = next((p for p in products if isinstance(p, dict) and
-                    p.get("type") == row.get("visa_type_name")), {}) if isinstance(products, list) else {}
-    # A separated product is passed as its own guidance dictionary.
-    if g.get("type") == row.get("visa_type_name"):
-        product = g
-    product_checked = "visa_products" in checked
-    def own(field):
-        return product_checked and product.get(field) not in (None, "", [], {})
-    exempt = row.get("visa_requirement") == "Visa-free"
-    stay_checked = bool(checked & {"permitted_stay", "permitted_stay_days"}) or own("max_stay_days") or own("permitted_stay")
-    checks = {
-        "visa_type_name": (exempt and "disposition" in checked) or "visa_category" in checked or product_checked,
-        "max_stay_duration": stay_checked,
-        "validity_duration": (stay_checked if exempt else own("validity") or "validity" in checked),
-        "entries": (exempt and "disposition" in checked) or own("entry") or product_checked,
-        "visa_fee_amount": (exempt and "disposition" in checked) or "government_fee" in checked or own("fee"),
-        "application_method": ("application_channel" in checked or own("application_channel") or
-                               own("application_channel_detail") or
-                               ("requirement_detail" in checked and row.get("visa_requirement_detail") in
-                                {"eVisa", "ETA Electronic Authorization", "Paper Visa on Arrival", "eVisa on Arrival"})),
-        "required_documents": "required_documents" in checked or own("required_documents"),
-    }
-    statuses = field_status(row)
-    return all(supported for field, supported in checks.items() if statuses.get(field) == "filled")
+def _required_values_supported(row: dict, g: dict, checked: set[str], route=None, provenance=None) -> bool:
+    from .grade_evidence import required_values_supported
+    return required_values_supported(row, g, checked, route or {}, provenance)
 
 
 def _regrade(row: dict, g: dict, disputed: list | None,
@@ -1548,6 +1524,8 @@ def _regrade(row: dict, g: dict, disputed: list | None,
         row["application_method"] = None
     prov, grounded = row.pop("_prov", None), row.pop("_grounded", False)
     checked = set(row.pop("_grade_checked_fields", ()))
+    grade_route = row.pop("_grade_route", {})
+    grade_provenance = row.pop("_grade_provenance", None)
     if verdict_provenance_supported(prov):
         checked.update((prov or {}).get("fields") or ())
     row["_reviewed_pure_exemption"] = bool(
@@ -1575,7 +1553,7 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     if not (prov and "disposition" in (prov.get("fields") or ())):
         row["_evidence_low"] = row["_evidence_low"] or str(g.get("confidence") or "").lower() == "low"
     row["confidence_level"] = _confidence(g, prov,
-                                          grounded, complete=complete and _required_values_supported(row, g, checked),
+                                          grounded, complete=complete and _required_values_supported(row, g, checked, grade_route, grade_provenance),
                                           disputed=conflicted)
     return row
 
@@ -1695,6 +1673,7 @@ def records_for_route(route: dict, guidance: dict,
         # the second and third page a route was checked against.
         "corroborating_sources": _corroborating(g),
         "_prov": provenance, "_grounded": grounded_ok,
+        "_grade_route": dict(route), "_grade_provenance": provenance,
         "_grade_checked_fields": sorted((set((provenance or {}).get("fields") or ()) if verdict_provenance_supported(provenance) else set()) |
                                         (set(grounded_fields or ()) if grounded_ok else set())),
         "_disputed_fields": sorted(set(disputed_fields)),
