@@ -20,7 +20,13 @@ def expected(layer):
  for item in c.RESOLUTIONS.get(layer['cache_key'],[]):g['uncertainty'].remove(item['warning'])
  return g
 
-def test_exact19_route_reader_values_proofs_unchanged_only8_old_warnings_removed(installed):
+def test_exact19_route_reader_values_proofs_unchanged_only8_old_warnings_removed(installed,monkeypatch):
+ # This assertion measures the warning-only release before the separate
+ # Moscow processing-time correction, which has its own current proof.
+ listed=vo._listed_reviewed_overlay_names()
+ monkeypatch.setattr(vo,'_listed_reviewed_overlay_names',lambda:[
+  name for name in listed if name!='reviewed_russia_japan_processing_overlay_20260910.json'])
+ vo.reload()
  m,layers=installed;old=deepcopy(layers);removed=0
  for layer in layers:
   g,p=vo.apply(deepcopy(layer['raw_guidance']),layer['route'])
@@ -30,6 +36,19 @@ def test_exact19_route_reader_values_proofs_unchanged_only8_old_warnings_removed
   assert g.get('visa_products')==layer['merged_guidance'].get('visa_products')
   assert tstation.records_for_route(layer['route'],g,p)==tstation.records_for_route(layer['route'],layer['merged_guidance'],layer['source_provenance'])
  assert removed==8 and layers==old
+
+def test_later_moscow_processing_proof_does_not_relabel_japan_sibling_fields(installed):
+ _,layers=installed
+ layer=next(x for x in layers if x['cache_key']=='RUS|RUS|JPN|tourism|default|unknown|v6')
+ g,p=vo.apply(deepcopy(layer['raw_guidance']),layer['route'])
+ proof=p['field_provenance']['processing_time']
+ assert proof['source_url']=='https://www.ru.emb-japan.go.jp/itpr_ja/vc20260904.html'
+ assert proof['verified_at']=='2026-09-10'
+ assert 'Moscow' in g['processing_time'] and '4–5' in g['processing_time']
+ assert g['visa_products']==layer['merged_guidance']['visa_products']
+ prior=layer['source_provenance']['field_provenance']
+ assert {k:v for k,v in p['field_provenance'].items() if k!='processing_time'}=={
+  k:v for k,v in prior.items() if k!='processing_time'}
 
 @pytest.mark.parametrize('index',range(19))
 @pytest.mark.parametrize('field',c.BASELINE_KEYS)

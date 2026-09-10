@@ -1,0 +1,702 @@
+{
+  "schema_version": 1,
+  "kind": "russia_japan_processing_exact_layers",
+  "specification": {
+    "schema_version": 1,
+    "kind": "reviewed_russia_japan_processing",
+    "id": "russia-japan-processing-20260910",
+    "sources": [
+      {
+        "id": "moscow_current",
+        "url": "https://www.ru.emb-japan.go.jp/itpr_ja/vc20260904.html",
+        "published_at": "2026-09-04",
+        "checked_at": "2026-09-10",
+        "text": "2026/9/4\nсоставляют 4–5 рабочих дней.\nс 21 по 23 сентября сроки рассмотрения визовых заявлений могут увеличиться до 10 дней, включая выходные.",
+        "sha256": "f15d24b0921edf47bc8b260dc0ad7c2226215e6bc96382a6c79ab5863a86fcb2",
+        "capture_method": "Selected literal excerpts from successful web page read on 2026-09-10; source page independently read by two AI reviewers. Separate curl captures returned HTTP 403, not policy evidence.",
+        "capture_scope": "Partial visible-text excerpts. Ellipsis-free fragments are separate evidence items; omitted text is not asserted to be absent."
+      },
+      {
+        "id": "moscow_minimum",
+        "url": "https://www.ru.emb-japan.go.jp/itpr_ja/visacenter.html",
+        "published_at": "2026-03-12",
+        "checked_at": "2026-09-10",
+        "text": "16, строение 5, Москва, 129110\nМинимальный срок оформления визы – 4 рабочих дня\nза несколько недель до планируемой поездки.",
+        "sha256": "56ea58382502bb058c0ac4b5a82a19d35a1f8e48f71170a077f54b002171288a",
+        "capture_method": "Selected literal excerpts from successful web page read on 2026-09-10; source page independently read by two AI reviewers. Separate curl captures returned HTTP 403, not policy evidence.",
+        "capture_scope": "Partial visible-text excerpts. Ellipsis-free fragments are separate evidence items; omitted text is not asserted to be absent."
+      },
+      {
+        "id": "mofa_general",
+        "url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+        "published_at": "2026-06-24",
+        "checked_at": "2026-09-10",
+        "text": "approximately one week\nIt may take longer than usual to receive the result of the visa examination\njurisdiction over your place of residence",
+        "sha256": "43a81ba48077820221449ca0ecaaef01500d14e3f9652c9c0604cf70701999c2",
+        "capture_method": "Selected literal excerpts from successful web page read on 2026-09-10; source page independently read by two AI reviewers. Separate curl captures returned HTTP 403, not policy evidence.",
+        "capture_scope": "Partial visible-text excerpts. Ellipsis-free fragments are separate evidence items; omitted text is not asserted to be absent."
+      }
+    ],
+    "routes": [
+      {
+        "cache_key": "RUS|RUS|JPN|tourism|default|unknown|v6",
+        "route": {
+          "passport_nationality": "RUS",
+          "lawful_country_of_residence": "RUS",
+          "destination_country": "JPN",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
+        "baseline_sha256": {
+          "route": "59e1fcd2134456af3fa6bdec0665363ae81857da5d4f63dd6a00e05fc1d39cd7",
+          "raw_guidance": "ecf9b50b14605f40170272439cb34d4524baf03a9ea911f55497ae964404070e",
+          "merged_guidance": "54bc2cd6eec3528868a5aefc9debf7ab9e2e1238894774a7f05937f8a0cf4fcd",
+          "source_provenance": "737c785f545f9f858e45076c01cd511621a83abc329832b66a02c33d166c096c",
+          "seed_entries": "317d80fec924f4cc95e55ef50d6d60983c983ea6ededec6c188aecdafc9d95a6",
+          "operator_entries": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "change": {
+          "field": "processing_time",
+          "old_raw": "About 5 working days at the embassy after authorised-agent submission",
+          "old_merged": "4 working days from acceptance of the application (Embassy of Japan in Russia)",
+          "new_value": "Embassy of Japan/JVAC in Moscow: normally 4–5 working days; the mission describes 4 working days as a minimum. Its September 2026 notice warns that the Japanese holidays on 21–23 September may extend processing to 10 days including weekends. Apply well in advance; additional examination can take longer. For another consular jurisdiction in Russia, follow that office's published timing.",
+          "evidence": [
+            {
+              "source_id": "moscow_current",
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/vc20260904.html",
+              "quote": "2026/9/4"
+            },
+            {
+              "source_id": "moscow_current",
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/vc20260904.html",
+              "quote": "составляют 4–5 рабочих дней."
+            },
+            {
+              "source_id": "moscow_current",
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/vc20260904.html",
+              "quote": "с 21 по 23 сентября сроки рассмотрения визовых заявлений могут увеличиться до 10 дней, включая выходные."
+            },
+            {
+              "source_id": "moscow_minimum",
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visacenter.html",
+              "quote": "16, строение 5, Москва, 129110"
+            },
+            {
+              "source_id": "moscow_minimum",
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visacenter.html",
+              "quote": "Минимальный срок оформления визы – 4 рабочих дня"
+            },
+            {
+              "source_id": "moscow_minimum",
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visacenter.html",
+              "quote": "за несколько недель до планируемой поездки."
+            },
+            {
+              "source_id": "mofa_general",
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+              "quote": "approximately one week"
+            },
+            {
+              "source_id": "mofa_general",
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+              "quote": "It may take longer than usual to receive the result of the visa examination"
+            },
+            {
+              "source_id": "mofa_general",
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+              "quote": "jurisdiction over your place of residence"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "routes": [
+    {
+      "cache_key": "RUS|RUS|JPN|tourism|default|unknown|v6",
+      "baseline": {
+        "route": {
+          "passport_nationality": "RUS",
+          "lawful_country_of_residence": "RUS",
+          "destination_country": "JPN",
+          "visa_category": "tourist_visa",
+          "travel_purpose": "tourism",
+          "arrival_date": null,
+          "consular_jurisdiction": null,
+          "travel_document_type": "ordinary_passport",
+          "transit_countries": null
+        },
+        "raw_guidance": {
+          "disposition": "VISA_REQUIRED",
+          "visa_category": "Short-term stay (tourism)",
+          "permitted_stay": "Up to 90 days per visit",
+          "passport_validity": "Valid for the duration of stay; six months remaining is recommended",
+          "required_documents": "passport, photo, visa application form, schedule of stay, flight/itinerary, accommodation proof, financial proof, employment/student certificate",
+          "application_channel": "authorised_agent",
+          "government_fee": {
+            "amount": 3000,
+            "currency": "JPY"
+          },
+          "processing_time": "About 5 working days at the embassy after authorised-agent submission",
+          "forms": [
+            "Visa application form (signed)",
+            "Schedule of stay (daily itinerary)",
+            "One recent passport photo attached to form"
+          ],
+          "official_portal_url": null,
+          "photo_requirements": "One recent color photo, 45 mm x 35 mm, white/plain background, taken within 6 months, full face, no head covering unless religious",
+          "biometrics_required": false,
+          "interview_required": false,
+          "appointment_required": false,
+          "account_registration_steps": [
+            "No personal online government account is required for the visa application; the accredited travel agent lodges it on your behalf"
+          ],
+          "payment_process": [
+            "Pay the official visa fee and the agency service fee to the accredited travel agent; the agent remits the consular fee to the Japanese Embassy/Consulate-General"
+          ],
+          "submission_process": [
+            "Prepare passport, completed form, photo, itinerary and supporting documents",
+            "Submit the application to an accredited travel agency/visa agent in your jurisdiction",
+            "The agency checks and forwards the application to the Japanese Embassy/Consulate-General",
+            "Collect your passport with the visa from the agency"
+          ],
+          "onward_travel_evidence": "Confirmed round-trip flight itinerary or tickets showing entry and departure from Japan",
+          "accommodation_evidence": "Hotel bookings or other proof of lodging covering the entire stay",
+          "financial_evidence": "Bank statements, certificate of deposit, employment/income proof or tax documents showing sufficient funds",
+          "insurance_required": false,
+          "exceptions": [
+            "3-year multiple-entry visa is available only for applicants meeting financial-capacity and travel-history conditions",
+            "Package-tour participants may use simplified documents arranged by the accredited agency",
+            "Minors/students may use a parent/sponsor financial documents"
+          ],
+          "uncertainty": [
+            {
+              "field": "visa_issuance_availability",
+              "reason": "Japan-Russia diplomatic measures and consulate closures may restrict or suspend tourist visa issuance; confirm current status with the Embassy of Japan in Moscow or an authorised agent."
+            },
+            {
+              "field": "government_fee",
+              "reason": "Standard single-entry fee is 3,000 JPY and multiple-entry is 6,000 JPY, but reciprocal or political changes could alter fees."
+            },
+            {
+              "field": "authorised_agent_network",
+              "reason": "The list of authorised travel agencies and submission locations in Russia may have changed due to consulate closures; verify current agencies."
+            }
+          ],
+          "confidence": "low",
+          "permitted_stay_days": 90,
+          "passport_validity_requirement": {
+            "kind": "valid_through_departure",
+            "months": null
+          },
+          "arrival_card": {
+            "required": true,
+            "name": "Visit Japan Web (VJW)",
+            "submission_window": "Can be registered up to 6 months before entry; QR codes for immigration and customs should be completed before arrival/departure"
+          },
+          "health_requirements": [
+            {
+              "name": "Yellow fever vaccination certificate",
+              "applicability": "not_applicable",
+              "trigger_countries": [],
+              "trigger": "Arrival within 6 days from or through a Japanese-designated yellow-fever endemic country",
+              "question": null
+            }
+          ],
+          "route_workflow_type": "embassy_submission",
+          "visa_products": [
+            {
+              "type": "Single-entry short-term tourist",
+              "entry": "single",
+              "validity": "3 months",
+              "max_stay_days": 90,
+              "fee": {
+                "amount": 3000,
+                "currency": "JPY"
+              },
+              "notes": "Standard tourist visa; actual granted stay depends on itinerary"
+            },
+            {
+              "type": "3-year multiple-entry short-term tourist",
+              "entry": "multiple",
+              "validity": "3 years",
+              "max_stay_days": 30,
+              "fee": {
+                "amount": 6000,
+                "currency": "JPY"
+              },
+              "notes": "For eligible frequent travelers; 30 days per visit"
+            }
+          ],
+          "application_channel_detail": "Russian ordinary passport holders must lodge through a travel agency authorised by the Japanese Embassy in Russia. The agency submits the paper application to the Embassy of Japan in Moscow.",
+          "requirement_detail": "paper_visa",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          }
+        },
+        "merged_guidance": {
+          "disposition": "VISA_REQUIRED",
+          "visa_category": "Short-term stay (tourism)",
+          "permitted_stay": "Up to 90 days per visit",
+          "passport_validity": "Valid for the duration of stay; six months remaining is recommended",
+          "required_documents": [
+            "passport, photo, visa application form, schedule of stay, flight/itinerary, accommodation proof, financial proof, employment/student certificate"
+          ],
+          "application_channel": "visa_center",
+          "government_fee": {
+            "amount": 0,
+            "currency": "JPY"
+          },
+          "processing_time": "4 working days from acceptance of the application (Embassy of Japan in Russia)",
+          "forms": [
+            "Visa application form (signed)",
+            "Schedule of stay (daily itinerary)",
+            "One recent passport photo attached to form"
+          ],
+          "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+          "photo_requirements": "One recent color photo, 45 mm x 35 mm, white/plain background, taken within 6 months, full face, no head covering unless religious",
+          "biometrics_required": false,
+          "interview_required": false,
+          "appointment_required": false,
+          "account_registration_steps": [
+            "No personal online government account is required for the visa application; the accredited travel agent lodges it on your behalf"
+          ],
+          "payment_process": [
+            "Pay the official visa fee and the agency service fee to the accredited travel agent; the agent remits the consular fee to the Japanese Embassy/Consulate-General"
+          ],
+          "submission_process": [
+            "Prepare passport, completed form, photo, itinerary and supporting documents",
+            "Submit the application to an accredited travel agency/visa agent in your jurisdiction",
+            "The agency checks and forwards the application to the Japanese Embassy/Consulate-General",
+            "Collect your passport with the visa from the agency"
+          ],
+          "onward_travel_evidence": "Confirmed round-trip flight itinerary or tickets showing entry and departure from Japan",
+          "accommodation_evidence": "Hotel bookings or other proof of lodging covering the entire stay",
+          "financial_evidence": "Bank statements, certificate of deposit, employment/income proof or tax documents showing sufficient funds",
+          "insurance_required": false,
+          "exceptions": [
+            "Russian citizens must obtain the appropriate visa before travel unless they already hold an applicable re-entry permit.",
+            "The government visa fee is waived for Russian citizens; visa-centre service charges may be separate."
+          ],
+          "uncertainty": [
+            {
+              "field": "visa_issuance_availability",
+              "reason": "Japan-Russia diplomatic measures and consulate closures may restrict or suspend tourist visa issuance; confirm current status with the Embassy of Japan in Moscow or an authorised agent."
+            },
+            {
+              "field": "government_fee",
+              "reason": "Standard single-entry fee is 3,000 JPY and multiple-entry is 6,000 JPY, but reciprocal or political changes could alter fees."
+            },
+            {
+              "field": "authorised_agent_network",
+              "reason": "The list of authorised travel agencies and submission locations in Russia may have changed due to consulate closures; verify current agencies."
+            }
+          ],
+          "confidence": "low",
+          "permitted_stay_days": 90,
+          "passport_validity_requirement": {
+            "kind": "valid_through_departure",
+            "months": null
+          },
+          "arrival_card": {
+            "required": true,
+            "name": "Disembarkation card and customs declaration",
+            "submission_window": "Submit at immigration and customs on arrival. Visit Japan Web is the recommended online option; paper forms remain accepted."
+          },
+          "health_requirements": [
+            {
+              "name": "Yellow fever vaccination certificate",
+              "applicability": "not_applicable",
+              "trigger_countries": [],
+              "trigger": "Arrival within 6 days from or through a Japanese-designated yellow-fever endemic country",
+              "question": null
+            }
+          ],
+          "route_workflow_type": "embassy_submission",
+          "visa_products": [
+            {
+              "type": "Single-entry short-term stay (tourism)",
+              "entry": "single",
+              "validity": "3 months",
+              "max_stay_days": 90,
+              "fee": {
+                "amount": 0,
+                "currency": "JPY"
+              },
+              "notes": "Government visa fee waived for this nationality for the temporary-visitor route. Visa centre or agency service charges may be separate.",
+              "field_provenance": {
+                "fee": {
+                  "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+                  "verified_at": "2026-09-09",
+                  "verified_by": "Ellis official-source audit",
+                  "verifier": "ai",
+                  "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Russia included in fee-exempt nationality table. No nationality-specific exception attached to Russia."
+                }
+              }
+            },
+            {
+              "type": "Multiple-entry short-term stay (tourism)",
+              "entry": "multiple",
+              "validity": "1 to 5 years",
+              "max_stay_days": 90,
+              "fee": {
+                "amount": 0,
+                "currency": "JPY"
+              },
+              "notes": "Government visa fee waived for this nationality for the temporary-visitor route. Visa centre or agency service charges may be separate.",
+              "field_provenance": {
+                "fee": {
+                  "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+                  "verified_at": "2026-09-09",
+                  "verified_by": "Ellis official-source audit",
+                  "verifier": "ai",
+                  "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Russia included in fee-exempt nationality table. No nationality-specific exception attached to Russia."
+                }
+              }
+            }
+          ],
+          "application_channel_detail": "For applications in Russia, submit at the Japan Visa Centre in person or through an authorised representative. The embassy does not accept visa applications by post.",
+          "requirement_detail": "paper_visa",
+          "transit_requirement": {
+            "required": null,
+            "note": null
+          },
+          "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+          "corroborating_sources": [
+            {
+              "url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+              "quote": "紙媒体の「外国人入国記録」を提出してください。",
+              "checked_at": "2026-09-09"
+            },
+            {
+              "url": "https://www.customs.go.jp/english/passenger/declaration/declaration_app.html",
+              "quote": "The existing paper version of the Customs Declaration Form can still be used",
+              "checked_at": "2026-09-09"
+            }
+          ]
+        },
+        "source_provenance": {
+          "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Advance temporary-visitor visa: complete Japan visa-exemption table excludes this ordinary nationality, corroborated by nationality-specific visa application procedure.",
+          "fields": [
+            "application_channel",
+            "application_channel_detail",
+            "arrival_card",
+            "consular_jurisdiction",
+            "corroborating_sources",
+            "disposition",
+            "exceptions",
+            "government_fee",
+            "official_portal_url",
+            "permitted_stay_days",
+            "processing_time",
+            "requirement_detail",
+            "visa_products"
+          ],
+          "field_provenance": {
+            "official_portal_url": {
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+              "verified_at": "2026-08-30",
+              "verified_by": "Ellis source audit (validity and jurisdiction)",
+              "verifier": "ai",
+              "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for "
+            },
+            "government_fee": {
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Only government visa fees reverified. Existing product validity/stay/documents retain their earlier unresolved audit status; source does not prove all product fields."
+            },
+            "permitted_stay_days": {
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+              "verified_at": "2026-08-30",
+              "verified_by": "Ellis source audit (validity and jurisdiction)",
+              "verifier": "ai",
+              "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for "
+            },
+            "visa_products": {
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Only government visa fees reverified. Existing product validity/stay/documents retain their earlier unresolved audit status; source does not prove all product fields."
+            },
+            "disposition": {
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Advance temporary-visitor visa: complete Japan visa-exemption table excludes this ordinary nationality, corroborated by nationality-specific visa application procedure."
+            },
+            "requirement_detail": {
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+              "verified_at": "2026-08-30",
+              "verified_by": "Ellis source audit (validity and jurisdiction)",
+              "verifier": "ai",
+              "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for "
+            },
+            "processing_time": {
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+              "verified_at": "2026-08-30",
+              "verified_by": "Ellis source audit (validity and jurisdiction)",
+              "verifier": "ai",
+              "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for "
+            },
+            "application_channel_detail": {
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Russian nationals require advance visa; Russia consular fee waiver and Russia JVAC procedure."
+            },
+            "exceptions": {
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Russian nationals require advance visa; Russia consular fee waiver and Russia JVAC procedure."
+            },
+            "consular_jurisdiction": {
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+              "verified_at": "2026-08-30",
+              "verified_by": "Ellis source audit (validity and jurisdiction)",
+              "verifier": "ai",
+              "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for "
+            },
+            "application_channel": {
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Russian nationals require advance visa; Russia consular fee waiver and Russia JVAC procedure."
+            },
+            "arrival_card": {
+              "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: New foreign visitor entry only: required forms, optional digital submission. This field does not establish passport acceptance or visa eligibility."
+            },
+            "corroborating_sources": {
+              "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+              "verified_at": "2026-09-09",
+              "verified_by": "Ellis official-source audit",
+              "verifier": "ai",
+              "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: Add current arrival-form evidence without changing unrelated visa or passport eligibility."
+            }
+          }
+        },
+        "seed_entries": [
+          {
+            "route": {
+              "nationality": "RUS",
+              "destination": "JPN",
+              "travel_purpose": "tourism"
+            },
+            "verified_at": "2026-08-30",
+            "verified_by": "Ellis source audit (validity and jurisdiction)",
+            "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+            "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple.",
+            "fields": {
+              "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+              "government_fee": {
+                "amount": 0,
+                "currency": "JPY"
+              },
+              "permitted_stay_days": 90,
+              "visa_products": [
+                {
+                  "type": "Single-entry short-term stay (tourism)",
+                  "entry": "single",
+                  "validity": "3 months",
+                  "max_stay_days": 90,
+                  "fee": {
+                    "amount": 0,
+                    "currency": "JPY"
+                  },
+                  "notes": "Government visa fee waived for this nationality for the temporary-visitor route. Visa centre or agency service charges may be separate.",
+                  "field_provenance": {
+                    "fee": {
+                      "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+                      "verified_at": "2026-09-09",
+                      "verified_by": "Ellis official-source audit",
+                      "verifier": "ai",
+                      "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Russia included in fee-exempt nationality table. No nationality-specific exception attached to Russia."
+                    }
+                  }
+                },
+                {
+                  "type": "Multiple-entry short-term stay (tourism)",
+                  "entry": "multiple",
+                  "validity": "1 to 5 years",
+                  "max_stay_days": 90,
+                  "fee": {
+                    "amount": 0,
+                    "currency": "JPY"
+                  },
+                  "notes": "Government visa fee waived for this nationality for the temporary-visitor route. Visa centre or agency service charges may be separate.",
+                  "field_provenance": {
+                    "fee": {
+                      "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+                      "verified_at": "2026-09-09",
+                      "verified_by": "Ellis official-source audit",
+                      "verifier": "ai",
+                      "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Russia included in fee-exempt nationality table. No nationality-specific exception attached to Russia."
+                    }
+                  }
+                }
+              ],
+              "disposition": "VISA_REQUIRED",
+              "requirement_detail": "paper_visa",
+              "processing_time": "4 working days from acceptance of the application (Embassy of Japan in Russia)",
+              "application_channel_detail": "For applications in Russia, submit at the Japan Visa Centre in person or through an authorised representative. The embassy does not accept visa applications by post.",
+              "exceptions": [
+                "Russian citizens must obtain the appropriate visa before travel unless they already hold an applicable re-entry permit.",
+                "The government visa fee is waived for Russian citizens; visa-centre service charges may be separate."
+              ],
+              "validity_duration": 3,
+              "validity_unit": "Month",
+              "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+              "application_channel": "visa_center",
+              "arrival_card": {
+                "required": true,
+                "name": "Disembarkation card and customs declaration",
+                "submission_window": "Submit at immigration and customs on arrival. Visit Japan Web is the recommended online option; paper forms remain accepted."
+              },
+              "corroborating_sources": [
+                {
+                  "url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+                  "quote": "紙媒体の「外国人入国記録」を提出してください。",
+                  "checked_at": "2026-09-09"
+                },
+                {
+                  "url": "https://www.customs.go.jp/english/passenger/declaration/declaration_app.html",
+                  "quote": "The existing paper version of the Customs Declaration Form can still be used",
+                  "checked_at": "2026-09-09"
+                }
+              ]
+            },
+            "field_provenance": {
+              "official_portal_url": {
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity and jurisdiction)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple."
+              },
+              "government_fee": {
+                "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Only government visa fees reverified. Existing product validity/stay/documents retain their earlier unresolved audit status; source does not prove all product fields."
+              },
+              "permitted_stay_days": {
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity and jurisdiction)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple."
+              },
+              "visa_products": {
+                "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Only government visa fees reverified. Existing product validity/stay/documents retain their earlier unresolved audit status; source does not prove all product fields."
+              },
+              "disposition": {
+                "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Advance temporary-visitor visa: complete Japan visa-exemption table excludes this ordinary nationality, corroborated by nationality-specific visa application procedure."
+              },
+              "requirement_detail": {
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity and jurisdiction)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple."
+              },
+              "processing_time": {
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity and jurisdiction)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple."
+              },
+              "application_channel_detail": {
+                "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Russian nationals require advance visa; Russia consular fee waiver and Russia JVAC procedure."
+              },
+              "exceptions": {
+                "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Russian nationals require advance visa; Russia consular fee waiver and Russia JVAC procedure."
+              },
+              "validity_duration": {
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity and jurisdiction)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple."
+              },
+              "validity_unit": {
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity and jurisdiction)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple."
+              },
+              "consular_jurisdiction": {
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity and jurisdiction)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple."
+              },
+              "application_channel": {
+                "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Russian nationals require advance visa; Russia consular fee waiver and Russia JVAC procedure."
+              },
+              "arrival_card": {
+                "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: New foreign visitor entry only: required forms, optional digital submission. This field does not establish passport acceptance or visa eligibility."
+              },
+              "corroborating_sources": {
+                "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: Add current arrival-form evidence without changing unrelated visa or passport eligibility."
+              }
+            },
+            "verifier": "ai"
+          }
+        ],
+        "operator_entries": []
+      }
+    }
+  ]
+}
