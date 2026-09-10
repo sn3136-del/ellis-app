@@ -127,7 +127,7 @@ def test_single_pass_produces_final_result_without_research(db):
     assert g["elapsed_seconds"] < 60
 
 
-def test_visa_required_plan_keeps_irreversible_confirmations(db):
+def test_unreviewed_visa_plan_stays_unknown_and_keeps_confirmation_boundary(db):
     _clear_cache(db)
     ans = dict(GOOD_ANSWER, disposition="VISA_REQUIRED",
                visa_category="Tourist L visa", application_channel="embassy",
@@ -146,13 +146,11 @@ def test_visa_required_plan_keeps_irreversible_confirmations(db):
     g = kimi_primary.get_route_guidance(db, dict(ROUTE, destination_country="CHN"))
     assert g["status"] == "KIMI_PRIMARY"
     assert g["irreversible_requires_confirmation"] is True
-    plan = {s["step"]: s for s in g["workflow_plan"]}
-    assert plan["prepare_forms"]["reversible"] is True
-    assert plan["generate_route_adapter"]["reversible"] is True
-    for irrev in ("account_registration", "appointment_booking", "payment",
-                  "final_review_and_signature", "submission"):
-        assert plan[irrev]["reversible"] is False
-        assert plan[irrev]["requires_applicant_confirmation"] is True
+    assert g['workflow_plan'] == []
+    assert g['apply_steps'] == []
+    assert g['application_steps_status'] == 'unknown'
+    assert g['guidance']['government_fee']['amount'] == 140
+
 
 
 def test_appointment_stages_only_when_appointment_required(db):
@@ -1187,76 +1185,28 @@ def test_a_verified_visa_free_verdict_clears_the_application_machinery():
     assert merged2["official_portal_url"] == "https://evisa.example.gov"
 
 
-def test_apply_steps_are_three_to_five_ordered_and_deduplicated():
-    """Trip.com's spec: 3-5 KEY steps. The engine's three arrays overlap and
-    repeat — a real answer carried 135 steps, another said both "Pay the visa
-    application charge online" and "Credit/debit card payment through
-    ImmiAccount at time of lodgement" — so one line per stage is kept, in the
-    order a traveller meets them."""
-    from app.visa_snapshot.kimi_primary import canonical_steps
-    g = {"account_registration_steps": [
-            "Create an individual ImmiAccount",
-            "Start a new application and select Visitor (subclass 600)",
-            "Complete all questions and upload required documents"],
-         "payment_process": [
-            "Pay the visa application charge online",
-            "Credit/debit card payment through ImmiAccount at time of lodgement"],
-         "submission_process": [
-            "Submit the application and wait for a decision",
-            "Lodge the application online through ImmiAccount",
-            "Provide biometrics at an Australian Visa Application Centre if requested",
-            "Collect passport or receive courier delivery after decision"]}
-    steps = canonical_steps(g)
-    assert 3 <= len(steps) <= 5, steps
-    joined = " | ".join(steps).lower()
-    assert joined.count("pay") == 1                     # one payment step
-    assert joined.count("biometric") <= 1
-    order = [i for i, s in enumerate(steps)
-             if "immiaccount" in s.lower() and "create" in s.lower()]
-    assert order == [0]                                  # account first
-    assert all(len(s) <= 110 for s in steps)             # readable length
-    assert all(s[0].isupper() for s in steps)            # sentence case
-    assert all(not s.endswith(".") for s in steps)
+def test_unreviewed_phase_arrays_do_not_establish_source_order():
+    from app.visa_snapshot.kimi_primary import canonical_steps, application_instructions
+    g = {"account_registration_steps": ["Create an individual ImmiAccount"],
+         "payment_process": ["Pay the visa application charge online"],
+         "submission_process": ["Submit the application", "Provide biometrics if requested"]}
+    assert canonical_steps(g) == []
+    assert application_instructions(g)['application_steps_status'] == 'unknown'
+    assert g['submission_process'][-1] == 'Provide biometrics if requested'
 
 
-def test_apply_steps_survive_an_answer_with_no_recognisable_stages():
+def test_legacy_unclassified_instructions_remain_unknown():
     from app.visa_snapshot.kimi_primary import canonical_steps
-    g = {"submission_process": ["Ask the tour operator to file the group list",
-                                "Wait for the provincial notice"]}
-    steps = canonical_steps(g)
-    assert steps and len(steps) <= 5
+    assert canonical_steps({"submission_process": ["Ask the tour operator to file the group list", "Wait for the provincial notice"]}) == []
     assert canonical_steps({}) == []
 
 
-def test_apply_steps_order_and_filter_the_way_a_traveller_meets_them():
-    """Two failures found on live answers, pinned. A US fee is paid ONLINE
-    before the biometrics visit and the interview, so it must not sort last;
-    and "Attend OFC appointment for fingerprints/photo" is a biometrics
-    visit, not paperwork (bare "photo" once classified it as documents).
-    Advisory lines like "Accepted methods vary by center" are not steps."""
+def test_keywords_do_not_invent_cross_country_order_or_drop_conditions():
     from app.visa_snapshot.kimi_primary import canonical_steps
-    usa = {"account_registration_steps": ["Create account on US Travel Docs China",
-                                          "Complete DS-160 and save confirmation number"],
-           "payment_process": ["Pay $185 MRV fee online via CGI Federal",
-                               "Accepted methods vary by center (card, cash)"],
-           "submission_process": ["Attend OFC appointment for fingerprints/photo",
-                                  "Attend the visa interview at the consulate",
-                                  "Collect passport by courier"]}
-    steps = canonical_steps(usa)
-    low = [s.lower() for s in steps]
-    pay = next(i for i, s in enumerate(low) if s.startswith("pay"))
-    ofc = next(i for i, s in enumerate(low) if "ofc" in s)
-    interview = next(i for i, s in enumerate(low) if "interview" in s)
-    assert pay < ofc < interview, steps            # the real-world order
-    assert not any("vary by" in s for s in low)     # advisory lines are not steps
-    # A fee paid AT the centre stays with the submission, not before booking.
-    fra = {"account_registration_steps": ["Complete the online application form"],
-           "payment_process": ["Pay the Schengen visa fee at the visa application centre"],
-           "submission_process": ["Book an appointment through TLScontact",
-                                  "Submit documents and provide biometrics"]}
-    fs = [s.lower() for s in canonical_steps(fra)]
-    assert fs.index(next(s for s in fs if "book an appointment" in s)) < \
-        fs.index(next(s for s in fs if s.startswith("pay")))
+    for submission in (["Pay before biometrics", "Attend appointment"],
+                       ["Pay at the centre", "Book an appointment"],
+                       ["If requested, attend biometrics after submission"]):
+        assert canonical_steps({'submission_process': submission}) == []
 
 
 def test_a_visa_free_answer_never_carries_application_machinery():
@@ -1463,7 +1413,7 @@ def test_a_verified_verdict_also_governs_what_was_derived_from_the_guidance():
         "permitted_stay": "90 days in any 180-day period",
     }
     out = kimi_primary._result("KIMI_PRIMARY", dict(raw), cached=True, stale=False)
-    assert out["apply_steps"], "the raw answer should carry steps to begin with"
+    assert out["apply_steps"] == [], "raw unsupported ETIAS instructions are already withheld"
 
     verdict = {
         "disposition": "VISA_EXEMPT",

@@ -426,6 +426,13 @@ def _validity_num_unit(text) -> tuple[float | None, str | None]:
     for word, digit in numbers.items():
         t = re.sub(rf"\b{word}\s*\(\s*{digit}\s*\)", digit, t)
         t = re.sub(rf"\b{word}\b", digit, t)
+    # A source may explicitly give its day equivalent in parentheses. Read
+    # that stated day measure only for this unambiguous complete construction;
+    # never convert an unstated calendar year or select a duration in prose.
+    equivalent = re.fullmatch(
+        r"1 year\s*\(\s*365 days\s*\)\s+from (?:the )?date of grant of (?:the )?eta[.]?", t)
+    if equivalent:
+        return 365, "Day"
     # Exactly one number must own exactly one unit. This rejects 1/3/5 years,
     # 1–3 years, 1 year or 3 years, mixed units and 90 days in any 180 days.
     if len(re.findall(r"\d+(?:\.\d+)?", t)) != 1:
@@ -567,7 +574,88 @@ def _fee_qualifier(product: dict, guidance: dict) -> str | None:
     return "from" if isinstance(fee, dict) and fee.get("qualifier") == "from" else None
 
 
-def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
+def _reviewed_product_zero_fee(product: dict, fee: dict, route: dict | None) -> bool:
+    """Retain a reviewed zero tariff even when the table does not say 'waived'.
+
+    This accepts only the product's own explicitly value-bound field review.
+    A parent quote, legacy whole-product proof, or a numerical zero alone
+    cannot open the existing zero-fee guard.
+    """
+    if not isinstance(route, dict) or not isinstance(product, dict):
+        return False
+    proof = (product.get("field_provenance") or {}).get("fee") if isinstance(product.get("field_provenance"), dict) else None
+    if (not isinstance(proof, dict) or proof.get("status") != "reviewed"
+            or proof.get("verifier") != "ai"
+            or proof.get("verification_scope") != "india_evisa_fee_table_cell"
+            or not isinstance(proof.get("reviewed_value"), dict)
+            or type(proof["reviewed_value"].get("amount")) not in (int, float)
+            or proof.get("reviewed_value") != {"amount": 0, "currency": fee.get("currency")}
+            or not isinstance(fee.get("currency"), str) or not fee["currency"]
+            or type(fee.get("amount")) not in (int, float) or fee["amount"] != 0):
+        return False
+    subject = proof.get("subject")
+    if (not isinstance(subject, dict) or subject.get("product_type") != product.get("type")
+            or not product.get("type") or any(not route.get(k) or subject.get(k) != route.get(k)
+                for k in ("passport_nationality", "destination_country", "travel_purpose"))
+            or subject.get("travel_document_type") != (route.get("travel_document_type") or "ordinary_passport")
+            or any(k not in subject or subject[k] != product.get(k)
+                   for k in ("disposition", "requirement_detail"))):
+        return False
+    from .authority import hostname, is_government_host
+    from .evidence_validator import jurisdiction_matches
+    url = proof.get("source_url")
+    if not isinstance(url, str) or not is_government_host(hostname(url)) or not jurisdiction_matches(url, route.get("destination_country", "")):
+        return False
+    try:
+        when = datetime.fromisoformat(proof["verified_at"].replace("Z", "+00:00"))
+        if when.tzinfo is None:
+            when = when.replace(tzinfo=timezone.utc)
+        if when > datetime.now(timezone.utc):
+            return False
+    except (KeyError, TypeError, AttributeError, ValueError):
+        return False
+    if any(proof.get(k) is not None for k in ("effective_from", "effective_to")):
+        return False  # A dated tariff needs separate interval validation.
+    quote = proof.get("quote")
+    extra = proof.get("additional_quotes", [])
+    if not isinstance(quote, str) or not isinstance(extra, list) or any(not isinstance(q, str) for q in extra):
+        return False
+    if re.search(r"\b(?:not|never|unless|except|if|may|might|withdrawn)\b", quote, re.I):
+        return False
+    text = " ".join([quote] + extra)
+    # The four-column Indian tariff binds both the nationality row and the
+    # selected duration/season column; a neighbouring zero is not this fee.
+    if (route.get("destination_country") != "IND" or product.get("requirement_detail") != "evisa"
+            or url != "https://indianvisaonline.gov.in/evisa/images/Etourist_fee_final.pdf"):
+        return False
+    table = re.fullmatch(r"([A-Za-z ]+?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)", quote.strip())
+    from .registry import iso3
+    if not table:
+        return False
+    row_country = "RUS" if table[1] == "Russia" else iso3(table[1])
+    if row_country != route.get("passport_nationality"):
+        return False
+    name = product["type"].lower().replace("–", "-").replace("—", "-")
+    column = None
+    if re.fullmatch(r"30-day e-tourist visa \(april(?:-| to )june\)", name):
+        column = 0
+    elif re.fullmatch(r"30-day e-tourist visa \(july(?:-| to )march\)", name):
+        column = 1
+    elif name == "1-year e-tourist visa":
+        column = 2
+    elif name == "5-year e-tourist visa":
+        column = 3
+    if column is None:
+        return False
+    zero = float(table[column + 2]) == 0
+    currency = re.escape(fee["currency"])
+    currency_present = bool(re.search(r"(?<![A-Z])" + currency + r"(?![A-Z])", text))
+    if fee["currency"] == "USD":
+        currency_present |= bool(re.search(r"\bUS\s*\$", text))
+    return zero and currency_present
+
+
+def _fee(product: dict, guidance: dict, route: dict | None = None) -> tuple[float | None, str | None]:
     fee = product.get("fee") if isinstance(product.get("fee"), dict) else None
     if not fee:
         g = guidance.get("government_fee")
@@ -596,7 +684,7 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
                 product.get("notes"), fee.get("note"), fee.get("notes"),
                 guidance.get("requirement_detail"),
                 guidance.get("application_channel_detail"))).lower()
-            if not any(k in texts for k in ("free", "gratis", "no fee", "fee waiver",
+            if not _reviewed_product_zero_fee(product, fee, route) and not any(k in texts for k in ("free", "gratis", "no fee", "fee waiver",
                                             "no visa fee", "no visa application fee",
                                             "waived", "exempt", "nil",
                                             "zero-fee", "免费", "免簽費",
@@ -1649,7 +1737,7 @@ def records_for_route(route: dict, guidance: dict,
             explicit_currency = (fee.get("currency") if isinstance(fee, dict)
                                  and isinstance(fee.get("currency"), str) else None)
             row["visa_fee_amount"], row["visa_fee_currency"] = (
-                _fee({}, g) if exempt_conflict else (0, explicit_currency if pure_exemption else "USD"))
+                _fee({}, g, route) if exempt_conflict else (0, explicit_currency if pure_exemption else "USD"))
         else:
             row["visa_type_name"] = g.get("visa_category") or None
             _set_stay(row, g.get("permitted_stay"), g.get("permitted_stay_days"))
@@ -1657,7 +1745,7 @@ def records_for_route(route: dict, guidance: dict,
             # Permitted stay never supplies that independent entry window.
             n, unit = _validity_num_unit(g.get("validity"))
             _set_validity(row, n, unit, g.get("validity"))
-            amt, cur = _fee({}, g)
+            amt, cur = _fee({}, g, route)
             row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
         if bound_social and disposition == "VISA_EXEMPT" and not exempt_conflict:
             # Visa exemption implies no visa fee, not a US-dollar tariff.
@@ -1805,7 +1893,7 @@ def records_for_route(route: dict, guidance: dict,
         # Definitional fallback: "single-entry" / "multiple-entry" in the
         # product's own name states the entries field.
         row["entries"] = _entries(p.get("entry")) or _entries(p.get("type"))
-        amt, cur = _fee(p, product_g)
+        amt, cur = _fee(p, product_g, route)
         row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
         row["visa_fee_qualifier"] = _fee_qualifier(p, product_g)
         note = p.get("notes")

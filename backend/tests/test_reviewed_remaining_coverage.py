@@ -94,7 +94,13 @@ def test_unresolved_vietnam_change_is_not_silently_materialized():
     assert not any(e['route']['nationality']=='IDN' and e['route']['destination']=='VNM' for e in MANIFEST['routes'])
 
 
-def test_current_india_border_form_overlay_is_exact_rebuilt_supersession(current_seed):
+def test_current_india_border_form_overlay_is_exact_rebuilt_supersession(current_seed,monkeypatch):
+    # Verify this historical border-form release before the later, independent
+    # processing-minimum/port-field review adds its own product provenance.
+    listed=vo._listed_reviewed_overlay_names()
+    monkeypatch.setattr(vo,'_listed_reviewed_overlay_names',lambda:[
+        name for name in listed if name!='reviewed_india_completeness_overlay_20260910.json'])
+    vo.reload()
     from scripts import convert_reviewed_india_entry as current
     from scripts.prepare_reviewed_product_patch import digest
     seed_root=ROOT/'data/database_seed'
@@ -120,3 +126,24 @@ def test_current_india_border_form_overlay_is_exact_rebuilt_supersession(current
         assert product['field_provenance']['entry_requirements']['status']=='partial'
     assert not report['raw_writes'] and not report['operator_writes'] and not report['issue_changes']
     assert not report['renew_fresh_until'] and not report['confidence_changed']
+
+
+def test_current_india_completeness_retains_border_form_proof_and_conditions(current_seed):
+    from scripts import convert_reviewed_india_entry as entry
+    from scripts import convert_reviewed_india_completeness as completeness
+    seed_root=ROOT/'data/database_seed'
+    manifest=json.loads((seed_root/'reviewed_india_completeness_manifest_20260910.json').read_text())
+    row=next(r for r in manifest['routes'] if r['cache_key']=='VNM|VNM|IND|tourism|default|unknown|v6')
+    baseline=row['baseline'];before=baseline['merged_guidance']
+    actual,proof=vo.apply(deepcopy(baseline['raw_guidance']),baseline['route'])
+    for field in ('arrival_card','entry_requirements'):
+        assert actual[field]==before[field]
+        assert proof['field_provenance'][field]==baseline['source_provenance']['field_provenance'][field]
+    assert entry.CARD in str(actual['entry_requirements']) and entry.DECL in str(actual['entry_requirements'])
+    for old,new in zip(before['visa_products'],actual['visa_products'],strict=True):
+        assert new['type']==old['type'] and new['entry_requirements']==old['entry_requirements']
+        assert new['field_provenance']['entry_requirements']==old['field_provenance']['entry_requirements']
+        assert new.get('processing_time') is None
+        assert new['field_provenance']['processing_time']['status']=='not_published'
+        assert new['field_provenance']['processing_time']['reason']==completeness.NP_REASON
+        assert new['field_provenance']['processing_time']['subject']['product_type']==new['type']

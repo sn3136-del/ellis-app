@@ -51,6 +51,7 @@ from .evidence_validator import (quote_in_text, supports_disposition, jurisdicti
 from .models import DatabaseIssueReport, KimiRouteGuidanceCache
 from . import freshness_evidence as proof_helpers
 from . import comparison_reuse
+from . import reviewed_stay_concepts
 
 # Fields the page is allowed to correct — the same vocabulary a human
 # override may correct, minus nothing: what a person may fix from a source,
@@ -101,6 +102,13 @@ must still be reported with its own scoped evidence. Empty workflow values
 instructions were withdrawn. Report an actual changed rule with its value and
 quote instead. The legacy online_application channel and online_portal describe
 the same filing channel; a spelling change alone is not a policy conflict.
+
+STAY CONCEPTS. Compare like with like: a published maximum for visa-exempt
+visit eligibility is distinct from the individual admission period granted by
+an immigration pass at entry. Read the stored stay text as well as its number.
+An intentionally unknown individual grant is not a claim that an explicitly
+retained exemption threshold is unknown. A changed threshold, changed admission
+rule or missing explanation must still be reported with its own scoped quote.
 
 MONEY, VALIDITY AND STAY ARE THE HIGHEST-VALUE CHECKS. Government fees and
 validity periods change by law and the stored answer's figure may predate the
@@ -794,6 +802,20 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     # Classify after all available pages are read: a named contract may need
     # a second official page, and a generic fee page cannot establish eligibility.
     fresh_sources = proof_helpers.source_map(captures, catalog)
+    # Both fresh captures must exist before distinguishing an eligibility
+    # threshold from a reviewed, individually assigned admission grant.
+    scoped_candidates = []
+    for fr, answer, quoted, evidence, check in candidates:
+        rejected = reviewed_stay_concepts.rejected_stay_fields(quoted, evidence,
+            fr.final_url, captures, guidance, reviewed_fields, route, when[:10])
+        if rejected:
+            check['rejected_stay_concept_fields'] = rejected
+            check['validation_errors'].extend('stay concept mismatch: ' + k for k in rejected)
+            check['outcome'] = 'validation_error'
+            quoted = {k: v for k, v in quoted.items() if k not in rejected}
+            check['proposed_fields'] = {k: v for k, v in check['proposed_fields'].items() if k not in rejected}
+        scoped_candidates.append((fr, answer, quoted, evidence, check))
+    candidates = scoped_candidates
     route_results = []
     deferred = []
     for fr, answer, quoted, evidence, check in candidates:
@@ -1255,6 +1277,16 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
         quoted = {k:v for k,v in quoted.items() if k not in rejected}
         candidates.append((fr,raw,quoted,evidence,unquoted))
     fresh_sources = proof_helpers.source_map(captures,catalog)
+    stay_rejections, scoped_candidates = [], []
+    for fr, raw, quoted, evidence, unquoted in candidates:
+        rejected = reviewed_stay_concepts.rejected_stay_fields(quoted, evidence,
+            fr.final_url, captures, guidance, reviewed_fields, route, when[:10])
+        if rejected:
+            stay_rejections.append({'source_url': fr.final_url, 'fields': rejected})
+            quoted = {k: v for k, v in quoted.items() if k not in rejected}
+            evidence = {k: v for k, v in evidence.items() if k not in rejected}
+        scoped_candidates.append((fr, raw, quoted, evidence, unquoted))
+    candidates = scoped_candidates
     applicable, route_results, deferred = [], [], []
     for fr,raw,quoted,evidence,unquoted in candidates:
         source=captures[fr.final_url]
@@ -1312,6 +1344,15 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
             proposal = {'outcome': 'validation_error', 'checked_at': when, 'consistent': False,
                         'verified_fields': [], 'fields': {}}
         proposal['rejected_workflow_fields'] = workflow_rejections
+    if stay_rejections:
+        if not proposal or not (proposal.get('fields') or proposal.get('verified_fields')
+                                or proposal.get('awaiting_adjudication')):
+            # An invalid comparison is not an adjudication. Preserve the
+            # original issue and proposal rather than overwriting its history.
+            return {'outcome': 'validation_error', 'checked_at': when, 'consistent': False,
+                    'verified_fields': [], 'fields': {}, 'issue_unchanged': True,
+                    'rejected_stay_concept_fields': stay_rejections}
+        proposal['rejected_stay_concept_fields'] = stay_rejections
     issue.proposal = proposal or {"outcome": outcome, "checked_at": when}
     db.commit()
     return issue.proposal

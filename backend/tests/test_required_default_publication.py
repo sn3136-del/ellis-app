@@ -33,7 +33,7 @@ def test_live_required_default_and_qc_preservation(case,monkeypatch):
     assert len(out['product_publication'])==len(raw['guidance']['visa_products'])
     for p in raw['guidance']['visa_products'][1:]:assert p['type'] not in json.dumps(out)
     steps={p['step'] for p in out['workflow_plan']}
-    assert {'prepare_forms','generate_route_adapter','account_registration','submission'}<=steps
+    assert steps == set()  # Independent visa fields do not establish a filing order.
     assert 'prepare_entry_documents' not in steps and raw==before
     rows=tstation.records_for_route(case['route'],raw['guidance'],raw['source_verified'])
     assert not rows[0]['_evidence_low'] and rows[0]['confidence_level']=='Low'
@@ -64,8 +64,8 @@ def test_reviewed_positive_fee_and_reviewed_payment_steps_survive():
     out=apply_records_hold(c['route'],raw);assert out['publication_state']=='partial'
     assert out['guidance']['government_fee']==out['guidance']['visa_products'][0]['fee']==fee
     assert out['guidance']['payment_process']==g['payment_process']
-    assert 'Pay the e-visa fee online' in out['apply_steps']
-    assert next(p for p in out['workflow_plan'] if p['step']=='display_exact_fees')['fee']==fee
+    assert out['apply_steps']==[] and out['workflow_plan']==[]
+    assert out['application_steps_status']=='unknown'  # Fee proof is not proof of global procedure order.
 
 @pytest.mark.parametrize('reason',['unsupported_default','unknown_verdict','wrong_detail','own_unknown','missing_channel_proof','wrong_channel','missing_docs_proof','partial_docs','unreviewed_fee','unreviewed_product_fee','dispute','pending','stale','previous_hold','conflict','expired','future','malformed_bound','multiple_defaults'])
 def test_other_holds_and_critical_facts_remain_blocking(reason,monkeypatch):
@@ -112,4 +112,5 @@ def test_unreviewed_paper_workflow_and_future_containers_never_reappear():
     for key in ['advisories','workflow_plan','apply_steps','future_claims','reply']:r[key]=[needle]
     g['future_claims']=[needle];r['source_verified']['note']+=' '+needle
     out=apply_records_hold(c['route'],r);assert out['publication_state']=='partial' and needle not in json.dumps(out)
-    assert out['guidance']['application_channel']=='online_portal' and any(p['step']=='submission' for p in out['workflow_plan'])
+    assert out['guidance']['application_channel']=='online_portal'
+    assert out['workflow_plan']==[] and out['application_steps_status']=='unknown'

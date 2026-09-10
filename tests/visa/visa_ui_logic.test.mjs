@@ -10,6 +10,7 @@ import {
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
 import { arrivalCardLines } from '../../src/renderer/src/lib/arrivalCard.js'
 import { publishedStayText } from '../../src/renderer/src/lib/publishedStay.js'
+import { formatPolicyText } from '../../src/renderer/src/lib/policyText.js'
 import { applicationLane, applicationStepLinkIndex } from '../../src/renderer/src/lib/applicationLane.js'
 import { t as translate, SUPPORTED } from '../../src/renderer/src/lib/i18n.js'
 
@@ -469,12 +470,14 @@ test('renderer isolates legacy checks from entry facts and preserves existing st
   const source = fs.readFileSync(new URL('../../src/renderer/src/screens/TravelDatabase.jsx', import.meta.url), 'utf8')
   const entry = source.slice(source.indexOf('  const entryFacts ='), source.indexOf('  const documents ='))
   assert.ok(!entry.includes('g.biometrics_required') && !entry.includes('g.interview_required') && !entry.includes('g.appointment_required'))
-  assert.match(entry, /g\.insurance_required/)
+  assert.match(entry, /insurance\.valueKey/)
+  assert.match(source, /insuranceRequirement\(g, result\?\.requirement_evidence\)/)
   assert.match(source, /checkRequirements\(g\)/)
   assert.match(source, /Section title=\{t\('db.checksAndAppointments'\)\}/)
   assert.match(source, /publishedStayText/)
   assert.match(source, /itemsOf\(g\.required_documents\)/)
-  assert.match(source, /itemsOf\(g\.submission_process\)/)
+  assert.match(source, /applicationInstructions\(result, g\)\.steps/)
+  assert.doesNotMatch(source, /itemsOf\(g\.submission_process\)/)
 })
 
 import { entryInstructionTexts, publishedEntryInstructions } from '../../src/renderer/src/lib/entryInstructions.js'
@@ -509,4 +512,71 @@ test('missing held guidance and malformed values cannot create new instructions'
 test('condition lists retain order and partial overlap is not mistaken for equivalent product scope', () => {
   assert.deepEqual(publishedEntryInstructions({entry_requirements:[AIR],visa_products:[{type:'Permit',entry_requirements:[AIR,LAND]}]}),
     {route:[AIR],products:[{index:0,name:'Permit',texts:[AIR,LAND]}]})
+})
+
+import { insuranceRequirement } from '../../src/renderer/src/lib/insuranceRequirement.js'
+
+test('unproven insurance flags render an explicit unknown in all three locales', () => {
+  for (const value of [false, true, null, 'false']) {
+    const fact = insuranceRequirement({ insurance_required: value })
+    assert.equal(fact.valueKey, 'db.checkRequirementUnknown')
+    assert.equal(fact.tone, null)
+    for (const lang of SUPPORTED) {
+      assert.notEqual(translate(lang, fact.valueKey), translate(lang, 'db.notRequired'))
+      assert.notEqual(translate(lang, fact.valueKey), fact.valueKey)
+    }
+  }
+})
+test('only matching server entry evidence can render required or not required', () => {
+  for (const value of [false, true]) {
+    const evidence = { insurance_required: { contract: 'ellis.insurance-evidence.v1',
+      field: 'insurance_required', status: 'verified', scope: 'entry', value } }
+    const original = structuredClone(evidence)
+    assert.deepEqual(insuranceRequirement({ insurance_required: value }, evidence), {
+      valueKey: value ? 'db.required' : 'db.notRequired', tone: value ? 'yes' : 'no' })
+    assert.deepEqual(evidence, original)
+    for (const changes of [{ value: !value }, { scope: 'visa_application' },
+      { status: 'unknown' }, { field: 'appointment_required' }, { contract: 'old' }]) {
+      const changed = { insurance_required: { ...evidence.insurance_required, ...changes } }
+      assert.equal(insuranceRequirement({ insurance_required: value }, changed).valueKey,
+        'db.checkRequirementUnknown')
+    }
+  }
+})
+test('held or absent guidance cannot expose an insurance claim from metadata', () => {
+  assert.equal(insuranceRequirement(null, { insurance_required: { value: false } }), null)
+  assert.equal(insuranceRequirement({}), null)
+  assert.equal(insuranceRequirement(undefined), null)
+})
+
+test('Moscow working-day and September date ranges retain their meanings', () => {
+  const source = 'Embassy of Japan/JVAC in Moscow: normally 4–5 working days; holidays on 21–23 September may extend processing to 10 days including weekends.'
+  assert.equal(formatPolicyText(source), source.replace('; holidays', '. Holidays'))
+})
+
+test('Numeric ranges preserve ASCII, en and em dashes with source spacing', () => {
+  for (const range of ['4-5', '4–5', '4—5', '4 – 5', '4 — 5']) {
+    assert.equal(formatPolicyText(`Processing ${range} days`), `Processing ${range} days`)
+  }
+})
+
+test('Month, clock and currency ranges are not changed into separate values', () => {
+  const source = 'Apply April–June, 09:00–17:00; fees USD 25–50.'
+  assert.equal(formatPolicyText(source), 'Apply April–June, 09:00–17:00. Fees USD 25–50.')
+})
+
+test('Product codes, numeric signs and conditional clauses remain intact', () => {
+  const source = 'C-3-9 — only if eligible; temperature −5–10°C.'
+  assert.equal(formatPolicyText(source), 'C-3-9 — only if eligible. Temperature −5–10°C.')
+})
+
+test('Official URLs and their surrounding text remain byte-for-byte unchanged', () => {
+  const source = '4–5 days; details https://example.gov/visa?a=1_2&range=4-5'
+  assert.equal(formatPolicyText(source), source)
+})
+
+test('Null and existing enum/spacing formatting retain their supported behavior', () => {
+  assert.equal(formatPolicyText(null), null)
+  assert.equal(formatPolicyText(''), '')
+  assert.equal(formatPolicyText('visa_required;  follow instructions'), 'Visa required. Follow instructions.')
 })

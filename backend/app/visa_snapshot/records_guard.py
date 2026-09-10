@@ -12,6 +12,7 @@ def grounded_verdict_supported(check: dict | None) -> bool:
 def apply_records_hold(route: dict, out: dict, db=None) -> dict:
     """Apply the same evidence and contradiction gate to every reader path."""
     from . import kimi_primary, tstation
+    from .insurance_evidence import project_reader as project_insurance
     if not out.get("guidance"):
         return out
     out = dict(out)
@@ -55,11 +56,11 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
         scope = (scoped_exemption(route, out, rows, conflict=conflict, pending=pending)
                  or scoped_required_evisa(route, out, rows, conflict=conflict, pending=pending))
         if scope is not None:
-            return project_reader(route, out, scope)
+            return project_insurance(route, project_reader(route, out, scope))
     if conflict or pending or (low and not out.get("operator_released")):
         out["review_required"] = True
         out["held"] = True if conflict or pending else kimi_primary.hold_enabled()
-    return out
+    return project_insurance(route, out)
 
 
 _HELD_STATUS_FIELDS = frozenset({

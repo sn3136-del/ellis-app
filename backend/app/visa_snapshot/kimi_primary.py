@@ -830,91 +830,7 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     return clean, missing, contradictions
 
 
-# ---- "Steps to apply": 3-5 key steps, in the order they happen ------------
-# The engine returns three step arrays that overlap and repeat ("Pay the visa
-# fee online" and "Credit/debit card payment through ImmiAccount at time of
-# lodgement" are one step), sometimes dozens deep. Trip.com's spec asks for
-# 3-5 KEY steps. Each step is therefore classified into the stage it belongs
-# to, one line is kept per stage — the shortest clear one — and the stages are
-# emitted in the order a traveller meets them.
-# Biometrics come BEFORE the decisive submission: the US biometrics (OFC)
-# visit precedes the interview, and a visa centre takes them as you hand the
-# file in.
-_STAGE_ORDER = ("account", "form", "documents", "appointment", "pay",
-                "biometrics", "submit", "collect")
-_STAGE_WORDS = {
-    "account": ("create an account", "register an account", "create account",
-                "sign up", "registration", "immiaccount", "create a profile"),
-    "form": ("fill", "complete the application", "complete the form",
-             "application form", "ds-160", "online form", "questionnaire"),
-    # "photo" alone is too broad — it caught "Attend OFC appointment for
-    # fingerprints/photo", which is a biometrics visit, not paperwork.
-    "documents": ("upload", "gather", "prepare the document", "attach",
-                  "supporting document", "passport photo", "photo requirement"),
-    "appointment": ("appointment", "book a slot", "schedule", "interview slot"),
-    "pay": ("pay", "payment", "fee online", "charge", "card"),
-    "submit": ("submit", "lodge", "attend", "hand in", "deliver", "drop off",
-               "in person", "apply at"),
-    "biometrics": ("biometric", "fingerprint", "photograph at", "vfs biometric",
-                   "ofc appointment", "ofc visit", "applicant service centre",
-                   "applicant service center"),
-    "collect": ("collect", "pick up", "courier", "receive the passport",
-                "receive your visa", "track"),
-}
-_STAGE_MAX = 5
-
-
-# Lines that describe a CIRCUMSTANCE rather than an action ("Payment methods
-# vary by centre", "Accepted methods vary by center"). They belong in the
-# notes, not in a numbered list of things to do.
-_NOT_A_STEP = ("vary by", "varies by", "may differ", "differs by",
-               "depends on the", "accepted methods", "methods vary",
-               "where offered", "if applicable")
-
-
-def _is_actionable(step: str) -> bool:
-    low = step.lower().strip()
-    if any(w in low for w in _NOT_A_STEP):
-        return False
-    return len(low.split()) >= 2
-
-
-def _stage_of(step: str) -> str | None:
-    low = step.lower()
-    for stage in _STAGE_ORDER:
-        if any(w in low for w in _STAGE_WORDS[stage]):
-            return stage
-    return None
-
-
-def _pay_goes_early(step: str) -> bool:
-    """A fee paid ONLINE or in advance happens before the appointment (the US
-    MRV fee is paid before an interview can be booked). A fee paid AT the
-    centre happens with the submission, so it stays after."""
-    low = step.lower()
-    if any(w in low for w in ("at the visa application centre", "at the centre",
-                              "at the center", "on submission", "when submitting",
-                              "at time of submission", "on collection")):
-        return False
-    return any(w in low for w in ("online", "in advance", "before", "bank",
-                                 "portal", "website"))
-
-
-def _tidy_step(step: str) -> str:
-    """One short sentence, sentence-cased, no trailing full stop."""
-    t = " ".join(str(step or "").split()).strip(" .;·-")
-    if not t:
-        return t
-    # Cut a trailing qualifier that turns a step into a paragraph.
-    for sep in (" according to ", " as required by ", " depending on ",
-                " at time of ", "; ", " — ", " - "):
-        if len(t) > 90 and sep in t:
-            t = t.split(sep)[0].strip(" .;,-")
-    if len(t) > 110:
-        cut = t[:110].rsplit(" ", 1)[0]
-        t = cut.rstrip(" ,;:") 
-    return t[0].upper() + t[1:] if t else t
-
+# ---- Source-ordered application instructions -----------------------------
 
 def _australian_eta_app_workflow(g: dict) -> bool:
     """The ETA601 information page is not an initial web filing portal.
@@ -938,60 +854,32 @@ def _australian_eta_app_workflow(g: dict) -> bool:
                 "Apply using the Australian ETA app,"))
 
 
-def canonical_steps(g: dict) -> list:
-    """The 3-5 key steps for this answer, deduplicated and ordered.
+def application_instructions(g: dict, *, route=None, source_verified=None) -> dict:
+    """A versioned reader contract; unknown raw arrays never become steps."""
+    from .ordered_application_instructions import ordered_instructions, reviewed_eta_steps, reference_source
+    out = {'apply_steps': [], 'application_steps_status': 'unknown',
+           'application_steps_source_url': reference_source(source_verified)}
+    if not isinstance(g, dict):
+        return out
+    if g.get('disposition') == 'VISA_EXEMPT' and g.get('application_channel') in {'none','not_required',None}:
+        out.update(application_steps_status='not_applicable',application_steps_source_url=None)
+        return out
+    ordered = ordered_instructions(g, route, source_verified)
+    if ordered:
+        out.update(apply_steps=[step['text'] for step in ordered],
+                   application_steps_status='source_ordered',
+                   application_steps_source_url=ordered[0]['evidence'][0]['source_url'])
+    elif _australian_eta_app_workflow(g):
+        steps = reviewed_eta_steps(g, route, source_verified)
+        if steps:
+            out.update(apply_steps=steps,application_steps_status='source_ordered',
+                       application_steps_source_url=g['official_portal_url'])
+    return out
 
-    Deterministic: no model call. An unclassifiable step is kept only if
-    there is room, so a route whose steps are all unusual still shows
-    something rather than nothing."""
-    if _australian_eta_app_workflow(g):
-        # These source-ordered instructions distinguish initial app filing
-        # from a later requested ImmiAccount response. Generic keyword
-        # ranking promotes that conditional response to "create account"
-        # and truncates its boundaries. Keep the complete supplied text.
-        account = g.get("account_registration_steps") or []
-        submission = g.get("submission_process") or []
-        first = account[:1] if isinstance(account, list) else []
-        following = submission if isinstance(submission, list) else []
-        return list(dict.fromkeys(s.strip() for s in first + following
-                                  if isinstance(s, str) and s.strip()))[:_STAGE_MAX]
-    raw = []
-    for key in ("account_registration_steps", "payment_process",
-                "submission_process"):
-        for s in (g or {}).get(key) or []:
-            if isinstance(s, str) and s.strip():
-                raw.append(s.strip())
-    if not raw:
-        return []
-    best: dict = {}
-    extra: list = []
-    for s in raw:
-        t = _tidy_step(s)
-        if not t or not _is_actionable(t):
-            continue
-        stage = _stage_of(t)
-        if stage is None:
-            if t not in extra:
-                extra.append(t)
-            continue
-        # The clearest line for a stage is the shortest one that still says
-        # something (very short fragments lose to a fuller sentence).
-        cur = best.get(stage)
-        if cur is None or (len(t) >= 18 and len(t) < len(cur)) or len(cur) < 18:
-            best[stage] = t
-    # A fee paid online/in advance sorts before the appointment; a fee paid at
-    # the centre stays with the submission.
-    order = list(_STAGE_ORDER)
-    if "pay" in best and _pay_goes_early(best["pay"]):
-        order.remove("pay")
-        order.insert(order.index("appointment"), "pay")
-    steps = [best[st] for st in order if st in best]
-    for t in extra:
-        if len(steps) >= _STAGE_MAX:
-            break
-        if t not in steps:
-            steps.append(t)
-    return steps[:_STAGE_MAX]
+
+def canonical_steps(g: dict, *, route=None, source_verified=None) -> list:
+    """Complete explicitly ordered instructions, with no sorting or truncation."""
+    return application_instructions(g,route=route,source_verified=source_verified)['apply_steps']
 
 
 def derive_workflow_type(g: dict) -> str:
@@ -1058,48 +946,44 @@ def deterministic_advisories(route: dict, clean: dict, *, today: date | None = N
     return out
 
 
-def derive_workflow_plan(g: dict) -> list[dict]:
+def derive_workflow_plan(g: dict, *, route=None, source_verified=None) -> list[dict]:
     """Deterministic next-step plan from the guidance FIELDS (never free text).
     Route-specific: only stages that apply to this route type appear.
     Reversible preparation only; irreversible steps carry the confirmation flag."""
-    steps: list[dict] = []
-    disp = g.get("disposition")
-    wtype = g.get("route_workflow_type") or derive_workflow_type(g)
-    steps.append({"step": "collect_documents", "reversible": True,
-                  "items": g.get("required_documents") or []})
-    steps.append({"step": "ocr_and_validate_passport", "reversible": True})
-    if disp == "VISA_EXEMPT":
-        steps.append({"step": "prepare_entry_documents", "reversible": True,
-                      "items": g.get("forms") or []})
-        card = g.get("arrival_card") or {}
-        if isinstance(card, dict) and card.get("required"):
-            steps.append({"step": "arrival_card_preparation", "reversible": True,
-                          "name": card.get("name"),
-                          "submission_window": card.get("submission_window")})
-    else:
-        steps.append({"step": "prepare_forms", "reversible": True,
-                      "items": g.get("forms") or []})
-        if g.get("official_portal_url") and not _australian_eta_app_workflow(g):
-            steps.append({"step": "generate_route_adapter", "reversible": True,
-                          "portal": g.get("official_portal_url")})
-            steps.append({"step": "account_registration", "reversible": False,
-                          "requires_applicant_confirmation": True})
-        if g.get("appointment_required"):
-            steps.append({"step": "appointment_search", "reversible": True})
-            steps.append({"step": "appointment_booking", "reversible": False,
-                          "requires_applicant_confirmation": True})
-        fee = g.get("government_fee") or {}
-        if isinstance(fee, dict) and fee.get("amount"):
-            steps.append({"step": "display_exact_fees", "reversible": True, "fee": fee})
-            steps.append({"step": "payment", "reversible": False,
-                          "requires_applicant_confirmation": True})
-        steps.append({"step": "final_review_and_signature", "reversible": False,
-                      "requires_applicant_confirmation": True})
-        steps.append({"step": "submission", "reversible": False,
-                      "requires_applicant_confirmation": True})
-    steps.append({"step": "track_status", "reversible": True})
-    for s in steps:
-        s["workflow_type"] = wtype
+    from .ordered_application_instructions import ordered_instructions
+    ordered = ordered_instructions(g, route, source_verified)
+    if ordered:
+        names = {'apply_online':'submission', 'book_appointment':'appointment_booking',
+                 'attend_appointment':'attend_appointment', 'receive_decision':'track_status'}
+        return [dict(step=names[s['id']], instruction=s['text'],
+                     source_evidence=s['evidence'], after=s['after'],
+                     source_step_id=s['id'], workflow_type='standard_visitor_online_then_vac',
+                     reversible=s['id']=='receive_decision',
+                     requires_applicant_confirmation=s['id']!='receive_decision') for s in ordered]
+    if g.get('disposition') != 'VISA_EXEMPT':
+        instructions = application_instructions(g,route=route,source_verified=source_verified)
+        if _australian_eta_app_workflow(g) and instructions['apply_steps']:
+            # These manual instructions have their own exact app-field
+            # evidence. Raw fee/appointment/form flags may not append stages.
+            return [dict(step='reviewed_application_instruction',instruction=text,
+                         source_step_id=f'eta_app_{i+1}',
+                         after=[] if i==0 else [f'eta_app_{i}'],
+                         source_url=instructions['application_steps_source_url'],
+                         workflow_type='australian_eta_app', manual_only=True,
+                         reversible=False,requires_applicant_confirmation=True)
+                    for i,text in enumerate(instructions['apply_steps'])]
+        return []
+    # No visa filing: keep the separate entry-preparation plan unchanged.
+    wtype = g.get('route_workflow_type') or derive_workflow_type(g)
+    steps = [dict(step='collect_documents',reversible=True,items=g.get('required_documents') or []),
+             dict(step='ocr_and_validate_passport',reversible=True),
+             dict(step='prepare_entry_documents',reversible=True,items=g.get('forms') or [])]
+    card = g.get('arrival_card') or {}
+    if isinstance(card,dict) and card.get('required'):
+        steps.append(dict(step='arrival_card_preparation',reversible=True,
+                          name=card.get('name'),submission_window=card.get('submission_window')))
+    steps.append(dict(step='track_status',reversible=True))
+    for step in steps:step['workflow_type']=wtype
     return steps
 
 
@@ -1258,10 +1142,8 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
         "label": VERIFIED_LABEL if decided else "AI-generated route guidance",
         "guidance": guidance,
         "workflow_plan": derive_workflow_plan(guidance) if guidance and not problems else [],
-        # The 3-5 key steps a traveller actually follows, deduplicated and
-        # ordered (Trip.com's spec). The raw arrays stay in the guidance for
-        # anything that needs them.
-        "apply_steps": canonical_steps(guidance) if guidance and not problems else [],
+        # Own source evidence is applied after this raw envelope is built.
+        **application_instructions(guidance if not problems else None),
         "missing_fields": list(missing or []),
         "contradictions": list(contradictions or []),
         "advisories": list(advisories or []),
@@ -1380,8 +1262,8 @@ def apply_verified_overrides(out: dict, route: dict) -> dict:
     # "Pay the EUR 7 fee online", for an ETIAS the European Commission has not
     # brought into operation.
     problems = serve_time_invariants(merged)
-    out["apply_steps"] = canonical_steps(merged) if merged and not problems else []
-    out["workflow_plan"] = derive_workflow_plan(merged) if merged and not problems else []
+    out.update(application_instructions(merged if not problems else None,route=route,source_verified=prov))
+    out["workflow_plan"] = derive_workflow_plan(merged,route=route,source_verified=prov) if merged and not problems else []
     if prov is None:
         # Shared display normalization is not new evidence. Preserve the
         # stored completeness/status and every substantive disagreement.

@@ -162,8 +162,10 @@ def test_actual17_cached_readers_preserve_VAC_workflow_ETA_and_active_guards(inp
    direct_plan=kp.derive_workflow_plan(after['guidance'])
    assert direct_plan==kp.derive_workflow_plan(before['guidance'])
    if contract['route_channel']:
-    assert {'appointment_search','appointment_booking'} <= {step['step'] for step in direct_plan}
-    assert all(step['workflow_type']=='visa_center_submission' for step in direct_plan)
-    assert all(step['requires_applicant_confirmation'] for step in direct_plan if step['step'] in {'appointment_booking','payment','submission'})
+    # This historical channel-only correction never reviewed a global
+    # procedure. VAC requirements remain facts, but ordering stays unknown.
+    assert direct_plan==[]
+    assert after['guidance']['appointment_required'] is True
+    assert after['guidance']['biometrics_required'] is True
    if not contract['route_channel']:assert after['guidance']['application_channel']==before['guidance']['application_channel']=='online_portal'
   assert snapshot()==initial

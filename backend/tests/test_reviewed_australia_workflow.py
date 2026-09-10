@@ -137,7 +137,8 @@ def test_canonical_reader_rebuilds_workflow_without_store_writes(data,stores,mon
             assert {f:out['guidance'][f] for f in c.FIELDS}==c.VALUES
             assert out['guidance']['visa_products']==layer['merged_guidance']['visa_products']
             assert out['source_verified']['field_provenance']['disposition']==layer['source_provenance']['field_provenance']['disposition']
-            assert out['apply_steps']==kp.canonical_steps(out['guidance']) and out['workflow_plan']==kp.derive_workflow_plan(out['guidance'])
+            assert out['apply_steps']==kp.canonical_steps(out['guidance'],route=layer['route'],source_verified=out['source_verified'])
+            assert out['workflow_plan']==kp.derive_workflow_plan(out['guidance'],route=layer['route'],source_verified=out['source_verified'])
             initial=' '.join(out['guidance']['account_registration_steps']).lower()
             assert 'immiaccount' not in initial and 'online eta service' not in initial
             assert 'further information' in out['guidance']['submission_process'][-1] and 'ImmiAccount' in out['guidance']['submission_process'][-1]
@@ -150,16 +151,16 @@ def test_canonical_reader_rebuilds_workflow_without_store_writes(data,stores,mon
 def test_actual_reader_eta_app_sequence_has_full_conditions_and_no_web_filing(data,stores,route_index):
     layer=data[1][route_index]
     out=kp.apply_verified_overrides(kp._result('KIMI_PRIMARY',layer['raw_guidance'],cached=True,stale=False),layer['route'])
-    assert out['apply_steps']==[c.VALUES['account_registration_steps'][0],*c.VALUES['submission_process']]
-    assert len(out['apply_steps'])==5
+    assert out['apply_steps']==[*c.VALUES['account_registration_steps'],*c.VALUES['submission_process']]
+    assert len(out['apply_steps'])==7
     assert out['apply_steps'][0]=='Download and open the official Australian ETA app.'
     assert out['apply_steps'][-1].startswith('If Home Affairs sends a request for further information,')
     assert out['apply_steps'][-1].endswith('Do not lodge another ETA app application for the same request.')
     names={s['step'] for s in out['workflow_plan']}
     assert not names & {'generate_route_adapter','account_registration'}
-    assert {'display_exact_fees','payment','submission'} <= names
-    fee=next(s['fee'] for s in out['workflow_plan'] if s['step']=='display_exact_fees')
-    assert fee==layer['merged_guidance']['government_fee']
+    assert [s['instruction'] for s in out['workflow_plan']]==out['apply_steps']
+    assert 'pay the service fee and submit' in out['apply_steps'][4]
+    assert out['guidance']['government_fee']==layer['merged_guidance']['government_fee']
 
 @pytest.mark.parametrize('changed',[
     {'disposition':'VISA_REQUIRED'},
@@ -173,4 +174,5 @@ def test_actual_reader_eta_app_sequence_has_full_conditions_and_no_web_filing(da
 def test_app_selector_does_not_expand_to_other_visa_or_portal(data,changed):
     g=deepcopy(data[1][0]['merged_guidance']);g.update(changed)
     assert not kp._australian_eta_app_workflow(g)
-    assert 'generate_route_adapter' in {s['step'] for s in kp.derive_workflow_plan(g)}
+    # Neither an information URL nor an unsupported product establishes an application sequence.
+    assert kp.derive_workflow_plan(g)==[]

@@ -17,10 +17,13 @@ import { newSession } from '../lib/visaSession.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { publishedStayText } from '../lib/publishedStay.js'
 import { checkRequirements } from '../lib/checkRequirements.js'
+import { insuranceRequirement } from '../lib/insuranceRequirement.js'
 import { entryInstructionTexts, publishedEntryInstructions } from '../lib/entryInstructions.js'
 import { arrivalCardLines } from '../lib/arrivalCard.js'
 import { parseDatabaseRouteHash, databaseRouteHash } from '../lib/databaseRoute.js'
 import { applicationLane, applicationStepLinkIndex } from '../lib/applicationLane.js'
+import { applicationInstructions } from '../lib/applicationInstructions.js'
+import { formatPolicyText as humanize } from '../lib/policyText.js'
 
 const NAVY = 'var(--trip-navy, #0f294d)'
 const GRAY = 'var(--trip-gray, #64748b)'
@@ -133,25 +136,6 @@ function asText(v) {
     return Object.values(v).map((x) => asText(x)).filter(Boolean).join(', ')
   }
   return String(v)
-}
-
-// The engine writes compact reference prose. This turns it into plain
-// sentences: semicolons become full stops, dashes become commas, each
-// sentence starts with a capital, and longer lines end with a full stop.
-// URLs are left exactly as they are.
-const humanize = (v) => {
-  if (!v) return v
-  let out = String(v)
-  if (/https?:\/\//.test(out)) return out
-  out = out
-    .replace(/([A-Za-z0-9])_+([A-Za-z0-9])/g, '$1 $2')
-    .replace(/\s*[\u2014\u2013]\s*/g, ', ')
-    .replace(/\s*;\s*/g, '. ')
-    .replace(/\s{2,}/g, ' ')
-    .trim()
-  out = out.replace(/(^|[.!?]\s+)([a-z])/g, (m, lead, ch) => lead + ch.toUpperCase())
-  if (out.length > 28 && !/[.!?)]$/.test(out)) out += '.'
-  return out
 }
 
 const sentence = (s) => humanize(s)
@@ -792,10 +776,9 @@ export default function TravelDatabase({ onBack }) {
       ...products.flatMap((vp) => [asText(vp.type), asText(vp.validity), asText(vp.permitted_stay),
                                    asText(vp.notes), asText(vp.entry),
                                    ...entryInstructionTexts(vp.entry_requirements)]),
-      ...itemsOf(result?.apply_steps),
+      ...applicationInstructions(result, g).steps,
       ...itemsOf(g.required_documents), ...itemsOf(g.forms),
-      ...itemsOf(g.account_registration_steps), ...itemsOf(g.payment_process),
-      ...itemsOf(g.submission_process), ...itemsOf(g.health_requirements),
+      ...itemsOf(g.health_requirements),
       ...itemsOf(g.exceptions), ...itemsOf(g.uncertainty),
       ...itemsOf(result?.advisories),
     ].filter(Boolean))]
@@ -1094,38 +1077,23 @@ export default function TravelDatabase({ onBack }) {
   const disp = g ? (DISPOSITION_VIEW[g.disposition] || null) : null
   const countryName = (code) => countries.find((c) => c.value === code)?.label || code
 
-  // The 3-5 key steps, already deduplicated and ordered by the server (the
-  // engine's three arrays overlap and repeat — one answer carried 135 steps).
-  // The concatenation is only the fallback for an older cached answer.
-  // Steps to apply, but only where there is something to apply for. The
-  // fallback exists for older cached answers that predate apply_steps; it
-  // must not fire on a route whose channel says nothing is applied for,
-  // because there the backend's empty list is a DECISION and rebuilding from
-  // the raw guidance overrides it. Japan to Italy showed a five-step "How to
-  // apply" opening with "Pay the €7 fee online" under a headline of "No visa
-  // needed", rebuilt on the client after the server had already cleared it.
   const nothingToApplyFor = !g ? false
     : NO_APPLICATION_CHANNELS.has(String(g.application_channel || '').toLowerCase())
-  const applySteps = (!g || nothingToApplyFor) ? []
-    : (Array.isArray(result?.apply_steps) && result.apply_steps.length
-        ? result.apply_steps.map((x) => sentence(asText(x))).filter(Boolean)
-        : [...itemsOf(g.account_registration_steps),
-           ...itemsOf(g.payment_process),
-           ...itemsOf(g.submission_process)].slice(0, 5))
+  const instructions = applicationInstructions(result, g)
+  const applySteps = instructions.steps
   // Every application surface shares the same source-backed lane. An ETA
   // guide opens app instructions; it never implies initial ImmiAccount filing.
   const application = applicationLane(g)
   const portalStepIndex = applicationStepLinkIndex(applySteps, application)
 
-  const yesNo = (v) => v === true ? [t('db.required'), 'yes']
-    : v === false ? [t('db.notRequired'), 'no'] : null
+  const insurance = insuranceRequirement(g, result?.requirement_evidence)
   const processChecks = checkRequirements(g)
   const entryInstructions = publishedEntryInstructions(g)
   const entryInstructionWeight = [...entryInstructions.route,
     ...entryInstructions.products.flatMap((product) => product.texts)]
     .reduce((sum, text) => sum + Math.max(1, Math.ceil(text.length / 70)), 0)
   const entryFacts = g ? [
-    [t('db.insurance'), yesNo(g.insurance_required)],
+    [t('db.insurance'), insurance ? [t(insurance.valueKey), insurance.tone] : null],
   ].filter(([, v]) => v) : []
 
   const documents = g ? itemsOf(g.required_documents).map(T) : []
@@ -1852,8 +1820,12 @@ export default function TravelDatabase({ onBack }) {
               )
             })()}
 
-            {applySteps.length > 0 && (
+            {(applySteps.length > 0 || instructions.status === 'unknown') && (
               <Section title={t('db.steps')} accent={NAVY}>
+                    {instructions.status === 'unknown' && <p style={{ margin: '0 0 10px', color: GRAY }}>{t('db.stepsUnknown')}</p>}
+                    {instructions.status === 'unknown' && instructions.sourceUrl && (
+                      <a href={instructions.sourceUrl} target="_blank" rel="noreferrer" style={{ color: BLUE }}>{t('db.stepsOfficial')} ↗</a>
+                    )}
                 <ol style={{ margin: 0, paddingLeft: 0, listStyle: 'none',
                              position: 'relative' }}>
                   {applySteps.map((x, i) => (
@@ -1888,7 +1860,7 @@ export default function TravelDatabase({ onBack }) {
                     </li>
                   ))}
                 </ol>
-                {g.official_portal_url && portalStepIndex === -1 && (
+                {applySteps.length > 0 && g.official_portal_url && portalStepIndex === -1 && (
                   <a href={g.official_portal_url} target="_blank" rel="noreferrer"
                      style={{ display: 'inline-block', marginTop: 6, color: BLUE,
                               fontSize: 13.5, fontWeight: 700,

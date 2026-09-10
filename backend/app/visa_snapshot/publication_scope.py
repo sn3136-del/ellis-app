@@ -486,7 +486,7 @@ def project_reader(route, out, scope):
                  if k in _HELD_STATUS_FIELDS and k != 'approximate_reason'}
     projected.update(scope)
     projected.update(held=False, review_required=False)
-    projected['apply_steps'] = kimi_primary.canonical_steps(scope['guidance'])
-    projected['workflow_plan'] = kimi_primary.derive_workflow_plan(scope['guidance'])
+    projected.update(kimi_primary.application_instructions(scope['guidance'], route=route, source_verified=scope.get('source_verified')))
+    projected['workflow_plan'] = kimi_primary.derive_workflow_plan(scope['guidance'], route=route, source_verified=scope.get('source_verified'))
     projected['advisories'] = kimi_primary.deterministic_advisories(route, scope['guidance'])
     return projected
