@@ -1846,15 +1846,35 @@ def _corroborating(g: dict) -> list:
     return out
 
 
+def _no_consular_application(row: dict) -> bool:
+    """A supported, published exemption has no consular filing district.
+
+    The publication and evidence metadata is attached by the dataset reader
+    after grading. Requiring it keeps an unchecked label, operator release,
+    held product or disputed field from creating new completion credit.
+    Online filing alone does not establish absence of consular jurisdiction.
+    """
+    if (row.get("_held", row.get("held")) is not False
+            or row.get("_route_held", row.get("route_held", False)) is True
+            or row.get("_source_check", row.get("source_check")) not in {
+                "human-quote", "ai-quote", "grounded-consistent"}
+            or row.get("_disputed") or row.get("_contradictions")
+            or row.get("contradictions")):
+        return False
+    statuses = row.get("field_status")
+    if isinstance(statuses, dict) and "pending-review" in statuses.values():
+        return False
+    return (row.get("visa_requirement") in {"Visa-free", "Conditional"}
+            and row.get("visa_requirement_detail") in _VISA_FREE_DETAILS
+            and row.get("application_method") in (None, "", []))
+
+
 def field_status(row: dict, unpublished: set | None = None) -> dict:
     """Their per-field checklist verdict, with the three kinds of blank kept apart.
 
-    A blank cell is not one thing. "Validity" on a visa-free route is not
-    missing, there is no visa to have a validity. "Validity" on a French
-    Schengen visa is not missing either, the consulate sets it per applicant
-    and France publishes no figure. Only the third kind, a value that exists
-    somewhere official and nobody has fetched yet, should count against
-    completeness, and only that one should read as a gap to an operator.
+    A visa exemption has no visa validity. A documented unpublished value
+    remains distinct from that inapplicability. Missing facts stay incomplete
+    unless the record holds evidence for an explicit disposition.
     """
     unpublished = set(unpublished or ()) | set(row.get("_unpublished") or ())
     out = {}
@@ -1872,6 +1892,8 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
         elif f == "application_method" and no_application:
             out[f] = "not-applicable"
         elif exempt and f in _NOT_APPLICABLE_WHEN_EXEMPT:
+            out[f] = "not-applicable"
+        elif f == "consulate_district" and _no_consular_application(row):
             out[f] = "not-applicable"
         elif f in REQUIRED_FIELDS:
             out[f] = "missing"

@@ -300,6 +300,51 @@ def field_value_supported(name: str, value, text: str) -> bool:
     if name == "disposition":
         return supports_disposition(text, value)
     if name == "application_channel":
+        # The serving schema uses these names; the original matcher only
+        # recognized legacy online/visa_application_centre/none. A current
+        # channel therefore could never be reconfirmed from a fresh quote.
+        # Require an actual application instruction, not a payment/tracking
+        # page or the mere availability of a visa product.
+        canonical = {
+            "online_portal": r"\bapply(?:ing)?\s+online\b|"
+                             r"\bapply(?:ing)?\s+for\s+(?:an? |the )?(?:[a-z-]+\s+){0,3}visa\s+online\b|"
+                             r"\bapplications?\s+(?:(?:must|may|can|should)\s+be|are|is)\s+(?:submitted|lodged|made)\s+online\b|"
+                             r"\b(?:submit|lodge)\s+(?:an? |the |your )?(?:visa |e-visa )?application(?: form)?\s+(?:online|electronically)\b|"
+                             r"\b(?:website|portal)\b[^.!?;\n]{0,60}\b(?:to apply|for applying|to submit|to lodge)\b|"
+                             r"\bsubmit\s+(?:an? |the |your )?application\s+(?:from|through|via|on)\b[^.!?;,\n]{0,115}\b(?:website|portal)\b",
+            "visa_center": r"\bapply\b[^.!?;\n]{0,70}\bvisa application cent(?:re|er)\b|"
+                           r"\b(?:submit|lodge|submission of|lodgement of)\s+(?:an? |the |your )?(?:visa )?applications?\b[^.!?;\n]{0,70}\bvisa application cent(?:re|er)\b|"
+                           r"\bvisa application cent(?:re|er)\b[^.!?;\n]{0,60}\baccepts? (?:visa )?applications?\b",
+            "not_required": r"\bno (?:advance )?application (?:is )?(?:required|necessary|needed)\b|"
+                            r"\b(?:do|does) not need to (?:submit|make|lodge) (?:an? )?application\b",
+        }
+        if isinstance(value, str) and value in canonical:
+            if value in {'online_portal', 'visa_center'} and re.search(
+                    r"\b(?:cannot|can't|do not|does not|must not|may not|not permitted|not allowed|not eligible|not accepted|not available|unavailable|ineligible|prohibited)\b|"
+                    r"\b(?:cannot|can't|may not|must not|do not|does not|not permitted to)\s+(?:apply|submit|lodge)|"
+                    r"\b(?:not eligible|ineligible|not allowed|not permitted|prohibited|do not|must not|cannot|can't)\b[^.!?;\n]{0,100}\b(?:apply|submit|lodge)\b|"
+                    r"\b(?:online applications?|applications? online)\b[^.!?;\n]{0,25}\b(?:not accepted|unavailable|not available)\b|"
+                    r"\b(?:only|must)\b[^.!?;\n]{0,45}\b(?:through|via|by)\b[^.!?;\n]{0,30}\b(?:agent|agency)\b|"
+                    r"\b(?:agents?|agencies|representatives?)\s+(?:(?:must|may|can)\s+)?(?:apply|submit|lodge)\b", low):
+                return False
+            if value in {'online_portal', 'visa_center'} and re.search(
+                    r"\b(?:appointments?|appointment[- ]only|fingerprints?|biometrics?|if|unless|except)\b|"
+                    r"\bonly when\b|\bprovided (?:that|you)\b|\bsubject to\b", low):
+                # Booking a visit or submitting biometrics does not establish
+                # where the visa application itself may be lodged.
+                return False
+            if value == 'online_portal' and re.search(
+                    r"\b(?:print|printed|in person|by post|embassy|consulate|visa application cent(?:re|er))\b", low):
+                return False
+            if value == 'not_required' and re.search(
+                    r"\b(?:unless|except|if|children|child|under|residents?)\b|"
+                    r"\b(?:must|shall|need to|required to)\b[^.!?;\n]{0,30}\b(?:apply|submit|lodge)\b", low):
+                return False
+            if value == 'not_required':
+                # A cancelled application, fee payment or other limited
+                # procedure cannot prove a general no-application route.
+                return bool(re.fullmatch(r"(?:" + canonical[value] + r")[.!]?", low))
+            return bool(re.search(canonical[value], low))
         pattern = {"authorised_agent": r"accredited (?:travel )?agen|authori[sz]ed agen",
                    "embassy": r"embassy|consulate|mission", "visa_application_centre": r"visa application cent",
                    "evisa": r"e-?visa|electronic visa", "online": r"online|electronic|e-?visa",

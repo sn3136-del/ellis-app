@@ -123,7 +123,10 @@ Reply STRICT JSON:
  "field_scope": {field: "literal bounded passage naming the exact visa program and field"},
  "note": "one short sentence"}
 Rules: if the page does not mention a field, it is NOT a contradiction — leave
-it alone. Never invent a fee, date or URL the page does not state. If the page
+it alone. Classification proposals must use the supplied allowed_enum_values;
+do not turn ordinary visit conditions into invented requirement_detail labels.
+Report any supported changed condition under its actual field with its quote.
+Never invent a fee, date or URL the page does not state. If the page
 is irrelevant or unreadable, say page_relevant false and change nothing.
 An explicit warning that official guidance conflicts is not a settled fact
 contradicted by one page. Preserve that warning; a single source cannot
@@ -375,6 +378,25 @@ def _page_has_visa_topic(text: str) -> bool:
     return bool(re.search(r"visa|travel authori[sz]|\beta\b|\besta\b|免签|免簽|签证|簽證|thị thực", text or "", re.I))
 
 
+def _enum_proposal_errors(raw: dict) -> list[str]:
+    """Malformed model classifications are failed extraction, not policy facts.
+
+    Keep nullable optional fields' existing deletion/adjudication path. A new
+    phrase that restates entry conditions cannot become a novel enum merely
+    because its words occur in an official quote.
+    """
+    from . import kimi_primary
+    fields = raw.get('corrected_fields')
+    if not isinstance(fields, dict):
+        return []
+    vocabularies = {'disposition': kimi_primary.DISPOSITIONS,
+                    'requirement_detail': kimi_primary.REQUIREMENT_DETAILS,
+                    'application_channel': kimi_primary.APPLICATION_CHANNELS}
+    return sorted(k for k, allowed in vocabularies.items() if k in fields
+                  and not (fields[k] is None and k != 'disposition')
+                  and not (isinstance(fields[k], str) and fields[k] in allowed))
+
+
 def _quoted_proposals(raw: dict, text: str, route: dict | None = None) -> tuple[dict, dict, list[str]]:
     fields = raw.get("corrected_fields") or {}
     evidence = raw.get("evidence") or {}
@@ -383,8 +405,12 @@ def _quoted_proposals(raw: dict, text: str, route: dict | None = None) -> tuple[
     if not isinstance(evidence, dict):
         evidence = {}
     quoted, unquoted = {}, []
+    invalid_enums = set(_enum_proposal_errors(raw))
     for k, v in fields.items():
         if k not in OVERRIDABLE:
+            continue
+        if k in invalid_enums:
+            unquoted.append(k)
             continue
         if k == 'passport_validity_requirement':
             from ..passport_validity import normalize_passport_validity_rule
@@ -633,14 +659,16 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             return
         if not isinstance(answer, dict): answer = {}
         quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text, route)
+        invalid_enums = _enum_proposal_errors(answer)
         awaiting_adjudication = {k: {"value": v, "quote": evidence[k]}
                                 for k, v in quoted.items() if k in unresolved_fields}
         quoted = {k: v for k, v in quoted.items() if k not in unresolved_fields}
         unquoted_all.update(unquoted)
-        check = {'source_url': fr.final_url, 'outcome': 'page_not_relevant', 'at': when,
+        check = {'source_url': fr.final_url, 'outcome': 'validation_error' if invalid_enums else 'page_not_relevant', 'at': when,
             'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
             'comparison_reused': reused, 'content_hash': fr.content_hash, 'verified_fields': [],
             'unquoted_fields': unquoted,
+            'validation_errors': [f'invalid enum proposal: {k}' for k in invalid_enums],
             'awaiting_adjudication': awaiting_adjudication,
             'proposed_fields': {k: {'value': v, 'quote': evidence[k]} for k, v in quoted.items()}}
         source_checks.append(check)
@@ -683,6 +711,9 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                                "travel_purpose", "travel_document_type")},
                    "policy_date": when[:10],
                    "stored_answer": {k: guidance[k] for k in OVERRIDABLE if k in guidance},
+                   "allowed_enum_values": {'disposition': kimi_primary.DISPOSITIONS,
+                       'requirement_detail': kimi_primary.REQUIREMENT_DETAILS,
+                       'application_channel': kimi_primary.APPLICATION_CHANNELS},
                    "reviewed_evidence": reviewed_fields.get('disposition') if
                        (reviewed_fields.get('disposition') or {}).get('source_url') == fr.final_url else None,
                    "official_page_url": fr.final_url,
@@ -727,7 +758,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                     policy_date=when[:10]), 'scope_quotes': [], 'program': None}
             check['route_evidence'] = result
             check['route_supported'] = True
-            check['outcome'] = 'checked'
+            check['outcome'] = 'validation_error' if check.get('validation_errors') else 'checked'
             route_results.append(result)
             if page is None: page, raw = fr, answer
             readings.append((fr, answer, quoted, evidence, check))
@@ -736,7 +767,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     for fr, answer, quoted, evidence, check in deferred:
         allowed = proof_helpers.ancillary_fields(captures[fr.final_url], answer, guidance, route, route_results)
         if allowed:
-            check['outcome'] = 'field_checked'
+            check['outcome'] = 'validation_error' if check.get('validation_errors') else 'field_checked'
             check['allowed_fields'] = sorted(allowed)
             readings.append((fr, answer, {k:v for k,v in quoted.items() if k in allowed}, evidence, check))
         rejected = {k:v for k,v in quoted.items() if k not in allowed}
@@ -755,13 +786,16 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         elif time.monotonic() >= deadline:
             outcome = "budget_exhausted"
         else:
-            outcome = "provider_error" if any(s["outcome"] == "provider_error" for s in source_checks) else ("page_not_relevant" if tried else "fetch_failed")
+            outcome = ("provider_error" if any(s["outcome"] == "provider_error" for s in source_checks)
+                       else "validation_error" if any(s.get('validation_errors') for s in source_checks)
+                       else "page_not_relevant" if tried else "fetch_failed")
         entry = {"at": when, "outcome": outcome, "sources": sources,
                  "disputed_fields": sorted(unresolved_fields),
                  "sources_tried": tried, "irrelevant_sources": irrelevant,
                  "source_reads": len(tried),
                  "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
                  "unquoted_fields": sorted(unquoted_all), "source_checks": source_checks,
+                 "validation_errors": sorted({error for c in source_checks for error in c.get('validation_errors', [])}),
                  "source_cursor": source_cursor, "unchecked_sources": [u for u in all_sources if u not in visited],
                  **model_counts}
         if not _commit_recheck(db, row, entry, expected_guidance=original, expected_route=route):
@@ -921,11 +955,12 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                 verified_field_sources[key] = {'source_url':fr.final_url, 'checked_at':when, 'quote':quotes[key]}
     unverified_fields = sorted(substantive - verified_fields)
     unchecked_sources = [u for u in all_sources if u not in visited]
-    failed_sources = any(c["outcome"] in {"fetch_failed", "provider_error"} for c in source_checks)
+    failed_sources = any(c["outcome"] in {"fetch_failed", "provider_error", "validation_error"} for c in source_checks)
     renewed = (not (disputed or unresolved_fields or unquoted or fallback or remaining_contradictions or row.missing_fields
                     or unverified_fields or unchecked_sources or failed_sources
                     or active_disputed_fields(db, row.cache_key)) and (consistent or bool(applied)))
-    entry = {"at": when, "outcome": "checked", "evidence_contract": EVIDENCE_CONTRACT,
+    validation_errors = sorted({error for c in source_checks for error in c.get('validation_errors', [])})
+    entry = {"at": when, "outcome": "validation_error" if validation_errors else "checked", "evidence_contract": EVIDENCE_CONTRACT,
                  "source_reads": len(tried),
                  "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
                  "source_url": page.final_url,
@@ -933,6 +968,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                  "changed_fields": sorted(applied), "disputed_fields": sorted(set(disputed) | unresolved_fields),
                  "awaiting_adjudication_fields": sorted(unresolved_fields),
                  "unquoted_fields": unquoted, "irrelevant_sources": irrelevant,
+                 "validation_errors": validation_errors,
                  "verified_fields": sorted(verified_fields), "unverified_fields": unverified_fields,
                  "field_sources": verified_field_sources, "source_checks": source_checks,
                  "source_cursor": source_cursor, "unchecked_sources": unchecked_sources,
@@ -969,12 +1005,12 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], "disputed": [],
                 "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
                 **model_counts}
-    return {"outcome": "checked", "route_key": row.cache_key, "consistent": consistent,
+    return {"outcome": entry['outcome'], "route_key": row.cache_key, "consistent": consistent,
             "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
             **model_counts,
             "changed": sorted(applied), "disputed": sorted(set(disputed) | unresolved_fields),
             "generic_skipped": sorted(fallback[1]) if fallback else [],
-            "unquoted_fields": unquoted, "source_url": page.final_url}
+            "unquoted_fields": unquoted, "validation_errors": validation_errors, "source_url": page.final_url}
 
 
 def note_unreadable(db, row, outcome: dict | None) -> None:
