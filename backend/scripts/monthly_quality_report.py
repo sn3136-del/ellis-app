@@ -100,6 +100,8 @@ def quality_metrics(payload: dict, at: datetime) -> dict:
     contract = acceptance_summary([{**row,
         '_disputed': [field for field, status in row['field_status'].items()
                       if status == 'pending-review'],
+        '_unpublished': [field for field, status in row['field_status'].items()
+                        if status == 'not-published'],
         '_source_check': row['source_check']} for row in records])
     return {'at': at.astimezone(timezone.utc).isoformat(), 'records': total,
         'field_completeness_pct': pct(required_counts['filled'], required_denominator),

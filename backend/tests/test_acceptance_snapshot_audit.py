@@ -109,3 +109,57 @@ def test_legacy_top_level_total_is_validated_and_supported():
     data.pop('summary')
     data['total'] = 1
     assert module.audit(data)['product_rows'] == 1
+
+
+def test_documented_completion_normalizes_public_statuses_and_ignores_supplied_summary():
+    data = snapshot(info_validity=None, field_status={
+        'info_validity': 'not-published',
+        'special_conditions': 'optional-empty',
+        'visa_fee_amount': 'pending-review'})
+    data['acceptance_summary'] = {'documented_field_completeness_rate': 1}
+    result = module.audit(data)
+    # The two empty fields reduce literal completion. Only the documented
+    # unpublished date closes a gap; the pending zero fee remains incomplete.
+    assert result['contract_field_completeness_percent'] == 92
+    assert result['documented_completed_cells'] == 23
+    assert result['documented_disposition_cells'] == 1
+    assert result['documented_field_completeness_rate'] == 23 / 25
+    assert result['documented_complete_records'] == 0
+    assert result['accuracy_certified'] is False
+
+
+@pytest.mark.parametrize('date_status', ['missing', 'optional-empty', 'pending-review'])
+def test_unknown_or_pending_date_cannot_be_counted_as_documented(date_status):
+    result = module.audit(snapshot(info_validity=None, special_conditions='conditions',
+        field_status={'info_validity': date_status}))
+    assert result['documented_completed_cells'] == 24
+    assert result['documented_disposition_cells'] == 0
+
+
+def test_applicability_is_recomputed_from_the_product_not_an_arbitrary_label():
+    row = dict(special_conditions='conditions', validity_duration=None,
+               field_status={'validity_duration': 'not-applicable'})
+    required = module.audit(snapshot(**row, visa_requirement='Visa Required in Advance'))
+    free = module.audit(snapshot(**row, visa_requirement='Visa-free'))
+    assert required['documented_completed_cells'] == 24
+    assert required['documented_disposition_cells'] == 0
+    assert free['documented_completed_cells'] == 25
+    assert free['documented_disposition_cells'] == 1
+    assert free['documented_complete_records'] == 1
+    assert free['contract_record_completeness_percent'] == 0
+
+
+def test_pending_applicability_is_never_complete():
+    result = module.audit(snapshot(visa_requirement='Visa-free', special_conditions='conditions',
+        validity_duration=None, field_status={'validity_duration': 'pending-review'}))
+    assert result['documented_completed_cells'] == 24
+    assert result['documented_disposition_cells'] == 0
+
+
+def test_empty_documented_denominator_is_unavailable():
+    data = snapshot()
+    data['records'] = []
+    data['summary']['total'] = 0
+    result = module.audit(data)
+    assert result['documented_field_completeness_rate'] is None
+    assert result['documented_record_completeness_rate'] is None

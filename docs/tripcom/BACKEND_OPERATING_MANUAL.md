@@ -32,6 +32,11 @@ backup using the release-specific runbook, and check database integrity and
 public/quality behavior before reopening service. The contractual recovery
 target is at most one hour; a dated timed full recovery exercise is required to
 prove it. systemd process restart is useful but is not a disaster-recovery test.
+The 2026-09-10 live database-only drill restored a 23,834,624-byte backup,
+99 tables and 949 route-table rows with integrity `ok`; database backup and
+restore took 0.708 seconds. The daily wrapper was updated. Full-service recovery,
+including host/app/configuration/secrets/DNS and off-host durability, is not
+certified by that database check. Details are in `AVAILABILITY.md`.
 
 ## Quality-control backend
 https://ellis-visa.com/#ops - records with combined spot-check filters
@@ -45,10 +50,14 @@ kept in source provenance and publication controlled separately by the existing
 evidence/conflict gates. See `DATA_CALIBER_MANUAL.md` for precise definitions.
 `info_validity` is the published policy end date only; unknown dates remain
 blank. `freshness_valid_until` is separate internal review-deadline metadata.
-Use literal25 acceptance metrics alongside the operational fillable metric.
+The user-approved completeness target includes documented Not applicable/Not
+published across all 25 fields; unknown/unsupported/pending states stay incomplete.
+The recorded-state metric is 81.9521% on the 2026-09-10 02:29 UTC snapshot;
+operational applicable 20 completeness is separately 87.32%. Retain literal 25
+non-null diagnostics (72.9718% cells) as well. These are completion measurements,
+not certification of policy accuracy.
 
-Historical bilingual HTML/PDF operation/caliber manuals need release-matched
-regeneration before delivery. Old PASS labels, sample availability percentages,
+The current bilingual HTML/PDF manuals have been regenerated for these semantics. Old PASS labels, sample availability percentages,
 or unmeasured recovery claims are not current acceptance evidence.
 
 ## Security posture

@@ -52,8 +52,10 @@ def acceptance_summary(rows: list[dict]) -> dict:
 
     total = len(rows)
     filled = approved = complete = approved_complete = pending = 0
+    documented_cells = documented_records = disposition_cells = 0
     for row in rows:
         disputed = set(row.get("_disputed") or ())
+        statuses = field_status(row)
         count = sum(present(row.get(f)) for f in CONTRACT_FIELDS)
         reviewed = sum(present(row.get(f)) and f not in disputed for f in CONTRACT_FIELDS)
         pending += sum(present(row.get(f)) and f in disputed for f in CONTRACT_FIELDS)
@@ -63,6 +65,15 @@ def acceptance_summary(rows: list[dict]) -> dict:
         # Unchallenged content is not an accuracy certificate: this metric
         # only indicates the absence of outstanding field disputes.
         approved_complete += reviewed == len(CONTRACT_FIELDS)
+        # The user-approved completion definition accepts recorded N/A and
+        # Not published dispositions. Unknown/optional-empty and pending
+        # fields remain gaps; the literal non-null diagnostic stays separate.
+        documented = sum(f not in disputed and (present(row.get(f)) or
+            statuses.get(f) in {"not-applicable", "not-published"}) for f in CONTRACT_FIELDS)
+        disposition_cells += sum(f not in disputed and not present(row.get(f)) and
+            statuses.get(f) in {"not-applicable", "not-published"} for f in CONTRACT_FIELDS)
+        documented_cells += documented
+        documented_records += documented == len(CONTRACT_FIELDS)
     return {
         "field_names": list(CONTRACT_FIELDS),
         "field_count": len(CONTRACT_FIELDS),
@@ -76,6 +87,13 @@ def acceptance_summary(rows: list[dict]) -> dict:
         "unchallenged_filled_cells": approved,
         "unchallenged_complete_records": approved_complete,
         "pending_review_cells": pending,
+        "documented_completed_cells": documented_cells,
+        "documented_disposition_cells": disposition_cells,
+        "documented_complete_records": documented_records,
+        "documented_field_completeness_rate": rate(documented_cells, total * len(CONTRACT_FIELDS)),
+        "documented_record_completeness_rate": rate(documented_records, total),
+        "documented_completion_policy": "All 25 dictionary fields. Recorded Not applicable and Not published "
+            "count as complete; missing, optional-empty and pending review do not. Completion does not certify accuracy.",
         "source_url_presence_rate": rate(sum(present(r.get("source_url")) for r in rows), total),
         "requirement_support_rate": rate(sum(r.get("_source_check") in
             {"human-quote", "ai-quote", "grounded-consistent"} for r in rows), total),
@@ -1141,6 +1159,50 @@ def _product_fields(row: dict, product: dict) -> None:
         row["special_conditions"] = ". ".join(str(x) for x in v if x) if isinstance(v, list) else v
 
 
+_PRODUCT_FIELD_CELLS = {
+    "validity": ("validity_duration", "validity_unit"),
+    "entry": ("entries",),
+    "max_stay_days": ("max_stay_duration", "max_stay_unit"),
+    "permitted_stay": ("max_stay_duration", "max_stay_unit"),
+    "fee": ("visa_fee_amount", "visa_fee_currency"),
+    "processing_time": ("processing_min_days", "processing_unit"),
+    "application_channel": ("application_method",),
+    "application_channel_detail": ("application_method",),
+    "policy_valid_until": ("info_validity",),
+    "consular_jurisdiction": ("consulate_district",),
+    "exceptions": ("special_conditions",),
+    "notes": ("special_conditions",),
+}
+
+
+def _product_unpublished_fields(product: dict, inherited) -> set:
+    """An explicit product review supersedes a route's absence claim.
+
+    Preserve a route-wide Not published state only for cells the product has
+    not independently reviewed. A sibling's documented absence never supplies
+    another product's unknown field; own recorded dispositions stay local.
+    """
+    result = set(inherited)
+    own = set(product.get("unpublished_fields") or [])
+    proofs = product.get("field_provenance")
+    for field, proof in (proofs.items() if isinstance(proofs, dict) else ()):
+        if isinstance(proof, dict):
+            cells = _PRODUCT_FIELD_CELLS.get(field, (field,) if field in CONTRACT_FIELDS else ())
+            result.difference_update(cells)
+            # Old registered conversions stored these scoped proofs but put
+            # their flags on the route. Recover only the named product's
+            # explicit disposition, never a generic unknown reason.
+            recorded_np = (proof.get("status") in {"not_published", "not-published"}
+                           or (proof.get("status") == "unknown" and
+                               str(proof.get("reason") or "").startswith("Not published by the destination:")))
+            if recorded_np:
+                own.update(cells)
+            else:
+                own.difference_update(cells)
+    result.update(own)
+    return result
+
+
 def _explicit_product_verdict_provenance(product: dict, route: dict) -> tuple[bool, dict | None]:
     """A new explicit product review replaces, never inherits, parent proof."""
     proofs = product.get("field_provenance")
@@ -1536,8 +1598,19 @@ def records_for_route(route: dict, guidance: dict,
     raw_products = g.get("visa_products")
     products = [p for p in (raw_products if isinstance(raw_products, list) else [])
                 if isinstance(p, dict) and p.get("type")]
+    # Legacy conversions leaked one product's absence flags onto the route.
+    # Such a flag cannot close an unreviewed sibling's cell. Each explicitly
+    # documented product gets its own state back in the product loop below.
+    product_absence = set().union(*(_product_unpublished_fields(p, ()) for p in products))
+    product_route_unpublished = _unpub - product_absence
     exempt_conflict = disposition == "VISA_EXEMPT" and bool(contradictions)
-    if (disposition == "VISA_EXEMPT" and not exempt_conflict) or not products:
+    product_families = {_permission_family(_product_detail(p, base.get("visa_requirement_detail")))
+                        for p in products} - {None}
+    mixed_exemption_products = "exemption" in product_families and bool(product_families - {"exemption"})
+    # A verified exemption can coexist with an optional visa for a longer
+    # visit. Project each explicit lane instead of erasing the paid options;
+    # the ordinary separate-product rules keep their evidence independent.
+    if (disposition == "VISA_EXEMPT" and not exempt_conflict and not mixed_exemption_products) or not products:
         row = dict(base)
         if disposition == "VISA_EXEMPT":
             row["visa_type_name"] = (g.get("visa_category") or
@@ -1568,8 +1641,6 @@ def records_for_route(route: dict, guidance: dict,
         return [_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
     rows = []
     ambiguous_timing = _ambiguous_inherited_processing(g, products)
-    product_families = {_permission_family(_product_detail(p, base.get("visa_requirement_detail")))
-                        for p in products} - {None}
     for p in products:
         row = dict(base)
         if ambiguous_timing:
@@ -1635,6 +1706,9 @@ def records_for_route(route: dict, guidance: dict,
         # clear the parent's date above.
         if "policy_valid_until" in p:
             row["info_validity"] = p.get("policy_valid_until") or None
+        product_unpublished = _product_unpublished_fields(
+            p, () if separate_permission else product_route_unpublished)
+        row["_unpublished"] = sorted(product_unpublished)
         _product_fields(row, p)
         if not separate_permission and p.get("source_url"):
             from .authority import hostname, is_government_host
@@ -1687,8 +1761,19 @@ def records_for_route(route: dict, guidance: dict,
         # may name a conditional option whose grant remains discretionary.
         n, unit = _validity_num_unit(p.get("validity"))
         _set_validity(row, n, unit, p.get("validity"))
-        _set_stay(row, p.get("permitted_stay") or product_g.get("permitted_stay"),
-                  p.get("max_stay_days"))
+        stay_proofs = p.get("field_provenance") or {}
+        owns_unknown_stay = isinstance(stay_proofs, dict) and any(
+            isinstance(stay_proofs.get(field), dict)
+            and stay_proofs[field].get("status") in {"unknown", "not_published", "not-published"}
+            for field in ("max_stay_days", "permitted_stay"))
+        stay_text = p.get("permitted_stay")
+        if owns_unknown_stay:
+            own_text = stay_proofs.get("permitted_stay")
+            if not isinstance(own_text, dict) or own_text.get("status") not in {"reviewed", "verified"}:
+                stay_text = None
+        else:
+            stay_text = stay_text or product_g.get("permitted_stay")
+        _set_stay(row, stay_text, p.get("max_stay_days"))
         # Definitional fallback: "single-entry" / "multiple-entry" in the
         # product's own name states the entries field.
         row["entries"] = _entries(p.get("entry")) or _entries(p.get("type"))

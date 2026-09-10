@@ -1,5 +1,5 @@
-<title>Ellis Requirement Ledger</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ellis Requirement Ledger — 2026-09-10</title>
 <style>
   :root{
     --ink:#12203a; --ink-2:#4a5a75; --line:#dfe5ee; --ground:#f6f7fa;
@@ -24,8 +24,8 @@
   }
   html{background:var(--ground)}
   body{font-family:'IBM Plex Sans',-apple-system,'PingFang SC',sans-serif;
-    color:var(--ink);background:var(--ground);margin:0;line-height:1.55}
-  .wrap{max-width:1020px;margin:0 auto;padding:48px 22px 90px}
+    color:var(--ink);background:var(--ground);margin: 0;line-height:1.55}
+  .wrap{max-width:1020px;margin: 0 auto;padding:48px 22px 90px}
   .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;
     text-transform:uppercase;color:var(--accent);font-weight:600}
   h1{font-family:'Newsreader',Georgia,serif;font-size:39px;font-weight:600;
@@ -36,8 +36,8 @@
     background:var(--no-bg);border:1px solid color-mix(in srgb,var(--no) 30%,transparent)}
   .verdictbar b{font-family:'Newsreader',Georgia,serif;font-size:21px;color:var(--no);
     display:block;margin-bottom:4px}
-  .verdictbar p{margin:0 0 8px;font-size:13.5px;color:var(--ink-2);max-width:80ch}
-  .verdictbar p:last-child{margin-bottom:0}
+  .verdictbar p{margin: 0 0 8px;font-size:13.5px;color:var(--ink-2);max-width:80ch}
+  .verdictbar p:last-child{margin-bottom: 0}
   .scorecard{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 8px}
   .sc{border-radius:10px;padding:11px 16px;flex:1 1 132px}
   .sc b{display:block;font-family:var(--mono);font-size:20px;font-variant-numeric:tabular-nums}
@@ -48,7 +48,7 @@
   h2{font-family:'Newsreader',Georgia,serif;font-size:23px;font-weight:600;
     margin:46px 0 4px;letter-spacing:-.2px}
   h2 .zh{color:var(--ink-2);font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:500}
-  .sub{color:var(--ink-2);font-size:13.5px;margin:0 0 14px;max-width:76ch}
+  .sub{color:var(--ink-2);font-size:13.5px;margin: 0 0 14px;max-width:76ch}
   .tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
   table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:660px}
   th{background:color-mix(in srgb,var(--ground) 60%,var(--card));text-align:left;
@@ -91,491 +91,32 @@
   .rd b{display:block;font-family:var(--mono);font-size:23px;font-variant-numeric:tabular-nums}
   .rd .lab{font-size:11.5px;font-weight:600;letter-spacing:.03em;margin-bottom:6px}
   .rd p{margin:6px 0 0;font-size:12px;color:var(--ink-2);line-height:1.5}
-</style>
-
-<div class="wrap">
-  <div class="eyebrow">Ellis for Trip.com &middot; T-Station information base</div>
-  <h1>Requirement ledger</h1>
-  <p class="lede">Every requirement in the three documents, checked against the running
-  system rather than against intent. Read from the source PDFs, not from memory: the
-  Requirements Document, the Requirements Specification with its 25-field dictionary,
-  and the Acceptance &amp; Delivery Standard. Where a bar is not cleared it says so.</p>
-  <p class="stamp">Measured 2026-08-30 against ellis-visa.com &middot; 1,126 records &middot; 187 destinations</p>
-
-  <div class="verdictbar">
-    <b>Ellis does not pass &sect;6.2 today.</b>
-    <p>&sect;6.2 fails an acceptance on any single quantitative miss. <b>Two miss.</b>
-    Availability is 99.897% against 99.99%, and all three failed probes were caused by
-    our own deployments. Field completeness passes at 99.09% on the denominator we argue
-    for and fails at 91.34% on the literal clause, so it turns on a definition only
-    Trip.com can settle. A third metric, information accuracy, has never been measured by
-    either party: &sect;4.2.2 assigns that sampling to Party A.</p>
-    <p>Everything else in Chapter 4 and &sect;6.1 is met or is jointly owned. The
-    remaining functional gaps are listed and none is a crash, a data loss or a security
-    hole under the &sect;4.1.3 grading table.</p>
-  </div>
-
-  <div class="scorecard">
-    <div class="sc g"><b>100%</b><span>SOURCE COVERAGE</span></div>
-    <div class="sc g"><b>97.15%</b><span>CONFIDENCE MED+</span></div>
-    <div class="sc w"><b>99.09%</b><span>COMPLETENESS</span></div>
-    <div class="sc r"><b>99.897%</b><span>AVAILABILITY</span></div>
-    <div class="sc w"><b>2 / 18</b><span>STATIONS AT DEPTH</span></div>
-    <div class="sc g"><b>0</b><span>PAST THE 48H WINDOW</span></div>
-  </div>
-
-  <h2>1. The completeness question <span class="zh">字段完整度口径</span></h2>
-  <p class="sub">This is the single most consequential open item, and it is a definition
-  rather than a defect. The standard defines completeness twice, in two different ways,
-  and the two readings are 48 points apart on the same data.</p>
-
-  <div class="three">
-    <div class="rd"><div class="lab" style="color:var(--ok)">ELLIS READING</div><b>99.09%</b>
-      <p>Filled &divide; cells that <i>can</i> be filled. Excludes 1,440 cells that cannot
-      apply, because a visa-free route has no visa validity, and 316 that no government
-      publishes, because &sect;4.2.1 forbids inventing them.</p></div>
-    <div class="rd"><div class="lab" style="color:var(--no)">&sect;6.1 LITERAL</div><b>91.34%</b>
-      <p>已填字段数 &divide; 必填字段总数. Every required cell in the denominator, whether or
-      not it could ever hold a value. This is the table the standard calls the unified
-      measurement basis.</p></div>
-    <div class="rd"><div class="lab" style="color:var(--no)">&sect;4.2.2 LITERAL</div><b>44.61%</b>
-      <p>Records with <i>all</i> required fields non-null &divide; total records. A
-      record-level test: one blank anywhere fails the whole record.</p></div>
-  </div>
-
-  <div class="note"><b>Why the three differ, and what we need from you.</b> &sect;6.1 counts
-  cells; &sect;4.2.2 counts whole records. The standard applies the same ≥99% bar language
-  to a metric it has defined two ways, and the two cannot both be intended, because no
-  visa database of any depth reaches 99% of records with every field non-null. Our reading
-  removes only cells that cannot truthfully hold a value. One point in our favour is
-  settled: the dictionary marks exactly <b>20 of the 25 fields required</b>, with
-  processing time, consulate district, entry requirements and special conditions marked
-  如有则提供, and Ellis uses precisely that set of 20. The remaining question is whether a
-  cell that cannot apply belongs in the denominator.</div>
-
-  <h2>2. &sect;6.1 The eleven acceptance metrics <span class="zh">验收指标汇总表</span></h2>
-  <div class="tw"><table>
-    <thead><tr><th>Metric</th><th>Target</th><th>Measured today</th><th></th></tr></thead>
-    <tbody>
-      <tr><td class="req">Functional completeness<span class="zh">功能完整性</span></td>
-        <td class="num">100%</td>
-        <td class="ev">All four deliverables live. Individual gaps in sections 4 to 7.</td>
-        <td><span class="v part">PARTIAL</span></td></tr>
-      <tr><td class="req">Field completeness<span class="zh">字段完整率</span></td>
-        <td class="num">&ge;99%</td>
-        <td class="ev"><b>99.09%</b> on our denominator, <b>91.34%</b> literal. See section 1.</td>
-        <td><span class="v part">DEFINITION</span></td></tr>
-      <tr><td class="req">Information accuracy<span class="zh">信息准确率</span></td>
-        <td class="num">&ge;99.5%</td>
-        <td class="ev">Never measured by either party. &sect;4.2.2 assigns the sampling to
-          Party A. Ellis has no result to offer and will not assert one. The stricter
-          sibling clause, that policy red-line fields reach 100% high quality, is
-          likewise unmeasured.</td>
-        <td><span class="v joint">PARTY A</span></td></tr>
-      <tr><td class="req">Confidence at Medium or above<span class="zh">置信度中等及以上</span></td>
-        <td class="num">&ge;90%</td>
-        <td class="ev"><b>97.15%</b>. 32 Low records are withheld from customers until an
-          operator releases them, which is the &sect;4.2.3 handling rule.</td>
-        <td><span class="v met">MET</span></td></tr>
-      <tr><td class="req">Source coverage<span class="zh">来源覆盖率</span></td>
-        <td class="num">100%</td>
-        <td class="ev"><b>100.00%</b>, 1,123 of 1,123, every host passing the
-          government-domain gate. 1,073 of them quote a page that was fetched and matched;
-          the other 50 cite a correct official page that blocks automated fetchers.</td>
-        <td><span class="v met">MET</span></td></tr>
-      <tr><td class="req">Station coverage<span class="zh">站点覆盖率</span></td>
-        <td class="num">&ge;18</td>
-        <td class="ev"><b>18 of 18 present</b> across 187 destinations, but only
-          <b>2 at depth</b>. See section 3.</td>
-        <td><span class="v part">PARTIAL</span></td></tr>
-      <tr><td class="req">Availability<span class="zh">系统可用性</span></td>
-        <td class="num">&ge;99.99%</td>
-        <td class="ev"><b>99.897%</b>, 2,899 of 2,902 probes. All three failures were on
-          2026-08-30 and all three were our own deployments and a data re-warm that
-          starved the API. The watchdog restarted the service inside a minute each time.
-          Separately, the probe record covers 48 hours, so a monthly figure cannot yet be
-          demonstrated at all.</td>
-        <td><span class="v no">NOT MET</span></td></tr>
-      <tr><td class="req">Recovery objective<span class="zh">灾难恢复 RTO</span></td>
-        <td class="num">&le;1h</td>
-        <td class="ev">Auto-restart, per-minute probe with restart on failure, daily full
-          backup, written runbook. Today's three incidents each recovered inside a minute.
-          A restore drill has not been performed in front of Party A.</td>
-        <td><span class="v part">PARTIAL</span></td></tr>
-      <tr><td class="req">Policy update timeliness<span class="zh">政策更新时效</span></td>
-        <td class="num">&le;48h, urgent &le;24h</td>
-        <td class="ev">Pipeline live, same-day corrections shipped today. No external
-          policy change has occurred inside the monitoring window, so the clock has never
-          been started by a real event.</td>
-        <td><span class="v joint">NEEDS TIME</span></td></tr>
-      <tr><td class="req">Error feedback closure<span class="zh">错误反馈时效</span></td>
-        <td class="num">&le;48h</td>
-        <td class="ev"><b>0 past the window.</b> 129 open, every one filed inside 48 hours.</td>
-        <td><span class="v met">MET</span></td></tr>
-      <tr><td class="req">Backend readiness<span class="zh">后台功能可用</span></td>
-        <td class="num">pass</td>
-        <td class="ev">Live and in daily use. Two of the five correction stages have no
-          button in the console; see section 4.</td>
-        <td><span class="v part">PARTIAL</span></td></tr>
-    </tbody>
-  </table></div>
-
-  <h2>3. Station depth <span class="zh">站点深度</span></h2>
-  <p class="sub">The Requirements Document glosses a station as an outbound market: the
-  policies for US citizens travelling to countries around the world, and for Hong Kong
-  residents travelling across the globe. Two stations are at that depth. The rest are
-  seeded, and closing them is the largest remaining body of work.</p>
-  <div class="bars">
-    <i>USA</i><div class="bar"><span style="width:100%"></span></div><i>141</i>
-    <i>HKG</i><div class="bar"><span style="width:97%"></span></div><i>137</i>
-    <i>SGP</i><div class="bar"><span class="low" style="width:13.5%"></span></div><i>19</i>
-    <i>CAN</i><div class="bar"><span class="low" style="width:12.8%"></span></div><i>18</i>
-    <i>JPN</i><div class="bar"><span class="low" style="width:12.1%"></span></div><i>17</i>
-    <i>THA</i><div class="bar"><span class="low" style="width:12.1%"></span></div><i>17</i>
-    <i>TWN</i><div class="bar"><span class="low" style="width:11.3%"></span></div><i>16</i>
-    <i>KOR</i><div class="bar"><span class="low" style="width:10.6%"></span></div><i>15</i>
-    <i>PHL</i><div class="bar"><span class="low" style="width:10.6%"></span></div><i>15</i>
-    <i>RUS</i><div class="bar"><span class="low" style="width:9.9%"></span></div><i>14</i>
-    <i>AUS</i><div class="bar"><span class="low" style="width:9.9%"></span></div><i>14</i>
-    <i>IND</i><div class="bar"><span class="low" style="width:9.9%"></span></div><i>14</i>
-    <i>FRA</i><div class="bar"><span class="low" style="width:9.2%"></span></div><i>13</i>
-    <i>GBR</i><div class="bar"><span class="low" style="width:7.8%"></span></div><i>11</i>
-    <i>VNM</i><div class="bar"><span class="low" style="width:7.8%"></span></div><i>11</i>
-    <i>ESP</i><div class="bar"><span class="low" style="width:7.1%"></span></div><i>10</i>
-    <i>MYS</i><div class="bar"><span class="low" style="width:5.7%"></span></div><i>8</i>
-    <i>IDN</i><div class="bar"><span class="low" style="width:4.3%"></span></div><i>6</i>
-  </div>
-
-  <h2>4. P0 quality control backend <span class="zh">信息质量管控后台 &sect;4.1.2</span></h2>
-  <p class="sub">The standard makes this the precondition: if the backend does not meet
-  requirements, the whole delivery fails regardless of everything else.</p>
-  <div class="tw"><table>
-    <thead><tr><th>Capability</th><th></th><th>Evidence</th></tr></thead>
-    <tbody>
-      <tr><td class="req">Multi-dimensional spot check<span class="zh">多维抽查 · 组合筛选</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Station, passport, destination, purpose, visa type, passport type
-          and missing-field slices, all combinable, with type-ahead on the country and
-          visa-type boxes.</td></tr>
-      <tr><td class="req">Per-field checklist<span class="zh">逐字段校验清单</span></td>
-        <td><span class="v part">PARTIAL</span></td>
-        <td class="ev">Renders for all 25 fields, but uses six states where the clause
-          names three (已填 / 缺失 / 未过审). The three extra are exactly the ones excluded
-          from our completeness denominator, so this needs the same ruling as section 1.</td></tr>
-      <tr><td class="req">Change management<span class="zh">新增 / 修改 / 删除 · 高亮 · 可查历史</span></td>
-        <td><span class="v part">PARTIAL</span></td>
-        <td class="ev">Field-level diffs across 28 watched fields, day grouping, search
-          inside the query, CSV export. Additions and modifications only: <b>no deletion
-          has ever been recorded</b>, and expiring a cached answer writes no entry, so one
-          of the three named change types is invisible.</td></tr>
-      <tr><td class="req">Issue feedback loop<span class="zh">标记 → 通知 → 修正 → 复核 → 上线</span></td>
-        <td><span class="v part">PARTIAL</span></td>
-        <td class="ev">The API enforces all five stages, refuses skips and reversals, and
-          refuses a review by the person who wrote the fix. <b>The console has buttons for
-          only two of them</b>, so an operator cannot drive review or go-live without the
-          API. Full traceability is exposed: who was told, who fixed, who reviewed, when
-          it went live.</td></tr>
-      <tr><td class="req">Info quality level, low blocked<span class="zh">低置信度拦截</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">32 records held; the customer page shows a hold notice rather than
-          a guess. One ladder drives both the console grade and the customer block.</td></tr>
-      <tr><td class="req">Source traceability<span class="zh">每条绑定官方来源 URL</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">1,123 of 1,123 on hosts passing the government-domain gate,
-          clickable from the console and the customer page. Every change-log entry
-          resolves an official page too.</td></tr>
-      <tr><td class="req">Cross-validation binding<span class="zh">多源交叉验证 · 逐条绑定 URL</span></td>
-        <td><span class="v no">NOT MET</span></td>
-        <td class="ev">&sect;4.2.1 requires each corroborating source to be bound
-          individually where no single official source exists. A record binds exactly one
-          URL, so there is no slot in which cross-validation could be evidenced even where
-          it was performed.</td></tr>
-      <tr><td class="req">Batch export by filter<span class="zh">按筛选条件导出 Excel</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">.xlsx in under 3 seconds with the two required sheets, a field
-          description sheet and a data sheet, 25 fields plus source and confidence.</td></tr>
-      <tr><td class="req">Export of 10,000+ rows<span class="zh">单次导出 ≥ 1 万条</span></td>
-        <td><span class="v joint">UNTESTABLE</span></td>
-        <td class="ev">The database holds 1,123 rows, so the threshold cannot be exercised
-          honestly. No rows were fabricated to prove a ceiling.</td></tr>
-    </tbody>
-  </table></div>
-
-  <h2>5. P1 query tool <span class="zh">签证信息查询器</span></h2>
-  <div class="tw"><table>
-    <thead><tr><th>Requirement</th><th></th><th>Evidence</th></tr></thead>
-    <tbody>
-      <tr><td class="req">Six inputs offered<span class="zh">六项输入</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Document type across all 13 registry types, nationality, all seven
-          purposes, departure, destination, and transit capped at five stopovers.</td></tr>
-      <tr><td class="req">Required inputs gate<span class="zh">必填项校验</span></td>
-        <td><span class="v no">NOT MET</span></td>
-        <td class="ev">The Requirements Document marks five of the six 必填, with only the
-          transit point 可选. Nationality and destination gate correctly, returning 422.
-          <b>Document type and travel purpose do not</b>: a request omitting them returns
-          200 with ordinary passport and tourism silently assumed. Departure is enforced in
-          the browser only, so a server-to-server integration bypasses three of the five.</td></tr>
-      <tr><td class="req">Departure influences the answer<span class="zh">出发地参与判定</span></td>
-        <td><span class="v no">NOT MET</span></td>
-        <td class="ev">Four lookups differing only in departure city return byte-identical
-          answers. The city reaches the model on a cache miss but is absent from the cache
-          key, so on a cached route it can never change the result, even though Japan's
-          consular districts genuinely differ between Beijing and Shanghai.</td></tr>
-      <tr><td class="req">Three-level requirement<span class="zh">一级分类：免签 / 落地签 / 需提前办理</span></td>
-        <td><span class="v no">NOT MET</span></td>
-        <td class="ev">The dictionary's field 5 enumerates exactly three values and nests
-          ETA电子授权 under 需提前办理. Ellis uses a fourth, <code>Conditional</code>, on 146
-          records. It is deliberate and it is informative, but it is outside the enum the
-          dictionary defines.</td></tr>
-      <tr><td class="req">Eight subcategories<span class="zh">细化子类（8 类）</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">All eight present and reachable, with the exact Chinese labels.</td></tr>
-      <tr><td class="req">Subcategory nests under its parent<span class="zh">子类归属一级分类</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Fixed today. 74 records paired a subcategory with a primary the
-          tree does not nest it under, including "Visa-free / Paper Visa" beside a visa
-          type of "No visa needed". Now zero, and every record carries a subcategory where
-          three carried none. A shipped test refuses the pairing.</td></tr>
-      <tr><td class="req">Complete visa details per type<span class="zh">完整签证详情</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Per-product validity, stay, entries, fee and document checklist.</td></tr>
-      <tr><td class="req">Transit visa requirement<span class="zh">过境签证要求</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Stopovers enter the cache key, so a transit query is never served
-          the non-transit answer.</td></tr>
-      <tr><td class="req">Deep link shows the route it names<span class="zh">链接与结果一致</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Fixed today. The page read the address only on first load, so moving
-          between two routes' links left the first answer on screen under the second
-          address, and the browser's back button did the same. Every address change is
-          followed now, verified in a browser. Testing it surfaced an older race as well:
-          two lookups could be in flight at once and the slower one won whichever order
-          they were asked in, putting the heading of one route above the answer of
-          another. Only the newest request may write the page.</td></tr>
-      <tr><td class="req">No internal commentary in customer text<span class="zh">对客文案无内部批注</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Fixed today. Eleven routes including China to Thailand opened their
-          Good-to-know with the verification's own argument. Rewritten for the traveller,
-          with a loader guard and a shipped test.</td></tr>
-    </tbody>
-  </table></div>
-
-  <h2>6. P2 display page <span class="zh">签证信息展示页</span></h2>
-  <div class="tw"><table>
-    <thead><tr><th>Requirement</th><th></th><th>Evidence</th></tr></thead>
-    <tbody>
-      <tr><td class="req">A page per passport &times; destination<span class="zh">每组合为独立页面</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Deep links cold-load the full answer.</td></tr>
-      <tr><td class="req">Document switcher, ordinary by default<span class="zh">证件类型切换</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Switching returns a genuinely different answer, not a relabelling.</td></tr>
-      <tr><td class="req">Purpose filter within the page<span class="zh">出行目的筛选</span></td>
-        <td><span class="v part">PARTIAL</span></td>
-        <td class="ev">Works, but on China to Japan for business the ordinary-passport page
-          rendered a product whose own name said diplomatic passport. Corrected on that
-          route today; the axis leak is not proven absent elsewhere.</td></tr>
-      <tr><td class="req">The 16-item display standard<span class="zh">展示标准（基础版）</span></td>
-        <td><span class="v part">PARTIAL</span></td>
-        <td class="ev">All 16 blocks render on the main positions. On some switcher
-          positions whole sections are dropped rather than shown as a declared blank, so a
-          reader cannot tell "no fee" from "fee unknown".</td></tr>
-      <tr><td class="req">Answer is internally consistent<span class="zh">页面内容自洽</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Fixed today, and it was the deepest defect found. A customer answer
-          is a verified verdict layered over an unverified model answer, and the verdict
-          only cleared fields on a hand-maintained list, so anything not on it survived a
-          verdict that had made it false. Japan to Italy asked a visa-free traveller for a
-          payment card; Singapore to Spain said "no travel authorisation" in one field and
-          "require only an approved ETIAS" in the next. Across 1,123 records that was 39
-          asking for application-only documents and 40 offering an application method with
-          nothing to apply for. All now zero, and the reconciliation sits on the one path
-          every record takes rather than on the override branch.</td></tr>
-      <tr><td class="req">Held route stays usable<span class="zh">暂扣页面可用性</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Fixed today. The switchers lived inside the answer block and a held
-          route has no answer block, so the only control offered was a fresh search back to
-          an empty form. They are one shared element now and the held card carries them,
-          which matters because the hold is per purpose. The message names the purpose it
-          is holding rather than telling a customer we cannot answer a country pair we
-          answer fine.</td></tr>
-      <tr><td class="req">Fee is the consular fee<span class="zh">官方费用不含代办服务费</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Appendix defect 6. The headline fee is the consular fee and the
-          agency service fee is disclosed separately. China to Japan reads 715 CNY single
-          and 1,430 multiple, with the designated agency's own fee noted as additional.</td></tr>
-    </tbody>
-  </table></div>
-
-  <h2>7. P3 AI Q&amp;A <span class="zh">AI 问答交互</span></h2>
-  <div class="tw"><table>
-    <thead><tr><th>Requirement</th><th></th><th>Evidence</th></tr></thead>
-    <tbody>
-      <tr><td class="req">Natural-language questions<span class="zh">自然语言提问</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Trip.com's own example resolves in both Chinese and English.</td></tr>
-      <tr><td class="req">Answers from the knowledge base<span class="zh">检索知识库后作答</span></td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Answers come from the same cached route decisions the query tool
-          serves, not a free generation.</td></tr>
-      <tr><td class="req">Sources annotated<span class="zh">标注信息来源</span></td>
-        <td><span class="v part">PARTIAL</span></td>
-        <td class="ev">A verification badge with a date and a clickable official page. Some
-          logged exchanges carry no source URL.</td></tr>
-      <tr><td class="req">Refuses rather than fabricates</td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">A route-less question returns a localized clarification naming the
-          missing fact.</td></tr>
-      <tr><td class="req">Exchanges can be spot-checked<span class="zh">问答可抽查</span></td>
-        <td><span class="v part">PARTIAL</span></td>
-        <td class="ev">Every exchange is logged with its question, parsed route, answer and
-          source, readable at <code>/database/asks</code>. <b>No write path exists for a
-          reviewer's verdict</b>, so operations can read the sample but cannot record a
-          judgement, and the console has no Q&amp;A tab.</td></tr>
-    </tbody>
-  </table></div>
-
-  <h2>8. The seven demo defects <span class="zh">附录：demo 不准确的内容</span></h2>
-  <p class="sub">Trip.com listed these against the original demo. Five are closed, one
-  today.</p>
-  <div class="tw"><table>
-    <thead><tr><th>Defect</th><th></th><th>Evidence</th></tr></thead>
-    <tbody>
-      <tr><td class="req">1. Incomplete visa types<span class="zh">签证类型不完整</span></td>
-        <td><span class="v met">CLOSED</span></td>
-        <td class="ev">Closed today. The tourism answer for China to Japan offered two
-          products where the family-visit answer for the same route offered four. It now
-          carries the group visa, the individual single entry, and the 3-year and 5-year
-          multiple-entry visas.</td></tr>
-      <tr><td class="req">2. Missing convenience policies<span class="zh">特殊政策缺失</span></td>
-        <td><span class="v no">OPEN</span></td>
-        <td class="ev">Primary and secondary applicant rules and asset-free application
-          policies still appear nowhere in the flagship answer.</td></tr>
-      <tr><td class="req">3. Wrong application channel<span class="zh">申请渠道错误</span></td>
-        <td><span class="v met">CLOSED</span></td>
-        <td class="ev">Japan is recorded as agency-only, matching the embassy's own page.</td></tr>
-      <tr><td class="req">4. Wrong length of stay<span class="zh">停留天数错误</span></td>
-        <td><span class="v met">CLOSED</span></td>
-        <td class="ev">Per-product stays now read 15, 30 and 90 days exactly as the
-          appendix describes, taken from 停留期限 and not from the validity column beside it.</td></tr>
-      <tr><td class="req">5. Missing or wrong fee<span class="zh">签证费用缺失/错误</span></td>
-        <td><span class="v met">CLOSED</span></td>
-        <td class="ev">715 CNY single and 1,430 multiple, the consular fee, with the agency
-          service fee disclosed as additional rather than folded in.</td></tr>
-      <tr><td class="req">6. Official link points wrong<span class="zh">官网链接指向错误</span></td>
-        <td><span class="v met">CLOSED</span></td>
-        <td class="ev">All 457 links audited by reading each body rather than its status
-          code. Three genuinely failed for a person and were replaced; the rest are correct
-          canonical pages that block automated fetchers only.</td></tr>
-      <tr><td class="req">7. Over-collection of applicant data</td>
-        <td><span class="v met">CLOSED</span></td>
-        <td class="ev">The applicant processing flow is removed. The query tool asks for
-          the six specified inputs and nothing else.</td></tr>
-    </tbody>
-  </table></div>
-
-  <h2>9. Acceptance standard, &sect;1 to &sect;5</h2>
-  <div class="tw"><table>
-    <thead><tr><th>Clause</th><th></th><th>Evidence</th></tr></thead>
-    <tbody>
-      <tr><td class="req">&sect;1 Acceptance basis</td><td><span class="v met">MET</span></td>
-        <td class="ev">The three documents are the working baseline.</td></tr>
-      <tr><td class="req">&sect;2 Acceptance organization</td><td><span class="v joint">PARTY A</span></td>
-        <td class="ev">The team is convened by Party A and must be an odd number of three
-          or more. Ellis's Party B obligations are ready.</td></tr>
-      <tr><td class="req">&sect;3 Five stages, three deliverables each</td><td><span class="v joint">PARTY A</span></td>
-        <td class="ev">Stage 1 self-test is complete and the online link is public. Stages
-          2 to 5 are joint by definition.</td></tr>
-      <tr><td class="req">&sect;4.1.1 P0 precondition</td><td><span class="v part">PARTIAL</span></td>
-        <td class="ev">Backend live and in daily use, with the two gaps in section 4.</td></tr>
-      <tr><td class="req">&sect;4.1.3 Zero critical, zero major</td><td><span class="v part">PARTIAL</span></td>
-        <td class="ev">Today's audit found and fixed a blank quality console, customer
-          facing reviewer commentary, a dead US government link, a wrong-nationality
-          citation, and the self-contradiction class in section 6. Open items are listed
-          above; none is a crash, a data loss or a security hole. 2,633 backend tests green.</td></tr>
-      <tr><td class="req">&sect;4.2.1 Official sources, AI inference prohibited</td>
-        <td><span class="v met">MET</span></td>
-        <td class="ev">Enforced in code rather than by policy: a government-domain gate on
-          every override and on every link an override writes, and unpublished facts stay
-          blank with a stated reason rather than being inferred.</td></tr>
-      <tr><td class="req">&sect;4.2.2 Sampling method and calibers</td><td><span class="v joint">PARTY A</span></td>
-        <td class="ev">The measurement is Party A's. Its completeness definition is the one
-          in section 1 that needs settling.</td></tr>
-      <tr><td class="req">&sect;4.2.3 Quality grading and handling</td><td><span class="v met">MET</span></td>
-        <td class="ev">High, Medium and Low with the specified handling; Low is blocked
-          until an operator confirms.</td></tr>
-      <tr><td class="req">&sect;4.3 Change records and periodic review</td><td><span class="v part">PARTIAL</span></td>
-        <td class="ev">Every update logged against 28 watched fields. The monthly full
-          check and quarterly bidirectional sampling cannot have completed: the oldest
-          record is eight days old.</td></tr>
-      <tr><td class="req">&sect;4.4 7&times;24, monitoring, backup, browser-only</td><td><span class="v part">PARTIAL</span></td>
-        <td class="ev">Per-minute public probe, status page, auto-restart, daily backup,
-          nothing to install, usable to 320px. Availability short, see section 2.</td></tr>
-      <tr><td class="req">&sect;4.5 Documentation standards</td><td><span class="v met">MET</span></td>
-        <td class="ev">Operating manual, data-caliber manual, availability runbook,
-          requirement matrix, acceptance checklist. Every export carries field descriptions
-          and a UTC snapshot stamp.</td></tr>
-      <tr><td class="req">&sect;5.1 Ten deliverables</td><td><span class="v part">8 OF 10</span></td>
-        <td class="ev">Software, dataset, change log, manuals and the stage 1 report are
-          delivered. Outstanding: the per-stage test reports and the counter-signed
-          acceptance report, both of which need Party A.</td></tr>
-      <tr><td class="req">&sect;5.2 Export specification</td><td><span class="v met">MET</span></td>
-        <td class="ev">.xlsx, two sheets, 25 fields plus source and confidence, filterable
-          by station, destination and visa type.</td></tr>
-      <tr><td class="req">&sect;5.3 Archived process documents</td><td><span class="v joint">PARTY A</span></td>
-        <td class="ev">41 documents across the five stages, each carrying the seven
-          artefacts the clause names plus the acceptance report, regenerated from live
-          measurement. Verdict columns, rosters, minutes and signatures stay empty on
-          purpose: they record events between two parties and cannot be produced by the
-          party being audited.</td></tr>
-    </tbody>
-  </table></div>
-
-  <h2>10. What it would take to pass</h2>
-  <ul>
-    <li><b>Settle the completeness denominator.</b> One ruling from Party A moves this
-      metric from 91.34% to 99.09% or the reverse. Nothing else we can build changes it
-      as much.</li>
-    <li><b>Availability needs a clean month, not code.</b> 99.99% allows 4.3 minutes of
-      downtime in thirty days and we have spent three, all self-inflicted. The fix is that
-      deployments stop happening against the instance being measured.</li>
-    <li><b>The classification tree.</b> Fold <code>Conditional</code> into the three
-      values the dictionary defines, nesting electronic authorizations under 需提前办理, or
-      have Party A accept a fourth. Visible to any reviewer who opens two records.</li>
-    <li><b>Gate the three required inputs</b> that currently default silently, and put the
-      departure city into the cache key so it can change an answer.</li>
-    <li><b>188 cells</b> stand between us and a fuller completeness figure, concentrated in
-      Sudan, North Korea, Syria, Chad, Congo and Niger, where consular fees are genuinely
-      not posted online.</li>
-    <li><b>Station depth.</b> Sixteen stations at roughly 14 destinations each need to
-      reach what Hong Kong and the United States already have. This is Stage 4's whole
-      subject and the largest remaining body of work.</li>
-    <li><b>Smaller and each visible in a demo:</b> the console's three missing stage
-      buttons, the deep link that does not re-render, the held page that hides its own
-      switchers, deletion in the change log, and a write path for Q&amp;A sampling verdicts.</li>
-  </ul>
-
-  <h2>11. Questions only Trip.com can settle</h2>
-  <ul>
-    <li>Which completeness definition governs, &sect;6.1's cell count or &sect;4.2.2's
-      record count, and does a cell that cannot apply belong in the denominator?</li>
-    <li>Is <code>Conditional</code> acceptable as a fourth primary classification, or must
-      electronic authorizations sit under 需提前办理 as the dictionary shows?</li>
-    <li>For <code>info_validity</code>, do you want the policy's own expiry date, left
-      blank where no government publishes one, or the date Ellis warrants the row to and
-      rechecks it? Today it is the latter, declared in the export's field description sheet.</li>
-    <li>Does station coverage mean eighteen present or eighteen at comparable depth? The
-      answer changes the remaining scope by an order of magnitude.</li>
-    <li>Who performs the &sect;4.2.2 accuracy sampling, and against which sample frame?</li>
-    <li>How should cross-validation be evidenced when a record can bind only one URL?</li>
-  </ul>
-
-  <div class="foot">
-    Production <a href="https://ellis-visa.com">ellis-visa.com</a> &middot;
-    quality console <a href="https://ellis-visa.com/ops">/ops</a> &middot;
-    status <a href="https://ellis-visa.com/api/health/uptime">/api/health/uptime</a><br>
-    Every figure on this page was measured against production on 2026-08-30. Where a
-    requirement could not be verified, it says so rather than passing.
-  </div>
-</div>
+.foot code{overflow-wrap:anywhere;word-break:break-word} .stamp{overflow-wrap:anywhere}</style></head><body><main class="wrap">
+<div class="eyebrow">Ellis for Trip.com · T-Station information base</div><h 1>Requirement ledger</h 1>
+<p class="lede">Release-specific implementation evidence and remaining acceptance gaps. Requirements come from the supplied specification, acceptance standard and bilingual evaluation report. Historical dashboard percentages are superseded by the dated snapshot below.</p>
+<p class="stamp">Snapshot 2026-09-10 02:29 UTC · runtime 482e2fdd · manuals 54c54bd · 1,420 products / 946 canonical routes</p>
+<div class="verdictbar"><b>Acceptance remains open. 验收尚未完成。</b><p>The requested 100% coverage/completeness target has not been achieved. Documented-state25 completeness is 81.9521%; source binding, confidence diagnostics, unresolved route coverage and operational/client evidence remain short of the required basis. Engineering fixes do not certify every policy fact.</p><p>Source documents describe obligations; they do not authorize invented signatures, waivers, policy values or notifications. The user has approved counting documented Not applicable/Not published as complete. Each counted state requires source validation; unknown, unsupported and pending-review cells remain incomplete.</p></div>
+<h 2>1. Current measurement basis <span class="zh">当前统计口径</span></h 2>
+<p class="sub">The fixed dictionary has 25 numbered fields. The export has 26 columns because field 5 includes a separate requirement subcategory. Both contractual completeness formulas are retained.</p>
+<div class="three"><div class="rd"><div class="lab">DOCUMENTED STATE / ALL 25</div><b>81.9521%</b><p>29,093 / 35,500 cells; 3,225 documented dispositions. Unknown/pending remains incomplete. This differs from applicable 20 completeness of 87.32%.</p></div><div class="rd"><div class="lab">ALL 25 CELLS</div><b>72.9718%</b><p>25, 905 populated / 35,500 cells. No blank-cell exclusions; 37 populated cells remain pending review.</p></div><div class="rd"><div class="lab">ALL 25 PER RECORD</div><b>0%</b><p>0 of 1,420 records have every numbered field populated.</p></div><div class="rd"><div class="lab">PRIMARY URL PRESENT</div><b>88.3099%</b><p>1,254 of 1,420 rows. A URL alone does not prove official ownership, relevant scope or correctness.</p></div></div>
+<div class="note"><b>Operational completeness is a different diagnostic.</b> The specification marks 20 fields required and 5 conditional; the acceptance document also calls for all 25. The operational 20-field metric is separate from the approved documented-state 25 measure. Count a supported value or a source-validated Not applicable/Not published disposition across all 25 fields; retain both literal non-null diagnostics for comparison with the written acceptance clauses. The hardened auditor recomputed 29,093 / 35,500 documented-complete cells (81.9521%), including 3,225 disposition cells, and 0 complete records. The operational applicable 20 metric is separately 87.32%. These measure recorded completion states, not new official-source verification. Unknown policy end dates remain empty: <code>info_validity</code> is the policy's own supported end date, while <code>freshness_valid_until</code> is internal recheck metadata. There is no warranty-date fallback.</div>
+<h 2>2. Acceptance metrics <span class="zh">验收指标</span></h 2><div class="tw"><table><thead><tr><th>Requirement</th><th>Target</th><th>Current evidence</th><th>Status</th></tr></thead><tbody><tr><td class="req">Functional completeness / 功能完整性</td><td>100%</td><td class="ev">4,114 backend tests passed; 112 skipped. Release-specific browser and scenario checklist remains open.</td><td><span class="v part">EVIDENCE OPEN</span></td></tr><tr><td class="req">Literal 25 non-null diagnostic / 25字段非空诊断</td><td>User target 100% documented-state; literal diagnostic retained</td><td class="ev">25, 905 / 35,500 = 72.9718%. All 25 non-null records: 0 / 1,420. Recorded documented-state 25 completeness is 81.9521%, including 3,225 disposition cells, with 0 complete records. Unknown/pending states remain gaps.</td><td><span class="v part">NOT MET</span></td></tr><tr><td class="req">Policy accuracy / 政策准确率</td><td>Red-line 100%; other sampled fields≥99.5%</td><td class="ev">Full field-by-field official adjudication is incomplete. URL or requirement support is not accuracy certification.</td><td><span class="v part">UNPROVED</span></td></tr><tr><td class="req">Confidence / 置信度</td><td>≥90% Medium+</td><td class="ev">Configured binary High/Low: 1 / 1,419. High-or-Medium diagnostic 0.0704%. Existing grading preference retained; contractual mapping unresolved.</td><td><span class="v part">NOT MET</span></td></tr><tr><td class="req">Official source binding / 官方来源</td><td>100%</td><td class="ev">1,254 / 1,420 rows have a primary URL: 88.3099%. 991 have recorded requirement support: 69.7887%.</td><td><span class="v part">NOT MET</span></td></tr><tr><td class="req">Station and route coverage / 站点及路线覆盖</td><td>≥18 origins; global scope</td><td class="ev">18 station origins present with 722 stored routes. 306 breadth sample: 215 served, 90 held, 1 missing. Presence is not full coverage.</td><td><span class="v part">PARTIAL</span></td></tr><tr><td class="req">Availability / 可用性</td><td>≥99.99% monthly</td><td class="ev">Probe-report code exists; no complete current monthly evidence set, gap accounting or independent monitor certified here.</td><td><span class="v part">UNPROVED</span></td></tr><tr><td class="req">Recovery / 灾难恢复</td><td>Daily full DB backup; full-service RTO≤1 h</td><td class="ev">Safe daily SQLite backup deployed. Actual database backup/restore 0.708 s with integrity ok; full-service recovery and off-host durability not certified.</td><td><span class="v part">PARTIAL</span></td></tr><tr><td class="req">Policy update / 政策更新</td><td>≤48 h; urgent≤24 h</td><td class="ev">Six-hour bounded sweep and conflict-preserving lifecycle implemented; interrupted sweep and unverified backlog remain.</td><td><span class="v part">EVIDENCE OPEN</span></td></tr><tr><td class="req">Feedback closure / 错误闭环</td><td>≤48 h</td><td class="ev">Traceable issue/operator lifecycle exists. Full notification→correction→review→publication→receipt drill and clocks still required.</td><td><span class="v part">EVIDENCE OPEN</span></td></tr><tr><td class="req">Backend and acceptance process / 后台及验收</td><td>Usable P0; five signed stages</td><td class="ev">Backend source/test evidence and release manuals exist. Human roster, stage tests, minutes, usage report and signatures remain open.</td><td><span class="v part">EVIDENCE OPEN</span></td></tr></tbody></table></div>
+<h 2>3. Coverage and evidence <span class="zh">覆盖与证据</span></h 2>
+<p>The full stored inventory has 946 canonical routes across 31 origins and 198 destination codes. The 18 named station origins contain 722 routes, 1,026 products and 196 destination codes. These are stored-record counts, not an agreed exhaustive global scenario denominator. The separate 18×17 breadth sample has 305 present pairs: 215 served, 90 held and Indonesia→Vietnam missing. The Philippines destination has 16 served and 1 held of 17.</p>
+<p>All 570 distinct linked URLs matched the current official-host allowlist; 83 had reusable local captures in the audit workspace. Recorded requirement support covers 991 product rows. Neither figure is a completed all-route/product/field official-policy adjudication. There are 437 held routes, 217 routes with source/field disputes and 10 stored contradiction routes; no contradictory row was marked publicly exposed in the snapshot. Categories overlap.</p>
+<p>Current confidence is binary High/Low. 695 Low product rows were not held: missing ancillary fields can lower grade while a separate source-backed publication gate still permits a route. Preserve this distinction and reconcile the contract's three-tier/low-quality publication language explicitly. No false claim of 100% accuracy follows from a badge, URL or filled cell.</p>
+<h 2>4. Implemented systemic corrections <span class="zh">已实现的系统修正</span></h 2><ul>
+<li><b>Canonical policy reads:</b> four reported routes returned matching canonical keys and facts across date/residence variants with private, no-store responses. Malaysia→Russia used unified eVisa; Thailand→Australia used Visitor 600; Hong Kong→Vietnam used visa-required eVisa. Indonesia→South Korea remained held pending evidence resolution, so its traveler answer is not complete.</li>
+<li><b>Source dispute lifecycle:</b> distinct proposals remain attributable to their sources; dismissed unchanged evidence does not automatically reopen; new evidence can create a new issue. Fetch/verification failure cannot erase an active conflict or falsely renew freshness.</li>
+<li><b>Policy dates and products:</b> policy expiry is projected only from explicit or validated field-specific interval evidence; products retain their own scope and unknown state. The reviewed converter supports evidenced optional product fields without filling unsupported facts.</li>
+<li><b>Strict snapshot audit:</b> exact 25/26 schemas and declared full counts are checked, with duplicates, missing columns and truncated responses rejected. Output retains acceptance_certified=false and accuracy_certified=false.</li>
+<li><b>Backup and manuals:</b> WAL-safe SQLite backup and actual database restoration verified; current bilingual manuals explain binary grades, date semantics and evidence limitations. See <a href="AVAILABILITY.md">availability/recovery evidence</a>, <a href="backend-operations-manual.html">operations manual</a> and <a href="data-caliber-specification.html">data-caliber manual</a>.</li>
+</ul>
+<h 2>5. Remaining acceptance evidence <span class="zh">待完成验收证据</span></h 2><ul>
+<li>Current official field-by-field adjudication for every requested route and scenario, missing products/fields/sources, held/conflicting routes and the remaining sample gap.</li>
+<li>Actual browser/module checks for 13 document types, 7 purposes, transit/regional conditions, product catalogs, filters/deep links and multilingual continuing Q&amp;A.</li>
+<li>Complete live 10k+ query/export performance and release-matched localized installation smoke test; the actual workbook builder has passed a 10,001-row test using a supplied-data provider.</li>
+<li>Full policy-change/issue/notification drill and receipts; monthly completed verification, quarterly joint sampling, full-period uptime and a complete timed service restore from off-host recovery artifacts.</li>
+<li>Close the remaining gaps under the approved documented-state completeness measure, reconcile the remaining confidence interpretation, and obtain an actual odd-numbered team≥3, five stage exits, test reports, meeting records, usage report and client signatures.</li></ul>
+<p class="foot">Snapshot SHA-256:<code>3eb9a58789d6deb034781baa1021f315b0f5bc4ea50b05c948a76f2739376f18</code>. The auditor validates schema/counts and measures the supplied snapshot; it cannot certify policy accuracy or client acceptance. Later refreshes may change counts. Archived 2026-08-30/31 measurements are historical only.</p>
+</main></body></html>

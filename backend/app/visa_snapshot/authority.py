@@ -16,7 +16,14 @@ from urllib.parse import urlparse
 # website is independently listed by Taiwan's Ministry of Foreign Affairs:
 # https://www.mofa.gov.tw/OfficesInROC_Content.aspx?n=169&os=18&s=126&sms=86
 # Read 2026-09-09. Do not authorize the org.tw suffix or unreviewed subdomains.
-EXACT_OFFICIAL_HOSTS = frozenset({"meco.org.tw", "www.meco.org.tw"})
+# Benin's mission is linked as "Embassy of Benin in the United States" by
+# https://travel.state.gov/en/international-travel/travel-advisories/benin.html
+# (read 2026-09-10). Saudi's Ministry of Tourism Tourist Visa Regulations,
+# Article 4, names www.visitsaudi.com as the official visa platform; its
+# nationality selector links directly to visa.visitsaudi.com (read 2026-09-10).
+# Admit these exact hosts only, not the .us/.com suffix or other subdomains.
+EXACT_OFFICIAL_HOSTS = frozenset({"meco.org.tw", "www.meco.org.tw", "beninembassy.us",
+                                  "www.visitsaudi.com", "visa.visitsaudi.com"})
 
 # Government second-level suffix patterns used worldwide. Proper suffix match
 # only (host == suffix or host endswith "." + suffix). This is a curated,

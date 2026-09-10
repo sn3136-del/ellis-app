@@ -63,6 +63,8 @@ def test_literal_contract_metric_keeps_unpublished_blank_and_pending_value_visib
     assert contract['pending_review_cells'] == 1
     assert contract['requirement_support_rate'] == 0.5
     assert contract['accuracy_certified'] is False
+    assert contract['documented_completed_cells'] == 49
+    assert contract['documented_complete_records'] == 1
     assert out['complete_records'] == 1  # Explicit unpublished disposition is separate.
 
 

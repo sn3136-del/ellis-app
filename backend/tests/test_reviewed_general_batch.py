@@ -163,7 +163,8 @@ def test_a_visa_free_verdict_keeps_only_a_free_entry_product():
     fields = overlay['entries'][0]['fields']
     assert fields['disposition'] == 'VISA_EXEMPT'
     assert [p['type'] for p in fields['visa_products']] == ['Visa-free entry']
-    assert 'validity_duration' in fields['unpublished_fields']
+    assert 'validity_duration' not in fields['unpublished_fields']
+    assert 'validity_duration' in fields['visa_products'][0]['unpublished_fields']
     assert reports[0]['removed_products'][0]['type'] == 'Single-entry tourist e-visa'
 
 
@@ -205,6 +206,279 @@ def test_a_reviewed_optional_paid_visa_survives_beside_its_reviewed_exemption_la
     from app.visa_snapshot.kimi_primary import serve_time_invariants
     assert serve_time_invariants(guidance) == []
     assert len(guidance['visa_products']) == 2
+
+
+def interval_batch():
+    b = batch()
+    notice = 'This visa policy is effective from 15 March 2025 until 14 March 2028.'
+    b['sources'][0] = source(TEXT + ' ' + notice)
+    p = b['rows'][0]['verdict']['proof']
+    p['evidence'].append({'source_id': 's1', 'source_url': URL, 'quote': notice})
+    p.update(effective_from='2025-03-15', effective_to='2028-03-14')
+    return b
+
+
+def test_explicit_policy_interval_survives_conversion_and_holds_after_expiry():
+    from app.visa_snapshot import policy_intervals
+    b = interval_batch()
+    manifest = build_manifest(b, [layer()])
+    overlay, _ = convert(manifest, [layer()])
+    entry = overlay['entries'][0]
+    p = entry['field_provenance']['disposition']
+    assert p['effective_from'] == '2025-03-15' and p['effective_to'] == '2028-03-14'
+    end = p['policy_interval_evidence']['effective_to']
+    assert end['quote'].endswith('14 March 2028.') and end['subject'] == ROUTE
+    assert end['verified_at'] == '2026-09-09'
+    prov = {'field_provenance': entry['field_provenance']}
+    assert 'policy_interval_conflict' not in policy_intervals.annotate(entry['fields'], prov, {'arrival_date': '2028-03-14'})
+    held = policy_intervals.annotate(entry['fields'], prov, {'arrival_date': '2028-03-15'})
+    assert held['policy_interval_conflict']['fields'][0]['reason'] == 'policy_expired'
+    assert tstation._reviewed_policy_end(prov, ROUTE) == '2028-03-14'
+
+
+def test_later_review_retains_an_earlier_explicit_policy_notice():
+    first, _ = convert(build_manifest(interval_batch(), [layer()]), [layer()])
+    baseline = layer(seed_entries=first['entries'])
+    later = batch()
+    later['rows'][0]['verdict']['proof']['verified_at'] = '2026-09-10'
+    converted, _ = convert(build_manifest(later, [baseline]), [baseline])
+    p = converted['entries'][0]['field_provenance']['disposition']
+    assert p['verified_at'] == '2026-09-10'
+    assert p['effective_to'] == '2028-03-14'
+    assert p['policy_interval_evidence']['effective_to']['verified_at'] == '2026-09-09'
+
+
+def test_default_exemption_product_inherits_the_same_scoped_policy_end():
+    b = optional_visa_batch()
+    notice = 'The exemption policy ends on 14 March 2028.'
+    b['sources'][0] = source(b['sources'][0]['text'] + ' ' + notice)
+    p = b['rows'][0]['verdict']['proof']
+    p['evidence'].append({'source_id':'s1','source_url':URL,'quote':notice})
+    p['effective_to'] = '2028-03-14'
+    overlay,_ = convert(build_manifest(b,[layer()]),[layer()])
+    entry = overlay['entries'][0]
+    route_proof = entry['field_provenance']['disposition']
+    free = next(p for p in entry['fields']['visa_products'] if p['disposition']=='VISA_EXEMPT')
+    bound = free['field_provenance']['disposition']['policy_interval_evidence']['effective_to']
+    assert bound['subject']['product_type'] == free['type']
+    assert 'product_type' not in route_proof['policy_interval_evidence']['effective_to']['subject']
+    assert 'effective_to' not in entry['fields']['visa_products'][0]['field_provenance']['disposition']
+
+
+def product_interval_batch():
+    b = batch()
+    notice = 'This visa policy ends on 14 March 2028.'
+    b['sources'][0] = source(TEXT + ' ' + notice)
+    p = b['rows'][0]['products'][0]['proofs']['disposition']
+    p['evidence'].append({'source_id': 's1', 'source_url': URL, 'quote': notice})
+    p['effective_to'] = '2028-03-14'
+    return b
+
+
+def test_same_product_recheck_preserves_its_independent_policy_interval():
+    first, _ = convert(build_manifest(product_interval_batch(), [layer()]), [layer()])
+    baseline = layer(seed_entries=first['entries'], merged_guidance={
+        **layer()['merged_guidance'], **first['entries'][0]['fields']})
+    later = batch()
+    later['rows'][0]['products'][0]['proofs']['disposition']['verified_at'] = '2026-09-10'
+    out, _ = convert(build_manifest(later, [baseline]), [baseline])
+    p = out['entries'][0]['fields']['visa_products'][0]['field_provenance']['disposition']
+    assert p['verified_at'] == '2026-09-10'
+    assert p['effective_to'] == '2028-03-14'
+    assert p['policy_interval_evidence']['effective_to']['verified_at'] == '2026-09-09'
+    assert 'effective_to' not in out['entries'][0]['field_provenance']['disposition']
+
+
+def test_replacement_product_does_not_inherit_the_old_program_interval():
+    first, _ = convert(build_manifest(product_interval_batch(), [layer()]), [layer()])
+    baseline = layer(seed_entries=first['entries'], merged_guidance={
+        **layer()['merged_guidance'], **first['entries'][0]['fields']})
+    later = batch()
+    later['rows'][0]['products'][0]['product']['type'] = 'Replacement single-entry tourist e-visa'
+    out, _ = convert(build_manifest(later, [baseline]), [baseline])
+    p = out['entries'][0]['fields']['visa_products'][0]['field_provenance']['disposition']
+    assert 'effective_to' not in p and 'policy_interval_evidence' not in p
+
+
+def test_changed_route_permission_does_not_inherit_earlier_program_interval():
+    first, _ = convert(build_manifest(interval_batch(), [layer()]), [layer()])
+    baseline = layer(seed_entries=first['entries'], merged_guidance={
+        **layer()['merged_guidance'], **first['entries'][0]['fields']})
+    later = optional_visa_batch()
+    out, _ = convert(build_manifest(later, [baseline]), [baseline])
+    assert out['entries'][0]['fields']['disposition'] == 'VISA_EXEMPT'
+    assert 'effective_to' not in out['entries'][0]['field_provenance']['disposition']
+
+
+@pytest.mark.parametrize('notice', [
+    'The consular office will be closed on 14 March 2028.',
+    'The visa exemption policy page was last updated on 14 March 2028.',
+    'Under this visa policy, the visa is issued on 14 March 2028.',
+    'Under the visa exemption policy, passports must be valid until 14 March 2028.',
+    'The visa policy office is closed until 14 March 2028.',
+])
+@pytest.mark.parametrize('explicit_evidence', [False, True])
+def test_a_nonpolicy_date_cannot_become_a_policy_end(notice, explicit_evidence):
+    b = interval_batch()
+    b['sources'][0] = source(TEXT + ' ' + notice)
+    p = b['rows'][0]['verdict']['proof']
+    p.pop('effective_from')
+    p['evidence'][-1]['quote'] = notice
+    if explicit_evidence:
+        p['policy_interval_evidence'] = {'effective_to': {
+            'source_id': 's1', 'source_url': URL, 'quote': notice,
+            'verified_at': '2026-09-09', 'status': 'reviewed', 'verifier': 'ai',
+            'subject': dict(ROUTE), 'effective_to': '2028-03-14'}}
+    with pytest.raises(PatchRejected, match='Policy bound'):
+        validate_batch(b)
+
+
+def projected_entry(entry):
+    parsed = vo._parse_rows([entry], {})[vo._key('HKG', 'VNM', 'tourism', 'ordinary_passport')]
+    guidance, _ = vo.merge_verified_fields(layer()['raw_guidance'], parsed['fields'],
+                                          source_url=entry['source_url'])
+    provenance = dict(parsed['field_provenance']['disposition'], fields=list(parsed['fields']),
+                      field_provenance=parsed['field_provenance'])
+    return tstation.records_for_route(ROUTE, guidance, provenance)
+
+
+def test_one_products_unpublished_validity_does_not_complete_an_unknown_sibling():
+    b = batch()
+    first = b['rows'][0]['products'][0]
+    first['product']['validity'] = None
+    first['proofs']['validity'] = proof(status='not_published', reason='No validity published for this product.')
+    second = deepcopy(first)
+    second.update(action='add', current_name=None)
+    second['product'].update(type='Multiple-entry tourist e-visa', entry='multiple',
+                             fee={'amount': 50, 'currency': 'USD'})
+    second['proofs']['validity'] = proof(status='unknown', reason='This separate product has not yet been checked.')
+    second['proofs']['entry'] = proof('$50/multiple-entry electronic visa')
+    b['rows'][0]['products'].append(second)
+    out, _ = convert(build_manifest(b, [layer()]), [layer()])
+    entry = out['entries'][0]
+    assert entry['fields']['unpublished_fields'] == []
+    rows = projected_entry(entry)
+    assert tstation.field_status(rows[0])['validity_duration'] == 'not-published'
+    assert tstation.field_status(rows[1])['validity_duration'] == 'missing'
+    assert 'validity_duration' not in rows[1]['_unpublished']
+    # These two validity cells are the only completion difference between
+    # the products, even though their fee and entry values legitimately differ.
+    metrics = [tstation.acceptance_summary([r]) for r in rows]
+    assert metrics[0]['documented_completed_cells'] == metrics[1]['documented_completed_cells'] + 2
+
+
+def test_product_unknown_review_replaces_its_earlier_unpublished_state():
+    b = batch()
+    first = b['rows'][0]['products'][0]
+    first['product']['validity'] = None
+    first['proofs']['validity'] = proof(status='not_published', reason='No validity published for this product.')
+    initial, _ = convert(build_manifest(b, [layer()]), [layer()])
+    baseline = layer(seed_entries=initial['entries'], merged_guidance={
+        **layer()['merged_guidance'], **initial['entries'][0]['fields']})
+    later = batch()
+    later['rows'][0]['products'][0]['product']['validity'] = None
+    later['rows'][0]['products'][0]['proofs']['validity'] = proof(
+        status='unknown', reason='The current policy validity has not yet been confirmed.')
+    result, _ = convert(build_manifest(later, [baseline]), [baseline])
+    row = projected_entry(result['entries'][0])[0]
+    assert tstation.field_status(row)['validity_duration'] == 'missing'
+    assert 'validity_duration' not in row['_unpublished']
+
+
+def test_product_unknown_overrides_parent_np_without_erasing_unrelated_route_absence():
+    guidance = layer()['raw_guidance']
+    guidance['unpublished_fields'] = ['validity_duration', 'validity_unit',
+                                     'processing_min_days', 'processing_unit']
+    guidance['visa_products'][0]['validity'] = None
+    guidance['visa_products'][0]['field_provenance'] = {
+        'validity': {'status': 'unknown', 'reason': 'This product has not yet been checked.'}}
+    row = tstation.records_for_route(ROUTE, guidance)[0]
+    states = tstation.field_status(row)
+    assert states['validity_duration'] == states['validity_unit'] == 'missing'
+    assert states['processing_min_days'] == states['processing_unit'] == 'not-published'
+
+
+@pytest.mark.parametrize('sibling_review', [None, {'status': 'unknown', 'reason': 'Not checked yet.'}])
+def test_registered_legacy_product_np_is_not_a_global_sibling_absence(sibling_review):
+    guidance = layer()['raw_guidance']
+    first = guidance['visa_products'][0]
+    first['validity'] = None
+    first['field_provenance'] = {'validity': {'status': 'unknown',
+        'reason': 'Not published by the destination: no validity stated for the single-entry product.'}}
+    sibling = deepcopy(first)
+    sibling['type'] = 'Multiple-entry tourist e-visa'
+    sibling['field_provenance'] = {'validity': sibling_review} if sibling_review else {}
+    guidance['visa_products'].append(sibling)
+    guidance['unpublished_fields'] = ['validity_duration', 'validity_unit']
+    rows = tstation.records_for_route(ROUTE, guidance)
+    assert tstation.field_status(rows[0])['validity_duration'] == 'not-published'
+    assert tstation.field_status(rows[1])['validity_duration'] == 'missing'
+    assert 'validity_duration' not in rows[1]['_unpublished']
+
+
+def test_explicit_unknown_supersedes_a_stale_product_local_np_flag():
+    guidance = layer()['raw_guidance']
+    p = guidance['visa_products'][0]
+    p['validity'] = None
+    p['unpublished_fields'] = ['validity_duration', 'validity_unit']
+    p['field_provenance'] = {'validity': {'status': 'unknown', 'reason': 'Unresolved new policy.'}}
+    row = tstation.records_for_route(ROUTE, guidance)[0]
+    assert tstation.field_status(row)['validity_duration'] == 'missing'
+
+
+@pytest.mark.parametrize('stale_product_text', [None, 'Up to 90 days'])
+def test_unknown_product_stay_cannot_borrow_a_route_stay_and_count_as_filled(stale_product_text):
+    guidance = layer()['raw_guidance']
+    guidance['permitted_stay'] = 'Up to 90 days'
+    p = guidance['visa_products'][0]
+    p['max_stay_days'] = None
+    p['permitted_stay'] = stale_product_text
+    p['field_provenance'] = {'max_stay_days': {'status': 'unknown', 'reason': 'Separate product stay is unconfirmed.'}}
+    row = tstation.records_for_route(ROUTE, guidance)[0]
+    assert row['max_stay_duration'] is None and row['max_stay_unit'] is None
+    assert tstation.field_status(row)['max_stay_duration'] == 'missing'
+
+
+def test_new_route_unknown_review_replaces_its_earlier_unpublished_state():
+    b = batch()
+    b['rows'][0]['route_fields']['processing_time'] = None
+    b['rows'][0]['route_field_proofs']['processing_time'] = proof(
+        status='not_published', reason='No processing time published in the reviewed source.')
+    first, _ = convert(build_manifest(b, [layer()]), [layer()])
+    assert 'processing_min_days' in first['entries'][0]['fields']['unpublished_fields']
+    baseline = layer(seed_entries=first['entries'], merged_guidance={
+        **layer()['merged_guidance'], **first['entries'][0]['fields']})
+    later = batch()
+    later['rows'][0]['route_fields']['processing_time'] = None
+    later['rows'][0]['route_field_proofs']['processing_time'] = proof(
+        status='unknown', reason='The new procedure has not yet been checked.')
+    out, _ = convert(build_manifest(later, [baseline]), [baseline])
+    assert 'processing_min_days' not in out['entries'][0]['fields']['unpublished_fields']
+
+
+@pytest.mark.parametrize('mutation', ['wrong_date', 'invalid_date', 'reversed', 'foreign_notice', 'wrong_subject', 'invented_quote'])
+def test_unproven_policy_intervals_are_rejected(mutation):
+    b = interval_batch()
+    validate_batch(b)
+    p = b['rows'][0]['verdict']['proof']
+    bound = p['policy_interval_evidence']['effective_to']
+    if mutation == 'wrong_date':
+        p['effective_to'] = '2029-03-14'
+    elif mutation == 'invalid_date':
+        p['effective_to'] = '2028-02-30'
+    elif mutation == 'reversed':
+        p['effective_from'], p['effective_to'] = p['effective_to'], p['effective_from']
+        p.pop('policy_interval_evidence')
+    elif mutation == 'foreign_notice':
+        foreign = source('This visa policy ends on 14 March 2028.', 'https://www.immd.gov.hk/eng/news.html', 'foreign')
+        b['sources'].append(foreign)
+        bound.update(source_id='foreign', source_url=foreign['url'], quote=foreign['text'])
+    elif mutation == 'wrong_subject':
+        bound['subject']['passport_nationality'] = 'JPN'
+    else:
+        bound['quote'] = 'The updated policy is extended until 14 March 2028.'
+    with pytest.raises(PatchRejected, match='[Pp]olicy'):
+        validate_batch(b)
 
 
 @pytest.mark.parametrize('mutation', ['no_free_lane', 'unreviewed_free_lane', 'no_paid_verdict', 'wrong_paid_quote', 'wrong_fee'])

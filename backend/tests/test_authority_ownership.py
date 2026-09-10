@@ -10,6 +10,7 @@ from app.visa_snapshot import authority, authority_ownership as owners, evidence
     ('laoembassy.com', 'LAO'), ('bolivianembassy.co.uk', 'BOL'),
     ('myanmarconsulatehk.org', 'MMR'), ('syrembassy.cn', 'SYR'), ('maliembassy.us', 'MLI'),
     ('www.meco.org.tw', 'PHL'), ('evisa.gouv.tg', 'TGO'), ('bahrain.bh', 'BHR'),
+    ('beninembassy.us', 'BEN'), ('www.visitsaudi.com', 'SAU'), ('visa.visitsaudi.com', 'SAU'),
 ])
 def test_reviewed_mission_and_government_ownership_matches_only_its_country(host, country):
     assert authority.is_government_host(host)
@@ -31,6 +32,13 @@ def test_all_trusted_suffixes_have_reviewed_ownership_or_explicit_unsupported_sc
         assert not ev.jurisdiction_matches('https://' + host + '/visa', 'ZZZ')
     assert ev.jurisdiction_matches('https://eur-lex.europa.eu/eli/reg/2018/1806/oj', 'FRA')
     assert not ev.jurisdiction_matches('https://other.europa.eu/visa', 'FRA')
+
+
+@pytest.mark.parametrize('host', ['beninembassy.us', 'www.visitsaudi.com', 'visa.visitsaudi.com'])
+def test_new_delegated_hosts_do_not_authorize_unreviewed_subdomains(host):
+    assert not authority.is_government_host('unreviewed.' + host)
+    assert not authority.is_government_host(host + '.example.com')
+    assert not authority.is_government_host('fake-' + host)
 
 
 def test_kdmid_ownership_does_not_turn_program_eligibility_into_a_visa_obligation():

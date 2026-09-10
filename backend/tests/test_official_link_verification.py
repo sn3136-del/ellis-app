@@ -28,10 +28,10 @@ def test_new_government_suffixes_are_factual():
     for host in ("evisa.gouv.dj", "voyage.gouv.tg", "evisa.mfa.am",
                  "evisatraveller.mfa.ir", "www.evisa.e-gov.kg",
                  "evisa.mn", "www.migracija.lt", "evisa.kdmid.ru",
-                 "www.service-public.fr"):
+                 "www.service-public.fr", "visa.visitsaudi.com"):
         assert is_government_host(host), host
     # And the additions did not accidentally bless whole ccTLDs.
-    for host in ("evil.dj", "hayya.qa", "visa.visitsaudi.com", "evil.mn",
+    for host in ("evil.dj", "hayya.qa", "evil.visitsaudi.com", "evil.mn",
                  "korea-evisa.com", "www.vfsglobal.com"):
         assert not is_government_host(host), host
 

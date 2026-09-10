@@ -103,6 +103,112 @@ def _today():
     return date.today()
 
 
+def _policy_bound_statement(quote, forms, key):
+    """A dated office notice or visa issue date does not bound a policy.
+
+    Require explicit policy-effect language in the same sentence as the
+    date. Ambiguous or unsupported language needs a better captured passage;
+    the reviewer's label alone cannot turn a date into a rule's expiry.
+    """
+    dates = '(?:' + '|'.join(re.escape(_norm(form)).replace(r'\ ', r'\s*')
+                            for form in forms) + ')'
+    policy = re.compile(r'\b(?:polic(?:y|ies)|regulations?|rules?|resolutions?|'
+                        r'agreements?|decrees?|schemes?|programmes?|programs?|'
+                        r'visa[- ]?exemption|visa[- ]?free|exemption)\b|'
+                        r'政策|免簽|免签|規定|规定|法規|法规|辦法|办法', re.I)
+    if key == 'effective_from':
+        relation = (r'(?:effective\s*(?:from|on|as of)?|(?:comes?|enters?)\s+into\s+force\s*(?:on|from)?|'
+                    r'takes?\s+effect\s*(?:on|from)?|(?:starts?|begins?|commences?)\s*(?:on|from)?|'
+                    r'appl(?:y|ies)\s+from)\s*[:,]?\s*' + dates)
+        chinese = r'(?:自|從|从|於|于)\s*' + dates + r'[^。；\n]{0,60}(?:起|生效|實施|实施|至|到)'
+    else:
+        relation = (r'(?:until|through|ends?\s*(?:on)?|ending\s+on|expires?\s*(?:on)?|'
+                    r'ceases?\s+to\s+(?:apply|have\s+effect)\s*(?:on)?)\s*[:,]?\s*'
+                    r'(?:and\s+including\s+)?' + dates)
+        chinese = r'(?:至|截至|到|有效至)\s*' + dates + r'|' + dates + r'\s*(?:止|屆滿|届满|到期)'
+    for sentence in re.split(r'[.!?;。；\n]', str(quote or '')):
+        sentence = _norm(sentence)
+        if re.search(r'\b(?:holiday|closed|closure|issued|issuance|updated|published)\b|'
+                     r'passport.{0,35}(?:valid|expir)|護照|护照|休館|休馆|休假|發證|发证', sentence):
+            continue
+        if policy.search(sentence) and (re.search(relation, sentence, re.I)
+                                        or re.search(chinese, sentence)):
+            return True
+    return False
+
+
+def _checked_policy_bounds(proof, sources, route, product=None):
+    """Keep policy dates tied to their own captured notice and subject.
+
+    A check date does not renew a rule. Explicit interval evidence uses the
+    serving provenance shape; absent separate evidence, the bound must occur
+    in this review's own destination-government passages.
+    """
+    from app.visa_snapshot.evidence_validator import jurisdiction_matches
+    from scripts.convert_reviewed_product_patch import _subject
+    supplied = proof.get('policy_interval_evidence') or {}
+    if not isinstance(supplied, dict):
+        raise PatchRejected('policy interval evidence must be an object')
+    bounds, checked = {}, {}
+    for key in ('effective_from', 'effective_to'):
+        value = proof.get(key)
+        if value is None:
+            if key in supplied:
+                raise PatchRejected('policy interval evidence has no explicit bound: ' + key)
+            continue
+        try:
+            day = date.fromisoformat(value)
+            if day.isoformat() != value:
+                raise ValueError
+        except (TypeError, ValueError) as exc:
+            raise PatchRejected('Invalid policy interval date: ' + key) from exc
+        forms = (value, f'{day.day} {day.strftime("%B")} {day.year}',
+                 f'{day.strftime("%B")} {day.day}, {day.year}',
+                 f'{day.day:02d} {day.strftime("%B")} {day.year}',
+                 f'{day.day}/{day.month}/{day.year}',
+                 f'{day.day:02d}/{day.month:02d}/{day.year}',
+                 f'{day.year}年{day.month}月{day.day}日')
+        evidence = supplied.get(key)
+        if evidence is None:
+            item = next((e for e in proof.get('evidence') or []
+                         if jurisdiction_matches(str(e.get('source_url') or ''), route['destination_country'])
+                         and any(quote_literal(form, e.get('quote') or '') for form in forms)
+                         and _policy_bound_statement(e.get('quote'), forms, key)), None)
+            if item is None:
+                raise PatchRejected('Policy bound has no literal destination-source date: ' + key)
+            evidence = dict(deepcopy(item), status='reviewed', verifier='ai',
+                            verified_at=proof['verified_at'], subject=_subject(route, product),
+                            note=proof['scope_note'], **{key: value})
+        if (not isinstance(evidence, dict) or evidence.get('status') != 'reviewed'
+                or evidence.get('verifier') != 'ai'
+                or evidence.get('subject') != _subject(route, product)
+                or evidence.get(key) not in (None, value)):
+            raise PatchRejected('Policy bound evidence has the wrong review or subject: ' + key)
+        source = sources.get(evidence.get('source_id'))
+        quote = evidence.get('quote')
+        if (source is None or source['url'] != evidence.get('source_url')
+                or not jurisdiction_matches(source['url'], route['destination_country'])
+                or not isinstance(quote, str) or '...' in quote or '…' in quote
+                or not quote_literal(quote, source['text'])
+                or not any(quote_literal(form, quote) for form in forms)
+                or not _policy_bound_statement(quote, forms, key)):
+            raise PatchRejected('Policy bound lacks captured literal date evidence: ' + key)
+        try:
+            reviewed = date.fromisoformat(str(evidence.get('verified_at') or '')[:10])
+            if reviewed > _today():
+                raise ValueError
+        except ValueError as exc:
+            raise PatchRejected('Invalid policy bound review date: ' + key) from exc
+        bounds[key] = value
+        checked[key] = deepcopy(evidence)
+        checked[key]['subject'] = _subject(route, product)
+    if bounds.get('effective_from') and bounds.get('effective_to') and bounds['effective_to'] < bounds['effective_from']:
+        raise PatchRejected('Policy interval ends before it starts')
+    if checked:
+        bounds['policy_interval_evidence'] = checked
+    return bounds
+
+
 def _source_table(batch):
     sources = {}
     for source in batch.get('sources') or []:
@@ -163,6 +269,10 @@ def _check_proof(proof, sources, route, field, value, *, product=None):
         raise PatchRejected(f'{field}: the proof needs a verification date')
     passages = '\n'.join(item['quote'] for item in evidence)
     _check_value(field, value, passages, route, product)
+    if any(k in proof for k in ('effective_from', 'effective_to', 'policy_interval_evidence')):
+        if field != 'disposition':
+            raise PatchRejected('Policy bounds belong to the reviewed visa disposition')
+        proof.update(_checked_policy_bounds(proof, sources, route, product))
     return proof
 
 
@@ -184,6 +294,11 @@ def _monetary_text(passages, code):
     text = passages
     for symbol in _CURRENCY_SYMBOLS.get(code, ()):
         text = re.sub(symbol, f' {code} ', text, flags=re.I)
+    # Official tariffs also write "SAR (300)". Remove only parentheses that
+    # enclose the complete amount immediately after this currency; dates,
+    # references and unrelated parenthesized figures remain untouched.
+    text = re.sub(r'\b' + re.escape(code) + r'\s*\((\d[\d,]*(?:\.\d+)?)\)',
+                  lambda m: f'{code} {m.group(1)}', text, flags=re.I)
     # European and Indonesian figures: 1.650.000 or 500.000,00 mean 1650000
     # and 500000.00. Only groups of exactly three digits are thousands.
     text = re.sub(r'(?<!\d)(\d{1,3}(?:\.\d{3})+),(\d{2})(?!\d)', lambda m: m.group(1).replace('.', '') + '.' + m.group(2), text)
@@ -441,7 +556,16 @@ def _proof_for(proof, route, field, product=None):
         # cell reads "not published" through unpublished_fields.
         proof = {'status': 'unknown', 'verifier': 'ai',
                  'reason': 'Not published by the destination: ' + str(proof.get('reason') or '').strip()}
-    return field_provenance(proof, route, field, product)
+    converted = field_provenance(proof, route, field, product)
+    for key in ('effective_from', 'effective_to', 'policy_interval_evidence'):
+        if key in proof:
+            converted[key] = deepcopy(proof[key])
+    if product is not None:
+        from scripts.convert_reviewed_product_patch import _subject
+        for evidence in (converted.get('policy_interval_evidence') or {}).values():
+            if evidence.get('subject') == _subject(route):
+                evidence['subject'] = _subject(route, product)
+    return converted
 
 
 def _reviewed_optional_products(products, specs, verdict, sources, route):
@@ -468,7 +592,11 @@ def _reviewed_optional_products(products, specs, verdict, sources, route):
         proofs = spec.get('proofs') or {}
         decision = proofs.get('disposition')
         if exemption and decision is None:
-            decision = verdict['proof']
+            decision = deepcopy(verdict['proof'])
+            from scripts.convert_reviewed_product_patch import _subject
+            for evidence in (decision.get('policy_interval_evidence') or {}).values():
+                if evidence.get('subject') == _subject(route):
+                    evidence['subject'] = _subject(route, product)
         if _check_proof(decision, sources, route, 'disposition', product.get('disposition'), product=product) is None:
             raise PatchRejected('An optional product needs its own reviewed verdict')
         for field in PRODUCT_PROOF_FIELDS[1:]:
@@ -524,9 +652,15 @@ def convert(manifest, current_layers):
         proofs = deepcopy(old.get('field_provenance') or {})
         unpublished = set(fields.get('unpublished_fields') or [])
         verdict = row['verdict']
+        same_permission = (fields.get('disposition') == verdict['disposition']
+                           and fields.get('requirement_detail') == verdict['requirement_detail'])
         fields['disposition'] = verdict['disposition']
         fields['requirement_detail'] = verdict['requirement_detail']
+        from app.visa_snapshot.policy_intervals import inherit_bounds
         vproof = _proof_for(verdict['proof'], route, 'disposition')
+        previous_verdict = proofs.get('disposition') or {}
+        if same_permission and previous_verdict.get('subject') == vproof.get('subject'):
+            vproof = inherit_bounds(previous_verdict, vproof)
         proofs['disposition'] = vproof
         proofs['requirement_detail'] = dict(vproof, note='The subcategory is read from the same verified verdict passage.')
         values = row.get('route_fields') or {}
@@ -534,6 +668,7 @@ def convert(manifest, current_layers):
             proof = (row.get('route_field_proofs') or {}).get(key)
             if proof is None:
                 continue
+            unpublished.difference_update(NOT_PUBLISHED_CELLS.get(key, ()))
             if proof.get('status') in ('unknown', 'not_published'):
                 for c in covered:
                     fields[c] = None
@@ -564,6 +699,7 @@ def convert(manifest, current_layers):
             product['disposition'] = pspec['disposition']
             product['requirement_detail'] = pspec['requirement_detail']
             pproofs = deepcopy(product.get('field_provenance') or {})
+            product_unpublished = set(product.get('unpublished_fields') or [])
             for field in PRODUCT_FIELDS:
                 proof = (spec.get('proofs') or {}).get(field)
                 unbound = isinstance(proof, dict) and str(proof.get('reason') or '').startswith('No literal official quote')
@@ -572,14 +708,16 @@ def convert(manifest, current_layers):
                     # value stays as it was, unsupported and untouched.
                     continue
                 if field in pspec and (proof is not None or action == 'add'):
+                    product_unpublished.difference_update(NOT_PUBLISHED_CELLS.get(field, ()))
                     if proof is not None and proof.get('status') in ('unknown', 'not_published'):
                         product[field] = None if field != 'fee' else {'amount': None, 'currency': None}
                         pproofs[field] = _proof_for(proof, route, field, product)
                         if proof.get('status') == 'not_published':
-                            unpublished.update(NOT_PUBLISHED_CELLS.get(field, ()))
+                            product_unpublished.update(NOT_PUBLISHED_CELLS.get(field, ()))
                     elif proof is not None:
                         product[field] = deepcopy(pspec[field])
                         pproofs[field] = _proof_for(proof, route, field, product)
+            product['unpublished_fields'] = sorted(product_unpublished)
             decision = (spec.get('proofs') or {}).get('disposition')
             if (decision is None or decision.get('status') != 'reviewed') \
                     and product['disposition'] == verdict['disposition'] \
@@ -600,6 +738,13 @@ def convert(manifest, current_layers):
                 final.append(product)
                 continue
             dproof = _proof_for(decision, route, 'disposition', product)
+            previous_decision = pproofs.get('disposition') or {}
+            if (action != 'add' and previous_decision.get('subject') == dproof.get('subject')
+                    and previous_decision.get('subject')):
+                # Rechecking this exact product cannot erase its own known
+                # interval. A renamed product or different permission/detail
+                # must not inherit the previous program's policy notice.
+                dproof = inherit_bounds(previous_decision, dproof)
             pproofs['disposition'] = dproof
             pproofs['requirement_detail'] = dict(dproof, note='The subcategory is read from the same verified verdict passage.')
             product['field_provenance'] = pproofs

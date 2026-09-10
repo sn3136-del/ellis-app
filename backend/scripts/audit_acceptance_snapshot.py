@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.visa_snapshot.tstation import CONTRACT_FIELDS, FIELD_ORDER
+from app.visa_snapshot.tstation import CONTRACT_FIELDS, FIELD_ORDER, acceptance_summary
 
 STATIONS = ('HKG', 'TWN', 'JPN', 'KOR', 'USA', 'THA', 'SGP', 'MYS', 'GBR',
             'RUS', 'AUS', 'IDN', 'PHL', 'FRA', 'VNM', 'ESP', 'IND', 'CAN')
@@ -60,6 +60,20 @@ def audit(payload):
         totals.append(summary['total'])
     if not totals or any(type(n) is not int or n != len(rows) for n in totals):
         raise ValueError('A paginated or incomplete snapshot cannot certify full coverage')
+    # Recompute from rows rather than trusting a supplied summary. The public
+    # serializer names this metadata differently from the internal projector.
+    # A recorded unpublished disposition is completion evidence, not a new
+    # verification of its official source by this read-only auditor.
+    normalized = []
+    for row in rows:
+        statuses = row.get('field_status', {})
+        if not isinstance(statuses, dict):
+            raise ValueError('Malformed field status metadata')
+        normalized.append({**row,
+            '_disputed': [f for f, status in statuses.items() if status == 'pending-review'],
+            '_unpublished': [f for f, status in statuses.items() if status == 'not-published'],
+            '_source_check': row.get('source_check')})
+    contract = acceptance_summary(normalized)
     counts = Counter(r.get('confidence_level') for r in rows)
     linked = sum(populated(r.get('source_url')) for r in rows)
     supported = sum(r.get('source_check') in SUPPORTED for r in rows)
@@ -95,10 +109,15 @@ def audit(payload):
             'Strict counts include every exported column; no N/A or unpublished exclusions.',
             'The numbered dictionary has 25 fields; the exported visa subcategory belongs to field 5.',
             'Pending review is never counted as operator approval.',
+            'Documented completion counts recorded Not applicable/Not published states; it does not reverify their sources.',
         ],
         'product_rows': len(rows), 'canonical_routes': len(routes),
         'exported_columns': len(fields), 'dashboard_required_columns': len(required),
         'contract_field_count': len(contract_fields),
+        **{key: contract[key] for key in (
+            'documented_completed_cells', 'documented_disposition_cells',
+            'documented_complete_records', 'documented_field_completeness_rate',
+            'documented_record_completeness_rate', 'documented_completion_policy')},
         'contract_field_completeness_percent': percent(
             sum(populated(r.get(f)) for r in rows for f in contract_fields),
             len(rows) * len(contract_fields)),

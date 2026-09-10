@@ -1,6 +1,6 @@
 # Data Caliber Manual — T-Station Visa Information Base
 
-Current implementation rules, revised 2026-09-09. This document describes the
+Current implementation rules, revised 2026-09-10. This document describes the
 verification and serving contract. It does not certify that every stored field
 has been verified or that every official page is readable.
 
@@ -29,10 +29,24 @@ using the bound's own official-jurisdiction source, verification date and exact
 quoted date. An inherited `policy_interval_evidence` notice retains its original
 evidence; bare interval dates or unrelated field dates do not fill this column.
 
-The API's `acceptance_summary` exposes both literal 25-field formulas: filled
-cells / all 25 cells, and records with all 25 non-null / all records. No blank
-exclusions apply to those metrics. The operational fillable metric separately
-excludes explicitly not-applicable and source-confirmed not-published fields.
+The user-approved completion target counts documented Not applicable and Not
+published states as complete across all 25 fields. Unknown, unsupported,
+optional-empty and pending-review cells remain gaps; policy values must not be
+invented to raise the score. `acceptance_summary` separately exposes documented
+completed cells/records and disposition counts. These measure recorded states,
+not an independent verification that every recorded disposition is correct.
+
+Both literal non-null diagnostics remain: filled cells / all 25 cells, and
+records with all 25 non-null / all records. They exclude no blanks. The separate
+operational applicable 20 metric uses the configured 20 required fields and
+excludes not-applicable/source-confirmed not-published cells from its denominator.
+
+On the 2026-09-10 02:29 UTC snapshot, documented 25 completeness is 29,093 /
+35,500 = 81.9521%, including 3,225 disposition cells; 0 of 1,420 records are
+complete across all 25. Operational applicable 20 completeness is 87.32%; literal
+non-null25 cells are 72.9718%. None is a claim of 100% completion or accuracy.
+The documented-state result was recomputed with the follow-up metric code from
+the recorded snapshot, not inferred from the older response's summary.
 The export splits item 5 into requirement and subcategory, producing 26 columns;
 the subcategory does not become a 26th contractual field. The offline acceptance
 auditor validates the exact dictionary and the API's declared complete row count.
@@ -122,17 +136,20 @@ The console reports the actual timer and durable worker status, including
 unfinished attempts, partial checks, unreadable sources and errors. A missing
 timer or dead worker cannot be displayed as a confirmed upcoming/completed run.
 
-The monthly report currently archives the operational fillable-field metric.
-For formal acceptance retain the full timestamped records snapshot and its
-literal25 audit as well; the operational metric is not a substitute.
+The monthly reporter and hardened offline auditor recompute all 25 metrics from
+the full records response, including public pending/unpublished metadata, rather
+than trusting a supplied summary. The monthly report retains operational metrics
+alongside literal 25 and documented 25 counts. Keep the timestamped snapshot and
+hash for reproducibility. Scheduled attempts, successful reads and recorded
+completion dispositions are distinct from verified policy accuracy.
 
 ## Historical documentation
 
-The September 3 HTML/PDF data-caliber documents and `requirement-ledger.html`
-retain earlier warranty-date and three-tier descriptions. They are historical
-and must be regenerated/reviewed before being delivered as current acceptance
-materials. This Markdown manual and the exported field dictionary describe the
-current explicit-policy-date semantics.
+The current bilingual HTML/PDF manuals and `requirement-ledger.html` replace the
+September 3 warranty-date and three-tier descriptions. They follow the current
+Markdown/manual and export dictionary. Earlier acceptance archives remain dated
+historical evidence; their PASS labels or signatures cannot be inferred as
+acceptance of this release.
 
 ## Reader and saved-workflow gates
 
