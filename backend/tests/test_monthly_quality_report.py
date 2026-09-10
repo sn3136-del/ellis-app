@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 import httpx
 import pytest
+from app.visa_snapshot.tstation import FIELD_ORDER, REQUIRED_FIELDS
 
 
 @pytest.fixture
@@ -20,11 +21,13 @@ def report():
 
 def payload():
     def row(status, check, held, confidence):
-        return {'field_status': {'visa_requirement': 'filled', 'visa_fee': status},
+        return {**dict.fromkeys(FIELD_ORDER, 'value'),
+            'visa_fee_amount': 0,
+            'field_status': {**dict.fromkeys(FIELD_ORDER, 'filled'), 'visa_fee_amount': status},
             'source_url': 'https://official.example/visa', 'source_check': check,
             'held': held, 'review_required': held, 'confidence_level': confidence}
-    return {'fields': ['visa_requirement', 'visa_fee'],
-        'required_fields': ['visa_requirement', 'visa_fee'],
+    return {'fields': list(FIELD_ORDER),
+        'required_fields': sorted(REQUIRED_FIELDS),
         'records': [row('pending-review', 'unchecked', True, 'Low'),
                     row('filled', 'ai-quote', False, 'High')],
         'summary': {'total': 2, 'source_coverage': 0.5}}
@@ -37,12 +40,45 @@ def config(token='private-' + 's' * 48):
 
 def test_counts_pending_separately_and_links_never_equal_source_evidence(report):
     out = report.quality_metrics(payload(), datetime(2026, 9, 9, tzinfo=timezone.utc))
-    assert out['field_completeness_pct'] == 75
+    assert out['field_completeness_pct'] == 97.5
     assert out['record_completeness_pct'] == out['high_confidence_pct'] == 50
     assert out['source_link_coverage_pct'] == 100 and out['source_coverage_pct'] == 50
     assert out['held_records'] == out['pending_review_records'] == 1
-    assert out['field_counts']['filled'] == 3 and out['field_counts']['pending-review'] == 1
+    assert out['field_counts']['filled'] == 51 and out['field_counts']['pending-review'] == 1
     assert 'do not certify' in out['scope']
+
+
+def test_literal_contract_metric_keeps_unpublished_blank_and_pending_value_visible(report):
+    data = payload()
+    data['records'][1]['info_validity'] = None
+    data['records'][1]['field_status']['info_validity'] = 'not-published'
+    out = report.quality_metrics(data, datetime(2026, 9, 10, tzinfo=timezone.utc))
+    contract = out['contract_acceptance_metrics']
+    assert contract['field_count'] == 25 and contract['required_cells'] == 50
+    assert contract['filled_cells'] == 49  # A real zero fee is populated.
+    assert contract['field_completeness_rate'] == 0.98
+    assert contract['complete_records'] == 1
+    assert contract['unchallenged_filled_cells'] == 48
+    assert contract['unchallenged_complete_records'] == 0
+    assert contract['pending_review_cells'] == 1
+    assert contract['requirement_support_rate'] == 0.5
+    assert contract['accuracy_certified'] is False
+    assert out['complete_records'] == 1  # Explicit unpublished disposition is separate.
+
+
+@pytest.mark.parametrize('fault', ['short-fields', 'unknown-field', 'short-required', 'duplicate-required'])
+def test_contract_denominator_cannot_be_shrunk_by_payload_schema(report, fault):
+    data = payload()
+    if fault == 'short-fields':
+        data['fields'] = ['visa_requirement']
+    elif fault == 'unknown-field':
+        data['fields'][-1] = 'unknown'
+    elif fault == 'short-required':
+        data['required_fields'] = ['visa_requirement']
+    else:
+        data['required_fields'].append(data['required_fields'][0])
+    with pytest.raises(ValueError, match='schema or record count'):
+        report.quality_metrics(data, datetime(2026, 9, 10, tzinfo=timezone.utc))
 
 
 def test_loopback_request_uses_bound_private_credential_and_writes_private_atomic_report(report, monkeypatch, tmp_path, capsys):

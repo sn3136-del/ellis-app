@@ -15,6 +15,7 @@ import httpx
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.config import settings
+from app.visa_snapshot.tstation import CONTRACT_FIELDS, FIELD_ORDER, REQUIRED_FIELDS, acceptance_summary
 
 REPORT_DIR = Path('/var/lib/ellis/quality-reports')
 RECORDS_URL = 'http://127.0.0.1:8000/database/records'
@@ -49,8 +50,10 @@ def quality_metrics(payload: dict, at: datetime) -> dict:
         ('records', 'fields', 'required_fields', 'summary'))
     if (not isinstance(records, list) or not isinstance(fields, list) or not fields
             or not all(isinstance(f, str) for f in fields) or len(fields) != len(set(fields))
+            or set(fields) not in (set(CONTRACT_FIELDS), set(FIELD_ORDER))
             or not isinstance(required, list) or not required
-            or not all(isinstance(f, str) for f in required) or not set(required) <= set(fields)
+            or not all(isinstance(f, str) for f in required) or len(required) != len(set(required))
+            or set(required) != REQUIRED_FIELDS
             or not isinstance(summary, dict) or summary.get('total') != len(records)):
         raise ValueError('The records API schema or record count is incomplete')
     all_counts, required_counts, confidence = Counter(), Counter(), Counter()
@@ -90,6 +93,14 @@ def quality_metrics(payload: dict, at: datetime) -> dict:
 
     required_denominator = sum(required_counts[s] for s in
         ('filled', 'pending-review', 'missing', 'optional-empty'))
+    # Recompute the literal contractual denominator from the complete snapshot.
+    # The public serializer uses field_status/source_check instead of the
+    # internal metadata consumed by acceptance_summary. Pending values stay
+    # populated but are excluded from the separately labelled unchallenged count.
+    contract = acceptance_summary([{**row,
+        '_disputed': [field for field, status in row['field_status'].items()
+                      if status == 'pending-review'],
+        '_source_check': row['source_check']} for row in records])
     return {'at': at.astimezone(timezone.utc).isoformat(), 'records': total,
         'field_completeness_pct': pct(required_counts['filled'], required_denominator),
         'record_completeness_pct': pct(complete, total),
@@ -102,9 +113,11 @@ def quality_metrics(payload: dict, at: datetime) -> dict:
         'field_counts': {s: all_counts[s] for s in STATES},
         'required_field_counts': {s: required_counts[s] for s in STATES},
         'confidence_counts': {s: confidence[s] for s in ('high', 'low')},
+        'contract_acceptance_metrics': contract,
         'scope': 'Snapshot of records/products, not unique routes. Completeness counts filled applicable '
             'required fields; pending review is not filled. Source coverage counts supported visa-verdict '
-            'evidence, not bare links. These metrics do not certify every detail or current policy accuracy.'}
+            'evidence, not bare links. Contract acceptance metrics independently count all 25 dictionary '
+            'fields, with no blank exclusions. These metrics do not certify every detail or current policy accuracy.'}
 
 
 def write_report(path: Path, report: dict) -> None:
