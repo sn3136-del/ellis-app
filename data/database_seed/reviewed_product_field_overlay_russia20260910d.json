@@ -1,0 +1,2876 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "entries": [
+    {
+      "fields": {
+        "government_fee": null,
+        "permitted_stay_days": 30,
+        "visa_products": [
+          {
+            "type": "Unified electronic visa (tourism)",
+            "requirement_detail": "evisa",
+            "entry": "single",
+            "validity": "120 days from the date of issue",
+            "max_stay_days": 30,
+            "fee": {
+              "amount": null,
+              "currency": null
+            },
+            "processing_time": "No more than 4 calendar days, excluding the day of application or corrected resubmission. Apply from 86 to 4 days before planned entry.",
+            "application_channel": "online_portal",
+            "application_channel_detail": "Apply online through the Russian MFA e-visa portal or official mobile app; complete payment and wait for issuance.",
+            "required_documents": [
+              "Machine-readable national passport valid at least 6 months from e-visa application and with space for border stamps",
+              "JPEG image of the passport data page",
+              "JPEG face photograph meeting the portal requirements",
+              "Email address for application notifications",
+              "Bank card accepted by the payment service"
+            ],
+            "entry_requirements": "Use the same passport and show the issued e-visa notification at boarding and the border. Enter and leave only through checkpoints approved for unified e-visas. Leave within the 30-day stay and the visa’s 120-day validity; arrival and departure each count as a day. Medical insurance valid in Russia for the whole stay is required unless a published reciprocity exemption applies.",
+            "exceptions": [
+              "Unified e-visas permit tourism, private or business visits and the events specified by the Russian MFA. Other purposes need the appropriate regular visa.",
+              "No invitation letter, hotel-booking confirmation or other documentary proof of travel purpose is required for the unified e-visa application. Provide intended accommodation contact details in the form.",
+              "If you already have a valid Russian visa, travel under that visa; a new e-visa does not extend its validity.",
+              "Every child needs a separate e-visa. No consular fee is charged for applicants under 6; payment-provider charges must be checked in the application.",
+              "The issued notification can be printed or displayed on a mobile device. Only approved e-visa border checkpoints may be used for entry and exit."
+            ],
+            "notes": "Pay the fee shown by the official application service. Invoices may be denominated in yuan or dirhams, with bank currency conversion.",
+            "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+            "source_quote": "The list of foreign States whose nationals can apply for e-visa:",
+            "verified_at": "2026-09-09",
+            "verifier": "ai",
+            "corroborating_sources": [
+              {
+                "url": "https://electronic-visa.kdmid.ru/country_en.html",
+                "quote": "France",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              }
+            ],
+            "disposition": "VISA_REQUIRED",
+            "field_provenance": {
+              "entry": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "The unified e-visa is a single entry visa.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Unified e-visa.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "validity": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "The validity period of a unified electronic visa is 120 days from the date of issue.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Unified e-visa issued from 23 August 2025.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "max_stay_days": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Unified e-visa.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "fee": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "Not published by the destination: The MFA e-visa pages and the Russian Embassy in France state that a fee is charged but do not publish the amount.",
+                "note": "Not published by the destination: The MFA e-visa pages and the Russian Embassy in France state that a fee is charged but do not publish the amount.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "disposition": {
+                "source_id": "s10",
+                "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+                "quote": "The list of foreign States whose nationals can apply for e-visa:",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "French citizens, tourism.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "France"
+                ]
+              },
+              "requirement_detail": {
+                "source_id": "s10",
+                "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+                "quote": "The list of foreign States whose nationals can apply for e-visa:",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "The subcategory is read from the same verified verdict passage.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "France"
+                ]
+              }
+            }
+          },
+          {
+            "type": "Single-entry tourist visa",
+            "entry": "single",
+            "validity": "Up to 3 months",
+            "max_stay_days": 30,
+            "fee": null,
+            "notes": null,
+            "requirement_detail": "paper_visa",
+            "processing_time": null,
+            "application_channel": null,
+            "application_channel_detail": null,
+            "required_documents": null,
+            "entry_requirements": null,
+            "source_url": "https://www.kdmid.ru/cons/visas/",
+            "source_quote": null,
+            "verified_at": null,
+            "field_provenance": {
+              "type": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "validity": {
+                "source_id": "rus-central-ordinary-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI product-validity field review",
+                "status": "reviewed",
+                "note": "FRA→RUS, ordinary passport, independent tourism; existing single-entry paper product 'Single-entry tourist visa'. The Russian MFA expressly distinguishes ordinary tourist single/double entry (maximum three months) from multiple entry (maximum six months). The replacement is a maximum visa-validity bound, not a promise of a three-month grant and not a permitted-stay duration. Keep the current entry count, stay and all other product facts unchanged. No nationality eligibility verdict, fee, freshness or release is reviewed by this patch. The current Russian MFA France bilateral index lists the EU facilitation agreement as suspended and publishes no separate French ordinary-tourist single/double six-month term. The current central tourist-product maximum is the supported correction; local application requirements are not imported from another country.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "product_validity_only"
+              },
+              "max_stay_days": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "fee": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "notes": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "requirement_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "processing_time": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "required_documents": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry_requirements": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "source_url": {
+                "source_id": "rus-central-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI source-reference review",
+                "status": "reviewed",
+                "note": "Reference only for FRA→RUS ordinary tourism, existing product 'Single-entry tourist visa'. The Russian MFA national tourist-visa section expressly discusses single/double/multiple ordinary tourist visas. This proof establishes source relevance only, not nationality eligibility, entry-count entitlement, granted validity, stay, fee, documents or product verification. The restricted nationality list for the hotel-booking application basis must not be generalized to all paper-visa products.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "source_reference_only"
+              },
+              "verified_at": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              }
+            },
+            "disposition": "VISA_REQUIRED"
+          },
+          {
+            "type": "Double-entry tourist visa",
+            "entry": "double",
+            "validity": "Up to 3 months",
+            "max_stay_days": 30,
+            "fee": null,
+            "notes": null,
+            "requirement_detail": "paper_visa",
+            "processing_time": null,
+            "application_channel": null,
+            "application_channel_detail": null,
+            "required_documents": null,
+            "entry_requirements": null,
+            "source_url": "https://www.kdmid.ru/cons/visas/",
+            "source_quote": null,
+            "verified_at": null,
+            "field_provenance": {
+              "type": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "validity": {
+                "source_id": "rus-central-ordinary-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI product-validity field review",
+                "status": "reviewed",
+                "note": "FRA→RUS, ordinary passport, independent tourism; existing double-entry paper product 'Double-entry tourist visa'. The Russian MFA expressly distinguishes ordinary tourist single/double entry (maximum three months) from multiple entry (maximum six months). The replacement is a maximum visa-validity bound, not a promise of a three-month grant and not a permitted-stay duration. Keep the current entry count, stay and all other product facts unchanged. No nationality eligibility verdict, fee, freshness or release is reviewed by this patch. The current Russian MFA France bilateral index lists the EU facilitation agreement as suspended and publishes no separate French ordinary-tourist single/double six-month term. The current central tourist-product maximum is the supported correction; local application requirements are not imported from another country.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "product_validity_only"
+              },
+              "max_stay_days": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "fee": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "notes": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "requirement_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "processing_time": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "required_documents": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry_requirements": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "source_url": {
+                "source_id": "rus-central-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI source-reference review",
+                "status": "reviewed",
+                "note": "Reference only for FRA→RUS ordinary tourism, existing product 'Double-entry tourist visa'. The Russian MFA national tourist-visa section expressly discusses single/double/multiple ordinary tourist visas. This proof establishes source relevance only, not nationality eligibility, entry-count entitlement, granted validity, stay, fee, documents or product verification. The restricted nationality list for the hotel-booking application basis must not be generalized to all paper-visa products.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "source_reference_only"
+              },
+              "verified_at": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              }
+            },
+            "disposition": "VISA_REQUIRED"
+          },
+          {
+            "type": "Multiple-entry tourist visa",
+            "disposition": "VISA_REQUIRED",
+            "requirement_detail": "paper_visa",
+            "entry": null,
+            "validity": null,
+            "max_stay_days": null,
+            "fee": {
+              "amount": null,
+              "currency": null
+            },
+            "field_provenance": {
+              "entry": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "No literal official quote was captured for this value",
+                "note": "No literal official quote was captured for this value",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "validity": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "No literal official quote was captured for this value",
+                "note": "No literal official quote was captured for this value",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "max_stay_days": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "No literal official quote was captured for this value",
+                "note": "No literal official quote was captured for this value",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "fee": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "No literal official quote was captured for this value",
+                "note": "No literal official quote was captured for this value",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "source_url": {
+                "source_id": "rus-central-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI source-reference review",
+                "status": "reviewed",
+                "note": "Reference only for FRA→RUS ordinary tourism, existing product 'Multiple-entry tourist visa'. The Russian MFA national tourist-visa section expressly discusses single/double/multiple ordinary tourist visas. This proof establishes source relevance only, not nationality eligibility, entry-count entitlement, granted validity, stay, fee, documents or product verification. The restricted nationality list for the hotel-booking application basis must not be generalized to all paper-visa products.",
+                "subject": {
+                  "passport_nationality": "FRA",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "source_reference_only"
+              }
+            },
+            "source_url": "https://www.kdmid.ru/cons/visas/"
+          }
+        ],
+        "processing_time": "No more than 4 calendar days from the date of submission",
+        "consular_jurisdiction": "Apply at the Russian consular office covering your place of permanent residence.",
+        "disposition": "VISA_REQUIRED",
+        "requirement_detail": "evisa",
+        "visa_category": "Unified electronic visa (tourism)",
+        "permitted_stay": "Up to 30 days from the date of entry on a unified e-visa, within its 120 day validity",
+        "application_channel": "online_portal",
+        "application_channel_detail": "Apply online through the Russian MFA e-visa portal or official mobile app; complete payment and wait for issuance.",
+        "official_portal_url": "https://evisa.kdmid.ru/",
+        "required_documents": [
+          "Machine-readable passport issued by France and valid at least 6 months from the date of application",
+          "Scan of the passport data page in JPEG format",
+          "Digital face photograph in JPEG format meeting the portal requirements",
+          "Bank card for online payment of the fee",
+          "Medical insurance valid in Russia for the whole stay"
+        ],
+        "entry_requirements": "Use the same passport and show the issued e-visa notification at boarding and the border. Enter and leave only through checkpoints approved for unified e-visas. Leave within the 30-day stay and the visa’s 120-day validity; arrival and departure each count as a day. Medical insurance valid in Russia for the whole stay is required unless a published reciprocity exemption applies.",
+        "passport_validity": "Machine-readable national passport valid at least 6 months from the date of e-visa application, with space for border stamps.",
+        "passport_validity_requirement": null,
+        "appointment_required": false,
+        "biometrics_required": null,
+        "accommodation_evidence": "Provide the intended accommodation’s name, address and telephone number. Hotel-booking confirmation is not required for the e-visa application.",
+        "financial_evidence": null,
+        "onward_travel_evidence": null,
+        "exceptions": [
+          "No consular fee is charged for e-visa applications for children under 6 years of age",
+          "Each child needs a separate e-visa application",
+          "The e-visa is valid only for entry and exit through the border crossing points listed on the portal",
+          "Travellers who prefer a longer or multiple-entry stay can apply for a regular tourist visa at the Russian Embassy in France"
+        ],
+        "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+        "corroborating_sources": [
+          {
+            "url": "https://electronic-visa.kdmid.ru/country_en.html",
+            "quote": "The list of foreign States whose nationals can apply for e-visa:",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/",
+            "quote": "Могут въезжать по электронной визе на срок до 30 дней.",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://electronic-visa.kdmid.ru/faq_en.html",
+            "quote": "the invoice is issued in dirhams or yuan",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "arrival_card": null,
+        "unpublished_fields": [
+          "visa_fee_amount",
+          "visa_fee_currency"
+        ]
+      },
+      "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+      "verified_at": "2026-09-09",
+      "verified_by": "Ellis AI official-source field review",
+      "verifier": "ai",
+      "field_provenance": {
+        "government_fee": {
+          "status": "unknown",
+          "verifier": "ai",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "Not published by the destination: Neither evisa.kdmid.ru, electronic-visa.kdmid.ru nor the Russian Embassy in France publishes the e-visa fee amount on their pages, they only state that a fee is charged."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa for all eligible nationalities including France.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "The validity period of a unified electronic visa is 120 days from the date of issue."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "FRA",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+        },
+        "visa_products": {
+          "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Product rows carry their own reviewed verdict proofs.",
+          "source_id": "s10",
+          "supporting_evidence": [
+            {
+              "source_id": "s26",
+              "source_url": "https://evisa.kdmid.ru/",
+              "quote": "Only citizens of the following foreign countries, the list of which is approved by the Government of the Russian Federation, are eligible for the unified e-visa."
+            },
+            {
+              "source_id": "s26",
+              "source_url": "https://evisa.kdmid.ru/",
+              "quote": "The unified e-visa is a single entry visa."
+            }
+          ],
+          "additional_quotes": [
+            "France"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "FRA",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The list of foreign States whose nationals can apply for e-visa:"
+        },
+        "processing_time": {
+          "source_url": "https://electronic-visa.kdmid.ru/index_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa.",
+          "source_id": "s12",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "FRA",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "An e-visa is issued within 4 calendar days, including week-ends and bank holidays."
+        },
+        "consular_jurisdiction": {
+          "source_url": "https://www.kdmid.ru/cons/visas/",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+        },
+        "disposition": {
+          "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "French ordinary passport, tourism. France is on the Russian MFA e-visa country list, so a unified e-visa obtained online before travel is the standard route. A regular tourist visa from the Russian Embassy in France remains available.",
+          "source_id": "s10",
+          "supporting_evidence": [
+            {
+              "source_id": "s26",
+              "source_url": "https://evisa.kdmid.ru/",
+              "quote": "Only citizens of the following foreign countries, the list of which is approved by the Government of the Russian Federation, are eligible for the unified e-visa."
+            },
+            {
+              "source_id": "s26",
+              "source_url": "https://evisa.kdmid.ru/",
+              "quote": "The unified e-visa is a single entry visa."
+            }
+          ],
+          "additional_quotes": [
+            "France"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "FRA",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The list of foreign States whose nationals can apply for e-visa:"
+        },
+        "requirement_detail": {
+          "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "The subcategory is read from the same verified verdict passage.",
+          "source_id": "s10",
+          "supporting_evidence": [
+            {
+              "source_id": "s26",
+              "source_url": "https://evisa.kdmid.ru/",
+              "quote": "Only citizens of the following foreign countries, the list of which is approved by the Government of the Russian Federation, are eligible for the unified e-visa."
+            },
+            {
+              "source_id": "s26",
+              "source_url": "https://evisa.kdmid.ru/",
+              "quote": "The unified e-visa is a single entry visa."
+            }
+          ],
+          "additional_quotes": [
+            "France"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "FRA",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The list of foreign States whose nationals can apply for e-visa:"
+        },
+        "visa_category": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "permitted_stay": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa for all eligible nationalities including France.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "The validity period of a unified electronic visa is 120 days from the date of issue."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "FRA",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+        },
+        "application_channel": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "application_channel_detail": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "official_portal_url": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "required_documents": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "Digital photo of your face in JPEG format that meets the requirements."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "FRA",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Your passport must be machine-readable and issued by your country of nationality."
+        },
+        "entry_requirements": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "passport_validity": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "appointment_required": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "biometrics_required": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: No fixed requirement for this field established by the current unified e-visa application guidance. Clear unsupported inherited paper-visa assertion; leave unknown."
+        },
+        "accommodation_evidence": {
+          "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: the invoice is issued in dirhams or yuan Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "financial_evidence": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: No fixed requirement for this field established by the current unified e-visa application guidance. Clear unsupported inherited paper-visa assertion; leave unknown."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: No fixed requirement for this field established by the current unified e-visa application guidance. Clear unsupported inherited paper-visa assertion; leave unknown."
+        },
+        "exceptions": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa.",
+          "source_id": "s26",
+          "supporting_evidence": [
+            {
+              "source_id": "s11",
+              "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
+              "quote": "a separate application for an electronic visa must be submitted for each child"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "FRA",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "No consular fee is charged in case of e-visa applications for children under 6 years of age."
+        },
+        "source_url": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "corroborating_sources": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "arrival_card": {
+          "status": "unknown",
+          "verifier": "ai",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "None of the official pages fetched (evisa.kdmid.ru, electronic-visa.kdmid.ru, france.mid.ru) mention an arrival or migration card."
+        },
+        "unpublished_fields": {
+          "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "French ordinary passport, tourism. France is on the Russian MFA e-visa country list, so a unified e-visa obtained online before travel is the standard route. A regular tourist visa from the Russian Embassy in France remains available."
+        }
+      },
+      "note": "French ordinary passport, tourism. France is on the Russian MFA e-visa country list, so a unified e-visa obtained online before travel is the standard route. A regular tourist visa from the Russian Embassy in France remains available.",
+      "route": {
+        "nationality": "FRA",
+        "destination": "RUS",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "rus-single-double-validity-20260910d",
+      "partial_review": true,
+      "field_review_scope": "product_validity_only"
+    },
+    {
+      "fields": {
+        "government_fee": null,
+        "permitted_stay_days": 30,
+        "visa_products": [
+          {
+            "type": "Unified electronic visa (tourism)",
+            "requirement_detail": "evisa",
+            "entry": "single",
+            "validity": "120 days from the date of issue",
+            "max_stay_days": 30,
+            "fee": null,
+            "processing_time": "No more than 4 calendar days, excluding the day of application or corrected resubmission. Apply from 86 to 4 days before planned entry.",
+            "application_channel": "online_portal",
+            "application_channel_detail": "Apply online through the Russian MFA e-visa portal or official mobile app; complete payment and wait for issuance.",
+            "required_documents": [
+              "Machine-readable national passport valid at least 6 months from e-visa application and with space for border stamps",
+              "JPEG image of the passport data page",
+              "JPEG face photograph meeting the portal requirements",
+              "Email address for application notifications",
+              "Bank card accepted by the payment service"
+            ],
+            "entry_requirements": "Use the same passport and show the issued e-visa notification at boarding and the border. Enter and leave only through checkpoints approved for unified e-visas. Leave within the 30-day stay and the visa’s 120-day validity; arrival and departure each count as a day. Medical insurance valid in Russia for the whole stay is required unless a published reciprocity exemption applies.",
+            "exceptions": [
+              "Unified e-visas permit tourism, private or business visits and the events specified by the Russian MFA. Other purposes need the appropriate regular visa.",
+              "No invitation letter, hotel-booking confirmation or other documentary proof of travel purpose is required for the unified e-visa application. Provide intended accommodation contact details in the form.",
+              "If you already have a valid Russian visa, travel under that visa; a new e-visa does not extend its validity.",
+              "Every child needs a separate e-visa. No consular fee is charged for applicants under 6; payment-provider charges must be checked in the application.",
+              "The issued notification can be printed or displayed on a mobile device. Only approved e-visa border checkpoints may be used for entry and exit."
+            ],
+            "notes": "Pay the fee shown by the official application service. Invoices may be denominated in yuan or dirhams, with bank currency conversion.",
+            "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+            "source_quote": "The list of foreign States whose nationals can apply for e-visa:",
+            "verified_at": "2026-09-09",
+            "verifier": "ai",
+            "corroborating_sources": [
+              {
+                "url": "https://electronic-visa.kdmid.ru/country_en.html",
+                "quote": "India",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              },
+              {
+                "url": "https://evisa.kdmid.ru/",
+                "quote": "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry.",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              }
+            ],
+            "disposition": "VISA_REQUIRED",
+            "field_provenance": {
+              "entry": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "The unified e-visa is a single entry visa.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "All e-visa holders.",
+                "subject": {
+                  "passport_nationality": "IND",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "validity": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "The validity period of a unified electronic visa is 120 days from the date of issue.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "All e-visa holders.",
+                "subject": {
+                  "passport_nationality": "IND",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "max_stay_days": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "All e-visa holders.",
+                "subject": {
+                  "passport_nationality": "IND",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "The day of arrival and the day of departure are counted as two days."
+                ]
+              },
+              "disposition": {
+                "source_id": "s10",
+                "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+                "quote": "The list of foreign States whose nationals can apply for e-visa:",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Ordinary Indian passport, tourism. Diplomatic and official passport holders are visa free for up to 90 days and are out of scope.",
+                "subject": {
+                  "passport_nationality": "IND",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "India"
+                ],
+                "supporting_evidence": [
+                  {
+                    "source_id": "s26",
+                    "source_url": "https://evisa.kdmid.ru/",
+                    "quote": "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+                  }
+                ]
+              },
+              "requirement_detail": {
+                "source_id": "s10",
+                "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+                "quote": "The list of foreign States whose nationals can apply for e-visa:",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "The subcategory is read from the same verified verdict passage.",
+                "subject": {
+                  "passport_nationality": "IND",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "India"
+                ],
+                "supporting_evidence": [
+                  {
+                    "source_id": "s26",
+                    "source_url": "https://evisa.kdmid.ru/",
+                    "quote": "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "Single-entry tourist visa (sticker)",
+            "entry": "single",
+            "validity": "Up to 3 months",
+            "max_stay_days": 30,
+            "fee": null,
+            "notes": null,
+            "requirement_detail": "paper_visa",
+            "processing_time": null,
+            "application_channel": null,
+            "application_channel_detail": null,
+            "required_documents": null,
+            "entry_requirements": null,
+            "source_url": "https://www.kdmid.ru/cons/visas/",
+            "source_quote": null,
+            "verified_at": null,
+            "field_provenance": {
+              "type": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "validity": {
+                "source_id": "rus-central-ordinary-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI product-validity field review",
+                "status": "reviewed",
+                "note": "IND→RUS, ordinary passport, independent tourism; existing single-entry paper product 'Single-entry tourist visa (sticker)'. The Russian MFA expressly distinguishes ordinary tourist single/double entry (maximum three months) from multiple entry (maximum six months). The replacement is a maximum visa-validity bound, not a promise of a three-month grant and not a permitted-stay duration. Keep the current entry count, stay and all other product facts unchanged. No nationality eligibility verdict, fee, freshness or release is reviewed by this patch. The Russian MFA-published 4 February 2016 reciprocal agreement explicitly concerns MULTIPLE-entry tourist visas for up to six months, with each stay at most30 days and aggregate90/180. It does not extend these single/double products to six months. The hotel-booking route does not override the single/double maximum.",
+                "subject": {
+                  "passport_nationality": "IND",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist visa (sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "product_validity_only"
+              },
+              "max_stay_days": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "fee": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "notes": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "requirement_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "processing_time": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "required_documents": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry_requirements": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "source_url": {
+                "source_id": "rus-central-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI source-reference review",
+                "status": "reviewed",
+                "note": "Reference only for IND→RUS ordinary tourism, existing product 'Single-entry tourist visa (sticker)'. The Russian MFA national tourist-visa section expressly discusses single/double/multiple ordinary tourist visas. This proof establishes source relevance only, not nationality eligibility, entry-count entitlement, granted validity, stay, fee, documents or product verification. The restricted nationality list for the hotel-booking application basis must not be generalized to all paper-visa products.",
+                "subject": {
+                  "passport_nationality": "IND",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist visa (sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "source_reference_only"
+              },
+              "verified_at": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              }
+            },
+            "disposition": "VISA_REQUIRED"
+          },
+          {
+            "type": "Double-entry tourist visa (sticker)",
+            "entry": "double",
+            "validity": "Up to 3 months",
+            "max_stay_days": 30,
+            "fee": null,
+            "notes": null,
+            "requirement_detail": "paper_visa",
+            "processing_time": null,
+            "application_channel": null,
+            "application_channel_detail": null,
+            "required_documents": null,
+            "entry_requirements": null,
+            "source_url": "https://www.kdmid.ru/cons/visas/",
+            "source_quote": null,
+            "verified_at": null,
+            "field_provenance": {
+              "type": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "validity": {
+                "source_id": "rus-central-ordinary-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI product-validity field review",
+                "status": "reviewed",
+                "note": "IND→RUS, ordinary passport, independent tourism; existing double-entry paper product 'Double-entry tourist visa (sticker)'. The Russian MFA expressly distinguishes ordinary tourist single/double entry (maximum three months) from multiple entry (maximum six months). The replacement is a maximum visa-validity bound, not a promise of a three-month grant and not a permitted-stay duration. Keep the current entry count, stay and all other product facts unchanged. No nationality eligibility verdict, fee, freshness or release is reviewed by this patch. The Russian MFA-published 4 February 2016 reciprocal agreement explicitly concerns MULTIPLE-entry tourist visas for up to six months, with each stay at most30 days and aggregate90/180. It does not extend these single/double products to six months. The hotel-booking route does not override the single/double maximum.",
+                "subject": {
+                  "passport_nationality": "IND",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist visa (sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "product_validity_only"
+              },
+              "max_stay_days": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "fee": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "notes": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "requirement_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "processing_time": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "required_documents": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry_requirements": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "source_url": {
+                "source_id": "rus-central-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI source-reference review",
+                "status": "reviewed",
+                "note": "Reference only for IND→RUS ordinary tourism, existing product 'Double-entry tourist visa (sticker)'. The Russian MFA national tourist-visa section expressly discusses single/double/multiple ordinary tourist visas. This proof establishes source relevance only, not nationality eligibility, entry-count entitlement, granted validity, stay, fee, documents or product verification. The restricted nationality list for the hotel-booking application basis must not be generalized to all paper-visa products.",
+                "subject": {
+                  "passport_nationality": "IND",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist visa (sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "source_reference_only"
+              },
+              "verified_at": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              }
+            },
+            "disposition": "VISA_REQUIRED"
+          }
+        ],
+        "consular_jurisdiction": "Apply at the Russian consular office covering your place of permanent residence.",
+        "disposition": "VISA_REQUIRED",
+        "requirement_detail": "evisa",
+        "visa_category": "Unified electronic visa (tourism)",
+        "permitted_stay": "Up to 30 days from the date of entry within the 120 day e-visa validity, arrival and departure days each count",
+        "application_channel": "online_portal",
+        "application_channel_detail": "Apply online through the Russian MFA e-visa portal or official mobile app; complete payment and wait for issuance.",
+        "official_portal_url": "https://evisa.kdmid.ru/",
+        "processing_time": "No more than 4 calendar days from the date of submission",
+        "required_documents": [
+          "Machine-readable passport issued by India, valid at least 6 months from the application date, with space for border stamps",
+          "Digital photo of the passport data page in JPEG format",
+          "Digital face photo in JPEG format meeting the portal requirements",
+          "Bank card to pay the visa fee",
+          "Medical insurance valid in Russia for the whole stay"
+        ],
+        "entry_requirements": "Use the same passport and show the issued e-visa notification at boarding and the border. Enter and leave only through checkpoints approved for unified e-visas. Leave within the 30-day stay and the visa’s 120-day validity; arrival and departure each count as a day. Medical insurance valid in Russia for the whole stay is required unless a published reciprocity exemption applies.",
+        "passport_validity": "Machine-readable national passport valid at least 6 months from the date of e-visa application, with space for border stamps.",
+        "passport_validity_requirement": null,
+        "appointment_required": false,
+        "biometrics_required": null,
+        "accommodation_evidence": "Provide the intended accommodation’s name, address and telephone number. Hotel-booking confirmation is not required for the e-visa application.",
+        "financial_evidence": null,
+        "onward_travel_evidence": null,
+        "exceptions": [
+          "Holders of Indian diplomatic and official passports may enter visa free for up to 90 days",
+          "Indian citizens who are aircraft crew members may enter visa free",
+          "No consular fee is charged for e-visa applicants under 6 years of age",
+          "Travellers holding a valid regular Russian visa do not need an e-visa"
+        ],
+        "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+        "corroborating_sources": [
+          {
+            "url": "https://electronic-visa.kdmid.ru/country_en.html",
+            "quote": "The list of foreign States whose nationals can apply for e-visa:",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/",
+            "quote": "Могут въезжать по электронной визе на срок до 30 дней.",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://electronic-visa.kdmid.ru/faq_en.html",
+            "quote": "the invoice is issued in dirhams or yuan",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "arrival_card": null,
+        "unpublished_fields": []
+      },
+      "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+      "verified_at": "2026-09-09",
+      "verified_by": "Ellis AI official-source field review",
+      "verifier": "ai",
+      "field_provenance": {
+        "government_fee": {
+          "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: the invoice is issued in dirhams or yuan Scope: Unsupported USD52 total removed. Official FAQ describes invoices in dirhams or yuan and currency conversion; no fixed adult amount established in the current public pages read. Null is an unverified amount, not a zero fee or unpublished claim."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa, all eligible nationalities including India.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "The day of arrival and the day of departure are counted as two days."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "IND",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+        },
+        "visa_products": {
+          "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Product rows carry their own reviewed verdict proofs.",
+          "source_id": "s10",
+          "supporting_evidence": [
+            {
+              "source_id": "s26",
+              "source_url": "https://evisa.kdmid.ru/",
+              "quote": "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+            }
+          ],
+          "additional_quotes": [
+            "India"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "IND",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The list of foreign States whose nationals can apply for e-visa:"
+        },
+        "consular_jurisdiction": {
+          "source_url": "https://www.kdmid.ru/cons/visas/",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+        },
+        "disposition": {
+          "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary Indian passport, tourism. Diplomatic and official passport holders are visa free for up to 90 days and are out of scope.",
+          "source_id": "s10",
+          "supporting_evidence": [
+            {
+              "source_id": "s26",
+              "source_url": "https://evisa.kdmid.ru/",
+              "quote": "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+            }
+          ],
+          "additional_quotes": [
+            "India"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "IND",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The list of foreign States whose nationals can apply for e-visa:"
+        },
+        "requirement_detail": {
+          "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "The subcategory is read from the same verified verdict passage.",
+          "source_id": "s10",
+          "supporting_evidence": [
+            {
+              "source_id": "s26",
+              "source_url": "https://evisa.kdmid.ru/",
+              "quote": "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+            }
+          ],
+          "additional_quotes": [
+            "India"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "IND",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The list of foreign States whose nationals can apply for e-visa:"
+        },
+        "visa_category": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "permitted_stay": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa, all eligible nationalities including India.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "The day of arrival and the day of departure are counted as two days."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "IND",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+        },
+        "application_channel": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "application_channel_detail": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "official_portal_url": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "processing_time": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa only.",
+          "source_id": "s26",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "IND",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Applications for a unified e-visa will be processed in no more than 4 calendar days from the date of submission of the application."
+        },
+        "required_documents": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa. The insurance exemption list was not readable on the fetched page, so insurance is listed as required for Indian citizens.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "Digital photo of your passport data in JPEG format.",
+            "Bank card for paying the visa fee.",
+            "E-visa applicants are not required to submit an invitation letter, hotel booking confirmation or any other document confirming the purpose of their travel to the Russian Federation.",
+            "Foreign citizens staying in the Russian Federation on the basis of unified e-visas are required to have a medical insurance valid in the territory of the Russian Federation for the entire duration of their stay, with the exception of citizens of the following foreign countries who are exempt from this requirement on the basis of reciprocity."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "IND",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Your passport must be machine-readable and issued by your country of nationality. Your passport must be valid for at least 6 months from the date of submitting the application for a unified e-visa."
+        },
+        "entry_requirements": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "passport_validity": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "appointment_required": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "biometrics_required": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: No fixed requirement for this field established by the current unified e-visa application guidance. Clear unsupported inherited paper-visa assertion; leave unknown."
+        },
+        "accommodation_evidence": {
+          "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: the invoice is issued in dirhams or yuan Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "financial_evidence": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: No fixed requirement for this field established by the current unified e-visa application guidance. Clear unsupported inherited paper-visa assertion; leave unknown."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: No fixed requirement for this field established by the current unified e-visa application guidance. Clear unsupported inherited paper-visa assertion; leave unknown."
+        },
+        "exceptions": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Exceptions stated by the Russian Embassy in India and the MFA e-visa portal.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "If you have a valid Russian visa in your passport, you do not need to apply for a unified e-visa."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "IND",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "No consular fee is charged in case of e-visa applications for children under 6 years of age."
+        },
+        "source_url": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "corroborating_sources": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "arrival_card": {
+          "status": "unknown",
+          "verifier": "ai",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "Neither evisa.kdmid.ru nor india.mid.ru mention an arrival or migration card, so no official statement was found."
+        },
+        "unpublished_fields": {
+          "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary Indian passport, tourism. Diplomatic and official passport holders are visa free for up to 90 days and are out of scope."
+        }
+      },
+      "note": "Ordinary Indian passport, tourism. Diplomatic and official passport holders are visa free for up to 90 days and are out of scope.",
+      "route": {
+        "nationality": "IND",
+        "destination": "RUS",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "rus-single-double-validity-20260910d",
+      "partial_review": true,
+      "field_review_scope": "product_validity_only"
+    },
+    {
+      "fields": {
+        "government_fee": null,
+        "permitted_stay_days": 30,
+        "visa_products": [
+          {
+            "type": "Unified electronic visa (tourism)",
+            "requirement_detail": "evisa",
+            "entry": "single",
+            "validity": "120 days from the date of issue",
+            "max_stay_days": 30,
+            "fee": {
+              "amount": null,
+              "currency": null
+            },
+            "processing_time": "No more than 4 calendar days, excluding the day of application or corrected resubmission. Apply from 86 to 4 days before planned entry.",
+            "application_channel": "online_portal",
+            "application_channel_detail": "Apply online through the Russian MFA e-visa portal or official mobile app; complete payment and wait for issuance.",
+            "required_documents": [
+              "Machine-readable national passport valid at least 6 months from e-visa application and with space for border stamps",
+              "JPEG image of the passport data page",
+              "JPEG face photograph meeting the portal requirements",
+              "Email address for application notifications",
+              "Bank card accepted by the payment service"
+            ],
+            "entry_requirements": "Use the same passport and show the issued e-visa notification at boarding and the border. Enter and leave only through checkpoints approved for unified e-visas. Leave within the 30-day stay and the visa’s 120-day validity; arrival and departure each count as a day. Medical insurance valid in Russia for the whole stay is required unless a published reciprocity exemption applies.",
+            "exceptions": [
+              "Unified e-visas permit tourism, private or business visits and the events specified by the Russian MFA. Other purposes need the appropriate regular visa.",
+              "No invitation letter, hotel-booking confirmation or other documentary proof of travel purpose is required for the unified e-visa application. Provide intended accommodation contact details in the form.",
+              "If you already have a valid Russian visa, travel under that visa; a new e-visa does not extend its validity.",
+              "Every child needs a separate e-visa. No consular fee is charged for applicants under 6; payment-provider charges must be checked in the application.",
+              "The issued notification can be printed or displayed on a mobile device. Only approved e-visa border checkpoints may be used for entry and exit."
+            ],
+            "notes": "Pay the fee shown by the official application service. Invoices may be denominated in yuan or dirhams, with bank currency conversion.",
+            "source_url": "https://evisa.kdmid.ru/",
+            "source_quote": "the list of which is approved by the Government of the Russian Federation, are eligible for the unified e-visa.",
+            "verified_at": "2026-09-09",
+            "verifier": "ai",
+            "corroborating_sources": [
+              {
+                "url": "https://electronic-visa.kdmid.ru/country.html",
+                "quote": "Китай (включая Тайвань)",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              }
+            ],
+            "disposition": "VISA_REQUIRED",
+            "field_provenance": {
+              "entry": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "The unified e-visa is a single entry visa.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "All e-visas.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "validity": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "The validity period of a unified electronic visa is 120 days from the date of issue.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "All e-visas.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "max_stay_days": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "All e-visas.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "The day of arrival and the day of departure are counted as two days."
+                ]
+              },
+              "fee": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "Not published by the destination: Checked https://evisa.kdmid.ru/, https://evisa.kdmid.ru/Home/Instruction and https://electronic-visa.kdmid.ru/faq_en.html. No fee amount is published. The amount appears only inside the application.",
+                "note": "Not published by the destination: Checked https://evisa.kdmid.ru/, https://evisa.kdmid.ru/Home/Instruction and https://electronic-visa.kdmid.ru/faq_en.html. No fee amount is published. The amount appears only inside the application.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "disposition": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "the list of which is approved by the Government of the Russian Federation, are eligible for the unified e-visa.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Taiwan ordinary passport holders are on the MFA e-visa eligibility list.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "s9",
+                    "source_url": "https://electronic-visa.kdmid.ru/country.html",
+                    "quote": "Китай (включая Тайвань)"
+                  }
+                ]
+              },
+              "requirement_detail": {
+                "source_id": "s26",
+                "source_url": "https://evisa.kdmid.ru/",
+                "quote": "the list of which is approved by the Government of the Russian Federation, are eligible for the unified e-visa.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "The subcategory is read from the same verified verdict passage.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Unified electronic visa (tourism)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "s9",
+                    "source_url": "https://electronic-visa.kdmid.ru/country.html",
+                    "quote": "Китай (включая Тайвань)"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "Single-entry tourist visa (paper sticker)",
+            "entry": "single",
+            "validity": "Up to 3 months",
+            "max_stay_days": 30,
+            "fee": null,
+            "notes": null,
+            "requirement_detail": "paper_visa",
+            "processing_time": null,
+            "application_channel": null,
+            "application_channel_detail": null,
+            "required_documents": null,
+            "entry_requirements": null,
+            "source_url": "https://www.kdmid.ru/cons/visas/",
+            "source_quote": null,
+            "verified_at": null,
+            "field_provenance": {
+              "type": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "validity": {
+                "source_id": "rus-central-ordinary-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI product-validity field review",
+                "status": "reviewed",
+                "note": "TWN→RUS, ordinary passport, independent tourism; existing single-entry paper product 'Single-entry tourist visa (paper sticker)'. The Russian MFA expressly distinguishes ordinary tourist single/double entry (maximum three months) from multiple entry (maximum six months). The replacement is a maximum visa-validity bound, not a promise of a three-month grant and not a permitted-stay duration. Keep the current entry count, stay and all other product facts unchanged. No nationality eligibility verdict, fee, freshness or release is reviewed by this patch. The Russian representative office in Taipei current search-rendered primary-page text separately confirms single/double ordinary tourist entry up to three months and names Taiwanese passports. Direct opening was bot-blocked; the independently opened central MFA rule is the primary field proof. Do not equate Taiwanese passports with mainland-China hotel-booking eligibility.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist visa (paper sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "product_validity_only"
+              },
+              "max_stay_days": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "fee": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "notes": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "requirement_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "processing_time": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "required_documents": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry_requirements": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "source_url": {
+                "source_id": "rus-central-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI source-reference review",
+                "status": "reviewed",
+                "note": "Reference only for TWN→RUS ordinary tourism, existing product 'Single-entry tourist visa (paper sticker)'. The Russian MFA national tourist-visa section expressly discusses single/double/multiple ordinary tourist visas. This proof establishes source relevance only, not nationality eligibility, entry-count entitlement, granted validity, stay, fee, documents or product verification. The restricted nationality list for the hotel-booking application basis must not be generalized to all paper-visa products.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist visa (paper sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "source_reference_only"
+              },
+              "verified_at": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              }
+            },
+            "disposition": "VISA_REQUIRED"
+          },
+          {
+            "type": "Double-entry tourist visa (paper sticker)",
+            "entry": "double",
+            "validity": "Up to 3 months",
+            "max_stay_days": 30,
+            "fee": null,
+            "notes": null,
+            "requirement_detail": "paper_visa",
+            "processing_time": null,
+            "application_channel": null,
+            "application_channel_detail": null,
+            "required_documents": null,
+            "entry_requirements": null,
+            "source_url": "https://www.kdmid.ru/cons/visas/",
+            "source_quote": null,
+            "verified_at": null,
+            "field_provenance": {
+              "type": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "validity": {
+                "source_id": "rus-central-ordinary-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI product-validity field review",
+                "status": "reviewed",
+                "note": "TWN→RUS, ordinary passport, independent tourism; existing double-entry paper product 'Double-entry tourist visa (paper sticker)'. The Russian MFA expressly distinguishes ordinary tourist single/double entry (maximum three months) from multiple entry (maximum six months). The replacement is a maximum visa-validity bound, not a promise of a three-month grant and not a permitted-stay duration. Keep the current entry count, stay and all other product facts unchanged. No nationality eligibility verdict, fee, freshness or release is reviewed by this patch. The Russian representative office in Taipei current search-rendered primary-page text separately confirms single/double ordinary tourist entry up to three months and names Taiwanese passports. Direct opening was bot-blocked; the independently opened central MFA rule is the primary field proof. Do not equate Taiwanese passports with mainland-China hotel-booking eligibility.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist visa (paper sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "product_validity_only"
+              },
+              "max_stay_days": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "fee": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "notes": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "requirement_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "processing_time": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "application_channel_detail": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "required_documents": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "entry_requirements": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              },
+              "source_url": {
+                "source_id": "rus-central-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI source-reference review",
+                "status": "reviewed",
+                "note": "Reference only for TWN→RUS ordinary tourism, existing product 'Double-entry tourist visa (paper sticker)'. The Russian MFA national tourist-visa section expressly discusses single/double/multiple ordinary tourist visas. This proof establishes source relevance only, not nationality eligibility, entry-count entitlement, granted validity, stay, fee, documents or product verification. The restricted nationality list for the hotel-booking application basis must not be generalized to all paper-visa products.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist visa (paper sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "source_reference_only"
+              },
+              "verified_at": {
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "verified_at": "2026-08-30",
+                "verified_by": "Ellis source audit (validity)",
+                "verifier": "ai",
+                "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+              }
+            },
+            "disposition": "VISA_REQUIRED"
+          },
+          {
+            "type": "Multiple-entry tourist visa (paper sticker)",
+            "disposition": "VISA_REQUIRED",
+            "requirement_detail": "paper_visa",
+            "entry": null,
+            "validity": null,
+            "max_stay_days": null,
+            "fee": {
+              "amount": null,
+              "currency": null
+            },
+            "field_provenance": {
+              "entry": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "No literal official quote was captured for this value",
+                "note": "No literal official quote was captured for this value",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa (paper sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "validity": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "No literal official quote was captured for this value",
+                "note": "No literal official quote was captured for this value",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa (paper sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "max_stay_days": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "No literal official quote was captured for this value",
+                "note": "No literal official quote was captured for this value",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa (paper sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "fee": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "No literal official quote was captured for this value",
+                "note": "No literal official quote was captured for this value",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa (paper sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "source_url": {
+                "source_id": "rus-central-tourist",
+                "source_url": "https://www.kdmid.ru/cons/visas/",
+                "quote": "Обыкновенная туристическая виза может быть однократной или двукратной на срок до 3 месяцев либо многократной на срок до 6 месяцев",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI source-reference review",
+                "status": "reviewed",
+                "note": "Reference only for TWN→RUS ordinary tourism, existing product 'Multiple-entry tourist visa (paper sticker)'. The Russian MFA national tourist-visa section expressly discusses single/double/multiple ordinary tourist visas. This proof establishes source relevance only, not nationality eligibility, entry-count entitlement, granted validity, stay, fee, documents or product verification. The restricted nationality list for the hotel-booking application basis must not be generalized to all paper-visa products.",
+                "subject": {
+                  "passport_nationality": "TWN",
+                  "destination_country": "RUS",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist visa (paper sticker)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "verification_scope": "source_reference_only"
+              }
+            },
+            "source_url": "https://www.kdmid.ru/cons/visas/"
+          }
+        ],
+        "consular_jurisdiction": "Apply at the Russian consular office covering your place of permanent residence.",
+        "disposition": "VISA_REQUIRED",
+        "requirement_detail": "evisa",
+        "visa_category": "Unified electronic visa (tourism)",
+        "permitted_stay": "Up to 30 days from the date of entry on the unified e-visa, arrival and departure days both count",
+        "application_channel": "online_portal",
+        "application_channel_detail": "Apply from a personal account on the Russian MFA e-visa website evisa.kdmid.ru or the Russian MFA mobile application, between 86 and 4 days before the planned entry date",
+        "official_portal_url": "https://evisa.kdmid.ru/",
+        "processing_time": "No more than 4 calendar days from submission of the application",
+        "required_documents": [
+          "Machine-readable passport issued by Taiwan, valid at least 6 months from the application date, with space for border stamps",
+          "Digital photo of the passport data page in JPEG format",
+          "Digital face photo in JPEG format meeting the portal requirements, no more than six months old",
+          "Bank card issued outside Russia for paying the visa fee",
+          "Medical insurance valid in Russia for the whole stay"
+        ],
+        "entry_requirements": "Use the same passport and show the issued e-visa notification at boarding and the border. Enter and leave only through checkpoints approved for unified e-visas. Leave within the 30-day stay and the visa’s 120-day validity; arrival and departure each count as a day. Medical insurance valid in Russia for the whole stay is required unless a published reciprocity exemption applies.",
+        "passport_validity": "Machine-readable national passport valid at least 6 months from the date of e-visa application, with space for border stamps.",
+        "passport_validity_requirement": null,
+        "appointment_required": false,
+        "biometrics_required": null,
+        "accommodation_evidence": "Provide the intended accommodation’s name, address and telephone number. Hotel-booking confirmation is not required for the e-visa application.",
+        "financial_evidence": null,
+        "onward_travel_evidence": null,
+        "exceptions": [
+          "Holders of a valid regular Russian visa do not need an e-visa and travel on that visa instead",
+          "Children under 6 at the date of application pay no consular fee but still need their own e-visa",
+          "Tourists on large cruise ships may stay up to 72 hours without a visa only as part of an organised tour group",
+          "Trips for purposes other than private, business, tourism or listed events need a regular paper visa"
+        ],
+        "source_url": "https://evisa.kdmid.ru/",
+        "corroborating_sources": [
+          {
+            "url": "https://electronic-visa.kdmid.ru/country_en.html",
+            "quote": "The list of foreign States whose nationals can apply for e-visa:",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/",
+            "quote": "Могут въезжать по электронной визе на срок до 30 дней.",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://electronic-visa.kdmid.ru/faq_en.html",
+            "quote": "the invoice is issued in dirhams or yuan",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "unpublished_fields": [
+          "visa_fee_amount",
+          "visa_fee_currency"
+        ]
+      },
+      "source_url": "https://evisa.kdmid.ru/",
+      "verified_at": "2026-09-09",
+      "verified_by": "Ellis AI official-source field review",
+      "verifier": "ai",
+      "field_provenance": {
+        "government_fee": {
+          "status": "unknown",
+          "verifier": "ai",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "Not published by the destination: Checked https://evisa.kdmid.ru/, https://evisa.kdmid.ru/Home/Instruction and https://electronic-visa.kdmid.ru/faq_en.html. None states the fee amount. The amount is shown only inside the application after login."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa, all eligible nationalities including Taiwan.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "The day of arrival and the day of departure are counted as two days."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+        },
+        "visa_products": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Product rows carry their own reviewed verdict proofs.",
+          "source_id": "s26",
+          "supporting_evidence": [
+            {
+              "source_id": "s9",
+              "source_url": "https://electronic-visa.kdmid.ru/country.html",
+              "quote": "Китай (включая Тайвань)"
+            }
+          ],
+          "additional_quotes": [
+            "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "the list of which is approved by the Government of the Russian Federation, are eligible for the unified e-visa."
+        },
+        "consular_jurisdiction": {
+          "source_url": "https://www.kdmid.ru/cons/visas/",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay."
+        },
+        "disposition": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Taiwan ordinary passport, tourism. The Russian MFA e-visa portal lists Taiwan, China among the 64 eligible nationalities and the MFA country list page shows China including Taiwan. Taiwan residents apply for the e-visa online or for an ordinary paper visa through the Russian representative office in Taipei.",
+          "source_id": "s26",
+          "supporting_evidence": [
+            {
+              "source_id": "s9",
+              "source_url": "https://electronic-visa.kdmid.ru/country.html",
+              "quote": "Китай (включая Тайвань)"
+            }
+          ],
+          "additional_quotes": [
+            "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "the list of which is approved by the Government of the Russian Federation, are eligible for the unified e-visa."
+        },
+        "requirement_detail": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "The subcategory is read from the same verified verdict passage.",
+          "source_id": "s26",
+          "supporting_evidence": [
+            {
+              "source_id": "s9",
+              "source_url": "https://electronic-visa.kdmid.ru/country.html",
+              "quote": "Китай (включая Тайвань)"
+            }
+          ],
+          "additional_quotes": [
+            "The unified e-visa is a single entry visa. The validity period of a unified electronic visa is 120 days from the date of issue. The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "the list of which is approved by the Government of the Russian Federation, are eligible for the unified e-visa."
+        },
+        "visa_category": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "permitted_stay": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa, all eligible nationalities including Taiwan.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "The day of arrival and the day of departure are counted as two days."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "The permitted period of stay in the Russian Federation on the basis of a unified e-visa within its validity period shall not exceed 30 days from the date of entry."
+        },
+        "application_channel": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa applications only.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "The application can be submitted no earlier than 86 days and no later than 4 days before the expected date of entry into the Russian Federation."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "In order to apply for a unified e-visa, it is necessary to submit an application from your personal account on the specialized website of the Ministry of Foreign Affairs of Russia or through the Russian Foreign Ministry"
+        },
+        "application_channel_detail": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Unified e-visa applications only.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "The application can be submitted no earlier than 86 days and no later than 4 days before the expected date of entry into the Russian Federation."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "In order to apply for a unified e-visa, it is necessary to submit an application from your personal account on the specialized website of the Ministry of Foreign Affairs of Russia or through the Russian Foreign Ministry"
+        },
+        "official_portal_url": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Official MFA Consular Department portal.",
+          "source_id": "s26",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Welcome to the specialized website of the Consular Department of the Ministry of Foreign Affairs of the Russian Federation for obtaining e-visas."
+        },
+        "processing_time": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Resubmission after correction restarts the count.",
+          "source_id": "s26",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Applications for a unified e-visa will be processed in no more than 4 calendar days from the date of submission of the application."
+        },
+        "required_documents": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Taiwan is not listed among the insurance-exempt nationalities on the portal.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "Digital photo of your passport data in JPEG format.",
+            "Bank card for paying the visa fee.",
+            "E-visa applicants are not required to submit an invitation letter, hotel booking confirmation or any other document confirming the purpose of their travel to the Russian Federation.",
+            "Foreign citizens staying in the Russian Federation on the basis of unified e-visas are required to have a medical insurance valid in the territory of the Russian Federation for the entire duration of their stay, with the exception of citizens of the following foreign countries who are exempt from this requirement on the basis of reciprocity."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Your passport must be machine-readable and issued by your country of nationality. Your passport must be valid for at least 6 months from the date of submitting the application for a unified e-visa."
+        },
+        "entry_requirements": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "passport_validity": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "appointment_required": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "biometrics_required": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: No fixed requirement for this field established by the current unified e-visa application guidance. Clear unsupported inherited paper-visa assertion; leave unknown."
+        },
+        "accommodation_evidence": {
+          "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: the invoice is issued in dirhams or yuan Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "financial_evidence": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: No fixed requirement for this field established by the current unified e-visa application guidance. Clear unsupported inherited paper-visa assertion; leave unknown."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: No fixed requirement for this field established by the current unified e-visa application guidance. Clear unsupported inherited paper-visa assertion; leave unknown."
+        },
+        "exceptions": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "General rules published by the Russian MFA and its Taipei representative office.",
+          "source_id": "s26",
+          "additional_quotes": [
+            "Children under the age of six by the date of the submission of the application are exempt from the consular fee."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "TWN",
+            "destination_country": "RUS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "If you have a valid Russian visa in your passport, you do not need to apply for a unified e-visa."
+        },
+        "source_url": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "corroborating_sources": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: The unified e-visa is a single entry visa. Scope: Current MFA unified e-visa conditions, for the primary e-visa only. Regular visa alternatives require their own evidence."
+        },
+        "unpublished_fields": {
+          "source_url": "https://evisa.kdmid.ru/",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Taiwan ordinary passport, tourism. The Russian MFA e-visa portal lists Taiwan, China among the 64 eligible nationalities and the MFA country list page shows China including Taiwan. Taiwan residents apply for the e-visa online or for an ordinary paper visa through the Russian representative office in Taipei."
+        }
+      },
+      "note": "Taiwan ordinary passport, tourism. The Russian MFA e-visa portal lists Taiwan, China among the 64 eligible nationalities and the MFA country list page shows China including Taiwan. Taiwan residents apply for the e-visa online or for an ordinary paper visa through the Russian representative office in Taipei.",
+      "route": {
+        "nationality": "TWN",
+        "destination": "RUS",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "rus-single-double-validity-20260910d",
+      "partial_review": true,
+      "field_review_scope": "product_validity_only"
+    }
+  ],
+  "review_id": "rus-single-double-validity-20260910d",
+  "review_scope": "product_validity_fields_only",
+  "status": "not_installed",
+  "preflight": [
+    {
+      "cache_key": "FRA|FRA|RUS|tourism|default|unknown|v6",
+      "changed_product_validities": 2,
+      "changes": [
+        "product.validity",
+        "product.field_provenance.validity"
+      ],
+      "projection": [
+        {
+          "visa_type_name": "Single-entry tourist visa",
+          "source_url": "https://www.kdmid.ru/cons/visas/",
+          "data_source": "Ellis product information (reference only)",
+          "validity_duration": 3,
+          "validity_unit": "Month",
+          "collected_at": null,
+          "info_validity": null,
+          "confidence_level": "Low",
+          "_product_source_verified": null
+        },
+        {
+          "visa_type_name": "Double-entry tourist visa",
+          "source_url": "https://www.kdmid.ru/cons/visas/",
+          "data_source": "Ellis product information (reference only)",
+          "validity_duration": 3,
+          "validity_unit": "Month",
+          "collected_at": null,
+          "info_validity": null,
+          "confidence_level": "Low",
+          "_product_source_verified": null
+        }
+      ],
+      "retained_integrity_issues": [],
+      "new_product_verdict_reviews": 0,
+      "new_release": false,
+      "new_grounded_check": false,
+      "renew_fresh_until": false
+    },
+    {
+      "cache_key": "IND|IND|RUS|tourism|default|unknown|v6",
+      "changed_product_validities": 2,
+      "changes": [
+        "product.validity",
+        "product.field_provenance.validity"
+      ],
+      "projection": [
+        {
+          "visa_type_name": "Single-entry tourist visa (sticker)",
+          "source_url": "https://www.kdmid.ru/cons/visas/",
+          "data_source": "Ellis product information (reference only)",
+          "validity_duration": 3,
+          "validity_unit": "Month",
+          "collected_at": null,
+          "info_validity": null,
+          "confidence_level": "Low",
+          "_product_source_verified": null
+        },
+        {
+          "visa_type_name": "Double-entry tourist visa (sticker)",
+          "source_url": "https://www.kdmid.ru/cons/visas/",
+          "data_source": "Ellis product information (reference only)",
+          "validity_duration": 3,
+          "validity_unit": "Month",
+          "collected_at": null,
+          "info_validity": null,
+          "confidence_level": "Low",
+          "_product_source_verified": null
+        }
+      ],
+      "retained_integrity_issues": [],
+      "new_product_verdict_reviews": 0,
+      "new_release": false,
+      "new_grounded_check": false,
+      "renew_fresh_until": false
+    },
+    {
+      "cache_key": "TWN|TWN|RUS|tourism|default|unknown|v6",
+      "changed_product_validities": 2,
+      "changes": [
+        "product.validity",
+        "product.field_provenance.validity"
+      ],
+      "projection": [
+        {
+          "visa_type_name": "Single-entry tourist visa (paper sticker)",
+          "source_url": "https://www.kdmid.ru/cons/visas/",
+          "data_source": "Ellis product information (reference only)",
+          "validity_duration": 3,
+          "validity_unit": "Month",
+          "collected_at": null,
+          "info_validity": null,
+          "confidence_level": "Low",
+          "_product_source_verified": null
+        },
+        {
+          "visa_type_name": "Double-entry tourist visa (paper sticker)",
+          "source_url": "https://www.kdmid.ru/cons/visas/",
+          "data_source": "Ellis product information (reference only)",
+          "validity_duration": 3,
+          "validity_unit": "Month",
+          "collected_at": null,
+          "info_validity": null,
+          "confidence_level": "Low",
+          "_product_source_verified": null
+        }
+      ],
+      "retained_integrity_issues": [],
+      "new_product_verdict_reviews": 0,
+      "new_release": false,
+      "new_grounded_check": false,
+      "renew_fresh_until": false
+    }
+  ],
+  "contract": "Re-run exact raw, merged, route, source provenance, ordered seed and operator CAS immediately before atomic installation. No product verdict review, release, TTL or operator change."
+}

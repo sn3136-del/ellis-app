@@ -268,7 +268,12 @@ def _check_proof(proof, sources, route, field, value, *, product=None):
     if not str(proof.get('verified_at') or '').strip():
         raise PatchRejected(f'{field}: the proof needs a verification date')
     passages = '\n'.join(item['quote'] for item in evidence)
-    _check_value(field, value, passages, route, product)
+    if proof.get('verification_scope') == 'consular_product_eligibility':
+        if field != 'disposition' or not _consular_product_eligibility_supported(
+                value, evidence, sources, route, product):
+            raise PatchRejected('disposition: no scoped consular-product eligibility evidence')
+    else:
+        _check_value(field, value, passages, route, product)
     if any(k in proof for k in ('effective_from', 'effective_to', 'policy_interval_evidence')):
         if field != 'disposition':
             raise PatchRejected('Policy bounds belong to the reviewed visa disposition')
@@ -370,6 +375,80 @@ def _decision_supported(value, evidence_quotes, nat):
         general = bool(re.search(r'\b(?:all|any|every|foreign nationals|foreigners|following countries|following states|listed below|eligible countries|countries/territories)\b', sl))
         if sentence_named or (listed and general) or (listed and value != 'VISA_EXEMPT'):
             return True
+    return False
+
+
+
+def _consular_product_eligibility_supported(value, evidence, sources, route, product):
+    """Positive consular acceptance proves an optional product, not a route.
+
+    This deliberately narrow evidence mode accepts national-passport tourist
+    applications with prior immigration approval. The destination embassy
+    must actually invite physical applications, and its exact eligibility
+    sentence must remain visible in the product notes. A form, embassy name,
+    eVisa offer or default visa exemption alone cannot establish this lane.
+    """
+    if (not isinstance(product, dict) or value != 'VISA_REQUIRED'
+            or product.get('disposition') != value
+            or product.get('requirement_detail') != 'paper_visa'
+            or route.get('travel_purpose') != 'tourism'
+            or (route.get('travel_document_type') or 'ordinary_passport') != 'ordinary_passport'
+            or not re.search(r'\btourist\b', _norm(product.get('type')))):
+        return False
+    from app.visa_snapshot.authority import hostname
+    from app.visa_snapshot.evidence_validator import jurisdiction_matches
+    relevant = [item for item in evidence
+                if jurisdiction_matches(item['source_url'], route['destination_country'])]
+    # The traveller's nationality must be explicit on a destination page.
+    # Origin-country advice cannot supply the only identity anchor.
+    aliases = _aliases(route['passport_nationality'])
+    if not any(_list_line(item['quote'], aliases) for item in relevant):
+        return False
+    acceptance = re.compile(
+        r'\b(?:the )?embassy (?:only )?(?:accepts|processes) '
+        r'(?:tourist )?visa applications for holders of (?:valid )?national passports '
+        r'with approval letters issued by the immigration department of [^.!?\n]+[.!?]?', re.I)
+    invitation = re.compile(r'\binvited to submit your (?:tourist )?visa application '
+                            r'directly to the embassy(?:[’\']s)? (?:office|consular section)\b', re.I)
+    tourist_heading = re.compile(r'^(?:[ivx\d]+[.)]?\s*)?tourist visa\s*:?$', re.I)
+    for item in relevant:
+        host = hostname(item['source_url'])
+        local = [e for e in relevant if hostname(e['source_url']) == host]
+        for sentence in acceptance.findall(item['quote']):
+            # An immigration approval letter is a real prerequisite. Do not
+            # let a review quietly remove it from the traveller's product.
+            approval_country = _norm(re.split(r'immigration department of ', sentence,
+                                             flags=re.I)[-1]).rstrip('.!?')
+            if approval_country not in _aliases(route['destination_country']):
+                continue
+            notes = str(product.get('notes') or '')
+            if (not quote_literal(sentence, notes)
+                    or re.search(r'approval(?: letters?)?[^.!?\n]{0,25}'
+                                 r'\b(?:not required|optional|unnecessary|can be omitted)\b', notes, re.I)):
+                continue
+            if not any(tourist_heading.fullmatch(_norm(e['quote'])) for e in local):
+                continue
+            if not any(invitation.search(_norm(e['quote'])) for e in local):
+                continue
+            # Look at whole supplied captures too: quoting an old invitation
+            # cannot ignore an explicit suspension on that captured page.
+            pages = '\n'.join(sources[e['source_id']]['text'] for e in local)
+            statements = [_norm(s) for s in re.split(r'(?<=[.!?])\s+|\n+', pages)]
+            adverse = False
+            for statement in statements:
+                if (re.search(r'\b(?:no longer|not|unavailable|suspend\w*|stop\w*|clos\w*|halt\w*|ceas\w*)\b', statement)
+                        and re.search(r'\b(?:accept\w*|process\w*|issu\w*|applications?|services?|eligible)\b', statement)
+                        and re.search(r'\b(?:tourist|visa|passport)\b', statement)
+                        and not re.fullmatch(
+                            r'any other travel documents such as documents issued for refugees '
+                            r'or national passports without approval letters are not acceptable[.!?]?',
+                            statement)
+                        and not (re.search(r'\bby email\b', statement)
+                                 and not re.search(r'\b(?:or|in person|post)\b', statement))):
+                    adverse = True
+                    break
+            if not adverse:
+                return True
     return False
 
 
@@ -557,7 +636,7 @@ def _proof_for(proof, route, field, product=None):
         proof = {'status': 'unknown', 'verifier': 'ai',
                  'reason': 'Not published by the destination: ' + str(proof.get('reason') or '').strip()}
     converted = field_provenance(proof, route, field, product)
-    for key in ('effective_from', 'effective_to', 'policy_interval_evidence'):
+    for key in ('effective_from', 'effective_to', 'policy_interval_evidence', 'verification_scope'):
         if key in proof:
             converted[key] = deepcopy(proof[key])
     if product is not None:

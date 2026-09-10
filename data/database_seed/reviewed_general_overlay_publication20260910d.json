@@ -1,0 +1,1087 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "review_id": "publication20260910d",
+  "reviewed_at": "2026-09-09",
+  "status": "candidate; registered only after preflight under maintenance",
+  "contract": "Every value carries its own literal official-page quote; verdicts name the nationality; products bind to the exact current product; baseline layers are hash-pinned.",
+  "entries": [
+    {
+      "route": {
+        "nationality": "GBR",
+        "destination": "VNM",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "verified_at": "2026-09-09",
+      "verified_by": "Ellis AI official-source field review",
+      "verifier": "ai",
+      "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+      "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+      "fields": {
+        "permitted_stay_days": 45,
+        "permitted_stay": "Up to 45 days from entry (policy through 14 March 2028)",
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "government_fee": {
+          "amount": 0,
+          "currency": null
+        },
+        "exceptions": [
+          "British ordinary passport holders are visa-exempt for Vietnam tourism up to 45 days",
+          "For stays longer than 45 days, apply for a 90-day Vietnam e-Visa or an embassy visa",
+          "Other purposes such as work, study or journalism require a visa/permit regardless of length",
+          "Diplomatic/official passport holders may have separate bilateral arrangements",
+          "British National (Overseas) passports are excluded from this visa exemption and require an appropriate visa."
+        ],
+        "visa_products": [
+          {
+            "type": "Visa-free entry (up to 45 days)",
+            "disposition": "VISA_EXEMPT",
+            "requirement_detail": "unconditional_visa_free",
+            "entry": null,
+            "validity": null,
+            "max_stay_days": 45,
+            "fee": {
+              "amount": 0,
+              "currency": null
+            },
+            "unpublished_fields": [],
+            "field_provenance": {
+              "entry": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "Not applicable to this no-visa admission permission; no visa entry-count product is issued.",
+                "note": "Not applicable to this no-visa admission permission; no visa entry-count product is issued.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa-free entry (up to 45 days)",
+                  "disposition": "VISA_EXEMPT",
+                  "requirement_detail": "unconditional_visa_free"
+                }
+              },
+              "validity": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "Not applicable: no visa is issued for this exemption; admission stay and the policy effective interval are separate.",
+                "note": "Not applicable: no visa is issued for this exemption; admission stay and the policy effective interval are separate.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa-free entry (up to 45 days)",
+                  "disposition": "VISA_EXEMPT",
+                  "requirement_detail": "unconditional_visa_free"
+                }
+              },
+              "max_stay_days": {
+                "source_id": "vnm-mfa",
+                "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa-free entry (up to 45 days)",
+                  "disposition": "VISA_EXEMPT",
+                  "requirement_detail": "unconditional_visa_free"
+                }
+              },
+              "fee": {
+                "source_id": "vnm-mfa",
+                "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa-free entry (up to 45 days)",
+                  "disposition": "VISA_EXEMPT",
+                  "requirement_detail": "unconditional_visa_free"
+                },
+                "additional_quotes": [
+                  "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028."
+                ]
+              },
+              "disposition": {
+                "source_id": "vnm-mfa",
+                "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa-free entry (up to 45 days)",
+                  "disposition": "VISA_EXEMPT",
+                  "requirement_detail": "unconditional_visa_free"
+                },
+                "additional_quotes": [
+                  "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028."
+                ],
+                "effective_from": "2025-03-15",
+                "effective_to": "2028-03-14",
+                "policy_interval_evidence": {
+                  "effective_from": {
+                    "source_id": "vnm-mfa",
+                    "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                    "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+                    "status": "reviewed",
+                    "verifier": "ai",
+                    "verified_at": "2026-09-09",
+                    "subject": {
+                      "passport_nationality": "GBR",
+                      "destination_country": "VNM",
+                      "travel_purpose": "tourism",
+                      "travel_document_type": "ordinary_passport",
+                      "product_type": "Visa-free entry (up to 45 days)",
+                      "disposition": "VISA_EXEMPT",
+                      "requirement_detail": "unconditional_visa_free"
+                    },
+                    "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+                    "effective_from": "2025-03-15"
+                  },
+                  "effective_to": {
+                    "source_id": "vnm-mfa",
+                    "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                    "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+                    "status": "reviewed",
+                    "verifier": "ai",
+                    "verified_at": "2026-09-09",
+                    "subject": {
+                      "passport_nationality": "GBR",
+                      "destination_country": "VNM",
+                      "travel_purpose": "tourism",
+                      "travel_document_type": "ordinary_passport",
+                      "product_type": "Visa-free entry (up to 45 days)",
+                      "disposition": "VISA_EXEMPT",
+                      "requirement_detail": "unconditional_visa_free"
+                    },
+                    "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+                    "effective_to": "2028-03-14"
+                  }
+                }
+              },
+              "requirement_detail": {
+                "source_id": "vnm-mfa",
+                "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "The subcategory is read from the same verified verdict passage.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Visa-free entry (up to 45 days)",
+                  "disposition": "VISA_EXEMPT",
+                  "requirement_detail": "unconditional_visa_free"
+                },
+                "additional_quotes": [
+                  "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028."
+                ],
+                "effective_from": "2025-03-15",
+                "effective_to": "2028-03-14",
+                "policy_interval_evidence": {
+                  "effective_from": {
+                    "source_id": "vnm-mfa",
+                    "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                    "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+                    "status": "reviewed",
+                    "verifier": "ai",
+                    "verified_at": "2026-09-09",
+                    "subject": {
+                      "passport_nationality": "GBR",
+                      "destination_country": "VNM",
+                      "travel_purpose": "tourism",
+                      "travel_document_type": "ordinary_passport",
+                      "product_type": "Visa-free entry (up to 45 days)",
+                      "disposition": "VISA_EXEMPT",
+                      "requirement_detail": "unconditional_visa_free"
+                    },
+                    "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+                    "effective_from": "2025-03-15"
+                  },
+                  "effective_to": {
+                    "source_id": "vnm-mfa",
+                    "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                    "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+                    "status": "reviewed",
+                    "verifier": "ai",
+                    "verified_at": "2026-09-09",
+                    "subject": {
+                      "passport_nationality": "GBR",
+                      "destination_country": "VNM",
+                      "travel_purpose": "tourism",
+                      "travel_document_type": "ordinary_passport",
+                      "product_type": "Visa-free entry (up to 45 days)",
+                      "disposition": "VISA_EXEMPT",
+                      "requirement_detail": "unconditional_visa_free"
+                    },
+                    "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+                    "effective_to": "2028-03-14"
+                  }
+                }
+              }
+            },
+            "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+            "source_quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam.",
+            "verified_at": "2026-09-09",
+            "verifier": "ai",
+            "corroborating_sources": [
+              {
+                "url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              }
+            ]
+          },
+          {
+            "type": "90-day single-entry tourist e-Visa",
+            "entry": "single",
+            "validity": "90 days",
+            "max_stay_days": null,
+            "fee": {
+              "amount": 25,
+              "currency": "USD"
+            },
+            "notes": "Apply online if stay exceeds 45 days",
+            "disposition": "VISA_REQUIRED",
+            "requirement_detail": "evisa",
+            "unpublished_fields": [],
+            "field_provenance": {
+              "entry": {
+                "source_id": "vnm-govt-evisa",
+                "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+                "quote": "E-visa issued by Viet Nam shall be valid for maximum of 90 days, single or multiple entry.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. Separate single/multiple variants are explicitly available.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day single-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "validity": {
+                "source_id": "vnm-govt-evisa",
+                "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+                "quote": "E-visa issued by Viet Nam shall be valid for maximum of 90 days, single or multiple entry.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. Maximum e-visa validity; actual issued dates govern.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day single-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "max_stay_days": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "The current captured immigration and procedure pages establish 90-day visa validity, but a directly scoped residence/stay rule has not yet been captured; this reviewed field remains unknown, not Not published.",
+                "note": "The current captured immigration and procedure pages establish 90-day visa validity, but a directly scoped residence/stay rule has not yet been captured; this reviewed field remains unknown, not Not published.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day single-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "fee": {
+                "source_id": "vnm-procedure",
+                "source_url": "https://dichvucong.bocongan.gov.vn/public/link-to/chi-tiet-thu-tuc?ma-thu-tuc=26277",
+                "quote": "25 USD (Thị thực có giá trị một lần: 25USD/thị thực điện tử)",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. Individual e-visa official fee for this entry count.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day single-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "disposition": {
+                "source_id": "vnm-govt-evisa",
+                "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+                "quote": "Since August 15, 2023, all foreigners can apply for e-visa to visit Viet Nam regardless of their nationality.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. Optional e-visa eligibility follows the current all-nationality statement. The MFA country name is an identity anchor, not evidence that the default exempt journey requires a visa.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day single-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "vnm-mfa",
+                    "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                    "quote": "United Kingdom (UK)"
+                  }
+                ]
+              },
+              "requirement_detail": {
+                "source_id": "vnm-govt-evisa",
+                "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+                "quote": "Since August 15, 2023, all foreigners can apply for e-visa to visit Viet Nam regardless of their nationality.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "The subcategory is read from the same verified verdict passage.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day single-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "vnm-mfa",
+                    "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                    "quote": "United Kingdom (UK)"
+                  }
+                ]
+              }
+            },
+            "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+            "source_quote": "Since August 15, 2023, all foreigners can apply for e-visa to visit Viet Nam regardless of their nationality.",
+            "verified_at": "2026-09-09",
+            "verifier": "ai",
+            "corroborating_sources": [
+              {
+                "url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                "quote": "United Kingdom (UK)",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              }
+            ]
+          },
+          {
+            "type": "90-day multiple-entry tourist e-Visa",
+            "entry": "multiple",
+            "validity": "90 days",
+            "max_stay_days": null,
+            "fee": {
+              "amount": 50,
+              "currency": "USD"
+            },
+            "notes": "Apply online if stay exceeds 45 days",
+            "disposition": "VISA_REQUIRED",
+            "requirement_detail": "evisa",
+            "unpublished_fields": [],
+            "field_provenance": {
+              "entry": {
+                "source_id": "vnm-govt-evisa",
+                "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+                "quote": "E-visa issued by Viet Nam shall be valid for maximum of 90 days, single or multiple entry.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. Separate single/multiple variants are explicitly available.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day multiple-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "validity": {
+                "source_id": "vnm-govt-evisa",
+                "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+                "quote": "E-visa issued by Viet Nam shall be valid for maximum of 90 days, single or multiple entry.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. Maximum e-visa validity; actual issued dates govern.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day multiple-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "max_stay_days": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "The current captured immigration and procedure pages establish 90-day visa validity, but a directly scoped residence/stay rule has not yet been captured; this reviewed field remains unknown, not Not published.",
+                "note": "The current captured immigration and procedure pages establish 90-day visa validity, but a directly scoped residence/stay rule has not yet been captured; this reviewed field remains unknown, not Not published.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day multiple-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "fee": {
+                "source_id": "vnm-procedure",
+                "source_url": "https://dichvucong.bocongan.gov.vn/public/link-to/chi-tiet-thu-tuc?ma-thu-tuc=26277",
+                "quote": "50 USD (Thị thực có giá trị nhiều lần: 50USD/thị thực điện tử)",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. Individual e-visa official fee for this entry count.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day multiple-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                }
+              },
+              "disposition": {
+                "source_id": "vnm-govt-evisa",
+                "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+                "quote": "Since August 15, 2023, all foreigners can apply for e-visa to visit Viet Nam regardless of their nationality.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. Optional e-visa eligibility follows the current all-nationality statement. The MFA country name is an identity anchor, not evidence that the default exempt journey requires a visa.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day multiple-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "vnm-mfa",
+                    "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                    "quote": "United Kingdom (UK)"
+                  }
+                ]
+              },
+              "requirement_detail": {
+                "source_id": "vnm-govt-evisa",
+                "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+                "quote": "Since August 15, 2023, all foreigners can apply for e-visa to visit Viet Nam regardless of their nationality.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "The subcategory is read from the same verified verdict passage.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "90-day multiple-entry tourist e-Visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "vnm-mfa",
+                    "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                    "quote": "United Kingdom (UK)"
+                  }
+                ]
+              }
+            },
+            "source_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+            "source_quote": "Since August 15, 2023, all foreigners can apply for e-visa to visit Viet Nam regardless of their nationality.",
+            "verified_at": "2026-09-09",
+            "verifier": "ai",
+            "corroborating_sources": [
+              {
+                "url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+                "quote": "United Kingdom (UK)",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              }
+            ]
+          },
+          {
+            "type": "Embassy/consulate tourist visa",
+            "entry": null,
+            "validity": null,
+            "max_stay_days": null,
+            "fee": {
+              "amount": null,
+              "currency": null
+            },
+            "notes": "Optional embassy tourist visa for a trip outside the 45-day British-citizen exemption. The Embassy only processes visa applications for holders of national passports with approval letters issued by the Immigration Department of Viet Nam. Submit in person by appointment or by post; email applications are not currently accepted. Issuance remains subject to approval.",
+            "disposition": "VISA_REQUIRED",
+            "requirement_detail": "paper_visa",
+            "unpublished_fields": [],
+            "field_provenance": {
+              "entry": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "Current opened tourist instructions do not scope the number of entries to this product; old single entry was not verified.",
+                "note": "Current opened tourist instructions do not scope the number of entries to this product; old single entry was not verified.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Embassy/consulate tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "validity": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "Current opened pages do not provide a fixed general validity for this product; issued dates govern.",
+                "note": "Current opened pages do not provide a fixed general validity for this product; issued dates govern.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Embassy/consulate tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "max_stay_days": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "No distinct maximum authorised stay established by the captured consular instructions.",
+                "note": "No distinct maximum authorised stay established by the captured consular instructions.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Embassy/consulate tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "fee": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "Visa fee is required, but current amount not established by these captures. Not marked Not published.",
+                "note": "Visa fee is required, but current amount not established by these captures. Not marked Not published.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Embassy/consulate tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                }
+              },
+              "notes": {
+                "source_id": "london-general",
+                "source_url": "https://vietnamembassy.org.uk/consular-services/visa/i-general-rules/",
+                "quote": "The Embassy only processes visa applications for holders of national passports with approval letters issued by the Immigration Department of Viet Nam.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Critical product acceptance condition and application channels. Default45-day exemption remains separately reviewed. Fee/entry/stay not inferred from the process.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Embassy/consulate tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "additional_quotes": [
+                  "The Embassy reserves the right to request further information and documentation from applicants and to deny approval for any visa application without necessarily providing explanation for visa denial."
+                ],
+                "supporting_evidence": [
+                  {
+                    "source_id": "london-no-email",
+                    "source_url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/ii-5-apply-by-email-receive-loose-leaf-visa-by-post/",
+                    "quote": "We curently do not receive visa application by email. Please apply either in person or by post."
+                  },
+                  {
+                    "source_id": "london-person",
+                    "source_url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/ii-2-apply-in-person-at-the-embassy-of-viet-nam/",
+                    "quote": "Booking appointment is required."
+                  },
+                  {
+                    "source_id": "london-nationality",
+                    "source_url": "https://vnembassy-london.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+                    "quote": "45 days for all passport types under the unilateral visa exemption policy*"
+                  }
+                ]
+              },
+              "disposition": {
+                "source_id": "london-general",
+                "source_url": "https://vietnamembassy.org.uk/consular-services/visa/i-general-rules/",
+                "quote": "The Embassy only processes visa applications for holders of national passports with approval letters issued by the Immigration Department of Viet Nam. Any other travel documents such as documents issued for refugees or national passports without approval letters are not acceptable.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Product eligibility/classification only: ordinary British citizen national passport, tourism, optional consular visa outside the separately reviewed45-day exemption. Embassy acceptance requires an Immigration Department approval letter. Does not claim the default qualifying45-day trip requires a visa, that eligibility guarantees issuance, or that fee, entries or maximum stay were verified. London tourist section establishes this consular product; the UK name anchors nationality, not nonexemption.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Embassy/consulate tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "london-tourist",
+                    "source_url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/",
+                    "quote": "II. Tourist visa:"
+                  },
+                  {
+                    "source_id": "london-person",
+                    "source_url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/ii-2-apply-in-person-at-the-embassy-of-viet-nam/",
+                    "quote": "You are kindly invited to submit your visa application directly to the Embassy’s office at 12 – 14 Victoria Road, London, W8 5RD. Booking appointment is required. The required documents are:"
+                  },
+                  {
+                    "source_id": "london-nationality",
+                    "source_url": "https://vnembassy-london.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+                    "quote": "United Kingdom (UK)"
+                  },
+                  {
+                    "source_id": "london-no-email",
+                    "source_url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/ii-5-apply-by-email-receive-loose-leaf-visa-by-post/",
+                    "quote": "We curently do not receive visa application by email. Please apply either in person or by post."
+                  }
+                ],
+                "verification_scope": "consular_product_eligibility"
+              },
+              "requirement_detail": {
+                "source_id": "london-general",
+                "source_url": "https://vietnamembassy.org.uk/consular-services/visa/i-general-rules/",
+                "quote": "The Embassy only processes visa applications for holders of national passports with approval letters issued by the Immigration Department of Viet Nam. Any other travel documents such as documents issued for refugees or national passports without approval letters are not acceptable.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "The subcategory is read from the same verified verdict passage.",
+                "subject": {
+                  "passport_nationality": "GBR",
+                  "destination_country": "VNM",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Embassy/consulate tourist visa",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "london-tourist",
+                    "source_url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/",
+                    "quote": "II. Tourist visa:"
+                  },
+                  {
+                    "source_id": "london-person",
+                    "source_url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/ii-2-apply-in-person-at-the-embassy-of-viet-nam/",
+                    "quote": "You are kindly invited to submit your visa application directly to the Embassy’s office at 12 – 14 Victoria Road, London, W8 5RD. Booking appointment is required. The required documents are:"
+                  },
+                  {
+                    "source_id": "london-nationality",
+                    "source_url": "https://vnembassy-london.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+                    "quote": "United Kingdom (UK)"
+                  },
+                  {
+                    "source_id": "london-no-email",
+                    "source_url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/ii-5-apply-by-email-receive-loose-leaf-visa-by-post/",
+                    "quote": "We curently do not receive visa application by email. Please apply either in person or by post."
+                  }
+                ],
+                "verification_scope": "consular_product_eligibility"
+              }
+            },
+            "source_url": "https://vietnamembassy.org.uk/consular-services/visa/i-general-rules/",
+            "source_quote": "The Embassy only processes visa applications for holders of national passports with approval letters issued by the Immigration Department of Viet Nam. Any other travel documents such as documents issued for refugees or national passports without approval letters are not acceptable.",
+            "verified_at": "2026-09-09",
+            "verifier": "ai",
+            "corroborating_sources": [
+              {
+                "url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/",
+                "quote": "II. Tourist visa:",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              },
+              {
+                "url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/ii-2-apply-in-person-at-the-embassy-of-viet-nam/",
+                "quote": "You are kindly invited to submit your visa application directly to the Embassy’s office at 12 – 14 Victoria Road, London, W8 5RD. Booking appointment is required. The required documents are:",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              },
+              {
+                "url": "https://vnembassy-london.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+                "quote": "United Kingdom (UK)",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              },
+              {
+                "url": "https://vietnamembassy.org.uk/consular-services/visa/ii-tourist-visa/ii-5-apply-by-email-receive-loose-leaf-visa-by-post/",
+                "quote": "We curently do not receive visa application by email. Please apply either in person or by post.",
+                "checked_at": "2026-09-09",
+                "authority": "Official source; AI field review"
+              }
+            ]
+          }
+        ],
+        "unpublished_fields": [],
+        "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html"
+      },
+      "field_provenance": {
+        "permitted_stay_days": {
+          "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip.",
+          "source_id": "vnm-mfa",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "GBR",
+            "destination_country": "VNM",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam."
+        },
+        "permitted_stay": {
+          "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip.",
+          "source_id": "vnm-mfa",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "GBR",
+            "destination_country": "VNM",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam."
+        },
+        "disposition": {
+          "source_id": "vnm-mfa",
+          "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+          "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam.",
+          "verified_at": "2026-09-09",
+          "verifier": "ai",
+          "verified_by": "Ellis AI official-source field review",
+          "status": "reviewed",
+          "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+          "subject": {
+            "passport_nationality": "GBR",
+            "destination_country": "VNM",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "additional_quotes": [
+            "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028."
+          ],
+          "effective_from": "2025-03-15",
+          "effective_to": "2028-03-14",
+          "policy_interval_evidence": {
+            "effective_from": {
+              "source_id": "vnm-mfa",
+              "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+              "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+              "status": "reviewed",
+              "verifier": "ai",
+              "verified_at": "2026-09-09",
+              "subject": {
+                "passport_nationality": "GBR",
+                "destination_country": "VNM",
+                "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport"
+              },
+              "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+              "effective_from": "2025-03-15"
+            },
+            "effective_to": {
+              "source_id": "vnm-mfa",
+              "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+              "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+              "status": "reviewed",
+              "verifier": "ai",
+              "verified_at": "2026-09-09",
+              "subject": {
+                "passport_nationality": "GBR",
+                "destination_country": "VNM",
+                "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport"
+              },
+              "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+              "effective_to": "2028-03-14"
+            }
+          }
+        },
+        "requirement_detail": {
+          "source_id": "vnm-mfa",
+          "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+          "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam.",
+          "verified_at": "2026-09-09",
+          "verifier": "ai",
+          "verified_by": "Ellis AI official-source field review",
+          "status": "reviewed",
+          "note": "The subcategory is read from the same verified verdict passage.",
+          "subject": {
+            "passport_nationality": "GBR",
+            "destination_country": "VNM",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "additional_quotes": [
+            "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028."
+          ],
+          "effective_from": "2025-03-15",
+          "effective_to": "2028-03-14",
+          "policy_interval_evidence": {
+            "effective_from": {
+              "source_id": "vnm-mfa",
+              "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+              "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+              "status": "reviewed",
+              "verifier": "ai",
+              "verified_at": "2026-09-09",
+              "subject": {
+                "passport_nationality": "GBR",
+                "destination_country": "VNM",
+                "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport"
+              },
+              "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+              "effective_from": "2025-03-15"
+            },
+            "effective_to": {
+              "source_id": "vnm-mfa",
+              "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+              "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+              "status": "reviewed",
+              "verifier": "ai",
+              "verified_at": "2026-09-09",
+              "subject": {
+                "passport_nationality": "GBR",
+                "destination_country": "VNM",
+                "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport"
+              },
+              "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+              "effective_to": "2028-03-14"
+            }
+          }
+        },
+        "government_fee": {
+          "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+          "source_id": "vnm-mfa",
+          "additional_quotes": [
+            "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "GBR",
+            "destination_country": "VNM",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam."
+        },
+        "exceptions": {
+          "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. Only the added BNO exclusion is reverified here; inherited exceptions remain unverified.",
+          "source_id": "vnm-mfa",
+          "status": "partial",
+          "verification_scope": "changed_elements_only",
+          "verified_elements": [
+            "British National (Overseas) passports are excluded from this visa exemption and require an appropriate visa."
+          ],
+          "retained_unverified_elements": [
+            "British ordinary passport holders are visa-exempt for Vietnam tourism up to 45 days",
+            "For stays longer than 45 days, apply for a 90-day Vietnam e-Visa or an embassy visa",
+            "Other purposes such as work, study or journalism require a visa/permit regardless of length",
+            "Diplomatic/official passport holders may have separate bilateral arrangements"
+          ],
+          "subject": {
+            "passport_nationality": "GBR",
+            "destination_country": "VNM",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Note:  | 1) Foreigners holding British National Oversea (BNO) passports are not exempted from visa requirement, thus must have appropriate visas to enter Viet Nam."
+        },
+        "visa_products": {
+          "source_id": "vnm-mfa",
+          "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+          "quote": "| * In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries (Germany, France, Italy, Spain, United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay duration of 45 days from the date of entry, regardless of passport type or entry purpose, on the basis of fulfilling the entry conditions as prescribed by the Law on Entry, Exit, Transit and Residence of Foreigners in Viet Nam.",
+          "verified_at": "2026-09-09",
+          "verifier": "ai",
+          "verified_by": "Ellis AI official-source field review",
+          "status": "reviewed",
+          "note": "Product rows carry their own reviewed verdict proofs.",
+          "subject": {
+            "passport_nationality": "GBR",
+            "destination_country": "VNM",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "additional_quotes": [
+            "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028."
+          ],
+          "effective_from": "2025-03-15",
+          "effective_to": "2028-03-14",
+          "policy_interval_evidence": {
+            "effective_from": {
+              "source_id": "vnm-mfa",
+              "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+              "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+              "status": "reviewed",
+              "verifier": "ai",
+              "verified_at": "2026-09-09",
+              "subject": {
+                "passport_nationality": "GBR",
+                "destination_country": "VNM",
+                "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport"
+              },
+              "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+              "effective_from": "2025-03-15"
+            },
+            "effective_to": {
+              "source_id": "vnm-mfa",
+              "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+              "quote": "The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.",
+              "status": "reviewed",
+              "verifier": "ai",
+              "verified_at": "2026-09-09",
+              "subject": {
+                "passport_nationality": "GBR",
+                "destination_country": "VNM",
+                "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport"
+              },
+              "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply.",
+              "effective_to": "2028-03-14"
+            }
+          }
+        },
+        "unpublished_fields": {
+          "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply."
+        },
+        "source_url": {
+          "source_url": "https://web.mofa.gov.vn/web/guest/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-172.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "GBR ordinary passport, independent tourism in Viet Nam. Default exemption for up to 45 days; optional e-visa is separately scoped and is not mandatory for a qualifying exempt trip. British citizen passports only; BNO excluded. General entry conditions apply."
+        }
+      },
+      "review_id": "publication20260910d",
+      "cache_key": "GBR|GBR|VNM|tourism|default|unknown|v6"
+    }
+  ]
+}

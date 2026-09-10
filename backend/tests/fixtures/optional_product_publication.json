@@ -1,0 +1,1576 @@
+[
+  {
+    "cache_key": "HKG|HKG|LCA|tourism|default|unknown|v6",
+    "route": {
+      "passport_nationality": "HKG",
+      "lawful_country_of_residence": "HKG",
+      "destination_country": "LCA",
+      "visa_category": "tourist_visa",
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "merged_guidance": {
+      "disposition": "VISA_EXEMPT",
+      "permitted_stay": "maximum 6 weeks granted on entry",
+      "passport_validity": "typically valid for 6 months beyond intended stay",
+      "required_documents": [
+        "Valid passport",
+        "Passport-size photographs",
+        "Proof of accommodation",
+        "Return or onward ticket",
+        "Proof of sufficient funds",
+        "Travel itinerary"
+      ],
+      "government_fee": {
+        "amount": 0,
+        "currency": "XCD"
+      },
+      "photo_requirements": "Recent passport-sized photographs, number as instructed by the receiving mission",
+      "biometrics_required": null,
+      "interview_required": false,
+      "appointment_required": false,
+      "onward_travel_evidence": "Confirmed return or onward travel ticket",
+      "accommodation_evidence": "Hotel booking or letter of invitation from a host in Saint Lucia",
+      "financial_evidence": "Recent bank statements or other proof of sufficient funds for the stay",
+      "insurance_required": null,
+      "exceptions": [
+        "Diplomatic/service passport holders may be subject to separate bilateral arrangements; ordinary passport holders must apply as above",
+        "Minors under 18 may require parental consent and a birth certificate"
+      ],
+      "uncertainty": [
+        {
+          "field": "disposition",
+          "reason": "Saint Lucia visa policy for HKSAR ordinary passport holders is not widely documented in official sources; I cannot confirm whether a bilateral visa exemption exists."
+        },
+        {
+          "field": "government_fee",
+          "reason": "Official consular fee for Saint Lucia tourist visas is unknown."
+        },
+        {
+          "field": "processing_time",
+          "reason": "No reliable official processing-time data available."
+        },
+        {
+          "field": "official_portal_url",
+          "reason": "No known official online visa application portal for Saint Lucia."
+        },
+        {
+          "field": "source_url",
+          "reason": "Could not locate the specific official government page confirming the rule."
+        },
+        {
+          "field": "biometrics_required",
+          "reason": "Not confirmed by official guidance."
+        },
+        {
+          "field": "interview_required",
+          "reason": "Not confirmed by official guidance."
+        },
+        {
+          "field": "appointment_required",
+          "reason": "Not confirmed by official guidance."
+        },
+        {
+          "field": "insurance_required",
+          "reason": "Not confirmed by official guidance."
+        }
+      ],
+      "confidence": "low",
+      "permitted_stay_days": 42,
+      "passport_validity_requirement": {
+        "kind": "months_after_departure",
+        "months": 6
+      },
+      "arrival_card": {
+        "required": true,
+        "name": "Immigration/Customs disembarkation card",
+        "submission_window": "completed on arrival or provided in-flight/on vessel"
+      },
+      "health_requirements": [
+        {
+          "name": "Yellow fever vaccination",
+          "applicability": "conditional",
+          "trigger_countries": [],
+          "trigger": "Travel or transit through a yellow-fever endemic country within the relevant period before arrival",
+          "question": "Have you visited or transited a yellow-fever endemic country in the last 6 days?"
+        }
+      ],
+      "visa_products": [
+        {
+          "type": "No visa required for Hong Kong passport holders",
+          "entry": null,
+          "validity": null,
+          "max_stay_days": null,
+          "fee": {
+            "amount": 0,
+            "currency": "XCD"
+          },
+          "notes": "Per the Department of External Affairs visa-requirements table (last updated November 2018), Hong Kong is marked 'NO' for entry visa. Passport must be valid six months."
+        },
+        {
+          "type": "Non-Immigrant Visa, single entry (for nationalities that do need one)",
+          "entry": "single",
+          "validity": "Within a 3 month period",
+          "max_stay_days": null,
+          "fee": {
+            "amount": 125,
+            "currency": "XCD"
+          },
+          "notes": null
+        },
+        {
+          "type": "Non-Immigrant Visa, multiple entry (for nationalities that do need one)",
+          "entry": "multiple",
+          "validity": "Multiple entries over one year period",
+          "max_stay_days": null,
+          "fee": {
+            "amount": 190,
+            "currency": "XCD"
+          },
+          "notes": null
+        }
+      ],
+      "transit_requirement": {
+        "required": null,
+        "note": null
+      }
+    },
+    "source_provenance": {
+      "source_url": "https://www.govt.lc/services/apply-for-saint-lucia-non-immigrant-visa",
+      "verified_at": "2026-08-28",
+      "verified_by": "Ellis source audit (fee/validity verification)",
+      "verifier": "ai",
+      "note": "Eligibility error at the root: Saint Lucia's own Department of External Affairs visa-requirements table lists HONG KONG as 'NO' for entry visa, i.e. Hong Kong passport holders are visa-exempt. Ellis sells them single-entry and multiple-entry tourist visas that they do not need, with no fee, no valid | quote: 'Non-Immigrant Visa ... Office: Royal Saint Lucia Police Force ... Fee: EC$125.0",
+      "fields": [
+        "disposition",
+        "government_fee",
+        "permitted_stay",
+        "permitted_stay_days",
+        "visa_products"
+      ],
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.govt.lc/services/apply-for-saint-lucia-non-immigrant-visa",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "Eligibility error at the root: Saint Lucia's own Department of External Affairs visa-requirements table lists HONG KONG as 'NO' for entry visa, i.e. Hong Kong passport holders are visa-exempt. Ellis sells them single-entry and multiple-entry tourist visas that they do not need, with no fee, no valid | quote: 'Non-Immigrant Visa ... Office: Royal Saint Lucia Police Force ... Fee: EC$125.0"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.govt.lc/services/apply-for-saint-lucia-non-immigrant-visa",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "Eligibility error at the root: Saint Lucia's own Department of External Affairs visa-requirements table lists HONG KONG as 'NO' for entry visa, i.e. Hong Kong passport holders are visa-exempt. Ellis sells them single-entry and multiple-entry tourist visas that they do not need, with no fee, no valid | quote: 'Non-Immigrant Visa ... Office: Royal Saint Lucia Police Force ... Fee: EC$125.0"
+        },
+        "permitted_stay": {
+          "source_url": "https://www.govt.lc/services/apply-for-saint-lucia-non-immigrant-visa",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "Eligibility error at the root: Saint Lucia's own Department of External Affairs visa-requirements table lists HONG KONG as 'NO' for entry visa, i.e. Hong Kong passport holders are visa-exempt. Ellis sells them single-entry and multiple-entry tourist visas that they do not need, with no fee, no valid | quote: 'Non-Immigrant Visa ... Office: Royal Saint Lucia Police Force ... Fee: EC$125.0"
+        },
+        "government_fee": {
+          "source_url": "https://www.govt.lc/services/apply-for-saint-lucia-non-immigrant-visa",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "Eligibility error at the root: Saint Lucia's own Department of External Affairs visa-requirements table lists HONG KONG as 'NO' for entry visa, i.e. Hong Kong passport holders are visa-exempt. Ellis sells them single-entry and multiple-entry tourist visas that they do not need, with no fee, no valid | quote: 'Non-Immigrant Visa ... Office: Royal Saint Lucia Police Force ... Fee: EC$125.0"
+        },
+        "visa_products": {
+          "source_url": "https://www.govt.lc/services/apply-for-saint-lucia-non-immigrant-visa",
+          "verified_at": "2026-08-28",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "Eligibility error at the root: Saint Lucia's own Department of External Affairs visa-requirements table lists HONG KONG as 'NO' for entry visa, i.e. Hong Kong passport holders are visa-exempt. Ellis sells them single-entry and multiple-entry tourist visas that they do not need, with no fee, no valid | quote: 'Non-Immigrant Visa ... Office: Royal Saint Lucia Police Force ... Fee: EC$125.0"
+        }
+      }
+    },
+    "reader_before_guard": {
+      "status": "KIMI_UNCERTAIN",
+      "held": false,
+      "review_required": false,
+      "detail_pending": false,
+      "operator_released": false,
+      "contradictions": [],
+      "missing_fields": [
+        "visa_category"
+      ]
+    }
+  },
+  {
+    "cache_key": "USA|USA|ZMB|tourism|default|unknown|v6",
+    "route": {
+      "passport_nationality": "USA",
+      "lawful_country_of_residence": "USA",
+      "destination_country": "ZMB",
+      "visa_category": null,
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "merged_guidance": {
+      "disposition": "VISA_EXEMPT",
+      "permitted_stay": "up to 90 days",
+      "passport_validity": "6 months beyond arrival date",
+      "required_documents": [
+        "valid ordinary passport",
+        "return/onward ticket",
+        "proof of accommodation",
+        "sufficient funds evidence",
+        "recent passport photo (for e-Visa)",
+        "yellow fever certificate if applicable"
+      ],
+      "application_channel": "none",
+      "government_fee": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "photo_requirements": "One recent passport-style colour photo, digital upload for e-Visa",
+      "biometrics_required": false,
+      "interview_required": false,
+      "appointment_required": false,
+      "onward_travel_evidence": "return or onward ticket",
+      "accommodation_evidence": "hotel booking or host invitation letter",
+      "financial_evidence": "bank statement, cash or cards showing sufficient funds",
+      "insurance_required": false,
+      "exceptions": [
+        "Visa-exempt visitors arriving by air must hold valid return air tickets; those arriving by land or water must have enough funds for their stay in and departure from Zambia."
+      ],
+      "uncertainty": [
+        {
+          "field": "source_url",
+          "reason": "No exact official policy page URL was verified; the official e-Visa portal is known but a standalone source page was not confirmed"
+        },
+        {
+          "field": "government_fee",
+          "reason": "Fees vary by visa product and channel; the listed amounts are from memory and may have been revised"
+        },
+        {
+          "field": "visa_products",
+          "reason": "Validity period and current availability of the multiple-entry tourist visa and KAZA Univisa should be confirmed on the official portal"
+        },
+        {
+          "field": "visa_on_arrival",
+          "reason": "VOA availability for double/multiple entry and at specific ports may change; e-Visa is the safer advance route"
+        }
+      ],
+      "confidence": "medium",
+      "permitted_stay_days": 90,
+      "passport_validity_requirement": {
+        "kind": "months_after_arrival",
+        "months": 6
+      },
+      "arrival_card": {
+        "required": true,
+        "name": "arrival/departure card",
+        "submission_window": "completed on board or at port of entry"
+      },
+      "health_requirements": [
+        {
+          "name": "Yellow fever vaccination certificate",
+          "applicability": "conditional",
+          "trigger_countries": [],
+          "trigger": "arrival from or transit through a yellow-fever endemic country within 9 days",
+          "question": "Have you recently been in a yellow-fever endemic country?"
+        }
+      ],
+      "visa_products": [
+        {
+          "type": "Visa exemption (no visa required for US passport holders)",
+          "entry": "multiple",
+          "validity": "n/a",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 0,
+            "currency": "USD"
+          },
+          "notes": "Stay entitlement is 90 days in any 12-month period from first entry, not necessarily granted all at once; free extensions at an Immigration Office. Return/onward ticket required."
+        },
+        {
+          "type": "KAZA Univisa (optional, Zambia + Zimbabwe)",
+          "entry": "multiple",
+          "validity": "Up to 30 days within any 12-month period",
+          "max_stay_days": 30,
+          "notes": "Only usable at the listed ports of entry; covers day trips to Botswana via Kazungula"
+        },
+        {
+          "type": "Single Entry Visa (reference tariff for non-exempt nationals)",
+          "entry": "single",
+          "validity": "90 days from date of first issuance",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "USD 50.50 total on the e-services bill"
+        },
+        {
+          "type": "Multiple Entry Visa (reference tariff for non-exempt nationals)",
+          "entry": "multiple",
+          "validity": "90 days from date of first issuance",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "USD 80.80 total on the e-services bill. Issued only by Headquarters through the e-visa facility."
+        }
+      ],
+      "requirement_detail": "unconditional_visa_free",
+      "transit_requirement": {
+        "required": null,
+        "note": null
+      }
+    },
+    "source_provenance": {
+      "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
+      "verified_at": "2026-08-29",
+      "verified_by": "Ellis source audit",
+      "verifier": "ai",
+      "note": "Ellis sells US nationals a visa they do not need. The Zambia Department of Immigration lists the United States of America (entry 161) among 'Nationals Who Do Not Require Visa'; no tourist visa and no fee apply, so the USD 50 headline and the USD 50 single-entry product are both wrong. Two further er | quote: Who doesn't require visa? Nationals of the countries listed below do not require | Adjudic",
+      "fields": [
+        "application_channel",
+        "disposition",
+        "exceptions",
+        "government_fee",
+        "permitted_stay_days",
+        "requirement_detail",
+        "visa_products"
+      ],
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Ellis sells US nationals a visa they do not need. The Zambia Department of Immigration lists the United States of America (entry 161) among 'Nationals Who Do Not Require Visa'; no tourist visa and no fee apply, so the USD 50 headline and the USD 50 single-entry product are both wrong. Two further er | quote: Who doesn't require visa? Nationals of the countries listed below do not require | Adjudic"
+        },
+        "government_fee": {
+          "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Ellis sells US nationals a visa they do not need. The Zambia Department of Immigration lists the United States of America (entry 161) among 'Nationals Who Do Not Require Visa'; no tourist visa and no fee apply, so the USD 50 headline and the USD 50 single-entry product are both wrong. Two further er | quote: Who doesn't require visa? Nationals of the countries listed below do not require | Adjudic"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Ellis sells US nationals a visa they do not need. The Zambia Department of Immigration lists the United States of America (entry 161) among 'Nationals Who Do Not Require Visa'; no tourist visa and no fee apply, so the USD 50 headline and the USD 50 single-entry product are both wrong. Two further er | quote: Who doesn't require visa? Nationals of the countries listed below do not require | Adjudic"
+        },
+        "visa_products": {
+          "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Ellis sells US nationals a visa they do not need. The Zambia Department of Immigration lists the United States of America (entry 161) among 'Nationals Who Do Not Require Visa'; no tourist visa and no fee apply, so the USD 50 headline and the USD 50 single-entry product are both wrong. Two further er | quote: Who doesn't require visa? Nationals of the countries listed below do not require | Adjudic"
+        },
+        "requirement_detail": {
+          "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Ellis sells US nationals a visa they do not need. The Zambia Department of Immigration lists the United States of America (entry 161) among 'Nationals Who Do Not Require Visa'; no tourist visa and no fee apply, so the USD 50 headline and the USD 50 single-entry product are both wrong. Two further er | quote: Who doesn't require visa? Nationals of the countries listed below do not require | Adjudic"
+        },
+        "application_channel": {
+          "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Ellis sells US nationals a visa they do not need. The Zambia Department of Immigration lists the United States of America (entry 161) among 'Nationals Who Do Not Require Visa'; no tourist visa and no fee apply, so the USD 50 headline and the USD 50 single-entry product are both wrong. Two further er | quote: Who doesn't require visa? Nationals of the countries listed below do not require | Adjudic"
+        },
+        "exceptions": {
+          "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "Ellis sells US nationals a visa they do not need. The Zambia Department of Immigration lists the United States of America (entry 161) among 'Nationals Who Do Not Require Visa'; no tourist visa and no fee apply, so the USD 50 headline and the USD 50 single-entry product are both wrong. Two further er | quote: Who doesn't require visa? Nationals of the countries listed below do not require | Adjudic"
+        }
+      }
+    },
+    "reader_before_guard": {
+      "status": "KIMI_UNCERTAIN",
+      "held": false,
+      "review_required": false,
+      "detail_pending": false,
+      "operator_released": false,
+      "contradictions": [],
+      "missing_fields": [
+        "visa_category"
+      ]
+    }
+  },
+  {
+    "cache_key": "ESP|ESP|VNM|tourism|default|unknown|v6",
+    "route": {
+      "passport_nationality": "ESP",
+      "lawful_country_of_residence": "ESP",
+      "destination_country": "VNM",
+      "visa_category": "tourist_visa",
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null
+    },
+    "merged_guidance": {
+      "disposition": "VISA_EXEMPT",
+      "visa_category": "Unilateral visa exemption (miễn thị thực đơn phương), 12-country list",
+      "permitted_stay": "45 days from the date of entry, regardless of passport type or purpose of entry",
+      "passport_validity": "6 months beyond arrival",
+      "required_documents": [
+        "Valid passport issued by the competent authority of Spain, valid for at least 6 months from the date of entry",
+        "Not falling within the cases of suspension from entry under Vietnamese law"
+      ],
+      "application_channel": "not_required",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "photo_requirements": "None for visa-free entry; digital passport photo needed for optional e-visa",
+      "biometrics_required": false,
+      "interview_required": false,
+      "appointment_required": false,
+      "onward_travel_evidence": "Return or onward ticket recommended",
+      "accommodation_evidence": "Hotel booking or host address recommended",
+      "financial_evidence": "Bank statements or cash equivalent recommended",
+      "insurance_required": false,
+      "exceptions": [
+        "Exemption is time-limited: applies from 15 March 2025 through 14 March 2028 (Resolution 44/NQ-CP of 7 March 2025). extension to be considered under Vietnamese law",
+        "Stays beyond 45 days require a visa. the official e-visa (max 90 days, single or multiple entry) can be applied for online at evisa.gov.vn",
+        "Poland, Czech Republic and Switzerland citizens are on a separate, conditional tour-programme exemption. this does not apply to Spain"
+      ],
+      "uncertainty": [
+        {
+          "field": "arrival_card",
+          "reason": "Current paper entry/exit declaration practice can vary by port of entry; confirm with airline or immigration"
+        },
+        {
+          "field": "source_url",
+          "reason": "No single official English-language source URL was reliably available; verify on Vietnam Immigration Department / embassy site"
+        },
+        {
+          "field": "paper_embassy_visa_products",
+          "reason": "Embassy/consular tourist visa fees and validity vary by jurisdiction and were not confirmed"
+        }
+      ],
+      "confidence": "high",
+      "permitted_stay_days": 45,
+      "passport_validity_requirement": {
+        "kind": "months_after_arrival",
+        "months": 6
+      },
+      "arrival_card": {
+        "required": true,
+        "name": "Vietnam entry/exit declaration card",
+        "submission_window": "Completed and presented at immigration on arrival"
+      },
+      "health_requirements": [],
+      "visa_products": [
+        {
+          "type": "Visa exemption (unilateral, Resolution 44/NQ-CP)",
+          "entry": "single",
+          "validity": "Each entry, 15 March 2025 to 14 March 2028 policy window",
+          "max_stay_days": 45,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "Passport must be valid at least 6 months from the date of entry. no application required"
+        },
+        {
+          "type": "E-visa single entry",
+          "entry": "single",
+          "validity": "up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 25,
+            "currency": "USD"
+          },
+          "notes": "Applied online at evisa.gov.vn. fee paid via e-payment gateway and non-refundable if refused"
+        },
+        {
+          "type": "E-visa multiple entry",
+          "entry": "multiple",
+          "validity": "up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 50,
+            "currency": "USD"
+          },
+          "notes": "Applied online at evisa.gov.vn. fee paid via e-payment gateway and non-refundable if refused"
+        }
+      ],
+      "application_channel_detail": "No application. Unilateral visa exemption under Resolution 44/NQ-CP of 7 March 2025. present a valid passport at the border. For stays longer than 45 days apply for an e-visa online at evisa.gov.vn (Vietnam Immigration Department).",
+      "requirement_detail": "unconditional_visa_free",
+      "transit_requirement": {
+        "required": null,
+        "note": null
+      }
+    },
+    "source_provenance": {
+      "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+      "verified_at": "2026-09-03",
+      "verified_by": "Ellis source audit, two independent refutation passes",
+      "verifier": "ai",
+      "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March",
+      "fields": [
+        "application_channel",
+        "application_channel_detail",
+        "disposition",
+        "exceptions",
+        "government_fee",
+        "permitted_stay",
+        "permitted_stay_days",
+        "required_documents",
+        "requirement_detail",
+        "visa_category",
+        "visa_products"
+      ],
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "requirement_detail": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "visa_category": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "permitted_stay": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "application_channel": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "application_channel_detail": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "government_fee": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "visa_products": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "exceptions": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        },
+        "required_documents": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnamese Ministry of Foreign Affairs visa-exemption list (updated to 14/3/2025) states Vietnam unilaterally exempts citizens of 12 countries including Spain (Tây Ban Nha) for stays of up to 45 days, conditional only on a passport valid at least 6 months from entry and not being barred from entry. The legal basis cited on the page is Resolution 44/NQ-CP of 7 March 2025, in force from 15 March"
+        }
+      }
+    },
+    "reader_before_guard": {
+      "status": "KIMI_PRIMARY",
+      "held": false,
+      "review_required": false,
+      "detail_pending": false,
+      "operator_released": false,
+      "contradictions": [],
+      "missing_fields": []
+    }
+  },
+  {
+    "cache_key": "RUS|RUS|VNM|tourism|default|unknown|v6",
+    "route": {
+      "passport_nationality": "RUS",
+      "lawful_country_of_residence": "RUS",
+      "destination_country": "VNM",
+      "visa_category": "tourist_visa",
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null
+    },
+    "merged_guidance": {
+      "disposition": "VISA_EXEMPT",
+      "visa_category": "Unilateral visa exemption (Resolution 44/NQ-CP of 7 March 2025)",
+      "permitted_stay": "45 days from the date of entry, any passport type and any purpose of entry (unilateral exemption under Resolution 44/NQ-CP, in force 15 March 2025 through 14 March 2028)",
+      "passport_validity": "6 months beyond entry",
+      "required_documents": [
+        "Passport valid at least 6 months from the date of entry (hộ chiếu còn giá trị ít nhất 06 tháng kể từ ngày nhập cảnh)",
+        "Not falling under the cases of refusal of entry under Vietnamese law"
+      ],
+      "application_channel": "not_required",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "photo_requirements": "Not required for visa-free entry; a digital passport-style photo is required if applying for the optional e-visa",
+      "biometrics_required": false,
+      "interview_required": false,
+      "appointment_required": false,
+      "onward_travel_evidence": "Recommended; ticket departing Vietnam within 45 days may be requested",
+      "accommodation_evidence": "Recommended; hotel booking or host address in Vietnam may be requested",
+      "financial_evidence": "Recommended; bank statements, cash or cards showing adequate funds may be requested",
+      "insurance_required": false,
+      "exceptions": [
+        "The unilateral 45-day exemption applies from 15 March 2025 to the end of 14 March 2028 (Resolution 44/NQ-CP). the MFA/Consular Department states it will be considered for extension under Vietnamese law. Resolutions 32/NQ-CP (2022) and 128/NQ-CP (2023) expired on 15 March 2025.",
+        "Stays longer than 45 days require an e-visa (max 90 days) or another visa type.",
+        "Separate 30-day visa-free entry applies to foreigners entering Phu Quoc island directly from abroad (all nationalities)."
+      ],
+      "uncertainty": [
+        {
+          "field": "permitted_stay_days / exemption eligibility",
+          "reason": "Vietnam's unilateral visa-exemption terms and eligible nationalities have been revised in recent years; my knowledge may predate a 2025/2026 change, so confirm with an official Vietnamese source before travel."
+        },
+        {
+          "field": "e-visa fees and availability",
+          "reason": "E-visa fees and product rules are subject to revision; verify the current fee and eligibility on the official portal as of 2026-08-22."
+        }
+      ],
+      "confidence": "medium",
+      "permitted_stay_days": 45,
+      "passport_validity_requirement": {
+        "kind": "months_after_arrival",
+        "months": 6
+      },
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "health_requirements": [
+        {
+          "name": "Yellow fever vaccination certificate",
+          "applicability": "not_applicable",
+          "trigger_countries": [],
+          "trigger": "Required for travellers arriving from or transiting countries with risk of yellow fever transmission",
+          "question": null
+        }
+      ],
+      "visa_products": [
+        {
+          "type": "Visa exemption (unilateral, Resolution 44/NQ-CP)",
+          "entry": "single",
+          "validity": "Per entry; policy in force 15 March 2025 to 14 March 2028",
+          "max_stay_days": 45,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "Any passport type, any purpose of entry. passport valid at least 6 months from date of entry."
+        },
+        {
+          "type": "E-visa single entry",
+          "entry": "single",
+          "validity": "Up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 25,
+            "currency": "USD"
+          },
+          "notes": "Official portal evisa.gov.vn / thithucdientu.gov.vn (Vietnam Immigration Department). processed in 3 working days. fee not refunded if refused."
+        },
+        {
+          "type": "E-visa multiple entry",
+          "entry": "multiple",
+          "validity": "Up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 50,
+            "currency": "USD"
+          },
+          "notes": "Official portal evisa.gov.vn / thithucdientu.gov.vn (Vietnam Immigration Department). processed in 3 working days. fee not refunded if refused."
+        }
+      ],
+      "application_channel_detail": "No visa or pre-registration needed for stays up to 45 days. For longer stays or multiple entries, an e-visa (up to 90 days, single or multiple entry) can be applied for online on the official portal evisa.gov.vn / thithucdientu.gov.vn (Vietnam Immigration Department), processed in 3 working days.",
+      "source_url": "https://evisa.gov.vn/",
+      "requirement_detail": "unconditional_visa_free",
+      "transit_requirement": {
+        "required": null,
+        "note": null
+      }
+    },
+    "source_provenance": {
+      "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+      "verified_at": "2026-09-03",
+      "verified_by": "Ellis source audit, two independent refutation passes",
+      "verifier": "ai",
+      "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0",
+      "fields": [
+        "application_channel",
+        "application_channel_detail",
+        "disposition",
+        "exceptions",
+        "government_fee",
+        "permitted_stay",
+        "permitted_stay_days",
+        "required_documents",
+        "requirement_detail",
+        "visa_category",
+        "visa_products"
+      ],
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "requirement_detail": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "visa_category": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "permitted_stay": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "application_channel": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "application_channel_detail": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "government_fee": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "visa_products": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "exceptions": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        },
+        "required_documents": {
+          "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit, two independent refutation passes",
+          "verifier": "ai",
+          "note": "The Vietnam MFA list of visa exemptions (updated to 14/3/2025, published 30/06/2025) states that citizens of Russia (Nga) are unilaterally visa-exempt for stays not exceeding 45 days under Resolution 44/NQ-CP of 7 March 2025, applicable from 15/3/2025 to the end of 14/3/2028, subject to a passport valid at least 6 months from entry. The MFA Consular Department news item (lanhsuvietnam.gov.vn, 11/0"
+        }
+      }
+    },
+    "reader_before_guard": {
+      "status": "KIMI_PRIMARY",
+      "held": false,
+      "review_required": false,
+      "detail_pending": false,
+      "operator_released": false,
+      "contradictions": [],
+      "missing_fields": []
+    }
+  },
+  {
+    "cache_key": "HKG|HKG|OMN|tourism|default|unknown|v6",
+    "route": {
+      "passport_nationality": "HKG",
+      "lawful_country_of_residence": "HKG",
+      "destination_country": "OMN",
+      "visa_category": "tourist_visa",
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null
+    },
+    "merged_guidance": {
+      "disposition": "VISA_EXEMPT",
+      "visa_category": "Visa-free entry up to 14 days",
+      "permitted_stay": "Up to 14 days, which cannot be extended or converted",
+      "passport_validity": "6 months beyond arrival",
+      "required_documents": [
+        "valid HKSAR ordinary passport (valid for at least 6 months)",
+        "return/onward ticket",
+        "confirmed accommodation",
+        "travel health insurance",
+        "proof of sufficient funds"
+      ],
+      "application_channel": "not_required",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://evisa.rop.gov.om/",
+      "photo_requirements": "not required for the visa-free route; digital passport photo required if applying for an eVisa",
+      "biometrics_required": false,
+      "interview_required": false,
+      "appointment_required": false,
+      "onward_travel_evidence": "confirmed return/onward ticket",
+      "accommodation_evidence": "confirmed hotel booking or host invitation",
+      "financial_evidence": "proof of sufficient funds for the stay",
+      "insurance_required": true,
+      "exceptions": [
+        "The 14 day visa-free stay cannot be extended or converted. For longer tourism apply for an eVisa before travel",
+        "The visa-free period was 10 days until 14 May 2025 and is 14 days from 15 May 2025"
+      ],
+      "uncertainty": [
+        {
+          "field": "visa_exemption_status",
+          "reason": "Oman announced a 14-day visa-free entry list covering 103 nationalities; the exact current list and any post-cutoff changes should be confirmed with Omani authorities."
+        },
+        {
+          "field": "eVisa_products_and_fees",
+          "reason": "eVisa product durations and fees are recalled from the Royal Oman Police portal; verify current fees and availability if applying for a stay beyond 14 days."
+        },
+        {
+          "field": "health_insurance_requirement",
+          "reason": "Travel health insurance is reported as a condition of the 14-day visa-free entry; confirm current mandatory status before departure."
+        },
+        {
+          "field": "yellow_fever_trigger_countries",
+          "reason": "Full official list of yellow-fever trigger countries not verified; check WHO/Omani guidance if recent travel to endemic areas applies."
+        }
+      ],
+      "confidence": "high",
+      "permitted_stay_days": 14,
+      "passport_validity_requirement": {
+        "kind": "months_after_arrival",
+        "months": 6
+      },
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "health_requirements": [
+        {
+          "name": "Yellow fever vaccination certificate",
+          "applicability": "conditional",
+          "trigger_countries": [],
+          "trigger": "arrival within 6 days after staying in or transiting a yellow-fever risk country",
+          "question": "Have you stayed in or transited a yellow-fever endemic country in the past 6 days?"
+        }
+      ],
+      "visa_products": [
+        {
+          "type": "Visa-free entry",
+          "entry": "single",
+          "validity": "on arrival",
+          "max_stay_days": 14,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "Return ticket, confirmed hotel reservation, health insurance and sufficient funds are required."
+        },
+        {
+          "type": "Sponsored tourist visa, 30 days",
+          "entry": "single",
+          "validity": "30 days, extendable once",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 20,
+            "currency": "OMR"
+          },
+          "notes": "Sponsored by a licensed Omani tourism company."
+        },
+        {
+          "type": "One year tourist visit visa",
+          "entry": "multiple",
+          "validity": "One year",
+          "max_stay_days": null,
+          "fee": {
+            "amount": 50,
+            "currency": "OMR"
+          },
+          "notes": null
+        }
+      ],
+      "application_channel_detail": "No visa is needed for stays up to 14 days with a return ticket, confirmed hotel booking, health insurance and sufficient funds. For longer stays apply on the Royal Oman Police eVisa portal before travel.",
+      "requirement_detail": "conditional_visa_free",
+      "transit_requirement": {
+        "required": null,
+        "note": null
+      },
+      "unpublished_fields": [],
+      "corroborating_sources": [
+        {
+          "url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "quote": "The person will be allowed to stay in the Sultanate for a period of (14) days, which cannot be extended or transferred to any type of residence visa"
+        }
+      ]
+    },
+    "source_provenance": {
+      "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+      "verified_at": "2026-09-01",
+      "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+      "verifier": "ai",
+      "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa.",
+      "fields": [
+        "application_channel",
+        "application_channel_detail",
+        "confidence",
+        "corroborating_sources",
+        "disposition",
+        "exceptions",
+        "government_fee",
+        "official_portal_url",
+        "permitted_stay",
+        "permitted_stay_days",
+        "requirement_detail",
+        "unpublished_fields",
+        "visa_category",
+        "visa_products"
+      ],
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "visa_category": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "permitted_stay": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "application_channel": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "government_fee": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "official_portal_url": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "visa_products": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "exceptions": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "unpublished_fields": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "confidence": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.fm.gov.om/en/visitors/entry-visas/",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Omani Foreign Ministry. China including Hong Kong and Macau is in the first group of the over 100 countries visa-free scheme: 14 days without a visa since 15 May 2025, not extendable. Longer tourism uses the ROP eVisa."
+        }
+      }
+    },
+    "reader_before_guard": {
+      "status": "KIMI_PRIMARY",
+      "held": false,
+      "review_required": false,
+      "detail_pending": false,
+      "operator_released": false,
+      "contradictions": [],
+      "missing_fields": []
+    }
+  },
+  {
+    "cache_key": "CHN|CHN|THA|business|default|unknown|v6",
+    "route": {
+      "passport_nationality": "CHN",
+      "lawful_country_of_residence": "CHN",
+      "destination_country": "THA",
+      "visa_category": "business_visa",
+      "travel_purpose": "business",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "merged_guidance": {
+      "disposition": "VISA_EXEMPT",
+      "visa_category": "Visa-free entry for short business visits",
+      "permitted_stay": "Up to 30 days per stay under the bilateral agreement, and no more than 90 days in any 180-day period. The unilateral scheme allows up to 60 days for business engagements",
+      "passport_validity": "Valid at least 6 months beyond arrival",
+      "required_documents": [
+        "Valid passport (≥6 months)",
+        "Return or onward ticket",
+        "Proof of sufficient funds",
+        "Thai business invitation or meeting letter (recommended)",
+        "Accommodation details"
+      ],
+      "application_channel": "not_required",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.thaievisa.go.th",
+      "biometrics_required": false,
+      "interview_required": false,
+      "appointment_required": false,
+      "onward_travel_evidence": "Confirmed return or onward ticket within 60 days of arrival.",
+      "accommodation_evidence": "Proof of accommodation for the stay, such as a hotel booking or invitation/host letter.",
+      "financial_evidence": "Evidence of funds, e.g., 10,000 THB per person or 20,000 THB per family (cash, bank statement or equivalent).",
+      "insurance_required": false,
+      "exceptions": [
+        "The exemption covers business contacts but not residing, employment, study or media activities",
+        "Cumulative visa-free stays under the bilateral agreement are capped at 90 days in any 180-day period"
+      ],
+      "uncertainty": [
+        {
+          "field": "permitted_stay_days",
+          "reason": "China and Thailand have a bilateral 30-day visa-exemption agreement (with a 90-day-in-180-days cumulative cap) in addition to Thailand's unilateral 60-day exemption for Chinese nationals; the actual stamp and cumulative limit may depend on which rule the officer applies."
+        },
+        {
+          "field": "business purpose scope",
+          "reason": "Visa exemption covers short-term business meetings and negotiations only; gainful employment, assignment, or long-term business requires a Non-Immigrant B visa and possibly a work permit, which the provided facts do not rule out."
+        },
+        {
+          "field": "source_url",
+          "reason": "I do not have a reliably current official Thai MFA or Immigration Bureau URL for this route; verify with the Thai embassy/consulate or official Thai eVisa portal before traveling."
+        }
+      ],
+      "confidence": "high",
+      "permitted_stay_days": 30,
+      "passport_validity_requirement": {
+        "kind": "months_after_arrival",
+        "months": 6
+      },
+      "arrival_card": {
+        "required": true,
+        "name": "TM.6 Arrival/Departure Card",
+        "submission_window": "Completed and submitted at the port of entry on arrival."
+      },
+      "health_requirements": [
+        {
+          "name": "Yellow fever vaccination certificate",
+          "applicability": "not_applicable",
+          "trigger_countries": [],
+          "trigger": "Required only if arriving from or transiting a yellow-fever endemic country within 6 days.",
+          "question": null
+        }
+      ],
+      "visa_products": [
+        {
+          "type": "Visa-free entry for business contacts",
+          "entry": "multiple",
+          "validity": "on arrival",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "Employment, study, media and other prior-approval activities are excluded."
+        },
+        {
+          "type": "Non-Immigrant Visa B, single entry",
+          "entry": "single",
+          "validity": "3 months",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 2000,
+            "currency": "THB"
+          },
+          "notes": null
+        },
+        {
+          "type": "Non-Immigrant Visa B, multiple entry",
+          "entry": "multiple",
+          "validity": "1 year",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 5000,
+            "currency": "THB"
+          },
+          "notes": null
+        }
+      ],
+      "application_channel_detail": "No visa is needed for short business contacts. Employment or long assignments need a Non-Immigrant B visa, applied for on the Thai e-Visa portal before travel.",
+      "requirement_detail": "conditional_visa_free",
+      "transit_requirement": {
+        "required": null,
+        "note": null
+      },
+      "unpublished_fields": [
+        "processing_min_days"
+      ],
+      "corroborating_sources": [
+        {
+          "url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "quote": "for a period of stay not exceeding 30 days and a cumulative period of stays not exceeding 90 days in any 180-day period"
+        }
+      ]
+    },
+    "source_provenance": {
+      "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+      "verified_at": "2026-09-01",
+      "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+      "verifier": "ai",
+      "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa.",
+      "fields": [
+        "application_channel",
+        "application_channel_detail",
+        "confidence",
+        "corroborating_sources",
+        "disposition",
+        "exceptions",
+        "government_fee",
+        "official_portal_url",
+        "permitted_stay",
+        "permitted_stay_days",
+        "requirement_detail",
+        "unpublished_fields",
+        "visa_category",
+        "visa_products"
+      ],
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "visa_category": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "permitted_stay": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "application_channel": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "government_fee": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "official_portal_url": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "visa_products": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "exceptions": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "unpublished_fields": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "confidence": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (held-route release 2026-09-01, adversarially verified)",
+          "verifier": "ai",
+          "note": "Verified against the Thai MFA: the China-Thailand mutual exemption (in force 2024-03-01) is framed as facilitating tourist inflows and business contacts, 30 days per stay and 90 in any 180. China is also on the unilateral 93-country list allowing up to 60 days for tourism and business engagements. Employment and other prior-approval activities need a Non-Immigrant B visa."
+        }
+      }
+    },
+    "reader_before_guard": {
+      "status": "KIMI_PRIMARY",
+      "held": false,
+      "review_required": false,
+      "detail_pending": false,
+      "operator_released": false,
+      "contradictions": [],
+      "missing_fields": []
+    }
+  },
+  {
+    "cache_key": "HKG|HKG|IRN|tourism|default|unknown|v6",
+    "route": {
+      "passport_nationality": "HKG",
+      "lawful_country_of_residence": "HKG",
+      "destination_country": "IRN",
+      "visa_category": "tourist_visa",
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "merged_guidance": {
+      "disposition": "VISA_EXEMPT",
+      "permitted_stay": "21 days per arrival",
+      "passport_validity": "6 months beyond arrival",
+      "required_documents": [
+        "passport, photo, travel itinerary, accommodation proof, travel insurance, onward/return ticket"
+      ],
+      "application_channel": "not_required",
+      "government_fee": null,
+      "processing_time": null,
+      "photo_requirements": "One recent passport-size photograph; a physical copy may be requested at the port of entry",
+      "biometrics_required": null,
+      "interview_required": false,
+      "appointment_required": false,
+      "onward_travel_evidence": "Return or onward ticket may be requested on arrival",
+      "accommodation_evidence": "Confirmed hotel booking or host address in Iran may be requested",
+      "financial_evidence": "Evidence of sufficient funds for the stay, such as cash or bank cards",
+      "insurance_required": true,
+      "exceptions": [
+        "Tourist and Business visa waived for Hong Kong, Macao and Mainland Chinese passport holders since 22 July 2019",
+        "Passports are not stamped at the borders on visa-free entry"
+      ],
+      "uncertainty": [
+        {
+          "field": "requirement_detail",
+          "reason": "Iran's VOA list and e-visa eligibility for HKG passport holders have changed repeatedly; current 2026 policy cannot be verified in this session."
+        },
+        {
+          "field": "government_fee",
+          "reason": "Official consular fee varies by nationality, visa type and collection method; no verified exact amount available."
+        },
+        {
+          "field": "biometrics_required",
+          "reason": "Not confirmed whether Iran currently collects fingerprints for HKG tourist applicants."
+        }
+      ],
+      "confidence": "low",
+      "permitted_stay_days": 21,
+      "passport_validity_requirement": {
+        "kind": "months_after_arrival",
+        "months": 6
+      },
+      "arrival_card": {
+        "required": null,
+        "name": null,
+        "submission_window": null
+      },
+      "health_requirements": [],
+      "visa_products": [
+        {
+          "type": "Visa-free entry for tourism (HKSAR passport)",
+          "entry": "each arrival",
+          "validity": "n/a - no prior application",
+          "max_stay_days": 21,
+          "fee": {
+            "amount": 0,
+            "currency": "USD"
+          },
+          "notes": "In force since 22 July 2019; passports are not stamped at the border."
+        },
+        {
+          "type": "Tourist visa (Type B) - only needed for stays beyond 21 days",
+          "entry": "single",
+          "validity": "not published",
+          "max_stay_days": null,
+          "fee": {
+            "amount": 600,
+            "currency": "HKD"
+          },
+          "notes": "Applied at evisa.mfa.ir choosing Hong Kong as place of issue, then lodged at the Consulate General. Urgent visas add 50 percent and are issued in one working day."
+        }
+      ],
+      "application_channel_detail": "Hong Kong SAR passport holders are visa-free for tourism: 21-day stay upon each arrival, no prior application needed, and passports are not stamped at the border (waiver in force since 22 July 2019).",
+      "requirement_detail": "unconditional_visa_free",
+      "transit_requirement": {
+        "required": null,
+        "note": null
+      },
+      "unpublished_fields": [
+        "entries",
+        "validity_duration",
+        "validity_unit",
+        "visa_fee_amount",
+        "visa_fee_currency"
+      ]
+    },
+    "source_provenance": {
+      "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+      "verified_at": "2026-09-01",
+      "verified_by": "Ellis source audit (fee/validity verification)",
+      "verifier": "ai",
+      "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv",
+      "fields": [
+        "application_channel",
+        "application_channel_detail",
+        "disposition",
+        "exceptions",
+        "government_fee",
+        "permitted_stay",
+        "permitted_stay_days",
+        "processing_time",
+        "requirement_detail",
+        "unpublished_fields",
+        "visa_products"
+      ],
+      "field_provenance": {
+        "government_fee": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "visa_products": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "permitted_stay": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "disposition": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "requirement_detail": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "application_channel": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "application_channel_detail": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "processing_time": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "exceptions": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        },
+        "unpublished_fields": {
+          "source_url": "https://hongkong.mfa.gov.ir/en/generalcategoryservices/11765",
+          "verified_at": "2026-09-01",
+          "verified_by": "Ellis source audit (fee/validity verification)",
+          "verifier": "ai",
+          "note": "MAJOR ERROR - Hong Kong passport holders need no tourist visa for Iran at all. Iran's Consulate General in Hong Kong states the tourist and business visa has been waived for Hong K | Freshness audit 2026-09-01: Read via real browser after WebFetch (redirect loop) and curl (HTTP 503) failed; the URL resolves to the Iran Consulate General in Hong Kong's Consular Section page. It states Iran has waiv"
+        }
+      }
+    },
+    "reader_before_guard": {
+      "status": "KIMI_UNCERTAIN",
+      "held": false,
+      "review_required": false,
+      "detail_pending": false,
+      "operator_released": false,
+      "contradictions": [],
+      "missing_fields": [
+        "visa_category"
+      ]
+    }
+  }
+]

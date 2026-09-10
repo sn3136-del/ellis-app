@@ -1649,6 +1649,12 @@ export default function TravelDatabase({ onBack }) {
           {/* Available visa types — every product for this route, each with
               its own entry, validity, stay and fee (Trip.com feedback: never
               one generic product). */}
+          {result.publication_state === 'partial' && result.withheld_product_count > 0 && (
+            <p role="status" data-testid="database-partial-publication"
+               style={{ color: '#866000', fontSize: 13, marginTop: 16 }}>
+              {t('db.partialProducts')}
+            </p>
+          )}
           {Array.isArray(g.visa_products) && g.visa_products.length > 0 && (
             <div style={{ marginTop: 16 }}>
               <Section title={t('db.visaTypes')} accent="#0f8a3d">

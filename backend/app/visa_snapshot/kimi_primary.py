@@ -593,6 +593,65 @@ def _iso(v) -> date | None:
         return None
 
 
+def _direct_visa_centre_option(detail: str) -> bool:
+    """Recognize affirmative personal filing with explicitly optional agents.
+
+    Attendance for biometrics alone does not establish who lodges the visa.
+    An embassy's walk-in restriction is scoped to that embassy, while a
+    separate denial of personal centre filing must still block the channel.
+    """
+    import re
+    detail = " ".join(detail.lower().split())
+    sentences = re.split(r"[.;]\s+", detail)
+    agent = (r"(?:(?:consulate|embassy)[- ])?(?:designated|authori[sz]ed|accredited)"
+             r"[^,.;]{0,35}?(?:agents?\b|agenc(?:y|ies)\b|representatives?\b)")
+    centre = r"(?:visa (?:application )?cent(?:re|er)|tlscontact[^.;]{0,35}cent(?:re|er))"
+    connector = (r"\b(?:through|via|by|from)\b"
+                 r"(?:(?!\bor\b)[^,.;]){0,50}?" + agent)
+    for sentence in sentences:
+        if re.search(
+                r"(?:cannot|can't|can not|may not|must not|not (?:allowed|permitted) to)\s+"
+                r"(?:(?:personally|directly)\s+)?(?:apply|file|lodge|submit|attend|book)\b", sentence):
+            return False
+        for denial in re.finditer(r"(?:does not|do not|will not|cannot) accept (?:direct|individual|personal)", sentence):
+            # Only an immediately scoped embassy denial is excluded. Never
+            # suppress another negative instruction merely because the same
+            # sentence also mentions an embassy's walk-in restriction.
+            locations = list(re.finditer(r"\b(?:embassy|consulate|centre|center)\b", sentence[:denial.start()]))
+            if (not locations or locations[-1].group() not in {'embassy', 'consulate'} or
+                    denial.start() - locations[-1].end() > 40):
+                return False
+        for match in re.finditer(connector, sentence):
+            # Two supported alternatives: "in person OR through an agent",
+            # and the three-way list "in person, through an agent, OR online".
+            # A comma alone ("must apply in person, via an agent") is not an
+            # alternative and must not erase that agency requirement.
+            before, after = sentence[:match.start()], sentence[match.end():]
+            optional = (re.search(r"\bor\s*,?\s*$", before) or
+                        (re.search(r",\s*$", before) and re.match(r"\s*,\s*or\b", after)))
+            if not optional:
+                return False
+        if re.search(r"\bonly\s+(?:(?:an?|the)\s+)?" + agent, sentence):
+            return False
+        if re.search(agent + r"[^.;]{0,60}\b(?:must|shall|is required to|are required to)\b", sentence):
+            return False
+        for match in re.finditer(agent + r"[^,.;]{0,45}\b(?:appl(?:y|ies)|submit|submits|lodge|lodges|file|files|attend)\b", sentence):
+            if not re.search(r"\bor\s+(?:(?:an?|the)\s+)?$", sentence[:match.start()]):
+                return False
+    for clause in re.split(r"[.;]\s+|\bor\b", detail):
+        if not re.search(centre, clause):
+            continue
+        if re.search(r"\bin person\b", clause) and re.search(r"\b(?:apply|submit|lodge|file)\b", clause):
+            return True
+        if (re.search(r"\bbook and attend an appointment\b", clause) and
+                not re.search(r"\b(?:biometrics?|fingerprints?|interview)\b", clause)):
+            return True
+        if re.search(r"(?:passport holders|holders of[^.;]{0,45}passports|applicants|you)\b[^.;]{0,100}\b(?:lodge|submit)\b"
+                     r"[^.;]{0,80}\bat\b[^.;]{0,40}" + centre, clause):
+            return True
+    return False
+
+
 def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list, list]:
     """Whitelist + shape-check one answer. Returns (clean, missing, contradictions).
     Purely deterministic — schema validity, mandatory fields, and internal
@@ -732,7 +791,10 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
         "cannot apply directly", "not accept individual", "does not accept direct",
         "through a designated", "through an authorised", "through an authorized",
         "accredited travel agency", "designated agency", "designated travel",
-        "authorised agent", "authorized agent", "accredited agency"))
+        "authorised agent", "authorized agent", "accredited agency",
+        "authorised representative", "authorized representative", "accredited agencies"))
+    if channel == "visa_center" and cannot_self_file and _direct_visa_centre_option(detail):
+        cannot_self_file = False
     if cannot_self_file and channel in ("visa_center", "embassy", "online_portal"):
         contradictions.append(
             f"application_channel '{channel}' but the channel detail says "

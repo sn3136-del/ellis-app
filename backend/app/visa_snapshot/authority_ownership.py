@@ -12,7 +12,7 @@ from .registry import iso3
 
 _BY_COUNTRY = {
     'VAT': ('vaticanstate.va', 'vatican.va'),
-    'VNM': ('chinhphu.vn', 'baochinhphu.vn'),
+    'VNM': ('chinhphu.vn', 'baochinhphu.vn', 'vietnamembassy.org.uk'),
     'IRL': ('ireland.ie', 'irishimmigration.ie'),
     'TJK': ('mfa.tj', 'evisa.tj'), 'BHR': ('bahrain.bh',),
     'CUB': ('cubaminrex.cu', 'evisacuba.cu'), 'MUS': ('govmu.org',),

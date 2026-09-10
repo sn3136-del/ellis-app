@@ -85,12 +85,14 @@ official source and valid nonfuture date. The grader does not reinterpret
 every multilingual note's semantic relevance. The operator's factual judgment
 remains auditable through source and per-field provenance.
 
-Source labels describe evidence, while completeness and link coverage are
-separate measurements. Each record's held and review_required flags describe
-the entire canonical route, including its other products. Display grade and
-publication are separate: a completeness-only Low does not itself create a
-new hold. The existing source/conflict gate and explicit route hold metadata
-govern publication; the binary relabeling did not change those gates.
+Source labels, completeness and link coverage are separate measures.
+Completeness-only Low does not create a hold. QC retains every product and its
+evidence. Product held and default route_held are distinct. A current, supported
+exemption may publish while an unsupported optional product remains withheld,
+if no route conflict or prior hold remains. The traveler sees a partial-publication
+notice and supported guidance. Entry conditions cannot be discarded to permit
+publication. Reports distinguish default availability from full product coverage.
+Source disputes, pending detail, stale readers and invalid policy dates remain blocked.
 
 ## Evidence contract and corrections
 

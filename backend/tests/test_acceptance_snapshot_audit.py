@@ -163,3 +163,23 @@ def test_empty_documented_denominator_is_unavailable():
     result = module.audit(data)
     assert result['documented_field_completeness_rate'] is None
     assert result['documented_record_completeness_rate'] is None
+
+
+def test_sample_served_route_remains_distinct_from_held_optional_product():
+    from copy import deepcopy
+    data=snapshot(cache_key='ESP|ESP|VNM|tourism|default|unknown|v6',
+        travel_document_country='ESP',destination_country='VNM',
+        travel_document_type='ordinary_passport',travel_purpose='tourism',
+        held=False,route_held=False,source_check='ai-quote')
+    optional=deepcopy(data['records'][0])
+    optional.update(held=True,route_held=False,source_check='unchecked',
+                    visa_type_name='Alternative under review')
+    data['records'].append(optional);data['summary']['total']=2
+    result=module.audit(data)
+    assert result['sample_306']['served']==0
+    assert result['sample_306']['default_available']==1
+    assert result['sample_306']['partial_default']==1
+    assert result['route_remediation_queue'][0]['held_rows']==1
+    assert result['route_remediation_queue'][0]['unsupported_rows']==1
+    data['records'][0]['route_held']=True
+    assert module.audit(data)['sample_306']['served']==0

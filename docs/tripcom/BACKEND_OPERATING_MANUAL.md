@@ -64,3 +64,13 @@ or unmeasured recovery claims are not current acceptance evidence.
 UFW allows 22/80/443 only. Backend binds loopback; only Caddy is exposed.
 Secrets ship encrypted (backend/secrets.enc, AES-256-CBC) and are decrypted
 on the machine at deploy time; backend/.env never enters git.
+
+## Route and product publication
+
+QC keeps every product available for inspection. Product held and route_held
+are distinct: a partial route can publish its supported exemption while a
+separate optional visa remains withheld. The public page labels this state and
+excludes unsupported alternative claims from its answer and chat. Conditions
+cannot be discarded to make a route publishable. Report default availability,
+fully released routes and held products separately; partial publication is not
+100% product coverage.

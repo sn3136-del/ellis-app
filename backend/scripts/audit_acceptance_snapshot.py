@@ -137,6 +137,10 @@ def audit(payload):
         'sample_306': {
             'present': len(pairs),
             'served': sum(all(r.get('held') is False for r in rs) for rs in pairs.values()),
+            'default_available': sum(all(r.get('route_held', r.get('held')) is False for r in rs) for rs in pairs.values()),
+            'partial_default': sum(all(r.get('route_held', r.get('held')) is False for r in rs)
+                                   and any(r.get('held') is True for r in rs) for rs in pairs.values()),
+            'publication_definition': 'served requires every product published; default_available includes partial routes with withheld alternatives.',
             'missing': [{'nationality': a, 'destination': b} for a in STATIONS for b in STATIONS
                         if a != b and (a, b) not in pairs],
             'scope': 'Breadth sample only; not the total route universe.',

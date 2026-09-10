@@ -1641,8 +1641,9 @@ def records_for_route(route: dict, guidance: dict,
         return [_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
     rows = []
     ambiguous_timing = _ambiguous_inherited_processing(g, products)
-    for p in products:
+    for product_index, p in enumerate(products):
         row = dict(base)
+        row["_product_index"] = product_index
         if ambiguous_timing:
             row["processing_min_days"], row["processing_unit"] = None, None
             row["_processing_note"] = _processing_note(g, ambiguous=True)

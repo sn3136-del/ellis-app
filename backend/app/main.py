@@ -1470,8 +1470,14 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
             # confidence: without it the release half of the confidence gate
             # cannot be audited from the records surface.
             rec["_released"] = bool((r.verification or {}).get("operator_released"))
-            rec["_held"] = bool(_route_state.get("held"))
-            rec["_review_required"] = bool(_route_state.get("review_required"))
+            rec["_route_held"] = bool(_route_state.get("held"))
+            publication = next((item for item in _route_state.get("product_publication", [])
+                                if item.get("product_index") == rec.get("_product_index")), None)
+            rec["_held"] = bool(publication["held"]) if publication else rec["_route_held"]
+            rec["_review_required"] = rec["_held"] if publication else bool(_route_state.get("review_required"))
+            rec["_publication_state"] = publication["state"] if publication else (
+                "withheld" if rec["_held"] else "published")
+            rec["_publication_reason"] = publication["reason"] if publication else None
             # How solidly the source BACKS what this record shows:
             #   human-quote        a person verified these fields against the
             #                      named page and quoted it
@@ -1586,6 +1592,9 @@ def travel_database_records(nationality: str = "", destination: str = "",
                          "freshness_valid_until": r.get("freshness_valid_until"),
                          "operator_released": r.get("_released", False),
                          "held": r.get("_held", False),
+                         "route_held": r.get("_route_held", r.get("_held", False)),
+                         "publication_state": r.get("_publication_state"),
+                         "publication_reason": r.get("_publication_reason"),
                          "review_required": r.get("_review_required", False),
                          "field_status": _with_pending(tstation.field_status(r),
                                                        r.get("_disputed")),
@@ -2506,10 +2515,14 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     # transit) carries the verified policy note with the route answer.
     from .visa_snapshot import special_policies
     out = special_policies.attach(out, question=body.question, route=route)
-    if out.get("held"):
+    if out.get("held") or out.get("publication_state") == "partial":
         # Do not ask a model to rephrase a withheld answer: old conversation
         # history can contain the exact claim that the gate just withdrew.
         out["reply"] = assistant.fallback_reply(out, body.question, body.lang)
+        if out.get("publication_state") == "partial":
+            notice = ("部分其他签证选项仍在核实中，暂不显示。" if assistant.wants_chinese(body.question, body.lang)
+                      else "Some alternative visa options are still being checked and are not shown.")
+            out["reply"] = (out.get("reply") or "").rstrip() + " " + notice
         out["reply_source"] = "facts"
         return out
     # The composer phrases the answer from the served facts. Any failure

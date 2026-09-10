@@ -33,6 +33,11 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
         for issue in (out.get("contradictions") or [])))
     low = any(r.get("_evidence_low", r.get("confidence_level") == "Low") for r in rows)
     pending = bool(out.get("detail_pending"))
+    if low:
+        from .publication_scope import scoped_exemption, project_reader
+        scope = scoped_exemption(route, out, rows, conflict=conflict, pending=pending)
+        if scope is not None:
+            return project_reader(route, out, scope)
     if conflict or pending or (low and not out.get("operator_released")):
         out["review_required"] = True
         out["held"] = True if conflict or pending else kimi_primary.hold_enabled()

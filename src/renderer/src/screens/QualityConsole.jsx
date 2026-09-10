@@ -1801,7 +1801,12 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                       <span style={{ fontSize: 11, fontWeight: 700, color: BLUE }}>
                         {t('ops.qcAvailable')}
                       </span>
-                      {held && (
+                      {rec.publication_reason === 'optional_product_evidence_pending' && (
+                        <span data-testid="ops-product-withheld" style={{ color: '#866000', fontSize: 11 }}>
+                          {t('ops.productWithheld')}
+                        </span>
+                      )}
+                      {held && rec.publication_reason !== 'optional_product_evidence_pending' && (
                         <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
                                 data-testid="ops-release"
                                 title={t('ops.heldTip')}

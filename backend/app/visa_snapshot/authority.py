@@ -22,7 +22,11 @@ from urllib.parse import urlparse
 # Article 4, names www.visitsaudi.com as the official visa platform; its
 # nationality selector links directly to visa.visitsaudi.com (read 2026-09-10).
 # Admit these exact hosts only, not the .us/.com suffix or other subdomains.
-EXACT_OFFICIAL_HOSTS = frozenset({"meco.org.tw", "www.meco.org.tw", "beninembassy.us",
+EXACT_OFFICIAL_HOSTS = frozenset({
+    # Embassy of Vietnam in London: GOV.UK consular-contact guidance links
+    # this exact website; the Vietnam MFA London directory uses its domain.
+    # Checked 2026-09-10; no unrelated subdomain receives authority.
+    "vietnamembassy.org.uk","meco.org.tw", "www.meco.org.tw", "beninembassy.us",
                                   "www.visitsaudi.com", "visa.visitsaudi.com"})
 
 # Government second-level suffix patterns used worldwide. Proper suffix match
