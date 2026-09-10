@@ -85,7 +85,12 @@ def _continuation(previous, now):
         return None
     if start is None or start > now or now >= start + timedelta(seconds=budget):
         return None
-    plan = {'cycle_started_at': start.isoformat(), 'cycle_time_budget_seconds': budget,
+    # Scheduling position is bookkeeping only: it never extends the original
+    # deadline. Legacy checkpoints have no count and begin a fair block at one.
+    scheduled = previous.get('cycle_scheduled', 0)
+    if isinstance(scheduled, bool) or not isinstance(scheduled, int) or scheduled < 0:
+        scheduled = 0
+    plan = {'prior_cycle_scheduled': scheduled, 'cycle_started_at': start.isoformat(), 'cycle_time_budget_seconds': budget,
             'remaining_seconds': (start + timedelta(seconds=budget) - now).total_seconds(),
             'resumed_from_started_at': previous.get('started_at'),
             'prior_attempt_results': previous.get('attempted', 0)}
@@ -264,7 +269,7 @@ def _run_workers(keys: list[str], deadline: float, stop: threading.Event, status
 
 def main() -> int:
     from app.db import SessionLocal
-    from app.visa_snapshot import freshness
+    from app.visa_snapshot import freshness, freshness_priority
     path = freshness.sweep_status_path()
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -307,7 +312,11 @@ def main() -> int:
             "row_limit": MAX_ROWS, "workers": WORKERS, "due_before": None, "selected": 0,
             "scheduled": 0, "completed": 0, "in_flight": 0, "cycle_unattempted": 0,
             "integrity_violations": 0, "integrity_resolved": 0, "backlog_remaining": None,
-            "last_error": None, **{key: 0 for key in _COUNTS}}
+            "last_error": None, **{key: 0 for key in _COUNTS},
+            "queue_priority_policy": freshness_priority.POLICY_ID,
+            "queue_priority_basis": "User and Trip.com market priorities; not measured traffic",
+            "oldest_dispatch_every": freshness_priority.OLDEST_EVERY,
+            "prior_cycle_scheduled": 0, "cycle_scheduled": 0}
         status.update({k:v for k,v in continuation.items() if k != 'remaining_seconds'} if continuation else {
             'cycle_started_at': status['started_at'], 'cycle_time_budget_seconds': MAX_SECONDS})
         result = 0
@@ -316,6 +325,7 @@ def main() -> int:
         def save():
             nonlocal checkpoint_failed
             status["updated_at"] = _utc()
+            status["cycle_scheduled"] = status["prior_cycle_scheduled"] + status["scheduled"]
             status["elapsed_seconds"] = round(time.monotonic() - started, 3)
             try:
                 _write_status(path, status)
@@ -339,7 +349,10 @@ def main() -> int:
             if continuation:
                 due = _remaining_cycle_rows(due, status['cycle_started_at'], datetime.now(timezone.utc))
             status["due_before"] = len(due)
-            keys = [row.cache_key for row in due[:MAX_ROWS]]
+            ordered = freshness_priority.prioritize_due_rows(
+                due, now=datetime.now(timezone.utc),
+                dispatch_offset=status['prior_cycle_scheduled'])
+            keys = [row.cache_key for row in ordered[:MAX_ROWS]]
             db.close(); db = None  # no coordinator transaction survives worker dispatch
             status["selected"] = status["cycle_unattempted"] = len(keys)
             save()

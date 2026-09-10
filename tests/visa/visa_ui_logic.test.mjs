@@ -9,6 +9,7 @@ import {
 } from '../../src/renderer/src/lib/visaSession.js'
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
 import { arrivalCardLines } from '../../src/renderer/src/lib/arrivalCard.js'
+import { publishedStayText } from '../../src/renderer/src/lib/publishedStay.js'
 import { applicationLane, applicationStepLinkIndex } from '../../src/renderer/src/lib/applicationLane.js'
 import { t as translate, SUPPORTED } from '../../src/renderer/src/lib/i18n.js'
 
@@ -343,4 +344,135 @@ test('published visa fees preserve a from qualifier and existing fixed/free form
   for (const amount of [null, undefined, NaN, Infinity, -1, false, '']) {
     assert.equal(publishedFeeText({ amount, currency: 'AUD' }), null)
   }
+})
+
+
+test('India long-validity products preserve the calendar-year limit over the bare 180-day number', () => {
+  const product = { type: '1-year e-Tourist Visa', max_stay_days: 180,
+    permitted_stay: 'Cumulative stay must not exceed 180 days per calendar year; follow the issued permission for each visit.' }
+  const before = structuredClone(product)
+  assert.equal(publishedStayText(product), product.permitted_stay)
+  assert.deepEqual(product, before)
+})
+
+test('qualified product stay retains entry conditions, discretion and explicit uncertainty', () => {
+  for (const permitted_stay of [
+    'Up to 30 days only if holding a valid qualifying residence permit.',
+    'Maximum 6 weeks granted on entry, at the immigration officer’s discretion.',
+    'Permitted stay is not yet confirmed; check the issued permission.',
+  ]) assert.equal(publishedStayText({permitted_stay, max_stay_days: 180}), permitted_stay)
+})
+
+test('all supported locales render qualified text through the catalog and numeric fallback through local strings', () => {
+  const source = 'Cumulative stay must not exceed 180 days per calendar year.'
+  const localized = [source, '每个日历年累计停留不得超过180天。', '每個曆年累計停留不得超過180天。']
+  for (const [index, lang] of SUPPORTED.entries()) {
+    const seen = []
+    assert.equal(publishedStayText({permitted_stay: source, max_stay_days: 180}, {
+      translate: value => { seen.push(value); return localized[index] },
+      formatDays: n => translate(lang, 'db.upToDays', {n}),
+    }), localized[index])
+    assert.deepEqual(seen, [source])
+    assert.equal(publishedStayText({max_stay_days: 30}, {
+      formatDays: n => translate(lang, 'db.upToDays', {n}),
+    }), translate(lang, 'db.upToDays', {n: 30}))
+  }
+})
+
+test('missing translation preserves the full qualified stay rather than dropping to a number', () => {
+  const permitted_stay = 'Up to 30 days if the entry conditions are met.'
+  assert.equal(publishedStayText({permitted_stay, max_stay_days: 30}, {translate: () => ''}), permitted_stay)
+})
+
+test('numeric-only and blank-text products retain their own day fallback', () => {
+  for (const permitted_stay of [null, undefined, '', '  '])
+    assert.equal(publishedStayText({permitted_stay, max_stay_days: 30}), 'Up to 30 days')
+  assert.equal(publishedStayText({max_stay_days: '14'}), 'Up to 14 days')
+})
+
+test('missing or malformed numeric stays remain unknown without a parent or sibling fallback', () => {
+  for (const max_stay_days of [null, undefined, 0, -1, false, true, '', 'bad', Infinity])
+    assert.equal(publishedStayText({max_stay_days}, {unknownLabel: 'Unknown stay'}), 'Unknown stay')
+  assert.equal(publishedStayText(null, {unknownLabel: 'Unknown stay'}), 'Unknown stay')
+})
+
+
+import fs from 'node:fs'
+import { checkRequirements } from '../../src/renderer/src/lib/checkRequirements.js'
+const checkRoute = { passport_nationality: 'HKG', destination_country: 'JPN',
+  travel_purpose: 'tourism', travel_document_type: 'ordinary_passport' }
+
+for (const field of ['biometrics_required', 'interview_required', 'appointment_required']) {
+  for (const value of [true, false]) {
+    test(`${field}=${value} without backend stage never becomes a border or application decision`, () => {
+      const g = { [field]: value }; const before = structuredClone(g)
+      const [r] = checkRequirements(g)
+      assert.equal(r.valueKey, 'db.checkRequirementUnknown')
+      assert.equal(r.stageKey, 'db.checkStageUnknown')
+      assert.equal(r.tone, null)
+      assert.deepEqual(g, before)
+    })
+  }
+}
+
+for (const value of [null, undefined, 0, 1, 'false', [], {}]) {
+  test(`missing/malformed flag ${String(value)} never becomes a known requirement`, () => {
+    assert.deepEqual(checkRequirements({biometrics_required: value}), [])
+  })
+}
+
+test('claimed proof metadata cannot create a second frontend scope-verification contract', () => {
+  const p = { status: 'reviewed', verifier: 'ai', source_url: 'https://www.mofa.go.jp/visa/',
+    verified_at: '2026-09-10', quote: 'Source statement.', subject: checkRoute,
+    requirement_stage: 'visa_application', reviewed_value: false }
+  for (const proof of [undefined, p, { ...p, requirement_stage: 'border_entry' },
+    { ...p, status: 'partial' }, { ...p, status: 'unknown' },
+    { ...p, subject: { ...checkRoute, product_type: 'Optional long-stay paper visa' } },
+    { ...p, source_url: 'https://unrelated.example/' },
+    { ...p, verified_at: 'invalid' }, { ...p, verified_at: '2099-01-01' }]) {
+    for (const value of [true, false]) {
+      const [r] = checkRequirements({biometrics_required: value},
+        {field_provenance: {biometrics_required: proof}}, checkRoute)
+      assert.equal(r.scopeConfirmed, false)
+      assert.equal(r.valueKey, 'db.checkRequirementUnknown')
+    }
+  }
+})
+
+test('visa exemption and a no-application channel never manufacture scope', () => {
+  const [r] = checkRequirements({biometrics_required: false,
+    disposition: 'VISA_EXEMPT', application_channel: 'not_required'})
+  assert.equal(r.valueKey, 'db.checkRequirementUnknown')
+  assert.equal(r.stageKey, 'db.checkStageUnknown')
+})
+
+test('original flags, actual border instructions and application workflow are retained unchanged', () => {
+  const g = {biometrics_required: false, interview_required: true, appointment_required: false,
+    required_documents: ['Submit fingerprints at the visa application centre.'],
+    entry_requirements: ['Fingerprinting and photograph checks apply at the border, subject to exemptions.'],
+    submission_process: ['Attend the visa appointment.']}
+  const before = structuredClone(g)
+  assert.equal(checkRequirements(g).length, 3)
+  assert.deepEqual(g, before)
+})
+
+test('all locale labels describe unconfirmed scope and never a border exemption', () => {
+  const keys = ['db.checksAndAppointments', 'db.checkStageUnknown',
+    'db.checkRequirementUnknown', 'db.checkScopeExplanation']
+  for (const lang of SUPPORTED) {
+    for (const key of keys) assert.notEqual(translate(lang, key), key)
+    assert.notEqual(translate(lang, 'db.checkRequirementUnknown'), translate(lang, 'db.notRequired'))
+  }
+})
+
+test('renderer isolates legacy checks from entry facts and preserves existing stay/prose consumers', () => {
+  const source = fs.readFileSync(new URL('../../src/renderer/src/screens/TravelDatabase.jsx', import.meta.url), 'utf8')
+  const entry = source.slice(source.indexOf('  const entryFacts ='), source.indexOf('  const documents ='))
+  assert.ok(!entry.includes('g.biometrics_required') && !entry.includes('g.interview_required') && !entry.includes('g.appointment_required'))
+  assert.match(entry, /g\.insurance_required/)
+  assert.match(source, /checkRequirements\(g\)/)
+  assert.match(source, /Section title=\{t\('db.checksAndAppointments'\)\}/)
+  assert.match(source, /publishedStayText/)
+  assert.match(source, /itemsOf\(g\.required_documents\)/)
+  assert.match(source, /itemsOf\(g\.submission_process\)/)
 })

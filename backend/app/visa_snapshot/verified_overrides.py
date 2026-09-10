@@ -293,6 +293,9 @@ def _read_verification_store(path, kind, *, required=False, reviewed=False, erro
             # Reviewed files are produced by a bounded converter. A malformed
             # entry must not quietly disappear and expose an older answer.
             for row in rows:
+                from .reviewed_hkg_mainland_fields import entry_errors as delegated_entry_errors
+                if delegated_entry_errors(row):
+                    raise ValueError('invalid delegated permit application proof')
                 if (not isinstance(row, dict) or not isinstance(row.get('route'), dict)
                         or not row['route'].get('nationality') or not row['route'].get('destination')
                         or not row.get('verified_at') or not row.get('fields')
@@ -466,6 +469,9 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
     for r in rows if isinstance(rows, list) else []:
         if not isinstance(r, dict):
             continue
+        from .reviewed_hkg_mainland_fields import entry_errors as delegated_entry_errors
+        if delegated_entry_errors(r):
+            continue
         route = r.get("route") or {}
         url = str(r.get("source_url") or "").strip()
         when = str(r.get("verified_at") or "").strip()
@@ -526,6 +532,7 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
         per_field = {}
         prior_proofs = ((table.get(route_key) or (inherited or {}).get(route_key) or {})
                         .get("field_provenance") or {})
+        from .reviewed_hkg_mainland_fields import field_supported as delegated_field_supported
         for k in clean:
             p = (r.get("field_provenance") or {}).get(k)
             if isinstance(p, dict) and p.get("status") == "unknown" and clean[k] is None:
@@ -537,6 +544,7 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
                 continue
             if (isinstance(p, dict) and p.get("verified_at") and
                     (is_government_host(hostname(str(p.get("source_url") or "")))
+                     or delegated_field_supported(p, route, k, clean[k])
                      or social_entry and binding_for(p, route, field=k, value=clean[k])) and
                     p.get("verifier", "ai") in ("human", "ai", "public")):
                 per_field[k] = _provenance(p)
@@ -1060,6 +1068,8 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     merged = reconcile(route, merged, provenance)
     from .reviewed_japan_warning_resolution import reconcile as reconcile_japan
     merged = reconcile_japan(route, merged, provenance)
+    from .reviewed_hkg_mainland_warning_resolution import reconcile as reconcile_permit
+    merged = reconcile_permit(route, merged, provenance)
     result, provenance = scheduled_policies.apply(merged, provenance, route)
     result = policy_intervals.annotate(annotate(result, route), provenance, route)
     return _finalize_guidance(result, provenance), provenance

@@ -15,6 +15,8 @@ import { DEPARTURE_CITIES } from '../lib/departureCities.js'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
+import { publishedStayText } from '../lib/publishedStay.js'
+import { checkRequirements } from '../lib/checkRequirements.js'
 import { arrivalCardLines } from '../lib/arrivalCard.js'
 import { parseDatabaseRouteHash, databaseRouteHash } from '../lib/databaseRoute.js'
 import { applicationLane, applicationStepLinkIndex } from '../lib/applicationLane.js'
@@ -785,7 +787,7 @@ export default function TravelDatabase({ onBack }) {
       asText(g.transit_requirement && g.transit_requirement.note),
       // The visa-type table is the reader's decision surface; it must switch
       // languages with everything else (it previously stayed English).
-      ...products.flatMap((vp) => [asText(vp.type), asText(vp.validity),
+      ...products.flatMap((vp) => [asText(vp.type), asText(vp.validity), asText(vp.permitted_stay),
                                    asText(vp.notes), asText(vp.entry)]),
       ...itemsOf(result?.apply_steps),
       ...itemsOf(g.required_documents), ...itemsOf(g.forms),
@@ -1114,10 +1116,8 @@ export default function TravelDatabase({ onBack }) {
 
   const yesNo = (v) => v === true ? [t('db.required'), 'yes']
     : v === false ? [t('db.notRequired'), 'no'] : null
+  const processChecks = checkRequirements(g)
   const entryFacts = g ? [
-    [t('db.biometrics'), yesNo(g.biometrics_required)],
-    [t('db.interview'), yesNo(g.interview_required)],
-    [t('db.appointment'), yesNo(g.appointment_required)],
     [t('db.insurance'), yesNo(g.insurance_required)],
   ].filter(([, v]) => v) : []
 
@@ -1705,9 +1705,10 @@ export default function TravelDatabase({ onBack }) {
                                 : t('db.valueUnknown'))}
                       </div>
                       <div style={{ color: NAVY }}>
-                        {vp.max_stay_days
-                          ? t('db.upToDays', { n: vp.max_stay_days })
-                          : (T(asText(vp.permitted_stay)) || t('db.valueUnknown'))}
+                        {publishedStayText({ ...vp, permitted_stay: asText(vp.permitted_stay) }, {
+                          translate: T, formatDays: (n) => t('db.upToDays', { n }),
+                          unknownLabel: t('db.valueUnknown'),
+                        })}
                       </div>
                       <div style={{ color: NAVY, fontWeight: 600 }}>
                         {feeText(vp.fee, t) || '·'}</div>
@@ -1746,6 +1747,22 @@ export default function TravelDatabase({ onBack }) {
                                      { n: g.passport_validity_requirement.months })} />
                     ) : null}
                     <Fact label={t('db.photo')} value={T(asText(g.photo_requirements))} />
+                  </Section>
+                ) })
+              }
+              if (processChecks.length > 0) {
+                cards.push({ key: 'process-checks', weight: processChecks.length + 2, node: (
+                  <Section title={t('db.checksAndAppointments')} accent={BLUE} key="process-checks">
+                    {processChecks.map((check) => (
+                      <Fact key={check.field}
+                            label={`${t(check.labelKey)} · ${t(check.stageKey)}`}
+                            value={t(check.valueKey)} pill={check.tone} />
+                    ))}
+                    {processChecks.some((check) => !check.scopeConfirmed) && (
+                      <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8 }}>
+                        {t('db.checkScopeExplanation')}
+                      </div>
+                    )}
                   </Section>
                 ) })
               }

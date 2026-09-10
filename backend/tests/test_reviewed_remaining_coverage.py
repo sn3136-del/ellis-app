@@ -3,6 +3,7 @@ from copy import deepcopy
 from datetime import date
 import importlib.util
 import json
+import hashlib
 from pathlib import Path
 import pytest
 from app.visa_snapshot import structured_evidence as scopes, verified_overrides as vo
@@ -29,6 +30,15 @@ def current_seed(tmp_path,monkeypatch):
 
 @pytest.mark.parametrize('entry',MANIFEST['routes'],ids=lambda e:e['route']['nationality']+'-'+e['route']['destination'])
 def test_exact_reviewed_route_and_current_overlay_agree(entry,current_seed):
+    if entry['route'] == dict(nationality='VNM', destination='IND', travel_purpose='tourism', travel_document_type='ordinary_passport'):
+        assert hashlib.sha256(DATA.read_bytes()).hexdigest() == '79a518e7cdfbb9fe89ef0a47263644d0d78b9bb8a869388670d9e619e476f0d3'
+        from scripts.prepare_reviewed_product_patch import digest
+        assert digest(entry) == '5f55036f495a80e2ad78c7fb3a09db0c20dccbd412fe4d91b427b36a5fce002d'
+        before = deepcopy(entry)
+        with pytest.raises(ValueError, match='existing overlay changes a reviewed field'):
+            mod._validate_entry(deepcopy(entry),SOURCES,date(2026,9,9))
+        assert entry == before
+        return
     result=mod._validate_entry(deepcopy(entry),SOURCES,date(2026,9,9))
     assert result['guidance']==entry['guidance']
     assert entry['guidance'].get('confidence') != 'high'
@@ -82,3 +92,31 @@ def test_taiwan_hongkong_validity_uses_supported_arrival_kind(current_seed):
 def test_unresolved_vietnam_change_is_not_silently_materialized():
     assert len(MANIFEST['routes'])==25
     assert not any(e['route']['nationality']=='IDN' and e['route']['destination']=='VNM' for e in MANIFEST['routes'])
+
+
+def test_current_india_border_form_overlay_is_exact_rebuilt_supersession(current_seed):
+    from scripts import convert_reviewed_india_entry as current
+    from scripts.prepare_reviewed_product_patch import digest
+    seed_root=ROOT/'data/database_seed'
+    manifest_path=seed_root/'reviewed_india_entry_manifest_20260910.json'
+    overlay_path=seed_root/'reviewed_india_entry_overlay_20260910.json'
+    assert hashlib.sha256(manifest_path.read_bytes()).hexdigest() == '8cd9c606c50264f6d305856f85a30d7cd7a714626a10f4923f4107097dfc9617'
+    assert hashlib.sha256(overlay_path.read_bytes()).hexdigest() == '11744d6a1fd007556695d0f9809ca505226b8d1149dcf54e119b251327224006'
+    manifest=json.loads(manifest_path.read_text());overlay=json.loads(overlay_path.read_text())
+    layers=[dict(deepcopy(row['baseline']),cache_key=row['cache_key']) for row in manifest['routes']]
+    report=current.verify_prepared(manifest['specification'],layers,manifest,overlay)
+    reviewed=next(row for row in report['routes'] if row['cache_key']=='VNM|VNM|IND|tourism|default|unknown|v6')
+    baseline=next(row for row in layers if row['cache_key']==reviewed['cache_key'])
+    actual,provenance=vo.apply(deepcopy(baseline['raw_guidance']),baseline['route'])
+    assert digest(actual)==digest(reviewed['guidance'])
+    assert digest(provenance)==digest(reviewed['source_provenance'])
+    assert actual['arrival_card']['required'] is True and '72 hours' in actual['arrival_card']['submission_window']
+    assert current.CARD in str(actual['entry_requirements']) and current.DECL in str(actual['entry_requirements'])
+    assert provenance['field_provenance']['arrival_card']['status']=='reviewed'
+    assert provenance['field_provenance']['entry_requirements']['status']=='partial'
+    assert provenance['field_provenance']['entry_requirements']['verified_elements']==[current.CARD,current.DECL]
+    for product in actual['visa_products']:
+        assert current.CARD in str(product['entry_requirements']) and current.DECL in str(product['entry_requirements'])
+        assert product['field_provenance']['entry_requirements']['status']=='partial'
+    assert not report['raw_writes'] and not report['operator_writes'] and not report['issue_changes']
+    assert not report['renew_fresh_until'] and not report['confidence_changed']

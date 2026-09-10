@@ -314,6 +314,29 @@ def field_value_supported(name: str, value, text: str) -> bool:
         # channel therefore could never be reconfirmed from a fresh quote.
         # Require an actual application instruction, not a payment/tracking
         # page or the mere availability of a visa product.
+        if value == "in_person":
+            # A general filing claim needs an unqualified application rule.
+            # Attendance, eligibility conditions and other public services do
+            # not prove that this visa/permit may be applied for in person.
+            if re.search(
+                    r"\b(?:not|never|cannot|can't|ineligible|prohibited|unavailable|if|unless|except|only|"
+                    r"renew|renewal|replacement|driving|driver|licen[cs]e|biometrics?|fingerprints?|"
+                    r"agents?|agencies|representatives?)\b|\bprovided (?:that|you)\b|\bsubject to\b|"
+                    r"不应当|不應當|无需|無需|毋须|毋須|不得|不能|不可以|不接受|仅限|僅限|"
+                    r"如果|倘若|若是|只限|限于|限於", low):
+                return False
+            # Exact mainland-permit application syntax from the current NIA
+            # instruction; its following under-18 guardian rule is preserved.
+            if re.fullmatch(
+                    r"(?:\(一\)\s*)?港澳居民申请港澳居民来往内地通行证应当本人前往受理机构提出申请"
+                    r"(?:,未满十八周岁的申请人须由法定监护人陪同申请并提供法定监护人的身份证件)?[。.]?", low):
+                return True
+            # A standalone general visa/permit filing sentence cannot carry
+            # an unreviewed conditional or service-specific tail.
+            return bool(re.fullmatch(
+                r"(?:(?:applicants |you )(?:must|should|may|can) )?"
+                r"(?:submit|lodge|make) (?:an? |the |your )?(?:visa |permit )application(?: form)? in person[.!]?|"
+                r"(?:visa|permit) applications? (?:must|may|can|should) be (?:submitted|lodged|made) in person[.!]?", low))
         canonical = {
             "online_portal": r"\bapply(?:ing)?\s+online\b|"
                              r"\bapply(?:ing)?\s+for\s+(?:an? |the )?(?:[a-z-]+\s+){0,3}visa\s+online\b|"

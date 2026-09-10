@@ -26,6 +26,13 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
         # Scope/date/capture failures are hard conflicts. Neither a manual
         # release nor disabling the ordinary low-evidence hold can bypass them.
         problems.append("social_authority_scope_or_policy_conflict")
+    from .reviewed_hkg_mainland_fields import guidance_errors as delegated_guidance_errors
+    if delegated_guidance_errors(route, out["guidance"], provenance):
+        # Invalid registered scope/proof is already a hard conflict. Do not
+        # pass a malformed proof container into the product projector.
+        out["review_required"] = True
+        out["held"] = True
+        return out
     disputed = list(gc.get("disputed_fields") or [])
     if db is not None:
         from . import freshness
