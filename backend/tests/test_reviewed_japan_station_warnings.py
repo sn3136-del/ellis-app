@@ -23,9 +23,12 @@ def expected(layer):
 def test_exact19_route_reader_values_proofs_unchanged_only8_old_warnings_removed(installed,monkeypatch):
  # This assertion measures the warning-only release before the separate
  # Moscow processing-time correction, which has its own current proof.
+ # The later field-correction release (empty Japan health lists) is filtered
+ # the same way; it has its own exact-layer tests.
  listed=vo._listed_reviewed_overlay_names()
  monkeypatch.setattr(vo,'_listed_reviewed_overlay_names',lambda:[
-  name for name in listed if name!='reviewed_russia_japan_processing_overlay_20260910.json'])
+  name for name in listed if name not in ('reviewed_russia_japan_processing_overlay_20260910.json',
+                                          'reviewed_field_corrections_overlay_20260910.json')])
  vo.reload()
  m,layers=installed;old=deepcopy(layers);removed=0
  for layer in layers:
@@ -37,7 +40,13 @@ def test_exact19_route_reader_values_proofs_unchanged_only8_old_warnings_removed
   assert tstation.records_for_route(layer['route'],g,p)==tstation.records_for_route(layer['route'],layer['merged_guidance'],layer['source_provenance'])
  assert removed==8 and layers==old
 
-def test_later_moscow_processing_proof_does_not_relabel_japan_sibling_fields(installed):
+def test_later_moscow_processing_proof_does_not_relabel_japan_sibling_fields(installed,monkeypatch):
+ # Measured before the later field-correction release, which empties the
+ # unsupported RUS to JPN health list under its own exact-layer contract.
+ listed=vo._listed_reviewed_overlay_names()
+ monkeypatch.setattr(vo,'_listed_reviewed_overlay_names',lambda:[
+  name for name in listed if name!='reviewed_field_corrections_overlay_20260910.json'])
+ vo.reload()
  _,layers=installed
  layer=next(x for x in layers if x['cache_key']=='RUS|RUS|JPN|tourism|default|unknown|v6')
  g,p=vo.apply(deepcopy(layer['raw_guidance']),layer['route'])

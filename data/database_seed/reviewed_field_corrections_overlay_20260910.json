@@ -1,0 +1,2184 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "review_id": "field-corrections-20260910",
+  "entries": [
+    {
+      "fields": {
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "visa_category": "Visa-free visit (no visa / entry permit required)",
+        "permitted_stay": "Up to 90 days per visit",
+        "permitted_stay_days": 90,
+        "application_channel": "none",
+        "application_channel_detail": "No visa application or pre-arrival registration is required for this ordinary-passport visitor route.",
+        "government_fee": {
+          "amount": 0.0,
+          "currency": "HKD"
+        },
+        "required_documents": [
+          "Valid Canadian ordinary passport",
+          "Onward or return ticket",
+          "Proof of adequate funds"
+        ],
+        "exceptions": [
+          "Visitors may not take up employment (paid or unpaid), establish or join any business, or enter school as a student",
+          "Stays longer than the 90-day visa-free period require a visa or entry permit applied for before travelling",
+          "Adequate funds to cover the duration of the stay without working",
+          "Onward or return tickets (unless in transit to Chinese Mainland or the Macao SAR)",
+          "Entry is not automatic, HKSAR immigration authorities may refuse any person permission to land",
+          "Passport valid at least 1 month beyond the expected departure date (stated on the Government of Canada travel page, not the IMMD page)"
+        ],
+        "unpublished_fields": [
+          "processing_time",
+          "valid_until",
+          "passport_validity (not stated on the IMMD page; only on travel.gc.ca)",
+          "government_fee (none stated; visa-free)"
+        ],
+        "corroborating_sources": [
+          {
+            "url": "https://travel.gc.ca/destinations/hong-kong",
+            "quote": "\"Tourist visa: not required for stays of up to 90 days\" ... \"Your passport must be valid at least 1 month beyond the date you expect to leave Hong Kong.\""
+          }
+        ],
+        "arrival_card": {
+          "required": false,
+          "name": null,
+          "submission_window": null
+        },
+        "financial_evidence": "Adequate funds to cover the stay without working.",
+        "onward_travel_evidence": "Onward or return ticket required unless in transit to Chinese Mainland or Macao SAR.",
+        "entry_requirements": "No visa or pre-arrival registration is required for this ordinary-passport visit. Have adequate funds and an onward or return ticket unless transiting to Chinese Mainland or Macao SAR. Admission is subject to immigration examination.",
+        "health_requirements": []
+      },
+      "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+      "verified_at": "2026-09-03",
+      "verified_by": "Ellis source audit (official page, adversarially verified)",
+      "verifier": "ai",
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: CANADA\n90 Days. Scope: Complete ordinary-passport visitor exemption table; normal visitor conditions apply."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: CANADA\n90 Days. Scope: Complete ordinary-passport visitor exemption table; normal visitor conditions apply."
+        },
+        "visa_category": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit (official page, adversarially verified)",
+          "verifier": "ai",
+          "note": "Official page read and adversarially verified 2026-09-03: The Hong Kong Immigration Department's Visit Visa / Entry Permit Requirements page lists Canada in its visa-free visit table with a 90-day stay, with no visa or entry permit required for tourism; visitors must have adequate funds and an onward or return ticket and may not work, do business, or study | quote: \"Canada | 90 Days\" (visa-free vi"
+        },
+        "permitted_stay": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: CANADA\n90 Days. Scope: Complete ordinary-passport visitor exemption table; normal visitor conditions apply."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: CANADA\n90 Days. Scope: Complete ordinary-passport visitor exemption table; normal visitor conditions apply."
+        },
+        "application_channel": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: CANADA\n90 Days. Scope: Complete ordinary-passport visitor exemption table; normal visitor conditions apply."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: CANADA\n90 Days. Scope: Complete ordinary-passport visitor exemption table; normal visitor conditions apply."
+        },
+        "government_fee": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit (official page, adversarially verified)",
+          "verifier": "ai",
+          "note": "Official page read and adversarially verified 2026-09-03: The Hong Kong Immigration Department's Visit Visa / Entry Permit Requirements page lists Canada in its visa-free visit table with a 90-day stay, with no visa or entry permit required for tourism; visitors must have adequate funds and an onward or return ticket and may not work, do business, or study | quote: \"Canada | 90 Days\" (visa-free vi"
+        },
+        "required_documents": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit (official page, adversarially verified)",
+          "verifier": "ai",
+          "note": "Official page read and adversarially verified 2026-09-03: The Hong Kong Immigration Department's Visit Visa / Entry Permit Requirements page lists Canada in its visa-free visit table with a 90-day stay, with no visa or entry permit required for tourism; visitors must have adequate funds and an onward or return ticket and may not work, do business, or study | quote: \"Canada | 90 Days\" (visa-free vi"
+        },
+        "exceptions": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit (official page, adversarially verified)",
+          "verifier": "ai",
+          "note": "Official page read and adversarially verified 2026-09-03: The Hong Kong Immigration Department's Visit Visa / Entry Permit Requirements page lists Canada in its visa-free visit table with a 90-day stay, with no visa or entry permit required for tourism; visitors must have adequate funds and an onward or return ticket and may not work, do business, or study | quote: \"Canada | 90 Days\" (visa-free vi"
+        },
+        "unpublished_fields": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit (official page, adversarially verified)",
+          "verifier": "ai",
+          "note": "Official page read and adversarially verified 2026-09-03: The Hong Kong Immigration Department's Visit Visa / Entry Permit Requirements page lists Canada in its visa-free visit table with a 90-day stay, with no visa or entry permit required for tourism; visitors must have adequate funds and an onward or return ticket and may not work, do business, or study | quote: \"Canada | 90 Days\" (visa-free vi"
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-03",
+          "verified_by": "Ellis source audit (official page, adversarially verified)",
+          "verifier": "ai",
+          "note": "Official page read and adversarially verified 2026-09-03: The Hong Kong Immigration Department's Visit Visa / Entry Permit Requirements page lists Canada in its visa-free visit table with a 90-day stay, with no visa or entry permit required for tourism; visitors must have adequate funds and an onward or return ticket and may not work, do business, or study | quote: \"Canada | 90 Days\" (visa-free vi"
+        },
+        "arrival_card": {
+          "source_url": "https://www.immd.gov.hk/publications/a_report_2024/en/chapter3.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: All passengers are no longer required to complete and furnish an arrival or departure card Scope: Visitor arrival/departure cards abolished 16 October 2024. PAR is a distinct requirement."
+        },
+        "financial_evidence": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Visitors are required to have adequate funds to cover the duration of their stay without working. Scope: Part II also requires onward/return tickets, except transit to Chinese Mainland or Macao SAR. No arrival card or pre-arrival authorisation for this route."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Visitors are required to have adequate funds to cover the duration of their stay without working. Scope: Part II also requires onward/return tickets, except transit to Chinese Mainland or Macao SAR. No arrival card or pre-arrival authorisation for this route."
+        },
+        "entry_requirements": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Visitors are required to have adequate funds to cover the duration of their stay without working. Scope: Part II also requires onward/return tickets, except transit to Chinese Mainland or Macao SAR. No arrival card or pre-arrival authorisation for this route."
+        },
+        "health_requirements": {
+          "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary Canadian passport, tourism, arrival in Hong Kong. Absence evidence: the Immigration Department lists the visitor entry conditions (bona fides, adequate funds, onward or return tickets) without any health or vaccination condition, and the Centre for Health Protection describes yellow fever certificates only as other countries' entry requirements. No HKSAR authority publishes a yellow fever",
+          "source_id": "hk_immd_visit_visa",
+          "supporting_evidence": [
+            {
+              "source_id": "hk_chp_yellow_fever",
+              "source_url": "https://www.chp.gov.hk/en/healthtopics/content/24/25044.html",
+              "quote": "Some countries require proof of yellow fever vaccination as a condition of entry or transit for travellers arriving from certain countries."
+            }
+          ],
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "CAN",
+            "destination_country": "HKG",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Visitors are required to have adequate funds to cover the duration of their stay without working and, unless in transit to Chinese Mainland or the Macao Special Administrative Region, to hold onward or return tickets."
+        }
+      },
+      "note": "Official page read and adversarially verified 2026-09-03: The Hong Kong Immigration Department's Visit Visa / Entry Permit Requirements page lists Canada in its visa-free visit table with a 90-day stay, with no visa or entry permit required for tourism; visitors must have adequate funds and an onward or return ticket and may not work, do business, or study | quote: \"Canada | 90 Days\" (visa-free vi",
+      "route": {
+        "nationality": "CAN",
+        "destination": "HKG",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "field-corrections-20260910",
+      "field_review_scope": "reviewed_route_field_corrections"
+    },
+    {
+      "fields": {
+        "arrival_card": {
+          "required": true,
+          "name": "All Indonesia arrival card (Indonesia Arrival Card)",
+          "url": "https://allindonesia.imigrasi.go.id/",
+          "submission_window": "Can be completed from 3 days before arrival, up to and including on arrival. Mandatory for air and sea arrivals since 1 October 2025.",
+          "notes": "Directorate General of Immigration requires every arriving passenger, Indonesian and foreign, to submit the All Indonesia arrival declaration. It integrates immigration, customs, health and quarantine, and replaces the standalone customs e-CD at air and sea ports. Land crossings still use ECD Bea Cukai at https://ecd.beacukai.go.id/. This is an arrival declaration, not a visa application, and it does not change visa or visa-exemption eligibility."
+        },
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "visa_category": "A1 - Visa Exemption Tourism",
+        "permitted_stay": "Up to 30 days; not extendable",
+        "permitted_stay_days": 30,
+        "passport_validity": "Passport valid for at least 6 months upon arrival",
+        "passport_validity_requirement": {
+          "kind": "months_after_arrival",
+          "months": 6
+        },
+        "required_documents": [
+          "Passport valid for at least 6 months upon arrival",
+          "Outbound ticket from Indonesia"
+        ],
+        "onward_travel_evidence": "Present an outbound ticket from Indonesia upon arrival",
+        "financial_evidence": "Have sufficient living expenses while in Indonesia.",
+        "accommodation_evidence": null,
+        "entry_requirements": "For air and sea arrivals, complete the All Indonesia arrival declaration at https://allindonesia.imigrasi.go.id/. It integrates immigration, customs, health and quarantine declarations and can be completed from 3 days before arrival or upon landing. For land arrivals, Indonesian Customs directs travellers to the electronic customs declaration at https://ecd.beacukai.go.id/. Follow the declaration system required at your crossing; All Indonesia replaces the separate customs declaration where that system is implemented. Arrival declarations do not replace the applicable visa or exemption."
+      },
+      "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/",
+      "verified_at": "2026-08-22",
+      "verified_by": "Ellis source audit",
+      "verifier": "ai",
+      "field_provenance": {
+        "arrival_card": {
+          "source_url": "https://www.imigrasi.go.id/siaran_pers/mulai-1-oktober-deklarasi-kedatangan-penumpang-wajib-dilakukan-di-aplikasi-all-indonesia",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary HKSAR passport, tourism, arrival in Indonesia by air or sea. The Directorate General of Immigration press release makes the All Indonesia arrival declaration mandatory for every arriving passenger from 1 October 2025 and states it can be completed from three days before arrival. It integrates immigration, customs, health and quarantine declarations. It is an arrival declaration, not a vis",
+          "source_id": "id_imigrasi_all_indonesia",
+          "additional_quotes": [
+            "Aplikasi ini dapat diisi sejak tiga hari sebelum kedatangan.",
+            "All Indonesia merupakan integrasi layanan deklarasi keimigrasian, kepabeanan, kesehatan, dan karantina dalam satu aplikasi yang tersedia dalam bentuk web (allindonesia."
+          ],
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Mulai 1 Oktober 2025, setiap penumpang yang tiba dari luar negeri diwajibkan mengisi deklarasi kedatangan melalui aplikasi ini."
+        },
+        "disposition": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "supporting_evidence": [
+            {
+              "source_id": "bvk_voa",
+              "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+              "quote": "Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+        },
+        "requirement_detail": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "supporting_evidence": [
+            {
+              "source_id": "bvk_voa",
+              "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+              "quote": "Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+        },
+        "visa_category": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "supporting_evidence": [
+            {
+              "source_id": "bvk_voa",
+              "source_url": "https://ngurahrai.imigrasi.go.id/layanan-wna/",
+              "quote": "Daftar Subjek Bebas Visa Kunjungan (Berdasarkan Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan) : Brunei Darussalam Filipina Kamboja Laos Malaysia Myanmar Singapura Thailand Timor Leste Vietnam Suriname Kolombia Hong Kong Turkiye Brasil Peru"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+        },
+        "permitted_stay": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Type of Visa A1 - 30 Days\nUp to 30 days (not-extendable)"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "additional_quotes": [
+            "HONG KONG SAR\nTourism, Family Visit, and Transit\nA1 - Visa Exemption Tourism"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Type of Visa A1 - 30 Days\nUp to 30 days (not-extendable)"
+        },
+        "passport_validity": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "required_documents": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Present the following documents to the immigration officer upon arrival for immigration inspection:\nPassport valid for at least 6 months.\nOutbound ticket from Indonesia."
+        },
+        "financial_evidence": {
+          "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "selector",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Have sufficient living expenses while in Indonesia."
+        },
+        "accommodation_evidence": {
+          "status": "unknown",
+          "verifier": "ai",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "The reviewed A1/B1 arrival-document list does not establish a mandatory hotel booking or host-address document. This review does not certify absence of every possible request."
+        },
+        "entry_requirements": {
+          "source_url": "https://beacukai.go.id/ecd",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact ordinary-passport tourism field. Indonesia selector evidence was freshly read after selecting the exact passport and A1/B1 product. A1 is distinct from B1; pre-issued B1 validity is not a stay. US Taiwan passport validity is through intended stay. No other field, product, absence disposition, policy expiry or cache freshness is certified.",
+          "source_id": "customs",
+          "supporting_evidence": [
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "Arrival forms for immigration, customs, health, and quarantine (arrival cards) are now integrated into a single digital system through this application. Passengers can fill out the All Indonesia form three days before arriving in Indonesia from their country of origin and upon landing."
+            },
+            {
+              "source_id": "batam",
+              "source_url": "https://batam.imigrasi.go.id/berita/2025/09/arrival-passengers-at-three-international-airports-and-ports-in-batam-are-required-to-declare-their-arrival-through-the-all-indonesia-application",
+              "quote": "With this integration, international passengers arriving in Indonesia, whether through airports, seaports, or land borders where All Indonesia has been implemented, no longer need to fill out an electronic customs declaration (e-CD), as all customs declaration processes are already combined in this integrated digital system."
+            },
+            {
+              "source_id": "arrival",
+              "source_url": "https://evisa.imigrasi.go.id/",
+              "quote": "Arrival Card Submission is Required All travellers are required to submit an arrival card within 3 (three) days prior arrival in Indonesia\nSubmit Arrival Card Now\nhttps://allindonesia.imigrasi.go.id/"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "IDN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Kedatangan Melalui Udara dan Laut (Aplikasi All Indonesia) Saat ini, Indonesia menerapkan sistem satu pintu melalui layanan All Indonesia. Layanan ini mengintegrasikan informasi imigrasi, bea cukai (Customs Declaration), kesehatan, hingga karantina dalam satu tautan. Hal ini membuat proses kedatangan menjadi lebih cepat, mudah, dan aman. Akses: allindonesia.imigrasi.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia. Cara: Pilih kategori Warga Negara Indonesia atau Pengunjung Asing, lalu ikuti petunjuk pengisian hingga selesai. Kedatangan Melalui Darat dan Keberangkatan Luar Negeri (ECD Bea Cukai) Khusus bagi penumpang yang tiba melalui jalur darat (PLBN) atau penumpang yang akan berangkat ke luar negeri (ekspor) dengan membawa uang tunai (setara Rp100 juta atau lebih) serta barang-barang tertentu lainnya, pengisian formulir dilakukan melalui: Akses: ecd.beacukai.go.id Waktu Pengisian: Dapat diisi mulai 3 hari (H-3) sebelum jadwal kedatangan Anda di Indonesia."
+        }
+      },
+      "note": "Source recorded: HKSAR passport holders are on Indonesia's visa-exempt list.",
+      "route": {
+        "nationality": "HKG",
+        "destination": "IDN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "field-corrections-20260910",
+      "field_review_scope": "reviewed_route_field_corrections"
+    },
+    {
+      "fields": {
+        "arrival_card": {
+          "required": true,
+          "name": "Malaysia Digital Arrival Card (MDAC)",
+          "submission_window": "Submit before arrival; your arrival must be within 3 days including the date of submission."
+        },
+        "application_channel_detail": "No visa application is required for a tourism visit of up to 90 days. Complete MDAC before arrival unless covered by an official MDAC exemption; arrival must be within 3 days including submission day.",
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "permitted_stay": "90 days",
+        "permitted_stay_days": 90,
+        "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+        "passport_validity": "At least 6 months from the date of entry into Malaysia",
+        "required_documents": [
+          "Passport valid for more than 6 months from entry into Malaysia",
+          "Valid return ticket or onward ticket to the next destination country",
+          "Proof of sufficient funds for the stay",
+          "Proof of accommodation booking or confirmed lodging for the full stay",
+          "Completed Malaysia Digital Arrival Card (MDAC), unless covered by an official exemption"
+        ],
+        "onward_travel_evidence": "A valid return ticket to the home country or an onward ticket to the next destination country is required.",
+        "accommodation_evidence": "Proof of accommodation booking or confirmed lodging arrangements for the full stay is required.",
+        "financial_evidence": "Proof of sufficient funds for the stay is required.",
+        "insurance_required": false,
+        "exceptions": [
+          "Holders of diplomatic/official passports may have separate arrangements",
+          "For this ordinary-passport tourist route, complete MDAC unless you hold Malaysian permanent residence or a Malaysian long-term pass. Diplomatic and official passports have a separate exemption. The published MDAC exemption list does not contain a child-under-three exemption.",
+          "HKSAR passport holders must select Hong Kong as their nationality when completing MDAC."
+        ],
+        "photo_requirements": null,
+        "biometrics_required": null,
+        "passport_validity_requirement": null
+      },
+      "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+      "verified_at": "2026-09-10",
+      "verified_by": "Ellis AI official-source field review",
+      "verifier": "ai",
+      "field_provenance": {
+        "arrival_card": {
+          "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "mdac_scope",
+          "supporting_evidence": [
+            {
+              "source_id": "mdac_window",
+              "source_url": "https://imigresen-online.imi.gov.my/mdac/register",
+              "quote": "Please note that your trip must be within 3 days (including the date of submission)"
+            }
+          ],
+          "additional_quotes": [
+            "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "supporting_evidence": [
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+            },
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+            },
+            {
+              "source_id": "mdac_window",
+              "source_url": "https://imigresen-online.imi.gov.my/mdac/register",
+              "quote": "Please note that your trip must be within 3 days (including the date of submission)"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "disposition": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "requirement_detail": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "permitted_stay": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "source_url": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING HONG KONG | PASSPORT | 90 days"
+        },
+        "passport_validity": {
+          "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary HKSAR passport, tourism, entry into Malaysia. The Immigration Department entry requirements state six months or more from the date of entry, an inclusive boundary; the stored \"more than 6 months\" was stricter than the published rule.",
+          "source_id": "my_imi_entry_pdf",
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Documents must be valid for six months or more from the date of entry into Malaysia."
+        },
+        "required_documents": {
+          "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "hkg_exemption",
+          "supporting_evidence": [
+            {
+              "source_id": "entry_pdf",
+              "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+              "quote": "Every visitor is also required to prove the financial ability to declare himself in Malaysia along with a fixed return ticket to return to his home country or to another country."
+            },
+            {
+              "source_id": "entry_tourists",
+              "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+              "quote": "Possess a valid return ticket to their home country or an onward ticket to a next destination country."
+            },
+            {
+              "source_id": "entry_tourists",
+              "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+              "quote": "Possess proof of accommodation booking or confirmed lodging arrangements for the duration of the stay in Malaysia."
+            },
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+            },
+            {
+              "source_id": "mdac_scope",
+              "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+              "quote": "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+            }
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Passport MUST remain valid for more than 6 months from the entry date into Malaysia."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_tourists",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Possess a valid return ticket to their home country or an onward ticket to a next destination country."
+        },
+        "accommodation_evidence": {
+          "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_tourists",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Possess proof of accommodation booking or confirmed lodging arrangements for the duration of the stay in Malaysia."
+        },
+        "financial_evidence": {
+          "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "entry_pdf",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Every visitor is also required to prove the financial ability to declare himself in Malaysia along with a fixed return ticket to return to his home country or to another country."
+        },
+        "insurance_required": {
+          "source_url": "https://www.tourism.gov.my/media/view/malaysia-relaxes-covid-19-testing-rules-travel-insurance-for-inbound-travellers",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "insurance",
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Travel insurance will also not be a prerequisite for foreigners entering the country."
+        },
+        "exceptions": {
+          "source_url": "https://www.kln.gov.my/web/sgp_singapore/requirement_foreigner",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+          "source_id": "mdac_scope",
+          "supporting_evidence": [
+            {
+              "source_id": "hkg_exemption",
+              "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+              "quote": "Hong Kong and Macao passport holders are required to select “Hong Kong” or “Macao” as their nationality during MDAC registration to ensure the correct visa-free period is granted."
+            }
+          ],
+          "additional_quotes": [
+            "CATEGORIES EXEMPTED from filling the MDAC are: i. All citizens of Singapore; ii. Holders of Diplomatic and Official Passports; iii. Malaysian Permanent Residents and Malaysian Long Term Pass Holders; iv. Brunei Common Certificate of Identification (GCI); v. Holders of Brunei Malaysia Frequent Traveler Facility; vi. Thailand Border Pass Holder; and vii. Indonesian Cross Border Pass (PLB) holders;"
+          ],
+          "status": "partial",
+          "verification_scope": "changed_elements_only",
+          "verified_elements": [
+            "For this ordinary-passport tourist route, complete MDAC unless you hold Malaysian permanent residence or a Malaysian long-term pass. Diplomatic and official passports have a separate exemption. The published MDAC exemption list does not contain a child-under-three exemption.",
+            "HKSAR passport holders must select Hong Kong as their nationality when completing MDAC."
+          ],
+          "retained_unverified_elements": [
+            "Holders of diplomatic/official passports may have separate arrangements"
+          ],
+          "subject": {
+            "passport_nationality": "HKG",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Starting from 01 January 2024 it is MANDATORY to complete and submit MALAYSIA DIGITAL ARRIVAL CARD (MDAC) within 3 days before arrival in Malaysia, except for the specified categories."
+        },
+        "photo_requirements": {
+          "status": "unknown",
+          "verifier": "ai",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "No standalone photo requirement for this visa-exempt MDAC route was established by the reviewed official sources. Visa-application photo instructions are not evidence for an exempt visit."
+        },
+        "biometrics_required": {
+          "status": "unknown",
+          "verifier": "ai",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "These sources do not settle whether this visitor must give biometrics at immigration. A visa exemption does not prove that border biometrics are unnecessary."
+        },
+        "passport_validity_requirement": {
+          "status": "unknown",
+          "verifier": "ai",
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "note": "The HKSAR-specific consulate instruction says more than six months from entry. The current typed rule cannot express a strict greater-than boundary; the exact sourced text is retained."
+        }
+      },
+      "note": "AI review of this exact HKSAR or US ordinary-passport tourism field only. No source-wide grade, product, expiry or cache-freshness certification.",
+      "route": {
+        "nationality": "HKG",
+        "destination": "MYS",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "field-corrections-20260910",
+      "field_review_scope": "reviewed_route_field_corrections"
+    },
+    {
+      "fields": {
+        "disposition": "CONDITIONAL",
+        "requirement_detail": "conditional_visa_free",
+        "visa_category": "Visa exemption with e-passport registration, or short-term stay visa",
+        "permitted_stay": "15 days per visit with a registered ICAO-compliant e-passport",
+        "permitted_stay_days": 15,
+        "government_fee": {
+          "amount": 0,
+          "currency": "JPY"
+        },
+        "official_portal_url": "https://www.evisa.mofa.go.jp/personal/logintoko",
+        "application_channel": "online_portal",
+        "application_channel_detail": "Register the e-passport before departure on the Japan Visa Exemption System (JAVES) and show the registration notice on your phone or tablet at the airport. Printouts and screenshots are not accepted. Paper registration with a sticker is still available at the Japan Visa Application Center (JVAC) in Jakarta or a consulate general, in about 2 to 3 working days. Travellers who do not register apply for a paper visa through JVAC by appointment, or for the JAPAN eVISA through an accredited agency. Residents of Indonesia cannot apply on the JAPAN eVISA website themselves.",
+        "processing_time": "Registration about 2 to 3 working days",
+        "visa_products": [
+          {
+            "type": "E-passport visa exemption registration (JAVES or sticker)",
+            "entry": "multiple",
+            "validity": "3 years or until the passport expires, whichever is shorter",
+            "max_stay_days": 15,
+            "fee": {
+              "amount": 0,
+              "currency": "JPY"
+            },
+            "notes": "Registration and entry are free of charge. Repeated visits of up to 15 days during the registration validity."
+          },
+          {
+            "type": "Single-entry short-term stay visa (paper visa via JVAC, or eVISA via an accredited agency)",
+            "entry": "single",
+            "validity": "3 months",
+            "max_stay_days": 90,
+            "fee": {
+              "amount": 1650000,
+              "currency": "IDR"
+            },
+            "notes": "Fee from 1 July 2026 is Rp1,650,000, about 15,000 yen, paid in cash. Needed for holders of a non-electronic passport, for stays over 15 days, or for those who do not register."
+          },
+          {
+            "type": "Multiple-entry short-term stay visa (tourism)",
+            "entry": "multiple",
+            "validity": "5 years",
+            "max_stay_days": 30,
+            "fee": {
+              "amount": 3330000,
+              "currency": "IDR"
+            },
+            "notes": "Fee from 1 July 2026 is Rp3,330,000, about 30,000 yen. Issued to applicants who meet the embassy's conditions."
+          }
+        ],
+        "exceptions": [
+          "Holders of a non-electronic Indonesian passport must obtain a visa before travel.",
+          "E-passport holders who have not registered are refused entry at the Japanese airport.",
+          "Stays longer than 15 days, or any paid work, require a visa even with a registered e-passport.",
+          "The transit visa was abolished on 1 July 2026."
+        ],
+        "arrival_card": {
+          "required": true,
+          "name": "Disembarkation card and customs declaration",
+          "submission_window": "Submit at immigration and customs on arrival. Visit Japan Web is the recommended online option; paper forms remain accepted."
+        },
+        "unpublished_fields": [],
+        "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+        "corroborating_sources": [
+          {
+            "url": "https://www.mofa.go.jp/press/release/press4e_000498.html",
+            "quote": "Duration of stay : 15 (fifteen) days. Period of validity : Whichever is the shorter period between either three years or the validity of the passport"
+          },
+          {
+            "url": "https://www.id.emb-japan.go.jp/itpr_id/visa.html",
+            "quote": "Per 1 Juli 2026, biaya visa menjadi seperti tabel di bawah ini. 1. Visa Single Entry Rp1.650.000 2. Visa Multiple Entry Rp3.330.000. Aplikasi visa : Diajukan di JVAC (dengan sistem janji temu/reservasi)."
+          },
+          {
+            "url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+            "quote": "Application should be made through an accredited agency in countries/regions below ... (4) Hong Kong, India, Indonesia, Macau, Mongolia, the Republic of Korea, Singapore and United Arab Emirates"
+          },
+          {
+            "url": "https://www.surabaya.id.emb-japan.go.jp/itpr_id/visa_waiver.html",
+            "quote": "Masa tinggal : 15 hari. Masa berlaku : 3 tahun atau sampai batas akhir berlaku paspor"
+          },
+          {
+            "url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+            "quote": "紙媒体の「外国人入国記録」を提出してください。",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.customs.go.jp/english/passenger/declaration/declaration_app.html",
+            "quote": "The existing paper version of the Customs Declaration Form can still be used",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "confidence": "high",
+        "health_requirements": []
+      },
+      "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+      "verified_at": "2026-09-09",
+      "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+      "verifier": "ai",
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "requirement_detail": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "visa_category": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "permitted_stay": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "government_fee": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "official_portal_url": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "application_channel": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "processing_time": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "visa_products": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "exceptions": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "arrival_card": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: New foreign visitor entry only: required forms, optional digital submission. This field does not establish passport acceptance or visa eligibility."
+        },
+        "unpublished_fields": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "source_url": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: Add current arrival-form evidence without changing unrelated visa or passport eligibility."
+        },
+        "confidence": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis source audit (adversarially verified 2026-09-09)",
+          "verifier": "ai",
+          "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per"
+        },
+        "health_requirements": {
+          "source_url": "https://www.forth.go.jp/moreinfo/topics/yellow_fever_certificate.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary passport, tourism, arrival in Japan. The MHLW Quarantine Stations (FORTH) country table states that Japan requires no yellow fever vaccination certificate, with no country-of-departure or age trigger, so the stored conditional yellow fever item has no Japanese authority behind it and is removed. No claim is made about symptom screening at quarantine, which MHLW still performs.",
+          "source_id": "jp_forth_yellow_fever",
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "IDN",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "日本 JAPAN （2021） 黄熱予防接種証明書は要求されていません。"
+        }
+      },
+      "note": "Verified 2026-09-09 against MOFA's short-term visa exemption page (dated 1 September 2025): 'The period of stay granted upon landing permission will be 15 days for Indonesia' and '(Note 1) For nationals of Indonesia (since December 1, 2014), visas are not required only for those who have registered ICAO-compliant ePassport to diplomatic missions'. Fees from the Embassy of Japan in Indonesia: 'Per",
+      "route": {
+        "nationality": "IDN",
+        "destination": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "field-corrections-20260910",
+      "field_review_scope": "reviewed_route_field_corrections"
+    },
+    {
+      "fields": {
+        "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+        "government_fee": null,
+        "permitted_stay_days": 90,
+        "visa_products": [
+          {
+            "type": "Single-entry Temporary Visitor / JAPAN eVISA (tourism)",
+            "entry": "single",
+            "validity": "3 months",
+            "max_stay_days": 90,
+            "fee": null,
+            "notes": "For Indian nationals applying in India, the published government fee is INR 500 for single or multiple entry. The local-currency fee at another mission must be checked with that mission.",
+            "field_provenance": {
+              "fee": {
+                "source_url": "https://www.in.emb-japan.go.jp/itpr_en/Visa.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Single or Multiple visa: 500 INR Scope: Generic JPY amount removed because Indian nationals have a nationality-specific fee. INR 500 is scoped to applications in India; no globally applicable amount established."
+              }
+            }
+          },
+          {
+            "type": "Multiple-entry Temporary Visitor (tourism), 3-year",
+            "entry": "multiple",
+            "validity": "3 years",
+            "max_stay_days": 90,
+            "fee": null,
+            "notes": "For Indian nationals applying in India, the published government fee is INR 500 for single or multiple entry. The local-currency fee at another mission must be checked with that mission.",
+            "field_provenance": {
+              "fee": {
+                "source_url": "https://www.in.emb-japan.go.jp/itpr_en/Visa.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Single or Multiple visa: 500 INR Scope: Generic JPY amount removed because Indian nationals have a nationality-specific fee. INR 500 is scoped to applications in India; no globally applicable amount established."
+              }
+            }
+          },
+          {
+            "type": "Multiple-entry Temporary Visitor (tourism), 5-year",
+            "entry": "multiple",
+            "validity": "5 years",
+            "max_stay_days": 90,
+            "fee": null,
+            "notes": "For Indian nationals applying in India, the published government fee is INR 500 for single or multiple entry. The local-currency fee at another mission must be checked with that mission.",
+            "field_provenance": {
+              "fee": {
+                "source_url": "https://www.in.emb-japan.go.jp/itpr_en/Visa.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Single or Multiple visa: 500 INR Scope: Generic JPY amount removed because Indian nationals have a nationality-specific fee. INR 500 is scoped to applications in India; no globally applicable amount established."
+              }
+            }
+          }
+        ],
+        "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+        "disposition": "VISA_REQUIRED",
+        "arrival_card": {
+          "required": true,
+          "name": "Disembarkation card and customs declaration",
+          "submission_window": "Submit at immigration and customs on arrival. Visit Japan Web is the recommended online option; paper forms remain accepted."
+        },
+        "corroborating_sources": [
+          {
+            "url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+            "quote": "紙媒体の「外国人入国記録」を提出してください。",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.customs.go.jp/english/passenger/declaration/declaration_app.html",
+            "quote": "The existing paper version of the Customs Declaration Form can still be used",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "health_requirements": []
+      },
+      "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+      "verified_at": "2026-08-30",
+      "verified_by": "Ellis source audit (validity and jurisdiction)",
+      "verifier": "ai",
+      "field_provenance": {
+        "official_portal_url": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN."
+        },
+        "government_fee": {
+          "source_url": "https://www.in.emb-japan.go.jp/itpr_en/Visa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Single or Multiple visa: 500 INR Scope: Do not substitute INR 500 as a worldwide amount. Generic yen price removed; embassy India local amount remains scoped in product notes."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN."
+        },
+        "visa_products": {
+          "source_url": "https://www.in.emb-japan.go.jp/itpr_en/Visa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Single or Multiple visa: 500 INR Scope: Do not substitute INR 500 as a worldwide amount. Generic yen price removed; embassy India local amount remains scoped in product notes."
+        },
+        "consular_jurisdiction": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN."
+        },
+        "disposition": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: visas are not required only for holders of ePassport in compliance with ICAO standards. Scope: Ordinary Indian passports are not on the complete short-stay exemption list; embassy India publishes their visa application procedure."
+        },
+        "arrival_card": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: New foreign visitor entry only: required forms, optional digital submission. This field does not establish passport acceptance or visa eligibility."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: Add current arrival-form evidence without changing unrelated visa or passport eligibility."
+        },
+        "health_requirements": {
+          "source_url": "https://www.forth.go.jp/moreinfo/topics/yellow_fever_certificate.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary passport, tourism, arrival in Japan. The MHLW Quarantine Stations (FORTH) country table states that Japan requires no yellow fever vaccination certificate, with no country-of-departure or age trigger, so the stored conditional yellow fever item has no Japanese authority behind it and is removed. No claim is made about symptom screening at quarantine, which MHLW still performs.",
+          "source_id": "jp_forth_yellow_fever",
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "IND",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "日本 JAPAN （2021） 黄熱予防接種証明書は要求されていません。"
+        }
+      },
+      "note": "Verified 2026-08-30. Consular jurisdiction for JPN.",
+      "route": {
+        "nationality": "IND",
+        "destination": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "field-corrections-20260910",
+      "field_review_scope": "reviewed_route_field_corrections"
+    },
+    {
+      "fields": {
+        "government_fee": {
+          "amount": 0,
+          "currency": "JPY"
+        },
+        "permitted_stay_days": 90,
+        "visa_products": [
+          {
+            "type": "Single-entry Temporary Visitor (tourism), consular",
+            "entry": "single",
+            "validity": "3 months",
+            "max_stay_days": 90,
+            "fee": {
+              "amount": 0,
+              "currency": "JPY"
+            },
+            "notes": "Government visa fee waived for this nationality for the temporary-visitor route. Visa centre or agency service charges may be separate.",
+            "field_provenance": {
+              "fee": {
+                "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis. Scope: Philippine nationality fee exemption; Philippines JVAC application procedures, several-week processing caveat, single-entry three-month validity."
+              }
+            }
+          },
+          {
+            "type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+            "entry": "single",
+            "validity": "Generally 3 calendar months from issuance; single use.",
+            "max_stay_days": 15,
+            "fee": {
+              "amount": 0,
+              "currency": null,
+              "notes": "Philippine temporary-visitor government visa fee remains gratis; Visa Center/agency charges are separate and not established here."
+            },
+            "notes": "For Philippine nationals resident in the Philippines participating in a designated packaged tour only. At departure show the live Visa issuance notice with internet access; screenshots, PDF data and printouts are not accepted. Travel must be by air or international scheduled passenger ferry between Japan and Busan or Shanghai. The mission for the applicant’s residence may require an in-person interview.",
+            "field_provenance": {
+              "fee": {
+                "source_id": "phl-main",
+                "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+                "quote": "Please note that Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Philippine temporary-visitor government visa fee remains gratis; Visa Center/agency charges are separate and not established here.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "review_id": "japan26-20260909"
+              },
+              "disposition": {
+                "source_id": "evisa",
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                "quote": "(2) The Philippines Nationals of the Philippines, who reside in the Philippines and participate in a packaged tour organized by designated travel agencies *",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Filipino ordinary passport, resident Philippines, packaged tour organised by a designated agency.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "Only ordinary passport holder is eligible to apply through JAPAN eVISA website.",
+                  "Single-entry short-term stay visa for the purpose of Tourism (for a period of up to 90 days) (Note). Electronic visas will be issued to those who applied through JAPAN eVISA website. (Note: For nationals of China residing in China, electronic visas with a period of stay \"15 days\" or \"30 days\" will be issued. For nationals of Viet Nam residing in Viet Nam and Filipino nationals residing in the Philippines, the period of stay of electronic visas will be \"15 days\".)(Travelers with eVISA are required to display “Visa issuance notice” at the airport in the internet environment. PDF data, screenshot and printed copy will not be accepted.)"
+                ],
+                "review_id": "japan26-20260909"
+              },
+              "requirement_detail": {
+                "source_id": "evisa",
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                "quote": "(2) The Philippines Nationals of the Philippines, who reside in the Philippines and participate in a packaged tour organized by designated travel agencies *",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Electronic visa, not visa exemption or travel authorisation.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "Only ordinary passport holder is eligible to apply through JAPAN eVISA website.",
+                  "Single-entry short-term stay visa for the purpose of Tourism (for a period of up to 90 days) (Note). Electronic visas will be issued to those who applied through JAPAN eVISA website. (Note: For nationals of China residing in China, electronic visas with a period of stay \"15 days\" or \"30 days\" will be issued. For nationals of Viet Nam residing in Viet Nam and Filipino nationals residing in the Philippines, the period of stay of electronic visas will be \"15 days\".)(Travelers with eVISA are required to display “Visa issuance notice” at the airport in the internet environment. PDF data, screenshot and printed copy will not be accepted.)"
+                ],
+                "review_id": "japan26-20260909"
+              },
+              "entry": {
+                "source_id": "evisa",
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                "quote": "(2) The Philippines Nationals of the Philippines, who reside in the Philippines and participate in a packaged tour organized by designated travel agencies *",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Entry count of the named visa option; issue/landing decision remains individual.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "Only ordinary passport holder is eligible to apply through JAPAN eVISA website.",
+                  "Single-entry short-term stay visa for the purpose of Tourism (for a period of up to 90 days) (Note). Electronic visas will be issued to those who applied through JAPAN eVISA website. (Note: For nationals of China residing in China, electronic visas with a period of stay \"15 days\" or \"30 days\" will be issued. For nationals of Viet Nam residing in Viet Nam and Filipino nationals residing in the Philippines, the period of stay of electronic visas will be \"15 days\".)(Travelers with eVISA are required to display “Visa issuance notice” at the airport in the internet environment. PDF data, screenshot and printed copy will not be accepted.)"
+                ],
+                "review_id": "japan26-20260909"
+              },
+              "max_stay_days": {
+                "source_id": "evisa",
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                "quote": "(2) The Philippines Nationals of the Philippines, who reside in the Philippines and participate in a packaged tour organized by designated travel agencies *",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Maximum per-entry period for this product, not a guaranteed grant.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "Only ordinary passport holder is eligible to apply through JAPAN eVISA website.",
+                  "Single-entry short-term stay visa for the purpose of Tourism (for a period of up to 90 days) (Note). Electronic visas will be issued to those who applied through JAPAN eVISA website. (Note: For nationals of China residing in China, electronic visas with a period of stay \"15 days\" or \"30 days\" will be issued. For nationals of Viet Nam residing in Viet Nam and Filipino nationals residing in the Philippines, the period of stay of electronic visas will be \"15 days\".)(Travelers with eVISA are required to display “Visa issuance notice” at the airport in the internet environment. PDF data, screenshot and printed copy will not be accepted.)"
+                ],
+                "review_id": "japan26-20260909"
+              },
+              "permitted_stay": {
+                "source_id": "evisa",
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                "quote": "(2) The Philippines Nationals of the Philippines, who reside in the Philippines and participate in a packaged tour organized by designated travel agencies *",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Exact source unit and grant qualifications retained.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "Only ordinary passport holder is eligible to apply through JAPAN eVISA website.",
+                  "Single-entry short-term stay visa for the purpose of Tourism (for a period of up to 90 days) (Note). Electronic visas will be issued to those who applied through JAPAN eVISA website. (Note: For nationals of China residing in China, electronic visas with a period of stay \"15 days\" or \"30 days\" will be issued. For nationals of Viet Nam residing in Viet Nam and Filipino nationals residing in the Philippines, the period of stay of electronic visas will be \"15 days\".)(Travelers with eVISA are required to display “Visa issuance notice” at the airport in the internet environment. PDF data, screenshot and printed copy will not be accepted.)"
+                ],
+                "review_id": "japan26-20260909"
+              },
+              "validity": {
+                "source_id": "faq",
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/faq.html",
+                "quote": "The period of validity of a single-entry visa (that becomes invalid as soon as once you enter Japan) is basically three months. Enter Japan within three months of the issuance of the visa.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Visa validity is the entry window; it is separate from permission to stay.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "review_id": "japan26-20260909"
+              },
+              "application_channel": {
+                "source_id": "phl-main",
+                "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+                "quote": "Electronic Visa(eVISA) issuance starts on December 15, 2025. Please note that applications for eVISA has to be submitted through the Visa Center.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Only the explicitly described local application process is supported.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "evisa",
+                    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                    "quote": "(2) The Philippines Nationals of the Philippines, who reside in the Philippines and participate in a packaged tour organized by designated travel agencies *"
+                  },
+                  {
+                    "source_id": "evisa",
+                    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                    "quote": "Only ordinary passport holder is eligible to apply through JAPAN eVISA website."
+                  },
+                  {
+                    "source_id": "evisa",
+                    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                    "quote": "Single-entry short-term stay visa for the purpose of Tourism (for a period of up to 90 days) (Note). Electronic visas will be issued to those who applied through JAPAN eVISA website. (Note: For nationals of China residing in China, electronic visas with a period of stay \"15 days\" or \"30 days\" will be issued. For nationals of Viet Nam residing in Viet Nam and Filipino nationals residing in the Philippines, the period of stay of electronic visas will be \"15 days\".)(Travelers with eVISA are required to display “Visa issuance notice” at the airport in the internet environment. PDF data, screenshot and printed copy will not be accepted.)"
+                  }
+                ],
+                "review_id": "japan26-20260909"
+              },
+              "application_channel_detail": {
+                "source_id": "phl-main",
+                "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+                "quote": "Electronic Visa(eVISA) issuance starts on December 15, 2025. Please note that applications for eVISA has to be submitted through the Visa Center.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Applicants resident in the stated mission jurisdiction; another residence requires its competent mission.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "supporting_evidence": [
+                  {
+                    "source_id": "evisa",
+                    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                    "quote": "(2) The Philippines Nationals of the Philippines, who reside in the Philippines and participate in a packaged tour organized by designated travel agencies *"
+                  },
+                  {
+                    "source_id": "evisa",
+                    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                    "quote": "Only ordinary passport holder is eligible to apply through JAPAN eVISA website."
+                  },
+                  {
+                    "source_id": "evisa",
+                    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                    "quote": "Single-entry short-term stay visa for the purpose of Tourism (for a period of up to 90 days) (Note). Electronic visas will be issued to those who applied through JAPAN eVISA website. (Note: For nationals of China residing in China, electronic visas with a period of stay \"15 days\" or \"30 days\" will be issued. For nationals of Viet Nam residing in Viet Nam and Filipino nationals residing in the Philippines, the period of stay of electronic visas will be \"15 days\".)(Travelers with eVISA are required to display “Visa issuance notice” at the airport in the internet environment. PDF data, screenshot and printed copy will not be accepted.)"
+                  }
+                ],
+                "review_id": "japan26-20260909"
+              },
+              "processing_time": {
+                "source_id": "phl-main",
+                "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+                "quote": "Due to the increasing number of applications, it may take several weeks to process an application for a tourist visa.",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Timing starts at official acceptance; courier, agency and appointment time excluded unless stated. No guarantee.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "review_id": "japan26-20260909"
+              },
+              "required_documents": {
+                "status": "unknown",
+                "verifier": "ai",
+                "source_url": "",
+                "verified_at": null,
+                "verified_by": "",
+                "reason": "The exact packaged-tour agency/center checklist was not independently read; do not substitute generic or another product checklist.",
+                "note": "The exact packaged-tour agency/center checklist was not independently read; do not substitute generic or another product checklist.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "review_id": "japan26-20260909"
+              },
+              "source_url": {
+                "source_id": "evisa",
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                "quote": "(2) The Philippines Nationals of the Philippines, who reside in the Philippines and participate in a packaged tour organized by designated travel agencies *",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Specific ordinary-passport and packaged-tour eVISA program evidence.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "Only ordinary passport holder is eligible to apply through JAPAN eVISA website.",
+                  "Single-entry short-term stay visa for the purpose of Tourism (for a period of up to 90 days) (Note). Electronic visas will be issued to those who applied through JAPAN eVISA website. (Note: For nationals of China residing in China, electronic visas with a period of stay \"15 days\" or \"30 days\" will be issued. For nationals of Viet Nam residing in Viet Nam and Filipino nationals residing in the Philippines, the period of stay of electronic visas will be \"15 days\".)(Travelers with eVISA are required to display “Visa issuance notice” at the airport in the internet environment. PDF data, screenshot and printed copy will not be accepted.)"
+                ],
+                "review_id": "japan26-20260909"
+              },
+              "notes": {
+                "source_id": "evisa",
+                "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+                "quote": "(2) The Philippines Nationals of the Philippines, who reside in the Philippines and participate in a packaged tour organized by designated travel agencies *",
+                "verified_at": "2026-09-09",
+                "verifier": "ai",
+                "verified_by": "Ellis AI official-source field review",
+                "status": "reviewed",
+                "note": "Product-specific qualifications; no guarantee of visa issuance or admission.",
+                "subject": {
+                  "passport_nationality": "PHL",
+                  "destination_country": "JPN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "JAPAN eVISA (tourism, via designated travel agency package tour)",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "evisa"
+                },
+                "additional_quotes": [
+                  "Only ordinary passport holder is eligible to apply through JAPAN eVISA website.",
+                  "Single-entry short-term stay visa for the purpose of Tourism (for a period of up to 90 days) (Note). Electronic visas will be issued to those who applied through JAPAN eVISA website. (Note: For nationals of China residing in China, electronic visas with a period of stay \"15 days\" or \"30 days\" will be issued. For nationals of Viet Nam residing in Viet Nam and Filipino nationals residing in the Philippines, the period of stay of electronic visas will be \"15 days\".)(Travelers with eVISA are required to display “Visa issuance notice” at the airport in the internet environment. PDF data, screenshot and printed copy will not be accepted.)",
+                  "Japan eVISA is available for those traveling to Japan by air or sea (limited to international scheduled passenger ferries between Japan and Busan or Shanghai).",
+                  "During the application process, the applicant may be requested to appear in person at the Japanese overseas establishment with jurisdiction over the place of the applicant’s residence for an interview."
+                ],
+                "review_id": "japan26-20260909"
+              }
+            },
+            "disposition": "VISA_REQUIRED",
+            "requirement_detail": "evisa",
+            "permitted_stay": "15 days for this Filipino-resident packaged-tour eVISA.",
+            "application_channel": "authorised_agent",
+            "application_channel_detail": "Participate in a packaged tour organised by a designated agency; eVISA applications are submitted through the Visa Center in the Philippines. No direct self-service assumption.",
+            "processing_time": "The embassy warns tourist applications may take several weeks; no guaranteed numeric duration.",
+            "required_documents": null,
+            "source_url": "https://www.mofa.go.jp/j_info/visit/visa/visaonline.html",
+            "verifier": "ai",
+            "verified_at": "2026-09-09",
+            "review_id": "japan26-20260909"
+          },
+          {
+            "type": "Multiple-entry Temporary Visitor (tourism), 3- or 5-year",
+            "entry": "multiple",
+            "validity": "up to 5 years",
+            "max_stay_days": 90,
+            "fee": {
+              "amount": 0,
+              "currency": "JPY"
+            },
+            "notes": "Government visa fee waived for this nationality for the temporary-visitor route. Visa centre or agency service charges may be separate.",
+            "field_provenance": {
+              "fee": {
+                "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis. Scope: Philippine nationality fee exemption; Philippines JVAC application procedures, several-week processing caveat, single-entry three-month validity."
+              }
+            }
+          }
+        ],
+        "disposition": "VISA_REQUIRED",
+        "official_portal_url": "https://www.evisa.mofa.go.jp/",
+        "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+        "application_channel": "visa_center",
+        "application_channel_detail": "For applications in the Philippines, book an appointment at the Japan Visa Application Centre. Package-tour eVisa applications are also submitted through the Visa Centre.",
+        "processing_time": "For applications in the Philippines, tourist-visa processing can take several weeks. Apply well ahead, within the single-entry visa’s three-month validity window.",
+        "exceptions": [
+          "Temporary-visitor government visa fees are waived for Philippine nationals; centre or agency service charges may be separate.",
+          "Japan Visa Application Centres have accepted applications in the Philippines since 7 April 2025. eVisa applications for registered package tours must also be submitted through the Visa Centre.",
+          "A single-entry tourist visa is valid for travel within three months of issue. The granted stay and multiple-entry eligibility depend on the issued visa and applicable application category."
+        ],
+        "arrival_card": {
+          "required": true,
+          "name": "Disembarkation card and customs declaration",
+          "submission_window": "Submit at immigration and customs on arrival. Visit Japan Web is the recommended online option; paper forms remain accepted."
+        },
+        "corroborating_sources": [
+          {
+            "url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+            "quote": "紙媒体の「外国人入国記録」を提出してください。",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.customs.go.jp/english/passenger/declaration/declaration_app.html",
+            "quote": "The existing paper version of the Customs Declaration Form can still be used",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "health_requirements": []
+      },
+      "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+      "verified_at": "2026-09-09",
+      "verified_by": "Ellis official-source audit",
+      "verifier": "ai",
+      "field_provenance": {
+        "government_fee": {
+          "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis. Scope: Only government visa fees reverified. Existing product validity/stay/documents retain their earlier unresolved audit status; source does not prove all product fields."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN."
+        },
+        "visa_products": {
+          "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Only each explicitly reviewed product field has new evidence. Unreviewed products, unknown formats and unsupported named options remain unverified; this is not blanket product evidence.",
+          "status": "partial",
+          "verification_scope": "product_fields_only"
+        },
+        "disposition": {
+          "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis. Scope: Advance temporary-visitor visa: complete Japan visa-exemption table excludes this ordinary nationality, corroborated by nationality-specific visa application procedure."
+        },
+        "official_portal_url": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN."
+        },
+        "consular_jurisdiction": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN."
+        },
+        "application_channel": {
+          "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis. Scope: Philippine nationality fee exemption; Philippines JVAC application procedures, several-week processing caveat, single-entry three-month validity."
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis. Scope: Philippine nationality fee exemption; Philippines JVAC application procedures, several-week processing caveat, single-entry three-month validity."
+        },
+        "processing_time": {
+          "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis. Scope: Philippine nationality fee exemption; Philippines JVAC application procedures, several-week processing caveat, single-entry three-month validity."
+        },
+        "exceptions": {
+          "source_url": "https://www.ph.emb-japan.go.jp/itpr_en/00_000035.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis. Scope: Philippine nationality fee exemption; Philippines JVAC application procedures, several-week processing caveat, single-entry three-month validity."
+        },
+        "arrival_card": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: New foreign visitor entry only: required forms, optional digital submission. This field does not establish passport acceptance or visa eligibility."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: Add current arrival-form evidence without changing unrelated visa or passport eligibility."
+        },
+        "health_requirements": {
+          "source_url": "https://www.forth.go.jp/moreinfo/topics/yellow_fever_certificate.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary passport, tourism, arrival in Japan. The MHLW Quarantine Stations (FORTH) country table states that Japan requires no yellow fever vaccination certificate, with no country-of-departure or age trigger, so the stored conditional yellow fever item has no Japanese authority behind it and is removed. No claim is made about symptom screening at quarantine, which MHLW still performs.",
+          "source_id": "jp_forth_yellow_fever",
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "PHL",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "日本 JAPAN （2021） 黄熱予防接種証明書は要求されていません。"
+        }
+      },
+      "note": "Quote: Temporary Visitor Visa (for stay within 90 days at maximum) for Philippine Nationals remains as gratis. Scope: Advance temporary-visitor visa: complete Japan visa-exemption table excludes this ordinary nationality, corroborated by nationality-specific visa application procedure.",
+      "route": {
+        "nationality": "PHL",
+        "destination": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "field-corrections-20260910",
+      "field_review_scope": "reviewed_route_field_corrections"
+    },
+    {
+      "fields": {
+        "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+        "government_fee": {
+          "amount": 0,
+          "currency": "JPY"
+        },
+        "permitted_stay_days": 90,
+        "visa_products": [
+          {
+            "type": "Single-entry short-term stay (tourism)",
+            "entry": "single",
+            "validity": "3 months",
+            "max_stay_days": 90,
+            "fee": {
+              "amount": 0,
+              "currency": "JPY"
+            },
+            "notes": "Government visa fee waived for this nationality for the temporary-visitor route. Visa centre or agency service charges may be separate.",
+            "field_provenance": {
+              "fee": {
+                "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Russia included in fee-exempt nationality table. No nationality-specific exception attached to Russia."
+              }
+            }
+          },
+          {
+            "type": "Multiple-entry short-term stay (tourism)",
+            "entry": "multiple",
+            "validity": "1 to 5 years",
+            "max_stay_days": 90,
+            "fee": {
+              "amount": 0,
+              "currency": "JPY"
+            },
+            "notes": "Government visa fee waived for this nationality for the temporary-visitor route. Visa centre or agency service charges may be separate.",
+            "field_provenance": {
+              "fee": {
+                "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+                "verified_at": "2026-09-09",
+                "verified_by": "Ellis official-source audit",
+                "verifier": "ai",
+                "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Russia included in fee-exempt nationality table. No nationality-specific exception attached to Russia."
+              }
+            }
+          }
+        ],
+        "disposition": "VISA_REQUIRED",
+        "requirement_detail": "paper_visa",
+        "processing_time": "Embassy of Japan/JVAC in Moscow: normally 4–5 working days; the mission describes 4 working days as a minimum. Its September 2026 notice warns that the Japanese holidays on 21–23 September may extend processing to 10 days including weekends. Apply well in advance; additional examination can take longer. For another consular jurisdiction in Russia, follow that office's published timing.",
+        "application_channel_detail": "For applications in Russia, submit at the Japan Visa Centre in person or through an authorised representative. The embassy does not accept visa applications by post.",
+        "exceptions": [
+          "Russian citizens must obtain the appropriate visa before travel unless they already hold an applicable re-entry permit.",
+          "The government visa fee is waived for Russian citizens; visa-centre service charges may be separate."
+        ],
+        "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+        "application_channel": "visa_center",
+        "arrival_card": {
+          "required": true,
+          "name": "Disembarkation card and customs declaration",
+          "submission_window": "Submit at immigration and customs on arrival. Visit Japan Web is the recommended online option; paper forms remain accepted."
+        },
+        "corroborating_sources": [
+          {
+            "url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+            "quote": "紙媒体の「外国人入国記録」を提出してください。",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.customs.go.jp/english/passenger/declaration/declaration_app.html",
+            "quote": "The existing paper version of the Customs Declaration Form can still be used",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "health_requirements": []
+      },
+      "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+      "verified_at": "2026-08-30",
+      "verified_by": "Ellis source audit (validity and jurisdiction)",
+      "verifier": "ai",
+      "field_provenance": {
+        "official_portal_url": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for"
+        },
+        "government_fee": {
+          "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Only government visa fees reverified. Existing product validity/stay/documents retain their earlier unresolved audit status; source does not prove all product fields."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for"
+        },
+        "visa_products": {
+          "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visa_fee_exemptions.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Citizens of the following countries are exempt from paying visa fees: Scope: Only government visa fees reverified. Existing product validity/stay/documents retain their earlier unresolved audit status; source does not prove all product fields."
+        },
+        "disposition": {
+          "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Advance temporary-visitor visa: complete Japan visa-exemption table excludes this ordinary nationality, corroborated by nationality-specific visa application procedure."
+        },
+        "requirement_detail": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for"
+        },
+        "processing_time": {
+          "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/vc20260904.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Russian ordinary-passport tourist resident in Russia. Only processing_time is reviewed: the numeric 4–5 working-day estimate and 4-day minimum explicitly apply to Embassy/JVAC Moscow, with the September 2026 holiday qualification. No unsupported acceptance-day clock, guaranteed deadline, other Russian consular district, visa eligibility, product, expiry, confidence or cache freshness is certified.",
+          "source_id": "moscow_current",
+          "supporting_evidence": [
+            {
+              "source_id": "moscow_minimum",
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visacenter.html",
+              "quote": "16, строение 5, Москва, 129110"
+            },
+            {
+              "source_id": "moscow_minimum",
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visacenter.html",
+              "quote": "Минимальный срок оформления визы – 4 рабочих дня"
+            },
+            {
+              "source_id": "moscow_minimum",
+              "source_url": "https://www.ru.emb-japan.go.jp/itpr_ja/visacenter.html",
+              "quote": "за несколько недель до планируемой поездки."
+            },
+            {
+              "source_id": "mofa_general",
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+              "quote": "approximately one week"
+            },
+            {
+              "source_id": "mofa_general",
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+              "quote": "It may take longer than usual to receive the result of the visa examination"
+            },
+            {
+              "source_id": "mofa_general",
+              "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+              "quote": "jurisdiction over your place of residence"
+            }
+          ],
+          "additional_quotes": [
+            "составляют 4–5 рабочих дней.",
+            "с 21 по 23 сентября сроки рассмотрения визовых заявлений могут увеличиться до 10 дней, включая выходные."
+          ],
+          "status": "reviewed",
+          "subject": {
+            "passport_nationality": "RUS",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "2026/9/4"
+        },
+        "application_channel_detail": {
+          "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Russian nationals require advance visa; Russia consular fee waiver and Russia JVAC procedure."
+        },
+        "exceptions": {
+          "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Russian nationals require advance visa; Russia consular fee waiver and Russia JVAC procedure."
+        },
+        "consular_jurisdiction": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for"
+        },
+        "application_channel": {
+          "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. Scope: Russian nationals require advance visa; Russia consular fee waiver and Russia JVAC procedure."
+        },
+        "arrival_card": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: New foreign visitor entry only: required forms, optional digital submission. This field does not establish passport acceptance or visa eligibility."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: Add current arrival-form evidence without changing unrelated visa or passport eligibility."
+        },
+        "health_requirements": {
+          "source_url": "https://www.forth.go.jp/moreinfo/topics/yellow_fever_certificate.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary passport, tourism, arrival in Japan. The MHLW Quarantine Stations (FORTH) country table states that Japan requires no yellow fever vaccination certificate, with no country-of-departure or age trigger, so the stored conditional yellow fever item has no Japanese authority behind it and is removed. No claim is made about symptom screening at quarantine, which MHLW still performs.",
+          "source_id": "jp_forth_yellow_fever",
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "RUS",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "日本 JAPAN （2021） 黄熱予防接種証明書は要求されていません。"
+        }
+      },
+      "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for",
+      "route": {
+        "nationality": "RUS",
+        "destination": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "field-corrections-20260910",
+      "field_review_scope": "reviewed_route_field_corrections"
+    },
+    {
+      "fields": {
+        "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+        "permitted_stay_days": 90,
+        "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+        "arrival_card": {
+          "required": true,
+          "name": "Disembarkation card and customs declaration",
+          "submission_window": "Submit at immigration and customs on arrival. Visit Japan Web is the recommended online option; paper forms remain accepted."
+        },
+        "corroborating_sources": [
+          {
+            "url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+            "quote": "紙媒体の「外国人入国記録」を提出してください。",
+            "checked_at": "2026-09-09"
+          },
+          {
+            "url": "https://www.customs.go.jp/english/passenger/declaration/declaration_app.html",
+            "quote": "The existing paper version of the Customs Declaration Form can still be used",
+            "checked_at": "2026-09-09"
+          }
+        ],
+        "health_requirements": []
+      },
+      "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+      "verified_at": "2026-08-30",
+      "verified_by": "Ellis source audit (validity and jurisdiction)",
+      "verifier": "ai",
+      "field_provenance": {
+        "official_portal_url": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN."
+        },
+        "consular_jurisdiction": {
+          "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (validity and jurisdiction)",
+          "verifier": "ai",
+          "note": "Verified 2026-08-30. Consular jurisdiction for JPN."
+        },
+        "arrival_card": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: New foreign visitor entry only: required forms, optional digital submission. This field does not establish passport acceptance or visa eligibility."
+        },
+        "corroborating_sources": {
+          "source_url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+          "verified_at": "2026-09-09",
+          "verified_by": "Ellis official-source audit",
+          "verifier": "ai",
+          "note": "Quote: 紙媒体の「外国人入国記録」を提出してください。 Scope: Add current arrival-form evidence without changing unrelated visa or passport eligibility."
+        },
+        "health_requirements": {
+          "source_url": "https://www.forth.go.jp/moreinfo/topics/yellow_fever_certificate.html",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Ordinary passport, tourism, arrival in Japan. The MHLW Quarantine Stations (FORTH) country table states that Japan requires no yellow fever vaccination certificate, with no country-of-departure or age trigger, so the stored conditional yellow fever item has no Japanese authority behind it and is removed. No claim is made about symptom screening at quarantine, which MHLW still performs. MHLW separa",
+          "source_id": "jp_forth_yellow_fever",
+          "supporting_evidence": [
+            {
+              "source_id": "jp_mhlw_border",
+              "source_url": "https://www.mhlw.go.jp/stf/covid-19/bordercontrol.html",
+              "quote": "If you enter Japan after midnight Japan time on or after April 29th, 2023, valid vaccination certificate or pre-departure test is not required."
+            }
+          ],
+          "status": "reviewed",
+          "verification_scope": "reviewed_route_field_corrections",
+          "subject": {
+            "passport_nationality": "VNM",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "日本 JAPAN （2021） 黄熱予防接種証明書は要求されていません。"
+        }
+      },
+      "note": "Verified 2026-08-30. Consular jurisdiction for JPN.",
+      "route": {
+        "nationality": "VNM",
+        "destination": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "partial_review": true,
+      "review_id": "field-corrections-20260910",
+      "field_review_scope": "reviewed_route_field_corrections"
+    }
+  ],
+  "status": "detached; exact-layer preflight required"
+}

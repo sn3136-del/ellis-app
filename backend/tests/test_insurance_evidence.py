@@ -199,9 +199,23 @@ def test_active_policy_conflict_does_not_become_an_insurance_only_unknown(field)
     assert out['held'] and records_guard.held_envelope(out)['guidance'] is None
 
 
+@pytest.fixture
+def without_later_field_corrections(monkeypatch):
+    # The fixture pins the served provenance as captured before the later
+    # field-correction release changed HKG to IDN's arrival card under its
+    # own exact-layer contract; measure the insurance projection without it.
+    from app.visa_snapshot import verified_overrides as vo
+    listed = vo._listed_reviewed_overlay_names()
+    monkeypatch.setattr(vo, '_listed_reviewed_overlay_names',
+                        lambda: [n for n in listed if n != 'reviewed_field_corrections_overlay_20260910.json'])
+    vo.reload()
+    yield
+    vo.reload()
+
+
 @pytest.mark.parametrize('index', range(3))
 @pytest.mark.parametrize('pending', [False, True])
-def test_actual_cached_api_keeps_raw_boolean_dates_proofs_and_pending(db, client, monkeypatch, index, pending):
+def test_actual_cached_api_keeps_raw_boolean_dates_proofs_and_pending(db, client, monkeypatch, index, pending, without_later_field_corrections):
     from datetime import datetime, timedelta, timezone
     from app import main
     from app.visa_snapshot import kimi_primary as kp
