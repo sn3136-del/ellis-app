@@ -1497,6 +1497,9 @@ _FILINGS = re.compile(
     r"|MDAC|TDAC|SG Arrival|eTravel|e-Ticket|entry permit|entry form", re.I)
 
 
+_GRANT_DECIDED_PER_APPLICANT = re.compile(r"determined by consular|decided by (?:the )?consular|consular (?:officials?|officer|decision)", re.I)
+
+
 def _names_something_to_file(row: dict) -> bool:
     text = " ".join(str(row.get(f) or "") for f in (
         "entry_requirements", "required_documents", "special_conditions",
@@ -1871,10 +1874,17 @@ def records_for_route(route: dict, guidance: dict,
         _set_stay(row, stay_text, p.get("max_stay_days"))
         # Definitional fallback: "single-entry" / "multiple-entry" in the
         # product's own name states the entries field.
+        # A product name such as "Single-entry tourist visa" states the
+        # count definitionally, and an unknown proof that only records that
+        # no quote bound the value must not blank it. Only an own unknown
+        # proof that says the granted number is decided per applicant (a
+        # consular decision) stops the fallback, because there the name is a
+        # requested option, not a grant.
         entry_proof = (p.get("field_provenance") or {}).get("entry") if isinstance(p.get("field_provenance"), dict) else None
         explicit_unknown_entry = ("entry" in p and p["entry"] is None
                                   and isinstance(entry_proof, dict)
-                                  and entry_proof.get("status") == "unknown")
+                                  and entry_proof.get("status") == "unknown"
+                                  and bool(_GRANT_DECIDED_PER_APPLICANT.search(str(entry_proof.get("reason") or ""))))
         row["entries"] = None if explicit_unknown_entry else (_entries(p.get("entry")) or _entries(p.get("type")))
         amt, cur = _fee(p, product_g, route)
         row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur

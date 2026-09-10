@@ -141,7 +141,7 @@ def test_new_override_shape_guards(field,value):
  assert any(e.startswith(field) for e in vo._field_errors(row['fields']))
  assert field not in vo._parse_rows([row],{})[vo._key('USA','CHN','tourism','ordinary_passport')]['fields']
 
-@pytest.mark.parametrize('entry,proof,expected',[(None,{'status':'unknown'},None),(None,None,'Single'),('single',{'status':'reviewed'},'Single')])
+@pytest.mark.parametrize('entry,proof,expected',[(None,{'status':'unknown','reason':'Number granted is determined by consular officials; not a universal fixed value.'},None),(None,{'status':'unknown','reason':'No literal official quote was captured for this value'},'Single'),(None,{'status':'unknown'},'Single'),(None,None,'Single'),('single',{'status':'reviewed'},'Single')])
 def test_only_explicit_unknown_entry_stops_name_fallback(entry,proof,expected):
  p=preview();g=deepcopy(p['guidance']);product=g['visa_products'][0];product['entry']=entry
  if proof is None:product['field_provenance'].pop('entry')
