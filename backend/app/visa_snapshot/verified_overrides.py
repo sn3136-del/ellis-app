@@ -136,7 +136,7 @@ _CUSTOMER_TEXT = ("exceptions", "application_channel_detail", "requirement_detai
                   "entry_requirements", "consular_jurisdiction", "passport_validity",
                   "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
                   "account_registration_steps", "payment_process", "submission_process",
-                  "photo_requirements")
+                  "photo_requirements", "forms")
 
 _BOOLEAN_FIELDS = ("biometrics_required", "appointment_required", "interview_required", "insurance_required")
 
@@ -385,13 +385,17 @@ def _field_errors(fields: dict) -> list[str]:
     for key in _BOOLEAN_FIELDS:
         if fields.get(key) is not None and not isinstance(fields[key], bool):
             errors.append(f"{key} must be a boolean or null")
-    for key in ("account_registration_steps", "payment_process", "submission_process"):
+    for key in ("account_registration_steps", "payment_process", "submission_process", "forms"):
         value = fields.get(key)
         if value is not None and (not isinstance(value, list) or
                                   any(not isinstance(step, str) for step in value)):
             errors.append(f"{key} must be an array of strings or null")
     if fields.get("photo_requirements") is not None and not isinstance(fields["photo_requirements"], str):
         errors.append("photo_requirements must be a string or null")
+    if fields.get("route_workflow_type") is not None:
+        from .kimi_primary import WORKFLOW_TYPES
+        if not isinstance(fields["route_workflow_type"], str) or fields["route_workflow_type"] not in WORKFLOW_TYPES:
+            errors.append("route_workflow_type must be a known workflow enum or null")
     from .reviewed_japan_warning_resolution import health_shape_errors
     errors.extend(health_shape_errors(fields.get("health_requirements")))
     from ..passport_validity import passport_validity_rule_errors
@@ -465,6 +469,68 @@ def _provenance(entry: dict) -> dict:
     return result
 
 
+# Fields a historical seed entry may mention but that only an explicitly
+# scoped field review may set. Opening them for every entry revived old
+# ignored values (a legacy "forms: []" blanked a live ETA form list), so an
+# entry may set them only through its own reviewed proof that names the
+# field and the review kind it belongs to. Legacy entries stay ignored.
+SCOPED_FIELDS = frozenset({"forms", "route_workflow_type"})
+
+
+def _scoped_review(entry: dict, field: str) -> bool:
+    proof = (entry.get("field_provenance") or {}).get(field) if isinstance(entry, dict) else None
+    scope = proof.get("verification_scope") if isinstance(proof, dict) else None
+    return (isinstance(proof, dict) and proof.get("status") == "reviewed"
+            and isinstance(scope, dict) and bool(str(scope.get("kind") or "").strip())
+            and scope.get("field") == field)
+
+
+# An entry may declare that some of its fields describe the procedure for
+# applicants lawfully resident in one country (a mission's own filing steps,
+# fees and waivers). The declaration is stored per field and enforced by the
+# lookup, so a route that carries a different residence never receives those
+# fields or their proofs; the rest of the entry still applies.
+_APPLICABILITY_KEYS = ("lawful_country_of_residence",)
+
+
+def _field_applicability(entry: dict, clean: dict):
+    """Return {field: constraint} or None when the declaration is malformed."""
+    raw = entry.get("applicability") if isinstance(entry, dict) else None
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict) or set(raw) != {"lawful_country_of_residence", "fields"}:
+        return None
+    code = raw.get("lawful_country_of_residence")
+    fields = raw.get("fields")
+    declared = entry.get("fields") if isinstance(entry.get("fields"), dict) else {}
+    if (not isinstance(code, str) or not re.fullmatch(r"[A-Z]{3}", code)
+            or not isinstance(fields, list) or not fields
+            or any(not isinstance(f, str) or f not in declared for f in fields)):
+        return None
+    # A field the shape guards quarantined is simply absent; the constraint
+    # only ever covers what the entry still sets.
+    return {f: {"lawful_country_of_residence": code} for f in fields if f in clean}
+
+
+def _applicable(hit: dict | None, route: dict) -> dict | None:
+    scoped = hit.get("field_applicability") if isinstance(hit, dict) else None
+    if not scoped:
+        return hit
+    residence = str((route or {}).get("lawful_country_of_residence") or "").upper()
+    dropped = {f for f, c in scoped.items()
+               if residence and c.get("lawful_country_of_residence") != residence}
+    if not dropped:
+        return hit
+    fields = {k: v for k, v in hit["fields"].items() if k not in dropped}
+    if not fields:
+        return None
+    out = dict(hit)
+    out["fields"] = fields
+    out["field_provenance"] = {k: v for k, v in (hit.get("field_provenance") or {}).items() if k not in dropped}
+    out["inapplicable_fields"] = sorted(dropped)
+    return out
+
+
 def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
     for r in rows if isinstance(rows, list) else []:
         if not isinstance(r, dict):
@@ -486,7 +552,8 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             continue          # an override must cite applicable official evidence
         if r.get("verifier", "ai") not in ("human", "ai", "public"):
             continue
-        clean = _normalise_legacy_shapes({k: v for k, v in fields.items() if k in OVERRIDABLE})
+        clean = _normalise_legacy_shapes({k: v for k, v in fields.items()
+                                          if k in OVERRIDABLE or (k in SCOPED_FIELDS and _scoped_review(r, k))})
         route_key = _key(route["nationality"], route["destination"],
                          route.get("travel_purpose", "tourism"),
                          route.get("travel_document_type", ""))
@@ -509,7 +576,7 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
                     clean.pop(k, None)
             for k in _BOOLEAN_FIELDS + ("passport_validity_requirement",
                                        "account_registration_steps", "payment_process",
-                                       "submission_process", "photo_requirements", "health_requirements"):
+                                       "submission_process", "photo_requirements", "health_requirements", "forms", "route_workflow_type"):
                 if any(e.startswith(k) for e in errors):
                     clean.pop(k, None)
         for k in _URL_FIELDS:
@@ -527,6 +594,10 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             else:
                 clean.pop("corroborating_sources", None)
         if not clean:
+            continue
+        applicability = _field_applicability(r, clean)
+        if applicability is None:
+            log.warning("Override %s skipped: malformed applicability declaration", route_key)
             continue
         provenance = _provenance(dict(r, source_url=url, verified_at=when))
         per_field = {}
@@ -558,6 +629,8 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             "field_provenance": per_field,
             "note": str(r.get("note") or "").strip()[:400],
         }
+        if applicability:
+            table[route_key]["field_applicability"] = applicability
     return table
 
 
@@ -680,10 +753,11 @@ def find(route: dict) -> dict | None:
     doc = str(route.get("travel_document_type") or "ordinary_passport")
     table = _table()
     _LOOKUP_STORE_ERRORS.set(getattr(table, 'store_errors', ()))
-    return table.get(_key(route.get("passport_nationality", ""),
-                             route.get("destination_country", ""),
-                             route.get("travel_purpose", "tourism"),
-                             doc))
+    hit = table.get(_key(route.get("passport_nationality", ""),
+                         route.get("destination_country", ""),
+                         route.get("travel_purpose", "tourism"),
+                         doc))
+    return _applicable(hit, route)
 
 
 # Fields that only describe APPLYING for a visa. When a verified override

@@ -1,0 +1,2356 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "review_id": "usa-chn-current-tourism-20260910",
+  "entries": [
+    {
+      "fields": {
+        "government_fee": {
+          "amount": 140,
+          "currency": "USD"
+        },
+        "permitted_stay_days": null,
+        "visa_products": [
+          {
+            "type": "Single-entry tourist L",
+            "entry": null,
+            "validity": "Determined by consular officials and the visa issued.",
+            "max_stay_days": null,
+            "fee": {
+              "amount": 140,
+              "currency": "USD"
+            },
+            "notes": "Requested Single-entry tourist L option. Entries, validity and each stay are determined by consular officials and the visa issued; no fixed duration or grant is guaranteed. Regular US-citizen fee 140 USD under the reduction through 31 December 2026.",
+            "permitted_stay": "Determined by consular officials and the visa issued.",
+            "disposition": "VISA_REQUIRED",
+            "requirement_detail": "paper_visa",
+            "field_provenance": {
+              "validity": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+                "additional_quotes": [],
+                "supporting_evidence": [],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Existing requested L option; consular decision on entries, validity and each stay. No product-specific grant guarantee.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "validity",
+                  "evidence": [
+                    {
+                      "source_id": "faq2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                      "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+                    }
+                  ]
+                }
+              },
+              "permitted_stay": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+                "additional_quotes": [],
+                "supporting_evidence": [],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Existing requested L option; consular decision on entries, validity and each stay. No product-specific grant guarantee.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "permitted_stay",
+                  "evidence": [
+                    {
+                      "source_id": "faq2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                      "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+                    }
+                  ]
+                }
+              },
+              "notes": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+                "additional_quotes": [],
+                "supporting_evidence": [
+                  {
+                    "source_id": "fee2026",
+                    "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                    "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+                  }
+                ],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Existing requested L option; consular decision on entries, validity and each stay. No product-specific grant guarantee.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "notes",
+                  "evidence": [
+                    {
+                      "source_id": "faq2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                      "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+                    },
+                    {
+                      "source_id": "fee2026",
+                      "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                      "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+                    }
+                  ],
+                  "source_table": {
+                    "headers": [
+                      "Number of Entry",
+                      "U.S.Citizen",
+                      "Non-U.S. Citizen*"
+                    ],
+                    "us_fee_rowspan": 4,
+                    "us_fee_amount": 140,
+                    "currency": "USD",
+                    "entry_rows": [
+                      "Single Entry",
+                      "Double Entries",
+                      "Multiple Entries for6Months",
+                      "Multiple Entries for12Months or more"
+                    ],
+                    "fee_effective_to": "2026-12-31",
+                    "html_body_sha256": "0cb7f99e2964c598cb0d9af1840e3e4419ba48ffe546e3d8e1e08e43c2c28054"
+                  }
+                }
+              },
+              "entry": {
+                "status": "unknown",
+                "verifier": "ai",
+                "reason": "Number granted is determined by consular officials; not a universal fixed value or a Not published disposition."
+              },
+              "max_stay_days": {
+                "status": "unknown",
+                "verifier": "ai",
+                "reason": "Number granted is determined by consular officials; not a universal fixed value or a Not published disposition."
+              },
+              "fee": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "fee2026",
+                "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026.",
+                "additional_quotes": [
+                  "For an express service, there is an additional fee of $25 per visa."
+                ],
+                "supporting_evidence": [],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "US-citizen regular visa tariff140USD only; J1/J2 is a separate171USD row. Reduction ends31December2026; this is not the L-program expiry.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "fee",
+                  "evidence": [
+                    {
+                      "source_id": "fee2026",
+                      "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                      "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+                    },
+                    {
+                      "source_id": "fee2026",
+                      "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                      "quote": "For an express service, there is an additional fee of $25 per visa."
+                    }
+                  ],
+                  "source_table": {
+                    "headers": [
+                      "Number of Entry",
+                      "U.S.Citizen",
+                      "Non-U.S. Citizen*"
+                    ],
+                    "us_fee_rowspan": 4,
+                    "us_fee_amount": 140,
+                    "currency": "USD",
+                    "entry_rows": [
+                      "Single Entry",
+                      "Double Entries",
+                      "Multiple Entries for6Months",
+                      "Multiple Entries for12Months or more"
+                    ],
+                    "fee_effective_to": "2026-12-31",
+                    "html_body_sha256": "0cb7f99e2964c598cb0d9af1840e3e4419ba48ffe546e3d8e1e08e43c2c28054"
+                  }
+                },
+                "effective_to": "2026-12-31",
+                "policy_interval_evidence": {
+                  "effective_to": {
+                    "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                    "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026.",
+                    "verified_at": "2026-09-10",
+                    "verifier": "ai",
+                    "note": "Fee reduction ends on this date; no L-program expiry is asserted."
+                  }
+                }
+              },
+              "disposition": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "nia_entry_law",
+                "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law.",
+                "additional_quotes": [],
+                "supporting_evidence": [
+                  {
+                    "source_id": "us_state_entry",
+                    "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                    "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                  },
+                  {
+                    "source_id": "application2025",
+                    "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                    "quote": "Issued to those who intend to go to China for tourism"
+                  }
+                ],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Same ordinary L application category, represented as an existing requested-entry option. This proof establishes the need to apply for the L visa; it does not guarantee issuance, requested entries, validity or duration of stay. The tariff is not used as eligibility evidence.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "disposition",
+                  "evidence": [
+                    {
+                      "source_id": "nia_entry_law",
+                      "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                      "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law."
+                    },
+                    {
+                      "source_id": "us_state_entry",
+                      "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                      "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                    },
+                    {
+                      "source_id": "application2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                      "quote": "Issued to those who intend to go to China for tourism"
+                    }
+                  ]
+                }
+              },
+              "requirement_detail": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "nia_entry_law",
+                "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law.",
+                "additional_quotes": [],
+                "supporting_evidence": [
+                  {
+                    "source_id": "us_state_entry",
+                    "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                    "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                  },
+                  {
+                    "source_id": "application2025",
+                    "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                    "quote": "Issued to those who intend to go to China for tourism"
+                  }
+                ],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Single-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Same ordinary L application category, represented as an existing requested-entry option. This proof establishes the need to apply for the L visa; it does not guarantee issuance, requested entries, validity or duration of stay. The tariff is not used as eligibility evidence.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "requirement_detail",
+                  "evidence": [
+                    {
+                      "source_id": "nia_entry_law",
+                      "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                      "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law."
+                    },
+                    {
+                      "source_id": "us_state_entry",
+                      "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                      "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                    },
+                    {
+                      "source_id": "application2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                      "quote": "Issued to those who intend to go to China for tourism"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "type": "Double-entry tourist L",
+            "entry": null,
+            "validity": "Determined by consular officials and the visa issued.",
+            "max_stay_days": null,
+            "fee": {
+              "amount": 140,
+              "currency": "USD"
+            },
+            "notes": "Requested Double-entry tourist L option. Entries, validity and each stay are determined by consular officials and the visa issued; no fixed duration or grant is guaranteed. Regular US-citizen fee 140 USD under the reduction through 31 December 2026.",
+            "permitted_stay": "Determined by consular officials and the visa issued.",
+            "disposition": "VISA_REQUIRED",
+            "requirement_detail": "paper_visa",
+            "field_provenance": {
+              "validity": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+                "additional_quotes": [],
+                "supporting_evidence": [],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Existing requested L option; consular decision on entries, validity and each stay. No product-specific grant guarantee.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "validity",
+                  "evidence": [
+                    {
+                      "source_id": "faq2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                      "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+                    }
+                  ]
+                }
+              },
+              "permitted_stay": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+                "additional_quotes": [],
+                "supporting_evidence": [],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Existing requested L option; consular decision on entries, validity and each stay. No product-specific grant guarantee.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "permitted_stay",
+                  "evidence": [
+                    {
+                      "source_id": "faq2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                      "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+                    }
+                  ]
+                }
+              },
+              "notes": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+                "additional_quotes": [],
+                "supporting_evidence": [
+                  {
+                    "source_id": "fee2026",
+                    "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                    "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+                  }
+                ],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Existing requested L option; consular decision on entries, validity and each stay. No product-specific grant guarantee.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "notes",
+                  "evidence": [
+                    {
+                      "source_id": "faq2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                      "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+                    },
+                    {
+                      "source_id": "fee2026",
+                      "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                      "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+                    }
+                  ],
+                  "source_table": {
+                    "headers": [
+                      "Number of Entry",
+                      "U.S.Citizen",
+                      "Non-U.S. Citizen*"
+                    ],
+                    "us_fee_rowspan": 4,
+                    "us_fee_amount": 140,
+                    "currency": "USD",
+                    "entry_rows": [
+                      "Single Entry",
+                      "Double Entries",
+                      "Multiple Entries for6Months",
+                      "Multiple Entries for12Months or more"
+                    ],
+                    "fee_effective_to": "2026-12-31",
+                    "html_body_sha256": "0cb7f99e2964c598cb0d9af1840e3e4419ba48ffe546e3d8e1e08e43c2c28054"
+                  }
+                }
+              },
+              "entry": {
+                "status": "unknown",
+                "verifier": "ai",
+                "reason": "Number granted is determined by consular officials; not a universal fixed value or a Not published disposition."
+              },
+              "max_stay_days": {
+                "status": "unknown",
+                "verifier": "ai",
+                "reason": "Number granted is determined by consular officials; not a universal fixed value or a Not published disposition."
+              },
+              "fee": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "fee2026",
+                "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026.",
+                "additional_quotes": [
+                  "For an express service, there is an additional fee of $25 per visa."
+                ],
+                "supporting_evidence": [],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "US-citizen regular visa tariff140USD only; J1/J2 is a separate171USD row. Reduction ends31December2026; this is not the L-program expiry.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "fee",
+                  "evidence": [
+                    {
+                      "source_id": "fee2026",
+                      "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                      "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+                    },
+                    {
+                      "source_id": "fee2026",
+                      "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                      "quote": "For an express service, there is an additional fee of $25 per visa."
+                    }
+                  ],
+                  "source_table": {
+                    "headers": [
+                      "Number of Entry",
+                      "U.S.Citizen",
+                      "Non-U.S. Citizen*"
+                    ],
+                    "us_fee_rowspan": 4,
+                    "us_fee_amount": 140,
+                    "currency": "USD",
+                    "entry_rows": [
+                      "Single Entry",
+                      "Double Entries",
+                      "Multiple Entries for6Months",
+                      "Multiple Entries for12Months or more"
+                    ],
+                    "fee_effective_to": "2026-12-31",
+                    "html_body_sha256": "0cb7f99e2964c598cb0d9af1840e3e4419ba48ffe546e3d8e1e08e43c2c28054"
+                  }
+                },
+                "effective_to": "2026-12-31",
+                "policy_interval_evidence": {
+                  "effective_to": {
+                    "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                    "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026.",
+                    "verified_at": "2026-09-10",
+                    "verifier": "ai",
+                    "note": "Fee reduction ends on this date; no L-program expiry is asserted."
+                  }
+                }
+              },
+              "disposition": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "nia_entry_law",
+                "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law.",
+                "additional_quotes": [],
+                "supporting_evidence": [
+                  {
+                    "source_id": "us_state_entry",
+                    "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                    "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                  },
+                  {
+                    "source_id": "application2025",
+                    "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                    "quote": "Issued to those who intend to go to China for tourism"
+                  }
+                ],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Same ordinary L application category, represented as an existing requested-entry option. This proof establishes the need to apply for the L visa; it does not guarantee issuance, requested entries, validity or duration of stay. The tariff is not used as eligibility evidence.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "disposition",
+                  "evidence": [
+                    {
+                      "source_id": "nia_entry_law",
+                      "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                      "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law."
+                    },
+                    {
+                      "source_id": "us_state_entry",
+                      "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                      "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                    },
+                    {
+                      "source_id": "application2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                      "quote": "Issued to those who intend to go to China for tourism"
+                    }
+                  ]
+                }
+              },
+              "requirement_detail": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "nia_entry_law",
+                "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law.",
+                "additional_quotes": [],
+                "supporting_evidence": [
+                  {
+                    "source_id": "us_state_entry",
+                    "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                    "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                  },
+                  {
+                    "source_id": "application2025",
+                    "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                    "quote": "Issued to those who intend to go to China for tourism"
+                  }
+                ],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Double-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Same ordinary L application category, represented as an existing requested-entry option. This proof establishes the need to apply for the L visa; it does not guarantee issuance, requested entries, validity or duration of stay. The tariff is not used as eligibility evidence.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "requirement_detail",
+                  "evidence": [
+                    {
+                      "source_id": "nia_entry_law",
+                      "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                      "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law."
+                    },
+                    {
+                      "source_id": "us_state_entry",
+                      "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                      "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                    },
+                    {
+                      "source_id": "application2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                      "quote": "Issued to those who intend to go to China for tourism"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "type": "Multiple-entry tourist L",
+            "entry": null,
+            "validity": "Determined by consular officials and the visa issued.",
+            "max_stay_days": null,
+            "fee": {
+              "amount": 140,
+              "currency": "USD"
+            },
+            "notes": "Requested Multiple-entry tourist L option. Entries, validity and each stay are determined by consular officials and the visa issued; no fixed duration or grant is guaranteed. Regular US-citizen fee 140 USD under the reduction through 31 December 2026. Most US citizens may apply for a 10-year multiple-entry tourist visa; this is an application option, not a guaranteed grant.",
+            "permitted_stay": "Determined by consular officials and the visa issued.",
+            "disposition": "VISA_REQUIRED",
+            "requirement_detail": "paper_visa",
+            "field_provenance": {
+              "validity": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+                "additional_quotes": [],
+                "supporting_evidence": [],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Existing requested L option; consular decision on entries, validity and each stay. No product-specific grant guarantee.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "validity",
+                  "evidence": [
+                    {
+                      "source_id": "faq2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                      "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+                    }
+                  ]
+                }
+              },
+              "permitted_stay": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+                "additional_quotes": [],
+                "supporting_evidence": [],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Existing requested L option; consular decision on entries, validity and each stay. No product-specific grant guarantee.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "permitted_stay",
+                  "evidence": [
+                    {
+                      "source_id": "faq2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                      "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+                    }
+                  ]
+                }
+              },
+              "notes": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+                "additional_quotes": [],
+                "supporting_evidence": [
+                  {
+                    "source_id": "fee2026",
+                    "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                    "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+                  },
+                  {
+                    "source_id": "us_state_entry",
+                    "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                    "quote": "Most U.S. citizens may apply for a 10-year multiple-entry tourist visa."
+                  }
+                ],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Existing requested L option; consular decision on entries, validity and each stay. No product-specific grant guarantee.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "notes",
+                  "evidence": [
+                    {
+                      "source_id": "faq2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                      "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+                    },
+                    {
+                      "source_id": "fee2026",
+                      "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                      "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+                    },
+                    {
+                      "source_id": "us_state_entry",
+                      "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                      "quote": "Most U.S. citizens may apply for a 10-year multiple-entry tourist visa."
+                    }
+                  ],
+                  "source_table": {
+                    "headers": [
+                      "Number of Entry",
+                      "U.S.Citizen",
+                      "Non-U.S. Citizen*"
+                    ],
+                    "us_fee_rowspan": 4,
+                    "us_fee_amount": 140,
+                    "currency": "USD",
+                    "entry_rows": [
+                      "Single Entry",
+                      "Double Entries",
+                      "Multiple Entries for6Months",
+                      "Multiple Entries for12Months or more"
+                    ],
+                    "fee_effective_to": "2026-12-31",
+                    "html_body_sha256": "0cb7f99e2964c598cb0d9af1840e3e4419ba48ffe546e3d8e1e08e43c2c28054"
+                  }
+                }
+              },
+              "entry": {
+                "status": "unknown",
+                "verifier": "ai",
+                "reason": "Number granted is determined by consular officials; not a universal fixed value or a Not published disposition."
+              },
+              "max_stay_days": {
+                "status": "unknown",
+                "verifier": "ai",
+                "reason": "Number granted is determined by consular officials; not a universal fixed value or a Not published disposition."
+              },
+              "fee": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "fee2026",
+                "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026.",
+                "additional_quotes": [
+                  "For an express service, there is an additional fee of $25 per visa."
+                ],
+                "supporting_evidence": [],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "US-citizen regular visa tariff140USD only; J1/J2 is a separate171USD row. Reduction ends31December2026; this is not the L-program expiry.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "fee",
+                  "evidence": [
+                    {
+                      "source_id": "fee2026",
+                      "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                      "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+                    },
+                    {
+                      "source_id": "fee2026",
+                      "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                      "quote": "For an express service, there is an additional fee of $25 per visa."
+                    }
+                  ],
+                  "source_table": {
+                    "headers": [
+                      "Number of Entry",
+                      "U.S.Citizen",
+                      "Non-U.S. Citizen*"
+                    ],
+                    "us_fee_rowspan": 4,
+                    "us_fee_amount": 140,
+                    "currency": "USD",
+                    "entry_rows": [
+                      "Single Entry",
+                      "Double Entries",
+                      "Multiple Entries for6Months",
+                      "Multiple Entries for12Months or more"
+                    ],
+                    "fee_effective_to": "2026-12-31",
+                    "html_body_sha256": "0cb7f99e2964c598cb0d9af1840e3e4419ba48ffe546e3d8e1e08e43c2c28054"
+                  }
+                },
+                "effective_to": "2026-12-31",
+                "policy_interval_evidence": {
+                  "effective_to": {
+                    "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                    "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026.",
+                    "verified_at": "2026-09-10",
+                    "verifier": "ai",
+                    "note": "Fee reduction ends on this date; no L-program expiry is asserted."
+                  }
+                }
+              },
+              "disposition": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "nia_entry_law",
+                "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law.",
+                "additional_quotes": [],
+                "supporting_evidence": [
+                  {
+                    "source_id": "us_state_entry",
+                    "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                    "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                  },
+                  {
+                    "source_id": "application2025",
+                    "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                    "quote": "Issued to those who intend to go to China for tourism"
+                  }
+                ],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Same ordinary L application category, represented as an existing requested-entry option. This proof establishes the need to apply for the L visa; it does not guarantee issuance, requested entries, validity or duration of stay. The tariff is not used as eligibility evidence.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "disposition",
+                  "evidence": [
+                    {
+                      "source_id": "nia_entry_law",
+                      "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                      "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law."
+                    },
+                    {
+                      "source_id": "us_state_entry",
+                      "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                      "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                    },
+                    {
+                      "source_id": "application2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                      "quote": "Issued to those who intend to go to China for tourism"
+                    }
+                  ]
+                }
+              },
+              "requirement_detail": {
+                "status": "reviewed",
+                "verifier": "ai",
+                "verified_at": "2026-09-10",
+                "verified_by": "Ellis AI official-source field review",
+                "source_id": "nia_entry_law",
+                "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law.",
+                "additional_quotes": [],
+                "supporting_evidence": [
+                  {
+                    "source_id": "us_state_entry",
+                    "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                    "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                  },
+                  {
+                    "source_id": "application2025",
+                    "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                    "quote": "Issued to those who intend to go to China for tourism"
+                  }
+                ],
+                "subject": {
+                  "passport_nationality": "USA",
+                  "destination_country": "CHN",
+                  "travel_purpose": "tourism",
+                  "travel_document_type": "ordinary_passport",
+                  "product_type": "Multiple-entry tourist L",
+                  "disposition": "VISA_REQUIRED",
+                  "requirement_detail": "paper_visa"
+                },
+                "note": "Same ordinary L application category, represented as an existing requested-entry option. This proof establishes the need to apply for the L visa; it does not guarantee issuance, requested entries, validity or duration of stay. The tariff is not used as eligibility evidence.",
+                "verification_scope": {
+                  "kind": "usa_china_tourism_exact_fields_20260910",
+                  "field": "requirement_detail",
+                  "evidence": [
+                    {
+                      "source_id": "nia_entry_law",
+                      "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                      "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law."
+                    },
+                    {
+                      "source_id": "us_state_entry",
+                      "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                      "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+                    },
+                    {
+                      "source_id": "application2025",
+                      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                      "quote": "Issued to those who intend to go to China for tourism"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "disposition": "VISA_REQUIRED",
+        "requirement_detail": "paper_visa",
+        "visa_category": "L (Tourist)",
+        "permitted_stay": "Determined by consular officials and the visa issued.",
+        "passport_validity": "For entry, the US Department of State says at least 6 months beyond arrival and at least 2 blank pages. Separately, the Chinese mission requires more than 6 months remaining and at least 2 blank visa pages when applying.",
+        "passport_validity_requirement": {
+          "kind": "months_after_arrival",
+          "months": 6
+        },
+        "required_documents": [
+          "For the L visa application in the US: passport bio-page and blank visa page; passport with more than 6 months remaining and at least 2 blank visa pages.",
+          "Complete the New COVA form, upload the requested documents and proof of US residence; include the latest Chinese visa or residence permit where applicable.",
+          "After the status becomes “Passport to be submitted”, submit the original passport and the printed application information page with its barcode, plus applicable originals requested by the consular post.",
+          "Bring the old passport if it contains a still-valid Chinese visa or residence permit. Former Chinese nationals and applicants with a name change must follow the additional document rules; US-born minors of Chinese origin need the separate nationality/document guidance.",
+          "For L visa applicants within the US, round-trip bookings, hotel reservations, itinerary and invitation letter are no longer routinely required. The consular post may request additional documents case by case."
+        ],
+        "application_channel": "online_portal",
+        "application_channel_detail": "Apply through New COVA and select the Chinese embassy or consulate responsible for your US residence. After online preliminary approval shows “Passport to be submitted”, you or an agent may submit the passport, printed barcode information page and required originals at that post by walk-in. Routine personal attendance for fingerprint collection is not required; a consular officer may require an in-person interview or additional documents. The Washington Embassy does not accept mailed visa applications.",
+        "official_portal_url": "http://consular.mfa.gov.cn/VISA/",
+        "route_workflow_type": "embassy_submission",
+        "forms": [
+          "New COVA online application form",
+          "Printed application information page with barcode once the status is “Passport to be submitted”"
+        ],
+        "appointment_required": false,
+        "biometrics_required": false,
+        "interview_required": null,
+        "photo_requirements": "Upload the photo in New COVA and follow its photo check. If repeated uploads fail the check, continue the form and bring a standard ID photo when submitting the passport.",
+        "processing_time": "Washington Embassy reference average from passport submission: regular service 4 business days; urgent express service 3 business days. Some applications take longer. This is not a minimum or the online-review turnaround; other US consular jurisdictions must confirm their own timing.",
+        "account_registration_steps": [
+          "Register or sign in to New COVA and select the competent Chinese embassy or consulate for your US residence."
+        ],
+        "submission_process": [
+          "Register or sign in to New COVA and select the Chinese embassy or consulate responsible for your US residence.",
+          "Complete the online form and upload the required materials for preliminary review; follow requests for corrections or additional documents.",
+          "When the status is “Passport to be submitted”, you or an agent may bring the passport, printed barcode information page and required originals to the competent post by walk-in. Attend an interview if the consular officer requests one.",
+          "Follow the competent post’s collection and payment instructions. At Washington, wait for both the estimated pickup date and “Passport to be collected” status; the estimated date is not a guarantee."
+        ],
+        "payment_process": [
+          "Confirm collection and payment arrangements with the competent consular post. At the Washington Embassy, Master/Visa credit card, money order or cashier’s check are accepted for on-site pickup."
+        ],
+        "health_requirements": null,
+        "onward_travel_evidence": null,
+        "accommodation_evidence": null,
+        "financial_evidence": null,
+        "arrival_card": {
+          "required": true,
+          "name": "China Arrival Card (unless a listed exemption applies)",
+          "submission_window": "Online before travel, or complete at immigration on arrival",
+          "url": "https://s.nia.gov.cn/ArrivalCardFillingPC/",
+          "notes": "Exempt: Holders of a valid Foreign Permanent Resident ID Card of the People’s Republic of China; Holders of a valid Mainland Travel Permit for Hong Kong and Macao Residents (non-Chinese Citizens); Holders of a group visa or those eligible for group visa-free entry; Passengers in 24-hour direct transit who stay within the designated area of the port; Cruise passengers entering and departing on the same vessel; Travelers entering through the E-channel; Foreign crew members of exit-entry transport vehicles. Otherwise complete before travel online or at immigration on arrival by QR, on-site device or paper. No mandatory advance-only electronic deadline is asserted."
+        },
+        "entry_requirements": [
+          "Use the visa or entry permission applicable to your itinerary and comply with the stay granted. Entry remains subject to border inspection.",
+          "US Department of State entry guidance: passport valid at least 6 months beyond arrival with at least 2 blank pages.",
+          "Complete the China Arrival Card unless a listed exemption applies; advance online and completion at immigration on arrival, including paper, are alternatives."
+        ],
+        "exceptions": [
+          "An existing valid visa may avoid a new application. If it is in an expired passport, travel with both passports and confirm the identity and visa-purpose conditions with the Chinese mission.",
+          "US ordinary-passport holders may use 240-hour visa-free transit only on a qualifying third-country/region itinerary with confirmed onward seats and departure date, through designated ports and within the permitted areas. The current NIA policy lists 65 ports in 24 provinces/regions and a maximum 10-day stay. Work, study and news reporting require prior approval and the appropriate visa.",
+          "For transit of no more than 24 hours, valid travel documents and confirmed onward international tickets are required. Remain in the port’s restricted area; obtain a temporary entry permit before leaving it.",
+          "US ordinary-passport holders may enter through open Hainan ports and stay within Hainan for up to 30 days for permitted short visits including tourism. Work and study are excluded. The regional stay count starts at midnight following entry.",
+          "The cruise-group exemption requires at least two people organized and received by a China-registered travel agency, entry at a designated cruise port, and continued travel and departure on the same scheduled cruise ship. The maximum is 15 days within Beijing and the specified 11 coastal provinces/regions; the regional stay count starts at midnight following entry.",
+          "Entries, visa validity and each permitted stay are decided by consular officials; requested single, double or multiple-entry options are not guarantees. Most US citizens may apply for a 10-year multiple-entry tourist visa, according to the US Department of State."
+        ]
+      },
+      "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202412/t20241227_11519914.htm",
+      "verified_at": "2026-08-29",
+      "verified_by": "Ellis source audit",
+      "verifier": "ai",
+      "field_provenance": {
+        "government_fee": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "fee2026",
+          "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+          "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026.",
+          "additional_quotes": [
+            "For an express service, there is an additional fee of $25 per visa."
+          ],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "US-citizen regular visa tariff140USD only; J1/J2 is a separate171USD row. Reduction ends31December2026; this is not the L-program expiry.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "government_fee",
+            "evidence": [
+              {
+                "source_id": "fee2026",
+                "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026."
+              },
+              {
+                "source_id": "fee2026",
+                "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+                "quote": "For an express service, there is an additional fee of $25 per visa."
+              }
+            ],
+            "source_table": {
+              "headers": [
+                "Number of Entry",
+                "U.S.Citizen",
+                "Non-U.S. Citizen*"
+              ],
+              "us_fee_rowspan": 4,
+              "us_fee_amount": 140,
+              "currency": "USD",
+              "entry_rows": [
+                "Single Entry",
+                "Double Entries",
+                "Multiple Entries for6Months",
+                "Multiple Entries for12Months or more"
+              ],
+              "fee_effective_to": "2026-12-31",
+              "html_body_sha256": "0cb7f99e2964c598cb0d9af1840e3e4419ba48ffe546e3d8e1e08e43c2c28054"
+            }
+          },
+          "effective_to": "2026-12-31",
+          "policy_interval_evidence": {
+            "effective_to": {
+              "source_url": "https://us.china-embassy.gov.cn/eng./lsfw/zj/notice/202412/t20241227_11519914.htm",
+              "quote": "the Chinese Embassy and Consulates-General in the US will continue to reduce the visa fees until December 31, 2026.",
+              "verified_at": "2026-09-10",
+              "verifier": "ai",
+              "note": "Fee reduction ends on this date; no L-program expiry is asserted."
+            }
+          }
+        },
+        "permitted_stay_days": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "Individual consular decision; the source publishes no universal guaranteed number for this route. Not a Not published or Not applicable disposition."
+        },
+        "visa_products": {
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202412/t20241227_11519914.htm",
+          "verified_at": "2026-08-29",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "FEE IS WRONG AND OVERSTATED BY $45. The Chinese Embassy in Washington's current notice sets a reduced fee of US$140 for US citizens, in force until 31 December 2026 (the un-reduced rate is $185). Crucially the $140 is a FLAT rate for US citizens regardless of the number of entries - the per-entry la | quote: To facilitate people-to-people exchanges, the Chinese Embassy and Consulates-Gen | Adjudic"
+        },
+        "disposition": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "nia_entry_law",
+          "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+          "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law.",
+          "additional_quotes": [],
+          "supporting_evidence": [
+            {
+              "source_id": "us_state_entry",
+              "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+              "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Ordinary US-passport tourism default; existing visa or expressly applicable transit/regional exemptions may change the individual route. This is not a guarantee of admission or product grant.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "disposition",
+            "evidence": [
+              {
+                "source_id": "nia_entry_law",
+                "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law."
+              },
+              {
+                "source_id": "us_state_entry",
+                "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                "quote": "You must obtain a visa before arriving in China, with limited exceptions."
+              }
+            ]
+          }
+        },
+        "requirement_detail": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "application2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+          "quote": "Issued to those who intend to go to China for tourism",
+          "additional_quotes": [],
+          "supporting_evidence": [
+            {
+              "source_id": "faq2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+              "quote": "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site."
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Tourist L application: online preliminary review followed by submission of passport/originals; online filing is not an eVisa grant.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "requirement_detail",
+            "evidence": [
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Issued to those who intend to go to China for tourism"
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site."
+              }
+            ]
+          }
+        },
+        "visa_category": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "application2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+          "quote": "Issued to those who intend to go to China for tourism",
+          "additional_quotes": [],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Tourism visa category only; no entry count, duration or issuance guarantee.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "visa_category",
+            "evidence": [
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Issued to those who intend to go to China for tourism"
+              }
+            ]
+          }
+        },
+        "permitted_stay": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+          "additional_quotes": [],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Individual visa-grant duration; no fixed stay is guaranteed.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "permitted_stay",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+              }
+            ]
+          }
+        },
+        "passport_validity": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "us_state_entry",
+          "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+          "quote": "Your passport must be valid at least 6 months beyond your date of arrival.",
+          "additional_quotes": [
+            "Your passport must have a minimum of 2 blank pages to enter."
+          ],
+          "supporting_evidence": [
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "Passport remaining validity must be more than 6 months with at least 2 blank visa pages"
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Two distinct clocks and publishers: US passport-authority entry guidance, and Chinese mission application requirement. The application threshold is strictly more than six months.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "passport_validity",
+            "evidence": [
+              {
+                "source_id": "us_state_entry",
+                "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                "quote": "Your passport must be valid at least 6 months beyond your date of arrival."
+              },
+              {
+                "source_id": "us_state_entry",
+                "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                "quote": "Your passport must have a minimum of 2 blank pages to enter."
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Passport remaining validity must be more than 6 months with at least 2 blank visa pages"
+              }
+            ]
+          }
+        },
+        "passport_validity_requirement": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "us_state_entry",
+          "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+          "quote": "Your passport must be valid at least 6 months beyond your date of arrival.",
+          "additional_quotes": [],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "US Department of State guidance to US passport holders for entry into mainland China; not attributed to a Chinese destination authority and not derived from the application requirement.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "passport_validity_requirement",
+            "evidence": [
+              {
+                "source_id": "us_state_entry",
+                "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                "quote": "Your passport must be valid at least 6 months beyond your date of arrival."
+              }
+            ]
+          }
+        },
+        "required_documents": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)",
+          "additional_quotes": [
+            "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission."
+          ],
+          "supporting_evidence": [
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "Passport remaining validity must be more than 6 months with at least 2 blank visa pages"
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "The Proof of Residence (e.g., driver’s license, utility bill, bank bill)"
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "The latest Chinese visa or the Chinese residence permit"
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "Passport original used for visa application"
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "Application info-page showing “ Passport to be submitted ” status and the barcode of the application form"
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "Old passport containing previous Chinese visa or residence permit which is still within validity"
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "If the applicant was of Chinese nationality, this application is the first Chinese visa application after naturalization in a foreign country, please upload the bio-page of the Chinese passport and naturalization certificate."
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "If the applicant's name has been changed, and it is the first time to apply for a Chinese visa after the name change, please upload the name change document."
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "For the visa application by a minor of Chinese origin born in the US, please follow the guidance"
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "If the applicant was of Chinese nationality, the latest Chinese passport is required for submission."
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "Other original documents that the consular officials asked to be submitted on-site."
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "Tourist visa applicants within the United States will no longer be required to submit round-trip air ticket booking record, proof of hotel reservation, itinerary or invitation letter. Since visa applications are processed on a case-by-case basis, please refer to the Chinese Embassy and Consulates-General in the United States for specifics."
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Application documents for US-resident ordinary tourism only; conditional former-national/minor/name-change cases retained. This application waiver is not an entry-document exemption.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "required_documents",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)"
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission."
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Passport remaining validity must be more than 6 months with at least 2 blank visa pages"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "The Proof of Residence (e.g., driver’s license, utility bill, bank bill)"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "The latest Chinese visa or the Chinese residence permit"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Passport original used for visa application"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Application info-page showing “ Passport to be submitted ” status and the barcode of the application form"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Old passport containing previous Chinese visa or residence permit which is still within validity"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "If the applicant was of Chinese nationality, this application is the first Chinese visa application after naturalization in a foreign country, please upload the bio-page of the Chinese passport and naturalization certificate."
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "If the applicant's name has been changed, and it is the first time to apply for a Chinese visa after the name change, please upload the name change document."
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "For the visa application by a minor of Chinese origin born in the US, please follow the guidance"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "If the applicant was of Chinese nationality, the latest Chinese passport is required for submission."
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Other original documents that the consular officials asked to be submitted on-site."
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Tourist visa applicants within the United States will no longer be required to submit round-trip air ticket booking record, proof of hotel reservation, itinerary or invitation letter. Since visa applications are processed on a case-by-case basis, please refer to the Chinese Embassy and Consulates-General in the United States for specifics."
+              }
+            ]
+          }
+        },
+        "application_channel": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)",
+          "additional_quotes": [
+            "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission.",
+            "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site."
+          ],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Initial New COVA filing is online; physical passport/original submission follows preliminary approval at the competent Chinese embassy/consulate in the US.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "application_channel",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)"
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission."
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site."
+              }
+            ]
+          }
+        },
+        "application_channel_detail": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)",
+          "additional_quotes": [
+            "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission.",
+            "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site.",
+            "According to relevant regulations, applicants are not required to visit in person for fingerprint collection. However, based on the specifics of each case, consular officers may require the applicant to appear in person for an interview. Please follow the instructions of the consular officers.",
+            "The Chinese Embassy does not provide mailing services for visa application."
+          ],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "US mission filing sequence; no mandatory agency or CVASC-only requirement. No-mail statement is explicitly Washington-only. Interview and further documents remain conditional.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "application_channel_detail",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)"
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission."
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site."
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "According to relevant regulations, applicants are not required to visit in person for fingerprint collection. However, based on the specifics of each case, consular officers may require the applicant to appear in person for an interview. Please follow the instructions of the consular officers."
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "The Chinese Embassy does not provide mailing services for visa application."
+              }
+            ]
+          }
+        },
+        "official_portal_url": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)",
+          "additional_quotes": [],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Exact New COVA address linked by current Chinese mission instructions; a filing portal, not an electronic visa guarantee.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "official_portal_url",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)"
+              }
+            ]
+          }
+        },
+        "route_workflow_type": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site.",
+          "additional_quotes": [],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Online preliminary filing followed by competent embassy/consulate passport submission; avoids the obsolete CVASC workflow label.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "route_workflow_type",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site."
+              }
+            ]
+          }
+        },
+        "forms": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)",
+          "additional_quotes": [],
+          "supporting_evidence": [
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "Application info-page showing “ Passport to be submitted ” status and the barcode of the application form"
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Actual application forms; no appointment confirmation requirement is introduced.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "forms",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Application info-page showing “ Passport to be submitted ” status and the barcode of the application form"
+              }
+            ]
+          }
+        },
+        "appointment_required": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site.",
+          "additional_quotes": [],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "US embassy/consulates walk-in passport submission after online preliminary approval. Does not remove a case-specific interview request.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "appointment_required",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site."
+              }
+            ]
+          }
+        },
+        "biometrics_required": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "According to relevant regulations, applicants are not required to visit in person for fingerprint collection. However, based on the specifics of each case, consular officers may require the applicant to appear in person for an interview. Please follow the instructions of the consular officers.",
+          "additional_quotes": [],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Routine personal attendance for visa-application fingerprint collection is not required under the US mission FAQ. This says nothing about border biometrics.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "biometrics_required",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "According to relevant regulations, applicants are not required to visit in person for fingerprint collection. However, based on the specifics of each case, consular officers may require the applicant to appear in person for an interview. Please follow the instructions of the consular officers."
+              }
+            ]
+          }
+        },
+        "interview_required": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "An in-person interview is conditional on a consular request, not unconditionally required or unconditionally exempt; the reviewed application detail retains the exact condition."
+        },
+        "photo_requirements": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "online2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712388.htm",
+          "quote": "When uploading your photo, the system supports editing the photo using dragging and cropping tools and automatically determines whether the photo meets the requirements or not. If you fail to pass the check after multiple uploads, you may still continue filling out other sections and do remember to bring a standard ID photo when you submit your passport to the Embassy/Consulate-General.",
+          "additional_quotes": [],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Current portal instruction only; unsupported numerical photo dimensions are not retained as verified requirements.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "photo_requirements",
+            "evidence": [
+              {
+                "source_id": "online2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712388.htm",
+                "quote": "When uploading your photo, the system supports editing the photo using dragging and cropping tools and automatically determines whether the photo meets the requirements or not. If you fail to pass the check after multiple uploads, you may still continue filling out other sections and do remember to bring a standard ID photo when you submit your passport to the Embassy/Consulate-General."
+              }
+            ]
+          }
+        },
+        "processing_time": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "application2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+          "quote": "Regular service: 4 business days",
+          "additional_quotes": [
+            "Express service: 3 business days (urgent situation)",
+            "The above processing time is average and for reference only and is calculated from the date of passport submission. Some applications may require longer processing time that a pick-up date cannot be confirmed until notified by the Visa Office."
+          ],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Washington average and submission clock only; no nationwide minimum or guaranteed deadline.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "processing_time",
+            "evidence": [
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Regular service: 4 business days"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Express service: 3 business days (urgent situation)"
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "The above processing time is average and for reference only and is calculated from the date of passport submission. Some applications may require longer processing time that a pick-up date cannot be confirmed until notified by the Visa Office."
+              }
+            ]
+          }
+        },
+        "account_registration_steps": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)",
+          "additional_quotes": [
+            "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission."
+          ],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Initial official account and jurisdiction selection only.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "account_registration_steps",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)"
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission."
+              }
+            ]
+          }
+        },
+        "submission_process": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)",
+          "additional_quotes": [
+            "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission.",
+            "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site.",
+            "According to relevant regulations, applicants are not required to visit in person for fingerprint collection. However, based on the specifics of each case, consular officers may require the applicant to appear in person for an interview. Please follow the instructions of the consular officers."
+          ],
+          "supporting_evidence": [
+            {
+              "source_id": "online2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712388.htm",
+              "quote": "Please modify and supplement your application materials according to the Embassy or Consulate's feedback to avoid delays in the review process due to failure to provide supplementary materials in a timely manner."
+            },
+            {
+              "source_id": "application2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+              "quote": "The pick-up form issued by the staff of the Embassy will indicate the earliest estimated date for pick-up. Please check your online application status on or after that date. When the status shows “Passport to be collected”"
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Reviewed ordered application stages. Washington-only collection qualifier does not prescribe other consulates’ collection methods.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "submission_process",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "I. Signing up and Logging into Your Account. Go to http://consular.mfa.gov.cn/VISA/ (click to redirect)"
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission."
+              },
+              {
+                "source_id": "online2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712388.htm",
+                "quote": "Please modify and supplement your application materials according to the Embassy or Consulate's feedback to avoid delays in the review process due to failure to provide supplementary materials in a timely manner."
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "The Chinese Embassy and Consulates-General in the U.S. provide walk-in visa application services. After online preliminary review approved (with the application status of “Passport to be submitted” ), the applicant or an agent can go to the corresponding Embassy or Consulate-General to submit the passport, a printed copy of the application information page with the barcode, and certain original documents requiring submitted on-site."
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "According to relevant regulations, applicants are not required to visit in person for fingerprint collection. However, based on the specifics of each case, consular officers may require the applicant to appear in person for an interview. Please follow the instructions of the consular officers."
+              },
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "The pick-up form issued by the staff of the Embassy will indicate the earliest estimated date for pick-up. Please check your online application status on or after that date. When the status shows “Passport to be collected”"
+              }
+            ]
+          }
+        },
+        "payment_process": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "application2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+          "quote": "Credit card (Master or Visa card only), money order or cashier's check are accepted for on-site pick-up.",
+          "additional_quotes": [],
+          "supporting_evidence": [
+            {
+              "source_id": "faq2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+              "quote": "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission."
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Washington payment instruments at pickup only; no CVASC, mail-in payment or nationwide payment-method guarantee.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "payment_process",
+            "evidence": [
+              {
+                "source_id": "application2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+                "quote": "Credit card (Master or Visa card only), money order or cashier's check are accepted for on-site pick-up."
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "II. Filling out the Form and Uploading Materials. Please refer to the consular jurisdiction of Chinese Embassy and Consulates-General in the United States ( click to view ) and select corresponding Embassy/Consulate-General for your submission."
+              }
+            ]
+          }
+        },
+        "health_requirements": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "The old six-day yellow-fever lookback is not supported by the reviewed current US State entry guidance. Health requirements need a separate fully scoped review; this is unknown, not a vaccination exemption."
+        },
+        "onward_travel_evidence": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "The reviewed US L-visa application documents do not establish a universal independent border-evidence requirement for this field. Application booking waivers do not imply an entry exemption."
+        },
+        "accommodation_evidence": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "The reviewed US L-visa application documents do not establish a universal independent border-evidence requirement for this field. Application booking waivers do not imply an entry exemption."
+        },
+        "financial_evidence": {
+          "status": "unknown",
+          "verifier": "ai",
+          "reason": "The reviewed US L-visa application documents do not establish a universal independent border-evidence requirement for this field. Application booking waivers do not imply an entry exemption."
+        },
+        "arrival_card": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "arrival-card2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+          "quote": "Effective November 20, 2025, foreign nationals may fill in the relevant entry information online before coming to China through the official website and government service platform of the National Immigration Administration (NIA), the “NIA 12367” app and WeChat/Alipay mini program, or by scanning the QR code via mobile phone.",
+          "additional_quotes": [
+            "Foreigners who cannot fill in the information online in advance may complete the process upon arriving at the immigration inspection site at Chinese ports of entry by scanning the QR code via mobile phone, using the smart devices on site, or filling out a paper-based Arrival Card.",
+            "Holders of a valid Foreign Permanent Resident ID Card of the People’s Republic of China",
+            "Holders of a valid Mainland Travel Permit for Hong Kong and Macao Residents (non-Chinese Citizens)",
+            "Holders of a group visa or those eligible for group visa-free entry",
+            "Passengers in 24-hour direct transit who stay within the designated area of the port",
+            "Cruise passengers entering and departing on the same vessel",
+            "Travelers entering through the E-channel",
+            "Foreign crew members of exit-entry transport vehicles"
+          ],
+          "supporting_evidence": [],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Foreign individual entry default from20November2025 with all seven exemptions and on-arrival paper/electronic alternatives.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "arrival_card",
+            "evidence": [
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Effective November 20, 2025, foreign nationals may fill in the relevant entry information online before coming to China through the official website and government service platform of the National Immigration Administration (NIA), the “NIA 12367” app and WeChat/Alipay mini program, or by scanning the QR code via mobile phone."
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Foreigners who cannot fill in the information online in advance may complete the process upon arriving at the immigration inspection site at Chinese ports of entry by scanning the QR code via mobile phone, using the smart devices on site, or filling out a paper-based Arrival Card."
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Holders of a valid Foreign Permanent Resident ID Card of the People’s Republic of China"
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Holders of a valid Mainland Travel Permit for Hong Kong and Macao Residents (non-Chinese Citizens)"
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Holders of a group visa or those eligible for group visa-free entry"
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Passengers in 24-hour direct transit who stay within the designated area of the port"
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Cruise passengers entering and departing on the same vessel"
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Travelers entering through the E-channel"
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Foreign crew members of exit-entry transport vehicles"
+              }
+            ]
+          }
+        },
+        "entry_requirements": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "nia_entry_law",
+          "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+          "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law.",
+          "additional_quotes": [],
+          "supporting_evidence": [
+            {
+              "source_id": "faq2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+              "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+            },
+            {
+              "source_id": "us_state_entry",
+              "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+              "quote": "Your passport must be valid at least 6 months beyond your date of arrival."
+            },
+            {
+              "source_id": "us_state_entry",
+              "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+              "quote": "Your passport must have a minimum of 2 blank pages to enter."
+            },
+            {
+              "source_id": "arrival-card2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+              "quote": "Effective November 20, 2025, foreign nationals may fill in the relevant entry information online before coming to China through the official website and government service platform of the National Immigration Administration (NIA), the “NIA 12367” app and WeChat/Alipay mini program, or by scanning the QR code via mobile phone."
+            },
+            {
+              "source_id": "arrival-card2025",
+              "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+              "quote": "Foreigners who cannot fill in the information online in advance may complete the process upon arriving at the immigration inspection site at Chinese ports of entry by scanning the QR code via mobile phone, using the smart devices on site, or filling out a paper-based Arrival Card."
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Visa entry, actual grant and arrival-card requirements; application-document waiver is not extended to border entry.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "entry_requirements",
+            "evidence": [
+              {
+                "source_id": "nia_entry_law",
+                "source_url": "https://en.nia.gov.cn/n147418/n147458/c155978/content.html",
+                "quote": "Article 15 In order to entering China, foreigners shall apply to the visa-issuing authorities stationed abroad for a visa, except as otherwise provided for in this Law."
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+              },
+              {
+                "source_id": "us_state_entry",
+                "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                "quote": "Your passport must be valid at least 6 months beyond your date of arrival."
+              },
+              {
+                "source_id": "us_state_entry",
+                "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                "quote": "Your passport must have a minimum of 2 blank pages to enter."
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Effective November 20, 2025, foreign nationals may fill in the relevant entry information online before coming to China through the official website and government service platform of the National Immigration Administration (NIA), the “NIA 12367” app and WeChat/Alipay mini program, or by scanning the QR code via mobile phone."
+              },
+              {
+                "source_id": "arrival-card2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202512/t20251203_11765346.htm",
+                "quote": "Foreigners who cannot fill in the information online in advance may complete the process upon arriving at the immigration inspection site at Chinese ports of entry by scanning the QR code via mobile phone, using the smart devices on site, or filling out a paper-based Arrival Card."
+              }
+            ]
+          }
+        },
+        "exceptions": {
+          "status": "reviewed",
+          "verifier": "ai",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "source_id": "faq2025",
+          "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+          "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision.",
+          "additional_quotes": [
+            "Please check whether there is any change of Name, Gender, Date of Birth and Nationality between the new and expired passports. If the information above has not changed and the purpose of your upcoming trip to China is consistent with the visa type, a new visa is not required. Please travel to China with both passports."
+          ],
+          "supporting_evidence": [
+            {
+              "source_id": "us_state_entry",
+              "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+              "quote": "Most U.S. citizens may apply for a 10-year multiple-entry tourist visa."
+            },
+            {
+              "source_id": "nia-transit2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+              "quote": "Nationals of these countries, who need to transit through China to third countries or regions, may enter visa-free through any of the designated 65 open exit-entry ports in 24 provinces, autonomous regions and municipalities directly under the Central Government and stay in the permitted areas for no more than 10 days, provided that they hold ordinary passports and onward tickets with confirmed seats and departure dates."
+            },
+            {
+              "source_id": "nia-transit2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+              "quote": "North America (2 countries): Canada, United States"
+            },
+            {
+              "source_id": "nia-transit2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+              "quote": "Activities such as work, study, or news reporting still require prior approvals and appropriate visas."
+            },
+            {
+              "source_id": "nia-transit2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+              "quote": "Foreigners transiting through China to third countries or regions may stay in China for no more than 24 hours without a visa, provided that they hold valid international travel documents and onward international flight/ship/train tickets with confirmed seats, and will not leave the restricted areas of ports."
+            },
+            {
+              "source_id": "nia-transit2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+              "quote": "For any foreigner who does need to leave the designated restricted area, a temporary entry permit must be obtained first at the immigration inspection authority of the port concerned."
+            },
+            {
+              "source_id": "nia-regional2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+              "quote": "Foreign nationals holding ordinary passports from 61 countries may enter and stay within the administrative region of Hainan Province for a maximum of 30 days without a visa for short-term stays for purposes associated with tourism, business, visits, family visits, medical treatment, conferences and exhibitions, sports competitions, etc. The policy does not apply to those who intend to enter for working or studying."
+            },
+            {
+              "source_id": "nia-regional2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+              "quote": "The exit-entry ports for the foreign nationals concerned include all the open ports in Hainan."
+            },
+            {
+              "source_id": "nia-regional2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+              "quote": "the United Kingdom, the United States, Vietnam ."
+            },
+            {
+              "source_id": "nia-regional2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+              "quote": "Any foreign tourist group consisting of two or more individuals, which is organized and received by a travel agency registered in China, may enter China without a visa by a cruise ship via one of the cruise ports in the following 13 cities:"
+            },
+            {
+              "source_id": "nia-regional2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+              "quote": "All eligible foreign tourist groups shall continue their journey to the following scheduled ports and depart China with the same cruise ship as scheduled. The tourists concerned may stay in the Beijing and 11 coastal provinces, autonomous regions, and municipalities directly under the Central Government (namely Fujian, Guangdong, Guangxi, Hainan, Hebei, Jiangsu, Liaoning, Shandong, Shanghai, Tianjin, and Zhejiang) for a maximum of 15 days."
+            },
+            {
+              "source_id": "nia-regional2026",
+              "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+              "quote": "The stay period specified in any of the aforementioned policies is calculated from 0:00 on the day after the day of entry."
+            }
+          ],
+          "subject": {
+            "passport_nationality": "USA",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "note": "Only conditional transit/regional alternatives; no nationwide unconditional exemption. Ten-year language is a qualified application option. Date-of-midnight rule applies to regional exemptions, not inferred for240-hour transit.",
+          "verification_scope": {
+            "kind": "usa_china_tourism_exact_fields_20260910",
+            "field": "exceptions",
+            "evidence": [
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Whether to issue a visa, the type of visa, number of entries, validity and duration of each stay will be determined by consular officials. Consular officials will take the applicant's purpose of travel, the duration of stay and the supporting documents into comprehensive consideration and make the decision."
+              },
+              {
+                "source_id": "us_state_entry",
+                "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/china.html",
+                "quote": "Most U.S. citizens may apply for a 10-year multiple-entry tourist visa."
+              },
+              {
+                "source_id": "nia-transit2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+                "quote": "Nationals of these countries, who need to transit through China to third countries or regions, may enter visa-free through any of the designated 65 open exit-entry ports in 24 provinces, autonomous regions and municipalities directly under the Central Government and stay in the permitted areas for no more than 10 days, provided that they hold ordinary passports and onward tickets with confirmed seats and departure dates."
+              },
+              {
+                "source_id": "nia-transit2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+                "quote": "North America (2 countries): Canada, United States"
+              },
+              {
+                "source_id": "nia-transit2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+                "quote": "Activities such as work, study, or news reporting still require prior approvals and appropriate visas."
+              },
+              {
+                "source_id": "nia-transit2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+                "quote": "Foreigners transiting through China to third countries or regions may stay in China for no more than 24 hours without a visa, provided that they hold valid international travel documents and onward international flight/ship/train tickets with confirmed seats, and will not leave the restricted areas of ports."
+              },
+              {
+                "source_id": "nia-transit2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c183412/content.html",
+                "quote": "For any foreigner who does need to leave the designated restricted area, a temporary entry permit must be obtained first at the immigration inspection authority of the port concerned."
+              },
+              {
+                "source_id": "nia-regional2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+                "quote": "Foreign nationals holding ordinary passports from 61 countries may enter and stay within the administrative region of Hainan Province for a maximum of 30 days without a visa for short-term stays for purposes associated with tourism, business, visits, family visits, medical treatment, conferences and exhibitions, sports competitions, etc. The policy does not apply to those who intend to enter for working or studying."
+              },
+              {
+                "source_id": "nia-regional2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+                "quote": "The exit-entry ports for the foreign nationals concerned include all the open ports in Hainan."
+              },
+              {
+                "source_id": "nia-regional2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+                "quote": "the United Kingdom, the United States, Vietnam ."
+              },
+              {
+                "source_id": "nia-regional2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+                "quote": "Any foreign tourist group consisting of two or more individuals, which is organized and received by a travel agency registered in China, may enter China without a visa by a cruise ship via one of the cruise ports in the following 13 cities:"
+              },
+              {
+                "source_id": "nia-regional2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+                "quote": "All eligible foreign tourist groups shall continue their journey to the following scheduled ports and depart China with the same cruise ship as scheduled. The tourists concerned may stay in the Beijing and 11 coastal provinces, autonomous regions, and municipalities directly under the Central Government (namely Fujian, Guangdong, Guangxi, Hainan, Hebei, Jiangsu, Liaoning, Shandong, Shanghai, Tianjin, and Zhejiang) for a maximum of 15 days."
+              },
+              {
+                "source_id": "nia-regional2026",
+                "source_url": "https://en.nia.gov.cn/n147418/n147463/c180637/content.html",
+                "quote": "The stay period specified in any of the aforementioned policies is calculated from 0:00 on the day after the day of entry."
+              },
+              {
+                "source_id": "faq2025",
+                "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202309/t20230919_11144908.htm",
+                "quote": "Please check whether there is any change of Name, Gender, Date of Birth and Nationality between the new and expired passports. If the information above has not changed and the purpose of your upcoming trip to China is consistent with the visa type, a new visa is not required. Please travel to China with both passports."
+              }
+            ]
+          }
+        }
+      },
+      "note": "FEE IS WRONG AND OVERSTATED BY $45. The Chinese Embassy in Washington's current notice sets a reduced fee of US$140 for US citizens, in force until 31 December 2026 (the un-reduced rate is $185). Crucially the $140 is a FLAT rate for US citizens regardless of the number of entries - the per-entry la | quote: To facilitate people-to-people exchanges, the Chinese Embassy and Consulates-Gen | Adjudic",
+      "route": {
+        "nationality": "USA",
+        "destination": "CHN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "usa-chn-current-tourism-20260910",
+      "partial_review": true,
+      "field_review_scope": "existing_us_tourism_fields_and_individual_grant_terms_only",
+      "applicability": {
+        "lawful_country_of_residence": "USA",
+        "fields": [
+          "required_documents",
+          "application_channel",
+          "application_channel_detail",
+          "route_workflow_type",
+          "forms",
+          "appointment_required",
+          "biometrics_required",
+          "interview_required",
+          "photo_requirements",
+          "processing_time",
+          "account_registration_steps",
+          "submission_process",
+          "payment_process",
+          "government_fee"
+        ]
+      }
+    }
+  ],
+  "status": "detached; exact six-layer preflight required"
+}

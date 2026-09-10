@@ -23,7 +23,7 @@ ALLOWED_FIELDS = frozenset({'health_requirements', 'passport_validity', 'passpor
 RECORD_COLUMNS_MAY_CHANGE = frozenset({'entry_requirements', 'special_conditions', 'required_documents',
                                        'completeness', 'field_status'})
 ARRIVAL_KEYS = frozenset({'required', 'name', 'url', 'submission_window', 'notes'})
-_SIX_MONTHS = r'six \(?6?\)? ?months|6 months|6개월|6 bulan|six bulan'
+_SIX_MONTHS = r'six \(?6?\)?[ -]?months?|(?<!\d)6[ -]?months?|6개월|6 bulan|six bulan|enam bulan'
 _VALID_PASSPORT = r'shall be valid|valid passport|passport[^.]{0,40}\bvalid\b|유효한 여권|유효기간|passport[^.]{0,40}(?:valid|validity)'
 _NUMBER_WORDS = {1: 'one', 2: 'two', 3: 'three', 6: 'six', 12: 'twelve'}
 
@@ -52,7 +52,7 @@ def _check_value(field, value, proof):
             raise PatchRejected('passport_validity: the quotes state neither a months rule nor a validity-at-entry rule')
         if re.search(r'\bmore than\b', value, re.I) and not re.search(r'\bmore than\b', passages, re.I):
             raise PatchRejected('passport_validity: the value is stricter than its quote')
-        if re.search(r'6 months|six months', value, re.I) and not six:
+        if re.search(r'(?<!\d)6[ -]?months?|six[ -]months?', value, re.I) and not six:
             raise PatchRejected('passport_validity: the value states six months but no quote does')
     elif field == 'passport_validity_requirement':
         from app.passport_validity import passport_validity_rule_errors
@@ -64,8 +64,11 @@ def _check_value(field, value, proof):
                 raise PatchRejected('passport_validity_requirement: the quotes do not state a validity-at-entry or through-stay rule')
         else:
             months = value.get('months')
-            if not re.search(rf'\b{months}\b|{_NUMBER_WORDS.get(months, "")}', passages, re.I) or not re.search(r'months?|개월|bulan', passages, re.I):
-                raise PatchRejected('passport_validity_requirement: the months figure is not on the quoted page')
+            word = _NUMBER_WORDS.get(months)
+            unit = r'[ -]?(?:months?|개월|bulan)'
+            figure = rf'(?<![\d.]){months}(?![\d.]){unit}' + (rf'|\b{word}{unit}' if word else '')
+            if not re.search(figure, passages, re.I):
+                raise PatchRejected('passport_validity_requirement: the months figure is not on the quoted page next to a months word')
     elif field == 'arrival_card':
         if not isinstance(value, dict) or set(value) != ARRIVAL_KEYS or value['required'] is not True:
             raise PatchRejected('arrival_card: expected a required filing with name, url, window and notes')

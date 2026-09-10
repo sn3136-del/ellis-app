@@ -1871,7 +1871,11 @@ def records_for_route(route: dict, guidance: dict,
         _set_stay(row, stay_text, p.get("max_stay_days"))
         # Definitional fallback: "single-entry" / "multiple-entry" in the
         # product's own name states the entries field.
-        row["entries"] = _entries(p.get("entry")) or _entries(p.get("type"))
+        entry_proof = (p.get("field_provenance") or {}).get("entry") if isinstance(p.get("field_provenance"), dict) else None
+        explicit_unknown_entry = ("entry" in p and p["entry"] is None
+                                  and isinstance(entry_proof, dict)
+                                  and entry_proof.get("status") == "unknown")
+        row["entries"] = None if explicit_unknown_entry else (_entries(p.get("entry")) or _entries(p.get("type")))
         amt, cur = _fee(p, product_g, route)
         row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
         row["visa_fee_qualifier"] = _fee_qualifier(p, product_g)

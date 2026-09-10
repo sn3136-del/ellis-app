@@ -34,11 +34,20 @@ def test_six_layer_drift_rejects(field):
         c.validate(SPEC, layers)
 
 
-@pytest.mark.parametrize('mode', ['months_rule_without_figure', 'unknown_kind', 'six_months_in_text_without_quote', 'entry_rule_without_validity_quote'])
+@pytest.mark.parametrize('mode', ['months_rule_without_figure', 'months_rule_nine_on_six_month_quotes', 'months_rule_three_from_a_date', 'months_rule_twenty_four', 'unknown_kind', 'six_months_in_text_without_quote', 'hyphenated_six_month_text_without_quote', 'entry_rule_without_validity_quote'])
 def test_passport_rules_are_bound_to_their_quotes(mode):
     spec = deepcopy(SPEC); rule, text = spec['routes'][0]['changes']
     if mode == 'months_rule_without_figure':
         rule['new'] = {'kind': 'months_after_arrival', 'months': 3}
+    elif mode == 'months_rule_nine_on_six_month_quotes':
+        rule['new'] = {'kind': 'months_after_arrival', 'months': 9}; rule['proof']['evidence'] = deepcopy(text['proof']['evidence'])
+    elif mode == 'months_rule_three_from_a_date':
+        rule['new'] = {'kind': 'months_after_arrival', 'months': 3}; rule['proof']['evidence'] = deepcopy(text['proof']['evidence'])
+    elif mode == 'months_rule_twenty_four':
+        rule['new'] = {'kind': 'months_after_departure', 'months': 24}; rule['proof']['evidence'] = deepcopy(text['proof']['evidence'])
+    elif mode == 'hyphenated_six_month_text_without_quote':
+        text['new'] = 'At least a 6-month remaining validity on arrival'
+        text['proof']['evidence'] = [e for e in text['proof']['evidence'] if 'mofa.go.kr' not in e['source_url']]
     elif mode == 'unknown_kind':
         rule['new'] = {'kind': 'valid_for_duration_of_stay', 'months': None}
     elif mode == 'six_months_in_text_without_quote':
@@ -48,3 +57,10 @@ def test_passport_rules_are_bound_to_their_quotes(mode):
         rule['proof']['evidence'][0]['quote'] = '작성일 2021.06.29 조회수 19396'
     with pytest.raises(PatchRejected):
         c.build_manifest(spec, L)
+
+
+def test_months_rule_binds_to_a_figure_next_to_a_months_word():
+    spec = deepcopy(SPEC); rule, text = spec['routes'][0]['changes']
+    rule['new'] = {'kind': 'months_after_arrival', 'months': 6}
+    rule['proof']['evidence'] = deepcopy(text['proof']['evidence'])  # the Jakarta quotes say 6개월 and 6 bulan
+    c._check_value('passport_validity_requirement', rule['new'], rule['proof'])

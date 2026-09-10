@@ -864,8 +864,13 @@ def application_instructions(g: dict, *, route=None, source_verified=None) -> di
     if g.get('disposition') == 'VISA_EXEMPT' and g.get('application_channel') in {'none','not_required',None}:
         out.update(application_steps_status='not_applicable',application_steps_source_url=None)
         return out
+    from .reviewed_usa_china_workflow import steps as reviewed_china_steps
+    china = reviewed_china_steps(g, route, source_verified)
     ordered = ordered_instructions(g, route, source_verified)
-    if ordered:
+    if china:
+        out.update(apply_steps=[s["text"] for s in china], application_steps_status="source_ordered",
+                   application_steps_source_url=china[0]["evidence"][0]["source_url"])
+    elif ordered:
         out.update(apply_steps=[step['text'] for step in ordered],
                    application_steps_status='source_ordered',
                    application_steps_source_url=ordered[0]['evidence'][0]['source_url'])
@@ -951,6 +956,13 @@ def derive_workflow_plan(g: dict, *, route=None, source_verified=None) -> list[d
     Route-specific: only stages that apply to this route type appear.
     Reversible preparation only; irreversible steps carry the confirmation flag."""
     from .ordered_application_instructions import ordered_instructions
+    from .reviewed_usa_china_workflow import steps as reviewed_china_steps
+    china = reviewed_china_steps(g, route, source_verified)
+    if china:
+        return [dict(step='reviewed_application_instruction', instruction=s['text'],
+                     source_step_id=s['id'], after=s['after'], source_evidence=s['evidence'],
+                     workflow_type='new_cova_online_then_consular_submission', manual_only=True,
+                     reversible=False, requires_applicant_confirmation=True) for s in china]
     ordered = ordered_instructions(g, route, source_verified)
     if ordered:
         names = {'apply_online':'submission', 'book_appointment':'appointment_booking',
