@@ -41,12 +41,14 @@ records with all 25 non-null / all records. They exclude no blanks. The separate
 operational applicable 20 metric uses the configured 20 required fields and
 excludes not-applicable/source-confirmed not-published cells from its denominator.
 
-On the 2026-09-10 02:29 UTC snapshot, documented 25 completeness is 29,093 /
-35,500 = 81.9521%, including 3,225 disposition cells; 0 of 1,420 records are
-complete across all 25. Operational applicable 20 completeness is 87.32%; literal
-non-null25 cells are 72.9718%. None is a claim of 100% completion or accuracy.
-The documented-state result was recomputed with the follow-up metric code from
-the recorded snapshot, not inferred from the older response's summary.
+Current counts belong in the dated release audit, bound to the exact source
+commit and immutable snapshot SHA. Recompute documented 25, operational
+applicable 20 and literal 25 non-null metrics from that snapshot. Do not reuse
+an earlier release's counters or infer policy accuracy from any percentage.
+The 18-origin by 17-destination matrix of 306 routes is a breadth sample only.
+Report the full inventory and the sample separately, including missing routes,
+held defaults, partial routes and held products; do not narrow the inventory
+denominator to make coverage reach 100%.
 The export splits item 5 into requirement and subcategory, producing 26 columns;
 the subcategory does not become a 26th contractual field. The offline acceptance
 auditor validates the exact dictionary and the API's declared complete row count.
@@ -74,9 +76,10 @@ be High. Accepted AI and human source checks use the same grade; authorship
 remains explicit in provenance. Missing evidence, field gaps, public edits,
 invalid provenance and disputes remain Low. A model's self-rating or an
 official URL alone is never verification. There is no current Medium output.
-Trip.com's written standard describes a three-level ladder; the configured
-binary display must not be described as an unchanged implementation of that
-ladder or evidence of contractual acceptance.
+The user explicitly requested High/Low and removal of Medium. Preserve that
+choice and AI/human attribution. Trip.com's supplied written standard uses a
+three-level ladder; the user-authorized display change does not establish that
+Trip.com accepted a contract amendment or this release.
 
 A fresh automated check can support a grade when historical human provenance
 is incomplete; it cannot retrospectively establish human verification.
@@ -106,7 +109,9 @@ period. Corrections require a quote present in the source and support for the
 exact field value. A number elsewhere on a page, another nationality's table
 row or an ETA eligibility page alone is insufficient proof. Ambiguous tables
 and unsupported claims remain for review. Shared authority rules check official
-domains and jurisdiction; commercial pages are not official verification.
+domains and jurisdiction. A commercial page alone is not official verification;
+a government-designated provider may support only the exact delegated
+application facts under the separate evidence contract described below.
 
 Overrides validate vocabulary and shapes. Fees/products need a verified
 verdict or detail. Invalid historical machinery is quarantined with diagnostics
@@ -174,3 +179,38 @@ An operator release cannot override a material contradiction, pending detail
 stage or active source dispute. Low-confidence display follows the configured
 hold policy, which production must keep enabled. Corrections and saved-case
 requirement updates are recorded for review.
+
+## Qualified stays, entry mode and checks
+
+The public product table prefers the product's explicit permitted_stay text.
+Numeric max_stay_days is a fallback only when explicit text is absent. Annual
+caps, calendar-month wording, discretionary grants and conditional stays must
+remain visible; a yearly limit cannot become a per-visit allowance. Never fill a
+product from another product's stay.
+
+Legacy biometrics, interview and appointment booleans do not identify whether
+the fact concerns application processing or border entry. The public client
+shows these under Checks and appointments with the requirement/stage unconfirmed,
+rather than claiming that a bare false value exempts border checks. This display
+change does not verify a fact, change stored values or improve completeness.
+An explicit stage contract and scoped evidence are needed for a stronger claim.
+
+Arrival forms, health declarations and customs declarations keep their actual
+mode and timing scope. Mandatory before immigration, requested before boarding
+and an allowed advance submission window are different facts. Silence about a
+land or sea procedure is not evidence that it is exempt.
+
+## Delegated sources and warning reconciliation
+
+A government-designated service provider may support only the exact delegated
+application facts, with the government backlink and matching product retained.
+It does not certify independent eligibility or visa verdicts. For HKSAR mainland
+travel permits, the Chinese-citizen Home Return Permit and the separate permit
+for non-Chinese Hong Kong permanent residents have different eligibility; do
+not combine their stays, fees or validity.
+
+A stale warning may be reconciled only against the exact reviewed current
+facts, provenance and source scope. Remove only the reviewed obsolete warning;
+retain new issues, unrelated warnings, pending fields and prior verification
+dates. A linked official page alone, a successful HTTP request or a consular
+footer does not prove every field or contradict an exemption's procedure.
