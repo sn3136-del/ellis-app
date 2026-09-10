@@ -40,6 +40,8 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
         "no visa_products were listed" not in issue
         for issue in (out.get("contradictions") or [])))
     low = any(r.get("_evidence_low", r.get("confidence_level") == "Low") for r in rows)
+    from .reviewed_condition_resolution import preserve_unresolved_pending
+    out = preserve_unresolved_pending(route, out, db)
     pending = bool(out.get("detail_pending"))
     if low:
         from .publication_scope import scoped_exemption, scoped_required_evisa, project_reader

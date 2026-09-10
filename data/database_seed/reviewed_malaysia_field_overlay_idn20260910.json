@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "review_id": "idn-mys-entry-fields-20260910",
+  "entries": [
+    {
+      "fields": {
+        "disposition": "VISA_EXEMPT",
+        "required_documents": [
+          "Passport valid for six months or more from entry into Malaysia",
+          "Valid return ticket or onward ticket to the next destination country",
+          "Proof of sufficient funds for the stay",
+          "Proof of accommodation booking or confirmed lodging for the full stay"
+        ],
+        "onward_travel_evidence": "A valid return ticket to the home country or an onward ticket to the next destination country is required.",
+        "accommodation_evidence": "Proof of accommodation booking or confirmed lodging arrangements for the full stay is required.",
+        "financial_evidence": "Proof of sufficient funds for the stay is required.",
+        "insurance_required": false,
+        "exceptions": [
+          "Visa-free entry is for tourism/social visits only; employment or paid work is prohibited.",
+          "Extensions of the Short Term Social Visit Pass may be considered for special circumstances such as illness, accident or war in the home country. Supporting evidence and a confirmed ticket to the home country or a third country are required."
+        ]
+      },
+      "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+      "verified_at": "2026-08-30",
+      "verified_by": "Ellis source audit (wave-2 research)",
+      "verifier": "ai",
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+          "verified_at": "2026-08-30",
+          "verified_by": "Ellis source audit (wave-2 research)",
+          "verifier": "ai",
+          "note": "Wave-2 completeness research vs official sources. Quote: \"Visa is not required for a stay of less than one (1) month for ASEAN nationals except Myanmar. Visas required for duration of stay exceeds (\""
+        },
+        "required_documents": {
+          "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of the exact ordinary Indonesian tourism entry field. No new verdict, product, policy date, grade or freshness claim.",
+          "source_id": "entry_pdf",
+          "supporting_evidence": [
+            {
+              "source_id": "entry_tourists",
+              "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+              "quote": "Possess a valid return ticket to their home country or an onward ticket to a next destination country."
+            },
+            {
+              "source_id": "entry_tourists",
+              "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+              "quote": "Possess proof of accommodation booking or confirmed lodging arrangements for the duration of the stay in Malaysia."
+            }
+          ],
+          "additional_quotes": [
+            "Every visitor is also required to prove the financial ability to declare himself in Malaysia along with a fixed return ticket to return to his home country or to another country."
+          ],
+          "status": "reviewed",
+          "verification_scope": "malaysia_entry_fields_only",
+          "subject": {
+            "passport_nationality": "IDN",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Documents must be valid for six months or more from the date of entry into Malaysia."
+        },
+        "onward_travel_evidence": {
+          "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of the exact ordinary Indonesian tourism entry field. No new verdict, product, policy date, grade or freshness claim.",
+          "source_id": "entry_tourists",
+          "status": "reviewed",
+          "verification_scope": "malaysia_entry_fields_only",
+          "subject": {
+            "passport_nationality": "IDN",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Possess a valid return ticket to their home country or an onward ticket to a next destination country."
+        },
+        "accommodation_evidence": {
+          "source_url": "https://www.motac.gov.my/en/pengumuman/entry-requirements-for-foreign-tourists-for-immigration-inspection-at-international-entry-points/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of the exact ordinary Indonesian tourism entry field. No new verdict, product, policy date, grade or freshness claim.",
+          "source_id": "entry_tourists",
+          "status": "reviewed",
+          "verification_scope": "malaysia_entry_fields_only",
+          "subject": {
+            "passport_nationality": "IDN",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Possess proof of accommodation booking or confirmed lodging arrangements for the duration of the stay in Malaysia."
+        },
+        "financial_evidence": {
+          "source_url": "https://www.imi.gov.my/wp-content/uploads/2023/02/2023-CR-Portal-JIM-24022023-BI.pdf",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "AI review of the exact ordinary Indonesian tourism entry field. No new verdict, product, policy date, grade or freshness claim.",
+          "source_id": "entry_pdf",
+          "status": "reviewed",
+          "verification_scope": "malaysia_entry_fields_only",
+          "subject": {
+            "passport_nationality": "IDN",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Every visitor is also required to prove the financial ability to declare himself in Malaysia along with a fixed return ticket to return to his home country or to another country."
+        },
+        "insurance_required": {
+          "source_url": "https://www.tourism.gov.my/media/view/malaysia-relaxes-covid-19-testing-rules-travel-insurance-for-inbound-travellers",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Tourism Malaysia explicitly removed travel insurance as an entry prerequisite for foreigners from 1 May 2022. This tourism-only field review does not assert that employment, student, resident or activity-specific insurance is unnecessary. Older COVID testing measures on the same announcement are not imported.",
+          "source_id": "insurance",
+          "status": "reviewed",
+          "verification_scope": "malaysia_entry_fields_only",
+          "subject": {
+            "passport_nationality": "IDN",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Travel insurance will also not be a prerequisite for foreigners entering the country."
+        },
+        "exceptions": {
+          "source_url": "https://www.imi.gov.my/index.php/en/main-services/pass/visitor-pass/social-visit-pass/short-term-social-visit-pass/",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Only the replacement special-circumstances extension sentence was reviewed. The existing first purpose restriction is retained without new verification.",
+          "source_id": "extension",
+          "status": "partial",
+          "verification_scope": "changed_elements_only",
+          "verified_elements": [
+            "Extensions of the Short Term Social Visit Pass may be considered for special circumstances such as illness, accident or war in the home country. Supporting evidence and a confirmed ticket to the home country or a third country are required."
+          ],
+          "retained_unverified_elements": [
+            "Visa-free entry is for tourism/social visits only; employment or paid work is prohibited."
+          ],
+          "subject": {
+            "passport_nationality": "IDN",
+            "destination_country": "MYS",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "An Extension may be given on Special consideration e.g. due to illness, accident, war in home country etc. The visitor must furnish evidence, and also present a confirmed return ticket to their home country or third country."
+        }
+      },
+      "note": "Wave-2 completeness research vs official sources. Quote: \"Visa is not required for a stay of less than one (1) month for ASEAN nationals except Myanmar. Visas required for duration of stay exceeds (\"",
+      "route": {
+        "nationality": "IDN",
+        "destination": "MYS",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "idn-mys-entry-fields-20260910",
+      "partial_review": true
+    }
+  ],
+  "status": "detached; exact-layer preflight required"
+}

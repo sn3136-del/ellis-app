@@ -79,12 +79,17 @@ OVERRIDABLE = frozenset({
     # only its synthesized entry_requirements text left these stale facts
     # visible beneath the corrected record.
     "passport_validity", "passport_validity_requirement",
+    "insurance_required",
     "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
     "biometrics_required", "appointment_required", "interview_required",
     # A mandatory pre-arrival filing (Malaysia's MDAC, the SG Arrival Card) is
     # the difference between boarding and not boarding, so a verified fact
     # must be able to correct it.
     "arrival_card",
+    # These existing normalized workflow fields also render on the traveller
+    # page; a scoped correction must reach them as well as the channel label.
+    "account_registration_steps", "payment_process", "submission_process",
+    "photo_requirements",
     # Which mission handles this applicant. Verified jurisdiction rules were
     # being written and then silently dropped here, which is why that column
     # stayed empty on every record while the facts sat in the seed.
@@ -129,9 +134,11 @@ _REVIEWER_VOICE = (
 _CUSTOMER_TEXT = ("exceptions", "application_channel_detail", "requirement_detail",
                   "permitted_stay", "processing_time", "required_documents",
                   "entry_requirements", "consular_jurisdiction", "passport_validity",
-                  "onward_travel_evidence", "accommodation_evidence", "financial_evidence")
+                  "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
+                  "account_registration_steps", "payment_process", "submission_process",
+                  "photo_requirements")
 
-_BOOLEAN_FIELDS = ("biometrics_required", "appointment_required", "interview_required")
+_BOOLEAN_FIELDS = ("biometrics_required", "appointment_required", "interview_required", "insurance_required")
 
 
 def _clean_corroborating(value):
@@ -375,6 +382,13 @@ def _field_errors(fields: dict) -> list[str]:
     for key in _BOOLEAN_FIELDS:
         if fields.get(key) is not None and not isinstance(fields[key], bool):
             errors.append(f"{key} must be a boolean or null")
+    for key in ("account_registration_steps", "payment_process", "submission_process"):
+        value = fields.get(key)
+        if value is not None and (not isinstance(value, list) or
+                                  any(not isinstance(step, str) for step in value)):
+            errors.append(f"{key} must be an array of strings or null")
+    if fields.get("photo_requirements") is not None and not isinstance(fields["photo_requirements"], str):
+        errors.append("photo_requirements must be a string or null")
     from ..passport_validity import passport_validity_rule_errors
     errors.extend(passport_validity_rule_errors(fields.get("passport_validity_requirement")))
     if verdict is not None and verdict not in DISPOSITIONS:
@@ -485,7 +499,9 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             for k in ("government_fee", "visa_products"):
                 if invalid_decision or unanchored or any(e.startswith(k) for e in errors):
                     clean.pop(k, None)
-            for k in _BOOLEAN_FIELDS + ("passport_validity_requirement",):
+            for k in _BOOLEAN_FIELDS + ("passport_validity_requirement",
+                                       "account_registration_steps", "payment_process",
+                                       "submission_process", "photo_requirements"):
                 if any(e.startswith(k) for e in errors):
                     clean.pop(k, None)
         for k in _URL_FIELDS:
@@ -1038,6 +1054,8 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     verdict_provenance = field_provenance.get("disposition") or _provenance(hit)
     provenance = dict(verdict_provenance, fields=sorted(fields),
                       field_provenance=field_provenance)
+    from .reviewed_condition_resolution import reconcile
+    merged = reconcile(route, merged, provenance)
     result, provenance = scheduled_policies.apply(merged, provenance, route)
     result = policy_intervals.annotate(annotate(result, route), provenance, route)
     return _finalize_guidance(result, provenance), provenance

@@ -916,12 +916,45 @@ def _tidy_step(step: str) -> str:
     return t[0].upper() + t[1:] if t else t
 
 
+def _australian_eta_app_workflow(g: dict) -> bool:
+    """The ETA601 information page is not an initial web filing portal.
+
+    This is workflow selection only, never a passport eligibility decision.
+    Keep other authorization products and genuine web filing flows separate.
+    """
+    from urllib.parse import urlsplit
+    if not isinstance(g, dict):
+        return False
+    try:
+        source = urlsplit(str(g.get("official_portal_url") or ""))
+    except ValueError:
+        return False
+    return (g.get("disposition") == "ELECTRONIC_AUTHORIZATION_REQUIRED"
+            and g.get("requirement_detail") == "eta_electronic_authorization"
+            and source.scheme == "https"
+            and source.netloc.lower() == "immi.homeaffairs.gov.au"
+            and source.path.rstrip("/") == "/visas/getting-a-visa/visa-listing/electronic-travel-authority-601"
+            and str(g.get("application_channel_detail") or "").startswith(
+                "Apply using the Australian ETA app,"))
+
+
 def canonical_steps(g: dict) -> list:
     """The 3-5 key steps for this answer, deduplicated and ordered.
 
     Deterministic: no model call. An unclassifiable step is kept only if
     there is room, so a route whose steps are all unusual still shows
     something rather than nothing."""
+    if _australian_eta_app_workflow(g):
+        # These source-ordered instructions distinguish initial app filing
+        # from a later requested ImmiAccount response. Generic keyword
+        # ranking promotes that conditional response to "create account"
+        # and truncates its boundaries. Keep the complete supplied text.
+        account = g.get("account_registration_steps") or []
+        submission = g.get("submission_process") or []
+        first = account[:1] if isinstance(account, list) else []
+        following = submission if isinstance(submission, list) else []
+        return list(dict.fromkeys(s.strip() for s in first + following
+                                  if isinstance(s, str) and s.strip()))[:_STAGE_MAX]
     raw = []
     for key in ("account_registration_steps", "payment_process",
                 "submission_process"):
@@ -1046,7 +1079,7 @@ def derive_workflow_plan(g: dict) -> list[dict]:
     else:
         steps.append({"step": "prepare_forms", "reversible": True,
                       "items": g.get("forms") or []})
-        if g.get("official_portal_url"):
+        if g.get("official_portal_url") and not _australian_eta_app_workflow(g):
             steps.append({"step": "generate_route_adapter", "reversible": True,
                           "portal": g.get("official_portal_url")})
             steps.append({"step": "account_registration", "reversible": False,

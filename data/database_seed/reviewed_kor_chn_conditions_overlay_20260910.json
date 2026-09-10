@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_overlay_conversion",
+  "review_id": "kor-chn-entry-conditions-20260910",
+  "review_scope": "kor_chn_entry_conditions_only",
+  "entries": [
+    {
+      "fields": {
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "conditional_visa_free",
+        "visa_category": "Visa-free entry (unilateral policy)",
+        "permitted_stay": "Up to 30 days per entry, counted from the day after entry; multiple entries allowed. Policy in force until 31 December 2026.",
+        "permitted_stay_days": 30,
+        "application_channel": "not_required",
+        "application_channel_detail": "Eligible ordinary-passport visitors do not need to make advance visa-waiver declarations to Chinese embassies or consulates. Border examination and approval still apply.",
+        "government_fee": {
+          "amount": 0,
+          "currency": null
+        },
+        "official_portal_url": null,
+        "visa_products": [],
+        "exceptions": [
+          "Ordinary passports only: holders of temporary, emergency or other travel documents still need a visa",
+          "Work, study and news coverage are not covered; a visa is required for those purposes",
+          "The policy runs until 31 December 2026; check before travelling after that date",
+          "Stay is counted from 00:00 on the day after entry; there is no cap on the number of entries"
+        ],
+        "passport_validity": "Ordinary passport valid for at least the entire intended stay in China.",
+        "passport_validity_requirement": {
+          "kind": "valid_through_departure",
+          "months": 0
+        },
+        "required_documents": [
+          "Ordinary passport valid for the entire intended stay",
+          "Invitation letters, air tickets and accommodation reservations are recommended as evidence of the purpose of entry"
+        ],
+        "entry_requirements": "Use an ordinary passport valid for the entire intended stay. Admission is subject to examination and approval by Chinese border inspection authorities. The visa waiver covers tourism; it does not cover work, study or news coverage. Supporting invitation letters, air tickets and accommodation reservations are recommended.",
+        "insurance_required": null
+      },
+      "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+      "verified_at": "2026-08-22",
+      "verified_by": "Ellis source audit",
+      "verifier": "ai",
+      "field_provenance": {
+        "disposition": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "requirement_detail": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "visa_category": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "permitted_stay": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "permitted_stay_days": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "application_channel": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "application_channel_detail": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Exact KOR ordinary-tourism entry condition only; preserve all other facts, verdict ownership, policy dates and product grades.",
+          "source_id": "china-mfa-faq",
+          "additional_quotes": [
+            "Foreign nationals traveling for the purpose of business, tourism, family or friends visit，exchange and transit that meet the visa waiver requirements can be allowed to enter China without a visa upon examination and approval in accordance with law by border inspection authorities."
+          ],
+          "status": "reviewed",
+          "verification_scope": "kor_chn_entry_conditions_only",
+          "subject": {
+            "passport_nationality": "KOR",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "Foreign nationals eligible for the visa waiver do not need to declare in advance to Chinese embassies or consulates before entering China without a visa."
+        },
+        "government_fee": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "official_portal_url": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "visa_products": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "exceptions": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-08-22",
+          "verified_by": "Ellis source audit",
+          "verifier": "ai",
+          "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded."
+        },
+        "passport_validity": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Exact KOR ordinary-tourism entry condition only; preserve all other facts, verdict ownership, policy dates and product grades.",
+          "source_id": "china-mfa-faq",
+          "additional_quotes": [
+            "Holders of travel documents or temporary or emergency documents other than ordinary passports are not allowed to enter into China without a visa."
+          ],
+          "status": "reviewed",
+          "verification_scope": "kor_chn_entry_conditions_only",
+          "subject": {
+            "passport_nationality": "KOR",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "For foreign nationals, an ordinary passport valid for at least the duration of intended stay in China is needed."
+        },
+        "passport_validity_requirement": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Exact KOR ordinary-tourism entry condition only; preserve all other facts, verdict ownership, policy dates and product grades.",
+          "source_id": "china-mfa-faq",
+          "status": "reviewed",
+          "verification_scope": "kor_chn_entry_conditions_only",
+          "subject": {
+            "passport_nationality": "KOR",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "For foreign nationals, an ordinary passport valid for at least the duration of intended stay in China is needed."
+        },
+        "required_documents": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Exact KOR ordinary-tourism entry condition only; preserve all other facts, verdict ownership, policy dates and product grades.",
+          "source_id": "china-mfa-faq",
+          "additional_quotes": [
+            "It is recommended to take documents such as invitation letters, air tickets and reservations of accommodation as a proof corresponding to the purposes of entry into China."
+          ],
+          "status": "reviewed",
+          "verification_scope": "kor_chn_entry_conditions_only",
+          "subject": {
+            "passport_nationality": "KOR",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "For foreign nationals, an ordinary passport valid for at least the duration of intended stay in China is needed."
+        },
+        "entry_requirements": {
+          "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+          "verified_at": "2026-09-10",
+          "verified_by": "Ellis AI official-source field review",
+          "verifier": "ai",
+          "note": "Exact KOR ordinary-tourism entry condition only; preserve all other facts, verdict ownership, policy dates and product grades.",
+          "source_id": "china-mfa-faq",
+          "additional_quotes": [
+            "Foreign nationals traveling for the purpose of business, tourism, family or friends visit，exchange and transit that meet the visa waiver requirements can be allowed to enter China without a visa upon examination and approval in accordance with law by border inspection authorities.",
+            "Visa waiver does not apply to those who come to China for work, study, news coverage or purposes alike.",
+            "It is recommended to take documents such as invitation letters, air tickets and reservations of accommodation as a proof corresponding to the purposes of entry into China."
+          ],
+          "status": "reviewed",
+          "verification_scope": "kor_chn_entry_conditions_only",
+          "subject": {
+            "passport_nationality": "KOR",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          },
+          "quote": "For foreign nationals, an ordinary passport valid for at least the duration of intended stay in China is needed."
+        },
+        "insurance_required": {
+          "source_url": "",
+          "verified_at": null,
+          "verified_by": "",
+          "verifier": "ai",
+          "note": "The captured MFA FAQ does not establish an insurance requirement or exemption; the unsupported previous No is withdrawn.",
+          "status": "unknown",
+          "verification_scope": "kor_chn_entry_conditions_only",
+          "subject": {
+            "passport_nationality": "KOR",
+            "destination_country": "CHN",
+            "travel_purpose": "tourism",
+            "travel_document_type": "ordinary_passport"
+          }
+        }
+      },
+      "note": "China's unilateral visa-free policy, verified 2026-08-22 against the MFA consular FAQ, the NIA country list (2026-02-17) and embassy notices: 50 countries, up to 30 days per entry (raised from 15 on 30 Nov 2024), for business, tourism, family or friends visits, exchange and transit; in force until 31 December 2026. Ordinary passports only; work, study and news coverage are excluded.",
+      "route": {
+        "nationality": "KOR",
+        "destination": "CHN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport"
+      },
+      "review_id": "kor-chn-entry-conditions-20260910",
+      "partial_review": true,
+      "field_review_scope": "kor_chn_entry_conditions_only"
+    }
+  ]
+}
