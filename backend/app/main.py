@@ -568,7 +568,15 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
                    "visa_requirement": "disposition", "visa_requirement_detail": "requirement_detail",
                    "visa_type_name": "visa_category", "max_stay_duration": "permitted_stay_days",
                    "application_method": "application_channel"}
-        requested = {aliases.get(f.strip(), f.strip()) for f in str(row.field or "").split(",") if f.strip()}
+        # The field column is a 64 character display string, so a finding
+        # naming several fields has its last name cut mid word and could
+        # never be matched by any change-log row. The finding's own
+        # proposal carries the same names untruncated, so read them there
+        # and keep the column as the fallback.
+        proposed = (row.proposal or {}).get("fields")
+        names = (list(proposed) if isinstance(proposed, dict) and proposed
+                 else str(row.field or "").split(","))
+        requested = {aliases.get(str(f).strip(), str(f).strip()) for f in names if str(f).strip()}
         changes = db.execute(_sel(DatabaseChangeLog).where(
             DatabaseChangeLog.cache_key == kimi_primary.canonical_key(row.cache_key),
             DatabaseChangeLog.created_at >= row.created_at,
