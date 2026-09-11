@@ -553,6 +553,15 @@ _CAP_RE = re.compile(_words(
     r'paling lama|maksimal|maksimum|tidak lebih dari|tidak melebihi|tối đa|không quá|không vượt quá|'
     r'ไม่เกิน|สูงสุด|не более|не свыше|не дольше|не может превышать|не превыша|максимум|максимальн',
     r'最长|最長|最多|不超过|不得超过|不超過|不得超過|最大|を超えない|上限|최대|최장|초과하지'), re.I)
+# A bare "up to" before a figure is a ceiling the destination may grant
+# less than ("the visa may be valid for up to 10 years"). A cell may carry
+# the ceiling as its own wording ("Up to 30 days") and a traveller then
+# reads what the page says, so the fill is refused only when the stored
+# value drops the wording and serves the figure flat. A stay is a maximum
+# by definition, so this reads a validity alone.
+_BARE_CAP_RE = re.compile('(?:' + _words(
+    r'up to|up until|jusqu[’\']à|jusqu[’\']au|hasta|bis zu|fino a|até|sampai|hingga|lên đến|lên tới|ถึง|до',
+    r'最多|最长|最長|까지') + r')\s*(?:a|an|the)?\s*(?=' + _FIGURE_FORMS + ')', re.I)
 # "Non-extendable", "cannot be extended" state a firm rule, not an
 # extension, so they are blanked before the exception vocabulary is read.
 _NOT_EXTENDABLE_RE = re.compile(_words(
@@ -679,12 +688,23 @@ _INCLUSION_RE = re.compile(
 # "B-1/B-2 | None | Multiple | 120 Months": the entries cell is the entry
 # statement of the class the first cell names, and the validity cell is
 # its validity, whatever the row's words alone would say.
+# The validity column has to name the visa's own validity. A "Duration of
+# Stay" column states the stay a traveller is admitted for and a "Passport
+# Validity" column states a document's remaining validity, so neither may
+# take the validity slot.
 _HEADER_KINDS = {
     'class': re.compile(r'classification|visa type|type of visa|\bclass\b|category|\bvisa\b', re.I),
     'entries': re.compile(r'number of entries|no\.? of entries|entries|entry', re.I),
-    'validity': re.compile(r'validity|valid for|period of validity|duration', re.I),
+    'validity': re.compile(r'validity|valid for|period of validity', re.I),
     'fee': re.compile(r'\bfees?\b', re.I),
 }
+# Class is the widest kind (a bare "visa" names it), so a header cell reads
+# as the class column only when no narrower kind claims it first.
+_HEADER_ORDER = ('entries', 'validity', 'fee', 'class')
+# A reciprocity row carries its footnote as a marker after the class code or
+# after the value ("B-1/B-2 3", "60 Months 3"), and the footnote is where
+# the page qualifies the row.
+_ROW_MARKER_RE = re.compile(r'[^\W_]\s+(?:\d{1,2}|[▲◼■●◆†‡*※])\s*$')
 _CELL_ENTRIES = {'multiple': 'multiple', 'multi': 'multiple', 'm': 'multiple', 'single': 'single', 's': 'single',
                  'one': 'single', '1': 'single', 'double': 'double', 'd': 'double', 'two': 'double', '2': 'double'}
 
@@ -1187,6 +1207,109 @@ def _binding_problem(sentence, product, products):
     return None
 
 
+def _unanchored(sentence, product, products):
+    """Whether nothing in the sentence says which product it is about: it
+    prints no served product's label and carries no anchor of any of them.
+    On a one-product route such a sentence passes _binding_problem, so its
+    subject has to come from the section of the page it stands in."""
+    siblings = [_product_anchors(p) for p in _siblings(product, products)]
+    labels = [product['type']] + [p['type'] for p in _siblings(product, products)]
+    if any(_free_spans(label, sentence, labels) for label in labels):
+        return False
+    every = dict(_product_anchors(product))
+    for anchors in siblings:
+        every.update(anchors)
+    return not _anchors_in(sentence, every)
+
+
+def _names_subject(piece, product, products):
+    """Whether this piece of a page says which product or visa class the
+    text under it is about: it names a served product, carries one of
+    their anchors, or names a visa class at all."""
+    every = dict(_product_anchors(product))
+    labels = [product['type']]
+    for p in (products or []):
+        if isinstance(p, dict) and p.get('type'):
+            every.update(_product_anchors(p))
+            labels.append(p['type'])
+    if any(_free_spans(label, piece, labels) for label in labels):
+        return True
+    if _anchors_in(piece, every):
+        return True
+    for pattern in _VISA_CLASSES.values():
+        if any(_COMPOUND_VISA_RE.search(m.group()) for m in pattern.finditer(piece)):
+            return True
+        if _qualifies(piece, pattern, _CLASS_VISA_WORDS, extra=_VISA_CLASS_LINKS, links=5):
+            return True
+    return False
+
+
+# How far above a sentence the captured page is read for the subject of its
+# section. A page that says nothing about its subject in this much text
+# above a sentence has no section for it.
+_SECTION_WINDOW = 6000
+
+
+def _section_above(sentence, item, sources, product, products):
+    """The nearest piece of the captured page above this sentence that says
+    which product or visa class its section is about, or None when the page
+    prints nothing of the kind above it."""
+    page = (sources or {}).get(item.get('source_id')) if isinstance(sources, dict) else None
+    text = str((page or {}).get('text') or '')
+    quote = str(item.get('quote') or '')
+    if not text or not quote:
+        return None
+    span = quote if quote in text else _page_span(quote, text)
+    start = text.find(span) if span else -1
+    if start < 0:
+        return None
+    inner = text.find(sentence.strip(), start, start + len(span) + 2)
+    if inner >= 0:
+        start = inner
+    above = text[max(0, start - _SECTION_WINDOW):start]
+    for piece in reversed([p for p in _sentences(above) if p.strip()]):
+        if _names_subject(piece, product, products):
+            return piece
+    return None
+
+
+def _section_problem(sentence, item, sources, route, product, products, merged, cells=None):
+    """Why the section of the page a sentence with no anchor stands in is
+    not this product's. The section's subject is the nearest heading or
+    class-naming sentence above it, and it must not name a class or a
+    product the route does not serve. A sentence whose section the page
+    does not state binds only when the page as a whole is about the one
+    served product, which it is when it names no other class at all.
+
+    A row read through its header says which class it is about in its own
+    class cell, and _row_binding_problem reads that cell, so a row needs no
+    section above it."""
+    if cells is not None or not _unanchored(sentence, product, products):
+        return None
+    section = _section_above(sentence, item, sources, product, products)
+    if section is not None:
+        problem = (_class_problem(section, route, product, products, merged)
+                   or _binding_problem(section, product, products))
+        if problem:
+            return 'the sentence carries no anchor of the product and its page section (%s) %s' % (
+                section.strip()[:80], problem)
+        return None
+    page = (sources or {}).get(item.get('source_id')) if isinstance(sources, dict) else None
+    text = str((page or {}).get('text') or '')
+    title, lead = _page_title_and_lead(text)
+    if _heading_names(title + '\n' + lead, product, products):
+        return None
+    # Nothing above the sentence says whose section it is, so the whole page
+    # has to be about the one served product. A page that names another visa
+    # class anywhere may be stating that class's rule here.
+    for piece in _sentences(text):
+        problem = _class_problem(piece, route, product, products, merged)
+        if problem:
+            return ('the sentence carries no anchor of the product, the page states no section subject above it and '
+                    'the page is not about %s alone (%s)' % (product['type'], problem))
+    return None
+
+
 def _several_figures_problem(sentence, n, unit, product, products, merged):
     """The fee branch's several-amounts guard for durations. A statement
     that names several products, or several figures of the value's unit
@@ -1387,6 +1510,17 @@ def _governed_problem(sentence):
     if cap:
         return 'the figure is governed by a cap (%s), not stated as the value' % cap.group().strip()
     return None
+
+
+def _bare_cap_problem(text, stated):
+    """Why a bare "up to N" leaves this figure a ceiling rather than a
+    validity. The ceiling may be served when the stored value carries the
+    wording itself ("Up to 30 days"), never as a flat figure."""
+    cap = _BARE_CAP_RE.search(text)
+    if not cap or (isinstance(stated, str) and (_BARE_CAP_RE.search(stated) or _CAP_RE.search(stated))):
+        return None
+    return ('the figure is a ceiling the page states with "%s" and the stored value drops the wording, so it would be '
+            'served as a flat validity' % cap.group().strip())
 
 
 def _carved(sentence, match):
@@ -2007,7 +2141,10 @@ def _delimited_rows(passages):
     "Classification | Fee | Number" / "of Entries | Validity" / "Period");
     the lines above the first row are joined and read as one header. A run
     of rows counts only when a header names an entries or a validity
-    column and has exactly the rows' number of cells."""
+    column and has exactly the rows' number of cells. A header that names
+    one kind in two of its cells says nothing about which of them holds
+    the value, so its whole table is refused rather than read by
+    position."""
     lines = str(passages or '').split('\n')
     rows = {}
     is_row = [line.count('|') >= 2 and not any(k.search(line) for k in (_HEADER_KINDS['entries'], _HEADER_KINDS['validity'])) for line in lines]
@@ -2032,12 +2169,19 @@ def _delimited_rows(passages):
         joined = ' '.join(head)
         if joined.count('|') != len(cells) - 1:
             continue
-        columns = {}
+        found = {}
         for index, cell in enumerate(c.strip() for c in joined.split('|')):
-            for kind, pattern in _HEADER_KINDS.items():
-                if kind not in columns and pattern.search(cell) and not (kind == 'class' and index > 0 and 'entr' in cell.lower()):
-                    columns[kind] = index
-                    break
+            for kind in _HEADER_ORDER:
+                if not _HEADER_KINDS[kind].search(cell):
+                    continue
+                # A document's own validity is never the visa's, so a
+                # "Passport Validity" cell takes no column at all.
+                if kind != 'validity' or not _DOCUMENT_SUBJECT_RE.search(cell):
+                    found.setdefault(kind, []).append(index)
+                break
+        if any(len(indexes) > 1 for indexes in found.values()):
+            continue
+        columns = {kind: indexes[0] for kind, indexes in found.items()}
         if 'class' not in columns or not ({'entries', 'validity'} & set(columns)):
             continue
         for line in run:
@@ -2057,13 +2201,62 @@ def _row_binding_problem(cells, product):
     return None
 
 
+def _row_marker(cell):
+    """The footnote marker a bound cell ends in, or None. A trailing number
+    that belongs to a money amount ("USD 10") is the amount itself and not
+    a marker, so a priced cell is read as the page writes it."""
+    marker = _ROW_MARKER_RE.search(cell)
+    if marker is None:
+        return None
+    digits = re.search(r'\d+\s*$', cell)
+    if digits and any(m.start() <= digits.start() < m.end() for m in _MONEY_RE.finditer(cell)):
+        return None
+    return marker.group().strip()
+
+
+def _row_marker_problem(cells):
+    """Why a header-bound row cannot be read flat: one of its cells ends in
+    a footnote marker, so the page qualifies the row somewhere else and the
+    row alone does not state the value."""
+    for kind in sorted(cells):
+        cell = str(cells.get(kind) or '')
+        if _row_marker(cell):
+            return ('the row\'s %s cell (%s) ends in a footnote marker, so the page qualifies the row elsewhere and the '
+                    'row alone does not state the value' % (kind, cell))
+    return None
+
+
+def _row_conflict_problem(rows, cells, product, field):
+    """Why a product that carries several class codes cannot take this row:
+    the table states more than one value for the product's own codes, so
+    which of them the product is served under is the page's choice and not
+    the reviewer's."""
+    kind = {'validity': 'validity', 'entry': 'entries'}.get(field)
+    codes = {k: v for k, v in _product_anchors(product).items() if k[0] in ('code', 'subclass')}
+    if not cells or kind is None or kind not in cells or len(codes) < 2:
+        return None
+    stated = {}
+    for row in rows.values():
+        if kind not in row or not _anchors_in(row.get('class') or '', codes):
+            continue
+        stated.setdefault(_norm(row[kind]), set()).add(_row_key(row.get('class') or ''))
+    if len(stated) > 1:
+        return ('the table states %d different %s values for the product\'s own class codes (%s), so this row does not '
+                'state the product\'s value' % (len(stated), kind,
+                                                '; '.join('%s for %s' % (value or 'nothing', ', '.join(sorted(classes)))
+                                                          for value, classes in sorted(stated.items()))))
+    return None
+
+
 def _plain_heads(sentence):
     """The sentence in NFKC form with its parentheticals blanked to spaces,
     so a document named only in an aside ("(fax copy, click here to view
     the sample)") never stands at a head and positions stay aligned, and
-    the positions where an inclusion aside names the very documents the
+    the spans of an inclusion aside that names the very documents the
     requirement asks for ("upload the required documents (including a
-    valid passport)"). Those words stay and open a head of their own."""
+    valid passport)"). Those words stay and open a head of their own, and
+    the span ends where the aside closes, so the text after the aside is
+    read as the sentence's own again."""
     import unicodedata
     text = unicodedata.normalize('NFKC', str(sentence))
     out = list(text)
@@ -2074,16 +2267,16 @@ def _plain_heads(sentence):
             depth += 1
             keeping.append(bool(cue))
             if cue:
-                opened.append(cue.end())
+                opened.append([cue.end(), len(text)])
             out[i] = ' '
         elif ch in ')）]］':
-            if keeping:
-                keeping.pop()
+            if keeping and keeping.pop() and opened:
+                opened[-1][1] = i
             depth = max(0, depth - 1)
             out[i] = ' '
         elif depth and not (len(keeping) == 1 and keeping[0]):
             out[i] = ' '
-    return ''.join(out), opened
+    return ''.join(out), [(start, close) for start, close in opened]
 
 
 def _plain(sentence):
@@ -2137,6 +2330,39 @@ def _piece_heads(text, start, end):
             if re.search(r'[^\W_]', _PIECE_SEP_RE.sub(' ', text[h:heads[i + 1] if i + 1 < len(heads) else end]))]
 
 
+# What the page offers the applicant rather than asks of them: a sample or
+# a template, a page or a link, a service or an office, a fee. A piece of an
+# inclusion aside naming one of these is not a document to present.
+_OFFERED_RE = re.compile(_words(
+    r'samples?|examples?|specimens?|templates?|models?|pages?|websites?|sites?|links?|help|guides?|guidance|instructions?|'
+    r'faqs?|services?|couriers?|agenc(?:y|ies)|agents?|cent(?:re|er)s?|offices?|counters?|desks?|fees?|charges?|payments?|'
+    r'muestras?|ejemplos?|plantillas?|modelos?|páginas?|paginas?|enlaces?|servicios?|mensajer[íi]a|agencias?|oficinas?|tasas?|'
+    r'exemples?|modèles?|gabarits?|liens?|services?|agences?|bureaux?|frais|beispiele?|muster|vorlagen?|seiten?|links?|'
+    r'dienste?|gebühren?|contoh|halaman|tautan|layanan|kantor|biaya|mẫu|trang|liên kết|dịch vụ|lệ phí|'
+    r'образц|шаблон|страниц|ссылк|услуг|сбор',
+    r'样本|樣本|范例|範例|示例|模板|页面|頁面|链接|連結|服务|服務|手数料|見本|샘플|예시|페이지|링크|서비스'), re.I)
+
+
+# Document nouns the shared document vocabulary does not carry, because it
+# reads whole requirement sentences and these words stand alone only as the
+# name of a thing an applicant hands over.
+_DOCUMENT_NOUNS_EXTRA = re.compile(_words(
+    r'reservations?|contracts?|receipts?|statements?|polic(?:y|ies)|licen[cs]es?|permits?|registrations?|declarations?|'
+    r'payslips?|cards?|residenc(?:y|e)|records?|reports?|transcripts?|deeds?|affidavits?|'
+    r'reservas?|contratos?|recibos?|pólizas?|polizas?|r[ée]servations?|contrats?|re[çc]us?|'
+    r'reservasi|kontrak|kuitansi|đặt chỗ|hợp đồng|бронирован|договор|квитанц|полис',
+    r'预订|預訂|合同|合約|收据|收據|予約|契約|領収|예약|계약|영수증'), re.I)
+
+
+def _reads_as_document(piece):
+    """Whether a piece of an inclusion aside reads as a document the
+    applicant presents: it carries a document word and names no sample,
+    page, service or other thing the page merely offers."""
+    if _OFFERED_RE.search(piece):
+        return False
+    return bool(_DOCUMENT_WORDS.search(piece) or _DOCUMENT_NOUNS_EXTRA.search(piece))
+
+
 def _sentence_heads(sentence, bare_ok=False):
     """The NFKC form of a sentence and the positions where a document may
     stand in requirement position: the pieces after each requirement cue,
@@ -2154,12 +2380,21 @@ def _sentence_heads(sentence, bare_ok=False):
         starts.append(0)
     # An inclusion aside only names documents the requirement already asks
     # for, so it opens a head where a requirement cue stands before it.
-    starts += [position for position in included if any(cue <= position for cue in cues)]
-    starts = sorted(set(starts + cues))
+    asides = {start: close for start, close in included if any(cue <= start for cue in cues)}
+    starts = sorted(set(starts) | set(asides) | set(cues))
     heads = []
     for index, start in enumerate(starts):
         end = starts[index + 1] if index + 1 < len(starts) else len(plain)
-        heads += _piece_heads(plain, start, end)
+        pieces = _piece_heads(plain, start, end)
+        close = asides.get(start)
+        if close is not None:
+            # The aside confirms the documents the requirement asks for and
+            # does not enumerate whatever else the page prints inside it, so
+            # a piece of it that does not read as a document opens no head.
+            bounds = pieces + [end]
+            pieces = [head for i, head in enumerate(pieces)
+                      if head >= close or _reads_as_document(plain[head:min(bounds[i + 1], close)])]
+        heads += pieces
     # The heads are read on the blanked text. An item is matched on the
     # page's own text, so a parenthetical description of a document counts
     # towards its name while never opening a head of its own.
@@ -2242,9 +2477,12 @@ def _enumeration_coverage(value, sentences, bare_ok):
     states documents of its own, and, in a list passage, every list line
     (a marker line or a bare line) beside them. A whole sentence of the
     quote the stored list never touches counts against it, so a list
-    cannot drop one and still read as complete."""
-    total = covered = 0
-    previous = None
+    cannot drop one and still read as complete. A line of a list the counter
+    cannot read, because it runs longer than a bare item may or reads as
+    prose, is a piece of the list all the same and counts as one the stored
+    list does not cover, so the list is forced to partial rather than read
+    as complete past a line nobody judged."""
+    counted, previous = [], None
     for sentence in sentences:
         plain, heads = _sentence_heads(sentence, bare_ok)
         # A sub-bullet under a line that ends with a colon ("Proof of
@@ -2256,14 +2494,26 @@ def _enumeration_coverage(value, sentences, bare_ok):
                         and marker.group().strip()[:1] != above.group().strip()[:1])
         if not sub_item:
             previous = sentence
-        if not heads or sub_item:
+        if sub_item:
+            continue
+        if not heads:
+            # The line is held until it is known whether the passage is a
+            # list at all, because only a list makes a bare line an item.
+            counted.append(None)
             continue
         spans = [span for item in value for span in [_head_span(item, plain, head) for head in heads] if span]
         listed = bare_ok and (bool(_LIST_MARKER_RE.match(plain)) or not _REQUIREMENT_CUE_RE.search(_plain(sentence)))
         if not spans and not listed and not _sentence_states('required_documents', sentence):
+            counted.append(None)
             continue
-        total += len(heads)
-        covered += sum(1 for head in heads if any(start <= head < end for start, end in spans))
+        counted.append((len(heads), sum(1 for head in heads if any(start <= head < end for start, end in spans))))
+    items = [i for i, entry in enumerate(counted) if entry is not None]
+    total = sum(entry[0] for entry in counted if entry is not None)
+    covered = sum(entry[1] for entry in counted if entry is not None)
+    if bare_ok and items:
+        # Every line of the list the counter could not read is a piece the
+        # stored list does not cover, wherever in the list it stands.
+        total += sum(1 for entry in counted if entry is None)
     return total, covered
 
 
@@ -2285,9 +2535,11 @@ def _sentence_supports(field, value, sentence, cells=None):
     return field_value_supported(field, value, sentence)
 
 
-def _duration_problem(field, sentence, n, unit, own, other, product, products, merged, cells=None):
+def _duration_problem(field, sentence, n, unit, own, other, product, products, merged, cells=None, stated=None):
     """The gates a validity or stay figure passes in its sentence, or in
-    its header-named table cell."""
+    its header-named table cell. A cell passes the same hedge, cap and
+    document-duration gates as a sentence, because the header names the
+    column and says nothing about the words printed inside the cell."""
     noun = 'validity' if field == 'validity' else 'stay'
     if cells is not None:
         cell = cells.get('validity') or ''
@@ -2295,7 +2547,10 @@ def _duration_problem(field, sentence, n, unit, own, other, product, products, m
             return 'the row\'s validity cell (%s) does not state this figure' % cell
         if _range_or_choice(cell, n):
             return 'the row\'s validity cell states a range or a choice, not this one value'
-        return _several_figures_problem(cell, n, unit, product, products, merged)
+        if _owned_by_document(cell, n, unit):
+            return 'the row\'s validity cell states a document\'s own duration, not the visa\'s'
+        return (_governed_problem(cell) or _bare_cap_problem(cell, stated)
+                or _several_figures_problem(cell, n, unit, product, products, merged))
     if _range_or_choice(sentence, n):
         return 'the sentence states a range or a choice of %s, not this one value' % ('validities' if noun == 'validity' else 'stays')
     if not _bound(sentence, n, unit, own, other):
@@ -2303,7 +2558,8 @@ def _duration_problem(field, sentence, n, unit, own, other, product, products, m
             noun, 'a stay is not a validity' if noun == 'validity' else 'a validity is not a stay')
     if _owned_by_document(sentence, n, unit):
         return 'the figure is a passport\'s, certificate\'s or other document\'s duration, not the visa\'s'
-    return _governed_problem(sentence) or _several_figures_problem(sentence, n, unit, product, products, merged)
+    return (_governed_problem(sentence) or (_bare_cap_problem(sentence, stated) if field == 'validity' else None)
+            or _several_figures_problem(sentence, n, unit, product, products, merged))
 
 
 def _sentence_problem(field, value, sentence, route, product, products, merged=None, cells=None):
@@ -2322,8 +2578,8 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
     problem = _scope_problem(sentence, route) or _temporal_problem(sentence) or _restrictive_problem(sentence, product, products)
     if problem:
         return problem
-    if cells is not None and product is not None:
-        problem = _row_binding_problem(cells, product)
+    if cells is not None:
+        problem = _row_marker_problem(cells) or (_row_binding_problem(cells, product) if product is not None else None)
         if problem:
             return problem
     if field != 'entry':
@@ -2340,7 +2596,8 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
                     '/'.join(sorted(qualified)), '/'.join(sorted(known)))
     if field == 'validity':
         n, unit = _validity_num_unit(value)
-        problem = _duration_problem(field, sentence, n, unit, _VALIDITY_WORDS, _STAY_WORDS, product, products, merged, cells)
+        problem = _duration_problem(field, sentence, n, unit, _VALIDITY_WORDS, _STAY_WORDS, product, products, merged, cells,
+                                    stated=value)
         if problem:
             return problem
     elif field in ('max_stay_days', 'permitted_stay_days'):
@@ -2446,7 +2703,16 @@ def _check_fill_binding(field, value, proof, route, merged, product, label, sour
     ordered = _quote_sentences(proof)
     sentences = [s for s, _ in ordered]
     before = dict(ordered)
-    binding = {s: (_binding_problem(s, product, products) if product is not None else None) for s in sentences}
+    # The quote each sentence came from, so a sentence with no anchor of
+    # its own can be read against the section of the page it stands in.
+    quoted = {}
+    for evidence in proof['evidence']:
+        for s in _list_sentences(evidence['quote']):
+            quoted.setdefault(s, evidence)
+    binding = {s: (_binding_problem(s, product, products)
+                   or _section_problem(s, quoted.get(s) or {}, sources, route, product, products, merged,
+                                       rows.get(_row_key(s)))
+                   if product is not None else None) for s in sentences}
     bound = [s for s in sentences if binding[s] is None]
     bare_ok = _list_passage(passages)
     for item in items:
@@ -2466,6 +2732,7 @@ def _check_fill_binding(field, value, proof, route, merged, product, label, sour
                                     'clause describing another party, an aside, or beside no requirement cue)' % (label, item))
             candidates = positioned
         problems = [_anaphora_problem(s, before[s], route, product, products, binding)
+                    or (_row_conflict_problem(rows, rows.get(_row_key(s)), product, field) if product is not None else None)
                     or _sentence_problem(field, item, s, route, product, products, merged, rows.get(_row_key(s)))
                     for s in candidates]
         if all(problems):
@@ -2709,6 +2976,16 @@ def _partial_reason(fill, sources):
     return None
 
 
+def _quoted_elements(fill):
+    """The items a partial document proof did verify, for the store's own
+    reader. They travel under the retained key and never under
+    verified_elements, because the grader credits a partial proof whose
+    verified elements cover the stored value, and a list known to be
+    shorter than the page's may never raise a record's grade."""
+    value = fill.get('value')
+    return [deepcopy(v) for v in value] if isinstance(value, list) else []
+
+
 def _apply_fills(out, fills, route, sources):
     """Write the fills into the seed entry copy. Returns the applied fills
     and the route-level fields whose value changed."""
@@ -2733,6 +3010,13 @@ def _apply_fills(out, fills, route, sources):
                 scope = _age_scope_note('\n'.join(item['quote'] for item in reviewed['evidence']))
                 if scope:
                     reviewed['scope_note'] = (str(reviewed.get('scope_note') or '').strip() + ' ' + scope).strip()
+                    # The served visa_fee_qualifier column holds "from" or
+                    # nothing, and this amount is the top age band rather
+                    # than a floor, so writing "from" there would misstate
+                    # it. The band travels in the proof note and on the
+                    # applied record, where a release reads it beside the
+                    # amount instead of only inside the note.
+                    record['age_scope'] = scope
         # A single quoted document is not the destination's list, and a list
         # shorter than the enumeration it quotes is known to be incomplete.
         # Either proof is stored as partial with no verified element, so the
@@ -2756,7 +3040,7 @@ def _apply_fills(out, fills, route, sources):
                 unpublished.difference_update(CELLS[field])
                 proof = _proof_for(reviewed, route, field, product)
                 if partial:
-                    proof.update(status='partial', verified_elements=[], retained_unverified_elements=[])
+                    proof.update(status='partial', verified_elements=[], retained_unverified_elements=_quoted_elements(fill))
             proof['verification_scope'] = SCOPE
             if not isinstance(product.get('field_provenance'), dict):
                 product['field_provenance'] = {}
@@ -2780,7 +3064,7 @@ def _apply_fills(out, fills, route, sources):
                 proof = _proof_for(reviewed, route, field)
                 proof['verification_scope'] = SCOPE
                 if partial:
-                    proof.update(status='partial', verified_elements=[], retained_unverified_elements=[])
+                    proof.update(status='partial', verified_elements=[], retained_unverified_elements=_quoted_elements(fill))
                 proofs[field] = vo._provenance(proof)
             touched.add(field)
             if sorted(unpublished) != sorted(fields.get('unpublished_fields') or []):

@@ -380,13 +380,21 @@ def field_value_supported(name: str, value, text: str) -> bool:
         # An outsourced visa application centre (BLS, VFS, TLScontact, a
         # "centro de solicitud de visados") is the authorised agent the
         # application is lodged with: "la solicitud de visado se presenta
-        # ante Indonesia BLS Visa Spain". The centre or the provider has to
-        # be named, because a sentence that only says where an application
-        # is submitted is as often about the embassy itself.
-        pattern = {"authorised_agent": r"accredited (?:travel )?agen|authori[sz]ed agen|\bbls\b|\bvfs\b|tls ?contact|"
-                                       r"(?:visa )?application cent(?:re|er)|centro de solicitud de visados?|"
-                                       r"centre de (?:demande|dépôt|réception) (?:de|des) (?:visas?|demandes)|"
-                                       r"agencia (?:autorizada|acreditada)|agente (?:autorizado|acreditado)",
+        # ante Indonesia BLS Visa Spain". A provider named on its own says
+        # nothing, because a page may mention a centre it does not lodge
+        # through, so a lodgement word has to stand beside the provider in
+        # the same sentence, the way canonical['visa_center'] asks. The two
+        # agent wordings carry the lodgement in the word "agent" itself and
+        # keep matching alone, so stored data reads as before.
+        provider = (r"\bbls\b|\bvfs\b|tls ?contact|(?:visa )?application cent(?:re|er)|centro de solicitud de visados?|"
+                    r"centre de (?:demande|dépôt|réception) (?:de|des) (?:visas?|demandes)|"
+                    r"agencia (?:autorizada|acreditada)|agente (?:autorizado|acreditado)")
+        lodged = (r"\b(?:submit|submitted|lodge|lodged|lodgement|apply|applying|applications?|accepts?|accepted|"
+                  r"present|presented|presenta|presentar|presentarse|solicitud(?:es)?|d[ée]pos\w*|demandes?|"
+                  r"einreichen|eingereicht|antrag)\b")
+        pattern = {"authorised_agent": r"accredited (?:travel )?agen|authori[sz]ed agen|" +
+                                       lodged + r"[^.!?;\n]{0,70}(?:" + provider + r")|" +
+                                       r"(?:" + provider + r")[^.!?;\n]{0,70}" + lodged,
                    "embassy": r"embassy|consulate|mission", "visa_application_centre": r"visa application cent",
                    "evisa": r"e-?visa|electronic visa", "online": r"online|electronic|e-?visa",
                    "none": r"no application|visa[- ]free|without a visa", "on_arrival": r"on arrival|upon arrival"}.get(str(value))

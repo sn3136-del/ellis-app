@@ -127,7 +127,7 @@ def route_fill(field, value, proof_):
     return {'target': 'route', 'field': field, 'value': value, 'proof': proof_}
 
 
-VALIDITY = product_fill('validity', '30 days', proof('A tourist visa is valid for up to 30 days'))
+VALIDITY = product_fill('validity', 'Up to 30 days', proof('A tourist visa is valid for up to 30 days'))
 SOURCES = [source('ru_aus_tourist', URL, TEXT), source('ru_aus_fees', FEES, FEE_TEXT),
            source('ru_aus_business', BUSINESS, BUSINESS_TEXT), source('ru_aus_fee_schedule', FEE_PAGE, FEE_PAGE_TEXT)]
 
@@ -169,7 +169,7 @@ def test_a_quoted_validity_fill_projects_as_a_filled_validity():
     assert t.field_status(row)['validity_duration'] == 'filled'
     assert preview['changed_record_columns'] == ['validity_duration', 'validity_unit']
     product = preview['guidance']['visa_products'][0]
-    assert product['validity'] == '30 days'
+    assert product['validity'] == 'Up to 30 days'
     proof_ = product['field_provenance']['validity']
     assert proof_['quote'] == 'A tourist visa is valid for up to 30 days' and proof_['source_url'] == URL
     assert proof_['verifier'] == 'ai' and proof_['verified_by'] == c.VERIFIED_BY
@@ -179,7 +179,7 @@ def test_a_quoted_validity_fill_projects_as_a_filled_validity():
     assert not any(report[k] for k in ('raw_writes', 'operator_writes', 'issue_changes', 'renew_fresh_until', 'new_release'))
     # The overlay entry round-trips through the real store loader unchanged.
     parsed = vo._parse_rows([entry], {})[vo._key('AUS', 'RUS', 'tourism', 'ordinary_passport')]
-    assert parsed['fields']['visa_products'][0]['validity'] == '30 days'
+    assert parsed['fields']['visa_products'][0]['validity'] == 'Up to 30 days'
     applied = preview['fills'][0]
     assert applied['product_index'] == 0 and applied['grade_credited'] is True and applied['grade_reason'] is None
 
@@ -192,7 +192,7 @@ def test_the_emitted_overlay_passes_the_reviewed_store_gate(tmp_path):
     rows = vo._read_verification_store(path, 'reviewed_overlay', reviewed=True, errors=errors)
     assert len(rows) == 1 and errors == []
     table = vo._parse_rows(rows, {})
-    assert table[vo._key('AUS', 'RUS', 'tourism', 'ordinary_passport')]['fields']['visa_products'][0]['validity'] == '30 days'
+    assert table[vo._key('AUS', 'RUS', 'tourism', 'ordinary_passport')]['fields']['visa_products'][0]['validity'] == 'Up to 30 days'
 
 
 def test_a_fill_never_changes_the_verdict_or_any_other_fact():
@@ -261,7 +261,7 @@ def test_a_validity_is_not_taken_from_another_products_sentence():
     with pytest.raises(PatchRejected, match='product Tourist visa validity: the sentence that states this value does not bind to the product: '
                                             'the sentence is about the sibling product Business visa \\(named\\), not Tourist visa'):
         run(wrong, current=current, sources=sources)
-    right = product_fill('validity', '30 days', proof('A tourist visa is valid for up to 30 days.', sid='ru_aus_both',
+    right = product_fill('validity', 'Up to 30 days', proof('A tourist visa is valid for up to 30 days.', sid='ru_aus_both',
                                                        url='https://australia.mid.ru/en/consular_services/visas/'))
     (overlay, report), manifest, current = run(right, current=current, sources=sources)
     rows = report['routes'][0]['records']
@@ -815,7 +815,7 @@ def test_a_sentence_scoped_to_another_passport_class_bloc_or_residence_is_refuse
     fill, sources = on_page('validity', '3 years', 'A tourist visa is valid for up to 3 years for applicants permanently residing in New Zealand.', 'g3')
     with pytest.raises(PatchRejected, match='scoped to residents of another place, not AUS'):
         run(fill, sources=sources)
-    fill, sources = on_page('validity', '3 years', 'A tourist visa is valid for up to 3 years for applicants permanently residing in Australia.', 'g3b')
+    fill, sources = on_page('validity', 'Up to 3 years', 'A tourist visa is valid for up to 3 years for applicants permanently residing in Australia.', 'g3b')
     (overlay, report), manifest, current = run(fill, sources=sources)
     assert report['routes'][0]['records'][0]['validity_duration'] == 3
     route = dict(ROUTE, travel_document_type='ordinary_passport')
@@ -1023,7 +1023,10 @@ def test_a_single_item_document_list_is_stored_partial_and_never_moves_the_grade
     assert applied['partial'] is True and applied['grade_moved'] is False and applied['grade_credited'] is False
     assert applied['grade_reason'] == 'a single quoted document is stored as a partial list and is never credited'
     stored = overlay['entries'][0]['field_provenance']['required_documents']
-    assert stored['status'] == 'partial' and stored['verified_elements'] == [] and stored['retained_unverified_elements'] == []
+    # The items the review did quote travel under the retained key, never
+    # under verified_elements, which is what the grader credits.
+    assert stored['status'] == 'partial' and stored['verified_elements'] == []
+    assert stored['retained_unverified_elements'] == ['Valid passport']
     assert report['routes'][0]['records'][0]['required_documents'] == 'Valid passport'
     path = tmp_path / 'overlay.json'
     path.write_text(json.dumps(overlay, ensure_ascii=False))
@@ -1112,14 +1115,14 @@ def test_a_subclass_code_binds_a_sentence_to_the_labelled_product():
     target, sibling = products
     assert {k[1] for k in c._product_anchors(target) if k[0] == 'subclass'} == {'600'}
     assert ('code', 'evisitor') in c._product_anchors(sibling) and ('subclass', '651') in c._product_anchors(sibling)
-    fill, sources = on_page('validity', '12 months', 'A Visitor visa (subclass 600) in the Tourist stream is valid for up to 12 months.',
+    fill, sources = on_page('validity', 'Up to 12 months', 'A Visitor visa (subclass 600) in the Tourist stream is valid for up to 12 months.',
                             'anchor1', product_type=label)
     assert c._binding_problem(fill['proof']['evidence'][0]['quote'], target, products) is None
     (overlay, report), manifest, current = run(fill, current=current, sources=sources)
     rows = report['routes'][0]['records']
     assert [(r['visa_type_name'], r['validity_duration']) for r in rows] == [(t._clean_text(label), 12), ('eVisitor (subclass 651)', None)]
     # The sibling's code is the sibling's anchor: its sentence never fills the target.
-    fill, sources = on_page('validity', '12 months', 'An eVisitor (subclass 651) is valid for up to 12 months.', 'anchor1b', product_type=label)
+    fill, sources = on_page('validity', 'Up to 12 months', 'An eVisitor (subclass 651) is valid for up to 12 months.', 'anchor1b', product_type=label)
     with pytest.raises(PatchRejected, match='does not bind to the product: the sentence is about the sibling product eVisitor \\(subclass 651\\) '
                                             '\\(named\\), not Visitor visa'):
         run(fill, current=current, sources=sources)
@@ -1135,10 +1138,10 @@ def test_a_sibling_anchor_the_target_lacks_refuses_the_sentence():
         'the sentence is about the sibling product Electronic Visa on Arrival (B1) (named), not Visa on Arrival (B1)')
     assert c._binding_problem('The e-VOA (B1) is valid for up to 30 days.', paper, products) == (
         'the sentence is about the sibling product Electronic Visa on Arrival (B1) (electronic visa), not Visa on Arrival (B1)')
-    fill, sources = on_page('validity', '30 days', sentence, 'anchor2', product_type='Visa on Arrival (B1)')
+    fill, sources = on_page('validity', 'Up to 30 days', sentence, 'anchor2', product_type='Visa on Arrival (B1)')
     with pytest.raises(PatchRejected, match='does not bind to the product: the sentence is about the sibling product Electronic Visa on Arrival'):
         run(fill, current=current, sources=sources)
-    fill, sources = on_page('validity', '30 days', sentence, 'anchor2b', product_type='Electronic Visa on Arrival (B1)')
+    fill, sources = on_page('validity', 'Up to 30 days', sentence, 'anchor2b', product_type='Electronic Visa on Arrival (B1)')
     (overlay, report), manifest, current = run(fill, current=current, sources=sources)
     rows = report['routes'][0]['records']
     assert [(r['visa_type_name'], r['validity_duration']) for r in rows] == [('Visa on Arrival (B1)', None), ('Electronic Visa on Arrival (B1)', 30)]
@@ -1158,13 +1161,13 @@ def test_two_siblings_sharing_every_anchor_need_the_stream_word():
         'the sentence carries only anchors the product shares with its sibling Visitor (subclass 600) Frequent Traveller stream '
         '(subclass 600, visitor visa) and none of its own (tourist)')
     assert c._binding_problem(shared, frequent, products).endswith('and none of its own (frequent traveller)')
-    fill, sources = on_page('validity', '12 months', shared, 'anchor3', product_type='Visitor (subclass 600) Tourist stream')
+    fill, sources = on_page('validity', 'Up to 12 months', shared, 'anchor3', product_type='Visitor (subclass 600) Tourist stream')
     with pytest.raises(PatchRejected, match='does not bind to the product: the sentence carries only anchors the product shares'):
         run(fill, current=current, sources=sources)
     streamed = 'The Tourist stream of the Visitor visa (subclass 600) is valid for up to 12 months.'
     assert c._binding_problem(streamed, tourist, products) is None
     assert c._binding_problem(streamed, frequent, products).startswith('the sentence is about the sibling product Visitor (subclass 600) Tourist stream (tourist)')
-    fill, sources = on_page('validity', '12 months', streamed, 'anchor3b', product_type='Visitor (subclass 600) Tourist stream')
+    fill, sources = on_page('validity', 'Up to 12 months', streamed, 'anchor3b', product_type='Visitor (subclass 600) Tourist stream')
     (overlay, report), manifest, current = run(fill, current=current, sources=sources)
     rows = report['routes'][0]['records']
     assert [(r['visa_type_name'], r['validity_duration']) for r in rows] == [
@@ -1187,7 +1190,7 @@ def test_an_anchorless_sentence_binds_on_a_one_product_route():
     sentence = 'The visa is valid for up to 30 days from the date of issue.'
     assert c._anchors_in(sentence, c._product_anchors(products[0])) == set()
     assert c._binding_problem(sentence, products[0], products) is None
-    fill, sources = on_page('validity', '30 days', sentence, 'anchor4', product_type='Ordinary tourist visa (apply at the Embassy)')
+    fill, sources = on_page('validity', 'Up to 30 days', sentence, 'anchor4', product_type='Ordinary tourist visa (apply at the Embassy)')
     (overlay, report), manifest, current = run(fill, current=current, sources=sources)
     assert report['routes'][0]['records'][0]['validity_duration'] == 30
 
@@ -1317,15 +1320,16 @@ def test_a_list_shorter_than_the_enumeration_it_quotes_is_stored_partial():
     (overlay, report), manifest, current = run(whole, sources=sources)
     applied = report['routes'][0]['fills'][0]
     assert applied['partial'] is False and applied['grade_credited'] is True and applied['partial_reason'] is None
-    # A numbered enumeration counts its items too, sub-bullets under a colon
-    # belong to their item, and a bare list line with a verb is an explanation.
+    # A numbered enumeration counts its items too and sub-bullets under a
+    # colon belong to their item, while a list line the counter cannot read
+    # still counts as an item the stored list does not cover.
     keta = '01 Valid passport 02 Valid e-mail address 03 ID photo 04 Credit or debit cards that can be used to pay the fee'
     assert c._enumeration_coverage(['Valid passport', 'Valid e-mail address', 'ID photo'], c._list_sentences(keta), True)[1] < \
         c._enumeration_coverage(['Valid passport', 'Valid e-mail address', 'ID photo'], c._list_sentences(keta), True)[0]
     nested = '- Fotokopi Bukti Keuangan:\n* Surat Pajak Tahunan (SPT PPH-21)\n* Rekening koran tabungan 3 bulan terakhir'
     assert c._enumeration_coverage(['Fotokopi Bukti Keuangan'], c._list_sentences(nested), True) == (1, 1)
     explained = 'Copy of the passport.\nApplication form must be signed and dated.\nHotel reservation.\nRecent face photo'
-    assert c._enumeration_coverage(['Copy of passport', 'Hotel reservation', 'Recent face photo'], c._list_sentences(explained), True) == (3, 3)
+    assert c._enumeration_coverage(['Copy of passport', 'Hotel reservation', 'Recent face photo'], c._list_sentences(explained), True) == (4, 3)
     # A whole requirement sentence of the quote the list never touches
     # counts against it too, so a list cannot drop one and read complete.
     two = 'You must present a valid passport and one photo. Applicants must also submit a bank statement.'
@@ -1546,3 +1550,210 @@ def test_a_visa_application_centre_is_an_authorised_agent_channel():
                             'r5vac', target='route')
     (overlay, report), manifest, current = run(fill, current=layer(raw=raw), sources=sources)
     assert report['routes'][0]['records'][0]['application_method'] == 'Agency Service'
+
+
+# Round 6: the two blocking holes, the five majors and the three minors the
+# fifth review executed against 6603b81, each with the reviewer's own table
+# or sentence.
+
+RECIP_LABEL = 'Visitor visa (B-2 or B-1/B-2)'
+
+
+def recip(sid, body, path=None):
+    """A reciprocity schedule page and the layer that serves the B product
+    with an empty entry and validity."""
+    src, url = page(sid, 'Visa reciprocity schedule.\n' + body, path=path or sid)
+    return src, url, labelled_layer(RECIP_LABEL, entry=None)
+
+
+def test_a_stay_or_a_passport_column_never_takes_the_validity_slot():
+    # A "Duration of Stay" column states the stay, so the table carries no
+    # validity column at all and a validity fill finds nothing.
+    stay = 'Visa Class | Fee | Number of Entries | Duration of Stay\nB-1/B-2 | None | Multiple | 30 Days'
+    assert c._delimited_rows(stay) == {'B-1/B-2 | None | Multiple | 30 Days': {
+        'class': 'B-1/B-2', 'fee': 'None', 'entries': 'Multiple'}}
+    src, url, current = recip('r6stay', stay, path='reciprocity-stay')
+    with pytest.raises(PatchRejected, match='no quoted sentence bound to the product states this value'):
+        run(product_fill('validity', '30 days', proof(stay, sid='r6stay', url=url), product_type=RECIP_LABEL),
+            current=current, sources=SOURCES + [src])
+    # A document's own validity column takes no column either, so the visa's
+    # own column wins the slot and the passport figure states nothing.
+    both = ('Passport Validity | Visa Classification | Number of Entries | Visa Validity Period\n'
+            '6 Months | B-1/B-2 | Multiple | 120 Months')
+    assert c._delimited_rows(both) == {'6 Months | B-1/B-2 | Multiple | 120 Months': {
+        'class': 'B-1/B-2', 'entries': 'Multiple', 'validity': '120 Months'}}
+    src2, url2, current2 = recip('r6pass', both, path='reciprocity-passport')
+    with pytest.raises(PatchRejected, match='no quoted sentence bound to the product states this value'):
+        run(product_fill('validity', '6 months', proof(both, sid='r6pass', url=url2), product_type=RECIP_LABEL),
+            current=current2, sources=SOURCES + [src2])
+    (overlay, report), manifest, current2 = run(
+        product_fill('validity', '120 months', proof(both, sid='r6pass', url=url2), product_type=RECIP_LABEL),
+        current=recip('r6pass', both, path='reciprocity-passport')[2], sources=SOURCES + [src2])
+    assert report['routes'][0]['records'][0]['validity_duration'] == 120
+    # Two cells naming one kind say nothing about which of them holds the
+    # value, so the whole table is refused rather than read by position.
+    assert c._delimited_rows('Validity Period | Fee | Number of Entries | Validity\n'
+                             'B-1/B-2 | None | Multiple | 120 Months') == {}
+    # The cell is read through the same hedge, cap and document gates as a
+    # sentence, because the header names the column and not the cell's words.
+    assert c._duration_problem('validity', '', 60, 'Month', None, None, None, None, None,
+                               cells={'class': 'B-1/B-2', 'validity': 'Up to 60 Months'}, stated='60 months') == (
+        'the figure is a ceiling the page states with "Up to" and the stored value drops the wording, so it would be '
+        'served as a flat validity')
+
+
+def test_a_sentence_with_no_anchor_binds_to_the_section_it_stands_in():
+    transit = ('Transit visa.\n'
+               'Applicants must present a confirmed onward ticket, a visa for the third country and a hotel reservation.\n'
+               'Tourist visa.\n'
+               'A tourist visa is valid for up to 30 days and is issued as a single-entry visa.')
+    src, url = page('r6section', transit, path='visas/transit')
+    quote = 'Applicants must present a confirmed onward ticket, a visa for the third country and a hotel reservation.'
+    fill = product_fill('required_documents', ['Confirmed onward ticket', 'Visa for the third country', 'Hotel reservation'],
+                        proof(quote, sid='r6section', url=url))
+    with pytest.raises(PatchRejected, match='the sentence carries no anchor of the product and its page section '
+                                            '\\(Transit visa.\\) the sentence is about a transit visa class the route does not serve'):
+        run(fill, sources=SOURCES + [src])
+    # The tourist section of the same page still binds, so the gate reads the
+    # section and does not simply refuse the page.
+    good = product_fill('validity', 'Up to 30 days', proof('A tourist visa is valid for up to 30 days and is issued as a single-entry visa.',
+                                                           sid='r6section', url=url))
+    (overlay, report), manifest, current = run(good, sources=SOURCES + [src])
+    assert report['routes'][0]['records'][0]['validity_duration'] == 30
+    # With no section subject anywhere above it the page as a whole has to be
+    # about the one served product, and a page naming another class is not.
+    mixed = 'Applicants must present a confirmed onward ticket and a hotel reservation.\nA transit visa is issued for 10 days.'
+    src2, url2 = page('r6nosection', mixed, path='visas/mixed-section')
+    fill2 = product_fill('required_documents', ['Confirmed onward ticket', 'Hotel reservation'],
+                         proof('Applicants must present a confirmed onward ticket and a hotel reservation.', sid='r6nosection', url=url2))
+    with pytest.raises(PatchRejected, match='the page states no section subject above it and the page is not about Tourist visa alone'):
+        run(fill2, sources=SOURCES + [src2])
+
+
+def test_a_list_line_the_counter_cannot_read_counts_against_the_list():
+    listed = ('Valid passport.\nOne recent passport-size photograph.\n'
+              'Bank statements for the last three months bearing the official stamp and signature of the issuing bank branch.\n'
+              'Hotel reservation.')
+    stored = ['Valid passport', 'One recent passport-size photograph', 'Hotel reservation']
+    assert c._enumeration_coverage(stored, c._list_sentences(listed), True) == (4, 3)
+    fill, sources = on_page('required_documents', stored, listed, 'r6bank')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    applied = report['routes'][0]['fills'][0]
+    assert applied['partial'] is True and applied['grade_credited'] is False
+    assert applied['partial_reason'].startswith('the list covers 3 of the 4 items')
+    # The live Kuwait list, whose fifth item is a long bare line.
+    kuwait = ('Copy of passport.\nConfirmed travel ticket.\nHotel reservation.\nRecent face photo.\n'
+              'Copy of the GCC residency for residents of GCC countries, clearly indicating the profession.')
+    assert c._enumeration_coverage(['Copy of passport', 'Confirmed travel ticket', 'Hotel reservation', 'Recent face photo'],
+                                  c._list_sentences(kuwait), True) == (5, 4)
+
+
+def test_an_inclusion_aside_names_documents_and_never_a_page_or_a_service():
+    sample = 'Applicants must submit the documents (namely a passport, a photo, the sample letter and the help page).'
+    assert c._document_span('passport', sample, True) is not None
+    for offered in ('sample letter', 'help page'):
+        assert c._document_span(offered, sample, True) is None, offered
+    courier = 'Applicants must submit the documents (such as a passport, a photo and the courier service receipt).'
+    assert c._document_span('courier service receipt', courier, True) is None
+    # The aside still confirms the documents the requirement asks for.
+    somali = ('Applicants should complete the digital form, upload the required documents (including a valid passport), '
+              'pay the applicable fee, and await approval by email, which must be presented upon arrival.')
+    assert c._document_span('Valid passport', somali, True) is not None
+    fill, sources = on_page('required_documents', ['Passport', 'Photo', 'Sample letter', 'Help page'], sample, 'r6aside')
+    with pytest.raises(PatchRejected, match='the document "Sample letter" does not stand in the requirement position'):
+        run(fill, sources=sources)
+
+
+def test_a_bare_up_to_is_a_ceiling_and_not_a_flat_validity():
+    ceiling = 'A tourist visa may be valid for up to 10 years.'
+    src, url = page('r6upto', ceiling, path='visas/ceiling')
+    with pytest.raises(PatchRejected, match='the figure is a ceiling the page states with "up to" and the stored value drops '
+                                            'the wording, so it would be served as a flat validity'):
+        run(product_fill('validity', '10 years', proof(ceiling, sid='r6upto', url=url)), sources=SOURCES + [src])
+    # The ceiling may be served when the stored value carries the wording.
+    (overlay, report), manifest, current = run(
+        product_fill('validity', 'Up to 10 years', proof(ceiling, sid='r6upto', url=url)), sources=SOURCES + [src])
+    assert report['routes'][0]['records'][0]['validity_duration'] == 10
+    # A stay is a ceiling by definition, so the same words leave a stay alone.
+    stay = 'The holder may stay in Russia for up to 30 days.'
+    assert c._duration_problem('max_stay_days', stay, 30, 'Day', c._STAY_WORDS, c._VALIDITY_WORDS,
+                               None, None, None, stated=30) is None
+    assert c._duration_problem('validity', 'A tourist visa is valid for up to 30 days.', 30, 'Day', c._VALIDITY_WORDS,
+                               c._STAY_WORDS, None, None, None, stated='30 days')
+    for other in ('Le visa est valable jusqu\'à 90 jours.', 'El visado es válido hasta 90 días.',
+                  'Das Visum ist bis zu 90 Tage gültig.', 'Виза действительна до 90 дней.'):
+        assert c._BARE_CAP_RE.search(other), other
+
+
+def test_a_footnote_marked_row_is_never_read_flat():
+    footnoted = ('Visa Classification | Fee | Number of Entries | Validity Period\n'
+                 'B-1/B-2 3 | None | Multiple | 60 Months 3\n'
+                 'Country Specific Footnotes\n'
+                 '3. Validity is limited to the duration of the approved petition.')
+    src, url, current = recip('r6foot', footnoted, path='reciprocity-marked')
+    with pytest.raises(PatchRejected, match="the row's class cell \\(B-1/B-2 3\\) ends in a footnote marker"):
+        run(product_fill('validity', '60 months', proof(footnoted, sid='r6foot', url=url), product_type=RECIP_LABEL),
+            current=current, sources=SOURCES + [src])
+    assert c._row_marker_problem({'class': 'B-1/B-2', 'entries': 'Multiple', 'validity': '60 Months ▲'})
+    # A priced cell ends in the amount, not in a marker.
+    assert c._row_marker_problem({'class': 'B-1/B-2', 'fee': 'USD 10', 'validity': '120 Months'}) is None
+    assert c._row_marker_problem({'class': 'B-1/B-2', 'fee': 'None', 'entries': 'Multiple', 'validity': '120 Months'}) is None
+
+
+def test_a_product_with_several_class_codes_needs_its_rows_to_agree():
+    disagree = ('Visa Classification | Fee | Number of Entries | Validity Period\n'
+                'B-1 | None | Multiple | 120 Months\n'
+                'B-2 | None | One | 3 Months\n'
+                'B-1/B-2 | None | Multiple | 120 Months')
+    reason = ("the table states 2 different validity values for the product's own class codes "
+              "\\(120 months for B-1, B-1/B-2; 3 months for B-2\\), so this row does not state the product's value")
+    for value in ('120 months', '3 months'):
+        src, url, current = recip('r6dis', disagree, path='reciprocity-disagree')
+        with pytest.raises(PatchRejected, match=reason):
+            run(product_fill('validity', value, proof(disagree, sid='r6dis', url=url), product_type=RECIP_LABEL),
+                current=current, sources=SOURCES + [src])
+    # The shipped pages print the same value for every B row, which agrees.
+    agree = disagree.replace('B-2 | None | One | 3 Months', 'B-2 | None | Multiple | 120 Months')
+    src2, url2, current2 = recip('r6agree', agree, path='reciprocity-agree')
+    (overlay, report), manifest, current2 = run(
+        product_fill('validity', '120 months', proof(agree, sid='r6agree', url=url2), product_type=RECIP_LABEL),
+        current=current2, sources=SOURCES + [src2])
+    assert report['routes'][0]['records'][0]['validity_duration'] == 120
+
+
+def test_an_agent_channel_needs_a_lodgement_word_beside_the_provider():
+    from app.visa_snapshot.evidence_validator import field_value_supported
+    for named in ('Our partner BLS also runs a courier desk for passport collection.',
+                  'The nearest application center is closed on public holidays.',
+                  'VFS Global publishes its processing statistics every quarter.'):
+        assert not field_value_supported('application_channel', 'authorised_agent', named), named
+    for lodged in ('Applications are lodged at the BLS International centre in Jakarta.',
+                   'La solicitud de visado se presenta ante Indonesia BLS Visa Spain.',
+                   'You must submit your application at the VFS visa application centre.'):
+        assert field_value_supported('application_channel', 'authorised_agent', lodged), lodged
+    # The two agent wordings carry the lodgement in the word "agent" itself.
+    assert field_value_supported('application_channel', 'authorised_agent', 'Applications may be filed through an accredited travel agency.')
+
+
+def test_a_partial_list_names_the_items_the_review_quoted():
+    sentence = 'To complete the form, you will need your passport, a credit card, and an email address.'
+    fill, sources = on_page('required_documents', ['Passport', 'Credit card'], sentence, 'r6partial')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    stored = overlay['entries'][0]['fields']['visa_products'][0]['field_provenance']['required_documents']
+    assert stored['status'] == 'partial' and stored['retained_unverified_elements'] == ['Passport', 'Credit card']
+    # The grader credits a partial proof whose verified elements cover the
+    # stored value, so a list known to be short never names them there.
+    assert stored['verified_elements'] == []
+    assert report['routes'][0]['fills'][0]['grade_credited'] is False
+
+
+def test_an_age_scoped_fee_names_its_band_on_the_applied_record():
+    sentence = 'A partir de los 12 años de edad, deberá abonar una tasa de visado de 90 EUROS.'
+    fill, sources = on_page('fee', {'amount': 90, 'currency': 'EUR'}, sentence, 'r6age')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    applied = report['routes'][0]['fills'][0]
+    assert applied['age_scope'] == 'Fee stated for applicants aged 12 and over.'
+    # visa_fee_qualifier holds "from" or nothing and 90 EUR is the top band,
+    # so the served column stays empty rather than misstating the amount.
+    assert report['routes'][0]['changed_record_columns'] == ['visa_fee_amount', 'visa_fee_currency']
+    assert report['routes'][0]['records'][0]['visa_fee_qualifier'] is None
