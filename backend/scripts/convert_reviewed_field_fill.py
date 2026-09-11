@@ -13,13 +13,26 @@ reviewed overlay that a release must preflight against the exact six
 production layers it was built from.
 
 Every quote is bound to the cell's own subject before it is believed: the
-sentence must name the product, must not speak about another nationality or
-another entry type, must use a validity word for a validity and a stay word
-for a stay, must put the figure beside its own unit, must carry the currency
-marker beside the amount, and must be about the government fee rather than a
-service charge. A documented absence names the captured pages it checked and
-is refused when any of them states a value for the field. Where a gate cannot
-decide, it rejects, because a wrong value reaches travellers.
+sentence must bind to the product, must not speak about another nationality
+or another entry type, must use a validity word for a validity and a stay
+word for a stay, must put the figure beside its own unit, must carry the
+currency marker beside the amount, and must be about the government fee
+rather than a service charge. A documented absence names the captured pages
+it checked and is refused when any of them states a value for the field.
+Where a gate cannot decide, it rejects, because a wrong value reaches
+travellers.
+
+A served product is named with a synthesised label ("Visitor visa (subclass
+600) — Tourist stream (apply outside Australia)") that no government page
+prints, so a sentence binds to a product through anchors derived from the
+product: its class codes (subclass 600, B-1/B-2, K-ETA, VLS-TS), its permit
+family (visa on arrival, electronic visa, travel authorisation, tourist
+visa), its stream (tourist, business, family), its entry type and a duration
+in its name. A sentence binds to the target when it carries an anchor of the
+target and no anchor of a sibling product that the target lacks; against a
+sibling that shares every anchor the sentence carries, it must carry a word
+of the target's name that sibling's name lacks; a sentence with no anchor at
+all binds only when the route serves exactly one product.
 """
 from copy import deepcopy
 from datetime import date
@@ -695,20 +708,346 @@ def _name_spans(name, sentence):
     return [(m.start(), m.end()) for m in re.finditer(pattern, sentence, re.I)]
 
 
-def _several_figures_problem(sentence, n, unit, product_type, products, merged):
+# Product anchors. Ellis names a served product with a synthesised label
+# that no government page prints, so a quote binds to a product through
+# the anchors its label carries. Each family pairs the pattern that finds
+# it in a label with the forms the official pages of the served
+# destinations print. A family word alone ("tourist") is a stream anchor;
+# the family noun ("tourist visa") is a second, sharper anchor.
+_ANCHOR_FAMILIES = {
+    'visa on arrival': (
+        r'visas? on arrival|visa-on-arrival|arrival visas?|\bvoa\b|\be-?voa\b',
+        re.compile(_words(r'visas? (?:on|upon) arrival|visa-on-arrival|arrival visas?|e-?voa|voa|visas? à l[’\']arrivée|'
+                          r'visados? a la llegada|visa al arribo|visum bei (?:der )?ankunft|thị thực tại cửa khẩu|visa kedatangan',
+                          r'落地签|落地簽|到着ビザ|到着査証|도착비자|도착 비자|виз\w* по прибыти|วีซ่าหน้าด่าน|วีซ่า ณ ช่องทาง'), re.I)),
+    'unified electronic visa': (
+        r'unified (?:electronic |e-?)visas?',
+        re.compile(_words(r'unified (?:electronic |e-?)visas?|unified e-?visas?',
+                          r'един(?:ая|ой|ую) электронн(?:ая|ой|ую) виз\w*|ЕЭВ|统一电子签证|統一電子簽證'), re.I)),
+    'electronic visa': (
+        r'e-?visas?|evisas?|electronic visas?|electronic (?:[a-z]+ )?visas?|e-[a-z]+ visas?|\be-?voa\b',
+        re.compile(_words(r'e-?visas?|evisas?|electronic visas?|electronic (?:[a-z]+ )?visas?|online visas?|e-?voa|e-[a-z]+ visas?|'
+                          r'visas? électroniques?|visados? electrónicos?|visa elektronik|thị thực điện tử',
+                          r'电子签证|電子簽證|电子签|電子簽|電子ビザ|電子査証|전자비자|전자 비자|электронн\w* виз\w*|วีซ่าอิเล็กทรอนิกส์'), re.I)),
+    'travel authorisation': (
+        r'travel authori[sz]ation|travel authority|electronic travel|\be-?tas?\b|\bk-?eta\b|\bnz ?eta\b|\besta\b',
+        re.compile(_words(r'electronic travel authori[sz]ations?|electronic travel authority|travel authori[sz]ations?|'
+                          r'electronic authori[sz]ations?|autorisations? de voyage électroniques?|'
+                          r'autorizaci(?:ón|ones) (?:electrónica )?de viaje|otorisasi perjalanan',
+                          r'电子旅行授权|電子旅行授權|电子旅行许可|電子旅行許可|电子旅行认证|電子旅行認證|전자여행허가|'
+                          r'электронн\w* разрешени\w* на (?:въезд|поездку)'), re.I)),
+    'tourist visa': (
+        r'tourist visas?|tourism visas?|touristic visas?|tourist e-?visas?|e-?tourist visas?|visas? for tourism|旅游签证|旅遊簽證|観光ビザ|観光査証|관광비자',
+        re.compile(_words(r'tourist visas?|tourism visas?|touristic visas?|visas? for tourism|visas? for tourists?|tourist e-?visas?|'
+                          r'e-?tourist visas?|visados? de turismo|visados? de turista|visados? turísticos?|visas? de turismo|'
+                          r'visas? (?:de )?tourisme|visas? touristiques?|touristenvis(?:um|a|en)|visa turis|visa wisata|thị thực du lịch|'
+                          r'visa du lịch|วีซ่าท่องเที่ยว',
+                          r'旅游签证|旅遊簽證|观光签证|觀光簽證|観光ビザ|観光査証|관광비자|관광 비자|туристическ\w* виз\w*|виз\w* для туризма'), re.I)),
+    'visitor visa': (
+        r'visitor visas?|visit visas?|visitor \(subclass|visitor subclass|temporary visitor|temporary resident visa|visitor\'?s visa',
+        re.compile(_words(r'visitor visas?|visit visas?|visitor \(subclass \d+\)|visitor subclass \d+|temporary visitor(?:[’\']s)? visas?|'
+                          r'temporary visitor|temporary resident visas?|visas? de visiteur|visados? de visitante|visitor[’\']s visas?',
+                          r'访问签证|訪問簽證|探访签证|短期滞在|단기방문|방문비자|방문 비자|гостев\w* виз\w*'), re.I)),
+    'student visa': (
+        r'student visas?|study visas?|\bstudents?\b|\bstudy\b',
+        re.compile(_words(r'student visas?|study visas?|visas? (?:de |pour )?étudiants?|visas? (?:de )?études|visados? de estudiantes?|'
+                          r'visados? de estudios|studentenvis(?:um|a|en)|studienvis(?:um|a|en)|visa pelajar|thị thực du học',
+                          r'留学签证|留學簽證|学生签证|學生簽證|留学ビザ|留学査証|유학비자|학생비자|студенческ\w* виз\w*|учебн\w* виз\w*'), re.I)),
+    'business visa': (
+        r'business visas?',
+        re.compile(_words(r'business visas?|visas? d[’\']affaires|visados? de negocios|geschäftsvis(?:um|a|en)|visa bisnis|'
+                          r'thị thực công tác|thị thực thương mại',
+                          r'商务签证|商務簽證|商用ビザ|商用査証|비즈니스 비자|상용비자|делов\w* виз\w*|бизнес-виз\w*'), re.I)),
+    'schengen': (r'schengen', re.compile(_words(r'schengen', r'шенген\w*|申根|シェンゲン|셰겐|쉥겐|เชงเก้น|เชงเกน'), re.I)),
+    'travel permit': (
+        r'travel permits?|\bpermits?\b',
+        re.compile(_words(r'travel permits?|permits?', r'通行证|通行證|回乡证|回鄉證|허가증|разрешени\w* на въезд'), re.I)),
+    'visa-free entry': (
+        r'visa[- ]free|no visa|exempt',
+        re.compile(_words(r'visa[- ]free|visa exemption|visa[- ]exempt|exempt(?:ed)? from (?:the )?visa|without a visa|'
+                          r'no visa (?:is )?(?:required|needed)|sin visado|sans visa|visumfrei|miễn thị thực|bebas visa',
+                          r'免签|免簽|ビザ免除|査証免除|무비자|비자 면제|безвизов\w*|без визы|ฟรีวีซ่า|ยกเว้นวีซ่า'), re.I)),
+    'paper': (r'\bpaper\b|\bsticker\b|\bregular\b|\bordinary\b|\bconventional\b', _RESTRICTIVE_FAMILIES['paper']),
+    'long-stay': (r'long[- ]stay|long[- ]term|\bvls\b',
+                  re.compile(_words(r'long[- ]stay|long[- ]term|long séjour|larga duración|larga estancia|dài hạn',
+                                    r'长期|長期|장기|долгосрочн\w*'), re.I)),
+    'short-stay': (r'short[- ]stay|short[- ]term',
+                   re.compile(_words(r'short[- ]stay|short[- ]term|court séjour|corta duración|estancia corta|ngắn hạn',
+                                     r'短期|단기|краткосрочн\w*'), re.I)),
+    'transit': (r'\btransit\b', _VISA_CLASSES['transit']),
+    'medical': (r'\bmedical\b', _VISA_CLASSES['medical']),
+    'group': (r'\bgroups?\b|团队|團隊|団体', _RESTRICTIVE_FAMILIES['group']),
+    'individual': (r'\bindividual\b|个人|個人',
+                   re.compile(_words(r'individuals?|individuel(?:le)?s?|individual(?:es)?', r'个人|個人|개인|индивидуальн\w*'), re.I)),
+    'frequent traveller': (r'frequent travell?er', re.compile(_words(r'frequent travell?ers?', ''), re.I)),
+    'approved destination status': (r'approved destination status|\bads\b',
+                                    re.compile(_words(r'approved destination status|ADS', ''), re.I)),
+    'high income': (r'high[- ]income|高收入', re.compile(_words(r'high[- ]income', r'高收入|高所得'), re.I)),
+    'minor': (r'under (?:the age of )?\d+|\bchild(?:ren)?\b|\bminors?\b|未满|未滿|未満|미만',
+              re.compile(_words(r'under (?:the age of )?\d+|below (?:the age of )?\d+|minors?|child(?:ren)?|aged under',
+                                r'未满|未滿|未満|미만|младше|несовершеннолетн\w*'), re.I)),
+    'adult': (r'\d+ (?:and|or) (?:over|above|older)|\badults?\b|aged \d+|\d+周岁(?:及)?以上|\d+세 이상',
+              re.compile(_words(r'\d+ (?:years )?(?:and|or) (?:over|above|older)|adults?|aged \d+ (?:and|or) (?:over|above)',
+                                r'成年|成人|\d+周岁(?:及)?以上|\d+세 이상|старше \d+|совершеннолетн\w*'), re.I)),
+}
+# Stream words: the family word on its own, in the served languages.
+_ANCHOR_STREAMS = {
+    'tourist': (r'tourists?|tourism|touristic|旅游|旅遊|观光|觀光|観光|관광',
+                re.compile(_words(r'tourists?|tourism|touristic|turismo|turistas?|turístic[oa]s?|tourisme|touristiques?|touristen|'
+                                  r'touristisch|du lịch|wisata|turis|ท่องเที่ยว',
+                                  r'турист\w*|туристическ\w*|旅游|旅遊|观光|觀光|観光|관광'), re.I)),
+    'business': (r'\bbusiness\b|商务|商務|商用', _VISA_CLASSES['business']),
+    'family': (r'\bfamily\b|\bfamilies\b|\brelatives\b|探亲|探親|家族', _VISA_CLASSES['family']),
+}
+# The families a served requirement detail implies whatever the label says.
+_DETAIL_FAMILIES = {
+    'evisa': ('electronic visa',), 'evisa_on_arrival': ('electronic visa', 'visa on arrival'),
+    'paper_visa_on_arrival': ('visa on arrival',), 'eta_electronic_authorization': ('travel authorisation',),
+    'paper_visa': ('paper',), 'conditional_visa_free': ('visa-free entry',), 'unconditional_visa_free': ('visa-free entry',),
+}
+_ANCHOR_TYPE_RES = {name: re.compile(pattern, re.I) for name, (pattern, _) in {**_ANCHOR_FAMILIES, **_ANCHOR_STREAMS}.items()}
+_ANCHOR_PAGE_RES = {name: page for name, (_, page) in {**_ANCHOR_FAMILIES, **_ANCHOR_STREAMS}.items()}
+_SUBCLASS_RE = re.compile(r'(?:sub)?class\s*(\d{2,4})', re.I)
+_DURATION_TOKEN_RE = re.compile(r'^\d+[-‐–]?(?:days?|months?|years?|weeks?|hours?)$', re.I)
+_VISA_TOKEN_RE = re.compile(r'^e?-?visas?$|^evisas?$', re.I)
+_CODE_JOIN = r'[-‐–\s/]?'
+# The words of a product label that name nothing on their own: the
+# vocabulary the anchors already read, and the little words of a label.
+_LABEL_STOPWORDS = frozenset(
+    'visa visas visado visto visum stream the and for with apply applied applying application applications outside inside '
+    'from via per entry entries single double multiple multi tourist tourism business family electronic travel authorization '
+    'authorisation authority visitor visitors visit student students study permit permits subclass class type day days month '
+    'months year years week weeks hour hours arrival paper sticker ordinary regular short long stay term applicants applicant '
+    'holders holder over under required not non available eligible eligibility only all any other than more less through '
+    'without free needed need country countries national nationals citizen citizens'.split())
+
+
+def _label_tokens(label):
+    """The tokens of a product label, without the brackets and list marks."""
+    return [t.strip('.,;:/-‐–') for t in re.split(r'[\s(),;:—–…]+', str(label or '')) if t.strip('.,;:/-‐–')]
+
+
+def _country_words():
+    """Every alias of every known nationality, so a label's country word
+    (JAPAN eVISA) is never mistaken for a class code."""
+    if not hasattr(_country_words, 'cache'):
+        _country_words.cache = frozenset(a for code in _known_nationalities() for a in _aliases(code))
+    return _country_words.cache
+
+
+def _is_code(token):
+    """Whether a label token is a class code: letters beside digits (B-2,
+    e-T2V) or an acronym (ETA, eTAS, K-ETA, VLS-TS), never a duration, a
+    visa word or a country name."""
+    if len(token) > 12 or _DURATION_TOKEN_RE.match(token) or _VISA_TOKEN_RE.match(token) or token.isdigit():
+        return False
+    if _norm(token) in _country_words():
+        return False
+    letters = [ch for ch in token if ch.isalpha()]
+    if not letters:
+        return False
+    if any(ch.isdigit() for ch in token) or re.match(r'^e-?[A-Z][A-Za-z]{2,}$', token):
+        return True
+    upper = sum(1 for ch in letters if ch.isupper())
+    lower = len(letters) - upper
+    return upper >= 2 and lower <= 1 and len(token) <= 8
+
+
+def _code_key(code):
+    return re.sub(r'[^0-9a-z]', '', code.lower())
+
+
+def _code_pattern(code):
+    """The code as pages print it: its runs of letters and digits, joined
+    with an optional hyphen, space or slash, as written or all in capitals.
+    Codes keep their case: ESTA is not the Spanish word esta."""
+    runs = re.findall(r'[A-Za-z]+|\d+', code)
+    written = _CODE_JOIN.join(re.escape(r) for r in runs)
+    capitals = _CODE_JOIN.join(re.escape(r.upper()) for r in runs)
+    return re.compile(r'(?<![A-Za-z0-9])(?:' + written + '|' + capitals + r')(?![A-Za-z0-9])')
+
+
+def _letter_code_pattern(letter):
+    """A one-letter class (China's L visa) counts only beside a visa word or
+    in brackets: "L visa", "visa (L)", "L字签证", "(L)"."""
+    return re.compile(r'(?<![A-Za-z])' + letter + r'(?![A-Za-z])(?=[\s\-]?(?:[Vv]isa|签证|簽證|字签证|字簽證|类|類|型))|'
+                      r'(?<=[Vv]isa[\s(（])' + letter + r'(?![A-Za-z])|(?<=[(（])' + letter + r'(?=[)）])')
+
+
+def _product_anchors(product):
+    """The anchors of a served product, keyed so two products share an
+    anchor exactly when they share its meaning: (label, page pattern)."""
+    label = str(product.get('type') or '')
+    anchors = {}
+    for m in _SUBCLASS_RE.finditer(label):
+        anchors[('subclass', m.group(1))] = ('subclass ' + m.group(1),
+                                            re.compile(r'(?:sub)?class\s*' + m.group(1) + r'(?!\d)', re.I))
+    tokens = _label_tokens(label)
+    skip = False
+    for i, token in enumerate(tokens):
+        if skip:
+            skip = False
+            continue
+        # A code split at a space ("e-T2 V") is the code written together.
+        if _is_code(token) and i + 1 < len(tokens) and len(tokens[i + 1]) == 1 and tokens[i + 1].isupper():
+            token, skip = token + tokens[i + 1], True
+        parts = [token] + ([p for p in token.split('/') if p] if '/' in token else [])
+        for part in parts:
+            if len(part) == 1 and part.isupper() and part not in 'AI':
+                anchors[('code', part.lower())] = (part, _letter_code_pattern(part))
+            elif _is_code(part):
+                anchors[('code', _code_key(part))] = (part, _code_pattern(part))
+    families = {name for name, pattern in _ANCHOR_TYPE_RES.items() if pattern.search(label)}
+    families.update(_DETAIL_FAMILIES.get(str(product.get('requirement_detail') or ''), ()))
+    for name in sorted(families):
+        anchors[('family', name)] = (name, _ANCHOR_PAGE_RES[name])
+    entries = _entry_types(label, qualifiers=True)
+    cell = str(product.get('entry') or '').strip().lower()
+    if cell in ENTRIES:
+        entries.add(cell)
+    for kind in sorted(entries):
+        anchors[('entry', kind)] = (kind + ' entry', re.compile(_ENTRY_STATEMENTS[kind] + '|' + _ENTRY_QUALIFIERS[kind], re.I))
+    for unit in _UNIT_WORDS:
+        for m in _UNIT_FIGURE_RES[unit].finditer(label):
+            n = _figure_of(m.group())
+            if n is not None:
+                shown = int(n) if n == int(n) else n
+                anchors[('duration', n, unit)] = ('%s %s' % (shown, unit.lower() + ('s' if shown != 1 else '')), _figure_re(n, unit))
+    return anchors
+
+
+def _anchors_in(text, anchors):
+    """The keys of the anchors that stand in this text."""
+    return {key for key, (_, pattern) in anchors.items() if pattern.search(text)}
+
+
+def _anchor_spans(text, anchors):
+    return [(m.start(), m.end()) for _, pattern in anchors.values() for m in pattern.finditer(text)]
+
+
+def _anchor_labels(anchors, keys=None):
+    return ', '.join(anchors[k][0] for k in anchors if keys is None or k in keys)
+
+
+def _siblings(product, products):
+    return [p for p in (products or []) if isinstance(p, dict) and p.get('type') and p is not product
+            and p.get('type') != product.get('type')]
+
+
+def _label_words(label):
+    """The words of a label that can tell it from a sibling's."""
+    words = set()
+    for token in re.findall(r'[^\W_]+', _norm(label)):
+        if token in _LABEL_STOPWORDS or token.isdigit():
+            continue
+        if len(token) >= 3 or not _spaced_script(token):
+            words.add(token)
+    return words
+
+
+def _word_in(word, sentence):
+    return bool(re.search(_alias_pattern(word), _norm(sentence)))
+
+
+def _free_spans(label, sentence, labels):
+    """Where this label stands in the sentence outside any longer label of
+    the same route."""
+    covering = [span for other in labels if len(other) > len(label) for span in _name_spans(other, sentence)]
+    return [(a, b) for a, b in _name_spans(label, sentence) if not any(x <= a and b <= y for x, y in covering)]
+
+
+def _mentions(text, product):
+    """Whether a page mentions the product, by its label or any anchor."""
+    from app.visa_snapshot.evidence_validator import quote_in_text
+    return quote_in_text(product['type'], text) or bool(_anchors_in(text, _product_anchors(product)))
+
+
+def _binding_problem(sentence, product, products):
+    """Why this sentence does not bind to the product among the route's
+    served products, or None when it does. The sentence must carry an
+    anchor of the target and no anchor a sibling has that the target lacks;
+    against a sibling sharing every anchor the sentence carries, it must
+    carry a word of the target's label that sibling's label lacks; and a
+    sentence with no anchor at all binds only on a one-product route."""
+    target = _product_anchors(product)
+    siblings = [(p, _product_anchors(p)) for p in _siblings(product, products)]
+    # A label printed whole names its product, unless it stands inside a
+    # longer sibling label ("Visa on Arrival (B1)" inside "Electronic Visa
+    # on Arrival (B1)").
+    labels = [product['type']] + [p['type'] for p, _ in siblings]
+    mine = _free_spans(product['type'], sentence, labels)
+    theirs = [p['type'] for p, _ in siblings if _free_spans(p['type'], sentence, labels)]
+    if mine and theirs:
+        return 'the sentence names several products (%s) and binds to none of them alone' % ', '.join([product['type']] + theirs)
+    if mine:
+        return None
+    if theirs:
+        return 'the sentence is about the sibling product %s (named), not %s' % (theirs[0], product['type'])
+    every = dict(target)
+    for _, anchors in siblings:
+        every.update(anchors)
+    found = _anchors_in(sentence, every)
+    own = found & set(target)
+    for sibling, anchors in siblings:
+        foreign = found & (set(anchors) - set(target))
+        if not foreign:
+            continue
+        if own - set(anchors):
+            return 'the sentence names several products (%s, %s) and binds to none of them alone' % (product['type'], sibling['type'])
+        return 'the sentence is about the sibling product %s (%s), not %s' % (
+            sibling['type'], _anchor_labels(anchors, foreign), product['type'])
+    if not found:
+        if siblings:
+            return 'the sentence carries no anchor of the product (%s) and the route serves %d products' % (
+                _anchor_labels(target) or 'none', len(siblings) + 1)
+        return None
+    for sibling, anchors in siblings:
+        if own - set(anchors):
+            continue
+        distinct = set(target) - set(anchors)
+        if distinct:
+            return 'the sentence carries only anchors the product shares with its sibling %s (%s) and none of its own (%s)' % (
+                sibling['type'], _anchor_labels(target, own), _anchor_labels(target, distinct))
+        words = _label_words(product['type']) - _label_words(sibling['type'])
+        if not words:
+            return 'the product shares every anchor with its sibling %s and no word of its name tells them apart' % sibling['type']
+        if not any(_word_in(w, sentence) for w in words):
+            return 'the sentence carries only anchors the product shares with its sibling %s (%s) and none of the words that tell them apart (%s)' % (
+                sibling['type'], _anchor_labels(target, own), ', '.join(sorted(words)))
+    return None
+
+
+def _several_figures_problem(sentence, n, unit, product, products, merged):
     """The fee branch's several-amounts guard for durations. A statement
     that names several products, or several figures of the value's unit
-    with the value not beside the product name, binds nothing."""
+    with the value not beside the product's own anchor, binds nothing."""
     from app.visa_snapshot.evidence_validator import quote_in_text
-    names = [name for name in _served_names(products, merged, product_type) if quote_in_text(name, sentence)]
-    if len(names) > 1:
-        return 'the sentence names several products (%s), so its figure cannot be bound to one' % ', '.join(names)
+    typed = [p for p in (products or []) if isinstance(p, dict) and p.get('type')]
+    anchors = {p['type']: _product_anchors(p) for p in typed}
+    if product is not None:
+        spans = _name_spans(product['type'], sentence) + _anchor_spans(sentence, anchors.get(product['type'], {}))
+        anchor = product['type']
+    else:
+        named = []
+        for p in typed:
+            shared = set().union(*(set(a) for t, a in anchors.items() if t != p['type'])) if len(typed) > 1 else set()
+            own = {k: v for k, v in anchors[p['type']].items() if k not in shared}
+            if quote_in_text(p['type'], sentence) or _anchors_in(sentence, own):
+                named.append(p)
+        category = merged.get('visa_category') if isinstance(merged, dict) else None
+        names = [p['type'] for p in named]
+        if isinstance(category, str) and category.strip() and quote_in_text(category, sentence) and _norm(category) not in {_norm(x) for x in names}:
+            names.append(category)
+        if len(names) > 1:
+            return 'the sentence names several products (%s), so its figure cannot be bound to one' % ', '.join(names)
+        anchor = names[0] if names else None
+        spans = _name_spans(anchor, sentence) if anchor else []
+        if named:
+            spans += _anchor_spans(sentence, anchors[named[0]['type']])
     figures = [(_figure_of(m.group()), m.start(), m.end()) for m in _UNIT_FIGURE_RES[unit].finditer(sentence)]
     distinct = {f[0] for f in figures if f[0] is not None}
     if len(distinct) <= 1:
         return None
-    anchor = product_type or (names[0] if names else None)
-    spans = _name_spans(anchor, sentence) if anchor else []
     if not spans:
         return 'the sentence states several %s figures and names no product to bind this one to' % unit.lower()
 
@@ -931,24 +1270,40 @@ def _about_field(page, field):
     return bool(cue.search(title) or cue.search(lead))
 
 
-def _field_page_id(proof, sources, field, product):
+def _heading_names(heading, product, products):
+    """Whether a page heading is about the product: it names the product
+    or carries one of its anchors, and no anchor of a sibling the product
+    lacks."""
+    from app.visa_snapshot.evidence_validator import quote_in_text
+    if quote_in_text(product['type'], heading):
+        return True
+    target = _product_anchors(product)
+    if not _anchors_in(heading, target):
+        return False
+    for sibling in _siblings(product, products):
+        anchors = _product_anchors(sibling)
+        if _anchors_in(heading, {k: v for k, v in anchors.items() if k not in target}):
+            return False
+    return True
+
+
+def _field_page_id(proof, sources, field, product, products=None):
     """The first checked page that is the destination's page about this
     field for the product, or None. For a validity, stay or entry count the
-    product's own page counts when its heading names the product and the
+    product's own page counts when its heading is about the product and the
     page talks about the field."""
-    from app.visa_snapshot.evidence_validator import quote_in_text
     for sid in proof.get('source_ids') or []:
         page = sources.get(sid)
         if not page:
             continue
         text = page['text']
-        if product is not None and not quote_in_text(product['type'], text):
+        if product is not None and not _mentions(text, product):
             continue
         if _about_field(page, field):
             return sid
         if field in ('validity', 'max_stay_days', 'permitted_stay_days', 'permitted_stay', 'entry') and product is not None:
             title, lead = _page_title_and_lead(text)
-            if (quote_in_text(product['type'], title) or quote_in_text(product['type'], lead)) and _FIELD_CUES[field].search(text):
+            if _heading_names(title + '\n' + lead, product, products) and _FIELD_CUES[field].search(text):
                 return sid
     return None
 
@@ -1056,23 +1411,60 @@ def _currency_beside(sentence, amount, code, destination):
         if codes is None:
             seen.append('no currency marker stands beside the amount')
             continue
-        if len(codes) > 1:
-            qualified = set()
-            for pattern, named in _MARKER_TABLE:
-                if len(named) == 1 and pattern.search(sentence) and named <= codes:
-                    qualified |= named
-            home = _HOME_CURRENCY.get(destination)
-            if len(qualified) == 1:
-                codes = qualified
-            elif home in codes and not qualified:
-                codes = {home}
-            else:
-                seen.append('the currency marker beside the amount is ambiguous and the sentence does not name it')
-                continue
+        codes = _resolved_codes(codes, sentence, destination)
+        if codes is None:
+            seen.append('the currency marker beside the amount is ambiguous and the sentence does not name it')
+            continue
         if code in codes:
+            # Two amounts in the value's own currency are a table row or a
+            # choice (a standard and an express fee), never one fee.
+            others = _amounts_priced_in(sentence, code, destination) - {_amount_key(m.group())}
+            if others:
+                return 'the sentence prices several %s amounts (%s), not one fee' % (code, ', '.join(sorted(others)))
             return None
         seen.append('the quote prices in %s, not %s' % ('/'.join(sorted(codes)), code))
     return seen[0] if seen else 'the amount is not in this sentence'
+
+
+def _resolved_codes(codes, sentence, destination):
+    """An ambiguous marker (a bare dollar sign) resolves only through a
+    qualifier in the same sentence or the destination's own currency."""
+    if len(codes) == 1:
+        return codes
+    qualified = set()
+    for pattern, named in _MARKER_TABLE:
+        if len(named) == 1 and pattern.search(sentence) and named <= codes:
+            qualified |= named
+    home = _HOME_CURRENCY.get(destination)
+    if len(qualified) == 1:
+        return qualified
+    if home in codes and not qualified:
+        return {home}
+    return None
+
+
+def _amount_key(token):
+    return re.sub(r'[,.]00$', '', token).replace(',', '').replace('.', '').replace(' ', '')
+
+
+def _amounts_priced_in(sentence, code, destination):
+    """The distinct amounts the sentence writes beside a marker of this
+    currency."""
+    amounts = set()
+    for m in _NUMBER_TOKEN_RE.finditer(sentence):
+        codes = _adjacent_marker(sentence[max(0, m.start() - 24):m.start()], sentence[m.end():m.end() + 32])
+        codes = _resolved_codes(codes, sentence, destination) if codes else None
+        if codes and code in codes:
+            amounts.add(_amount_key(m.group()))
+    return amounts
+
+
+# A sentence about the money an applicant must hold prices nothing.
+_FUNDS_WORDS = re.compile(_words(
+    r'funds|balance|income|deposit|savings|bank statements?|financial means|means of subsistence|sufficient means|'
+    r'medios económicos|solvencia|ressources|moyens de subsistance|fondos|finanzielle mittel|tài chính|dana|'
+    r'ทุนทรัพย์|средств к существованию|финансов\w* средств',
+    r'收入|存款|资金|資金|預金|잔고|소득|재정'), re.I)
 
 
 def _fee_sentence_problem(sentence, route, product, products, merged):
@@ -1098,6 +1490,8 @@ def _fee_sentence_problem(sentence, route, product, products, merged):
             return 'the fee is stated for citizens of another country, not %s' % route['passport_nationality']
     if _TOTAL_RE.search(sentence) or _MULTIPLIED_RE.search(sentence):
         return 'the amount is a computed total, not the fee per application'
+    if _FUNDS_WORDS.search(sentence):
+        return 'the sentence is about the applicant\'s funds or income, not the fee'
     return None
 
 
@@ -1176,7 +1570,7 @@ def _list_states(text, cue, words, span=5):
     return None
 
 
-def _check_absence(proof, sources, route, field, value, label, product=None):
+def _check_absence(proof, sources, route, field, value, label, product=None, products=None):
     """A documented absence names the captured destination pages it checked,
     carries its review date, its verifier and a reason, is refused when any
     named page states a value for the field, and must include the
@@ -1192,7 +1586,7 @@ def _check_absence(proof, sources, route, field, value, label, product=None):
     # The general batch's own absence rule: an empty value and a reason.
     _checked_proof(proof, sources, route, field, value, label)
     _review_date(proof, label)
-    from app.visa_snapshot.evidence_validator import jurisdiction_matches, quote_in_text
+    from app.visa_snapshot.evidence_validator import jurisdiction_matches
     ids = proof.get('source_ids')
     if (not isinstance(ids, list) or not ids or len(set(ids)) != len(ids)
             or any(not isinstance(i, str) or i not in sources for i in ids)):
@@ -1200,14 +1594,15 @@ def _check_absence(proof, sources, route, field, value, label, product=None):
     pages = [sources[i] for i in ids]
     if any(not jurisdiction_matches(page['url'], route['destination_country']) for page in pages):
         raise PatchRejected(label + ': every page an absence checked must be a captured destination-government page')
-    if product is not None and not any(quote_in_text(product['type'], page['text']) for page in pages):
-        raise PatchRejected(label + ': none of the pages checked mentions the product ' + str(product['type']))
+    if product is not None and not any(_mentions(page['text'], product) for page in pages):
+        raise PatchRejected('%s: none of the pages checked mentions the product %s (by name or by an anchor: %s)' % (
+            label, product['type'], _anchor_labels(_product_anchors(product)) or 'none'))
     for page in pages:
         stated = _states_value(field, page['text'])
         if stated:
             raise PatchRejected('%s: the absence names %s, which states a value: "%s"' % (label, page['url'], stated.strip()[:160]))
     noun = _FIELD_NOUN[field]
-    if _field_page_id(proof, sources, field, product) is None:
+    if _field_page_id(proof, sources, field, product, products) is None:
         cued = [page['url'] for page in pages if _FIELD_CUES[field].search(page['text'])]
         if cued:
             raise PatchRejected('%s: %s carries the %s cue without a value, and none of the pages checked is the '
@@ -1216,11 +1611,11 @@ def _check_absence(proof, sources, route, field, value, label, product=None):
         raise PatchRejected('%s: none of the pages checked is the destination\'s %s page for %s (by URL, title or '
                             'leading text), so the absence has not read where the value would be published' % (
                                 label, noun, product['type'] if product else 'the route'))
-    if len(_absence_reason(proof, sources, field, product)) > _NOTE_LIMIT:
+    if len(_absence_reason(proof, sources, field, product, products)) > _NOTE_LIMIT:
         raise PatchRejected(label + ': the absence reason and its page list exceed the %d characters the store keeps' % _NOTE_LIMIT)
 
 
-def _absence_reason(proof, sources, field, product):
+def _absence_reason(proof, sources, field, product, products=None):
     """The stored reason: the reviewer's words, the review date, the pages
     checked and the id of the page about the field, so a stored absence
     says what was read, when, and where the value would have been."""
@@ -1228,7 +1623,7 @@ def _absence_reason(proof, sources, field, product):
     reason = str(proof.get('reason') or '').strip()
     return '%s Checked on %s: %s. %s page checked: %s.' % (
         reason, proof['verified_at'], ', '.join(urls), _FIELD_NOUN[field].capitalize(),
-        _field_page_id(proof, sources, field, product))
+        _field_page_id(proof, sources, field, product, products))
 
 
 def _sentence_supports(field, value, sentence):
@@ -1267,14 +1662,13 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
             if (product is not None and not known <= qualified) or (product is None and not (known & qualified)):
                 return 'the sentence is qualified by a %s entry, not the subject\'s %s' % (
                     '/'.join(sorted(qualified)), '/'.join(sorted(known)))
-    product_type = product.get('type') if product is not None else None
     if field == 'validity':
         n, unit = _validity_num_unit(value)
         if _range_or_choice(sentence, n):
             return 'the sentence states a range or a choice of validities, not this one value'
         if not _bound(sentence, n, unit, _VALIDITY_WORDS, _STAY_WORDS):
             return 'the figure is not bound to a validity word in the sentence (a stay is not a validity)'
-        problem = _several_figures_problem(sentence, n, unit, product_type, products, merged)
+        problem = _several_figures_problem(sentence, n, unit, product, products, merged)
         if problem:
             return problem
     elif field in ('max_stay_days', 'permitted_stay_days'):
@@ -1284,7 +1678,7 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
             return 'the sentence states a range or a choice of stays, not this one value'
         if not _bound(sentence, value, 'Day', _STAY_WORDS, _VALIDITY_WORDS):
             return 'the figure is not bound to a stay word in the sentence (a validity is not a stay)'
-        problem = _several_figures_problem(sentence, value, 'Day', product_type, products, merged)
+        problem = _several_figures_problem(sentence, value, 'Day', product, products, merged)
         if problem:
             return problem
     elif field == 'permitted_stay':
@@ -1296,7 +1690,7 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
                 return 'the sentence states a range or a choice of stays, not this one value'
             if not _bound(sentence, n, unit, _STAY_WORDS, _VALIDITY_WORDS):
                 return 'the figure is not bound to a stay word in the sentence (a validity is not a stay)'
-            problem = _several_figures_problem(sentence, n, unit, product_type, products, merged)
+            problem = _several_figures_problem(sentence, n, unit, product, products, merged)
             if problem:
                 return problem
         elif _VALIDITY_WORDS.search(sentence):
@@ -1316,8 +1710,9 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
 def _check_fill_binding(field, value, proof, route, merged, product, label):
     """Bind the quote to the cell's own subject. The general batch already
     proved the quote is literal and the figure occurs somewhere in it. This
-    proves it is this product's, this nationality's and this field's value."""
-    from app.visa_snapshot.evidence_validator import field_value_supported, quote_in_text
+    proves it is this product's, this nationality's and this field's value.
+    A product fill is read sentence by sentence: the sentence that states
+    the value must itself bind to the product through its anchors."""
     passages = '\n'.join(item['quote'] for item in proof['evidence'])
     products = merged.get('visa_products') if isinstance(merged.get('visa_products'), list) else []
     product_type = product.get('type') if product is not None else None
@@ -1326,19 +1721,20 @@ def _check_fill_binding(field, value, proof, route, merged, product, label):
         if value not in allowed:
             raise PatchRejected('%s: the channel %s contradicts the served %s verdict' % (
                 label, value, merged.get('disposition') or 'unknown'))
-    if product is not None:
-        bound = {'type': product_type, field: value}
-        text = _monetary_text(passages, value['currency']) if field == 'fee' else passages
-        if not field_value_supported('visa_products', bound, text):
-            raise PatchRejected(label + ': no quoted sentence names the product and states this value')
     items = value if field == 'required_documents' else [value]
-    sentences = [s for s in _sentences(passages) if product_type is None or quote_in_text(product_type, s)]
+    sentences = _sentences(passages)
+    binding = {s: (_binding_problem(s, product, products) if product is not None else None) for s in sentences}
+    bound = [s for s in sentences if binding[s] is None]
     for item in items:
-        candidates = [s for s in sentences if _sentence_supports(field, item, s)]
+        candidates = [s for s in bound if _sentence_supports(field, item, s)]
         if not candidates:
             what = 'the document "%s"' % item if field == 'required_documents' else 'this value'
+            stating = [s for s in sentences if binding[s] is not None and _sentence_supports(field, item, s)]
+            if stating:
+                raise PatchRejected('%s: the sentence that states %s does not bind to the product: %s' % (
+                    label, what, binding[stating[0]]))
             raise PatchRejected('%s: no quoted sentence %sstates %s' % (
-                label, 'names the product and ' if product_type else '', what))
+                label, 'bound to the product ' if product_type else '', what))
         problems = [_sentence_problem(field, item, s, route, product, products, merged) for s in candidates]
         if all(problems):
             raise PatchRejected(label + ': ' + problems[0])
@@ -1432,7 +1828,8 @@ def _validate_fill(fill, layer, sources, prior):
         raise PatchRejected(label + ': a fill is a quoted value or a documented absence, nothing else')
     owner = product if product is not None else merged
     if _wants_absence(proof):
-        _check_absence(proof, sources, route, field, fill['value'], label, product=product)
+        _check_absence(proof, sources, route, field, fill['value'], label, product=product,
+                       products=merged.get('visa_products'))
         if set(CELLS[field]) <= set(owner.get('unpublished_fields') or []):
             raise PatchRejected(label + ': already documented as not published')
         return 'absence'
@@ -1547,9 +1944,9 @@ def _apply_fills(out, fills, route, sources):
                       kind='absence' if absence else 'fill', value=deepcopy(fill['value']), cells=list(CELLS[field]))
         product = _product_named(fields['visa_products'], fill['product_type'], label) if fill['target'] == 'product' else None
         if absence:
-            reason = _absence_reason(fill['proof'], sources, field, product)
+            reason = _absence_reason(fill['proof'], sources, field, product, fields.get('visa_products'))
             record['checked_source_urls'] = [sources[i]['url'] for i in fill['proof']['source_ids']]
-            record['field_page_id'] = _field_page_id(fill['proof'], sources, field, product)
+            record['field_page_id'] = _field_page_id(fill['proof'], sources, field, product, fields.get('visa_products'))
         # A single quoted document is not the destination's list. Its proof
         # is stored as partial with no verified element, so the grader never
         # credits the cell and the record's grade cannot rise on it.

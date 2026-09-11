@@ -248,7 +248,7 @@ def test_a_route_with_operator_entries_is_rejected():
 
 def test_a_validity_is_not_taken_from_a_stay_sentence():
     fill = product_fill('validity', '30 days', proof('The holder may stay in Russia for up to 30 days.'))
-    with pytest.raises(PatchRejected, match='names the product and states this value'):
+    with pytest.raises(PatchRejected, match='the figure is not bound to a validity word in the sentence'):
         run(fill)
 
 
@@ -258,7 +258,8 @@ def test_a_validity_is_not_taken_from_another_products_sentence():
                                 'Visas. A tourist visa is valid for up to 30 days. A business visa is valid for up to 90 days.')]
     wrong = product_fill('validity', '90 days', proof('A business visa is valid for up to 90 days.', sid='ru_aus_both',
                                                        url='https://australia.mid.ru/en/consular_services/visas/'))
-    with pytest.raises(PatchRejected, match='product Tourist visa validity: no quoted sentence names the product'):
+    with pytest.raises(PatchRejected, match='product Tourist visa validity: the sentence that states this value does not bind to the product: '
+                                            'the sentence is about the sibling product Business visa \\(named\\), not Tourist visa'):
         run(wrong, current=current, sources=sources)
     right = product_fill('validity', '30 days', proof('A tourist visa is valid for up to 30 days.', sid='ru_aus_both',
                                                        url='https://australia.mid.ru/en/consular_services/visas/'))
@@ -294,7 +295,7 @@ def test_a_sentence_about_another_entry_type_cannot_fill_this_product():
 def test_the_scope_note_never_stands_in_for_the_sentence():
     fill = product_fill('validity', '30 days', proof('The holder may stay in Russia for up to 30 days.'))
     fill['proof']['scope_note'] = 'The tourist visa validity for Australian citizens is 30 days.'
-    with pytest.raises(PatchRejected, match='names the product and states this value'):
+    with pytest.raises(PatchRejected, match='the figure is not bound to a validity word in the sentence'):
         run(fill)
 
 
@@ -1086,3 +1087,127 @@ def test_the_product_index_is_counted_over_typed_products_like_tstation():
     (overlay, report), manifest, current = run(current=current)
     assert report['routes'][0]['fills'][0]['product_index'] == 0
     assert [(r['visa_type_name'], r['validity_duration']) for r in report['routes'][0]['records']] == [('Tourist visa', 30)]
+
+
+# Round 4: anchor binding. Ellis names a served product with a synthesised
+# label no government page prints, so a sentence binds to a product through
+# the anchors the label carries, never through the label itself.
+
+def labelled_layer(*labels, **cells):
+    """The fixture with its product renamed to synthesised labels no page
+    prints, one served product per label, every other cell the fixture's."""
+    products = [second_product(label, **cells) for label in labels]
+    raw, seed = deepcopy(RAW), deepcopy(SEED)
+    raw['visa_category'] = labels[0]
+    raw['visa_products'] = [dict(deepcopy(p), field_provenance=None, source_url=None, source_quote=None,
+                                 verified_at=None, verifier=None) for p in products]
+    seed['fields']['visa_products'] = products
+    return layer(raw=raw, seed=seed)
+
+
+def test_a_subclass_code_binds_a_sentence_to_the_labelled_product():
+    label = 'Visitor visa (subclass 600) — Tourist stream (apply outside Australia)'
+    current = labelled_layer(label, 'eVisitor (subclass 651)')
+    products = current['merged_guidance']['visa_products']
+    target, sibling = products
+    assert {k[1] for k in c._product_anchors(target) if k[0] == 'subclass'} == {'600'}
+    assert ('code', 'evisitor') in c._product_anchors(sibling) and ('subclass', '651') in c._product_anchors(sibling)
+    fill, sources = on_page('validity', '12 months', 'A Visitor visa (subclass 600) in the Tourist stream is valid for up to 12 months.',
+                            'anchor1', product_type=label)
+    assert c._binding_problem(fill['proof']['evidence'][0]['quote'], target, products) is None
+    (overlay, report), manifest, current = run(fill, current=current, sources=sources)
+    rows = report['routes'][0]['records']
+    assert [(r['visa_type_name'], r['validity_duration']) for r in rows] == [(t._clean_text(label), 12), ('eVisitor (subclass 651)', None)]
+    # The sibling's code is the sibling's anchor: its sentence never fills the target.
+    fill, sources = on_page('validity', '12 months', 'An eVisitor (subclass 651) is valid for up to 12 months.', 'anchor1b', product_type=label)
+    with pytest.raises(PatchRejected, match='does not bind to the product: the sentence is about the sibling product eVisitor \\(subclass 651\\) '
+                                            '\\(named\\), not Visitor visa'):
+        run(fill, current=current, sources=sources)
+
+
+def test_a_sibling_anchor_the_target_lacks_refuses_the_sentence():
+    current = labelled_layer('Visa on Arrival (B1)', 'Electronic Visa on Arrival (B1)')
+    products = current['merged_guidance']['visa_products']
+    paper, electronic = products
+    sentence = 'The electronic visa on arrival (B1) is valid for up to 30 days.'
+    assert c._binding_problem(sentence, electronic, products) is None
+    assert c._binding_problem(sentence, paper, products) == (
+        'the sentence is about the sibling product Electronic Visa on Arrival (B1) (named), not Visa on Arrival (B1)')
+    assert c._binding_problem('The e-VOA (B1) is valid for up to 30 days.', paper, products) == (
+        'the sentence is about the sibling product Electronic Visa on Arrival (B1) (electronic visa), not Visa on Arrival (B1)')
+    fill, sources = on_page('validity', '30 days', sentence, 'anchor2', product_type='Visa on Arrival (B1)')
+    with pytest.raises(PatchRejected, match='does not bind to the product: the sentence is about the sibling product Electronic Visa on Arrival'):
+        run(fill, current=current, sources=sources)
+    fill, sources = on_page('validity', '30 days', sentence, 'anchor2b', product_type='Electronic Visa on Arrival (B1)')
+    (overlay, report), manifest, current = run(fill, current=current, sources=sources)
+    rows = report['routes'][0]['records']
+    assert [(r['visa_type_name'], r['validity_duration']) for r in rows] == [('Visa on Arrival (B1)', None), ('Electronic Visa on Arrival (B1)', 30)]
+    # The paper product shares every anchor with the electronic one and no
+    # word of its name tells them apart, so only its label printed whole binds.
+    assert c._binding_problem('A Visa on Arrival (B1) is valid for up to 30 days.', paper, products) is None
+    assert c._binding_problem('A visa issued on arrival (B1) is valid for up to 30 days.', paper, products) == (
+        'the product shares every anchor with its sibling Electronic Visa on Arrival (B1) and no word of its name tells them apart')
+
+
+def test_two_siblings_sharing_every_anchor_need_the_stream_word():
+    current = labelled_layer('Visitor (subclass 600) Tourist stream', 'Visitor (subclass 600) Frequent Traveller stream')
+    products = current['merged_guidance']['visa_products']
+    tourist, frequent = products
+    shared = 'A Visitor visa (subclass 600) is valid for up to 12 months.'
+    assert c._binding_problem(shared, tourist, products) == (
+        'the sentence carries only anchors the product shares with its sibling Visitor (subclass 600) Frequent Traveller stream '
+        '(subclass 600, visitor visa) and none of its own (tourist)')
+    assert c._binding_problem(shared, frequent, products).endswith('and none of its own (frequent traveller)')
+    fill, sources = on_page('validity', '12 months', shared, 'anchor3', product_type='Visitor (subclass 600) Tourist stream')
+    with pytest.raises(PatchRejected, match='does not bind to the product: the sentence carries only anchors the product shares'):
+        run(fill, current=current, sources=sources)
+    streamed = 'The Tourist stream of the Visitor visa (subclass 600) is valid for up to 12 months.'
+    assert c._binding_problem(streamed, tourist, products) is None
+    assert c._binding_problem(streamed, frequent, products).startswith('the sentence is about the sibling product Visitor (subclass 600) Tourist stream (tourist)')
+    fill, sources = on_page('validity', '12 months', streamed, 'anchor3b', product_type='Visitor (subclass 600) Tourist stream')
+    (overlay, report), manifest, current = run(fill, current=current, sources=sources)
+    rows = report['routes'][0]['records']
+    assert [(r['visa_type_name'], r['validity_duration']) for r in rows] == [
+        ('Visitor (subclass 600) Tourist stream', 12), ('Visitor (subclass 600) Frequent Traveller stream', None)]
+    # Labels with identical anchors are told apart only by the words that differ.
+    current = labelled_layer('30-day e-Tourist Visa (April–June)', '30-day e-Tourist Visa (July–March)')
+    april, july = current['merged_guidance']['visa_products']
+    assert c._product_anchors(april).keys() == c._product_anchors(july).keys()
+    plain = 'The 30-day e-Tourist Visa is valid for 30 days.'
+    assert c._binding_problem(plain, april, [april, july]) == (
+        'the sentence carries only anchors the product shares with its sibling 30-day e-Tourist Visa (July–March) '
+        '(e-Tourist, electronic visa, tourist, tourist visa, 30 days) and none of the words that tell them apart (april, june)')
+    assert c._binding_problem('The 30-day e-Tourist Visa issued between April and June is valid for 30 days.', april, [april, july]) is None
+    assert c._binding_problem('The 30-day e-Tourist Visa issued between April and June is valid for 30 days.', july, [april, july])
+
+
+def test_an_anchorless_sentence_binds_on_a_one_product_route():
+    current = labelled_layer('Ordinary tourist visa (apply at the Embassy)')
+    products = current['merged_guidance']['visa_products']
+    sentence = 'The visa is valid for up to 30 days from the date of issue.'
+    assert c._anchors_in(sentence, c._product_anchors(products[0])) == set()
+    assert c._binding_problem(sentence, products[0], products) is None
+    fill, sources = on_page('validity', '30 days', sentence, 'anchor4', product_type='Ordinary tourist visa (apply at the Embassy)')
+    (overlay, report), manifest, current = run(fill, current=current, sources=sources)
+    assert report['routes'][0]['records'][0]['validity_duration'] == 30
+
+
+def test_an_anchorless_sentence_refuses_on_a_two_product_route():
+    current = two_product_layer()
+    products = current['merged_guidance']['visa_products']
+    sentence = 'The visa is valid for up to 30 days from the date of issue.'
+    assert c._binding_problem(sentence, products[0], products) == (
+        'the sentence carries no anchor of the product (paper, tourist, tourist visa, single entry) and the route serves 2 products')
+    fill, sources = on_page('validity', '30 days', sentence, 'anchor5')
+    with pytest.raises(PatchRejected, match='does not bind to the product: the sentence carries no anchor of the product .* and the route serves 2 products'):
+        run(fill, current=current, sources=sources)
+    # An absence still needs a page that mentions the product, by an anchor
+    # where the label never appears on a page.
+    src, url = page('anchor5b', 'Consular fees. The tourist visa fee is set by the Consular Department; contact the Consular Section.', path='fees/anchor5b')
+    fill = product_fill('fee', None, absence('The fee page states no amount.', source_ids=('anchor5b',)))
+    (overlay, report), manifest, current = run(fill, current=current, sources=SOURCES + [src])
+    assert report['routes'][0]['fills'][0]['field_page_id'] == 'anchor5b'
+    quiet, quiet_url = page('anchor5c', 'Consular fees. Contact the Consular Section for the current amount.', path='fees/anchor5c')
+    fill = product_fill('fee', None, absence('The fee page states no amount.', source_ids=('anchor5c',)))
+    with pytest.raises(PatchRejected, match='none of the pages checked mentions the product Tourist visa \\(by name or by an anchor: paper, tourist, tourist visa, single entry\\)'):
+        run(fill, current=current, sources=SOURCES + [quiet])
