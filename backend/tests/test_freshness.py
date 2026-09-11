@@ -1026,3 +1026,20 @@ def test_previous_cycles_late_rows_are_due_at_next_six_hour_start(db):
     row.verification = {'grounded_check': {'at': (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()}}
     db.commit()
     assert freshness.due_rows(db, older_than_hours=0.25) == [row]
+
+
+def test_dispute_snapshot_answers_exactly_like_the_per_route_query(db):
+    # A finding stored under a transit variant never answered for the
+    # canonical route (the per-route query compares the stored key to the
+    # canonical key). The whole-inventory snapshot must not fold it in.
+    row = _seed(db)
+    db.add(DatabaseIssueReport(org_id="platform", cache_key=row.cache_key + "|via:SGP",
+        route=ROUTE, field="government_fee", note="check", reported_by="freshness_monitor", status="open"))
+    db.add(DatabaseIssueReport(org_id="platform", cache_key=row.cache_key,
+        route=ROUTE, field="permitted_stay", note="check", reported_by="freshness_monitor", status="open"))
+    db.commit()
+    for key in (row.cache_key, row.cache_key + "|via:SGP"):
+        outside = freshness.active_disputed_fields(db, key)
+        with freshness.disputed_fields_snapshot(db):
+            inside = freshness.active_disputed_fields(db, key)
+        assert outside == inside == ["permitted_stay"], (key, outside, inside)

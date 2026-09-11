@@ -21,13 +21,23 @@ def _applicable(item,today):
     # it is not an inferred policy expiry or guarantee of a launch date.
     return item['kind']=='obsolete_2026_jesta' and date(2026,9,10)<=today<=date(2026,12,31)
 
+_MANIFEST_TEXT={}
+def _manifest_text(path):
+    # Re-read only when the file changes on disk: the review manifest is
+    # consulted once per cached answer during a record build.
+    st=path.stat();sig=(st.st_mtime_ns,st.st_size)
+    hit=_MANIFEST_TEXT.get(str(path))
+    if hit and hit[0]==sig:return hit[1]
+    text=path.read_text();_MANIFEST_TEXT[str(path)]=(sig,text)
+    return text
+
 def reconcile(route,guidance,provenance):
     if not isinstance(route,dict) or not isinstance(guidance,dict) or not isinstance(provenance,dict):return guidance
     from . import kimi_primary,verified_overrides as vo
     from scripts.prepare_reviewed_japan_station_warnings import MANIFEST
     from scripts.prepare_reviewed_product_patch import digest
     try:
-        entry=_reviewed((vo.OVERRIDES.parent/MANIFEST).read_text()).get(kimi_primary.cache_key(route))
+        entry=_reviewed(_manifest_text(vo.OVERRIDES.parent/MANIFEST)).get(kimi_primary.cache_key(route))
         if not entry or not entry['resolutions']:return guidance
         baseline=entry['baseline'];expected=baseline['merged_guidance']
         expected_route=deepcopy(baseline['route'])

@@ -35,6 +35,7 @@ happens to remember today.
 from __future__ import annotations
 
 import json
+import contextlib
 import re
 import os
 import time
@@ -1408,17 +1409,54 @@ def audit_integrity(db) -> dict:
     return {"checked": checked, "violated": violated, "created": created, "resolved": resolved}
 
 
+_DISPUTES = threading.local()
+
+
+@contextlib.contextmanager
+def disputed_fields_snapshot(db):
+    """Answer active_disputed_fields for every route from one query.
+
+    A whole-inventory read (the QC record build, the freshness listing) asked
+    the issue table once per cached answer, twice for the record build. Inside
+    this block the open monitor findings are read once at entry and grouped by
+    canonical key; the answer for each route is the same as the per-route
+    query would give at that moment.
+
+    Findings are grouped by the key they were STORED under, because the
+    per-route query compares the stored key to the route's canonical key. A
+    finding filed against a residence, dated or via: variant never answered
+    for the canonical route, and it must not start to inside this block."""
+    if getattr(_DISPUTES, "by_key", None) is not None:
+        yield
+        return
+    by_key: dict[str, list] = {}
+    for issue in db.execute(select(DatabaseIssueReport).where(
+            DatabaseIssueReport.reported_by == "freshness_monitor",
+            DatabaseIssueReport.status.in_(("open", "acknowledged")),
+            DatabaseIssueReport.field != "source_unreadable")).scalars():
+        by_key.setdefault(issue.cache_key or "", []).append(issue)
+    _DISPUTES.by_key = by_key
+    try:
+        yield
+    finally:
+        _DISPUTES.by_key = None
+
+
 def active_disputed_fields(db, cache_key: str) -> list[str]:
     """Material, unresolved monitor findings survive a newer grounding stamp.
     A transient source outage is not a dispute of previously checked facts.
     All other open/acknowledged monitor issues require explicit resolution."""
     from . import kimi_primary
     key = kimi_primary.canonical_key(cache_key)
-    issues = db.execute(select(DatabaseIssueReport).where(
-        DatabaseIssueReport.cache_key == key,
-        DatabaseIssueReport.reported_by == "freshness_monitor",
-        DatabaseIssueReport.status.in_(("open", "acknowledged")),
-        DatabaseIssueReport.field != "source_unreadable")).scalars()
+    snapshot = getattr(_DISPUTES, "by_key", None)
+    if snapshot is not None:
+        issues = snapshot.get(key, ())
+    else:
+        issues = db.execute(select(DatabaseIssueReport).where(
+            DatabaseIssueReport.cache_key == key,
+            DatabaseIssueReport.reported_by == "freshness_monitor",
+            DatabaseIssueReport.status.in_(("open", "acknowledged")),
+            DatabaseIssueReport.field != "source_unreadable")).scalars()
     fields = set()
     for issue in issues:
         proposed = (issue.proposal or {}).get("fields") or {}

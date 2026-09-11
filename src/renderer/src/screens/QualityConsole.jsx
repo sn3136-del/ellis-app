@@ -1805,20 +1805,24 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                       </div>
                     )}
                   </td>
-                  {/* QC inspection is available independently of traveler publication. */}
+                  {/* The owner asked on 11 September 2026 that this cell carry
+                      only the publish action: no availability label, no
+                      source link (the official page is linked in the
+                      record's own fields). */}
                   <td className="ops-cell" data-label={t('ops.col.site')}
                       style={{ padding: '10px 12px', verticalAlign: 'top' }}>
                     <div style={{ display: 'flex', flexDirection: 'column',
                                   alignItems: 'flex-start', gap: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: BLUE }}>
-                        {t('ops.qcAvailable')}
-                      </span>
-                      {productWithheld && (
-                        <span data-testid="ops-product-withheld" style={{ color: '#866000', fontSize: 11 }}>
-                          {t('ops.productWithheld')}
+                      {/* Published rows say so in green (owner request, 11
+                          September 2026); a held row carries the publish
+                          action unless only a product is withheld, where the
+                          whole-route release does not apply. */}
+                      {!held && (
+                        <span data-testid="ops-published" style={{ fontSize: 12, fontWeight: 700, color: '#1a7f37' }}>
+                          {t('ops.publishedToTravelers')}
                         </span>
                       )}
-                      {held && !productWithheld && (
+                      {held && !productWithheld && rec.publication_reason !== 'optional_product_evidence_pending' && (
                         <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
                                 data-testid="ops-release"
                                 title={t('ops.heldTip')}
@@ -1827,14 +1831,6 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                                          padding: '4px 12px', cursor: 'pointer' }}>
                           {t('ops.releaseAction')}
                         </button>
-                      )}
-                      {rec.source_url && (
-                        <a href={rec.source_url} target="_blank" rel="noreferrer"
-                           onClick={(e) => e.stopPropagation()}
-                           style={{ fontSize: 11.5, color: BLUE,
-                                    fontWeight: 700, whiteSpace: 'nowrap' }}>
-                          {t('ops.source')} ↗
-                        </a>
                       )}
                     </div>
                   </td>
@@ -2410,6 +2406,7 @@ function QualityWorkspace() {
       },
       confidence: {
         high: t('ops.conf.high'),
+        medium: t('ops.conf.medium'),
         low: t('ops.conf.low'),
       },
       visa_category: {

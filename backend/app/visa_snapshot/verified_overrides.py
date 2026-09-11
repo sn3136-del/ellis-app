@@ -33,6 +33,8 @@ RULES, all deliberate:
 from __future__ import annotations
 
 import json
+import stat as stat_module
+import contextlib
 import logging
 import math
 import os
@@ -215,20 +217,41 @@ REVIEWED_OVERLAY_NAMES = (
 REVIEWED_OVERLAY_LIST = "reviewed_overlays.json"
 
 
+_LISTED_NAMES: dict = {"sig": None, "names": []}
+
+
+def _stat_sig(path: pathlib.Path):
+    """(mtime_ns, size) of a regular file, else None: one system call."""
+    try:
+        st = os.stat(path)
+    except OSError:
+        return None
+    return (st.st_mtime_ns, st.st_size) if stat_module.S_ISREG(st.st_mode) else None
+
+
 def _listed_reviewed_overlay_names():
     """Batches converted by the general reviewed-batch converter register
     through a committed list beside the seed, installed with the same pinned
     deployment as the overlay itself. The list names files only: each file
-    still passes the reviewed-overlay schema and per-entry gates."""
+    still passes the reviewed-overlay schema and per-entry gates. The list
+    is parsed again only when the file changes on disk."""
     path = OVERRIDES.parent / REVIEWED_OVERLAY_LIST
+    sig = _stat_sig(path)
+    if sig is None:
+        return []
+    cached = _LISTED_NAMES
+    if cached["sig"] == (str(path), sig):
+        return list(cached["names"])
     try:
         names = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return []
     if not isinstance(names, list):
         return []
-    return [n for n in names if isinstance(n, str) and n.endswith(".json")
-            and "/" not in n and n not in REVIEWED_OVERLAY_NAMES]
+    names = [n for n in names if isinstance(n, str) and n.endswith(".json")
+             and "/" not in n and n not in REVIEWED_OVERLAY_NAMES]
+    _LISTED_NAMES.update(sig=(str(path), sig), names=list(names))
+    return names
 
 
 def _reviewed_overlay_paths():
@@ -242,20 +265,41 @@ def _table() -> dict:
     missing a source or a date, or citing a non-government domain, are
     dropped with no effect."""
     global _CACHE
+    pinned = getattr(_PINNED, "table", None)
+    if pinned is not None:
+        return pinned
     op = operator_overrides_path()
-    try:
-        mtime = tuple((path.stat().st_mtime_ns, path.stat().st_size)
-                      if path.is_file() else None
-                      for path in [OVERRIDES, OVERRIDES.parent / REVIEWED_OVERLAY_LIST,
-                                   *_reviewed_overlay_paths(), op])
-    except OSError:
-        mtime = ("unreadable",)
+    mtime = tuple(_stat_sig(path)
+                  for path in [OVERRIDES, OVERRIDES.parent / REVIEWED_OVERLAY_LIST,
+                               *_reviewed_overlay_paths(), op])
     cached = _CACHE
     if cached["mtime"] == mtime and cached["table"] is not None:
         return cached["table"]
     table = _load_table()
     _CACHE = {"mtime": mtime, "table": table}
     return table
+
+
+_PINNED = threading.local()
+
+
+@contextlib.contextmanager
+def pinned_table():
+    """Hold one table for the duration of a whole-inventory read.
+
+    A record build or a freshness listing asks for the table once per cached
+    answer; re-checking thirty files on disk each time cost more than the
+    answers themselves. Inside this block the table is the one current at
+    entry: the read is a snapshot, exactly as its rows are. A file written
+    meanwhile is seen by the next read, whose stat check runs as before."""
+    if getattr(_PINNED, "table", None) is not None:
+        yield _PINNED.table
+        return
+    _PINNED.table = _table()
+    try:
+        yield _PINNED.table
+    finally:
+        _PINNED.table = None
 
 
 def _read_rows(path: pathlib.Path) -> list:

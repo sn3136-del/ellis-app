@@ -61,8 +61,9 @@ def test_every_other_canonical_fact_and_proof_exactly_preserved(result):
 
 def test_exact_158_documented_cells_no_invented_processing_or_policy_date(result):
  rs=[z for route in result[1]['routes'] for z in route['records']];counts=Counter(t.field_status(x)[k] for x in rs for k in t.CONTRACT_FIELDS)
- assert counts=={'filled':1618,'not-published':148,'missing':93,'optional-empty':16}
- assert t.acceptance_summary(rs)['documented_completed_cells']==1766
+ # Field 24 on a checked answer is a documented absence (75 rows), no longer a gap.
+ assert counts=={'filled':1618,'not-published':223,'missing':18,'optional-empty':16}
+ assert t.acceptance_summary(rs)['documented_completed_cells']==1841
  assert all(x['info_validity'] is None and x['confidence_level']=='Medium' for x in rs)
  assert sum(t.field_status(x)['processing_min_days']=='not-published' for x in rs)==72
  assert all(x['processing_min_days'] is None and x['processing_unit'] is None for x in rs)

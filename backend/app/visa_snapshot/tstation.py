@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import math
 import re
+from functools import lru_cache
 from datetime import datetime, timezone
 
 # Their field order, exactly as numbered 1-25 in the requirements document.
@@ -1549,18 +1550,30 @@ _ASSERTS_AN_AUTHORISATION = re.compile(
     r"|(ETIAS|ESTA|K-ETA)\s+is\s+required)[^.]*\.?", re.I)
 
 
+@lru_cache(maxsize=8192)
+def _asserts_an_authorisation(text: str) -> bool:
+    return bool(_ASSERTS_AN_AUTHORISATION.search(text))
+
+
+@lru_cache(maxsize=8192)
+def _without_authorisation_sentences(text: str):
+    # The pattern scans every sentence of a long requirement text; the same
+    # texts recur across products and rebuilds, so the result is memoized.
+    cleaned = _ASSERTS_AN_AUTHORISATION.sub("", text)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" .,;")
+    return cleaned or None
+
+
 def _text_without_a_required_authorisation(value):
     """Remove only the sentences that contradict a no-authorisation verdict."""
     if isinstance(value, (list, tuple)):
         kept = [v for v in value
-                if not _ASSERTS_AN_AUTHORISATION.search(str(v or ""))]
+                if not _asserts_an_authorisation(str(v or ""))]
         return kept if kept else None
     text = str(value or "")
     if not text:
         return value
-    cleaned = _ASSERTS_AN_AUTHORISATION.sub("", text)
-    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" .,;")
-    return cleaned or None
+    return _without_authorisation_sentences(text)
 
 
 # The things a visa-free traveller can still be required to file before

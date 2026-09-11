@@ -954,8 +954,8 @@ def test_readers_share_one_rebuild_and_a_stale_test_copy_rebuilds_inline(monkeyp
     monkeypatch.setattr(m, "RECORDS_CACHE_SECONDS", 3600.0)
     monkeypatch.setitem(m._RECORDS_CACHE, "test_enabled", True)
     monkeypatch.setitem(m._RECORDS_CACHE, "rows", [{"visa_type_name": "stale"}])
-    monkeypatch.setitem(m._RECORDS_CACHE, "dirty", True)
     monkeypatch.setitem(m._RECORDS_CACHE, "building", False)
+    m.invalidate_records_cache()           # a write after the copy was built
     got = []
     threads = [_th.Thread(target=lambda: got.append(m._all_tstation_rows(None))) for _ in range(4)]
     for t in threads:
@@ -968,7 +968,7 @@ def test_readers_share_one_rebuild_and_a_stale_test_copy_rebuilds_inline(monkeyp
     assert m._all_tstation_rows(None)[0]["build"] == 2
     assert not any(t.name == "records-cache" for t in _th.enumerate())
     # A write that lands during a build keeps the result stale.
-    monkeypatch.setitem(m._RECORDS_CACHE, "dirty", True)
+    m.invalidate_records_cache()
 
     def writing_builder(db):
         builds["n"] += 1
@@ -978,3 +978,104 @@ def test_readers_share_one_rebuild_and_a_stale_test_copy_rebuilds_inline(monkeyp
     m._all_tstation_rows(None)
     with m._RECORDS_CACHE_LOCK:
         assert m._RECORDS_CACHE["dirty"] is True and m._RECORDS_CACHE["building"] is False
+
+
+def test_a_reader_takes_a_build_that_started_after_its_own_request(monkeypatch):
+    """A write that lands while a build is in flight marks the copy dirty,
+    but a reader who arrived before that write already has every write that
+    preceded its request in the copy: it takes the copy instead of paying
+    for a second build. A reader who arrives after the write waits for a
+    build that starts after it."""
+    import threading as _th
+    from app import main as m
+    builds = {"n": 0}
+    started = _th.Event()
+    release = _th.Event()
+
+    def slow_builder(db):
+        builds["n"] += 1
+        started.set()
+        release.wait(timeout=10)
+        return [{"visa_type_name": "x", "build": builds["n"]}]
+    monkeypatch.setattr(m, "_build_tstation_rows", slow_builder)
+    monkeypatch.setattr(m, "RECORDS_CACHE_SECONDS", 3600.0)
+    monkeypatch.setitem(m._RECORDS_CACHE, "test_enabled", True)
+    monkeypatch.setitem(m._RECORDS_CACHE, "rows", None)
+    monkeypatch.setitem(m._RECORDS_CACHE, "dirty", False)
+    monkeypatch.setitem(m._RECORDS_CACHE, "building", False)
+    monkeypatch.setitem(m._RECORDS_CACHE, "built_generation", -1)
+    got = {}
+    early = _th.Thread(target=lambda: got.setdefault("early", m._all_tstation_rows(None)))
+    early.start()
+    assert started.wait(timeout=5)
+    m.invalidate_records_cache()           # the write lands mid-build
+    late_rows = {}
+    late = _th.Thread(target=lambda: late_rows.setdefault("late", m._all_tstation_rows(None)))
+    late.start()
+    m._time.sleep(0.2)
+    release.set()
+    early.join(timeout=10)
+    assert got["early"][0]["build"] == 1, "the early reader takes the build that started after its request"
+    late.join(timeout=10)
+    assert late_rows["late"][0]["build"] == 2, "the late reader waits for a build started after the write"
+    assert builds["n"] == 2
+    with m._RECORDS_CACHE_LOCK:
+        assert m._RECORDS_CACHE["dirty"] is False and m._RECORDS_CACHE["building"] is False
+
+
+def test_a_dirty_build_converges_in_the_background_outside_the_test_runtime(monkeypatch):
+    from app import main as m
+    calls = {"n": 0}
+    monkeypatch.setattr(m, "_refresh_records_cache_in_background", lambda: calls.__setitem__("n", calls["n"] + 1))
+    monkeypatch.setitem(m._RECORDS_CACHE, "rows", None)
+    monkeypatch.setitem(m._RECORDS_CACHE, "building", False)
+
+    def writing_builder(db):
+        m.invalidate_records_cache()
+        return [{"visa_type_name": "x"}]
+    monkeypatch.setattr(m, "_build_tstation_rows", writing_builder)
+    assert m._claim_records_build()
+    m._build_records_cache(None)
+    assert calls["n"] == 0, "the test runtime never spawns the background thread"
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    assert m._claim_records_build()
+    m._build_records_cache(None)
+    assert calls["n"] == 1, "a copy left dirty by a mid-build write is rebuilt behind the readers"
+    monkeypatch.setattr(m, "_build_tstation_rows", lambda db: [{"visa_type_name": "clean"}])
+    assert m._claim_records_build()
+    m._build_records_cache(None)
+    assert calls["n"] == 1, "a clean build schedules nothing"
+
+
+def test_a_bulk_update_statement_on_an_answer_row_marks_the_cache_dirty(client, monkeypatch):
+    """The freshness recheck stamps verification with an UPDATE statement,
+    which the unit-of-work flush never sees. The statement hook catches it."""
+    from sqlalchemy import update as _update
+    from app import main as m
+    from app.db import SessionLocal
+    from app.visa_snapshot.models import KimiRouteGuidanceCache
+    _provide(ANSWER)
+    look = client.post("/database/lookup", headers=READER,
+                       json={"nationality": "ISL", "destination": "FSM"}).json()
+    monkeypatch.setitem(m._RECORDS_CACHE, "test_enabled", True)
+    monkeypatch.setitem(m._RECORDS_CACHE, "rows", [{"visa_type_name": "x"}])
+    monkeypatch.setitem(m._RECORDS_CACHE, "dirty", False)
+    session = SessionLocal()
+    try:
+        session.execute(_update(KimiRouteGuidanceCache)
+                        .where(KimiRouteGuidanceCache.cache_key == look["cache_key"])
+                        .values(model="bulk-stamped"))
+        with m._RECORDS_CACHE_LOCK:
+            assert m._RECORDS_CACHE["dirty"] is False, "nothing is stale until the commit"
+        session.commit()
+    finally:
+        session.close()
+    with m._RECORDS_CACHE_LOCK:
+        assert m._RECORDS_CACHE["dirty"] is True
+
+
+def test_only_the_lookup_and_ask_posts_skip_invalidation():
+    from app import main as m
+    assert m._records_read_post("/database/lookup") and m._records_read_post("/database/ask")
+    assert not m._records_read_post("/database/asks/12/review"), "an ask review is an operator write"
+    assert not m._records_read_post("/database/records/edit")

@@ -148,6 +148,12 @@ def _startup():
 _RECORDS_READ_POSTS = ("/database/lookup", "/database/ask")
 
 
+def _records_read_post(path: str) -> bool:
+    """Exactly the two read-shaped POSTs: an ask review at
+    /database/asks/{id}/review is an operator write and must invalidate."""
+    return path in _RECORDS_READ_POSTS
+
+
 @app.middleware("http")
 async def _records_cache_invalidation(request: Request, call_next):
     """Every successful operator write under /database/ (edits, approvals,
@@ -155,7 +161,7 @@ async def _records_cache_invalidation(request: Request, call_next):
     once; the next read waits for one shared rebuild."""
     response = await call_next(request)
     if request.method in ("POST", "PUT", "DELETE") and request.url.path.startswith("/database/") \
-            and not request.url.path.startswith(_RECORDS_READ_POSTS) \
+            and not _records_read_post(request.url.path) \
             and response.status_code < 400:
         invalidate_records_cache()
         _refresh_records_cache_in_background_if_warm()
@@ -1021,10 +1027,43 @@ def travel_database_freshness(db=Depends(get_session),
     from .visa_snapshot.models import KimiRouteGuidanceCache
     require_quality_control(p)
     now = datetime.now(timezone.utc)
+    from .visa_snapshot import freshness as _fresh
+    with verified_overrides.pinned_table(), _fresh.disputed_fields_snapshot(db):
+        rows = _freshness_rows(db, now, _select, verified_overrides, tstation, kimi_primary, KimiRouteGuidanceCache, _fresh)
+    timer = _sweep_timer_status()
+    return {"answers": rows,
+            "summary": {
+                "total": len(rows),
+                "stale": sum(1 for x in rows if x["stale"]),
+                # Disjoint tiers: an answer that is BOTH human-verified and
+                # machine-grounded counts once, in the higher tier — summed
+                # coverage must never read as 108% of the answers.
+                "grounded": sum(1 for x in rows
+                                if x["grounded"] and not x["human_override"]),
+                "human_verified": sum(1 for x in rows if x["human_override"]),
+                "disputed": sum(1 for x in rows if x["disputed_fields"]),
+                "next_sweep_at": timer.get("next_sweep_at"),
+                "scheduler": timer,
+                "last_run": _last_sweep_status(),
+                # The AI provider's own state: a suspended account (out of
+                # balance) stops every check, and the operator must see that
+                # named here rather than infer it from a wall of failures.
+                "provider": kimi_primary.provider_status(),
+                "sweep_interval_hours": 6,
+                "attempt_target_hours": 6,
+                # Current six-hour attempt/read/verdict coverage and legacy
+                # 24/48-hour comparisons. Only canonical destination answers
+                # count; request-specific transit checks are separate.
+                **_recheck_coverage(rows, now),
+            }}
+
+
+
+def _freshness_rows(db, now, _select, verified_overrides, tstation, kimi_primary, KimiRouteGuidanceCache, _fresh):
+    from datetime import timezone
     rows = []
     for r in db.execute(_select(KimiRouteGuidanceCache).order_by(
             KimiRouteGuidanceCache.fresh_until)).scalars():
-        from .visa_snapshot import freshness as _fresh
         if not kimi_primary.is_canonical_key(r.cache_key):
             continue
         # The latest attempt, for the sweep's own bookkeeping, and the
@@ -1060,33 +1099,7 @@ def travel_database_freshness(db=Depends(get_session),
             "human_override": human,
             **_freshness_field_check(eff),
         })
-    timer = _sweep_timer_status()
-    return {"answers": rows,
-            "summary": {
-                "total": len(rows),
-                "stale": sum(1 for x in rows if x["stale"]),
-                # Disjoint tiers: an answer that is BOTH human-verified and
-                # machine-grounded counts once, in the higher tier — summed
-                # coverage must never read as 108% of the answers.
-                "grounded": sum(1 for x in rows
-                                if x["grounded"] and not x["human_override"]),
-                "human_verified": sum(1 for x in rows if x["human_override"]),
-                "disputed": sum(1 for x in rows if x["disputed_fields"]),
-                "next_sweep_at": timer.get("next_sweep_at"),
-                "scheduler": timer,
-                "last_run": _last_sweep_status(),
-                # The AI provider's own state: a suspended account (out of
-                # balance) stops every check, and the operator must see that
-                # named here rather than infer it from a wall of failures.
-                "provider": kimi_primary.provider_status(),
-                "sweep_interval_hours": 6,
-                "attempt_target_hours": 6,
-                # Current six-hour attempt/read/verdict coverage and legacy
-                # 24/48-hour comparisons. Only canonical destination answers
-                # count; request-specific transit checks are separate.
-                **_recheck_coverage(rows, now),
-            }}
-
+    return rows
 
 def _freshness_field_check(check: dict) -> dict:
     """Expose the stored strict reading's scope, not private provider payloads.
@@ -1414,14 +1427,16 @@ def travel_database_issues(db=Depends(get_session),
 # (the sweep writes from another process, so the time bound covers it).
 # Filters then run over the cached set in memory, which is milliseconds.
 _RECORDS_CACHE: dict = {"rows": None, "built_at": 0.0, "building": False,
-                        "dirty": False, "generation": 0}
+                        "dirty": False, "generation": 0, "built_generation": -1}
 _RECORDS_CACHE_LOCK = threading.Lock()
 # Readers waiting for an in-flight rebuild sleep on this instead of each
 # starting a build of their own.
 _RECORDS_CACHE_READY = threading.Condition(_RECORDS_CACHE_LOCK)
 RECORDS_CACHE_SECONDS = _env_float("ELLIS_RECORDS_CACHE_SECONDS", 120.0)
-# How long a reader waits on someone else's rebuild before building alone.
-RECORDS_CACHE_WAIT_SECONDS = _env_float("ELLIS_RECORDS_CACHE_WAIT_SECONDS", 300.0)
+# How long a reader waits on someone else's rebuild before building alone:
+# under the console's own 120 s read deadline, so the fallback can still
+# answer the request that waited.
+RECORDS_CACHE_WAIT_SECONDS = _env_float("ELLIS_RECORDS_CACHE_WAIT_SECONDS", 100.0)
 
 
 def invalidate_records_cache() -> None:
@@ -1449,9 +1464,12 @@ def _release_records_build() -> None:
 
 
 def _build_records_cache(db) -> list[dict]:
-    """Build the full set for the generation current at the start. A write
-    that lands during the build bumps the generation, so the result is
-    stored but stays marked dirty and the next read rebuilds again."""
+    """Build the full set for the generation current at the start, and
+    remember that generation with the copy. A write that lands during the
+    build bumps the generation, so the copy is stored marked dirty: a reader
+    who arrived before that write may still take it (it reflects every
+    write before the reader's own request), a reader who arrives after it
+    waits for the next build, which starts at once in the background."""
     with _RECORDS_CACHE_LOCK:
         generation = _RECORDS_CACHE["generation"]
     try:
@@ -1462,9 +1480,15 @@ def _build_records_cache(db) -> list[dict]:
     with _RECORDS_CACHE_READY:
         _RECORDS_CACHE["rows"] = rows
         _RECORDS_CACHE["built_at"] = _time.monotonic()
-        _RECORDS_CACHE["dirty"] = _RECORDS_CACHE["generation"] != generation
+        _RECORDS_CACHE["built_generation"] = generation
+        stale = _RECORDS_CACHE["generation"] != generation
+        _RECORDS_CACHE["dirty"] = stale
         _RECORDS_CACHE["building"] = False
         _RECORDS_CACHE_READY.notify_all()
+    if stale and not os.environ.get("PYTEST_CURRENT_TEST"):
+        # Converge behind the readers: the copy that follows is clean, so
+        # the next request after a write does not pay for the build.
+        _refresh_records_cache_in_background()
     return rows
 
 
@@ -1473,14 +1497,19 @@ def _refresh_records_cache_in_background() -> None:
         return
 
     def _work():
-        from .db import SessionLocal
-        session = SessionLocal()
+        session = None
         try:
+            from .db import SessionLocal
+            session = SessionLocal()
             _build_records_cache(session)
-        except Exception:  # noqa: BLE001 - the last copy stays; the next read rebuilds
-            pass
+        except BaseException:  # noqa: BLE001 - the last copy stays; the next read rebuilds
+            # Whatever failed, before or during the build, the claim is
+            # given back: a latched "building" would make every later read
+            # wait on a build that does not exist.
+            _release_records_build()
         finally:
-            session.close()
+            if session is not None:
+                session.close()
     try:
         threading.Thread(target=_work, name="records-cache", daemon=True).start()
     except BaseException:
@@ -1493,7 +1522,18 @@ def _refresh_records_cache_in_background() -> None:
 def _records_cache_state() -> tuple:
     with _RECORDS_CACHE_LOCK:
         return (_RECORDS_CACHE["rows"], _RECORDS_CACHE["dirty"],
-                _time.monotonic() - _RECORDS_CACHE["built_at"])
+                _time.monotonic() - _RECORDS_CACHE["built_at"],
+                _RECORDS_CACHE["generation"])
+
+
+def _records_copy_for(entered: int):
+    """The cached copy when its build started at or after the generation
+    the reader entered with (every write before the reader's request is in
+    it), else None. Caller holds the lock."""
+    rows = _RECORDS_CACHE["rows"]
+    if rows is not None and _RECORDS_CACHE["built_generation"] >= entered:
+        return rows
+    return None
 
 
 def _all_tstation_rows(db) -> list[dict]:
@@ -1512,7 +1552,7 @@ def _all_tstation_rows(db) -> list[dict]:
         # runtime mode they emulate; they read the truth each time unless a
         # test opts into the cache explicitly.
         return _build_tstation_rows(db)
-    rows, dirty, age = _records_cache_state()
+    rows, dirty, age, entered = _records_cache_state()
     if rows is not None and not dirty:
         if age > RECORDS_CACHE_SECONDS:
             if testing:
@@ -1521,14 +1561,18 @@ def _all_tstation_rows(db) -> list[dict]:
         return rows
     waited_until = _time.monotonic() + RECORDS_CACHE_WAIT_SECONDS
     for _attempt in range(3):
+        with _RECORDS_CACHE_LOCK:
+            rows = _records_copy_for(entered)
+        if rows is not None:
+            return rows
         if _claim_records_build():
             return _build_records_cache(db)
         with _RECORDS_CACHE_READY:
             while _RECORDS_CACHE["building"] and _time.monotonic() < waited_until:
                 _RECORDS_CACHE_READY.wait(timeout=1.0)
-            rows, dirty = _RECORDS_CACHE["rows"], _RECORDS_CACHE["dirty"]
+            rows = _records_copy_for(entered)
             still_building = _RECORDS_CACHE["building"]
-        if rows is not None and not dirty:
+        if rows is not None:
             return rows
         if still_building:
             # The build in flight has outlived the wait bound: answer from
@@ -1577,11 +1621,31 @@ def _records_rollback(session) -> None:
     session.info.pop("records_cache_dirty", None)
 
 
+def _records_orm_execute(state) -> None:
+    """A bulk UPDATE, INSERT or DELETE statement issued through the session
+    (the freshness recheck stamps verification that way) never passes
+    through the unit of work, so the flush hook cannot see it. The
+    statement itself marks the session; its commit marks the cache."""
+    try:
+        if state.is_select or not (state.is_insert or state.is_update or state.is_delete):
+            return
+        models_ = _records_source_models()
+        mapper = state.bind_mapper
+        target = getattr(mapper, "class_", None)
+        table = getattr(state.statement, "table", None)
+        names = {m.__table__.name for m in models_}
+        if target in models_ or (table is not None and getattr(table, "name", None) in names):
+            state.session.info["records_cache_dirty"] = True
+    except Exception:  # noqa: BLE001 - a bookkeeping hook must never break a write
+        pass
+
+
 from sqlalchemy import event as _sa_event  # noqa: E402
 from sqlalchemy.orm import Session as _SASession  # noqa: E402
 _sa_event.listen(_SASession, "after_flush", _records_flush)
 _sa_event.listen(_SASession, "after_commit", _records_commit)
 _sa_event.listen(_SASession, "after_rollback", _records_rollback)
+_sa_event.listen(_SASession, "do_orm_execute", _records_orm_execute)
 
 
 def _tstation_rows(db, *, nationality: str = "", destination: str = "",
@@ -1636,7 +1700,20 @@ def _build_tstation_rows(db):
     from sqlalchemy import select as _select
     from .visa_snapshot import kimi_primary, verified_overrides, tstation
     from .visa_snapshot.models import KimiRouteGuidanceCache
-    verified_overrides.reload()
+    from .visa_snapshot import freshness as _fresh
+    # The override table re-checks its files on every lookup; a build asks
+    # for it once per cached answer, so it is pinned for the build, and the
+    # open monitor findings are read once instead of twice per answer. Both
+    # are snapshots at build start, like the rows themselves. The forced
+    # reload that used to sit here re-parsed every overlay on every build;
+    # the table's own stat check already notices a changed file.
+    with verified_overrides.pinned_table(), _fresh.disputed_fields_snapshot(db):
+        return _collect_tstation_rows(db, kimi_primary, verified_overrides, tstation, KimiRouteGuidanceCache)
+
+
+def _collect_tstation_rows(db, kimi_primary, verified_overrides, tstation, KimiRouteGuidanceCache):
+    from sqlalchemy import select as _select
+    from .visa_snapshot import freshness as _fresh
     # Only canonical policy rows can represent current route products.
     # Legacy dated/residence/transit rows stay in storage for migration and
     # history, but an orphan variant is never promoted to a route decision.

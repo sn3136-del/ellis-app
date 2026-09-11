@@ -35,5 +35,9 @@ def test_export_preserves_10001_rows_sources_zero_fees_and_dictionary(monkeypatc
     descriptions = list(workbook['Field descriptions'].values)
     assert descriptions[0][0] == 'Snapshot (UTC)'
     assert descriptions[0][1].endswith('Z')
-    assert {row[1] for row in descriptions[2:]} == set(tstation.FIELD_ORDER)
+    fields = descriptions[2:2 + len(tstation.FIELD_ORDER)]
+    assert {row[1] for row in fields} == set(tstation.FIELD_ORDER)
+    # The two documented labels are defined on the same sheet.
+    labels = {row[0] for row in descriptions[2 + len(tstation.FIELD_ORDER):] if row and row[0]}
+    assert {tstation.NOT_PUBLICLY_AVAILABLE, tstation.NOT_APPLICABLE} <= labels
     workbook.close()
