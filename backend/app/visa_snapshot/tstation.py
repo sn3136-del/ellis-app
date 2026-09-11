@@ -2111,6 +2111,24 @@ _NOT_APPLICABLE_WHEN_EXEMPT = frozenset({
 })
 
 
+# The two documented labels an exported cell can carry instead of a value:
+# the destination was checked and does not publish the fact, or the fact
+# cannot apply to this record (a visa-free route has no visa validity).
+# Missing and optional-empty cells stay blank: an export never invents.
+NOT_PUBLICLY_AVAILABLE = "Not publicly available"
+NOT_APPLICABLE = "Not applicable"
+_EXPORT_LABELS = {"not-published": NOT_PUBLICLY_AVAILABLE, "not-applicable": NOT_APPLICABLE}
+
+
+def export_values(row: dict, unpublished: set | None = None) -> list:
+    """The 25 cells of one workbook row: a filled value verbatim, the
+    documented label for a not-published or not-applicable cell, blank
+    otherwise. Reuses the record surface's own field_status verdicts."""
+    statuses = field_status(row, unpublished)
+    return [row.get(f) if statuses.get(f) == "filled" else _EXPORT_LABELS.get(statuses.get(f))
+            for f in FIELD_ORDER]
+
+
 def completeness(row: dict, unpublished: set | None = None) -> float:
     """Share of required fields filled, out of those that could be filled.
 

@@ -2068,7 +2068,9 @@ def travel_database_export(nationality: str = "", destination: str = "",
     for c in ws1[1]:
         c.font = Font(bold=True)
     for r in rows:
-        ws1.append([r.get(f) for f in tstation.FIELD_ORDER])
+        # A documented blank reads as its label ("Not publicly available",
+        # "Not applicable") rather than as a gap; a filled cell is verbatim.
+        ws1.append(tstation.export_values(r))
     ws1.freeze_panes = "A2"
     ws0 = wb.create_sheet("Field descriptions")
     # 5.2: offline data marks its snapshot moment explicitly.
