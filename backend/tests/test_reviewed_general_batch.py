@@ -525,3 +525,25 @@ def test_a_listed_general_overlay_is_loaded_with_the_reviewed_gates(tmp_path, mo
     vo.reload()
     assert 'reviewed_overlay' in vo._table().store_errors
     vo.reload()
+
+
+@pytest.mark.parametrize('sentence', [
+    'Russian passport holders require a visa to enter Singapore for business or for social visit purposes.',
+    'Los ciudadanos de India, Nepal, Sri Lanka, Maldivas y Bután necesitan un visado Schengen para entrar en el espacio Schengen.',
+    'Nationals of India need a valid visa to enter the United Kingdom as a Standard Visitor.',
+    'Les ressortissants indiens ont besoin d\'un visa pour entrer en France.',
+])
+def test_verdict_rules_accept_plain_requirement_wording(sentence):
+    from scripts.convert_reviewed_general_batch import _decision_supported
+    nat = 'RUS' if 'Russian' in sentence else 'IND'
+    assert _decision_supported('VISA_REQUIRED', [sentence], nat)
+
+
+@pytest.mark.parametrize('sentence,nat', [
+    ('Nationals of Australia, Brazil, Canada and the United States are exempt from short-term stay visa.', 'PHL'),
+    ('You will need a visa to enter Singapore if you are holding a travel document issued by this country.', 'RUS'),
+    ('Russian nationals do not need a visa for stays of up to 30 days.', 'RUS'),
+])
+def test_verdict_rules_still_refuse_unnamed_or_contrary_sentences(sentence, nat):
+    from scripts.convert_reviewed_general_batch import _decision_supported
+    assert not _decision_supported('VISA_REQUIRED', [sentence], nat)

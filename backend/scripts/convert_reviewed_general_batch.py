@@ -94,9 +94,57 @@ _EXTRA_ALIASES = {
 }
 
 
+# Demonym stems whose endings inflect for gender, number or case on official
+# pages ("ressortissants indiens", "ciudadanos rusos", "граждане России").
+# A stem matches with up to five further letters, so one stem covers
+# indien/indienne/indiens/indiennes without listing every form. Stems are
+# the adjective root only; a country name that is already an alias is not
+# repeated here.
+_DEMONYM_STEMS = {
+    'HKG': ('hongkongais', 'hongkon', 'hongkonger', 'гонконг'),
+    'TWN': ('taïwanais', 'taiwanais', 'taiwan', 'taiwanisch', 'тайван'),
+    'JPN': ('japonais', 'japon', 'giapponese', 'japanisch', 'japanese', 'япон'),
+    'KOR': ('coréen', 'coreen', 'coreano', 'koreanisch', 'korean', 'корей', 'кореи'),
+    'USA': ('américain', 'americain', 'estadounidense', 'norteamericano', 'amerikanisch', 'американ', 'états-unien', 'etats-unien'),
+    'THA': ('thaïlandais', 'thailandais', 'tailandés', 'tailandes', 'tailandese', 'thailändisch', 'таиланд', 'тайск'),
+    'SGP': ('singapourien', 'singapurense', 'singaporean', 'singapurisch', 'сингапур'),
+    'MYS': ('malaisien', 'malasio', 'malese', 'malaysisch', 'malaysian', 'малайзи'),
+    'GBR': ('britannique', 'británico', 'britanico', 'britannico', 'britisch', 'british', 'britânico', 'британ', 'великобритани'),
+    'RUS': ('russe', 'ruso', 'rusa', 'russo', 'russisch', 'russian', 'росси', 'русск'),
+    'AUS': ('australien', 'australiano', 'australisch', 'australian', 'австрали'),
+    'IDN': ('indonésien', 'indonesien', 'indonesio', 'indonesiano', 'indonesisch', 'indonesian', 'индонези'),
+    'PHL': ('philippin', 'filipino', 'filipina', 'filippino', 'philippinisch', 'филиппин'),
+    'FRA': ('français', 'francais', 'francés', 'frances', 'francese', 'französisch', 'french', 'francês', 'франци', 'француз'),
+    'VNM': ('vietnamien', 'vietnamita', 'vietnamesisch', 'vietnamese', 'вьетнам'),
+    'ESP': ('espagnol', 'español', 'espanol', 'spagnolo', 'spanisch', 'spanish', 'espanhol', 'испан'),
+    'IND': ('indien', 'indio', 'indiano', 'indisch', 'indian', 'инди'),
+    'CAN': ('canadien', 'canadiense', 'canadese', 'kanadisch', 'canadian', 'canadiano', 'канад'),
+    'CHN': ('chinois', 'chino', 'cinese', 'chinesisch', 'chinese', 'chinês', 'chines', 'китай', 'китая'),
+}
+_NAME_PATTERNS = {}
+
+
 def _aliases(nat):
     from app.visa_snapshot.evidence_validator import _NATIONALITY_NAMES
     return sorted({_norm(a) for a in (*_NATIONALITY_NAMES.get(nat, ()), *_EXTRA_ALIASES.get(nat, ())) if _norm(a)})
+
+
+def _name_pattern(nat):
+    """One compiled pattern for "this nationality is named here": the fixed
+    aliases (ASCII-letter boundaries, as the validator reads them) plus the
+    inflecting demonym stems (letter boundaries in any script)."""
+    pattern = _NAME_PATTERNS.get(nat)
+    if pattern is None:
+        parts = [r'(?<![a-z])' + re.escape(a) + r'(?![a-z])' for a in _aliases(nat)]
+        parts += [r'(?<![^\W\d_])' + re.escape(_norm(stem)) + r'[^\W\d_]{0,5}(?![^\W\d_])'
+                  for stem in _DEMONYM_STEMS.get(nat, ())]
+        pattern = _NAME_PATTERNS[nat] = re.compile('|'.join(parts) if parts else r'(?!x)x')
+    return pattern
+
+
+def _named(text, nat):
+    """The normalized text names the nationality (alias or inflected demonym)."""
+    return bool(_name_pattern(nat).search(_norm(text)))
 
 
 def _today():
@@ -256,7 +304,7 @@ def _check_proof(proof, sources, route, field, value, *, product=None):
         if not source or source['url'] != item.get('source_url'):
             raise PatchRejected(f'{field}: evidence cites an uncaptured page')
         quote = item.get('quote')
-        short_ok = isinstance(quote, str) and _list_line(quote, _aliases(route['passport_nationality']))
+        short_ok = isinstance(quote, str) and _list_line(quote, route['passport_nationality'])
         if not isinstance(quote, str) or (len(quote.strip()) < 8 and not short_ok) or '...' in quote or '…' in quote:
             raise PatchRejected(f'{field}: a quote must be a literal passage without ellipsis')
         if not quote_literal(quote, source['text']):
@@ -318,6 +366,10 @@ def _monetary_text(passages, code):
 _VERDICT_RULES = {
     # A sentence that states the rule, and the words that flip it.
     'VISA_REQUIRED': (r"(?:e-?visa|visa)s?\b[^.;\n]{0,60}\b(?:is |are )?(?:required|mandatory|needed|necessary|obligatoire|obligatorio|necesario|bắt buộc)|"
+                      r"\b(?:need|needs|require|requires|must have|must hold|must obtain|are required to hold|are required to obtain|is subject to|are subject to)\b (?:a |an |the )?(?:valid |prior |entry |tourist |schengen |visitor |short[- ]stay )*(?:e-?visa|visa)s?\b|"
+                      r"\bnecesita(?:n|r[áa]n?)? (?:de )?(?:un |el )?visado|\brequiere(?:n)? (?:de )?(?:un |el )?visado|\bont besoin d'un visa|\bdoivent (?:obtenir|demander|solliciter) un visa|\bvisa (?:est |sera )?(?:requis|nécessaire|exigé)|"
+                      r"\bnecessitano (?:di )?un visto|\bvisto (?:è )?(?:richiesto|necessario|obbligatorio)|\bbenötigen ein visum|\bvisumpflichtig\b|\bprecisam de visto|\bvisto (?:é )?(?:obrigatório|necessário)|"
+
                       r"\b(?:need|needs|require|requires|must|shall|should|have to|has to|required to|doivent|doit|deben|debe|phải|cần)\b[^.;\n]{0,40}"
                       r"\b(?:obtain|hold|have|apply for|possess|be in possession of|get|obtenir|être munis?|obtener|xin|có)\b[^.;\n]{0,40}\b(?:e-?visa|visa|thị thực)\b|"
                       r"\b(?:can|may|eligible to|entitled to) apply for (?:an? )?(?:e-?visa|electronic visa)|"
@@ -339,10 +391,10 @@ _VERDICT_RULES = {
 }
 
 
-def _list_line(quote, aliases):
+def _list_line(quote, nat):
     """A quote that is essentially the nationality's own line in a list."""
     text = _norm(re.sub(r'^\s*(?:\d+[.)]|[-*•])\s*', '', quote))
-    return len(text) <= 60 and any(re.search(r'(?<![a-z])' + re.escape(_norm(a)) + r'(?![a-z])', text) for a in aliases)
+    return len(text) <= 60 and _named(text, nat)
 
 
 def _decision_supported(value, evidence_quotes, nat):
@@ -352,9 +404,7 @@ def _decision_supported(value, evidence_quotes, nat):
     flipping it in the same sentence."""
     from app.visa_snapshot.evidence_validator import supports_disposition, NEGATED_VISA_EXEMPTION
     passages = '\n'.join(evidence_quotes)
-    aliases = _aliases(nat)
-    low = _norm(passages)
-    named = any(re.search(r'(?<![a-z])' + re.escape(a) + r'(?![a-z])', low) for a in aliases)
+    named = _named(passages, nat)
     if value == 'CONDITIONAL':
         return named and bool(_CONDITION_RE.search(passages))
     if supports_disposition(passages, value, nationality=nat):
@@ -366,14 +416,14 @@ def _decision_supported(value, evidence_quotes, nat):
         return False
     if value == 'VISA_EXEMPT':
         negative = '(?:' + negative + ')|(?:' + NEGATED_VISA_EXEMPTION + ')'
-    listed = any(_list_line(q, aliases) for q in evidence_quotes)
+    listed = any(_list_line(q, nat) for q in evidence_quotes)
     for sentence in re.split(r'(?<=[.;!?])\s+|\n+', passages):
         sl = _norm(sentence)
         if not re.search(positive, sl, re.I):
             continue
         if negative and re.search(negative, sl, re.I):
             continue
-        sentence_named = any(re.search(r'(?<![a-z])' + re.escape(a) + r'(?![a-z])', sl) for a in aliases)
+        sentence_named = _named(sl, nat)
         general = bool(re.search(r'\b(?:all|any|every|foreign nationals|foreigners|following countries|following states|listed below|eligible countries|countries/territories)\b', sl))
         if sentence_named or (listed and general) or (listed and value != 'VISA_EXEMPT'):
             return True
@@ -403,8 +453,7 @@ def _consular_product_eligibility_supported(value, evidence, sources, route, pro
                 if jurisdiction_matches(item['source_url'], route['destination_country'])]
     # The traveller's nationality must be explicit on a destination page.
     # Origin-country advice cannot supply the only identity anchor.
-    aliases = _aliases(route['passport_nationality'])
-    if not any(_list_line(item['quote'], aliases) for item in relevant):
+    if not any(_list_line(item['quote'], route['passport_nationality']) for item in relevant):
         return False
     acceptance = re.compile(
         r'\b(?:the )?embassy (?:only )?(?:accepts|processes) '
