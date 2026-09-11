@@ -60,11 +60,12 @@ def test_the_25_field_record_speaks_their_dictionary_exactly():
     # an audit of every such record found 19 of 21 wrong (superseded fees,
     # products the destination does not issue, visas demanded of exempt
     # travellers). Once the official page has been read and agrees, the same
-    # answer can be High once its required fields are complete and checked.
+    # answer is Medium while required fields remain unchecked, and High once
+    # its required fields are complete and checked.
     assert r["confidence_level"] == "Low"
     ok = tstation.records_for_route(route, ANSWER, None, "2026-08-27T00:00:00",
                                     grounded_ok=True)
-    assert ok[0]["confidence_level"] == "Low"  # Verdict-only grounding cannot certify all filled fields.
+    assert ok[0]["confidence_level"] == "Medium"  # Verdict-only grounding cannot certify all filled fields: checked, but not High.
     bare = {k: v for k, v in ANSWER.items()
             if k not in ("source_url", "official_portal_url")}
     low = tstation.records_for_route(route, bare, None, "2026-08-27T00:00:00")

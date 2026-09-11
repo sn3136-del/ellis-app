@@ -776,7 +776,7 @@ def test_a_blocked_page_never_demotes_a_grounded_record_to_low(client):
         row.verification = dict(row.verification or {},
                                 grounded_check=good, last_good_check=dict(good))
         db.commit()
-        assert grade() == {"Low"}
+        assert grade() == {"Medium"}
         # The page now blocks robots.
         fetching.set_fetcher(lambda url, timeout_seconds=0: FetchResult(
             requested_url=url, ok=True, final_url=url,
@@ -788,7 +788,7 @@ def test_a_blocked_page_never_demotes_a_grounded_record_to_low(client):
     finally:
         fetching.set_fetcher(None)
         db.close()
-    assert grade() == {"Low"}, "a blocked page must not demote a grounded record"
+    assert grade() == {"Medium"}, "a blocked page must not demote a grounded record"
     after = client.post("/database/lookup", headers=READER,
                         json={"nationality": "ISL", "destination": "TON"}).json()
     assert after["held"] is False and after["guidance"]["disposition"] == "VISA_REQUIRED"

@@ -51,7 +51,7 @@ def test_high_allows_ai_with_evidence_and_complete_record():
     assert record(prov=dict(PROV, note=""))["confidence_level"] == "Low"
     assert record(prov=dict(PROV, source_url="https://blog.example.com/"))["confidence_level"] == "Low"
     assert record(prov=dict(PROV, note=""), grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == "High"
-    assert record(g={k: v for k, v in FREE.items() if not k.startswith("permitted_stay")})["confidence_level"] == "Low"
+    assert record(g={k: v for k, v in FREE.items() if not k.startswith("permitted_stay")})["confidence_level"] == "Medium"
 
 
 @pytest.mark.parametrize("patch", [
@@ -63,7 +63,7 @@ def test_high_allows_ai_with_evidence_and_complete_record():
 def test_imported_verdict_provenance_requires_note_and_actual_verification_date(patch):
     prov = dict(PROV, **patch)
     assert record(prov=prov)["confidence_level"] == "Low"
-    assert record(prov=prov, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == ("Low" if patch.get("verified_at", "present") in (None, "") else "High")
+    assert record(prov=prov, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == ("Medium" if patch.get("verified_at", "present") in (None, "") else "High")  # No collection date: grounded but incomplete.
 
 
 @pytest.mark.parametrize("field", ["permitted_stay_days", "arrival_card", "official_portal_url",
@@ -79,7 +79,7 @@ def test_model_only_source_label_does_not_claim_verification():
 def test_official_homepage_alone_cannot_verify_a_productless_exemption():
     g = dict(FREE, source_url="https://www.mofa.go.jp/", visa_products=[])
     assert record(g, prov=None)["confidence_level"] == "Low"
-    assert record(g, prov=None, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == "Low"  # Collection date is still missing.
+    assert record(g, prov=None, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == "Medium"  # Grounded, but the collection date is still missing.
     assert record(g, prov=dict(PROV, verifier="ai"))["confidence_level"] == "High"
 
 
@@ -448,24 +448,29 @@ def test_hour_validity_is_exact_or_preserved_as_text(hours,days):
 
 def test_binary_grading_requires_support_for_filled_values_not_just_verdict():
     assert record(prov=dict(PROV, verifier='ai'))['confidence_level'] == 'High'
-    assert record(prov=dict(PROV, fields=['disposition']))['confidence_level'] == 'Low'
+    assert record(prov=dict(PROV, fields=['disposition']))['confidence_level'] == 'Medium'
     assert record(prov=None, grounded_ok=True, collected_at='2026-09-09',
                   grounded_fields=['disposition', 'permitted_stay_days', 'required_documents'])['confidence_level'] == 'High'
     assert record(prov=None, grounded_ok=True, collected_at='2026-09-09',
-                  grounded_fields=['disposition'])['confidence_level'] == 'Low'
+                  grounded_fields=['disposition'])['confidence_level'] == 'Medium'
     for verifier in ('ai', 'human', 'public'):
         for complete in (True, False):
             for disputed in (True, False):
                 grade = tstation._confidence(FREE, dict(PROV, verifier=verifier),
                                               complete=complete, disputed=disputed)
-                assert grade in {'High', 'Low'}
+                # Trip.com's field 25 ladder: a checked, undisputed record is
+                # High when complete and Medium when it still has gaps; a
+                # public edit or a dispute is Low whatever else is true.
+                assert grade in {'High', 'Medium', 'Low'}
                 assert (grade == 'High') == (verifier != 'public' and complete and not disputed)
+                assert (grade == 'Medium') == (verifier != 'public' and not complete and not disputed)
+                assert (grade == 'Low') == (verifier == 'public' or disputed)
 
 
 def test_binary_label_does_not_change_existing_publication_evidence_gate():
-    # Previously Medium: source-backed verdict, but no verification of stay.
+    # Medium: source-backed verdict, but no verification of stay. The hold gate is untouched.
     incomplete_review = record(prov=dict(PROV, fields=['disposition']))
-    assert incomplete_review['confidence_level'] == 'Low'
+    assert incomplete_review['confidence_level'] == 'Medium'
     assert incomplete_review['_evidence_low'] is False
     assert record(prov=None)['_evidence_low'] is True
     assert record(disputed_fields=['permitted_stay_days'])['_evidence_low'] is True
