@@ -965,7 +965,8 @@ def travel_database_issue_accept_proposal(issue_id: str,
               if isinstance(v, dict)}
     if not fields or not prop.get("source_url"):
         raise HTTPException(422, "this issue carries no acceptable proposal")
-    if row.reported_by == "freshness_monitor":
+    fill = prop.get("kind") == "fill"
+    if row.reported_by == "freshness_monitor" and not fill:
         raise HTTPException(422, "monitor disputes are ruled through the "
                                  "normal stages, not accepted wholesale")
     rt = dict(row.route or {})
@@ -992,6 +993,30 @@ def travel_database_issue_accept_proposal(issue_id: str,
     doc = str(rt.get("travel_document_type") or "").strip().lower()
     if doc and doc != "ordinary_passport":
         entry["route"]["travel_document_type"] = doc
+    if fill:
+        # The monitor found a value the record lacks. Nothing is contested,
+        # so an operator may accept it the way a flag's page reading is
+        # accepted, but only while the cell is still empty: a value that
+        # arrived in the meantime makes this a disagreement for the normal
+        # stages. The override is an AI quote accepted by a person, never a
+        # human verification and never a public edit, so the confidence
+        # ladder grades it as the monitor's reading.
+        served, _ = verified_overrides.apply(dict(cached.guidance or {}), rt)
+        entry["fields"] = _fill_override_fields(served, prop, fields)
+        entry["verifier"] = "ai"
+        entry["verified_by"] = f"Ellis freshness monitor, accepted by {p.user_id}"
+        product = str(prop.get("product_type") or "").strip()
+        entry["note"] = (f"Freshness monitor fill: the official page states "
+                         f"{', '.join(sorted(fields))}"
+                         f"{' for the ' + product + ' product' if product else ''} "
+                         f"and the record left the cell empty. Quotes: {quotes}")[:400]
+        anchored = {"government_fee", "visa_products"} & set(entry["fields"])
+        existing = verified_overrides.find(rt) or {}
+        if anchored and not any((existing.get("fields") or {}).get(k)
+                                for k in ("disposition", "requirement_detail")):
+            raise HTTPException(422, "a fee or product fill anchors to a verified "
+                                     "verdict: verify this route's disposition from "
+                                     "its official page first, then accept the fill")
     try:
         verified_overrides.append_operator_entry(entry, guidance=cached.guidance)
     except ValueError as e:
@@ -1207,7 +1232,8 @@ def _last_sweep_status() -> dict | None:
         "no_official_source", "source_reads", "source_fetch_failures",
         "model_comparisons", "model_comparisons_reused", "cycle_started_at",
         "cycle_time_budget_seconds", "resumed_from_started_at", "prior_attempt_results",
-        "provider_suspended", "provider_notice", "provider_suspended_at")
+        "provider_suspended", "provider_notice", "provider_suspended_at",
+        "fill_proposed", "fill_rejected")
     result = {k: data[k] for k in allowed if k in data}
     result.update(status=data.get("state"), checked=data.get("attempted", 0))
     if data.get("running") is True:
@@ -2238,6 +2264,74 @@ class DatabaseRecordEditIn(BaseModel):
     product_patch: dict | None = None
 
 
+def _merge_product_patch(before: dict, patch: dict) -> list:
+    """Merge an edit of ONE visa product's own columns into the product list
+    the reader currently sees, leaving its siblings untouched. Shared by the
+    console's product edit and an accepted monitor fill, so both write the
+    same shape into the override."""
+    want = str(patch.get("visa_type_name") or "").strip()
+    prods = [dict(pp) for pp in (before.get("visa_products") or [])
+             if isinstance(pp, dict)]
+    hit = next((pp for pp in prods
+                if str(pp.get("type") or "").strip() == want), None)
+    if hit is None:
+        raise HTTPException(422, f"no visa product named {want!r} on "
+                                 "this route")
+    if str(patch.get("validity") or "").strip():
+        hit["validity"] = str(patch["validity"]).strip()
+    if str(patch.get("entry") or "").strip():
+        hit["entry"] = str(patch["entry"]).strip()
+    if patch.get("max_stay_days") not in (None, ""):
+        hit["max_stay_days"] = int(patch["max_stay_days"])
+    amt = patch.get("fee_amount")
+    cur = str(patch.get("fee_currency") or "").strip()
+    if amt not in (None, "") or cur:
+        old_fee = hit.get("fee") or {}
+        hit["fee"] = {"amount": (float(amt) if amt not in (None, "")
+                                 else old_fee.get("amount")),
+                      "currency": cur.upper() or old_fee.get("currency")}
+    docs = patch.get("required_documents")
+    if isinstance(docs, list) and any(str(d).strip() for d in docs):
+        hit["required_documents"] = [str(d).strip() for d in docs if str(d).strip()]
+    if str(patch.get("notes") or "").strip():
+        hit["notes"] = str(patch["notes"]).strip()[:340]
+    return prods
+
+
+def _fill_override_fields(served: dict, proposal: dict, fields: dict) -> dict:
+    """The override an accepted fill writes: route fields as proposed, a
+    product cell as a patch of that product in the served list. Refused
+    when the cell is no longer empty, because then there is a difference to
+    rule on and not a gap to fill."""
+    def empty(value):
+        if isinstance(value, dict) and "amount" in value:
+            return value.get("amount") in (None, "")
+        return value in (None, "", [], {})
+    product_type = str(proposal.get("product_type") or "").strip()
+    if not product_type:
+        for k in fields:
+            if not empty(served.get(k)):
+                raise HTTPException(422, f"the record now holds a value for {k}: "
+                                         "rule on the difference through the normal stages")
+        return dict(fields)
+    prods = [pp for pp in (served.get("visa_products") or []) if isinstance(pp, dict)]
+    hit = next((pp for pp in prods
+                if str(pp.get("type") or "").strip() == product_type), None)
+    if hit is None:
+        raise HTTPException(422, f"no visa product named {product_type!r} on this route")
+    for k in fields:
+        if not empty(hit.get(k)):
+            raise HTTPException(422, f"the {product_type} product now holds a value for {k}: "
+                                     "rule on the difference through the normal stages")
+    patch = {"visa_type_name": product_type}
+    for k, v in fields.items():
+        if k == "fee" and isinstance(v, dict):
+            patch["fee_amount"], patch["fee_currency"] = v.get("amount"), v.get("currency")
+        else:
+            patch[k] = v
+    return {"visa_products": _merge_product_patch(served, patch)}
+
+
 @app.post("/database/records/edit")
 def travel_database_record_edit(body: DatabaseRecordEditIn,
                                 db=Depends(get_session),
@@ -2292,31 +2386,7 @@ def travel_database_record_edit(body: DatabaseRecordEditIn,
         if not before:
             raise HTTPException(422, "this route has no served answer yet, "
                                      "so its visa products cannot be edited")
-        want = str(body.product_patch.get("visa_type_name") or "").strip()
-        prods = [dict(pp) for pp in (before.get("visa_products") or [])
-                 if isinstance(pp, dict)]
-        hit = next((pp for pp in prods
-                    if str(pp.get("type") or "").strip() == want), None)
-        if hit is None:
-            raise HTTPException(422, f"no visa product named {want!r} on "
-                                     "this route")
-        pf = body.product_patch
-        if str(pf.get("validity") or "").strip():
-            hit["validity"] = str(pf["validity"]).strip()
-        if str(pf.get("entry") or "").strip():
-            hit["entry"] = str(pf["entry"]).strip()
-        if pf.get("max_stay_days") not in (None, ""):
-            hit["max_stay_days"] = int(pf["max_stay_days"])
-        amt = pf.get("fee_amount")
-        cur = str(pf.get("fee_currency") or "").strip()
-        if amt not in (None, "") or cur:
-            old_fee = hit.get("fee") or {}
-            hit["fee"] = {"amount": (float(amt) if amt not in (None, "")
-                                     else old_fee.get("amount")),
-                          "currency": cur.upper() or old_fee.get("currency")}
-        if str(pf.get("notes") or "").strip():
-            hit["notes"] = str(pf["notes"]).strip()[:340]
-        entry["fields"]["visa_products"] = prods
+        entry["fields"]["visa_products"] = _merge_product_patch(before, body.product_patch)
     try:
         verified_overrides.append_operator_entry(entry,
             guidance=cached.guidance if cached is not None else None)

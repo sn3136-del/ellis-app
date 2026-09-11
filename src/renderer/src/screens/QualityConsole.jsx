@@ -1872,7 +1872,10 @@ function ProposalBlock({ issue, onAccept, onResolve, t }) {
   const prop = issue.proposal || {}
   const fields = prop.fields || {}
   const keys = Object.keys(fields)
-  if (issue.reported_by === 'freshness_monitor') return null
+  // A monitor dispute is ruled through the stages, never accepted here. A
+  // monitor fill (a value the page states for a cell the record leaves
+  // empty) is the one monitor proposal an operator accepts or declines.
+  if (issue.reported_by === 'freshness_monitor' && prop.kind !== 'fill') return null
   if (!['open', 'acknowledged'].includes(issue.status || 'open')) return null
   if (prop.outcome !== 'checked') {
     if (['open', 'acknowledged'].includes(issue.status || 'open')
@@ -1916,6 +1919,9 @@ function ProposalBlock({ issue, onAccept, onResolve, t }) {
       <div style={{ fontSize: 12, fontWeight: 800, color: NAVY }}>
         {t('ops.prop.title')}
       </div>
+      {prop.product_type && (
+        <div style={{ fontSize: 12.5, color: GRAY }}>{prop.product_type}</div>
+      )}
       {keys.map((k) => (
         <div key={k} style={{ fontSize: 12.5, color: NAVY }}>
           <b>{k}</b>: {show(fields[k].record_holds)}
