@@ -1874,7 +1874,11 @@ def _wording_field(r: dict, cell: str, key: str, statuses: dict):
     period" rides with its figure so the console never loses it)."""
     from .visa_snapshot import tstation
     if r.get(cell) not in (None, ""):
-        return r.get(key) or None
+        # Beside a number only wording that states something (a period, a
+        # per-application rule) rides along, never a pointer or a
+        # placeholder or another product's sentence.
+        text = r.get(key)
+        return text if text and tstation._wording_status(text) != "missing" else None
     return tstation.wording_shown(r, cell, statuses)
 
 

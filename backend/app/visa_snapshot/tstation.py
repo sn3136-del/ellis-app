@@ -1499,16 +1499,14 @@ def _strip_visa_only_fields(row: dict) -> dict:
     if not _no_visa_issued(row):
         return row
     row = dict(row)
-    # No exemption lane states a visa validity in words: the wording that
-    # reaches a Conditional lane is the permission's own (a bilateral
-    # agreement window, an e-passport registration), never a visa's.
-    row["validity_text"] = None
     if str(row.get("visa_requirement") or "") != "Visa-free":
-        # A Conditional lane may carry a real permission with its own
-        # numeric terms (the Mainland Travel Permit's 10-year validity,
-        # multiple entries and processing time): those stay.
+        # A Conditional exemption with no application (a bilateral
+        # agreement window) carries no validity wording of its own; one
+        # that is applied for (the Mainland Travel Permit, an e-passport
+        # registration) keeps its stated terms, numeric or worded.
+        row["validity_text"] = None
         return row
-    for f in ("validity_duration", "validity_unit", "entries",
+    for f in ("validity_duration", "validity_unit", "validity_text", "entries",
               "processing_min_days", "processing_unit"):
         row[f] = None
     # Their enum has no "not applicable", so an empty cell carries it and the
@@ -2261,9 +2259,6 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
 # "As decided by the consulate (minimum 15 days)" and "12 months or above"
 # stay values, and a string that merely OPENS with a placeholder token
 # ("n/a - no prior application") is a placeholder too.
-_POINTER_WORDING = re.compile(
-    r"^\s*(?:as above|as below|same as\b.*|see\b.*|refer\b.*|idem|ditto|n/?a|none|unknown|tbd|tba|"
-    r"varies|variable|-+|\?+)\s*\.?\s*$", re.I)
 _PLACEHOLDER_OPENING = re.compile(r"^\s*(?:n/?a|none|unknown|tbd|tba|varies|variable|as above|as below)\b\s*(?:[-:;,.]|$)", re.I)
 # Wording that asserts, anywhere in the string, that the destination does
 # not publish the figure is a documented absence (the "Not publicly
@@ -2277,11 +2272,17 @@ _INAPPLICABLE_WORDING = re.compile(r"^\s*not\s+applicable\b", re.I)
 # case by case, with no figure of its own, documents an absence as well:
 # the destination publishes no fixed period.
 _VARIABLE_WORDING = re.compile(
-    r"\b(?:decided|decides?|determined|determines?|set|sets|fixed|established|varies|vary|variable|depends|depending|"
-    r"discretion|discretionary|case[- ]by[- ]case|per application|per trip|per visit|as issued|as granted|"
-    r"as stated (?:in|on) the|as shown on the|as printed on the|as endorsed|as granted at|granted at (?:arrival|entry)|"
+    r"\b(?:(?:decided|decides?|determined|determines?|set|sets|fixed|established)\s+"
+    r"(?:by|at|on|in accordance|according|case[- ]by[- ]case|individually|per application)|"
+    r"(?:determines?|decides?)\s+(?:the|your|its|each)\b|"
+    r"(?:varies|vary|variable|depends|depending)\s+(?:by|on|with|according|per)|"
+    r"discretion|discretionary|case[- ]by[- ]case|per application|"
+    r"as stated (?:in|on) the|as shown on the|as printed on the|as endorsed|"
     r"to be determined|limited to (?:the )?(?:intended |approved )?(?:trip|travel) dates|"
     r"trip dates|travel dates)\b", re.I)
+_POINTER_WORDING = re.compile(
+    r"^\s*(?:as above|as below|same as\b.*|see\b.*|refer\b.*|idem|ditto|n/?a|none|unknown|tbd|tba|"
+    r"varies|variable|as issued|as granted|set per trip|per trip|per visit|-+|\?+)\s*\.?\s*$", re.I)
 # A period actually stated: a figure or a number word beside a duration unit
 # in any of the corpus languages, a numeral beside a CJK or Thai unit, or a
 # phrase that describes a period. A bare digit (a form number, a subclass)
@@ -2294,8 +2295,9 @@ _NUMBER_WORDS = (r"(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|tw
                  r"forty|forty[- ]five|sixty|ninety|un|une|deux|trois|quatre|cinq|six|dix|douze|uno|una|dos|tres|"
                  r"cuatro|cinco|seis|diez|doce|satu|dua|tiga|enam|một|hai|ba|sáu)")
 _PERIOD_WORDING = re.compile(
-    r"(?<![\w-])\d+(?:[.,]\d+)?\s*" + _LATIN_UNITS + r"\b|"
-    r"\b" + _NUMBER_WORDS + r"\s+" + _LATIN_UNITS + r"\b|"
+    # "30 days", "6-12 months", "30-day", "1 to 3 months", "six (6) months"
+    r"(?<!\w)\d+(?:[.,]\d+)?(?:\s*(?:[-\u2013\u2014]|to|or|à|a|/)\s*\d+(?:[.,]\d+)?)?\s*[-\u2013\u2014]?\s*" + _LATIN_UNITS + r"\b|"
+    r"\b" + _NUMBER_WORDS + r"(?:\s*\(\d+\))?(?:\s*(?:to|or|[-\u2013\u2014])\s*" + _NUMBER_WORDS + r"(?:\s*\(\d+\))?)?\s*[-\u2013\u2014]?\s*" + _LATIN_UNITS + r"\b|"
     r"[\d一二三四五六七八九十百千两兩]+\s*(?:日間|日|天|周|週|个月|個月|ヶ月|か月|月|年|時間|时间|개월|일|년|주|วัน|เดือน|ปี)|"
     r"\b(?:duration of|for the duration|tied to the duration|course duration|tour duration|programme duration|"
     r"program duration|until (?:the )?passport (?:expires|expiry)|until expiry|whichever is (?:sooner|earlier|shorter|less)|"
@@ -2330,11 +2332,15 @@ def _wording_status(text) -> str:
         return "missing"
     if _INAPPLICABLE_WORDING.match(text):
         return "not-applicable"
-    if _ABSENCE_WORDING.search(text):
+    absence = _ABSENCE_WORDING.search(text)
+    if absence and absence.start() <= 4:
+        # The absence governs the whole statement ("not stated on the pages
+        # read, stay limited to 90 days" documents the validity, the 90
+        # days is the stay).
         return "not-published"
     if _states_period(text):
         return "filled"
-    if _VARIABLE_WORDING.search(text):
+    if absence or _VARIABLE_WORDING.search(text):
         return "not-published"
     return "missing"
 
@@ -2357,10 +2363,25 @@ def _validity_in_words(row: dict) -> bool:
 
 
 def _no_visa_issued(row: dict) -> bool:
-    """True on every exemption lane, Conditional and Transit included: no
-    visa is issued, so no visa validity or entry count can exist."""
-    return (str(row.get("visa_requirement") or "") == "Visa-free"
-            or str(row.get("visa_requirement_detail") or "") in _VISA_FREE_DETAILS)
+    """True on an exemption lane where nothing is applied for: a plain
+    visa-free route, or a Conditional or Transit exemption with no
+    application, fee or processing time of its own. A Conditional lane
+    that carries an application (an e-passport registration, a permit) is
+    a permission with terms of its own and keeps them."""
+    requirement = str(row.get("visa_requirement") or "")
+    if requirement == "Visa-free":
+        return True
+    if str(row.get("visa_requirement_detail") or "") not in _VISA_FREE_DETAILS:
+        return False
+    return not _permission_applied_for(row)
+
+
+def _permission_applied_for(row: dict) -> bool:
+    """True when the row describes something the traveller applies for."""
+    return (row.get("application_method") not in (None, "", [])
+            or row.get("processing_min_days") not in (None, "")
+            or (row.get("visa_fee_amount") not in (None, "") and row.get("visa_fee_amount") != 0)
+            or row.get("validity_duration") not in (None, ""))
 
 
 def wording_shown(row: dict, cell: str, statuses: dict | None = None) -> str | None:

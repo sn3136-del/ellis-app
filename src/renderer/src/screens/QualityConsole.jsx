@@ -664,7 +664,7 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
                   <span>{stayText}</span>
                   <div style={{ marginTop: 5, fontSize: 11, fontWeight: 400,
                                 fontStyle: 'normal', color: GRAY, lineHeight: 1.45 }}>
-                    {t('ops.stayTextOnly')}
+                    {st === 'filled' || st === 'pending-review' ? t('ops.stayTextOnly') : t('ops.wordingAbsence')}
                   </div>
                 </>
               : f === 'validity_duration' && validityText
@@ -672,7 +672,7 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
                   <span>{validityText}</span>
                   <div style={{ marginTop: 5, fontSize: 11, fontWeight: 400,
                                 fontStyle: 'normal', color: GRAY, lineHeight: 1.45 }}>
-                    {t('ops.validityTextOnly')}
+                    {st === 'filled' || st === 'pending-review' ? t('ops.validityTextOnly') : t('ops.wordingAbsence')}
                   </div>
                 </>
               : (rec[f] == null || rec[f] === '')
@@ -1802,8 +1802,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                                lineHeight: 1.45, overflowWrap: 'anywhere',
                                fontVariantNumeric: 'tabular-nums' }}>
                     {rec.max_stay_duration != null
-                      ? `${rec.max_stay_duration} ${rec.max_stay_unit === 'Hour'
-                          ? t('ops.u.hour') : t('ops.u.day')}`
+                      ? `${rec.max_stay_duration} ${unitName(rec.max_stay_unit)}`
                       : wordingFor(rec, 'max_stay_duration', 'max_stay_text')
                         || (rec.field_status?.max_stay_duration === 'not-applicable' ? t('ops.notApplicable')
                           : rec.field_status?.max_stay_duration ? t('ops.notPublished') : '·')}

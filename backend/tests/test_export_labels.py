@@ -134,7 +134,7 @@ def test_wording_predicates_follow_the_owner_rule():
     # Wording that only says the period is decided per application documents
     # the absence in the destination's words: shown, counted as documented,
     # never filled (skeptic classification, 11 September 2026).
-    for value in ('as granted', 'Determined by consular officials and the visa issued.', 'As issued', 'Limited to the intended trip dates'):
+    for value in ('Determined by consular officials and the visa issued.', 'Limited to the intended trip dates'):
         val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': value}
         st = tstation.field_status(val)
         assert st['validity_duration'] == 'not-published' and st['validity_unit'] == 'not-applicable', value
@@ -241,7 +241,7 @@ def test_the_corpus_classification_from_the_skeptic_review():
         assert tstation._wording_status(text) == 'filled', text
     # Wording that says the figure is set per application documents the
     # absence in the destination's words and is shown, but never filled.
-    for text in ("Set by the mission", "varies by consulate", "determined by issued visa", "Set case-by-case"):
+    for text in ("Set by the mission", "varies by consulate", "determined by issued visa", "Set case-by-case", "Determined by CBP at the port of entry and recorded on the I-94"):
         assert tstation._wording_status(text) == 'not-published', text
         row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
         assert tstation.wording_shown(row, 'validity_duration') == text
@@ -291,3 +291,36 @@ def test_the_third_skeptic_cases():
     gap = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': 'Issued at the border'}
     st = tstation.field_status(gap)
     assert st['max_stay_duration'] == 'missing' and st['max_stay_unit'] == 'missing'
+
+
+def test_the_fourth_skeptic_cases():
+    # Figures joined to their unit by a bracket, a hyphen or a range word.
+    for text in ("maximum of six (6) months", "a stay of less than one (1) month", "One (1) to three (3) months",
+                 "6-12 months", "30-90 days", "free 30-day tourist visa issued on arrival", "an initial stay of thirty (30) days"):
+        assert tstation._wording_status(text) == 'filled', text
+    # Vacuous wording is a gap, not a documented absence.
+    for text in ("As issued", "as granted", "Set per trip", "Issued at the border"):
+        assert tstation._wording_status(text) == 'missing', text
+    # A period stated beside an absence remark is a value; an absence that
+    # opens the statement governs it.
+    assert tstation._wording_status("90 days from issue, extension not guaranteed") == 'filled'
+    assert tstation._wording_status("not stated on the pages read, stay limited to 90 days in any 180-day period") == 'not-published'
+    # A Conditional lane that is applied for keeps its permission's terms
+    # and its honest gaps; one with no application carries no validity.
+    javes = {'visa_requirement': 'Conditional', 'visa_requirement_detail': 'Conditional Visa-free',
+             'visa_type_name': 'E-passport visa exemption registration (JAVES or sticker)',
+             'application_method': 'Online Application', 'processing_min_days': 2, 'processing_unit': 'Working Day',
+             'entries': 'Multiple', 'visa_fee_amount': 0, 'visa_fee_currency': 'JPY',
+             'validity_text': '3 years or until the passport expires, whichever is shorter'}
+    st = tstation.field_status(javes)
+    assert st['validity_duration'] == 'filled' and st['validity_unit'] == 'not-applicable'
+    assert tstation._strip_visa_only_fields(javes)['validity_text'] == javes['validity_text']
+    evisa = {'visa_requirement': 'Conditional', 'visa_requirement_detail': 'Conditional Visa-free',
+             'visa_type_name': 'Tourist', 'application_method': 'Online Application'}
+    st = tstation.field_status(evisa)
+    assert st['validity_duration'] == 'missing' and st['entries'] == 'missing' and st['processing_min_days'] == 'optional-empty'
+    agreement = {'visa_requirement': 'Conditional', 'visa_requirement_detail': 'Conditional Visa-free',
+                 'visa_type_name': 'Visa-free entry', 'validity_text': 'Agreement in force from 17 July 2025 for an initial 5 years'}
+    st = tstation.field_status(agreement)
+    assert st['validity_duration'] == 'not-applicable' and st['entries'] == 'not-applicable'
+    assert tstation._strip_visa_only_fields(agreement)['validity_text'] is None

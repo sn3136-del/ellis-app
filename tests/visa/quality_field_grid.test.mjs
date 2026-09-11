@@ -87,7 +87,9 @@ test('a documented absence stated in the destination words shows that wording wi
     field_status: { validity_duration: 'not-published', validity_unit: 'not-applicable' } })
   const html = render(rec)
   assert.ok(html.includes('Set by the mission'))
-  assert.ok(html.includes(t('en', 'ops.validityTextOnly')))
+  // The note under a documented absence says so, not "shown as stored".
+  assert.ok(html.includes(t('en', 'ops.wordingAbsence')))
+  assert.ok(!html.includes(t('en', 'ops.validityTextOnly')))
   assert.ok(!html.includes('✓'))
 })
 
