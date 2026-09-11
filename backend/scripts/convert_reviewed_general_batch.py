@@ -138,10 +138,40 @@ def _name_pattern(nat):
     pattern = _NAME_PATTERNS.get(nat)
     if pattern is None:
         parts = [r'(?<![a-z])' + re.escape(a) + r'(?![a-z])' for a in _aliases(nat)]
-        parts += [r'(?<![^\W\d_])' + re.escape(_norm(stem)) + r'[^\W\d_]{0,5}(?![^\W\d_])'
+        # A stem inside a hyphenated or regional compound ("sud-américains",
+        # "latin american") names a region, not this nationality.
+        parts += [_COMPOUND_GUARD + r'(?<![^\W\d_])' + re.escape(_norm(stem)) + r'[^\W\d_]{0,5}(?![^\W\d_])'
                   for stem in _DEMONYM_STEMS.get(nat, ())]
         pattern = _NAME_PATTERNS[nat] = re.compile('|'.join(parts) if parts else r'(?!x)x')
     return pattern
+
+
+_COMPOUND_GUARD = ''.join(f'(?<!{p})' for p in ('-', 'sud ', 'nord ', 'south ', 'north ', 'latin ', 'latino ',
+                                                 'hispano ', 'afro ', 'anglo ', 'central ', 'indo '))
+# A mention right after a negating prefix ("non-US citizens", "other than
+# Indian nationals") speaks about everyone but this nationality.
+_NEGATED_PREFIX_RE = re.compile(r"(?:\bnon[- ]?|\bother than\s+|\bexcluding\s+|\bexcept(?:ing)?(?:\s+for)?\s+|\bnot\s+|"
+                                r"\bsauf\s+|\bhors\s+|\bexcepto\s+|\bsalvo\s+|\bexceto\s+|\baußer\s+|\btranne\s+|"
+                                r"\bkecuali\s+|\bкроме\s+|\bне\s+)$")
+
+
+def _mentions(text, nat):
+    """Spans of the nationality's own mentions in the normalized text: fixed
+    aliases and inflected demonyms, negated mentions left out."""
+    low = _norm(text)
+    spans = [m.span() for m in _name_pattern(nat).finditer(low)
+             if not _NEGATED_PREFIX_RE.search(low[max(0, m.start() - 24):m.start()])]
+    tokens = _CAPITAL_TOKENS.get(nat)
+    if tokens:
+        nfkc = unicodedata.normalize('NFKC', str(text or ''))
+        for m in re.finditer(r'(?<![A-Za-z])(?:' + '|'.join(tokens) + r')(?![A-Za-z])', nfkc):
+            if _NEGATED_PREFIX_RE.search(nfkc[max(0, m.start() - 24):m.start()].casefold()):
+                continue
+            # Locate the same token in the normalized text for a span.
+            low_token = re.escape(_norm(m.group(0)))
+            at = re.search(r'(?<![a-z])' + low_token + r'(?![a-z])', low)
+            spans.append(at.span() if at else (0, 0))
+    return spans
 
 
 # Abbreviations that are the nationality only as capitals: "USA" is the
@@ -151,13 +181,9 @@ _CAPITAL_TOKENS = {'USA': (r'USA', r'EUA', r'EE\.?UU\.?', r'U\.S\.A\.?')}
 
 def _named(text, nat):
     """The text names the nationality: a fixed alias, an inflected demonym
-    (after normalization) or a capitalised abbreviation (as written)."""
-    text = str(text or '')
-    if _name_pattern(nat).search(_norm(text)):
-        return True
-    tokens = _CAPITAL_TOKENS.get(nat)
-    return bool(tokens and re.search(r'(?<![A-Za-z])(?:' + '|'.join(tokens) + r')(?![A-Za-z])',
-                                     unicodedata.normalize('NFKC', text)))
+    (after normalization) or a capitalised abbreviation (as written), and
+    not only behind a negating prefix."""
+    return bool(_mentions(text, nat))
 
 
 def _today():
@@ -294,14 +320,24 @@ def _source_table(batch):
     return sources
 
 
-def _check_proof(proof, sources, route, field, value, *, product=None):
-    """Return the validated proof or None for an explicit unknown/not_published."""
+def _empty_value(value):
+    return value in (None, [], {}, '') or (isinstance(value, dict) and all(v is None for v in value.values()))
+
+
+def _check_proof(proof, sources, route, field, value, *, product=None, covered=None):
+    """Return the validated proof or None for an explicit unknown/not_published.
+    `covered` carries the other values this proof key covers (the prose
+    permitted_stay under the permitted_stay_days proof); an unknown or
+    unpublished proof leaves every one of them empty."""
     if not isinstance(proof, dict) or proof.get('verifier', 'ai') != 'ai':
         raise PatchRejected(f'{field}: the source review must be attributed to AI')
     status = proof.get('status')
     if status in ('unknown', 'not_published'):
-        if value not in (None, [], {}, '') and not (isinstance(value, dict) and all(v is None for v in value.values())):
+        if not _empty_value(value):
             raise PatchRejected(f'{field}: an unknown or unpublished value must be empty')
+        for key, other in (covered or {}).items():
+            if not _empty_value(other):
+                raise PatchRejected(f'{field}: an unknown or unpublished proof cannot cover a stated {key}')
         if not str(proof.get('reason') or '').strip():
             raise PatchRejected(f'{field}: an unknown or unpublished value needs a reason')
         return None
@@ -334,7 +370,10 @@ def _check_proof(proof, sources, route, field, value, *, product=None):
                 value, evidence, sources, route, product):
             raise PatchRejected('disposition: no scoped consular-product eligibility evidence')
     else:
-        pages = [(item['source_id'], sources[item['source_id']]['text']) for item in evidence]
+        # One page per quoted line: a quote with a line break inside keeps its
+        # page pairing line by line instead of losing the page binding.
+        pages = [(item['source_id'], sources[item['source_id']]['text'])
+                 for item in evidence for line in item['quote'].split('\n') if line.strip()]
         _check_value(field, value, passages, route, product, pages=pages)
     if any(k in proof for k in ('effective_from', 'effective_to', 'policy_interval_evidence')):
         if field != 'disposition':
@@ -387,8 +426,12 @@ _VERDICT_RULES = {
                       r"\bnecessitano (?:di )?un visto|\bvisto (?:è )?(?:richiesto|necessario|obbligatorio)|\bbenötigen ein visum|\bvisumpflichtig\b|\bprecisam de visto|\bvisto (?:é )?(?:obrigatório|necessário)|"
                       r"\b(?:need|needs|require|requires|must|shall|should|have to|has to|required to|doivent|doit|deben|debe|phải|cần)\b[^.;\n]{0,40}"
                       r"\b(?:obtain|hold|have|apply for|possess|be in possession of|get|obtenir|être munis?|obtener|xin|có)\b[^.;\n]{0,40}\b(?:e-?visa|visa|thị thực)\b|"
-                      r"\b(?:can|may|eligible to|entitled to) apply (?:for )?(?:an? |the )?(?:\w+ ){0,2}(?:e-?visa|electronic visa|visa)\b|"
-                      r"\bmay be (?:granted|issued) (?:an? )?e-?visa|"
+                      r"\b(?:can|may|eligible to|entitled to) apply (?:for )?(?:an? |the )?(?:\w+ ){0,2}(?:e-?visa|electronic visa)\b|"
+                      # "may apply for a visa" proves a requirement only beside a requirement word;
+                      # alone it also describes an optional longer-stay visa.
+                      r"\b(?:required|must|need|needs|mandatory|compulsory|obligatory)\b[^.;\n]{0,80}\b(?:can|may|eligible to|entitled to) apply (?:for )?(?:an? |the )?(?:\w+ ){0,2}visa\b|"
+                      r"\b(?:can|may|eligible to|entitled to) apply (?:for )?(?:an? |the )?(?:\w+ ){0,2}visa\b[^.;\n]{0,80}\b(?:required|must|need|needs|mandatory|compulsory|obligatory)\b|"
+                      r"\bmay be (?:granted|issued) (?:with )?(?:an? )?e-?visa|"
                       r"\beligible for (?:the |an? )?(?:\w+ ){0,2}e-?visa|"
                       r"\b(?:grant|granted|issue|issued)\b[^.;\n]{0,30}\b(?:visit|tourist|entry|e-?)visas?\b[^.;\n]{0,80}\b(?:to|for) (?:foreigners|nationals|citizens|holders)|"
                       r"виз[аы] по всем|требуется виза|необходима виза|нужна виза|оформить визу|получить визу|должны иметь[^.;\n]{0,30}визу|"
@@ -411,23 +454,41 @@ _VERDICT_RULES = {
                     r"(?<!no )(?<!sin )(?<!sans )(?:visa|e-?visa) (?:is |are )?(?:required|mandatory)|must (?:obtain|hold|apply)"),
     'ELECTRONIC_AUTHORIZATION_REQUIRED': (r"\b(?:eta|etas|esta|k-eta|evisitor|etias|nzeta|e-?ta)\b|electronic travel authori[sz]ation|electronic travel authority|travel authori[sz]ation|pre-arrival registration|电子旅行授权|電子旅行許可|전자여행허가",
                                           r"not required|exempt(?:ed)? from (?:the )?(?:k-eta|eta|esta)|without (?:an? )?(?:k-eta|eta|esta)|do(?:es)? not need"),
-    'VISA_ON_ARRIVAL': (r"visa[- ]on[- ]arrival|on arrival|upon arrival|upon entry|on entry|at the port of entry|at the (?:airport|border)|saat kedatangan|à l['’]arrivée|a la llegada|à chegada|по прибытии|落地签|落地簽|到着ビザ|도착비자|e-?voa",
-                        r"not (?:available|eligible|issued)|no visa on arrival|cannot obtain"),
+    # The arrival wording must sit beside a visa noun in the same clause; a
+    # stamp, card or check "on entry" carries no visa meaning of its own.
+    'VISA_ON_ARRIVAL': (r"visa[- ]on[- ]arrival|visas?\b[^.;,\n]{0,60}\b(?:on|upon) (?:arrival|arriving|entry|entering)\b|\b(?:on|upon) (?:arrival|entry)\b[^.;,\n]{0,25}\bvisas?\b|"
+                        r"visas?\b[^.;,\n]{0,60}\bat the (?:airport|border|port of entry)\b|"
+                        r"(?:visa|visto|visado|виз\w*)\b[^.;,\n]{0,40}(?:saat kedatangan|à l['’]arrivée|a la llegada|à chegada|по прибытии)|"
+                        r"(?:saat kedatangan|à l['’]arrivée|a la llegada|à chegada|по прибытии)[^.;,\n]{0,40}(?:visa|visto|visado|виз)|"
+                        r"落地签|落地簽|到着ビザ|도착비자|e-?voa",
+                        r"not (?:available|eligible|issued)|no visa on arrival|cannot obtain|do(?:es)? not (?:need|require)|visa[- ]free|without (?:a |an )?visa|exempt"),
 }
 
 # Words that carry a verdict. A list entry (a country's own line in a list
 # or table) must not contain one; the rule sentence does.
 _RULE_WORDS = re.compile(r"visa|visado|visto|visum|víz|viz|виз|签证|簽證|査証|查証|ビザ|비자|thị thực|วีซ่า|تأشيرة|"
                          r"\b(?:eta|etas|esta|etias|k-eta|nzeta|evisitor)\b|exempt|arrival|免签|免簽|entry clearance|travel authori", re.I)
-# A sentence that speaks about a list of nationalities rather than one.
-_GENERAL_RE = re.compile(
-    r"\b(?:all|any|every|foreign nationals|foreigners|following countries|following states|listed below|eligible countries|countries/territories|"
+# A sentence that opens a list of nationalities: only such a sentence can be
+# proved by a nationality's own list line. A universal statement ("all
+# foreigners") opens no list and names no one.
+_LIST_INTRO_RE = re.compile(
+    r"\b(?:following countries|following states|listed below|listed above|eligible countries|countries/territories|"
+    r"(?:set out|criteria|countries|list|shown|mentioned|specified|named|indicated|table) (?:below|above)|"
     r"the following|list of|lists? [a-z]\b|countries (?:that|which|who|whose|not|requiring|exempt|with|and regions|or regions|and territories)|"
     r"\d+ countries|these countries|nationalities|in the table|table below|schedule|countries whose (?:citizens|nationals)|"
-    r"liste des pays|pays suivants|pays ci-après|ci-dessous|ci-après|ressortissants des pays|"
+    r"liste des pays|pays suivants|pays ci-après|ci-dessous|ci-après|ci-dessus|ressortissants des pays|"
     r"lista de (?:los )?pa[ií]ses|siguientes pa[ií]ses|pa[ií]ses siguientes|seguintes pa[ií]ses|pa[ií]ses cujos|"
     r"staatenliste|folgenden? (?:staaten|länder)|daftar|negara(?:-negara)? berikut|krajiny, ktorých|список|следующих|danh sách|các nước)\b|"
     r"以下|下列|上述|次の|下記|国持|\d+国|国・地域", re.I)
+# A sentence that refers back to the list before it.
+_LIST_ABOVE_RE = re.compile(r"\b(?:above|foregoing|aforementioned|ci-dessus|précédente?s?|anteriores?|acima|oben|di atas|выше)\b|上述|上記", re.I)
+# Words that are prose, not part of a list entry, before or after the name.
+_ENTRY_PROSE_RE = re.compile(
+    r"\b(?:to|for|is|are|was|were|be|been|being|must|may|can|could|will|shall|should|would|need|needs|require|requires|"
+    r"requiring|required|proof|mission|embassy|consulate|apply|applying|application|applications|contact|issued|issue|"
+    r"issues|by|with|from|at|in|into|on|non|other|except|excluding|than|unless|your|you|we|our|please|if|when|who|"
+    r"which|that|this|these|those|residing|travel|travelling|traveling|enter|entering|entry|stay|visit|visiting|"
+    r"au|aux|pour|para|por|con|sin|avec|dans|für|mit|von|bei|nach)\b", re.I)
 # A sentence that introduces its own subject cannot borrow the previous
 # sentence's nationality.
 _OWN_SUBJECT_RE = re.compile(r"\b(?:nationals|citizens|holders|residents|ressortissants|ciudadanos|nacionales|cidadãos|citoyens|"
@@ -437,20 +498,38 @@ _TERMINATOR_RE = re.compile(r"[.!?。！？;\n|]")
 _SENTENCE_SPLIT = re.compile(r"(?<=[.;!?])(?<![A-Z]\.[A-Z]\.)(?<!\s[A-Z]\.)\s+|\n+")
 
 
+_ITEM_SPLIT_RE = re.compile(r'\s*(?:,|;|、|，|/|\||&|\s[-–—]\s|\s(?:and|und|et|y|e|dan|và|и)\s)\s*', re.I)
+
+
+def _entry_shaped(item, nat):
+    """The item is the nationality's name with at most a short qualifier: no
+    prose verbs or prepositions before or after the name, no negation."""
+    low = _norm(item)
+    if not low.strip(' ()*') or len(low.strip(' ()*')) > 60:
+        return False
+    spans = _mentions(item, nat)
+    if not spans:
+        return False
+    start, end = spans[0]
+    lead, trail = low[:start].strip(' ()*'), low[end:].strip(' ()*.')
+    return (len(lead) <= 30 and len(trail) <= 40
+            and not _ENTRY_PROSE_RE.search(lead) and not _ENTRY_PROSE_RE.search(trail))
+
+
 def _list_line(quote, nat):
     """A quote that is essentially the nationality's own line in a list: a
-    short line, a run of names separated by commas, dashes or CJK
-    enumerators, or a longer table entry that carries no verdict word."""
+    short entry-shaped line, or a run of names separated by commas, dashes
+    or CJK enumerators whose item is entry-shaped. A verdict word, a prose
+    fragment that mentions the nationality, or a negated mention is not a
+    list line."""
     raw = re.sub(r'^\s*(?:\d+[.)]|[-*•])\s*', '', str(quote or ''))
-    text = _norm(raw)
-    if not _named(raw, nat) or _RULE_WORDS.search(text):
+    if not _named(raw, nat) or _RULE_WORDS.search(_norm(raw)):
         return False
-    if len(text) <= 60:
+    if _entry_shaped(raw, nat):
         return True
-    items = re.split(r'\s*(?:,|;|、|，|/|\||\s[-–—]\s|\s(?:and|und|et|y|e|dan|và|и)\s)\s*', text)
-    if len(items) >= 3 and all(len(item.strip()) <= 45 for item in items):
-        return True
-    return len(text) <= 160 and not re.search(r'[.!?。！？;:]', text[:-1])
+    items = _ITEM_SPLIT_RE.split(raw)
+    return (len(items) >= 3 and all(len(_norm(item)) <= 45 for item in items)
+            and any(_entry_shaped(item, nat) for item in items))
 
 
 def _page_index(text):
@@ -463,10 +542,43 @@ def _page_index(text):
     for i, ch in enumerate(kept):
         if not ch.isspace():
             stripped.append(ch); back.append(i)
-    return kept, ''.join(stripped), back
+    return kept, ''.join(stripped), back, _headings(kept)
 
 
-def _passages(evidence_quotes, pages):
+def _headings(kept):
+    """Offsets of the sentences that open a list of nationalities under a
+    verdict ("Countries whose citizens must have a visa:"). They cut the
+    page into sections; a list line proves only the heading of its own
+    section."""
+    starts, pieces, at = [], [], 0
+    for piece in _TERMINATOR_RE.split(kept):
+        if _RULE_WORDS.search(piece) and _LIST_INTRO_RE.search(piece):
+            starts.append(at)
+            pieces.append(piece)
+        at += len(piece) + 1
+    return starts, pieces
+
+
+def _states_other_verdict(text, value):
+    """The text states a verdict other than this one (its own positive
+    wording without its flip), or flips this one."""
+    low = _norm(text)
+    for key, (positive, negative) in _VERDICT_RULES.items():
+        if key == value:
+            if negative and re.search(negative, low, re.I):
+                return True
+        elif re.search(positive, low, re.I) and not (negative and re.search(negative, low, re.I)):
+            return True
+    return False
+
+
+def _section(headings, pos):
+    """Index of the section (between two headings) that holds the offset."""
+    from bisect import bisect_right
+    return None if pos is None else bisect_right(headings, pos)
+
+
+def _passages(evidence_quotes, pages, nat=None):
     """Group the quotes into passages. Without page texts each quote is its
     own passage. With them, quotes are located on their captured page and two
     quotes that the page shows inside one sentence or table row (no sentence
@@ -475,20 +587,25 @@ def _passages(evidence_quotes, pages):
     read as one passage in page order, since the reviewer only split what the
     page says in one breath. Each passage carries its page id and offset."""
     if pages is None:
-        return [{'text': q, 'page': None, 'pos': None, 'parts': [{'text': q, 'page': None, 'pos': None}]}
-                for q in evidence_quotes]
+        return [{'text': q, 'page': None, 'pos': None, 'section': None, 'ambiguous': False,
+                 'parts': [{'text': q, 'page': None, 'pos': None, 'section': None, 'ambiguous': False}]}
+                for q in evidence_quotes], {}
     located, indexes = [], {}
     for order, (quote, (page_id, page_text)) in enumerate(zip(evidence_quotes, pages, strict=True)):
         if page_id not in indexes:
             indexes[page_id] = _page_index(page_text)
-        kept, stripped, back = indexes[page_id]
+        kept, stripped, back, headings = indexes[page_id]
         needle = re.sub(r'\s+', '', _norm(quote))
         hits = [m.start() for m in re.finditer(re.escape(needle), stripped)][:200] if needle else []
-        located.append({'text': quote, 'page': page_id, 'order': order,
+        located.append({'text': quote, 'page': page_id, 'order': order, 'ambiguous': False,
                         'hits': [(back[at], back[at + len(needle) - 1] + 1) for at in hits]})
     # A repeated cell ("No visa required.") is read at the occurrence that
     # continues the line or sentence of a quote occurring once on that page
-    # (the country's own line), else at the nearest occurrence to one.
+    # (the country's own line), else at the nearest occurrence to one. A
+    # quote that names the nationality without a verdict word (its own
+    # country line) and occurs under two different verdict headings is
+    # ambiguous: the page states two rules for it and the reviewer's other
+    # quote must not pick one.
     def rank(hit, anchors, kept):
         best = None
         for start, end in anchors:
@@ -502,15 +619,23 @@ def _passages(evidence_quotes, pages):
         anchors = [other['hits'][0] for other in located
                    if other is not unit and other['page'] == unit['page'] and len(other['hits']) == 1]
         hits = unit['hits']
+        headings = indexes[unit['page']][3][0]
         if not hits:
             unit['pos'] = unit['end'] = None
+        elif (len(hits) > 1 and not _RULE_WORDS.search(_norm(unit['text']))
+              and (nat is None or _named(unit['text'], nat))
+              and len({_section(headings, h[0]) for h in hits}) > 1):
+            unit['pos'] = unit['end'] = None
+            unit['ambiguous'] = True
         elif len(hits) == 1 or not anchors:
             unit['pos'], unit['end'] = hits[0]
         else:
             unit['pos'], unit['end'] = min(hits, key=lambda h: rank(h, anchors, indexes[unit['page']][0]))
     for unit in located:
         del unit['hits']
-        unit['parts'] = [{'text': unit['text'], 'page': unit['page'], 'pos': unit['pos']}]
+        unit['section'] = _section(indexes[unit['page']][3][0], unit['pos'])
+        unit['parts'] = [{'text': unit['text'], 'page': unit['page'], 'pos': unit['pos'],
+                          'section': unit['section'], 'ambiguous': unit['ambiguous']}]
     located.sort(key=lambda u: (str(u['page']), u['pos'] if u['pos'] is not None else 10 ** 9, u['order']))
     merged = []
     for unit in located:
@@ -528,16 +653,48 @@ def _passages(evidence_quotes, pages):
             last['parts'].extend(unit['parts'])
             continue
         merged.append(dict(unit))
-    return merged
+    return merged, indexes
 
 
-def _same_region(listed, unit):
-    """A list line proves a general sentence only on the same captured page,
-    within one list's reach of it."""
-    if unit['page'] is None:
+def _sentence_span(index, sentence, unit):
+    """Page span of this sentence of the unit: the occurrence inside the
+    unit's own span when the sentence sits there, else the first occurrence
+    on the page; None when the sentence is not on the page."""
+    kept, stripped, back, _ = index
+    needle = re.sub(r'\s+', '', _norm(sentence))
+    if not needle:
+        return None
+    hits = [(back[m.start()], back[m.end() - 1] + 1) for m in re.finditer(re.escape(needle), stripped)]
+    if not hits:
+        return None
+    inside = [h for h in hits if unit.get('pos') is not None and unit['pos'] <= h[0] < unit.get('end', unit['pos'])]
+    return (inside or hits)[0]
+
+
+def _same_list(listed, page, span, backwards, index, value):
+    """A list line proves the sentence that opens its list: the line sits on
+    the same captured page after the sentence (before it when the sentence
+    refers back to the list above), and no heading between them states
+    another verdict. The reach of a heading ends where the next verdict
+    heading begins, not at a fixed distance."""
+    if page is None:
         return bool(listed)
-    return any(entry['page'] == unit['page'] and entry['pos'] is not None and unit['pos'] is not None
-               and abs(entry['pos'] - unit['pos']) <= 12000 for entry in listed)
+    if span is None:
+        return False
+    starts, pieces = index[3]
+    for entry in listed:
+        if entry['page'] != page or entry['pos'] is None:
+            continue
+        if backwards:
+            lo, hi = entry['pos'], span[0]
+        else:
+            lo, hi = span[1], entry['pos']
+        if lo > hi:
+            continue
+        between = [piece for start, piece in zip(starts, pieces) if lo <= start < hi]
+        if not any(_states_other_verdict(piece, value) for piece in between):
+            return True
+    return False
 
 
 # Named groups an official page may use instead of the country, with the
@@ -611,15 +768,24 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None):
     named = _named(passages, nat)
     if value == 'CONDITIONAL':
         return named and bool(_CONDITION_RE.search(passages))
-    if supports_disposition(passages, value, nationality=nat):
-        return decide('validator: anchored statement')
     positive, negative = _VERDICT_RULES.get(value, (None, None))
+    if positive and value == 'VISA_EXEMPT':
+        negative = '(?:' + negative + ')|(?:' + NEGATED_VISA_EXEMPTION + ')'
+    # The validator's anchored statement still needs a non-negated mention of
+    # the nationality and a sentence that states the rule without flipping it.
+    unflipped = (not positive or any(re.search(positive, _norm(s), re.I) and not (negative and re.search(negative, _norm(s), re.I))
+                                     for s in _SENTENCE_SPLIT.split(passages)))
+    if named and unflipped and supports_disposition(passages, value, nationality=nat):
+        return decide('validator: anchored statement')
     if not positive:
         return False
-    if value == 'VISA_EXEMPT':
-        negative = '(?:' + negative + ')|(?:' + NEGATED_VISA_EXEMPTION + ')'
-    units = _passages(evidence_quotes, pages)
-    listed = [part for unit in units for part in unit['parts'] if _list_line(part['text'], nat)]
+    units, indexes = _passages(evidence_quotes, pages, nat)
+    listed = [part for unit in units for part in unit['parts']
+              if not part['ambiguous'] and _list_line(part['text'], nat)]
+    if explain is not None:
+        for unit in units:
+            if unit['ambiguous']:
+                explain.append('list line occurs under different verdict headings: ' + _norm(unit['text'])[:120])
     others = [n for n in _EXTRA_ALIASES if n != nat]
     seen_positive = False
     for unit in units:
@@ -639,11 +805,15 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None):
             borrowable = (not sentence_named and not _OWN_SUBJECT_RE.search(sl)
                           and not any(_named(sentence, other) for other in others))
             carried = borrowable and (labelled or previous_named)
-            previous_named = sentence_named or carried
+            flipped = bool(negative and re.search(negative, sl, re.I))
+            # A sentence that flips this verdict cannot lend its nationality
+            # to the next one: "do not need a visa" followed by an optional
+            # "may apply for a visa" is still an exemption.
+            previous_named = (sentence_named or carried) and not flipped
             if not re.search(positive, sl, re.I):
                 continue
             seen_positive = True
-            if negative and re.search(negative, sl, re.I):
+            if flipped:
                 if explain is not None:
                     explain.append('flipped in the same sentence: ' + sl[:120])
                 continue
@@ -653,11 +823,15 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None):
                 return decide(('label' if labelled else 'previous sentence') + ' names the nationality: ' + sl[:120])
             if _group_member(sentence, nat):
                 return decide('group membership: ' + sl[:120])
-            if listed and _same_region(listed, unit) and (_GENERAL_RE.search(sl) or value != 'VISA_EXEMPT'):
-                return decide('list line beside the rule sentence: ' + sl[:120])
-            if listed and explain is not None:
-                explain.append(('list line on another page or region' if not _same_region(listed, unit)
-                                else 'list line but the rule sentence is not general') + ': ' + sl[:120])
+            if listed and _LIST_INTRO_RE.search(sl):
+                index = indexes.get(unit['page']) if unit['page'] is not None else None
+                span = _sentence_span(index, sentence, unit) if index else None
+                if _same_list(listed, unit['page'], span, bool(_LIST_ABOVE_RE.search(sl)), index, value):
+                    return decide('list line beside the rule sentence: ' + sl[:120])
+                if explain is not None:
+                    explain.append('list line on another page or under another heading: ' + sl[:120])
+            elif listed and explain is not None:
+                explain.append('list line but the rule sentence opens no list: ' + sl[:120])
     if explain is not None:
         explain.append('rejected: ' + ('nationality never named' if not named else
                                        'no rule sentence in the evidence' if not seen_positive else
@@ -827,8 +1001,16 @@ def _validate_row(row, sources):
         dropped = row.setdefault('dropped', [])
         for key, covered in ROUTE_PROOF_COVERS.items():
             if key in proofs:
+                if isinstance(proofs[key], dict) and proofs[key].get('status') in ('unknown', 'not_published'):
+                    # The proof says the figure is unknown or not published:
+                    # the prose it covers is unproved too and is not asserted.
+                    for c in covered:
+                        if c != key and not _empty_value(values.get(c)):
+                            dropped.append(f'{c}: a value under an unknown or unpublished {key} proof')
+                            values.pop(c, None)
                 try:
-                    _check_proof(proofs[key], sources, route, key, values.get(key))
+                    _check_proof(proofs[key], sources, route, key, values.get(key),
+                                 covered={c: values.get(c) for c in covered if c != key})
                 except PatchRejected as exc:
                     # An ancillary value that cannot be proved is not asserted;
                     # the verdict is the only field that decides the row.
@@ -863,6 +1045,10 @@ def _validate_row(row, sources):
                         raise PatchRejected(f'{spec["type"]}: {field} has a value but no proof')
                 except PatchRejected as exc:
                     dropped.append(str(exc))
+                    if field == 'disposition' and field in pproofs:
+                        # A product verdict whose own proof fails is unproved:
+                        # the product is not served with an asserted verdict.
+                        product['verdict_unproved'] = str(exc)
                     pproofs.pop(field, None)
                     if field != 'disposition':
                         spec[field] = {'amount': None, 'currency': None} if field == 'fee' else None
@@ -1058,8 +1244,19 @@ def convert(manifest, current_layers):
                 removed.append({'type': spec.get('current_name'), 'reason': spec.get('remove_reason')})
                 seen.add(spec.get('current_name'))
                 continue
-            base = deepcopy(by_name.get(spec.get('current_name')) or {}) if action != 'add' else {}
             seen.add(spec.get('current_name'))
+            if spec.get('verdict_unproved'):
+                # The reviewer asserted a product verdict its evidence does not
+                # state; neither that verdict nor the current product is served.
+                # On an exemption lane a paid option without its own reviewed
+                # verdict stays a row-level defect, as before.
+                amount = ((spec['product'].get('fee') or {}).get('amount')
+                          if isinstance(spec['product'].get('fee'), dict) else None)
+                if verdict['disposition'] == 'VISA_EXEMPT' and isinstance(amount, (int, float)) and amount > 0:
+                    raise PatchRejected('An optional product needs its own reviewed verdict')
+                removed.append({'type': spec['product'].get('type'), 'reason': spec['verdict_unproved']})
+                continue
+            base = deepcopy(by_name.get(spec.get('current_name')) or {}) if action != 'add' else {}
             product = dict(base)
             pspec = spec['product']
             product['type'] = pspec['type']
@@ -1100,6 +1297,19 @@ def convert(manifest, current_layers):
                 # differs from the route's must prove its own.
                 decision = verdict['proof']
             if decision is None or decision.get('status') != 'reviewed':
+                if (product['disposition'] != verdict['disposition']
+                        or product['requirement_detail'] != verdict['requirement_detail']):
+                    # A reviewed product whose verdict differs from the
+                    # route's must prove its own; without a reviewed proof
+                    # its verdict is not served. On an exemption lane a paid
+                    # option without its own reviewed verdict stays a
+                    # row-level defect, as before.
+                    amount = (product.get('fee') or {}).get('amount') if isinstance(product.get('fee'), dict) else None
+                    if verdict['disposition'] == 'VISA_EXEMPT' and isinstance(amount, (int, float)) and amount > 0:
+                        raise PatchRejected('An optional product needs its own reviewed verdict')
+                    removed.append({'type': product['type'],
+                                    'reason': 'disposition: the product verdict differs from the route verdict and has no reviewed proof'})
+                    continue
                 unsupported.append(product['type'])
                 product['field_provenance'] = pproofs
                 final.append(product)
