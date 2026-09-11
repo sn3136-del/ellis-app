@@ -57,7 +57,10 @@ async function call(method, path, session, body, options = {}) {
   // deliberately outside this read deadline: timing one out cannot establish
   // whether the server completed a correction.
   const qualityRead = method === 'GET' && (path.startsWith('/database/') || path === '/health/uptime')
-  const timeoutMs = qualityRead ? (options.timeoutMs ?? 30000) : 0
+  // The record browser payload is large (4.8 MB for 1,442 records) and is
+  // served from a server-side cache since 11 September 2026; the first cold
+  // read after a restart can still take longer than 30 seconds.
+  const timeoutMs = qualityRead ? (options.timeoutMs ?? (path.startsWith('/database/records') ? 120000 : 30000)) : 0
   const controller = timeoutMs > 0 ? new AbortController() : null
   let timer
   const deadline = controller ? new Promise((_, reject) => {

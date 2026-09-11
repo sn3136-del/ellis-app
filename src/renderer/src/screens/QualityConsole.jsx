@@ -486,10 +486,15 @@ function MissingLine({ missing, t }) {
 
 // Translated label for one of the 25 T-Station field keys; falls back to the
 // humanized key so an unmapped field is still readable, never snake_case.
+// Recovered historical values stay in the recovery file for operators who
+// ask, but the owner asked on 11 September 2026 that the console show only
+// the current record, so the inline history section is off.
+const SHOW_RECOVERED_HISTORY = false
 let recoveredRecordRequest
 function RecoveredRecord({ rec, t }) {
   const [recoveredIndex, setRecoveredIndex] = useState(null)
   useEffect(() => {
+    if (!SHOW_RECOVERED_HISTORY) return undefined
     let active = true
     if (!recoveredRecordRequest) {
       recoveredRecordRequest = fetch('/qc-recovered-records.json', { cache: 'no-store' })
@@ -503,7 +508,7 @@ function RecoveredRecord({ rec, t }) {
     return () => { active = false }
   }, [])
   const history = recoveredIndex ? recoveredForRecord(rec, recoveredIndex) : []
-  if (!history.length) return null
+  if (!SHOW_RECOVERED_HISTORY || !history.length) return null
   return <section style={{ gridColumn: '1 / -1', padding: 12, background: '#f7f9fc', borderRadius: 10 }}>
     <strong>{t('ops.recoveredInline')}</strong>
     <p style={{ fontSize: 12, color: GRAY }}>{t('ops.recoveredPrecedence')}</p>
@@ -1462,7 +1467,10 @@ export function NextSweepCountdown({ at, summary, t }) {
     { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
   const run = summary.last_run
   const runStates = ['running', 'complete', 'complete_with_errors', 'budget_exhausted',
-    'interrupted', 'failed', 'status_stale', 'status_unconfirmed']
+    'interrupted', 'failed', 'provider_suspended', 'status_stale', 'status_unconfirmed']
+  const providerNotice = summary.provider?.suspended
+    ? (summary.provider.reason || t('ops.fresh.run.provider_suspended'))
+    : (run?.provider_notice && run?.status === 'provider_suspended' ? run.provider_notice : null)
   const runState = runStates.includes(run?.status) ? run.status : 'status_unconfirmed'
   const runCount = name => Number.isFinite(run?.[name]) ? run[name] : '—'
   const validTime = value => typeof value === 'string' && Number.isFinite(Date.parse(value))
@@ -1499,7 +1507,7 @@ export function NextSweepCountdown({ at, summary, t }) {
               {t('ops.fresh.verifiedMeasured').replace('{n}', summary.verified_target).replace('{total}', summary.canonical_total)}
             </div>
             <div>{t('ops.fresh.runResult')}: {run
-              ? `${t(`ops.fresh.run.${runState}`)} · ${run.finished_at || run.started_at || '·'}`
+              ? `${t(`ops.fresh.run.${runState}`)} · ${run.finished_at || run.started_at || '·'}${providerNotice ? ` · ${t('ops.fresh.providerNotice')}: ${providerNotice}` : ''}`
               : t('ops.fresh.runUnknown')}</div>
             {run && <>
               {continued && <div data-testid="ops-fresh-continuation" style={{ color: NAVY }}>
@@ -1655,6 +1663,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
     'Visa Required in Advance': [t('ops.req.advance'), NAVY],
     Conditional: [t('ops.req.conditional'), AMBER],
   }
+  const TIER_COLOR = { High: GREEN, Medium: BLUE, Low: RED }
   const CHECKS = {
     'human-quote': [t('ops.check.quoted'), GREEN, t('ops.tip.quoted')],
     'ai-quote': [t('ops.check.aiQuoted'), BLUE, t('ops.tip.aiQuoted')],
@@ -1769,22 +1778,19 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                   </td>
                   <td className="ops-cell" data-label={t('ops.col.quality')}
                       style={{ padding: '10px 12px' }}>
-                    <span title={checkTip} style={{ cursor: 'help' }}>
-                      <Chip color={checkColor} filled={false} wrap>{checkLabel}</Chip>
+                    {/* Trip.com's field 25: High, Medium or Low is the badge.
+                        The source-check vocabulary (human quote, AI quote,
+                        grounded, reference) explains it in the tooltip. */}
+                    <span title={`${checkLabel} · ${checkTip}`} style={{ cursor: 'help' }}>
+                      <Chip color={TIER_COLOR[rec.confidence_level] || GRAY} filled={false} wrap>{confLabel}</Chip>
                     </span>
                     {/* The sub-line appears only when it says something: a
                         confidence below High, or an incomplete record. A row
                         that is High and 100% needs no extra annotation. */}
-                    {(rec.confidence_level !== 'High' || pctDone < 100) && (
+                    {pctDone < 100 && (
                       <div style={{ display: 'flex', alignItems: 'center',
                                     gap: 5, marginTop: 4, fontSize: 10.5,
                                     color: GRAY }}>
-                        {rec.confidence_level !== 'High' && (
-                          <span>{t('ops.col.confidence')} {confLabel}</span>
-                        )}
-                        {rec.confidence_level !== 'High' && pctDone < 100 && (
-                          <span style={{ color: '#c3cddd' }}>·</span>
-                        )}
                         {pctDone < 100 && (
                           <span style={{ fontWeight: 700, color: AMBER }}>
                             {pctDone}%
@@ -2665,6 +2671,7 @@ function QualityWorkspace() {
     if (!data?.summary) return null
     const t0 = filtered
     const high = t0.filter((r) => r.confidence_level === 'High').length
+    const medium = t0.filter((r) => r.confidence_level === 'Medium').length
     const low = t0.filter((r) => r.confidence_level === 'Low').length
     const complete = t0.filter((r) => r.completeness === 1).length
     // The standard defines completeness twice: section 6.1 counts filled
@@ -2851,6 +2858,7 @@ function QualityWorkspace() {
                       style={{ ...input, color: filters.confidence ? NAVY : GRAY }}>
                 <option value="">{t('ops.anyConfidence')}</option>
                 <option value="High">{t('ops.conf.high')}</option>
+                <option value="Medium">{t('ops.conf.medium')}</option>
                 <option value="Low">{t('ops.conf.low')}</option>
               </select>
               </F>
