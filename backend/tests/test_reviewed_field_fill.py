@@ -31,6 +31,11 @@ FEE_TEXT = ('Consular fees. The consular fee for a tourist visa is A$150 per app
             'payable at the Embassy in Australian dollars.')
 BUSINESS_TEXT = ('Business visa. A business visa is valid for up to 90 days. '
                  'The visa centre also charges a service fee of A$62 per application, which is not a consular fee.')
+# The destination's own fee page for the product, which names the product
+# and states no amount: the page a fee absence must have read.
+FEE_PAGE = 'https://australia.mid.ru/en/consular_services/fees/tourist/'
+FEE_PAGE_TEXT = ('Consular fees. The consular fee for a tourist visa is set by the Consular Department and is payable '
+                 'on lodgement. Contact the Consular Section for the current amount.')
 ROUTE = {'passport_nationality': 'AUS', 'lawful_country_of_residence': 'AUS', 'destination_country': 'RUS',
          'visa_category': 'tourist_visa', 'travel_purpose': 'tourism', 'arrival_date': None, 'consular_jurisdiction': None}
 KEY = 'AUS|AUS|RUS|tourism|default|unknown|v6'
@@ -108,7 +113,8 @@ def proof(*quotes, sid='ru_aus_tourist', url=URL):
             'evidence': [{'source_id': sid, 'source_url': url, 'quote': q} for q in quotes]}
 
 
-def absence(reason='The tourist visa page states no fee.', source_ids=('ru_aus_tourist',), verified_at='2026-09-11'):
+def absence(reason='The tourist visa page states no fee.', source_ids=('ru_aus_tourist', 'ru_aus_fee_schedule'),
+            verified_at='2026-09-11'):
     return {'status': 'not_published', 'verifier': 'ai', 'reason': reason, 'verified_at': verified_at,
             'source_ids': list(source_ids)}
 
@@ -123,7 +129,7 @@ def route_fill(field, value, proof_):
 
 VALIDITY = product_fill('validity', '30 days', proof('A tourist visa is valid for up to 30 days'))
 SOURCES = [source('ru_aus_tourist', URL, TEXT), source('ru_aus_fees', FEES, FEE_TEXT),
-           source('ru_aus_business', BUSINESS, BUSINESS_TEXT)]
+           source('ru_aus_business', BUSINESS, BUSINESS_TEXT), source('ru_aus_fee_schedule', FEE_PAGE, FEE_PAGE_TEXT)]
 
 
 def spec(*fills, current=None, sources=None):
@@ -482,13 +488,14 @@ def test_a_documented_absence_writes_unpublished_fields_and_reads_not_published(
     proof_ = product['field_provenance']['fee']
     assert proof_['status'] == 'unknown' and proof_['verified_at'] == '2026-09-11'
     assert proof_['reason'] == ('Not published by the destination: The tourist visa page states no fee. '
-                                'Checked on 2026-09-11: ' + URL + '.')
-    assert proof_['checked_source_urls'] == [URL] and proof_['verification_scope'] == c.SCOPE
+                                'Checked on 2026-09-11: ' + URL + ', ' + FEE_PAGE + '. Fee page checked: ru_aus_fee_schedule.')
+    assert proof_['checked_source_urls'] == [URL, FEE_PAGE] and proof_['verification_scope'] == c.SCOPE
     row = report['routes'][0]['records'][0]
     status = t.field_status(row)
     assert status['visa_fee_amount'] == 'not-published' and status['visa_fee_currency'] == 'not-published'
     applied = report['routes'][0]['fills'][0]
-    assert applied['kind'] == 'absence' and applied['checked_source_urls'] == [URL]
+    assert applied['kind'] == 'absence' and applied['checked_source_urls'] == [URL, FEE_PAGE]
+    assert applied['field_page_id'] == 'ru_aus_fee_schedule' and applied['grade_moved'] is False
     assert report['routes'][0]['documented_absences'] == ['fee']
 
 
@@ -497,7 +504,7 @@ def test_a_route_level_absence_carries_its_date_and_pages_in_the_stored_note():
     (overlay, report), manifest, current = run(fill)
     note = overlay['entries'][0]['field_provenance']['government_fee']['note']
     assert note == ('Not published by the destination: The tourist visa page states no government fee. '
-                    'Checked on 2026-09-11: ' + URL + '.')
+                    'Checked on 2026-09-11: ' + URL + ', ' + FEE_PAGE + '. Fee page checked: ru_aus_fee_schedule.')
     assert t.field_status(report['routes'][0]['records'][0])['visa_fee_amount'] == 'not-published'
 
 
@@ -728,3 +735,354 @@ def test_an_uncredited_fill_says_why_the_grader_refused_it():
     absent = product_fill('fee', None, absence())
     (overlay, report), manifest, current = run(absent)
     assert report['routes'][0]['fills'][0]['grade_credited'] is None
+
+
+# Round 3. The second review executed these sentences against the round-2
+# converter and every one of them was served. Each is refused now.
+
+def page(sid, text, path=None):
+    """A captured destination page with the reviewer's text, and its fill helpers."""
+    url = 'https://australia.mid.ru/en/consular_services/%s/' % (path or sid)
+    return source(sid, url, text), url
+
+
+def on_page(field, value, text, sid, product_type='Tourist visa', target='product'):
+    src, url = page(sid, text)
+    proof_ = proof(text, sid=sid, url=url)
+    fill = product_fill(field, value, proof_, product_type=product_type) if target == 'product' else route_fill(field, value, proof_)
+    return fill, SOURCES + [src]
+
+
+# Blocking 1: a duration table flattened into one sentence.
+
+def test_a_one_sentence_duration_table_binds_no_figure_to_the_product():
+    current = two_product_layer()
+    fill, sources = on_page('validity', '90 days', 'Visa validity: Tourist visa 30 days, Business visa 90 days, Work visa 1 year.', 'a1')
+    with pytest.raises(PatchRejected, match='names several products \\(Tourist visa, Business visa\\)'):
+        run(fill, current=current, sources=sources)
+    fill, sources = on_page('max_stay_days', 90, 'Permitted stay: tourist visa 30 days, business visa 90 days.', 'k2')
+    with pytest.raises(PatchRejected, match='several day figures and the one beside Tourist visa is 30, not 90'):
+        run(fill, current=stayless_layer(), sources=sources)
+    fill, sources = on_page('permitted_stay', 'Up to 90 days', 'Permitted stay: tourist visa 30 days, business visa 90 days.', 'k3', target='route')
+    with pytest.raises(PatchRejected, match='several day figures and the one beside Tourist visa is 30, not 90'):
+        run(fill, current=stayless_layer(), sources=sources)
+    fill, sources = on_page('max_stay_days', 30, 'Permitted stay: tourist visa 30 days.', 'k4')
+    (overlay, report), manifest, current = run(fill, current=stayless_layer(), sources=sources)
+    assert report['routes'][0]['records'][0]['max_stay_duration'] == 30
+
+
+# Blocking 2: a route-level fill borrowed another visa class's sentence.
+
+def test_a_route_level_fill_never_borrows_another_visa_classs_sentence():
+    fill, sources = on_page('required_documents', ['Letter of acceptance from a Russian university', 'Certificate of HIV testing'],
+                            'Student visa applicants must submit a letter of acceptance from a Russian university and a certificate of HIV testing.',
+                            'b', target='route')
+    with pytest.raises(PatchRejected, match='route required_documents: the sentence is about a student visa class the route does not serve'):
+        run(fill, sources=sources)
+    fill, sources = on_page('permitted_stay', 'Up to 90 days', 'A business visa holder may stay in the Russian Federation for up to 90 days.', 'c2', target='route')
+    with pytest.raises(PatchRejected, match='about a business visa class the route does not serve'):
+        run(fill, current=stayless_layer(), sources=sources)
+    raw = deepcopy(RAW)
+    raw.pop('application_channel'); raw.pop('application_channel_detail')
+    fill, sources = on_page('application_channel', 'authorised_agent', 'Business visa applications must be lodged through an authorised agent.', 'g9', target='route')
+    with pytest.raises(PatchRejected, match='about a business visa class the route does not serve'):
+        run(fill, current=layer(raw=raw), sources=sources)
+    fill, sources = on_page('application_channel', 'authorised_agent', 'Tourist visa applications must be lodged through an authorised agent.', 'g9b', target='route')
+    (overlay, report), manifest, current = run(fill, current=layer(raw=raw), sources=sources)
+    assert report['routes'][0]['records'][0]['application_method'] == 'Agency Service'
+    route = dict(ROUTE, travel_document_type='ordinary_passport')
+    merged = layer()['merged_guidance']
+    for sentence in ('Los solicitantes de visado de estudiante deben presentar una carta de admisión.', "Le visa d'affaires est valable 90 jours.",
+                     'Das Geschäftsvisum ist 90 Tage gültig.', '商务签证有效期为90天。', '商用ビザの有効期間は90日です。',
+                     '취업비자 소지자는 90일까지 체류할 수 있습니다.', 'Thị thực công tác có thời hạn 90 ngày.', 'Visa kerja berlaku 90 hari.',
+                     'วีซ่าธุรกิจมีอายุ 90 วัน', 'Транзитная виза действительна 10 дней.', 'Crew members require a crew visa valid for 30 days.'):
+        assert c._class_problem(sentence, route, None, merged['visa_products'], merged), sentence
+    for sentence in ('Applications must be lodged through an authorised agent.', 'Residents of Australia may apply for a visa online.',
+                     'Acreditar la identidad con un documento de viaje válido y en vigor'):
+        assert c._class_problem(sentence, route, None, merged['visa_products'], merged) is None, sentence
+
+
+# Blocking 3: another passport class, another bloc, another residence.
+
+def test_a_sentence_scoped_to_another_passport_class_bloc_or_residence_is_refused():
+    fill, sources = on_page('validity', '5 years', 'A tourist visa issued to the holder of a diplomatic passport is valid for up to 5 years.', 'g1')
+    with pytest.raises(PatchRejected, match="holders of diplomatic passports or documents, not the route's ordinary_passport"):
+        run(fill, sources=sources)
+    fill, sources = on_page('validity', '5 years', 'Tourist visas issued to nationals of European Union member states are valid for up to 5 years.', 'g2')
+    with pytest.raises(PatchRejected, match='nationals of the European Union, and AUS is not a member'):
+        run(fill, sources=sources)
+    fill, sources = on_page('validity', '3 years', 'A tourist visa is valid for up to 3 years for applicants permanently residing in New Zealand.', 'g3')
+    with pytest.raises(PatchRejected, match='scoped to residents of another place, not AUS'):
+        run(fill, sources=sources)
+    fill, sources = on_page('validity', '3 years', 'A tourist visa is valid for up to 3 years for applicants permanently residing in Australia.', 'g3b')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    assert report['routes'][0]['records'][0]['validity_duration'] == 3
+    route = dict(ROUTE, travel_document_type='ordinary_passport')
+    for sentence in ("Le visa de tourisme délivré aux titulaires d'un passeport diplomatique est valable 5 ans.",
+                     'El visado de turismo para titulares de pasaporte de servicio tiene una validez de 5 años.',
+                     '持外交护照的旅游签证有效期为5年。', '公用旅券所持者の観光査証の有効期間は5年です。', '관용여권 소지자의 관광비자 유효기간은 5년입니다.',
+                     'Thị thực du lịch cấp cho người mang hộ chiếu công vụ có thời hạn 5 năm.', 'Visa turis untuk pemegang paspor dinas berlaku 5 tahun.',
+                     'วีซ่าท่องเที่ยวสำหรับผู้ถือหนังสือเดินทางราชการมีอายุ 5 ปี', 'Туристическая виза для владельцев служебных паспортов действительна 5 лет.',
+                     'Refugees holding a travel document receive a tourist visa valid for 90 days.',
+                     'Los ciudadanos de la Unión Europea reciben un visado de turista válido por 5 años.', '欧盟公民的旅游签证有效期为5年。',
+                     'EU 국민의 관광비자 유효기간은 5년입니다.', "Les citoyens de l'UE reçoivent un visa de tourisme valable 5 ans.",
+                     'El visado de turista es válido por 3 años para los residentes en Nueva Zelanda.'):
+        assert c._scope_problem(sentence, route), sentence
+    for sentence in ('A Schengen visa for nationals of Australia is valid for 90 days.', 'Consular services: passport renewal and visas.',
+                     'The official website lists the tourist visa validity as 30 days.', 'Australian residents may apply for a tourist visa valid for 30 days.'):
+        assert c._scope_problem(sentence, route) is None, sentence
+    assert c._scope_problem('A tourist visa issued to the holder of a diplomatic passport is valid for up to 5 years.',
+                            dict(route, travel_document_type='diplomatic_passport')) is None
+
+
+# Blocking 4: a concession fee published as the fee.
+
+def test_a_reduced_child_or_group_fee_is_never_the_products_fee():
+    fill, sources = on_page('fee', {'amount': 75, 'currency': 'AUD'},
+                            'Tourist visa. A reduced consular visa fee of A$75 applies to children under 12 applying for a tourist visa.', 'd1b')
+    with pytest.raises(PatchRejected, match="prices a concession or an eligibility class \\(reduced\\), not the product's own fee"):
+        run(fill, sources=sources)
+    fill, sources = on_page('fee', {'amount': 300, 'currency': 'AUD'}, 'The consular visa fee for a tourist visa is A$300 in total for a family of two.', 'd2')
+    with pytest.raises(PatchRejected, match='computed total, not the fee per application'):
+        run(fill, sources=sources)
+    fill, sources = on_page('fee', {'amount': 150, 'currency': 'AUD'}, 'The consular visa fee for a tourist visa is A$150 for citizens of New Zealand.', 'd3')
+    with pytest.raises(PatchRejected, match='stated for citizens of another country, not AUS'):
+        run(fill, sources=sources)
+    route = dict(ROUTE, travel_document_type='ordinary_passport')
+    merged = layer()['merged_guidance']
+    product = merged['visa_products'][0]
+    for sentence in ('La tasa del visado de turista es de 40 euros para menores de 12 años.', 'Die Visumgebühr für Kinder unter 6 Jahren entfällt (gebührenfrei).',
+                     'Le droit de visa touristique est de 40 euros pour les enfants de 6 à 12 ans.', 'ค่าธรรมเนียมวีซ่าท่องเที่ยวสำหรับเด็ก 1,000 บาท',
+                     '儿童旅游签证费为 80 美元。', '子供の観光査証手数料は 1,500 円です。', '어린이 관광비자 수수료는 20,000원입니다.',
+                     'Lệ phí thị thực du lịch cho trẻ em là 12 USD.', 'Biaya visa turis untuk anak-anak Rp 250.000.',
+                     'Консульский сбор за туристическую визу для детей составляет 20 евро.', 'The consular visa fee for a tourist visa is 2 x A$150 for a couple.'):
+        assert c._fee_sentence_problem(sentence, route, product, merged['visa_products'], merged), sentence
+    for sentence in ('The consular visa fee for a tourist visa is A$150 for citizens of Australia.', 'The consular visa fee for a tourist visa is A$150 for foreign citizens.',
+                     'Консульский сбор за туристическую визу для иностранных граждан составляет 50 евро.'):
+        assert c._fee_sentence_problem(sentence, route, product, merged['visa_products'], merged) is None, sentence
+    child = dict(product, type='Child tourist visa')
+    assert c._fee_sentence_problem('The consular fee for a child tourist visa is A$75 for children under 12.', route, child, [child],
+                                   dict(merged, visa_products=[child])) is None
+
+
+# Blocking 5: the fee vocabulary of every served language.
+
+@pytest.mark.parametrize('sentence', [
+    'ค่าธรรมเนียมวีซ่าท่องเที่ยว 2,000 บาท', 'Las tasas consulares para el visado de turista son de 80 euros por solicitud.',
+    'El precio del visado de turista es de 80 euros.', 'El importe de los derechos consulares por la tramitación del visado es de 80 EUR.',
+    'Die Visumgebühr beträgt 90 Euro pro Antrag.', 'Le montant du droit de visa est de 90 euros.', '観光査証の手数料は3,000円です。',
+    'ビザの費用は3,000円です。', '비자 수수료는 40,000원입니다.', '비자 비용은 40,000원입니다.', '签证费用为 160 美元。', '簽證費為 160 美元。',
+    'Lệ phí thị thực là 25 USD.', 'Phí thị thực: 25 đô la Mỹ.', 'Biaya visa adalah Rp 500.000.', 'Консульский сбор составляет 50 евро.',
+    'Государственная пошлина: 3000 рублей.', 'Visa type | Validity | Entries | Fee\nTourist visa | 30 days | Single | A$150',
+    'Fee (in US $)\nTourist visa | 160', 'Visa | Fee\nTourist | A$ | 150', 'Consular fee\nTourist visa | USD | 160'])
+def test_a_published_fee_in_every_served_language_refuses_a_fee_absence(sentence):
+    assert c._states_value('fee', sentence), sentence
+
+
+def test_a_german_fee_page_refuses_a_fee_absence_end_to_end():
+    src, url = page('ru_de', 'Tourist visa. Die Visumgebühr beträgt 90 Euro pro Antrag.')
+    fill = product_fill('fee', None, absence('The German page states no fee.', source_ids=('ru_de', 'ru_aus_fee_schedule')))
+    with pytest.raises(PatchRejected, match='names ' + url + ', which states a value: "Die Visumgebühr beträgt 90 Euro'):
+        run(fill, sources=SOURCES + [src])
+
+
+# Blocking 6: a figure glued to a CJK, Hangul or Thai character.
+
+@pytest.mark.parametrize('sentence, n, unit', [
+    ('観光目的の短期滞在査証の有効期間は90日です。', 90, 'Day'), ('旅游签证有效期为90天。', 90, 'Day'), ('滞在期間は15日間です。', 15, 'Day'),
+    ('旅游签证（L字签证）有效期为90天，停留期为30天。', 30, 'Day'), ('有效期为3个月', 3, 'Month'), ('有效期為3個月', 3, 'Month'), ('有効期間は3ヶ月', 3, 'Month'),
+    ('有效期为1年', 1, 'Year'), ('유효기간은 90일입니다', 90, 'Day'), ('체류기간3개월', 3, 'Month'), ('유효기간1년', 1, 'Year'),
+    ('อายุวีซ่า90วัน', 90, 'Day'), ('พำนัก3เดือน', 3, 'Month'), ('อายุ1ปี', 1, 'Year')])
+def test_a_figure_glued_to_a_cjk_hangul_or_thai_character_is_a_figure(sentence, n, unit):
+    assert c._DURATION_RE.search(sentence), sentence
+    assert c._figure_re(n, unit).search(sentence), sentence
+
+
+def test_a_japanese_or_chinese_page_that_states_the_validity_refuses_the_absence():
+    assert c._states_value('validity', '観光目的の短期滞在査証の有効期間は90日です。')
+    assert c._states_value('max_stay_days', '滞在期間は15日間です。')
+    assert c._states_value('validity', '旅游签证（L字签证）有效期为90天，停留期为30天。')
+    src, url = page('ru_ja', 'Tourist visa. 観光目的の短期滞在査証の有効期間は90日です。')
+    fill = product_fill('validity', None, absence('No validity is stated.', source_ids=('ru_ja',)))
+    with pytest.raises(PatchRejected, match='which states a value: "観光目的の短期滞在査証の有効期間は90日です'):
+        run(fill, sources=SOURCES + [src])
+
+
+# Blocking 7: a value split across a table header and its row.
+
+def test_a_table_header_and_row_together_state_the_value():
+    table = 'Tourist visa\nVisa type | Validity | Entries | Fee\nTourist visa | 30 days | Single | A$150\n'
+    assert c._states_value('validity', table) and c._states_value('entry', table) and c._states_value('fee', table)
+    assert c._states_value('required_documents', 'Tourist visa\nDocuments required:\n- Passport valid for six months\n- One photo\n')
+    assert c._states_value('application_channel', 'Tourist visa\nHow to apply\nLodge the application at the Embassy in Canberra\n')
+    assert c._states_value('validity', 'Tourist visa\nContact the Embassy for details.\n') is None
+    src, url = page('ru_table', table)
+    fill = product_fill('validity', None, absence('The table page states no validity.', source_ids=('ru_table',)))
+    with pytest.raises(PatchRejected, match='names ' + url + ', which states a value: "Visa type \\| Validity'):
+        run(fill, sources=SOURCES + [src])
+
+
+# Blocking 8: an absence needs positive coverage of the field's own page.
+
+FAQ_TEXT = ('Frequently asked questions\n'
+            'Tourist visa questions and answers for applicants.\n'
+            'How long does it take to process a tourist visa application at the Embassy?\n'
+            'Where do I lodge my tourist visa application in Australia?\n'
+            'What cards can I use to pay the fee?\n'
+            'Can I pay the consular fee in euros or other local currency?\n'
+            'you can pay the consular fee only with cards issued by banks of other countries\n'
+            'Contact the Visa Application Center through which you paid the consular fee\n')
+
+
+def test_an_absence_over_pages_that_mention_the_fee_without_the_fee_page_is_refused():
+    src, url = page('ru_faq', FAQ_TEXT, path='faq')
+    fill = product_fill('fee', None, absence('No page states the fee.', source_ids=('ru_faq',)))
+    with pytest.raises(PatchRejected, match=url + " carries the fee cue without a value, and none of the pages checked is the destination's fee page for Tourist visa"):
+        run(fill, sources=SOURCES + [src])
+    quiet, quiet_url = page('ru_quiet', 'Tourist visa. Applications are lodged at the Embassy in Canberra.', path='quiet')
+    fill = product_fill('fee', None, absence('No page states the fee.', source_ids=('ru_quiet',)))
+    with pytest.raises(PatchRejected, match="none of the pages checked is the destination's fee page for Tourist visa"):
+        run(fill, sources=SOURCES + [quiet])
+    fill = product_fill('fee', None, absence('The fee page states no amount.', source_ids=('ru_faq', 'ru_aus_fee_schedule')))
+    (overlay, report), manifest, current = run(fill, sources=SOURCES + [src])
+    applied = report['routes'][0]['fills'][0]
+    assert applied['field_page_id'] == 'ru_aus_fee_schedule'
+    reason = report['routes'][0]['guidance']['visa_products'][0]['field_provenance']['fee']['reason']
+    assert reason.endswith('Checked on 2026-09-11: ' + url + ', ' + FEE_PAGE + '. Fee page checked: ru_aus_fee_schedule.')
+    assert c._about_field({'url': FEE_PAGE, 'text': ''}, 'fee') and not c._about_field({'url': url, 'text': FAQ_TEXT}, 'fee')
+
+
+# Majors: temporal scope, a restrictive stream, a single-item document list.
+
+def test_an_exceptional_past_or_suspended_statement_is_not_the_current_value():
+    fill, sources = on_page('validity', '60 days', 'A tourist visa is normally valid for 30 days but may in exceptional cases be issued for 60 days.', 'e2')
+    with pytest.raises(PatchRejected, match='states an exception, a discretion or an extension beside the value'):
+        run(fill, sources=sources)
+    fill, sources = on_page('validity', '60 days', 'Until 1 January 2020 a tourist visa was valid for up to 60 days.', 'g4')
+    with pytest.raises(PatchRejected, match='describes a past or closed period, not the current rule'):
+        run(fill, sources=sources)
+    fill, sources = on_page('validity', '30 days', 'Issuance is currently suspended; when resumed, a tourist visa is valid for up to 30 days.', 'g5')
+    with pytest.raises(PatchRejected, match='describes a suspended or resumed issuance, not the current rule'):
+        run(fill, sources=sources)
+    assert c._temporal_problem('A tourist visa is usually valid for 30 days, in some cases 60 days.')
+    assert c._temporal_problem('การพำนักชั่วคราว 30 วัน') is None
+
+
+def test_a_restricted_stream_of_the_product_family_is_not_the_plain_product():
+    fill, sources = on_page('validity', '90 days', 'A tourist visa issued to a participant of an organised tour group is valid for up to 90 days.', 'a3')
+    with pytest.raises(PatchRejected, match='restricts the product to a class of holders or participants'):
+        run(fill, sources=sources)
+    fill, sources = on_page('validity', '72 hours', 'A tourist visa for cruise passengers is valid for 72 hours.', 'a4')
+    with pytest.raises(PatchRejected, match='about a cruise stream the served product is not'):
+        run(fill, sources=sources)
+    fill, sources = on_page('validity', '30 days', 'An electronic tourist visa is valid for 30 days.', 'a5')
+    with pytest.raises(PatchRejected, match='about a electronic stream the served product is not'):
+        run(fill, sources=sources)
+
+
+ES_URL = 'https://www.exteriores.gob.es/Embajadas/tokio/es/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada.aspx'
+ES_TEXT = ('Condiciones de entrada en España. Los ciudadanos japoneses no necesitan visado para estancias de hasta 90 días. '
+           'Acreditar la identidad con un documento de viaje válido y en vigor. '
+           'Justificar el objeto y las condiciones de la estancia prevista con una reserva de hotel.')
+ES_QUOTE = 'Los ciudadanos japoneses no necesitan visado para estancias de hasta 90 días.'
+
+
+def exempt_layer():
+    """A productless visa-free route whose only empty required cell is the
+    document list, so any list that lands completes the record."""
+    route = {'passport_nationality': 'JPN', 'lawful_country_of_residence': 'JPN', 'destination_country': 'ESP',
+             'visa_category': 'visa_exemption', 'travel_purpose': 'tourism', 'arrival_date': None, 'consular_jurisdiction': None}
+    fields = {'disposition': 'VISA_EXEMPT', 'requirement_detail': 'unconditional_visa_free', 'visa_category': 'Visa exemption',
+              'source_url': ES_URL, 'permitted_stay_days': 90, 'permitted_stay': 'Up to 90 days in any 180-day period.',
+              'government_fee': None, 'visa_products': [], 'application_channel': 'not_required', 'application_channel_detail': None,
+              'processing_time': None, 'required_documents': [], 'exceptions': []}
+    subject = {'passport_nationality': 'JPN', 'destination_country': 'ESP', 'travel_purpose': 'tourism', 'travel_document_type': 'ordinary_passport'}
+    decision = {'source_id': 'es_entry', 'source_url': ES_URL, 'quote': ES_QUOTE, 'verified_at': '2026-09-01', 'verifier': 'ai',
+                'verified_by': 'Ellis AI official-source field review', 'status': 'reviewed', 'note': 'Japanese ordinary passport, tourism.',
+                'subject': subject}
+    seed = {'route': {'nationality': 'JPN', 'destination': 'ESP', 'travel_purpose': 'tourism', 'travel_document_type': 'ordinary_passport'},
+            'verified_at': '2026-09-01', 'verified_by': 'Ellis AI official-source field review', 'verifier': 'ai',
+            'source_url': ES_URL, 'note': 'Japanese ordinary passport, tourism.', 'fields': deepcopy(fields),
+            'field_provenance': {'disposition': decision}}
+    return build_layer(route, 'JPN|JPN|ESP|tourism|default|unknown|v6', dict(deepcopy(fields), entry_requirements=None), seed)
+
+
+def es_fill(value):
+    return route_fill('required_documents', value, {
+        'status': 'reviewed', 'verifier': 'ai', 'verified_at': '2026-09-11', 'scope_note': 'Japanese ordinary passport, tourism.',
+        'evidence': [{'source_id': 'es_entry', 'source_url': ES_URL, 'quote': 'Acreditar la identidad con un documento de viaje válido y en vigor. '
+                      'Justificar el objeto y las condiciones de la estancia prevista con una reserva de hotel.'}]})
+
+
+def test_a_single_item_document_list_is_stored_partial_and_never_moves_the_grade(tmp_path):
+    fill = route_fill('required_documents', ['Valid passport'], proof(
+        'Documents required: a valid passport, a completed visa application form, one photo,'))
+    (overlay, report), manifest, current = run(fill)
+    applied = report['routes'][0]['fills'][0]
+    assert applied['partial'] is True and applied['grade_moved'] is False and applied['grade_credited'] is False
+    assert applied['grade_reason'] == 'a single quoted document is stored as a partial list and is never credited'
+    stored = overlay['entries'][0]['field_provenance']['required_documents']
+    assert stored['status'] == 'partial' and stored['verified_elements'] == [] and stored['retained_unverified_elements'] == []
+    assert report['routes'][0]['records'][0]['required_documents'] == 'Valid passport'
+    path = tmp_path / 'overlay.json'
+    path.write_text(json.dumps(overlay, ensure_ascii=False))
+    errors = []
+    assert len(vo._read_verification_store(path, 'reviewed_overlay', reviewed=True, errors=errors)) == 1 and errors == []
+    # On a productless visa-free record the list is the last empty cell, so
+    # the grade would rise on a fill the grader never credited. Refused.
+    current = exempt_layer()
+    row = before_rows(current)[0]
+    assert row['visa_type_name'] == 'No visa needed' and row['confidence_level'] == 'Medium'
+    assert t.field_status(row)['required_documents'] == 'missing'
+    sources = [source('es_entry', ES_URL, ES_TEXT)]
+    with pytest.raises(PatchRejected, match='the grade would rise on JPN\\|JPN\\|ESP\\S* although the grader did not credit the fill \\(a single quoted document'):
+        run(es_fill(['Documento de viaje válido y en vigor']), current=current, sources=sources)
+    (overlay, report), manifest, current = run(es_fill(['Documento de viaje válido y en vigor', 'Reserva de hotel']), current=current, sources=sources)
+    applied = report['routes'][0]['fills'][0]
+    assert applied['partial'] is False and applied['grade_credited'] is True and applied['grade_moved'] is True
+    assert report['routes'][0]['records'][0]['confidence_level'] == 'High' and report['grade_changes'][0]['after'] == 'High'
+
+
+# Minors: the report says whether the grade moved, an absence names its
+# verifier, a shapeless row is refused for its shape, the product index
+# is counted the way tstation counts it.
+
+def test_each_applied_fill_reports_whether_the_grade_moved():
+    (overlay, report), manifest, current = run(VALIDITY, product_fill('fee', None, absence()))
+    by_field = {a['field']: a for a in report['routes'][0]['fills']}
+    assert by_field['validity']['grade_moved'] is False and by_field['fee']['grade_moved'] is False
+    assert set(by_field['validity']) >= {'grade_credited', 'grade_reason', 'grade_moved', 'partial'}
+
+
+def test_an_absence_must_name_its_verifier():
+    proof_ = absence()
+    proof_.pop('verifier')
+    with pytest.raises(PatchRejected, match='the absence must name its verifier'):
+        run(product_fill('fee', None, proof_))
+
+
+def test_triage_refuses_a_shapeless_row_for_its_shape_before_looking_for_the_layer():
+    current = layer()
+    s = spec(current=current)
+    row = s['routes'][0]
+    row.pop('cache_key')
+    kept, kept_layers, report = c.triage(s, [current])
+    assert kept['routes'] == [] and len(report['rejected']) == 1
+    rejected = report['rejected'][0]
+    assert rejected['cache_key'] is None and rejected['field'] == 'validity'
+    assert rejected['reason'] == 'Extra instruction: a route row carries exactly cache_key, route, baseline_sha256 and fills (missing cache_key)'
+    extra = spec(current=current)
+    extra['routes'][0]['operator'] = 'me'
+    assert c.triage(extra, [current])[2]['rejected'][0]['reason'].endswith('(extra operator)')
+
+
+def test_the_product_index_is_counted_over_typed_products_like_tstation():
+    raw, seed = deepcopy(RAW), deepcopy(SEED)
+    typeless = {'type': None, 'disposition': 'VISA_REQUIRED', 'notes': 'placeholder'}
+    raw['visa_products'].insert(0, deepcopy(typeless))
+    seed['fields']['visa_products'].insert(0, deepcopy(typeless))
+    current = layer(raw=raw, seed=seed)
+    assert c._product_index(current['merged_guidance']['visa_products'], 'Tourist visa', 'product Tourist visa validity') == 0
+    (overlay, report), manifest, current = run(current=current)
+    assert report['routes'][0]['fills'][0]['product_index'] == 0
+    assert [(r['visa_type_name'], r['validity_duration']) for r in report['routes'][0]['records']] == [('Tourist visa', 30)]
