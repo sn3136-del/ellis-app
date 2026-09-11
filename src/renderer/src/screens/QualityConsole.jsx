@@ -1802,15 +1802,22 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                     <div style={{ display: 'flex', flexDirection: 'column',
                                   alignItems: 'flex-start', gap: 6 }}>
                       {/* Published rows say so in green (owner request, 11
-                          September 2026); a held row carries the publish
-                          action unless only a product is withheld, where the
-                          whole-route release does not apply. */}
-                      {!held && (
+                          September 2026). A row whose only hold is one
+                          withheld product keeps its published default route,
+                          so it says so too and names the product under
+                          review; every other held row carries the publish
+                          action instead. */}
+                      {(!held || productWithheld) && (
                         <span data-testid="ops-published" style={{ fontSize: 12, fontWeight: 700, color: '#1a7f37' }}>
                           {t('ops.publishedToTravelers')}
                         </span>
                       )}
-                      {held && !productWithheld && rec.publication_reason !== 'optional_product_evidence_pending' && (
+                      {held && productWithheld && (
+                        <span data-testid="ops-product-withheld" style={{ fontSize: 11, fontWeight: 600, color: AMBER }}>
+                          {t('ops.productWithheld')}
+                        </span>
+                      )}
+                      {held && !productWithheld && (
                         <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
                                 data-testid="ops-release"
                                 title={t('ops.heldTip')}
