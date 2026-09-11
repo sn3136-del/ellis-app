@@ -672,7 +672,7 @@ def _policy_bound_statement(quote, forms, key):
         relation = (r'(?:until|till|through|thru|to|ends?\s*(?:on)?|ending\s+on|expires?\s*(?:on)?|expiring\s+on|'
                     r'valid\s+(?:until|through|to)|extended\s+(?:until|to|through)|prolonged\s+(?:until|to)|in\s+force\s+until|'
                     r'ceases?\s+to\s+(?:apply|have\s+effect)\s*(?:on)?|jusqu[\'’](?:au|à)|hasta(?:\s+el)?|até|bis(?:\s+zum)?|fino\s+al|до|по|'
-                    r'đến(?:\s+hết|\s+ngày)?|tới(?:\s+ngày)?|hingga|sampai(?:\s+dengan)?|(?:จน)?ถึง(?:วันที่)?)\s*[:,]?\s*'
+                    r'đến(?:\s+hết)?(?:\s+ngày)?|tới(?:\s+ngày)?|hingga|sampai(?:\s+dengan)?|(?:จน)?ถึง(?:วันที่)?)\s*[:,]?\s*'
                     r'(?:and\s+including\s+)?' + clock + dates)
         chinese = (r'(?:至|截至|到|有效至|延期至|延長至|延长至|施行至|有效期至|截止)\s*' + dates + r'|' + dates
                    + r'\s*(?:止|屆滿|届满|到期|까지|まで)')
@@ -758,7 +758,7 @@ _DATE_LIKE_RE = re.compile(
     r'(?:end of\s+|start of\s+|beginning of\s+|early\s+|late\s+|mid-?\s*)?|(?:至|截至|到|自|从|從|於|于|まで|から|까지|부터)\s*)' + _YEAR + r'(?!\d)(?!\s*[/-]\d)',
     re.I)
 _RANGE_BETWEEN_RE = re.compile(r'\s*(?:to|till|until|through|thru|and|-|–|—|~|至|到|bis|à|au|al|a|hasta|até|e|по|до|부터|까지|から|'
-                               r'đến(?:\s+hết|\s+ngày)?|tới|hingga|sampai(?:\s+dengan)?|s/d|(?:จน)?ถึง(?:วันที่)?)\s*'
+                               r'đến(?:\s+hết)?(?:\s+ngày)?|tới|hingga|sampai(?:\s+dengan)?|s/d|(?:จน)?ถึง(?:วันที่)?)\s*'
                                r'(?:\d{1,2}[:.]\d{2}\s*(?:on|hrs?|h|時|时)?\s*)?(?:the\s+)?$', re.I)
 _START_BEFORE_RE = re.compile(r'(?:\bfrom|\bas\s+of|\bas\s+from|\bon\s+or\s+after|\bwith\s+effect\s+from|\beffective(?:\s+from|\s+on|\s+as\s+of)?|\bstarting(?:\s+from|\s+on)?|'
                               r'\bbeginning(?:\s+from|\s+on)?|\bcommencing(?:\s+from|\s+on)?|\bsince|\bw\.e\.f\.?|\bà\s+(?:partir|compter)\s+d[ue]|'
@@ -768,7 +768,7 @@ _START_BEFORE_RE = re.compile(r'(?:\bfrom|\bas\s+of|\bas\s+from|\bon\s+or\s+afte
 _START_AFTER_RE = re.compile(r'^\s*(?:起|부터|以降|이후|より|onwards?|onward)')
 _END_BEFORE_RE = re.compile(r'(?:\buntil|\btill|\bthrough|\bthru|\bup\s+to|\bends?(?:\s+on)?|\bending(?:\s+on)?|\bexpires?(?:\s+on)?|\bexpiring(?:\s+on)?|'
                             r'\bvalid\s+(?:until|through|to)|\bextended\s+(?:until|to|through)|\bprolonged\s+(?:until|to)|\bin\s+force\s+until|'
-                            r'\bjusqu[\'’](?:au|à)|\bhasta(?:\s+el)?|\baté|\bbis(?:\s+zum)?|\bfino\s+al|\bдо|\bпо|\bđến(?:\s+hết|\s+ngày)?|\btới(?:\s+ngày)?|'
+                            r'\bjusqu[\'’](?:au|à)|\bhasta(?:\s+el)?|\baté|\bbis(?:\s+zum)?|\bfino\s+al|\bдо|\bпо|\bđến(?:\s+hết)?(?:\s+ngày)?|\btới(?:\s+ngày)?|'
                             r'\bhingga|\bsampai(?:\s+dengan)?|(?:จน)?ถึง(?:วันที่)?|至|截至|到|有效至|延期至|延長至|延长至|施行至|有效期至|截止)'
                             r'\s*[:,]?\s*(?:\d{1,2}[:.]\d{2}\s*(?:on|hrs?|h|時|时)?\s*)?(?:the\s+)?$', re.I)
 _END_AFTER_RE = re.compile(r'^\s*(?:止|屆滿|届满|到期|까지|まで)')
@@ -858,6 +858,56 @@ _ENTRY_SCOPE_RE = re.compile(
 _CLAUSE_GENERAL_RE = re.compile(
     r"\b(?:all|every|each|any|other|others|remaining|rest|listed|above|following|these|those|such|everyone|everybody)\b|"
     r"上述|以上|其他|其它|以下|各国|모든|기타|すべて|その他|以下の", re.I)
+# A longer passage (a footnote, a page section, a whole sentence) speaks of
+# every traveller, not of one nationality's entry, when a quantifier lands
+# on a traveller noun ("all listed nationals", "the following countries",
+# "any visitor") or on a bare universal. A quantifier on a document or a
+# condition ("other passport types", "the following conditions") narrows
+# neither the nationality nor the list, so it leaves the passage scoped to
+# whatever nationality it names. _CLAUSE_GENERAL_RE stays the looser test
+# for a single comma clause, where one quantifier word is enough.
+_GENERAL_TRAVELLER_RE = re.compile(
+    r"\b(?:all|any|every|each|other|others|remaining|rest|listed|above|below|following|these|those|such|both|no)\s+"
+    r"(?:[\w\-’']+\s+){0,3}?"
+    r"(?:countries|territories|nationalit(?:y|ies)|nationals?|citizens?|passport ?holders?|holders?|"
+    r"travell?ers?|visitors?|foreigners?|aliens?|persons?|people|applicants?|tourists?|passengers?)\b|"
+    r"\b(?:everyone|everybody|anyone|anybody)\b|"
+    r"\bforeign (?:nationals?|citizens?|visitors?|travell?ers?|passport ?holders?|passengers?)\b|"
+    r"\btous (?:les )?(?:ressortissants|étrangers|voyageurs|pays)\b|\btodos los (?:ciudadanos|extranjeros|viajeros|países)\b|"
+    r"\balle (?:staatsangehörigen|ausländer|reisenden|länder)\b|\bsemua (?:warga|orang asing|negara)\b|"
+    r"\bmọi (?:công dân|người|quốc gia)\b|\bвсе (?:граждане|иностранц\w*|стран\w*)\b|"
+    r"上述|以上|其他国|所有国|各国|全ての国|その他の国|모든 국가|기타 국가", re.I)
+# A footnote line opens with its own mark, after an optional table pipe.
+_FOOTNOTE_LINE_RE = re.compile(r"^\s*(?:\|\s*)?(?:[*†‡]{1,3}|\(\d{1,2}\)|\[\d{1,2}\]|\d{1,2}\))\s*\S")
+
+
+def _scope_blocks(text):
+    """The text in the blocks a policy window's subject is read from: a line
+    that opens with a footnote mark starts a block and the lines under it
+    continue it, so a footnote's own window is read with the nationalities
+    that footnote names and not with the whole page. A text with no footnote
+    line is one block, read whole as before."""
+    lines = str(text or '').split('\n')
+    marks = [i for i, line in enumerate(lines) if _FOOTNOTE_LINE_RE.match(line)]
+    if not marks:
+        yield text
+        return
+    bounds = [0] + marks + [len(lines)]
+    for lo, hi in zip(bounds, bounds[1:]):
+        block = '\n'.join(lines[lo:hi])
+        if block.strip():
+            yield block
+
+
+def _window_elsewhere(scope, nat):
+    """The text the window was read from is another nationality's: it names
+    other nationalities as travellers, names neither this one nor a group it
+    belongs to, and does not speak of every traveller. A footnote that lists
+    the nationalities its scheme covers bounds those and no others."""
+    low = _norm(scope)
+    if not low or _named(scope, nat) or _group_named(scope, nat) or _GENERAL_TRAVELLER_RE.search(low):
+        return False
+    return any(_named_as_traveller(scope, other) for other in _known_nationalities() if other != nat)
 
 
 def _window_entry(low, start, end):
@@ -926,38 +976,50 @@ def _window_violation(quotes, bounds=None, where='the quoted policy window', val
     full interval. A start alone that has already passed says the rule is
     in force and needs no record. None when every window is current and
     recorded. `where` names the text the window was read from. `nat`
-    lets a window that another entry or clause of the sentence scopes to
-    another nationality pass this one by; without it every window of the
-    text bounds the verdict."""
+    lets a window that another entry, clause or footnote scopes to another
+    nationality pass this one by; without it every window of the text bounds
+    the verdict. Each quote is read on its own, so the passage a window sits
+    in is the passage its subject is looked for in."""
     bounds = bounds or {}
     today = _today()
-    for start, end, low, clause, entry in _policy_windows('\n'.join(quotes)):
-        if value is not None and not _concerns_verdict(low, value):
-            # A window of another verdict's rule on the captured page (a
-            # K-ETA waiver under a visa requirement) does not bound this
-            # verdict; the reviewer's own quotes are always read.
-            continue
-        if nat is not None and entry is not None and not _named(entry, nat) and not _group_named(entry, nat):
-            # A bound in a parenthesis on one entry of the list ("North
-            # Macedonia*(effective until March 31, 2030)") is that entry's
-            # alone; on this nationality's own entry, or on a group it
-            # belongs to, it bounds this verdict.
-            continue
-        if (nat is not None and not _named(clause, nat) and not _CLAUSE_GENERAL_RE.search(clause)
-                and any(_named(clause, other) for other in _known_nationalities() if other != nat)):
-            # A window whose clause names another nationality ("the policy
-            # for Russian passport holders runs until ...") is theirs; a
-            # window whose clause names no one, or speaks of everyone,
-            # covers this nationality too.
-            continue
-        if end is not None and end < today:
-            return f'{where} ended on {end.isoformat()}: {low[:100]}'
-        if start is not None and start > today:
-            return f'{where} starts on {start.isoformat()}: {low[:100]}'
-        if end is not None and bounds.get('effective_to') != end.isoformat():
-            return f'{where} until {end.isoformat()} is not recorded as effective_to: {low[:100]}'
-        if end is not None and start is not None and bounds.get('effective_from') != start.isoformat():
-            return f'{where} from {start.isoformat()} is not recorded as effective_from: {low[:100]}'
+    for quote in quotes:
+        elsewhere = None
+        for start, end, low, clause, entry in _policy_windows(quote):
+            if value is not None and not _concerns_verdict(low, value):
+                # A window of another verdict's rule on the captured page (a
+                # K-ETA waiver under a visa requirement) does not bound this
+                # verdict; the reviewer's own quotes are always read.
+                continue
+            if nat is not None and entry is not None and not _named(entry, nat) and not _group_named(entry, nat):
+                # A bound in a parenthesis on one entry of the list ("North
+                # Macedonia*(effective until March 31, 2030)") is that entry's
+                # alone; on this nationality's own entry, or on a group it
+                # belongs to, it bounds this verdict.
+                continue
+            if (nat is not None and not _named(clause, nat) and not _CLAUSE_GENERAL_RE.search(clause)
+                    and any(_named(clause, other) for other in _known_nationalities() if other != nat)):
+                # A window whose clause names another nationality ("the policy
+                # for Russian passport holders runs until ...") is theirs; a
+                # window whose clause names no one, or speaks of everyone,
+                # covers this nationality too.
+                continue
+            if (nat is not None and entry is None and not _named(clause, nat)
+                    and not _CLAUSE_GENERAL_RE.search(clause)):
+                # The passage the window sits in may scope it the same way a
+                # clause does: a footnote that names the nationalities of its
+                # own scheme bounds those and no others.
+                if elsewhere is None:
+                    elsewhere = _window_elsewhere(quote, nat)
+                if elsewhere:
+                    continue
+            if end is not None and end < today:
+                return f'{where} ended on {end.isoformat()}: {low[:100]}'
+            if start is not None and start > today:
+                return f'{where} starts on {start.isoformat()}: {low[:100]}'
+            if end is not None and bounds.get('effective_to') != end.isoformat():
+                return f'{where} until {end.isoformat()} is not recorded as effective_to: {low[:100]}'
+            if end is not None and start is not None and bounds.get('effective_from') != start.isoformat():
+                return f'{where} from {start.isoformat()} is not recorded as effective_from: {low[:100]}'
     return None
 
 
@@ -1921,15 +1983,41 @@ _ITEM_WORDS = re.compile(r"\b(?:nationals?|citizens?|holders?|passport holders?|
                          r"国民|公民|人员|人員|国籍|旅券|护照|護照|여권|국민|시민|공민")
 
 
+# Where the sentence's own predicate resumes after an exception clause:
+# "except those holding diplomatic passports, are eligible for the
+# programme" excepts the passports, not the eligibility.
+_CLAUSE_RESUMES_RE = re.compile(
+    r"^\s*(?:and\s+|but\s+|they\s+|he\s+|she\s+|it\s+|who\s+|which\s+|that\s+)?"
+    r"(?:are|is|was|were|do|does|did|shall|will|would|may|can|must|should|have|has|had|remain|remains|need|needs|"
+    r"require|requires|receive|receives|enjoy|enjoys|sont|est|ont|doivent|son|es|están|deben|sind|ist|müssen)\b", re.I)
+
+
+def _clause_text(clause):
+    """The captured text of one exception clause, cut where the sentence's own
+    predicate resumes. A run of names ("except for Brunei, Singapore and
+    Malaysia") crosses its commas untouched, because no comma of it opens a
+    predicate; a clause in the middle of a sentence stops at the comma that
+    closes it, so the rest of the rule is not read as an excepted item."""
+    text = next((g for g in clause.groups() if g is not None), '')
+    for mark in re.finditer(r'[,，;；]', text):
+        if _CLAUSE_RESUMES_RE.match(text[mark.end():]):
+            return text[:mark.start()]
+    return text
+
+
+def _clause_items(text):
+    """The bare items of one exception clause's captured text."""
+    for item in re.split(r"\s*(?:,|;|/|、|，|\s(?:and|or|und|et|y|e|dan|và|hoặc|atau|и|или)\s)\s*", str(text or '')):
+        # Capitals are kept: "USA" is the country, "usa" a Spanish verb.
+        yield _ITEM_WORDS.sub(' ', ' '.join(unicodedata.normalize('NFKC', item).split())).strip(' ()（）')
+
+
 def _exception_items(sentence, following=None):
     """The bare items of every exception clause in the sentence, plus those
     of the adjacent following sentence when that sentence is nothing but an
     exception clause."""
     for clause in _EXCEPTION_RE.finditer(str(sentence or '')):
-        text = next((g for g in clause.groups() if g is not None), '')
-        for item in re.split(r"\s*(?:,|;|/|、|，|\s(?:and|or|und|et|y|e|dan|và|hoặc|atau|и|или)\s)\s*", text):
-            # Capitals are kept: "USA" is the country, "usa" a Spanish verb.
-            yield _ITEM_WORDS.sub(' ', ' '.join(unicodedata.normalize('NFKC', item).split())).strip(' ()（）')
+        yield from _clause_items(_clause_text(clause))
     low = _norm(following)
     if low and (_EXCEPTION_LEAD_RE.match(low) or _EXCEPTION_TAIL_RE.search(low)):
         yield from _exception_items(following)
@@ -1981,13 +2069,40 @@ def _group_named(sentence, nat):
     return False
 
 
-def _unreadable_exception(sentence, following=None):
+def _exception_elsewhere(clause, nat, document_type):
+    """The exception clause is resolved to a subject that is not this row's:
+    it excepts other nationalities by name and neither this one nor a group
+    it belongs to, or it is scoped to a document class the route is not
+    ("except those holding diplomatic or official/service passports"). With
+    no nationality to compare against nothing is resolved, so the clause
+    keeps refusing."""
+    if nat is None:
+        return False
+    low = _norm(clause)
+    if document_type and _document_class_restriction(low, document_type):
+        return True
+    if _named(clause, nat) or _group_named(clause, nat) or _GENERAL_TRAVELLER_RE.search(low):
+        return False
+    return any(_named_as_traveller(clause, other) for other in _known_nationalities() if other != nat)
+
+
+def _unreadable_exception(sentence, following=None, *, nat=None, document_type=None):
     """The first exception item the converter cannot resolve to a nationality,
     or None. A sentence with such an item may except this nationality in
-    words the converter cannot read, so it proves nothing for anyone."""
-    for bare in _exception_items(sentence, following):
-        if not _resolves_to_nationality(bare):
-            return bare or '(empty)'
+    words the converter cannot read, so it proves nothing for anyone. Given
+    `nat` and `document_type` each clause is resolved to its own subject
+    first: a clause that excepts other nationalities by name, or a document
+    class the route is not, cannot be excepting this row, so its unreadable
+    item is not this row's to answer for."""
+    for clause in _EXCEPTION_RE.finditer(str(sentence or '')):
+        text = _clause_text(clause)
+        unreadable = next((bare or '(empty)' for bare in _clause_items(text)
+                           if not _resolves_to_nationality(bare)), None)
+        if unreadable is not None and not _exception_elsewhere(text, nat, document_type):
+            return unreadable
+    low = _norm(following)
+    if low and (_EXCEPTION_LEAD_RE.match(low) or _EXCEPTION_TAIL_RE.search(low)):
+        return _unreadable_exception(following, nat=nat, document_type=document_type)
     return None
 
 
@@ -2006,10 +2121,12 @@ def _exception_opens_list(sentence, positive, negative):
     return False
 
 
-def _group_member(sentence, nat, following=None):
+def _group_member(sentence, nat, following=None, document_type=None):
     """The sentence names a group the nationality belongs to, every carve-out
-    in it resolves to a nationality by name, and none of them is this one."""
-    return (_group_named(sentence, nat) and _unreadable_exception(sentence, following) is None
+    in it resolves to a nationality by name or to another document class, and
+    none of them is this one."""
+    return (_group_named(sentence, nat)
+            and _unreadable_exception(sentence, following, nat=nat, document_type=document_type) is None
             and not _carved_out(sentence, nat, following))
 
 
@@ -2028,12 +2145,24 @@ def _label(quote, nat):
     return None
 
 
+def _closing_mark_elsewhere(text, nat):
+    """The mark that closes the text closes another entry: another
+    nationality is named after this one's last mention, so the mark sits on
+    that entry's cell and says nothing about this one."""
+    spans = _mentions(text, nat)
+    if not spans:
+        return False
+    tail = _norm(text)[max(end for _, end in spans):]
+    return any(_named(tail, other) for other in _known_nationalities() if other != nat)
+
+
 def _footnote_marked(text, nat):
     """A footnote mark sits on the nationality's own name ("United States of
     America*", "Japan (1)") or closes the cell ("No necesita Visa (4)"). The
-    page says more about this entry than the cell states."""
+    page says more about this entry than the cell states. A mark that closes
+    another entry of the same line ("Japan, Korea (1)") is that entry's."""
     low = ' '.join(unicodedata.normalize('NFC', str(text or '')).casefold().split())
-    if _FOOTNOTE_END_RE.search(_norm(text)):
+    if _FOOTNOTE_END_RE.search(_norm(text)) and not _closing_mark_elsewhere(text, nat):
         return True
     # The mark may follow a continuation of the name that is not itself an
     # alias ("United States of America*", "République de Corée*").
@@ -2079,7 +2208,7 @@ def _sentence_block(sentence, following, value, nat, negative, document_type, pu
         return 'fee or price row, not a rule sentence'
     if _carved_out(sentence, nat, following):
         return 'carved out by name'
-    unreadable = _unreadable_exception(sentence, following)
+    unreadable = _unreadable_exception(sentence, following, nat=nat, document_type=document_type)
     if unreadable is not None:
         return ('group named but an exception cannot be read: ' if _group_named(sentence, nat)
                 else 'exception clause cannot be read: ') + unreadable[:80]
@@ -2106,6 +2235,33 @@ def _about_rule(low):
     return bool(_POLICY_WORD_RE.search(low) or _RULE_WORDS.search(low) or _ANAPHOR_RE.search(low))
 
 
+def _about_verdict(low, value, negative):
+    """The normalized sentence speaks of this verdict's own rule: it states
+    the rule, flips it, states another verdict in its place, or excludes
+    from it. A sentence about something else (a processing time, a
+    conversion of status, a document the traveller carries) decides nothing
+    about this verdict."""
+    positive, _ = _VERDICT_RULES.get(value, (None, None))
+    return bool((positive and re.search(positive, low, re.I))
+                or (negative and re.search(negative, low, re.I))
+                or _states_opposite(low, value)
+                or (_EXCLUSION_RE.search(low) and _concerns_verdict(low, value)))
+
+
+def _exception_binds(sentence, nat, value, negative):
+    """An exception clause or a carve-out in this sentence can refuse this row
+    only when the sentence is a rule this row is under: it speaks of this
+    verdict, and it speaks of it for this nationality, for a group the
+    nationality belongs to, or for every traveller. A sentence whose own
+    subject is another nationality's entry ("Nationals of Honduras, except
+    those holding diplomatic passports, are eligible ..."), or no traveller
+    at all ("the application is processed within three days, excluding the
+    day of submission"), governs that entry and not this one."""
+    low = _norm(sentence)
+    return bool(_about_verdict(low, value, negative)
+                and (_named(sentence, nat) or _group_named(sentence, nat) or _GENERAL_TRAVELLER_RE.search(low)))
+
+
 def _passage_block(text, value, nat, positive, negative, document_type, purpose, where, quoted):
     """Why the sentences of this text refuse the verdict for this route, or
     None. Every sentence is read, not only the deciding one: a suspension,
@@ -2115,7 +2271,10 @@ def _passage_block(text, value, nat, positive, negative, document_type, purpose,
     nationality, or a date the parser cannot read in a rule sentence.
     `quoted` says the text is the reviewer's evidence, where every
     sentence counts; on a captured page section only sentences about a
-    rule or naming the nationality are read."""
+    rule or naming the nationality are read. A carve-out and an exception
+    bind only where the sentence is a rule this row is under, so a clause
+    that belongs to another nationality's entry or to no traveller at all
+    refuses nothing here."""
     for sentence in re.split(r'(?<=[.!?])\s+|[;。；！？\n]+', str(text or '')):
         low = _norm(sentence)
         if not low:
@@ -2129,13 +2288,14 @@ def _passage_block(text, value, nat, positive, negative, document_type, purpose,
         opposite = _states_opposite(low, value)
         # A question ("Do US citizens need a visa?") states nothing.
         question = bool(re.search(r'[?？]\s*$', sentence.rstrip()))
-        if not opposite and _carved_out(sentence, nat):
+        if not opposite and _carved_out(sentence, nat) and _exception_binds(sentence, nat, value, negative):
             return f'carved out by name in {where}: {low[:100]}'
         if _excluded_by_statement(sentence, nat, value):
             return f'excluded from the rule in {where}: {low[:100]}'
-        unreadable = _unreadable_exception(sentence)
-        if unreadable is not None and not (positive and _exception_opens_list(sentence, positive, negative)):
-            return f'an exception clause in {where} cannot be read: {unreadable[:80]}'
+        if _exception_binds(sentence, nat, value, negative):
+            unreadable = _unreadable_exception(sentence, nat=nat, document_type=document_type)
+            if unreadable is not None and not (positive and _exception_opens_list(sentence, positive, negative)):
+                return f'an exception clause in {where} cannot be read: {unreadable[:80]}'
         # A sentence that states the opposite verdict for this nationality
         # as a traveller, for the route's own document and purpose and not
         # for a longer stay, contradicts the verdict.
@@ -2187,10 +2347,13 @@ def _sections_block(units, indexes, value, nat, positive, negative, document_typ
     # A dated window of this verdict's rule anywhere on a captured page the
     # quotes come from must be current and recorded: the sunset a page
     # states two sections below the quoted list still expires the verdict.
+    # The page is read footnote block by footnote block, so a window stated
+    # under one scheme's mark is read with the nationalities that mark names.
     for page in {part['page'] for unit in units for part in unit['parts'] if part.get('page') is not None}:
-        window = _window_violation([indexes[page][0]], bounds, where='a policy window on the captured page', value=value, nat=nat)
-        if window:
-            return window
+        for block in _scope_blocks(indexes[page][0]):
+            window = _window_violation([block], bounds, where='a policy window on the captured page', value=value, nat=nat)
+            if window:
+                return window
     return None
 
 
@@ -2312,7 +2475,7 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None, *
                 return decide('named in the rule sentence: ' + sl[:120])
             if carried and not list_only:
                 return decide(('label' if labelled else 'previous sentence') + ' names the nationality: ' + sl[:120])
-            if not list_only and _group_member(sentence, nat, following):
+            if not list_only and _group_member(sentence, nat, following, document_type):
                 return decide('group membership: ' + sl[:120])
             if listed and _LIST_INTRO_RE.search(sl):
                 index = indexes.get(unit['page']) if unit['page'] is not None else None

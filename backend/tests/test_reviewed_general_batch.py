@@ -1336,8 +1336,11 @@ def test_an_unreadable_exception_refuses_the_sentence_for_the_named_nationality_
     from scripts.convert_reviewed_general_batch import _unreadable_exception
     assert _unreadable_exception(quote) is not None
     ok, explain = supported('VISA_EXEMPT', [quote], nat)
-    # "with the exception of holders of" also flips the exemption outright, so either gate refuses.
-    assert not ok and any('cannot be read' in e or e.startswith('flipped in the same sentence') for e in explain)
+    # "with the exception of holders of" also flips the exemption outright, and
+    # a clause the round-seven scope test resolves to another document class
+    # leaves the sentence scoped to that class. Every gate refuses the row.
+    assert not ok and any('cannot be read' in e or e.startswith('flipped in the same sentence')
+                          or e.startswith('scoped to') for e in explain), explain
 
 
 def test_an_exception_clause_that_opens_a_list_is_the_rule_of_that_list():
@@ -2175,3 +2178,118 @@ def test_the_dry_run_corrections_of_round_six_hold():
     _check_value('fee', {'amount': 0, 'currency': 'USD'}, 'Malaysia 00 00 40 200\nCountry/Territory Wise e-Tourist Visa Fee (in US $)', ROUTE, None)
     with pytest.raises(PatchRejected, match='zero fee'):
         _check_value('fee', {'amount': 0, 'currency': 'USD'}, 'Malaysia 10 25 40 200', ROUTE, None)
+
+
+# Round-seven review regressions. The held-pairs pilot dry run kept 9 of 24
+# bound rows because a footnote, a dated window or an exception clause that
+# governs ANOTHER nationality, another scheme or another document class
+# reached a row whose own rule is clean. Every gate now resolves the clause,
+# the footnote mark and the window to its own subject before it binds, and
+# still refuses whatever it cannot resolve to anyone.
+
+
+def test_another_nationalitys_exception_clause_does_not_refuse_our_list_line():
+    """boca.gov.tw: the 30-day list line that names Singapore stands in the
+    same page section as "Nationals of Honduras*, except those holding
+    diplomatic or official/service passports, are eligible ...". That clause
+    governs Honduras, and the Brunei note two sections down governs Brunei."""
+    rule = ('Nationals of the following countries are eligible for the visa-exemption program, '
+            'with a duration of stay of up to 30 days: Belize*, Malaysia, Saint Lucia*, and Singapore.')
+    others = ('Nationals of Honduras*, except those holding diplomatic or official/service passports, are eligible for '
+              'the visa-exemption program, with a duration of stay of up to 90 days.\n'
+              'Nationals of the Philippines, except those holding diplomatic or official/service passports, are eligible '
+              'for the visa-exemption program, with a duration of stay of up to 14 days.\n'
+              'Those holding emergency, temporary, or other informal passports or travel documents are ineligible, with '
+              'the exception of those holding a Brunei certificate of identity.\n')
+    ok, explain = supported('VISA_EXEMPT', [rule], 'SGP', pages=[('p', rule + '\n' + others)])
+    assert ok, explain
+    # Fail closed twice over. An exception the converter can resolve to
+    # nobody still refuses, wherever on the page it stands, and one that
+    # names this nationality carves it out of its own rule.
+    annex = 'All visitors are eligible for the visa-exemption program, except those listed in the annex.\n'
+    ok, explain = supported('VISA_EXEMPT', [rule], 'SGP', pages=[('p', rule + '\n' + annex)])
+    assert not ok and any('an exception clause in the same page section cannot be read' in e for e in explain), explain
+    ours = 'ASEAN nationals are eligible for the visa-exemption program, except Singapore.\n'
+    ok, explain = supported('VISA_EXEMPT', [rule], 'SGP', pages=[('p', rule + '\n' + ours)])
+    assert not ok and any('carved out by name in the same page section' in e for e in explain), explain
+    # A clause that excepts only a document class the route is not is that
+    # class's own; against a route of that class it is unreadable again, and
+    # read without a route it stays unreadable as round five left it.
+    from scripts.convert_reviewed_general_batch import _unreadable_exception
+    clause = ('ASEAN nationals, except those holding diplomatic or official/service passports, are eligible for '
+              'the visa-exemption program.')
+    assert _unreadable_exception(clause) is not None
+    assert _unreadable_exception(clause, nat='SGP', document_type='ordinary_passport') is None
+    assert _unreadable_exception(clause, nat='SGP', document_type='diplomatic_passport') is not None
+
+
+def test_another_nationalitys_sunset_on_the_captured_page_does_not_expire_our_verdict():
+    """imi.gov.my carries the row "India** citizen: visa exempts until 31st
+    December 2026" beside the ASEAN rule sentence that proves Indonesia,
+    Thailand, Vietnam and the United Kingdom. That sunset is India's."""
+    rule = ASEAN_SENTENCE
+    page = rule + '\n1) Indonesia citizen: visa exempts for 30 days\n2) India** citizen: visa exempts until 31st December 2026\n'
+    ok, explain = supported('VISA_EXEMPT', [rule], 'IDN', pages=[('p', page)])
+    assert ok, explain
+    # Fail closed: the same row against our own nationality must be recorded
+    # as the bound it is, and a sunset of everyone's rule still binds.
+    ours = rule + '\n1) India citizen: visa exempts for 30 days\n2) Indonesia** citizen: visa exempts until 31st December 2026\n'
+    ok, explain = supported('VISA_EXEMPT', [rule], 'IDN', pages=[('p', ours)])
+    assert not ok and any('until 2026-12-31 is not recorded as effective_to' in e for e in explain), explain
+    ok, _ = supported('VISA_EXEMPT', [rule], 'IDN', pages=[('p', ours)], bounds={'effective_to': '2026-12-31'})
+    assert ok
+    everyone = rule + '\n1) India citizen: visa exempts for 30 days\n2) The visa exemption for all listed nationals runs until 31st December 2026.\n'
+    ok, explain = supported('VISA_EXEMPT', [rule], 'IDN', pages=[('p', everyone)])
+    assert not ok and any('until 2026-12-31 is not recorded as effective_to' in e for e in explain), explain
+
+
+def test_another_schemes_footnote_window_does_not_expire_our_footnotes_verdict():
+    """mofa.gov.vn's exemption table marks Japan's row * (the unilateral
+    policy, in force to 14 March 2028) and Poland's ** (the 2025 tourism
+    stimulus programme, which ended on 31 December 2025). The ** footnote
+    names its own nationalities, so its window is theirs."""
+    rule = 'No | Country | Duration of stay'
+    rows = ('43 | japan | 45 days for other passport types under the unilateral visa exemption policy*\n'
+            '71 | poland | 45 days for other passport types under the tourism stimulus program in 2025**\n')
+    marks = ('| * In accordance with Resolution No. 44/NQ-CP, citizens of 12 countries (Germany, France, Italy, Spain, '
+             'United Kingdom, Russia, Japan, Korea, Denmark, Sweden, Norway and Finland) enjoy visa exemption with a stay '
+             'duration of 45 days from the date of entry.\n'
+             'The unilateral visa exemption policy is effective from 15 March 2025 until 14 March 2028.\n'
+             '| ** In accordance with Resolution No.11/NQ-CP, under the tourism stimulus program in 2025, citizens of '
+             'Poland, Czech and Switzerland enjoy visa exemption with a stay duration of 45 days from the date of entry.\n'
+             'The visa exemption policy under the tourism stimulus program in 2025 is effective from 01 March 2025 '
+             'until 31 December 2025.\n')
+    page = rule + '\n' + rows + marks
+    quote = '43 | japan | 45 days for other passport types under the unilateral visa exemption policy*'
+    bounds = {'effective_from': '2025-03-15', 'effective_to': '2028-03-14'}
+    ok, explain = supported('VISA_EXEMPT', [marks.split('\n')[0].lstrip('| '), quote], 'JPN',
+                            pages=[('p', page)] * 2, bounds=bounds, detail='conditional_visa_free')
+    assert ok, explain
+    # Fail closed: the footnote that does govern our entry expires it. Poland
+    # carries the ** mark, so the ended window is Poland's own.
+    pol = '71 | poland | 45 days for other passport types under the tourism stimulus program in 2025**'
+    ok, explain = supported('VISA_EXEMPT', [marks.split('\n')[2].lstrip('| '), pol], 'POL',
+                            pages=[('p', page)] * 2, detail='conditional_visa_free')
+    assert not ok and any('ended on 2025-12-31' in e for e in explain), explain
+    # And a footnote that names no nationality is resolved to nobody, so its
+    # window still bounds every row of the page.
+    anonymous = page.replace('citizens of Poland, Czech and Switzerland enjoy', 'the listed citizens enjoy')
+    ok, explain = supported('VISA_EXEMPT', [marks.split('\n')[0].lstrip('| '), quote], 'JPN',
+                            pages=[('p', anonymous)] * 2, bounds=bounds, detail='conditional_visa_free')
+    assert not ok and any('ended on 2025-12-31' in e for e in explain), explain
+
+
+def test_a_closing_footnote_mark_on_another_entry_of_the_line_is_not_ours():
+    """A mark that closes the line closes the entry it sits on. "Japan,
+    Thailand (1)" says more about Thailand, nothing about Japan."""
+    from scripts.convert_reviewed_general_batch import _footnote_marked
+    assert _footnote_marked('Japan, Thailand (1)', 'THA') and not _footnote_marked('Japan, Thailand (1)', 'JPN')
+    assert _footnote_marked('Japan (1)', 'JPN') and _footnote_marked('No necesita Visa (4)', 'JPN')
+    rule = 'Nationals of the following countries do not need a visa for stays of up to 90 days:'
+    page = rule + '\nJapan, Thailand (1)\n'
+    ok, explain = supported('VISA_EXEMPT', [rule, 'Japan, Thailand (1)'], 'JPN', pages=[('p', page)] * 2,
+                            detail='unconditional_visa_free')
+    assert ok, explain
+    ok, explain = supported('VISA_EXEMPT', [rule, 'Japan, Thailand (1)'], 'THA', pages=[('p', page)] * 2,
+                            detail='unconditional_visa_free')
+    assert not ok and any(e.startswith('footnote on the list line') for e in explain), explain
