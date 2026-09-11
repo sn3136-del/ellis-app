@@ -32,7 +32,7 @@ _COUNTS = ("attempted", "read", "verified", "renewed", "partial", "corrected", "
            "unreadable", "skipped_pending", "deferred", "errors", "insufficient_evidence",
            "provider_failed", "no_official_source", "source_reads", "source_fetch_failures",
            "model_comparisons", "model_comparisons_reused", "provider_suspended",
-           "provider_rate_limited")
+           "provider_rate_limited", "fill_proposed", "fill_rejected")
 
 
 def _utc():
@@ -169,7 +169,8 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
         outcome = report.get("outcome")
         # Reading an official page and proving a route are distinct events.
         # Even an interrupted comparison can have completed real source reads.
-        for counter in ("source_reads", "source_fetch_failures", "model_comparisons", "model_comparisons_reused"):
+        for counter in ("source_reads", "source_fetch_failures", "model_comparisons",
+                        "model_comparisons_reused", "fill_proposed", "fill_rejected"):
             value = report.get(counter)
             delta[counter] = value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else 0
         delta["read"] = int(delta["source_reads"] > 0 or outcome == "checked")

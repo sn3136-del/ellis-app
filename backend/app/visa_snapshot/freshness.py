@@ -155,6 +155,30 @@ adjudicate a disagreement between official sources or verify the warning away.
 When in doubt about whether the page speaks for THIS nationality, say
 page_is_nationality_specific false and correct nothing nationality-specific."""
 
+# Appended to _SYSTEM only when the record has empty required cells. The
+# contradiction prompt above is untouched: a complete record sends it byte
+# for byte, and a page is only asked about a cell when the record lacks it.
+# The fold keeps the runtime budget: one model call per page, never two.
+_FILL_SUPPLEMENT = """
+
+EMPTY CELLS. The payload lists empty_fields: required cells the stored answer
+does not carry (each entry names the field and, for a visa product's own
+cell, that product's type). A value the page states for one of them is not a
+contradiction, it is a value the record lacks, so report it separately in
+"stated_fields": a list of {"field": <name exactly as listed>,
+"product_type": <the listed product type, omitted for a route field>,
+"value": <the value>, "quote": "<one verbatim contiguous passage from the
+page that states it, no ellipsis, no paraphrase>"}. Value shapes: fee and
+government_fee as {"amount": number, "currency": "ISO 4217 code"};
+max_stay_days and permitted_stay_days as an integer number of days;
+permitted_stay and validity as short text using the page's own figure
+("90 days", "6 months"); entry as "single", "double" or "multiple";
+application_channel from allowed_enum_values; required_documents as a list
+of short document names. Only fields in empty_fields, only when the page
+states the value for this route and this nationality, never from your own
+knowledge: a field the page does not state is simply absent from
+stated_fields. corrected_fields and evidence keep the rules above."""
+
 _PROVIDER = None
 _MODEL_SLOTS = threading.BoundedSemaphore(4)
 
@@ -557,12 +581,206 @@ def _source_conflict_fields(guidance):
             and not re.search(r"\b(?:resolved|superseded)\b", value, re.I)}
 
 
+# Which dictionary cells a fill may target and the guidance field each maps
+# back to. A route row fills route fields, a product row fills the product's
+# own columns. A route-level validity or entry count has no overridable
+# field, so it is not listed: a fill can only name a cell an override can
+# carry, and the accept path writes exactly these shapes.
+_ROUTE_CELL_FIELDS = {
+    "max_stay_duration": ("permitted_stay_days", "permitted_stay"),
+    "max_stay_unit": ("permitted_stay_days", "permitted_stay"),
+    "visa_fee_amount": ("government_fee",), "visa_fee_currency": ("government_fee",),
+    "application_method": ("application_channel",),
+    "required_documents": ("required_documents",),
+}
+_PRODUCT_CELL_FIELDS = {
+    "validity_duration": "validity", "validity_unit": "validity",
+    "max_stay_duration": "max_stay_days", "max_stay_unit": "max_stay_days",
+    "entries": "entry",
+    "visa_fee_amount": "fee", "visa_fee_currency": "fee",
+    "required_documents": "required_documents",
+}
+# The entry vocabulary the reviewed batch converter accepts, so a fill and a
+# converted review prove an entry count from the same words.
+_FILL_ENTRY_WORDS = {"single": r"single|one entry|一次",
+                     "double": r"double|two entries|二次|兩次|两次",
+                     "multiple": r"multiple|multi|数次|多次"}
+
+
+def _empty_fields(route, guidance, provenance):
+    """The required cells the served record shows as "Not publicly available".
+
+    Read off the same projection the workbook and the QC console use, so a
+    cell counts as empty exactly when a reader sees it empty: a visa-free
+    route's validity is not applicable and is never asked for, a product's
+    validity is asked for under that product's type. A cell the record marks
+    unpublished is asked for too: the owner's rule is that a cell may only
+    read "Not publicly available" when official sources really do not state
+    it, and the page is the test of that.
+    """
+    from . import tstation
+    try:
+        rows = tstation.records_for_route(dict(route), dict(guidance), provenance)
+    except Exception:  # noqa: BLE001 - a projection failure is not a gap to fill
+        return []
+    raw_products = guidance.get("visa_products")
+    products = [p for p in (raw_products if isinstance(raw_products, list) else [])
+                if isinstance(p, dict) and p.get("type")]
+    out, seen = [], set()
+    for row in rows:
+        statuses = tstation.field_status(row)
+        gaps = [f for f in tstation.FIELD_ORDER if f in tstation.REQUIRED_FIELDS
+                and statuses.get(f) in ("missing", "not-published")]
+        index = row.get("_product_index")
+        product = products[index] if isinstance(index, int) and 0 <= index < len(products) else None
+        separate = bool(row.get("_separate_permission"))
+        for cell in gaps:
+            # A unit or currency beside a stated number is not a missing
+            # fact: a zero fee with no currency is a known free entry, and a
+            # stay stated in words has no unit. Only the number cell decides.
+            partner = {"visa_fee_currency": "visa_fee_amount", "validity_unit": "validity_duration",
+                       "max_stay_unit": "max_stay_duration"}.get(cell)
+            if partner and statuses.get(partner) == "filled":
+                continue
+            if product is not None and cell in _PRODUCT_CELL_FIELDS and (
+                    separate or cell != "required_documents"):
+                items = [{"field": _PRODUCT_CELL_FIELDS[cell], "product_type": str(product["type"])}]
+            elif product is not None and cell == "required_documents":
+                # A product that shares the route's permission reads the
+                # route's document list, so that is the cell to fill.
+                items = [{"field": "required_documents"}]
+            elif product is not None and cell == "application_method" and not separate:
+                items = [{"field": "application_channel"}]
+            elif product is None and cell in _ROUTE_CELL_FIELDS:
+                items = [{"field": f} for f in _ROUTE_CELL_FIELDS[cell]]
+            else:
+                continue
+            for item in items:
+                key = (item["field"], item.get("product_type"))
+                if key not in seen:
+                    seen.add(key)
+                    out.append(item)
+    return out
+
+
+def _fill_value_supported(field, value, quote):
+    """The value gate a dispute passes, applied to a cell the record lacks:
+    every figure and token of the value must be in the quoted passage, in
+    the shape the record stores."""
+    from . import kimi_primary
+    if field in {"fee", "government_fee"}:
+        if (not isinstance(value, dict) or isinstance(value.get("amount"), bool)
+                or not isinstance(value.get("amount"), (int, float))
+                or value["amount"] < 0 or not isinstance(value.get("currency"), str)
+                or not re.fullmatch(r"[A-Z]{3}", value["currency"])):
+            return False
+        if value["amount"] == 0:
+            # A zero fee needs the page to say free, not a missing figure.
+            return bool(re.search(r"\bfree\b|no fee|no charge|gratis|waived|免费|免費", quote, re.I))
+        return field_value_supported("government_fee", value, quote)
+    if field in {"max_stay_days", "permitted_stay_days"}:
+        return (isinstance(value, int) and not isinstance(value, bool) and 0 < value <= 3660
+                and field_value_supported(field, value, quote))
+    if field in {"permitted_stay", "validity"}:
+        return (isinstance(value, str) and 0 < len(value.strip()) <= 120
+                and field_value_supported(field, value.strip(), quote))
+    if field == "entry":
+        return (isinstance(value, str) and value in _FILL_ENTRY_WORDS
+                and bool(re.search(_FILL_ENTRY_WORDS[value], quote, re.I)))
+    if field == "application_channel":
+        return (isinstance(value, str) and value in kimi_primary.APPLICATION_CHANNELS
+                and field_value_supported(field, value, quote))
+    if field == "required_documents":
+        return (isinstance(value, list) and 0 < len(value) <= 20
+                and all(isinstance(d, str) and 0 < len(d.strip()) <= 120 for d in value)
+                and field_value_supported(field, [d.strip() for d in value], quote))
+    return False
+
+
+def _stated_fills(answer, text, empty_fields, route, host_ok, exclude=()):
+    """Validate the page's stated values for empty cells the way a dispute is
+    validated: the quote must be literally on the fetched page, the value
+    must be in the quote, the page must be an official host that speaks for
+    this route. Anything else is dropped and counted, never filed.
+    Returns ({product_type or None: {field: proposal cell}}, dropped)."""
+    stated = answer.get("stated_fields") if isinstance(answer, dict) else None
+    if not empty_fields or not isinstance(stated, list):
+        return {}, 0
+    allowed = {(e["field"], e.get("product_type")) for e in empty_fields}
+    fills, rejected = {}, 0
+    for item in stated:
+        if not isinstance(item, dict):
+            rejected += 1
+            continue
+        field, quote, value = item.get("field"), item.get("quote"), item.get("value")
+        product_type = item.get("product_type")
+        product_type = str(product_type) if product_type not in (None, "") else None
+        scope_name = "visa_products" if product_type else field
+        if ((field, product_type) not in allowed or field in exclude or not host_ok
+                or answer.get("page_relevant") is not True
+                or (product_type is None and field in NATIONALITY_SPECIFIC
+                    and answer.get("page_is_nationality_specific") is not True)
+                or not isinstance(quote, str) or not quote_in_text(quote, text)
+                or not _fill_value_supported(field, value, quote)
+                or not proof_helpers.field_scope_matches_route(scope_name, quote, route)):
+            rejected += 1
+            continue
+        fills.setdefault(product_type, {})[field] = {
+            "page_says": value, "record_holds": None, "quote": quote.strip()}
+    return fills, rejected
+
+
+def _file_fill(db, row, route, product_type, fields, source_url, when):
+    """One fill issue per record, page and product: the page states values
+    for cells the record leaves empty. Nothing is applied here. The value
+    reaches the record only when an operator accepts the issue, and a rerun
+    on the same page never files the same fill twice."""
+    if not fields:
+        return 0
+    field_key = ",".join(sorted(fields))[:64]
+    proposal = {"kind": "fill", "outcome": "checked", "source_url": source_url,
+                "checked_at": when, "fields": {k: fields[k] for k in sorted(fields)}}
+    if product_type:
+        proposal["product_type"] = product_type
+    note = (f"Automatic source check against {source_url}: " + "; ".join(
+        f"{k}: page says {json.dumps(v['page_says'], ensure_ascii=False)[:120]} "
+        f"(quote: {v['quote'][:160]})" for k, v in sorted(fields.items())))[:1000]
+    candidates = db.execute(select(DatabaseIssueReport).where(
+        DatabaseIssueReport.cache_key == row.cache_key,
+        DatabaseIssueReport.reported_by == "freshness_monitor",
+        DatabaseIssueReport.field == field_key,
+        DatabaseIssueReport.status.in_(("open", "acknowledged", "dismissed")))).scalars().all()
+    identity = _proposal_identity(proposal)
+    # An identical fill already waiting, or one an operator dismissed, is not
+    # a new finding.
+    if identity is None or any(_proposal_identity(c.proposal) == identity for c in candidates):
+        return 0
+    existing = next((c for c in candidates if c.status != "dismissed"
+        and isinstance(c.proposal, dict) and c.proposal.get("kind") == "fill"
+        and c.proposal.get("source_url") == source_url
+        and c.proposal.get("product_type") == proposal.get("product_type")
+        and isinstance(c.proposal.get("fields"), dict)
+        and set(c.proposal["fields"]) == set(fields)), None)
+    if existing is not None:
+        # The same page now states a different value: refresh the waiting
+        # issue rather than stacking a second one beside it.
+        existing.note, existing.proposal = note, proposal
+    else:
+        db.add(DatabaseIssueReport(org_id="platform", cache_key=row.cache_key,
+                                   route=route, field=field_key, note=note,
+                                   reported_by="freshness_monitor", status="open",
+                                   proposal=proposal))
+    return len(fields)
+
+
 def _proposal_identity(proposal):
     """Only an unchanged finding inherits an operator's dismissal.
 
     Read timestamps and HTML whitespace change on ordinary rechecks. The
     source, quoted claim, current value and any conflicting readings do not
-    get ignored: a change to any of them is a new finding.
+    get ignored: a change to any of them is a new finding. A fill carries
+    its kind and product too, so a stated value for one product is never
+    mistaken for the same value stated for another.
     """
     if not isinstance(proposal, dict) or not isinstance(proposal.get("fields"), dict):
         return None
@@ -583,7 +801,7 @@ def _proposal_identity(proposal):
 
     try:
         return json.dumps(normalize({k: proposal.get(k) for k in
-            ("source_url", "fields", "conflicting_evidence")}),
+            ("source_url", "fields", "conflicting_evidence", "kind", "product_type")}),
             sort_keys=True, ensure_ascii=False, allow_nan=False)
     except (TypeError, ValueError):
         return None
@@ -655,6 +873,11 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     override = verified_overrides.find(route)
     guidance, provenance = verified_overrides.apply(dict(original), route)
     unresolved_fields = _source_conflict_fields(guidance)
+    # A page that states a value the record LACKS is invisible to a
+    # contradiction check, so the empty required cells are named to the
+    # model in the same call. A complete record sends the unchanged prompt.
+    empty_fields = _empty_fields(route, guidance, provenance)
+    system_prompt = _SYSTEM + _FILL_SUPPLEMENT if empty_fields else _SYSTEM
     old_comparisons = (row.verification or {}).get('comparison_cache')
     reviewed_fields, catalog = proof_helpers.reviewed_evidence(override, row.verification)
     source_override = dict(override or {}, supporting_sources=[{'id':k,'url':v} for k,v in catalog.items()])
@@ -679,7 +902,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     tried, irrelevant, unquoted_all = [], [], set()
     readings, source_checks, candidates, captures = [], [], [], {}
     full_captures, deferred_comparisons, comparison_context = {}, [], {}
-    model_counts = {'model_comparisons': 0, 'model_comparisons_reused': 0}
+    model_counts = {'model_comparisons': 0, 'model_comparisons_reused': 0,
+                    'fill_proposed': 0, 'fill_rejected': 0}
     visited, completed = set(), set()
     page = raw = None
     fallback = None
@@ -697,7 +921,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                 model_counts['model_comparisons_reused'] += 1
             else:
                 model_counts['model_comparisons'] += 1
-                answer = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False, sort_keys=True), timeout_seconds=remaining)
+                answer = _call(system_prompt, json.dumps(payload, ensure_ascii=False, sort_keys=True), timeout_seconds=remaining)
         except Exception as e:
             source_checks.append({'source_url': fr.final_url, 'outcome': 'provider_error', 'at': when,
                 'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
@@ -719,7 +943,14 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                                 for k, v in quoted.items() if k in unresolved_fields}
         quoted = {k: v for k, v in quoted.items() if k not in unresolved_fields}
         unquoted_all.update(unquoted)
+        fills, fill_rejected = _stated_fills(answer, fr.content_text, empty_fields, route,
+                                             is_government_host(fr.final_hostname), exclude=set(quoted))
+        model_counts['fill_rejected'] += fill_rejected
+        for product_type, stated in fills.items():
+            model_counts['fill_proposed'] += _file_fill(db, row, route, product_type, stated, fr.final_url, when)
         check = {'source_url': fr.final_url, 'outcome': 'validation_error' if invalid_enums or empty_workflow or equivalent or workflow_rejected else 'page_not_relevant', 'at': when,
+            'fill_fields': [{'product_type': pt, 'fields': sorted(stated)} for pt, stated in fills.items()],
+            'fill_rejected': fill_rejected,
             'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
             'comparison_reused': reused, 'content_hash': fr.content_hash, 'verified_fields': [],
             'unquoted_fields': unquoted,
@@ -779,7 +1010,9 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                        (reviewed_fields.get('disposition') or {}).get('source_url') == fr.final_url else None,
                    "official_page_url": fr.final_url,
                    "official_page_text": fr.content_text[:MAX_PAGE_CHARS]}
-        signature = comparison_reuse.identity(payload=payload, system=_SYSTEM,
+        if empty_fields:
+            payload["empty_fields"] = empty_fields
+        signature = comparison_reuse.identity(payload=payload, system=system_prompt,
             guidance=guidance, provenance=provenance, reviewed_fields=reviewed_fields,
             catalog=catalog, sources=all_sources, full_text=fr.content_text,
             requested_url=url, evidence_contract=EVIDENCE_CONTRACT,
@@ -1459,7 +1692,13 @@ def active_disputed_fields(db, cache_key: str) -> list[str]:
             DatabaseIssueReport.field != "source_unreadable")).scalars()
     fields = set()
     for issue in issues:
-        proposed = (issue.proposal or {}).get("fields") or {}
+        proposal = issue.proposal if isinstance(issue.proposal, dict) else {}
+        if proposal.get("kind") == "fill":
+            # A stated value for an empty cell disputes nothing: the record
+            # holds no competing fact, so an open fill neither grades the
+            # answer down nor blocks its renewal.
+            continue
+        proposed = proposal.get("fields") or {}
         if isinstance(proposed, dict) and proposed:
             fields.update(proposed)
         else:
