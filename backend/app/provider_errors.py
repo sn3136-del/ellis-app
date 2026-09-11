@@ -117,8 +117,8 @@ _PATTERNS: list[tuple[str, re.Pattern]] = [
 ]
 
 _SECRET_PAT = re.compile(
-    r"(sk-[A-Za-z0-9]{8,}|Bearer\s+\S+|AKIA[0-9A-Z]{16}|eyJ[A-Za-z0-9_\-]{10,}|"
-    r"api[_-]?key\s*[:=]\s*\S+|password\s*[:=]\s*\S+)", re.I)
+    r"(<[^<>]*(?:sk|ak)-[A-Za-z0-9]{6,}[^<>]*>|(?:sk|ak)-[A-Za-z0-9]{6,}|Bearer\s+\S+|AKIA[0-9A-Z]{16}|"
+    r"eyJ[A-Za-z0-9_\-]{10,}|api[_-]?key\s*[:=]\s*\S+|password\s*[:=]\s*\S+)", re.I)
 
 
 def redact_diagnostic(raw: str, limit: int = 120) -> str:

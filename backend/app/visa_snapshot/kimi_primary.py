@@ -429,7 +429,21 @@ class GuidanceProviderSuspended(GuidanceProviderError):
 # cooldown lapses and one call probes the account again.
 _PROVIDER_STATE = {"suspended_until": 0.0, "reason": "", "since": ""}
 _PROVIDER_LOCK = threading.Lock()
-SUSPENSION_COOLDOWN_SECONDS = float(os.getenv("ELLIS_KIMI_SUSPENSION_COOLDOWN", "900") or 900)
+
+
+def _env_float(name: str, default: float) -> float:
+    """A float setting from the environment, or the default when unset,
+    blank or not a number: a typo in a unit file must not stop the import."""
+    raw = os.getenv(name)
+    if raw is None or not str(raw).strip():
+        return default
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return default
+
+
+SUSPENSION_COOLDOWN_SECONDS = _env_float("ELLIS_KIMI_SUSPENSION_COOLDOWN", 900.0)
 
 
 def note_provider_suspension(reason: str, seconds: float | None = None) -> None:
@@ -451,6 +465,10 @@ def provider_suspension() -> dict | None:
     with _PROVIDER_LOCK:
         left = _PROVIDER_STATE["suspended_until"] - time.monotonic()
         if left <= 0:
+            # A lapsed cooldown is over: the next suspension, if any, starts
+            # its own "since" instead of inheriting this one.
+            if _PROVIDER_STATE["since"] or _PROVIDER_STATE["reason"]:
+                _PROVIDER_STATE.update({"suspended_until": 0.0, "reason": "", "since": ""})
             return None
         return {"suspended": True, "reason": _PROVIDER_STATE["reason"],
                 "since": _PROVIDER_STATE["since"],
@@ -466,6 +484,7 @@ def provider_status() -> dict:
         left = _RATE_GATE["until"] - time.monotonic()
         if left > 0:
             out["rate_limited_for_seconds"] = int(left) + 1
+            out["rate_gate_saturated"] = _RATE_GATE["backoff"] >= RATE_GATE_MAX_SECONDS
     return out
 
 
@@ -477,8 +496,8 @@ def provider_status() -> dict:
 # what the account allows instead of burning the budget on rejections.
 _RATE_GATE = {"until": 0.0, "backoff": 0.0}
 _RATE_LOCK = threading.Lock()
-RATE_GATE_MAX_SECONDS = float(os.getenv("ELLIS_KIMI_RATE_GATE_MAX", "30") or 30)
-RATE_GATE_BASE_SECONDS = float(os.getenv("ELLIS_KIMI_RATE_GATE_BASE", "2") or 2)
+RATE_GATE_MAX_SECONDS = _env_float("ELLIS_KIMI_RATE_GATE_MAX", 30.0)
+RATE_GATE_BASE_SECONDS = _env_float("ELLIS_KIMI_RATE_GATE_BASE", 2.0)
 
 
 def _rate_gate_wait(deadline: float) -> bool:
@@ -495,12 +514,24 @@ def _rate_gate_wait(deadline: float) -> bool:
 
 
 def _rate_gate_hit(retry_after: float | None = None) -> float:
+    """Close the gate for the next interval: the provider's Retry-After when
+    it sends one, otherwise the doubling backoff. Either is capped at
+    RATE_GATE_MAX_SECONDS so one header cannot park the whole process."""
     with _RATE_LOCK:
         backoff = min(RATE_GATE_MAX_SECONDS, max(RATE_GATE_BASE_SECONDS, _RATE_GATE["backoff"] * 2))
-        pause = float(retry_after) if retry_after else backoff
+        pause = min(RATE_GATE_MAX_SECONDS, float(retry_after)) if retry_after else backoff
         _RATE_GATE["backoff"] = backoff
         _RATE_GATE["until"] = max(_RATE_GATE["until"], time.monotonic() + pause)
         return pause
+
+
+def rate_gate_saturated() -> bool:
+    """The gate is closed and its backoff sits at the cap: the account's
+    limit is not clearing, so a long sweep gains nothing by waiting per
+    route and should end its cycle like it does for a suspension."""
+    with _RATE_LOCK:
+        return (_RATE_GATE["backoff"] >= RATE_GATE_MAX_SECONDS
+                and _RATE_GATE["until"] > time.monotonic())
 
 
 def _rate_gate_clear() -> None:
@@ -588,18 +619,28 @@ def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> di
     deadline = time.monotonic() + max(0.0, timeout)
     neutralised = False
     suspended = provider_suspension()
+    from .. import provider_errors
     if suspended:
-        from .. import provider_errors
         raise GuidanceProviderSuspended(provider_errors.user_error(
-            "kimi moonshot HTTP 429"), suspended["reason"])
-    with _LIVE_SLOTS:
-        for attempt in range(3):
-            if not _rate_gate_wait(deadline):
-                # The process is paced by a rate limit and this caller's own
-                # budget cannot cover the pause: the honest answer is the
-                # rate-limit message, not a longer spinner.
-                from .. import provider_errors
-                raise GuidanceProviderError(provider_errors.user_error("kimi moonshot HTTP 429"))
+            "kimi moonshot HTTP 429", category="kimi_quota_exhausted"), suspended["reason"])
+    for attempt in range(3):
+        # The rate gate is waited on BEFORE a slot is taken: a paced caller
+        # holding one of the three engine slots while it sleeps would keep
+        # every other caller out for the length of the pause.
+        if not _rate_gate_wait(deadline):
+            # The process is paced by a rate limit and this caller's own
+            # budget cannot cover the pause: the honest answer is the
+            # rate-limit message, not a longer spinner.
+            raise GuidanceProviderError(provider_errors.user_error("kimi moonshot HTTP 429"))
+        left = deadline - time.monotonic()
+        if left <= 0:
+            raise GuidanceTimeout()
+        if not _LIVE_SLOTS.acquire(timeout=left):
+            # Every slot stayed busy for the caller's whole budget: the
+            # engine is saturated, which the reader sees as a rate limit.
+            raise GuidanceProviderError(provider_errors.user_error("kimi moonshot HTTP 429"))
+        pause = 0.0
+        try:
             left = deadline - time.monotonic()
             if left <= 0:
                 raise GuidanceTimeout()
@@ -622,12 +663,13 @@ def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> di
                 if getattr(e, "account_suspended", False):
                     # Out of balance is not a rate limit: no retry, and every
                     # caller in this process stands down until the cooldown
-                    # lapses. The operator sees the reason on the Freshness tab.
+                    # lapses. The operator sees the reason on the Freshness tab
+                    # and the envelope's category raises the admin alert.
                     note_provider_suspension(getattr(e, "message", "") or
                                              "provider account suspended")
-                    from .. import provider_errors
                     raise GuidanceProviderSuspended(provider_errors.user_error(
-                        f"kimi moonshot HTTP {e.status}"), getattr(e, "message", "")) from e
+                        f"kimi moonshot HTTP {e.status}", category="kimi_quota_exhausted"),
+                        getattr(e, "message", "")) from e
                 # Back off only while the caller's own budget can still pay
                 # for it. Past that the honest answer is the failure, not a
                 # longer spinner. A rate limit pauses every caller in the
@@ -640,10 +682,14 @@ def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> di
                     _rate_gate_hit(getattr(e, "retry_after", None))
                 if (e.status not in _RETRY_STATUS or attempt == 2
                         or deadline - time.monotonic() <= pause + 2.0):
-                    from .. import provider_errors
                     raise GuidanceProviderError(provider_errors.user_error(
                         f"kimi moonshot HTTP {e.status}")) from e
-                time.sleep(pause)
+        finally:
+            # The slot is released before any pause, so the retry wait of
+            # one caller never blocks the others.
+            _LIVE_SLOTS.release()
+        if pause:
+            time.sleep(pause)
     raise GuidanceTimeout()
 
 

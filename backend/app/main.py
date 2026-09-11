@@ -11,6 +11,19 @@ import re
 import threading
 import time as _time
 
+
+def _env_float(name: str, default: float) -> float:
+    """A float setting from the environment, or the default when it is
+    unset, blank or not a number: a typo in a unit file must not stop the
+    API from importing."""
+    raw = os.getenv(name)
+    if raw is None or not str(raw).strip():
+        return default
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return default
+
 from typing import Annotated, Any, Optional
 
 from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
@@ -128,13 +141,21 @@ def _startup():
         _refresh_records_cache_in_background()
 
 
+# Read-shaped POSTs under /database/: a lookup or a question. They only
+# change the record set when the engine commits a new answer row, and that
+# commit invalidates the cache on its own (see _records_flush below), so
+# they must not rebuild 1,442 records behind every traveller.
+_RECORDS_READ_POSTS = ("/database/lookup", "/database/ask")
+
+
 @app.middleware("http")
 async def _records_cache_invalidation(request: Request, call_next):
     """Every successful operator write under /database/ (edits, approvals,
     issue rulings, research, drills) makes the cached record set stale at
-    once; reads keep serving the last good copy while it rebuilds."""
+    once; the next read waits for one shared rebuild."""
     response = await call_next(request)
     if request.method in ("POST", "PUT", "DELETE") and request.url.path.startswith("/database/") \
+            and not request.url.path.startswith(_RECORDS_READ_POSTS) \
             and response.status_code < 400:
         invalidate_records_cache()
         _refresh_records_cache_in_background_if_warm()
@@ -1392,62 +1413,175 @@ def travel_database_issues(db=Depends(get_session),
 # process, and refreshed in the background while the stale copy is served
 # (the sweep writes from another process, so the time bound covers it).
 # Filters then run over the cached set in memory, which is milliseconds.
-_RECORDS_CACHE: dict = {"rows": None, "built_at": 0.0, "building": False}
+_RECORDS_CACHE: dict = {"rows": None, "built_at": 0.0, "building": False,
+                        "dirty": False, "generation": 0}
 _RECORDS_CACHE_LOCK = threading.Lock()
-RECORDS_CACHE_SECONDS = float(os.getenv("ELLIS_RECORDS_CACHE_SECONDS", "120") or 120)
+# Readers waiting for an in-flight rebuild sleep on this instead of each
+# starting a build of their own.
+_RECORDS_CACHE_READY = threading.Condition(_RECORDS_CACHE_LOCK)
+RECORDS_CACHE_SECONDS = _env_float("ELLIS_RECORDS_CACHE_SECONDS", 120.0)
+# How long a reader waits on someone else's rebuild before building alone.
+RECORDS_CACHE_WAIT_SECONDS = _env_float("ELLIS_RECORDS_CACHE_WAIT_SECONDS", 300.0)
 
 
 def invalidate_records_cache() -> None:
+    """A write happened: the cached set is stale and must not be served
+    again. The next read waits for a rebuild that started after this call,
+    so an operator never reads back the value from before their own edit."""
     with _RECORDS_CACHE_LOCK:
-        _RECORDS_CACHE["built_at"] = 0.0
+        _RECORDS_CACHE["dirty"] = True
+        _RECORDS_CACHE["generation"] += 1
+
+
+def _claim_records_build() -> bool:
+    """True when the caller must build; False when a build is in flight."""
+    with _RECORDS_CACHE_LOCK:
+        if _RECORDS_CACHE["building"]:
+            return False
+        _RECORDS_CACHE["building"] = True
+        return True
+
+
+def _release_records_build() -> None:
+    with _RECORDS_CACHE_READY:
+        _RECORDS_CACHE["building"] = False
+        _RECORDS_CACHE_READY.notify_all()
 
 
 def _build_records_cache(db) -> list[dict]:
-    rows = _build_tstation_rows(db)
+    """Build the full set for the generation current at the start. A write
+    that lands during the build bumps the generation, so the result is
+    stored but stays marked dirty and the next read rebuilds again."""
     with _RECORDS_CACHE_LOCK:
+        generation = _RECORDS_CACHE["generation"]
+    try:
+        rows = _build_tstation_rows(db)
+    except BaseException:
+        _release_records_build()
+        raise
+    with _RECORDS_CACHE_READY:
         _RECORDS_CACHE["rows"] = rows
         _RECORDS_CACHE["built_at"] = _time.monotonic()
+        _RECORDS_CACHE["dirty"] = _RECORDS_CACHE["generation"] != generation
         _RECORDS_CACHE["building"] = False
+        _RECORDS_CACHE_READY.notify_all()
     return rows
 
 
 def _refresh_records_cache_in_background() -> None:
-    with _RECORDS_CACHE_LOCK:
-        if _RECORDS_CACHE["building"]:
-            return
-        _RECORDS_CACHE["building"] = True
+    if not _claim_records_build():
+        return
 
     def _work():
         from .db import SessionLocal
         session = SessionLocal()
         try:
             _build_records_cache(session)
-        except Exception:  # noqa: BLE001 - the stale copy stays served
-            with _RECORDS_CACHE_LOCK:
-                _RECORDS_CACHE["building"] = False
+        except Exception:  # noqa: BLE001 - the last copy stays; the next read rebuilds
+            pass
         finally:
             session.close()
-    threading.Thread(target=_work, name="records-cache", daemon=True).start()
+    try:
+        threading.Thread(target=_work, name="records-cache", daemon=True).start()
+    except BaseException:
+        # A thread that never started must not leave "building" latched,
+        # or every later read would wait on a build that does not exist.
+        _release_records_build()
+        raise
+
+
+def _records_cache_state() -> tuple:
+    with _RECORDS_CACHE_LOCK:
+        return (_RECORDS_CACHE["rows"], _RECORDS_CACHE["dirty"],
+                _time.monotonic() - _RECORDS_CACHE["built_at"])
 
 
 def _all_tstation_rows(db) -> list[dict]:
-    """The complete record set, cached. A fresh copy is built synchronously
-    only when nothing is cached yet; a stale copy is served at once and
-    rebuilt behind the reader."""
-    if RECORDS_CACHE_SECONDS <= 0 or (os.environ.get("PYTEST_CURRENT_TEST")
-                                      and not _RECORDS_CACHE.get("test_enabled")):
+    """The complete record set (before dedupe), cached.
+
+    A copy that is merely old (past the time bound, nothing written in this
+    process) is served at once and rebuilt behind the reader: the sweep
+    writes from another process and the bound covers it. A copy made stale
+    by a write in this process is never served: the reader waits for the
+    one rebuild in flight, or builds it, so the read after an edit shows
+    the edit. Under pytest the cache is off unless a test opts in, and an
+    opted-in test rebuilds inline rather than leaking a thread."""
+    testing = bool(os.environ.get("PYTEST_CURRENT_TEST"))
+    if RECORDS_CACHE_SECONDS <= 0 or (testing and not _RECORDS_CACHE.get("test_enabled")):
         # Tests seed and mutate state inside one request sequence, in every
         # runtime mode they emulate; they read the truth each time unless a
         # test opts into the cache explicitly.
         return _build_tstation_rows(db)
-    with _RECORDS_CACHE_LOCK:
-        rows = _RECORDS_CACHE["rows"]
-        age = _time.monotonic() - _RECORDS_CACHE["built_at"]
-    if rows is None:
-        return _build_records_cache(db)
-    if age > RECORDS_CACHE_SECONDS:
-        _refresh_records_cache_in_background()
-    return rows
+    rows, dirty, age = _records_cache_state()
+    if rows is not None and not dirty:
+        if age > RECORDS_CACHE_SECONDS:
+            if testing:
+                return _build_records_cache(db) if _claim_records_build() else rows
+            _refresh_records_cache_in_background()
+        return rows
+    waited_until = _time.monotonic() + RECORDS_CACHE_WAIT_SECONDS
+    for _attempt in range(3):
+        if _claim_records_build():
+            return _build_records_cache(db)
+        with _RECORDS_CACHE_READY:
+            while _RECORDS_CACHE["building"] and _time.monotonic() < waited_until:
+                _RECORDS_CACHE_READY.wait(timeout=1.0)
+            rows, dirty = _RECORDS_CACHE["rows"], _RECORDS_CACHE["dirty"]
+            still_building = _RECORDS_CACHE["building"]
+        if rows is not None and not dirty:
+            return rows
+        if still_building:
+            # The build in flight has outlived the wait bound: answer from
+            # the database directly rather than never.
+            return _build_tstation_rows(db)
+    return _build_tstation_rows(db)
+
+
+# Engine and intake writers commit answer rows from request threads and
+# background threads alike (a cold lookup, the ground-on-access recheck,
+# the after-cold-answer recheck, an intake resolution). None of them pass
+# through the operator-write middleware, so the commit itself is the
+# invalidation: a flush that touches a table the record builder reads marks
+# the session, and its commit marks the cache stale.
+_RECORDS_SOURCE_MODELS = None
+
+
+def _records_source_models():
+    global _RECORDS_SOURCE_MODELS
+    if _RECORDS_SOURCE_MODELS is None:
+        from .visa_snapshot.models import (DatabaseChangeLog, DatabaseIssueReport,
+                                           KimiRouteGuidanceCache)
+        _RECORDS_SOURCE_MODELS = (KimiRouteGuidanceCache, DatabaseIssueReport, DatabaseChangeLog)
+    return _RECORDS_SOURCE_MODELS
+
+
+def _records_flush(session, _flush_context) -> None:
+    try:
+        models_ = _records_source_models()
+        if any(isinstance(obj, models_) for obj in (*session.new, *session.dirty, *session.deleted)):
+            session.info["records_cache_dirty"] = True
+    except Exception:  # noqa: BLE001 - a bookkeeping hook must never break a write
+        pass
+
+
+def _records_commit(session) -> None:
+    try:
+        if session.info.pop("records_cache_dirty", False):
+            invalidate_records_cache()
+            _refresh_records_cache_in_background_if_warm()
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _records_rollback(session) -> None:
+    session.info.pop("records_cache_dirty", None)
+
+
+from sqlalchemy import event as _sa_event  # noqa: E402
+from sqlalchemy.orm import Session as _SASession  # noqa: E402
+_sa_event.listen(_SASession, "after_flush", _records_flush)
+_sa_event.listen(_SASession, "after_commit", _records_commit)
+_sa_event.listen(_SASession, "after_rollback", _records_rollback)
 
 
 def _tstation_rows(db, *, nationality: str = "", destination: str = "",
@@ -1485,38 +1619,20 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
             continue
         if confidence and str(rec.get("confidence_level") or "").lower() != confidence.strip().lower():
             continue
-        # A copy per read: callers annotate and re-shape records, and the
-        # cached set must stay exactly what the builder produced.
-        out.append(dict(rec))
-    return out
+        out.append(rec)
+    # Filters first, then one row per product: the cached set is kept before
+    # dedupe because the dedupe key does not carry confidence or requirement,
+    # and a filter over deduped rows would drop the row the filter asked for
+    # when a sibling variant had outranked it.
+    # A copy per read: callers annotate and re-shape records, and the cached
+    # set must stay exactly what the builder produced.
+    return [dict(rec) for rec in _dedupe_dataset_rows(out)]
 
 
 def _build_tstation_rows(db):
-    from .visa_snapshot.registry import iso3
-    from .visa_snapshot import kimi_primary as _kp
-    nationality = destination = purpose = document = requirement = confidence = ""
-
-    def _resolve(term: str) -> str:
-        # The spot-check accepts "China", "CHN", "CN" and Chinese names like
-        # 中国: the registry first, then the ask box's alias table (which
-        # carries the Chinese country names). An unresolvable term keeps its
-        # literal form and simply matches nothing.
-        term = re.sub(r"^[^\w\u4e00-\u9fff]+", "", term.strip())
-        got = iso3(term, default=None)
-        if got:
-            return got
-        low = term.lower()
-        for code, names in getattr(_kp, "_ALIASES", {}).items():
-            if low in names or term in names:
-                return code
-        return term.upper()
-    if nationality:
-        nationality = _resolve(nationality)
-    if destination:
-        destination = _resolve(destination)
-    """Every served answer as Trip.com 25-field records, filters combined —
-    their "multi-dimensional spot check": slice by station (the nationality a
-    T-site serves), passport type, destination, visa requirement, field."""
+    """Every served answer as Trip.com 25-field records, unfiltered and not
+    yet deduplicated: the set the record cache holds. _tstation_rows slices
+    it and reduces it to one row per product."""
     from sqlalchemy import select as _select
     from .visa_snapshot import kimi_primary, verified_overrides, tstation
     from .visa_snapshot.models import KimiRouteGuidanceCache
@@ -1529,12 +1645,6 @@ def _build_tstation_rows(db):
         if not kimi_primary.is_canonical_key(r.cache_key or ""):
             continue
         route = dict(r.route or {})
-        if nationality and str(route.get("passport_nationality") or "").upper() != nationality.upper():
-            continue
-        if destination and str(route.get("destination_country") or "").upper() != destination.upper():
-            continue
-        if purpose and str(route.get("travel_purpose") or "tourism").lower() != purpose.lower():
-            continue
         doc = str(route.get("travel_document_type") or "")
         if not doc:
             # Rows cached before the document type was stored carry it only
@@ -1543,8 +1653,6 @@ def _build_tstation_rows(db):
                         if part.startswith("doc:")), "ordinary_passport")
         doc = kimi_primary.normalize_document_type(doc)
         route["travel_document_type"] = doc
-        if document and doc != document:
-            continue
         gkey = (str(route.get("passport_nationality") or "").upper(),
                 str(route.get("destination_country") or "").upper(),
                 str(route.get("travel_purpose") or "tourism").lower(), doc)
@@ -1602,11 +1710,6 @@ def _build_tstation_rows(db):
                     rec["source_url"] = portal
                     rec["data_source"] = (rec.get("data_source")
                                           or "Official portal (reference only)")
-            if requirement and str(rec.get("visa_requirement") or "") != requirement:
-                continue
-            if confidence and str(rec.get("confidence_level") or "").lower() \
-                    != confidence.strip().lower():
-                continue
             rec["_cache_key"] = r.cache_key
             rec["_status"] = kimi_primary.STATUS_UNCERTAIN if _problems else r.status
             rec["_contradictions"] = _problems
@@ -1645,7 +1748,7 @@ def _build_tstation_rows(db):
             else:
                 rec["_source_check"] = "unchecked"
             out.append(rec)
-    return _dedupe_dataset_rows(out)
+    return out
 
 
 def _dedupe_dataset_rows(rows: list[dict]) -> list[dict]:

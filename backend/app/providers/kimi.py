@@ -218,13 +218,10 @@ class KimiHttpError(Exception):
 
 def _scrub(message) -> str:
     """Keep a provider message readable for an operator, never a secret:
-    anything that looks like a key or bearer token is replaced."""
-    import re as _re
-    text = str(message or "")[:240]
-    text = _re.sub(r"(?i)bearer\s+[A-Za-z0-9._\-]+", "bearer <redacted>", text)
-    text = _re.sub(r"\b(?:sk|ak)-[A-Za-z0-9]{8,}\b", "<redacted>", text)
-    text = _re.sub(r"<[^<>]*(?:sk|ak)-[A-Za-z0-9]{6,}[^<>]*>", "<redacted>", text)
-    return text
+    the one redaction rule of provider_errors decides what a key looks like,
+    so this message and the diagnostics envelope can never disagree."""
+    from ..provider_errors import redact_diagnostic
+    return redact_diagnostic(str(message or ""), limit=240)
 
 
 def _http_error(response) -> KimiHttpError:

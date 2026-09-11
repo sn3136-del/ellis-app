@@ -282,3 +282,37 @@ def test_a_suspended_provider_stops_the_cycle_and_names_the_reason(sweep, monkey
         assert plan is not None and plan["cycle_started_at"], "a suspended cycle resumes inside its own budget"
     finally:
         kp.clear_provider_suspension()
+
+
+def test_a_rate_gate_stuck_at_its_cap_stops_the_cycle_like_a_suspension(sweep, monkeypatch):
+    """When every 429 has doubled the gate up to its cap and the account is
+    still refusing, the remaining routes would each time out against a
+    closed gate. The cycle stops with its own state, exits non-zero and
+    resumes next run, the same as an account suspension."""
+    rows = [SimpleNamespace(cache_key=str(i), route={}, guidance={"disposition": "VISA_REQUIRED"}, verification={}) for i in range(6)]
+    setup(monkeypatch, rows)
+    kp.clear_provider_suspension()
+    kp._rate_gate_clear()
+    attempted = []
+
+    def check(_db, row, **_kwargs):
+        attempted.append(row.cache_key)
+        for _ in range(6):
+            kp._rate_gate_hit()
+        return {"outcome": "provider_error"}
+    monkeypatch.setattr(freshness, "recheck_row", check)
+    try:
+        assert kp.rate_gate_saturated() is False
+        assert sweep.main() == 1
+        status = freshness.read_sweep_status()
+        assert status["state"] == "rate_limited"
+        assert "rate limit" in status["provider_notice"]
+        assert status["provider_rate_limited"] >= 1 and status["provider_failed"] >= 1
+        assert status["provider_suspended"] == 0 and status["verified"] == 0
+        assert len(attempted) < 6, "dispatch stopped before every route failed the same way"
+        from datetime import datetime, timezone
+        plan = sweep._continuation(status, datetime.now(timezone.utc))
+        assert plan is not None and plan["cycle_started_at"], "a rate-limited cycle resumes inside its own budget"
+    finally:
+        kp._rate_gate_clear()
+        kp.clear_provider_suspension()

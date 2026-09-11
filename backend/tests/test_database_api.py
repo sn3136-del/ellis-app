@@ -835,3 +835,146 @@ def test_the_record_browser_is_served_from_a_cache_that_writes_invalidate(client
     served = client.get("/database/records", headers=OTHER_ORG_ADMIN).json()["records"][0]
     assert served["travel_document_country"] == cached["travel_document_country"]
     assert builds["n"] == 2
+
+
+def test_the_read_after_an_edit_shows_the_edit_never_the_cached_rows(client, monkeypatch):
+    """Review finding on ops20260911a: invalidation only zeroed the age, so
+    the first read after an operator edit still served the pre-edit set and
+    rebuilt behind it (fee edited to 137, next read showed 100). A write now
+    marks the set stale and the next read waits for one rebuild."""
+    from app import main as m
+    _provide(ANSWER)
+    look = client.post("/database/lookup", headers=READER,
+                       json={"nationality": "ISL", "destination": "FSM"}).json()
+    monkeypatch.setattr(m, "RECORDS_CACHE_SECONDS", 3600.0)
+    monkeypatch.setitem(m._RECORDS_CACHE, "test_enabled", True)
+    monkeypatch.setitem(m._RECORDS_CACHE, "rows", None)
+    monkeypatch.setitem(m._RECORDS_CACHE, "dirty", False)
+    before = client.get("/database/records?nationality=ISL&destination=FSM", headers=OTHER_ORG_ADMIN).json()["records"]
+    assert before
+    # Operator overrides persist in a file across runs, so the edit uses a
+    # fee no earlier run can have left behind.
+    new_fee = int(before[0]["visa_fee_amount"] or 0) + 37
+    fields = {"disposition": "VISA_REQUIRED", "requirement_detail": "paper_visa",
+              "government_fee": {"amount": new_fee, "currency": "USD"},
+              "visa_products": [dict(p, fee={"amount": new_fee, "currency": "USD"}) for p in ANSWER["visa_products"]]}
+    edited = client.post("/database/records/edit", headers=OTHER_ORG_ADMIN, json={
+        "nationality": "ISL", "destination": "FSM", "fields": fields,
+        "source_url": ANSWER["source_url"], "note": f"Fixture source establishes the corrected {new_fee} USD fee."})
+    assert edited.status_code == 200, edited.text
+    with m._RECORDS_CACHE_LOCK:
+        assert m._RECORDS_CACHE["dirty"] is True, "the write marked the set stale"
+    after = client.get("/database/records?nationality=ISL&destination=FSM", headers=OTHER_ORG_ADMIN).json()["records"]
+    assert after and all(r["visa_fee_amount"] == new_fee for r in after), "the very next read shows the edit"
+    with m._RECORDS_CACHE_LOCK:
+        assert m._RECORDS_CACHE["dirty"] is False and m._RECORDS_CACHE["rows"] is not None
+
+
+def test_an_engine_commit_from_any_session_invalidates_the_record_cache(client, monkeypatch):
+    """The background rechecks and the intake writers commit answer rows
+    from their own sessions, never through the operator-write middleware.
+    The commit itself marks the cache stale; a rollback does not."""
+    from app import main as m
+    from app.db import SessionLocal
+    from app.visa_snapshot.models import KimiRouteGuidanceCache
+    _provide(ANSWER)
+    look = client.post("/database/lookup", headers=READER,
+                       json={"nationality": "ISL", "destination": "FSM"}).json()
+    monkeypatch.setattr(m, "RECORDS_CACHE_SECONDS", 3600.0)
+    monkeypatch.setitem(m._RECORDS_CACHE, "test_enabled", True)
+    monkeypatch.setitem(m._RECORDS_CACHE, "rows", None)
+    monkeypatch.setitem(m._RECORDS_CACHE, "dirty", False)
+    builds = {"n": 0}
+    real_builder = m._build_tstation_rows
+
+    def counted(db):
+        builds["n"] += 1
+        return real_builder(db)
+    monkeypatch.setattr(m, "_build_tstation_rows", counted)
+    client.get("/database/records", headers=OTHER_ORG_ADMIN)
+    assert builds["n"] == 1
+    session = SessionLocal()
+    try:
+        row = session.query(KimiRouteGuidanceCache).filter_by(cache_key=look["cache_key"]).one()
+        row.model = "rolled-back-model"
+        session.flush()
+        session.rollback()
+        with m._RECORDS_CACHE_LOCK:
+            assert m._RECORDS_CACHE["dirty"] is False, "a rolled-back flush changes nothing"
+        row = session.query(KimiRouteGuidanceCache).filter_by(cache_key=look["cache_key"]).one()
+        row.model = "background-recheck-model"
+        session.commit()
+    finally:
+        session.close()
+    with m._RECORDS_CACHE_LOCK:
+        assert m._RECORDS_CACHE["dirty"] is True, "a committed answer row marks the set stale"
+    client.get("/database/records", headers=OTHER_ORG_ADMIN)
+    assert builds["n"] == 2
+    # A read-shaped POST (a traveller's lookup) does not rebuild the set on
+    # its own; only a committed row does.
+    client.post("/database/lookup", headers=READER, json={"nationality": "ISL", "destination": "FSM"})
+    client.get("/database/records", headers=OTHER_ORG_ADMIN)
+    assert builds["n"] == 2
+
+
+def test_record_filters_run_before_dedupe_so_a_confidence_slice_keeps_its_rows(monkeypatch):
+    """Review finding on ops20260911a: the cached set was deduplicated before
+    the filters ran, and the dedupe key carries neither confidence nor
+    source check, so ?confidence=Low lost the row a higher-ranked sibling
+    variant had outranked."""
+    from app import main as m
+    identity = {"travel_document_country": "ISL", "destination_country": "FSM",
+                "travel_purpose": "tourism", "travel_document_type": "ordinary_passport",
+                "visa_type_name": "Tourist visa", "visa_requirement": "VISA_REQUIRED"}
+    strong = dict(identity, confidence_level="High", _source_check="human-quote", visa_fee_amount=100)
+    weak = dict(identity, confidence_level="Low", _source_check="unchecked", visa_fee_amount=100)
+    monkeypatch.setattr(m, "_all_tstation_rows", lambda db: [strong, weak])
+    everything = m._tstation_rows(None)
+    assert len(everything) == 1 and everything[0]["confidence_level"] == "High", "one row per product, best evidence wins"
+    low = m._tstation_rows(None, confidence="Low")
+    assert len(low) == 1 and low[0]["confidence_level"] == "Low", "the filter sees the row it asked for"
+    assert m._tstation_rows(None, requirement="VISA_EXEMPT") == []
+    low[0]["visa_fee_amount"] = 1
+    assert weak["visa_fee_amount"] == 100, "records handed out are copies"
+
+
+def test_readers_share_one_rebuild_and_a_stale_test_copy_rebuilds_inline(monkeypatch):
+    """Several readers arriving while the set is stale wait for the one
+    rebuild in flight instead of each starting their own; under pytest a
+    copy past its time bound rebuilds inline, leaking no thread."""
+    import threading as _th
+    from app import main as m
+    builds = {"n": 0}
+
+    def slow_builder(db):
+        builds["n"] += 1
+        m._time.sleep(0.3)
+        return [{"visa_type_name": "x", "build": builds["n"]}]
+    monkeypatch.setattr(m, "_build_tstation_rows", slow_builder)
+    monkeypatch.setattr(m, "RECORDS_CACHE_SECONDS", 3600.0)
+    monkeypatch.setitem(m._RECORDS_CACHE, "test_enabled", True)
+    monkeypatch.setitem(m._RECORDS_CACHE, "rows", [{"visa_type_name": "stale"}])
+    monkeypatch.setitem(m._RECORDS_CACHE, "dirty", True)
+    monkeypatch.setitem(m._RECORDS_CACHE, "building", False)
+    got = []
+    threads = [_th.Thread(target=lambda: got.append(m._all_tstation_rows(None))) for _ in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=10)
+    assert builds["n"] == 1 and len(got) == 4 and all(rows[0]["build"] == 1 for rows in got)
+    # A copy that is merely old rebuilds inline in the test runtime.
+    monkeypatch.setitem(m._RECORDS_CACHE, "built_at", m._time.monotonic() - 7200)
+    assert m._all_tstation_rows(None)[0]["build"] == 2
+    assert not any(t.name == "records-cache" for t in _th.enumerate())
+    # A write that lands during a build keeps the result stale.
+    monkeypatch.setitem(m._RECORDS_CACHE, "dirty", True)
+
+    def writing_builder(db):
+        builds["n"] += 1
+        m.invalidate_records_cache()
+        return [{"visa_type_name": "x", "build": builds["n"]}]
+    monkeypatch.setattr(m, "_build_tstation_rows", writing_builder)
+    m._all_tstation_rows(None)
+    with m._RECORDS_CACHE_LOCK:
+        assert m._RECORDS_CACHE["dirty"] is True and m._RECORDS_CACHE["building"] is False

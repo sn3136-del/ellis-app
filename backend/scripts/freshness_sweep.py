@@ -31,7 +31,8 @@ DUE_AFTER_HOURS = 0.25  # exclude only very recent on-demand duplicate reads
 _COUNTS = ("attempted", "read", "verified", "renewed", "partial", "corrected", "disputed",
            "unreadable", "skipped_pending", "deferred", "errors", "insufficient_evidence",
            "provider_failed", "no_official_source", "source_reads", "source_fetch_failures",
-           "model_comparisons", "model_comparisons_reused", "provider_suspended")
+           "model_comparisons", "model_comparisons_reused", "provider_suspended",
+           "provider_rate_limited")
 
 
 def _utc():
@@ -72,7 +73,8 @@ def _continuation(previous, now):
     state = previous.get('state')
     finished_with_backlog = (state in {'complete', 'complete_with_errors'}
                              and _positive_backlog(previous))
-    if state not in {'running', 'interrupted', 'failed', 'budget_exhausted', 'provider_suspended'} \
+    if state not in {'running', 'interrupted', 'failed', 'budget_exhausted', 'provider_suspended',
+                     'rate_limited'} \
             and not finished_with_backlog:
         return None
     if previous.get('schema_version') not in (2, 3):
@@ -200,6 +202,15 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
             if suspended:
                 delta["provider_suspended"] = 1
                 delta["provider_notice"] = suspended.get("reason") or "provider account suspended"
+            elif kimi_primary.rate_gate_saturated():
+                # The rate gate has doubled up to its cap and is still
+                # closed: the account's limit is not clearing within a
+                # route's budget, so the rest of the cycle would only time
+                # out route after route. Stop like a suspension and resume
+                # next run.
+                delta["provider_rate_limited"] = 1
+                delta["provider_notice"] = ("AI provider rate limit persisted at the "
+                                            f"{int(kimi_primary.RATE_GATE_MAX_SECONDS)} second cap")
         elif outcome == "no_official_source":
             delta["no_official_source"] = 1
         delta["corrected"] = int(bool(report.get("changed")))
@@ -264,11 +275,11 @@ def _run_workers(keys: list[str], deadline: float, stop: threading.Event, status
                         "message": type(exc).__name__ + ": " + str(exc)[:250], "at": _utc()}}
                 for counter in _COUNTS:
                     status[counter] += delta.get(counter, 0)
-                if delta.get("provider_suspended") and not stop.is_set():
-                    # Stop dispatching: the provider account is suspended.
-                    # Routes not attempted stay due and are picked up by the
-                    # next cycle after the account is recharged.
-                    status["state"] = "provider_suspended"
+                if (delta.get("provider_suspended") or delta.get("provider_rate_limited")) and not stop.is_set():
+                    # Stop dispatching: the provider account is suspended, or
+                    # its rate limit is not clearing. Routes not attempted
+                    # stay due and are picked up by the next cycle.
+                    status["state"] = "provider_suspended" if delta.get("provider_suspended") else "rate_limited"
                     status["provider_notice"] = str(delta.get("provider_notice") or
                                                     "provider account suspended")[:240]
                     status["provider_suspended_at"] = _utc()
@@ -384,7 +395,7 @@ def main() -> int:
             if status["state"] == "running":
                 status["state"] = ("interrupted" if stop.is_set() else
                     "complete_with_errors" if status["errors"] else "complete")
-            if status["errors"] or status["state"] in {"failed", "interrupted", "provider_suspended"}:
+            if status["errors"] or status["state"] in {"failed", "interrupted", "provider_suspended", "rate_limited"}:
                 # A suspended provider exits non-zero on purpose: systemd
                 # records the failure, which is the alert an operator sees.
                 result = 1
