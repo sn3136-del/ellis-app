@@ -558,8 +558,6 @@ def test_verdict_rules_still_refuse_unnamed_or_contrary_sentences(sentence, nat)
     ('VISA_EXEMPT', ['a US national or permanent resident', 'You don’t need a visa or an eTA to travel to Canada if you are one of the following:'], 'USA'),
     # "do not need to apply for a visa".
     ('VISA_EXEMPT', ['Japanese Nationals do not need to apply for a visa to travel to Singapore for leisure/business.'], 'JPN'),
-    # "generally not required" with an unrelated category exception.
-    ('VISA_EXEMPT', ['A visa is generally not required for Canadian citizens, except those Canadians that fall under nonimmigrant visa categories E, K, S, or V as provided in paragraphs (h), (l), and (m) of this section and 22 CFR 41.2.'], 'CAN'),
     # A long comma-separated list line beside a "following countries" sentence.
     ('VISA_EXEMPT', ['Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia',
                      'Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*.'], 'ESP'),
@@ -665,6 +663,10 @@ def test_verdict_rules_read_official_wording_from_the_station_batch(value, quote
     ('VISA_ON_ARRIVAL', ['Visa on arrival for US citizens: $25'], 'USA'),
     # A price row lends its buyer to no universal sentence after it.
     ('VISA_REQUIRED', ['Visa fee for USA nationals: $50. All visitors must obtain a visa before arrival.'], 'USA'),
+    # An exception clause the converter reads only in part ("those Canadians that fall under nonimmigrant
+    # visa categories E, K, S, or V") carves the nationality out of the rule it cannot finish reading
+    # (round three): the row is refused rather than proved from half a sentence.
+    ('VISA_EXEMPT', ['A visa is generally not required for Canadian citizens, except those Canadians that fall under nonimmigrant visa categories E, K, S, or V as provided in paragraphs (h), (l), and (m) of this section and 22 CFR 41.2.'], 'CAN'),
 ])
 def test_verdict_rules_still_refuse_unnamed_grouped_or_borrowed_sentences(value, quotes, nat):
     from scripts.convert_reviewed_general_batch import _decision_supported
@@ -1072,11 +1074,12 @@ def test_a_territory_word_elsewhere_in_the_sentence_still_leaves_the_nationality
     assert _decision_supported('VISA_REQUIRED', [quote], nat)
 
 
-def test_a_dropped_field_proof_becomes_an_explicit_unknown_and_is_reported():
-    """CAN|CAN|ESP dropped application_channel and the served layer kept the
-    prior value with its prior provenance; USA|USA|ZAF dropped it over an
-    empty prior and left no trace. A failed proof now serves the field as
-    null with the rejection reason, and the conversion report lists it."""
+def test_a_dropped_field_proof_leaves_the_prior_value_and_provenance_and_is_reported():
+    """Round two blanked every cell whose new proof failed, and round three
+    measured 175 correct prior fields erased across 76 kept rows (CAN|CAN|KOR
+    lost its K-ETA channel, detail and portal URL). A failed proof asserts
+    nothing: the prior layer's value and its prior provenance stand, the
+    report lists the drop, and with no prior the field is simply absent."""
     good = batch()
     prior_overlay, _ = convert(build_manifest(good, [layer()]), [layer()])
     prior = prior_overlay['entries'][0]
@@ -1090,22 +1093,70 @@ def test_a_dropped_field_proof_becomes_an_explicit_unknown_and_is_reported():
     _, accepted, rejected = validate_batch(b, strict=False)
     assert rejected == [] and len(accepted) == 1
     fee_proof = accepted[0]['route_field_proofs']['government_fee']
-    assert fee_proof['status'] == 'unknown' and 'fee amount is not in its evidence' in fee_proof['reason']
+    assert fee_proof['status'] == 'unknown' and fee_proof['dropped'] and 'fee amount is not in its evidence' in fee_proof['reason']
     time_proof = accepted[0]['route_field_proofs']['processing_time']
-    assert time_proof['status'] == 'unknown' and 'a value without a proof' in time_proof['reason']
-    for current in (with_prior, layer()):
-        overlay, reports = convert(build_manifest(b, [current]), [current])
-        fields = overlay['entries'][0]['fields']
-        provenance = overlay['entries'][0]['field_provenance']
-        assert fields['government_fee'] is None and fields['processing_time'] is None
-        assert provenance['government_fee']['status'] == 'unknown'
-        assert 'fee amount is not in its evidence' in provenance['government_fee']['reason']
-        assert provenance['processing_time']['status'] == 'unknown'
-        assert 'a value without a proof' in provenance['processing_time']['reason']
-        assert any(d.startswith('government_fee: the fee amount is not in its evidence') for d in reports[0]['dropped'])
-        assert any(d.startswith('processing_time: a value without a proof') for d in reports[0]['dropped'])
-        # The proved values are still served.
-        assert fields['permitted_stay_days'] == 90
+    assert time_proof['status'] == 'unknown' and time_proof['dropped'] and 'a value without a proof' in time_proof['reason']
+    # With a prior: the prior value and the prior review's provenance survive untouched.
+    overlay, reports = convert(build_manifest(b, [with_prior]), [with_prior])
+    fields = overlay['entries'][0]['fields']
+    provenance = overlay['entries'][0]['field_provenance']
+    assert fields['government_fee'] == {'amount': 25, 'currency': 'USD'}
+    assert fields['processing_time'] == '3 working days'
+    assert provenance['government_fee'] == prior['field_provenance']['government_fee']
+    assert provenance['processing_time'] == prior['field_provenance']['processing_time']
+    assert provenance['government_fee']['status'] == 'reviewed'
+    assert any(d.startswith('government_fee: the fee amount is not in its evidence') for d in reports[0]['dropped'])
+    assert any(d.startswith('processing_time: a value without a proof') for d in reports[0]['dropped'])
+    # Without a prior: nothing is asserted and nothing is invented.
+    overlay, reports = convert(build_manifest(b, [layer()]), [layer()])
+    fields = overlay['entries'][0]['fields']
+    assert fields.get('government_fee') is None and fields.get('processing_time') is None
+    assert 'government_fee' not in overlay['entries'][0]['field_provenance']
+    assert 'processing_time' not in overlay['entries'][0]['field_provenance']
+    assert any(d.startswith('government_fee: the fee amount is not in its evidence') for d in reports[0]['dropped'])
+    # The proved values are still served either way.
+    assert fields['permitted_stay_days'] == 90
+
+
+def test_a_dropped_proof_keeps_the_prior_not_published_state():
+    """A cell the earlier review marked not published stays so when a later
+    proof for it fails: the drop must not degrade it to a plain blank."""
+    first = batch()
+    first['rows'][0]['route_fields']['processing_time'] = None
+    first['rows'][0]['route_field_proofs']['processing_time'] = proof(
+        status='not_published', reason='No processing time is published.')
+    prior_overlay, _ = convert(build_manifest(first, [layer()]), [layer()])
+    prior = prior_overlay['entries'][0]
+    assert 'processing_min_days' in prior['fields']['unpublished_fields']
+    later = batch()
+    later['rows'][0]['route_field_proofs']['processing_time']['evidence'][0] = {
+        'source_id': 's1', 'source_url': URL, 'quote': 'Vietnam E-visa is valid for maximum of 90 days'}
+    current = layer(seed_entries=[prior])
+    overlay, reports = convert(build_manifest(later, [current]), [current])
+    fields = overlay['entries'][0]['fields']
+    assert fields['processing_time'] is None
+    assert 'processing_min_days' in fields['unpublished_fields']
+    from scripts.convert_reviewed_general_batch import _prior
+    stored = _prior(current, ROUTE)['field_provenance']['processing_time']
+    assert overlay['entries'][0]['field_provenance']['processing_time'] == stored
+    assert stored['status'] == 'unknown' and 'dropped' not in stored
+    assert any(d.startswith('processing_time:') for d in reports[0]['dropped'])
+
+
+def test_only_an_explicit_reviewer_unknown_blanks_a_prior_value():
+    """The reviewer's own unknown or not_published proof is the one thing
+    that empties a field the earlier review had filled."""
+    good = batch()
+    prior_overlay, _ = convert(build_manifest(good, [layer()]), [layer()])
+    current = layer(seed_entries=[prior_overlay['entries'][0]])
+    later = batch()
+    later['rows'][0]['route_fields']['processing_time'] = None
+    later['rows'][0]['route_field_proofs']['processing_time'] = proof(status='unknown', reason='Not checked this round.')
+    overlay, _ = convert(build_manifest(later, [current]), [current])
+    fields = overlay['entries'][0]['fields']
+    provenance = overlay['entries'][0]['field_provenance']
+    assert fields['processing_time'] is None
+    assert provenance['processing_time']['status'] == 'unknown' and 'dropped' not in provenance['processing_time']
 
 
 def test_a_row_without_a_proof_table_still_records_its_dropped_value():
@@ -1115,8 +1166,10 @@ def test_a_row_without_a_proof_table_still_records_its_dropped_value():
     row['route_fields'] = {'processing_time': '3 working days'}
     _, accepted, _ = validate_batch(b, strict=False)
     assert accepted[0]['route_field_proofs']['processing_time']['status'] == 'unknown'
+    assert accepted[0]['route_field_proofs']['processing_time']['dropped']
     overlay, reports = convert(build_manifest(b, [layer()]), [layer()])
-    assert overlay['entries'][0]['fields']['processing_time'] is None
+    assert overlay['entries'][0]['fields'].get('processing_time') is None
+    assert 'processing_time' not in overlay['entries'][0]['field_provenance']
     assert reports[0]['dropped'] == ['processing_time: a value without a proof']
 
 
@@ -1190,3 +1243,457 @@ def test_a_demonym_stem_does_not_swallow_a_place_or_person_name(quote, nat):
 def test_the_retired_stems_inflected_forms_are_still_named(quote, nat):
     from scripts.convert_reviewed_general_batch import _named
     assert _named(quote, nat)
+
+
+# Round-three review regressions. Every sentence below is one the review
+# executed against the converter at 8051e48 and found proving the wrong
+# verdict. Each case is refused now and the positive shape beside it still
+# reads.
+
+def supported(value, quotes, nat, **kw):
+    from scripts.convert_reviewed_general_batch import _decision_supported
+    explain = []
+    ok = _decision_supported(value, quotes, nat, explain=explain, **kw)
+    return ok, explain
+
+
+@pytest.mark.parametrize('quote,nat', [
+    ('EU citizens do not need a visa, with the exception of Bulgarian nationals.', 'BGR'),
+    ('EU citizens do not need a visa, apart from Bulgarian nationals.', 'BGR'),
+    ('EU citizens do not need a visa, aside from Bulgarian nationals.', 'BGR'),
+    ("Les ressortissants de l'Union européenne sont dispensés de visa, à l'exception des Bulgares et des Roumains.", 'BGR'),
+    ("Les ressortissants de l'Union européenne sont dispensés de visa, à l'exception des Bulgares et des Roumains.", 'ROU'),
+    ("Les ressortissants de l'Union européenne sont dispensés de visa, hormis les Roumains.", 'ROU'),
+    ('Los ciudadanos de la Unión Europea están exentos de visado, con excepción de los búlgaros.', 'BGR'),
+    ('EU-Bürger benötigen kein Visum, mit Ausnahme von Bulgarien und Rumänien.', 'BGR'),
+    ('EU-Bürger benötigen kein Visum, mit Ausnahme von Bulgarien und Rumänien.', 'ROU'),
+    ('EU-Bürger benötigen kein Visum, ausgenommen Rumänien.', 'ROU'),
+    ("I cittadini dell'Unione europea sono esenti dal visto, ad eccezione dei bulgari.", 'BGR'),
+    ('Os cidadãos da União Europeia estão isentos de visto, com exceção dos búlgaros.', 'BGR'),
+    ('Công dân ASEAN được miễn thị thực, ngoại trừ Bulgaria và Romania.', 'BGR'),
+    ('Warga negara Uni Eropa bebas visa, selain Bulgaria.', 'BGR'),
+    ('东盟国家公民免签，缅甸除外。', 'MMR'),
+    ('東南アジア諸国連合の国民はビザ免除ですが、ミャンマーを除く。', 'MMR'),
+    ('아세안 국민은 무비자입니다. 미얀마는 제외합니다.', 'MMR'),
+    # A clause the converter reads only in part carves out both names, whatever their length.
+    ('EU citizens do not need a visa, except Bulgarian and Romanian nationals holding non-biometric passports.', 'ROU'),
+    ('EU citizens do not need a visa, except Bulgarian and Romanian nationals holding non-biometric passports.', 'BGR'),
+])
+def test_every_exception_wording_carves_the_excepted_nationality_out_of_the_sentence(quote, nat):
+    from scripts.convert_reviewed_general_batch import _carved_out
+    sentence, _, following = quote.partition('. ')
+    assert _carved_out(sentence, nat, following or None)
+    ok, explain = supported('VISA_EXEMPT', [quote], nat)
+    assert not ok and any(e.startswith('carved out by name') for e in explain)
+
+
+def test_a_readable_exception_still_lets_the_other_members_through():
+    ok, explain = supported('VISA_EXEMPT', ['EU citizens do not need a visa, with the exception of Bulgarian nationals.'], 'ESP')
+    assert ok and explain[-1].startswith('group membership')
+    ok, explain = supported('VISA_EXEMPT', ['아세안 국민은 무비자입니다. 미얀마는 제외합니다.'], 'THA')
+    assert ok and explain[-1].startswith('group membership')
+    ok, explain = supported('VISA_EXEMPT', ['东盟国家公民免签，缅甸除外。'], 'THA')
+    assert ok and explain[-1].startswith('group membership')
+
+
+@pytest.mark.parametrize('quote,nat', [
+    # The excepted item is not a nationality the converter can name: nothing is proved for anyone, named or grouped.
+    ('Indian nationals do not need a visa, with the exception of holders of emergency travel documents.', 'IND'),
+    ('Les ressortissants indiens sont dispensés de visa, hormis les titulaires de documents de voyage provisoires.', 'IND'),
+    ('EU citizens do not need a visa, apart from those listed in the annex.', 'FRA'),
+    ('東南アジア諸国連合の国民はビザ免除ですが、外交旅券所持者を除く。', 'THA'),
+])
+def test_an_unreadable_exception_refuses_the_sentence_for_the_named_nationality_too(quote, nat):
+    from scripts.convert_reviewed_general_batch import _unreadable_exception
+    assert _unreadable_exception(quote) is not None
+    ok, explain = supported('VISA_EXEMPT', [quote], nat)
+    # "with the exception of holders of" also flips the exemption outright, so either gate refuses.
+    assert not ok and any('cannot be read' in e or e.startswith('flipped in the same sentence') for e in explain)
+
+
+def test_an_exception_clause_that_opens_a_list_is_the_rule_of_that_list():
+    """imi.gov.my: "...except for the following countries which do not require
+    a visa for any purpose of entry:" heads the exempt list. The clause proves
+    nothing by name or group, but the country line under it proves the
+    verdict the clause states."""
+    rule = 'EXCEPT for the following countries which do not require a visa for any purpose of entry:'
+    page = ('This visa facility is open to all foreign nationals who require a visa to enter Malaysia, ' + rule.lower() + '\n'
+            'No. | Country\n1. | South Africa\n2. | Australia\n3. | United Kingdom\n4. | Canada\n')
+    ok, explain = supported('VISA_EXEMPT', [rule, 'United Kingdom'], 'GBR', pages=[('p', page)] * 2)
+    assert ok and explain[-1].startswith('list line beside the rule sentence')
+    ok, _ = supported('VISA_REQUIRED', [rule, 'United Kingdom'], 'GBR', pages=[('p', page)] * 2)
+    assert not ok
+    ok, _ = supported('VISA_EXEMPT', [rule], 'GBR')
+    assert not ok
+
+
+@pytest.mark.parametrize('value,quote,nat', [
+    ('VISA_REQUIRED', 'Non-EU citizens must obtain a visa before travelling.', 'FRA'),
+    ('VISA_REQUIRED', 'Non-EU nationals are required to hold a visa.', 'FRA'),
+    ('VISA_REQUIRED', 'Citizens of non-EU countries need a visa.', 'FRA'),
+    ('VISA_REQUIRED', 'Les ressortissants hors Union européenne doivent obtenir un visa.', 'FRA'),
+    ('VISA_REQUIRED', 'Non-ASEAN nationals must obtain a visa.', 'THA'),
+    ('VISA_EXEMPT', 'Nicht-EU-Bürger benötigen kein Visum.', 'FRA'),
+    ('VISA_REQUIRED', 'Warga negara bukan ASEAN wajib memiliki visa.', 'THA'),
+    ('VISA_REQUIRED', '非东盟国家公民需要签证。', 'THA'),
+])
+def test_a_negated_group_names_everyone_but_its_members(value, quote, nat):
+    from scripts.convert_reviewed_general_batch import _group_named
+    assert not _group_named(quote, nat)
+    ok, _ = supported(value, [quote], nat)
+    assert not ok
+    assert _group_named('EU citizens do not need a visa.', 'FRA')
+
+
+@pytest.mark.parametrize('quote,nat', [
+    ('Visa-free entry for Indian nationals has been suspended with effect from 1 July 2026.', 'IND'),
+    ('The visa exemption agreement with China has been terminated.', 'CHN'),
+    ('La exención de visado para los ciudadanos españoles queda suspendida.', 'ESP'),
+    ('日本国民に対する査証免除措置は一時停止されています。', 'JPN'),
+    ('대한민국 국민에 대한 사증면제 조치가 중단되었습니다.', 'KOR'),
+    ('Việc miễn thị thực cho công dân Việt Nam đã bị tạm dừng.', 'VNM'),
+    ('Bebas visa bagi warga negara Indonesia telah dihentikan sementara.', 'IDN'),
+    ('การยกเว้นวีซ่าสำหรับคนไทยถูกระงับชั่วคราว', 'THA'),
+    ('Безвизовый режим для граждан России приостановлен.', 'RUS'),
+    ('Die Visumfreiheit für deutsche Staatsangehörige ist ausgesetzt.', 'DEU'),
+    ('Indian nationals were exempt from the visa requirement until the agreement was withdrawn.', 'IND'),
+    ('Indian nationals will be exempt from the visa requirement.', 'IND'),
+])
+def test_a_suspended_terminated_or_dated_out_exemption_is_not_an_exemption(quote, nat):
+    ok, explain = supported('VISA_EXEMPT', [quote], nat)
+    assert not ok and any(e.startswith('flipped in the same sentence') for e in explain)
+
+
+@pytest.mark.parametrize('value,quote,nat', [
+    ('VISA_ON_ARRIVAL', 'Visa on arrival for Indian nationals has been suspended until further notice.', 'IND'),
+    ('VISA_ON_ARRIVAL', '인도 국민에 대한 도착비자 발급이 중단되었습니다.', 'IND'),
+    ('ELECTRONIC_AUTHORIZATION_REQUIRED', 'The K-ETA requirement for Japanese nationals is temporarily suspended.', 'JPN'),
+    ('ELECTRONIC_AUTHORIZATION_REQUIRED', '일본 국민의 K-ETA 의무는 일시 중단되었습니다.', 'JPN'),
+])
+def test_suspension_also_flips_arrival_and_authorisation_verdicts(value, quote, nat):
+    ok, _ = supported(value, [quote], nat)
+    assert not ok
+
+
+def test_no_longer_reads_in_its_two_senses():
+    ok, _ = supported('VISA_EXEMPT', ['Indian nationals no longer need a visa for stays of up to 30 days.'], 'IND')
+    assert ok
+    ok, _ = supported('VISA_REQUIRED', ['A visa is no longer required for Indian nationals.'], 'IND')
+    assert not ok
+    ok, _ = supported('VISA_EXEMPT', ['Indian nationals are no longer visa-exempt.'], 'IND')
+    assert not ok
+
+
+@pytest.mark.parametrize('quote,nat,reason', [
+    ('From 1 January 2024 to 31 December 2024, United States nationals are exempt from the visa requirement.', 'USA', 'ended on 2024-12-31'),
+    ('中方决定对法国持普通护照人员试行免签政策，实施期限为2023年12月1日至2024年11月30日。', 'FRA', 'ended on 2024-11-30'),
+    ('From 1 January 2027, Indian nationals will be exempt from the visa requirement.', 'IND', 'starts on 2027-01-01'),
+    ('The visa exemption for Indian nationals applied until 30 June 2025.', 'IND', 'ended on 2025-06-30'),
+    ('对法国持普通护照人员的免签政策施行至2025年12月31日。', 'FRA', 'ended on 2025-12-31'),
+    ('单方面免签政策延期至2025年12月31日24时。', 'FRA', 'ended on 2025-12-31'),
+    ('2027년 1월 1일부터 대한민국 국민은 무비자 입국이 가능합니다.', 'KOR', 'starts on 2027-01-01'),
+])
+def test_an_expired_or_future_policy_window_proves_nothing_today(quote, nat, reason):
+    from scripts.convert_reviewed_general_batch import _window_violation
+    assert reason in (_window_violation([quote]) or '')
+    ok, explain = supported('VISA_EXEMPT', [quote], nat)
+    assert not ok and any(reason in e for e in explain)
+
+
+def test_a_current_window_must_be_recorded_by_the_reviewer():
+    """The three kept China rows quoted a sunset ("延期至2026年12月31日24时",
+    "From 00:00 on February 17, 2026 to 24:00 on December 31, 2026") and
+    recorded no bound. The end date, and the start of a full interval, must
+    be recorded to be served; a past start alone needs no record."""
+    from scripts.convert_reviewed_general_batch import _window_violation
+    british = ('From 00:00 on February 17, 2026 to 24:00 on December 31, 2026 (Beijing time), ordinary passport holders '
+               'from the UK and Canada can be exempted from visa to enter China and stay for up to 30 days.')
+    assert 'not recorded as effective_to' in _window_violation([british])
+    assert 'not recorded as effective_from' in _window_violation([british], {'effective_to': '2026-12-31'})
+    assert _window_violation([british], {'effective_from': '2026-02-17', 'effective_to': '2026-12-31'}) is None
+    assert 'not recorded as effective_to' in _window_violation(['为持续便利中外人员往来，中方决定将对法国等国单方面免签政策延期至2026年12月31日24时。'])
+    assert 'not recorded as effective_to' in _window_violation(['对其余48国持普通护照人员的免签政策施行至2026年12月31日'])
+    assert _window_violation(['e-Visa facility is available for holders of Spanish passports with effect from November 3, 2015.']) is None
+    ok, _ = supported('VISA_EXEMPT', [british], 'GBR')
+    assert not ok
+    ok, _ = supported('VISA_EXEMPT', [british], 'GBR', bounds={'effective_from': '2026-02-17', 'effective_to': '2026-12-31'})
+    assert ok
+    # End to end: the recorded bound must also be the literal one the page states.
+    b = interval_batch()
+    b['rows'][0]['verdict']['proof'].pop('effective_to')
+    with pytest.raises(PatchRejected, match='policy window until 2028-03-14 is not recorded'):
+        validate_batch(b)
+    validate_batch(interval_batch())
+    b = route_batch('HKG', 'VNM', 'VISA_EXEMPT', 'unconditional_visa_free',
+                    'From 1 January 2024 to 31 December 2024, holders of a Hong Kong SAR passport are exempt from the visa requirement.',
+                    'From 1 January 2024 to 31 December 2024, holders of a Hong Kong SAR passport are exempt from the visa requirement.', URL, KEY)
+    with pytest.raises(PatchRejected, match='policy window ended on 2024-12-31'):
+        validate_batch(b)
+
+
+@pytest.mark.parametrize('notice', [
+    'The consular office will be closed from 1 March 2026 to 30 April 2026.',
+    'Visas issued from 1 January 2026 are valid until 31 December 2026.',
+    'This page was updated on 1 January 2026.',
+    'Your passport must be valid until 31 December 2026.',
+])
+def test_an_office_issue_update_or_passport_date_is_no_policy_window(notice):
+    from scripts.convert_reviewed_general_batch import _window_violation
+    assert _window_violation([notice]) is None
+
+
+HEADING_RULE = 'Nationals of the following countries must obtain a visa before travelling to Freedonia.'
+HEADING_FREE_LINE = 'France, Spain, Japan, United States, United Kingdom, Singapore, Canada, Australia'
+
+
+@pytest.mark.parametrize('heading', [
+    'Schedule 2', 'Annex II', 'Part II', 'Category B', 'List B', 'Group II', 'Second Schedule',
+    'Countries whose nationals may enter freely', 'Freedom of movement list',
+    'Visa waiver countries', 'Visa Waiver Program', 'ETA countries', 'Visa nationals',
+])
+def test_a_section_heading_by_shape_or_vocabulary_ends_the_rule_sentences_reach(heading):
+    from scripts.convert_reviewed_general_batch import _headings, _page_index
+    page = HEADING_RULE + '\nAfghanistan, Bangladesh, India, Pakistan\n' + heading + '\n' + HEADING_FREE_LINE + '\n'
+    assert heading.casefold() in [h.strip() for h in _headings(_page_index(page)[0])[1]]
+    pages = [('p', page)] * 2
+    for nat in ('FRA', 'ESP', 'JPN', 'USA', 'GBR', 'SGP', 'CAN', 'AUS'):
+        ok, explain = supported('VISA_REQUIRED', [HEADING_FREE_LINE, HEADING_RULE], nat, pages=pages)
+        assert not ok and any(e.startswith('list line on another page or under another heading') for e in explain)
+    ok, _ = supported('VISA_REQUIRED', ['Afghanistan, Bangladesh, India, Pakistan', HEADING_RULE], 'IND', pages=pages)
+    assert ok
+
+
+def test_a_heading_between_entry_lines_needs_list_vocabulary_but_a_comma_run_needs_none():
+    from scripts.convert_reviewed_general_batch import _headings, _page_index
+    lines = HEADING_RULE + '\nAfghanistan\nBangladesh\nIndia\nAnnex II\nFrance\nSpain\nJapan\n'
+    assert [h.strip() for h in _headings(_page_index(lines)[0])[1]] == [HEADING_RULE.rstrip('.').casefold(), 'annex ii']
+    ok, _ = supported('VISA_REQUIRED', ['Japan', HEADING_RULE], 'JPN', pages=[('p', lines)] * 2)
+    assert not ok
+    ok, _ = supported('VISA_REQUIRED', ['India', HEADING_RULE], 'IND', pages=[('p', lines)] * 2)
+    assert ok
+    # A country line is never a heading by shape, and a region sub-heading does not cut its list.
+    regions = 'Nationals of the following countries do not need a visa:\nEurope\nFrance, Germany\nAsia\nJapan, Singapore\n'
+    assert [h.strip() for h in _headings(_page_index(regions)[0])[1]] == ['nationals of the following countries do not need a visa:']
+    ok, _ = supported('VISA_EXEMPT', ['Japan, Singapore', 'Nationals of the following countries do not need a visa:'], 'JPN', pages=[('p', regions)] * 2)
+    assert ok
+
+
+def test_heading_vocabulary_states_a_verdict_and_a_restating_heading_does_not_cut():
+    from scripts.convert_reviewed_general_batch import _states_other_verdict, _boundary
+    for heading in ('Visa waiver countries', 'Visa Waiver Program', 'ETA countries', 'Visa-free countries'):
+        assert _states_other_verdict(heading, 'VISA_REQUIRED'), heading
+    assert _states_other_verdict('Visa nationals', 'VISA_EXEMPT')
+    assert _states_other_verdict('ETA countries', 'VISA_EXEMPT')
+    assert not _states_other_verdict('Visa required (Asia)', 'VISA_REQUIRED')
+    assert _boundary('Visa nationals', 'VISA_REQUIRED')
+    assert not _boundary('Visa required (Asia)', 'VISA_REQUIRED')
+    assert not _boundary('Nationals of the following countries also require a visa:', 'VISA_REQUIRED')
+    assert _boundary('Annex II', 'VISA_REQUIRED')
+
+
+@pytest.mark.parametrize('quote,nat', [
+    ('Holders of diplomatic and official passports of India are exempt from the visa requirement.', 'IND'),
+    ('Indian nationals holding diplomatic or service passports do not require a visa.', 'IND'),
+    ('中国外交护照持有人免签。', 'CHN'),
+    ('Visa-free entry applies to holders of United States diplomatic passports.', 'USA'),
+    ('Les titulaires de passeports diplomatiques français sont dispensés de visa.', 'FRA'),
+    ('Người mang hộ chiếu ngoại giao Việt Nam được miễn thị thực.', 'VNM'),
+    ('Pemegang paspor diplomatik Indonesia bebas visa.', 'IDN'),
+    ('ผู้ถือหนังสือเดินทางทูตไทยได้รับยกเว้นวีซ่า', 'THA'),
+    ('대한민국 외교관 여권 소지자는 무비자입니다.', 'KOR'),
+    ('British National (Overseas) passport holders do not require a visa.', 'GBR'),
+])
+def test_a_rule_for_another_passport_class_does_not_prove_the_ordinary_route(quote, nat):
+    ok, _ = supported('VISA_EXEMPT', [quote], nat, document_type='ordinary_passport')
+    assert not ok
+
+
+def test_the_passport_class_gate_is_symmetric_and_reads_a_sentence_naming_both():
+    ok, explain = supported('VISA_EXEMPT', ['Holders of diplomatic and official passports of India are exempt from the visa requirement.'],
+                            'IND', document_type='diplomatic_passport')
+    assert ok
+    ok, explain = supported('VISA_EXEMPT', ['Ordinary passport holders of India are exempted from visa up to 90 days.'], 'IND',
+                            document_type='official_passport')
+    assert not ok and any('scoped to ordinary passports' in e for e in explain)
+    ok, _ = supported('VISA_EXEMPT', ['Citizens holding a national passport (diplomatic, official, or ordinary) of the United States do not need a visa for visiting South Africa.'], 'USA')
+    assert ok
+    ok, _ = supported('VISA_EXEMPT', ['Citizens of the United States, holders of all types of passports, do not need visas for the entry.'], 'USA')
+    assert ok
+    ok, _ = supported('VISA_REQUIRED', ['All Indian nationals must obtain a visa through the Korean diplomatic mission.'], 'IND')
+    assert ok
+    # The mfa.gov.tr label: the route's own class is the half that decides.
+    label = 'Canada: Official passport holders are required to have visa to enter Türkiye. Ordinary passport holders are exempted from visa up to 90 days in any 180-day period.'
+    ok, _ = supported('VISA_EXEMPT', [label], 'CAN')
+    assert ok
+    ok, _ = supported('VISA_EXEMPT', [label], 'CAN', document_type='official_passport')
+    assert not ok
+
+
+@pytest.mark.parametrize('quote,nat', [
+    ('Indian nationals in direct transit through the international airport do not require a visa.', 'IND'),
+    ('Chinese citizens are eligible for the 144-hour visa-free transit policy.', 'CHN'),
+    ('日本国民は通過の場合、ビザ免除となります。', 'JPN'),
+])
+def test_a_transit_scoped_exemption_proves_only_a_transit_route(quote, nat):
+    ok, explain = supported('VISA_EXEMPT', [quote], nat, purpose='tourism')
+    assert not ok and any(e.startswith('scoped to transit') for e in explain)
+    ok, _ = supported('VISA_EXEMPT', [quote], nat, purpose='transit')
+    assert ok
+
+
+def test_transit_beside_entry_or_tourism_is_not_a_transit_scope():
+    ok, _ = supported('VISA_EXEMPT', ['The holders of passports issued in the Special Administrative Region of the People\'s Republic of China: Hong Kong and Macau are exempted from visa regime when entering, exiting and transiting through the territory of Bosnia and Herzegovina, up to 90 days.'], 'HKG')
+    assert ok
+    ok, _ = supported('VISA_EXEMPT', ['上述国家持普通护照人员来华经商、旅游观光、探亲访友、交流访问、过境不超过30天，可免办签证入境。', '法国、德国'], 'FRA')
+    assert ok
+
+
+@pytest.mark.parametrize('line,nat', [
+    ('Japan (diplomatic passports only)', 'JPN'),
+    ('United Kingdom (BN(O) only)', 'GBR'),
+    ('India (service passports)', 'IND'),
+])
+def test_an_annotated_list_line_for_another_passport_class_is_no_list_line(line, nat):
+    from scripts.convert_reviewed_general_batch import _list_line
+    assert not _list_line(line, nat)
+    assert _list_line(line.split(' (')[0], nat)
+
+
+@pytest.mark.parametrize('quote,nat', [
+    ('Indian nationals holding a valid United States visa do not require a visa.', 'IND'),
+    ('Chinese nationals who are permanent residents of Hong Kong do not require a visa.', 'CHN'),
+    ('Nationals who hold a residence permit of a Schengen State (for example Indian nationals resident in Germany) do not require a visa.', 'IND'),
+    ('Indian nationals who are crew members of an aircraft do not require a visa.', 'IND'),
+    ('Indian nationals do not require a visa provided they hold a return ticket.', 'IND'),
+    ('Holders of biometric Indian passports do not require a visa.', 'IND'),
+])
+def test_a_conditional_sentence_cannot_prove_an_unconditional_verdict(quote, nat):
+    ok, explain = supported('VISA_EXEMPT', [quote], nat, detail='unconditional_visa_free')
+    assert not ok and any(e.startswith(('conditional wording', 'nationality named only as an example')) for e in explain)
+    ok, _ = supported('VISA_EXEMPT', [quote], nat, detail='conditional_visa_free')
+    assert ok
+
+
+def test_a_passport_holder_subject_and_a_purpose_example_are_no_condition():
+    for quote, nat in (('Holders of a Hong Kong SAR passport do not require a visa for stays of up to 30 days.', 'HKG'),
+                       ('Canadian passport holders do not require a visa for the entry purpose of a short term visit (e.g Tourism, Visiting friends or relatives) up to 180 days.', 'CAN'),
+                       ('Under the amended Compact of Free Association, U.S. citizens need only valid passport for entry.', 'USA'),
+                       ('Singaporean citizens, who hold the appropriate passports, do not need to apply for visas in advance when traveling to China for short terms.', 'SGP')):
+        ok, explain = supported('VISA_EXEMPT', [quote], nat, detail='unconditional_visa_free')
+        assert ok, (quote, explain)
+
+
+def test_the_uruguay_cell_serves_no_unconditional_exemption():
+    """HKG|HKG|URY: the gub.uy cell says "No necesita Visa (solo Pte. HKSAR)
+    (4)" and footnote (4) states the condition. The unconditional
+    subcategory is refused, the conditional one reads."""
+    url = 'https://www.gub.uy/ministerio-interior/comunicacion/publicaciones/regimen-visas'
+    page = ('Régimen de visas\nPaís | Visa\nHong Kong\nNo necesita Visa (solo Pte. HKSAR) (4)\nHungría\nNo necesita Visa\n'
+            '(4) Si en el pasaporte no luce la sigla "HKSAR" u "OVERSEAS" requerirá visa.\n')
+    b = route_batch('HKG', 'URY', 'VISA_EXEMPT', 'unconditional_visa_free', page, 'Hong Kong', url, 'HKG|HKG|URY|tourism|default|unknown|v6')
+    b['rows'][0]['verdict']['proof']['evidence'].append({'source_id': 's1', 'source_url': url, 'quote': 'No necesita Visa (solo Pte. HKSAR) (4)'})
+    with pytest.raises(PatchRejected, match='does not state this verdict'):
+        validate_batch(b)
+    b['rows'][0]['verdict']['requirement_detail'] = 'conditional_visa_free'
+    validate_batch(b)
+
+
+def test_a_footnote_on_the_nationalitys_own_list_line_refuses_the_unconditional_subcategory():
+    from scripts.convert_reviewed_general_batch import _footnote_marked
+    line = 'Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*.'
+    assert _footnote_marked(line, 'USA') and _footnote_marked(line, 'GBR') and not _footnote_marked(line, 'ESP')
+    assert _footnote_marked('Japan (1)', 'JPN') and not _footnote_marked('Visa is not required for a stay of less than one (1) month for ASEAN nationals except Myanmar.', 'THA')
+    rule = 'Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days:'
+    page = rule + '\n' + line + '\n'
+    ok, explain = supported('VISA_EXEMPT', [line, rule], 'USA', pages=[('p', page)] * 2, detail='unconditional_visa_free')
+    assert not ok and any(e.startswith('footnote on the list line') for e in explain)
+    ok, _ = supported('VISA_EXEMPT', [line, rule], 'USA', pages=[('p', page)] * 2, detail='conditional_visa_free')
+    assert ok
+    ok, _ = supported('VISA_EXEMPT', [line, rule], 'ESP', pages=[('p', page)] * 2, detail='unconditional_visa_free')
+    assert ok
+
+
+@pytest.mark.parametrize('quote,nat', [
+    ('British National (Overseas) passport holders do not require a visa.', 'GBR'),
+    ('Holders of Bermuda passports issued by the United Kingdom do not require a visa.', 'GBR'),
+    ('Holders of Dutch Caribbean identity cards do not require a visa.', 'NLD'),
+])
+def test_a_bracketed_or_document_phrase_dependency_does_not_name_the_parent(quote, nat):
+    from scripts.convert_reviewed_general_batch import _named, _list_line
+    assert not _named(quote, nat)
+    ok, _ = supported('VISA_EXEMPT', [quote], nat)
+    assert not ok
+    assert not _list_line('United Kingdom (BN(O) only)', 'GBR')
+    assert _named('Holders of passports issued by the United Kingdom do not require a visa.', 'GBR')
+
+
+def test_a_currency_or_product_mention_carries_no_subject_forward():
+    from scripts.convert_reviewed_general_batch import _label, _named
+    quote = 'Fees are payable in cash (Indian rupees are not accepted). A visa is required for all visitors.'
+    assert _label(quote, 'IND') is None
+    assert not _named('Indian rupees are not accepted', 'IND')
+    ok, _ = supported('VISA_REQUIRED', [quote], 'IND')
+    assert not ok
+    for quote, nat in (('Korean won is not accepted. A visa is required for all visitors.', 'KOR'),
+                       ('Thai cuisine is served on board. A visa is required for all visitors.', 'THA'),
+                       ('Please contact the Indian Embassy. A visa is required for all visitors.', 'IND'),
+                       ('Chinese yuan: not accepted. A visa is required for all visitors.', 'CHN')):
+        ok, _ = supported('VISA_REQUIRED', [quote], nat)
+        assert not ok, quote
+    ok, _ = supported('VISA_REQUIRED', ['Indian nationals: a visa is required before travel.'], 'IND')
+    assert ok
+    assert _named('俄罗斯、瑞典、加拿大、英国50国持普通护照人员来华可免签入境。', 'GBR')
+
+
+@pytest.mark.parametrize('quote,nat', [
+    ('Indian nationals: the ETA portal is necessary reading before you travel.', 'IND'),
+    ('한국 국민은 K-ETA 없이도 입국할 수 있으나 필요 시 사전등록을 권장합니다.', 'KOR'),
+    ('Canadian citizens must carry a valid passport, and the ETA website has more information.', 'CAN'),
+    ('Les ressortissants indiens peuvent entrer sans ETA mais doivent présenter un passeport.', 'IND'),
+])
+def test_an_authorisation_token_outside_the_requirement_clause_states_no_requirement(quote, nat):
+    ok, _ = supported('ELECTRONIC_AUTHORIZATION_REQUIRED', [quote], nat)
+    assert not ok
+
+
+def test_the_group_table_check_is_an_explicit_raise_on_the_compiled_pattern(monkeypatch):
+    import inspect
+    import scripts.convert_reviewed_general_batch as c
+    source = inspect.getsource(c)
+    assert 'assert _EXTRA_ALIASES' not in source
+    assert '\n_check_group_names()\n' in source
+    c._check_group_names()
+    monkeypatch.setitem(c._EXTRA_ALIASES, 'MLT', ('',))
+    monkeypatch.setitem(c._DEMONYM_STEMS, 'MLT', ())
+    with pytest.raises(PatchRejected, match='group member without a name pattern: MLT'):
+        c._check_group_names()
+    monkeypatch.delitem(c._EXTRA_ALIASES, 'MLT')
+    with pytest.raises(PatchRejected, match='MLT'):
+        c._check_group_names()
+    # The check also runs under python -O: compiled with asserts stripped, a
+    # module whose Malta names and stems are both empty still refuses the
+    # table, while the real table imports cleanly.
+    nameless = (source.replace("'MLT': ('malta', 'malte'),", "'MLT': ('',),")
+                .replace("'MLT': ('maltese', 'maltais', 'maltesisch', 'maltés', 'maltes'),", "'MLT': (),"))
+    assert nameless != source and "'MLT': (),\n" in nameless
+    namespace = {'__name__': 'scripts._round_three_probe', '__file__': c.__file__}
+    with pytest.raises(PatchRejected, match='MLT'):
+        exec(compile(nameless, c.__file__, 'exec', optimize=1), namespace)
+    exec(compile(source, c.__file__, 'exec', optimize=1), dict(namespace))
+
+
+def test_a_country_name_inside_navigation_boilerplate_is_no_list_line():
+    """kdmid.ru renders every country of its site index between the same
+    three link texts; the JPN|JPN|RUS row quoted "Япония" from there."""
+    rule = 'Информация о визовом/безвизовом режиме поездок: граждане следующих государств должны иметь визу.'
+    triad = 'информация о стране\nконсульские учреждения россии\nнормативная база двусторонних консульских отношений\n'
+    page = rule + '\n' + 'Ямайка\n' + triad + 'Япония\n' + triad + 'Йемен\n' + triad
+    ok, explain = supported('VISA_REQUIRED', ['Япония', rule], 'JPN', pages=[('p', page)] * 2)
+    assert not ok and any(e.startswith('list line sits in navigation boilerplate') for e in explain)
+    plain = rule + '\nЯмайка\nЯпония\nЙемен\n'
+    ok, _ = supported('VISA_REQUIRED', ['Япония', rule], 'JPN', pages=[('p', plain)] * 2)
+    assert ok
+    # A verdict or stay cell repeating down a table column is not boilerplate.
+    table = 'Nationals of the following countries do not need a visa:\nJamaica | 90 days | Not required\nJapan | 90 days | Not required\nJordan | 90 days | Not required\n'
+    ok, _ = supported('VISA_EXEMPT', ['Japan', 'Nationals of the following countries do not need a visa:'], 'JPN', pages=[('p', table)] * 2)
+    assert ok
