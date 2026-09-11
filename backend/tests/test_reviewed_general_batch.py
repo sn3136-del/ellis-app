@@ -633,6 +633,21 @@ def test_verdict_rules_read_official_wording_from_the_station_batch(value, quote
     # Regional compounds over the USA demonym stem are not US nationals.
     ('VISA_REQUIRED', ['Les ressortissants sud-américains doivent obtenir un visa avant leur arrivée.'], 'USA'),
     ('VISA_REQUIRED', ['Latin American nationals must obtain a visa before travel.'], 'USA'),
+    # The fixed aliases ("American citizens", "Americans") inside a regional compound are not US nationals either.
+    ('VISA_EXEMPT', ['Latin American citizens do not need a visa.'], 'USA'),
+    ('VISA_EXEMPT', ['South American citizens are exempt from visa requirements.'], 'USA'),
+    ('VISA_EXEMPT', ['Central Americans do not need a visa for stays up to 90 days.'], 'USA'),
+    # The bare token "eu" is a French participle and a Portuguese pronoun, not the European Union.
+    ('VISA_EXEMPT', ['Les ressortissants qui ont eu un titre de séjour sont dispensés de visa pour un séjour de moins de 90 jours.'], 'FRA'),
+    ('VISA_EXEMPT', ['Les personnes ayant eu un visa de long séjour sont dispensées de visa pour un séjour de moins de 90 jours.'], 'ESP'),
+    # The pronoun "us", the currency prefix "US$" and the US Embassy name nobody; a universal sentence after them names no one.
+    ('VISA_REQUIRED', ['Tourist visa fee: US$50. All visitors must obtain a visa before arrival.'], 'USA'),
+    ('VISA_REQUIRED', ['The fee is US $50 per entry. Every foreign national needs a visa to enter.'], 'USA'),
+    ('VISA_EXEMPT', ['For enquiries please contact us. Visitors do not need a visa for stays up to 90 days.'], 'USA'),
+    ('VISA_REQUIRED', ['Apply at the US Embassy in Hanoi. A visa is required.'], 'USA'),
+    ('VISA_REQUIRED', ['Fees are payable in US dollars and a visa is required.'], 'USA'),
+    # The Vietnamese pronoun "anh" is not the United Kingdom.
+    ('VISA_EXEMPT', ['Anh được miễn thị thực 45 ngày.'], 'GBR'),
     # A negated mention in the rule sentence speaks about everyone else.
     ('VISA_REQUIRED', ['A visa is required for non-US citizens.'], 'USA'),
 ])
@@ -645,6 +660,8 @@ def test_verdict_rules_still_refuse_unnamed_grouped_or_borrowed_sentences(value,
     ('VISA_EXEMPT', ['Visa is not required for a stay of less than one (1) month for ASEAN nationals except Myanmar. Visas required for duration of stay exceeds (1) month except for Brunei and Singapore nationals.'], 'IDN'),
     ('VISA_EXEMPT', ['Visa tidak diperlukan untuk tempoh tinggal kurang daripada satu (1) bulan bagi warganegara negara-negara ASEAN kecuali Myanmar.'], 'THA'),
     ('VISA_EXEMPT', ['EU-Bürger benötigen generell kein Visum für die Einreise nach Deutschland.'], 'FRA'),
+    ('VISA_EXEMPT', ['EU citizens do not need a visa for stays of up to 90 days.'], 'ESP'),
+    ('VISA_EXEMPT', ['Citizens of the European Union are exempt from visa requirements.'], 'ITA'),
 ])
 def test_group_membership_resolves_asean_and_eu_against_the_membership_table(value, quotes, nat):
     from scripts.convert_reviewed_general_batch import _decision_supported
@@ -682,6 +699,12 @@ def test_quotes_split_across_one_page_sentence_or_table_row_are_read_together():
 @pytest.mark.parametrize('sentence,nat', [
     ('Les ressortissants américains doivent obtenir un visa avant leur arrivée.', 'USA'),
     ('Nationals of the United States must obtain a visa before travel.', 'USA'),
+    ('American citizens must obtain a visa before travel.', 'USA'),
+    # A nationality-shaped "US" still names the United States: beside a nationality noun or after "the".
+    ('US citizens must obtain a visa before travel.', 'USA'),
+    ('Citizens of the US must obtain a visa before travel.', 'USA'),
+    ('Nationals of the U.S. must obtain a visa before travel.', 'USA'),
+    ('Công dân Anh phải xin thị thực trước khi nhập cảnh.', 'GBR'),
 ])
 def test_the_plain_demonym_still_names_the_nationality(sentence, nat):
     from scripts.convert_reviewed_general_batch import _decision_supported
@@ -706,6 +729,32 @@ def test_a_genuine_visa_issued_on_entry_still_reads_as_visa_on_arrival():
     ('unless residing in Hong Kong SAR with a valid HKSAR ID Card', 'HKG', False),
     ('Those who hold a passport issued by Taiwan that includes in it the number of the identification card', 'TWN', False),
     ('other than Indian nationals', 'IND', False),
+    # A dependency or another jurisdiction that carries the parent's name is not the parent's line.
+    ('British Virgin Islands', 'GBR', False),
+    ('British Indian Ocean Territory', 'GBR', False),
+    ('British Overseas Territories', 'GBR', False),
+    ('United States Minor Outlying Islands', 'USA', False),
+    ('United States Virgin Islands', 'USA', False),
+    ('US Virgin Islands', 'USA', False),
+    ('Îles Vierges américaines', 'USA', False),
+    ('îles mineures eloignees des etats-unis', 'USA', False),
+    ('French Polynesia', 'FRA', False),
+    ('Polynésie française', 'FRA', False),
+    ('Chinese Taipei', 'CHN', False),
+    ('Hong Kong SAR, China', 'CHN', False),
+    ('Taiwan, Province of China', 'CHN', False),
+    ('China, Hong Kong SAR', 'CHN', False),
+    ('Korea (North)', 'KOR', False),
+    # An entry that includes the sibling jurisdiction is still the line of both.
+    ('China (including Hong Kong and Macau)', 'HKG', True),
+    ('China (includes Hong Kong and Macau)', 'CHN', True),
+    ('Hong Kong, China', 'HKG', True),
+    # The parent's own line still is.
+    ('United States of America', 'USA', True),
+    ("ETATS-UNIS D'AMERIQUE", 'USA', True),
+    ('Hong Kong (HKSAR or HK COF I)', 'HKG', True),
+    ('Russian Federation', 'RUS', True),
+    ('United Kingdom of Great Britain and Northern Ireland', 'GBR', True),
 ])
 def test_a_list_line_is_the_name_with_at_most_a_short_qualifier(quote, nat, expected):
     from scripts.convert_reviewed_general_batch import _list_line
@@ -738,6 +787,35 @@ def test_a_list_line_proves_only_the_heading_of_its_own_list():
                                pages=[('p', above)] * 2)
     assert not _decision_supported('VISA_REQUIRED', ['Australia', 'Nationals of the countries listed above must have a visa.'], 'AUS',
                                    pages=[('p', above)] * 2)
+
+
+def test_a_dependency_line_cannot_prove_the_parent_nationality_on_a_page():
+    from scripts.convert_reviewed_general_batch import _decision_supported
+    page = ('Nationals of the following countries do not need a visa:\nBritish Virgin Islands\nCanada\nJapan\n'
+            'Nationals of the following countries must obtain a visa:\nIndia\nUnited Kingdom\n')
+    free = 'Nationals of the following countries do not need a visa:'
+    assert not _decision_supported('VISA_EXEMPT', [free, 'British Virgin Islands'], 'GBR', pages=[('p', page)] * 2)
+    assert _decision_supported('VISA_REQUIRED', ['Nationals of the following countries must obtain a visa:', 'United Kingdom'], 'GBR',
+                               pages=[('p', page)] * 2)
+
+
+def test_a_plain_verdict_heading_that_opens_a_list_cuts_the_earlier_headings_reach():
+    """'Visa-free countries' carries no list-intro wording, but it ends its
+    line and opens a block of entry lines: it is a section boundary, so the
+    visa-required heading above it cannot reach the countries below it."""
+    from scripts.convert_reviewed_general_batch import _decision_supported, _headings, _page_index
+    page = ('Visa required countries: the nationals of the following countries require a visa to enter Freedonia.\n'
+            'Brazil\nChina\nIndia\nVisa-free countries\nArgentina\nUnited States of America\nUruguay')
+    heading = 'Visa required countries: the nationals of the following countries require a visa to enter Freedonia.'
+    pages = [('p', page)] * 2
+    assert [h.strip() for h in _headings(_page_index(page)[0])[1]] == [heading.rstrip('.').casefold(), 'visa-free countries']
+    explain = []
+    assert not _decision_supported('VISA_REQUIRED', [heading, 'United States of America'], 'USA', pages=pages, explain=explain)
+    assert any(e.startswith('list line on another page or under another heading') for e in explain)
+    assert _decision_supported('VISA_REQUIRED', [heading, 'India'], 'IND', pages=pages)
+    # A line with a verdict word that is followed by prose, not entries, opens no list.
+    prose = 'Visa fees\nThe fee depends on the visa type and is payable on application.\nBrazil\nIndia\n'
+    assert _headings(_page_index(prose)[0])[1] == []
 
 
 def test_a_country_line_under_two_verdict_headings_is_refused_not_resolved():
@@ -793,15 +871,37 @@ def test_an_unpublished_stay_proof_cannot_cover_a_stated_stay_sentence():
                      covered={'permitted_stay': 'Some sentence'})
 
 
-def test_a_product_verdict_whose_proof_fails_is_not_served():
-    """The product's own disposition quote does not state its verdict: the
-    product is dropped with the reason, it does not inherit the route proof."""
+def test_a_product_carrying_the_route_verdict_inherits_the_route_proof_when_its_own_fails():
+    """The product's own disposition quote does not state its verdict, but
+    the product asserts exactly the route's proved verdict: it is served
+    under the route's nationality-anchored proof, and the failure is
+    reported instead of the product being erased."""
     b = batch()
     row = b['rows'][0]
     row['products'][0]['proofs']['disposition'] = proof('Nationals of Japan do not require a visa for stays of up to 45 days.')
     _, accepted, _ = validate_batch(b, strict=False)
     assert accepted[0]['products'][0]['verdict_unproved'].startswith('disposition:')
     overlay, reports = convert(build_manifest(b, [layer()]), [layer()])
+    products = overlay['entries'][0]['fields']['visa_products']
+    assert [p['type'] for p in products] == [PRODUCT['type']]
+    assert products[0]['disposition'] == 'VISA_REQUIRED' and products[0]['requirement_detail'] == 'evisa'
+    assert products[0]['field_provenance']['disposition']['quote'].startswith('Holders of a Hong Kong SAR passport')
+    assert products[0]['fee'] == {'amount': 25, 'currency': 'USD'}
+    assert reports[0]['removed_products'] == []
+    assert reports[0]['route_verdict_products'] == [{'type': PRODUCT['type'], 'reason': accepted[0]['products'][0]['verdict_unproved']}]
+    assert reports[0]['unsupported_products'] == []
+
+
+def test_a_product_verdict_that_differs_from_the_route_and_fails_its_proof_is_not_served():
+    """A product that asserts a verdict the route does not carry must prove
+    it; when its quote does not, the product is dropped with the reason."""
+    b = batch()
+    row = b['rows'][0]
+    row['products'][0]['product']['requirement_detail'] = 'paper_visa'
+    row['products'][0]['proofs']['disposition'] = proof('Nationals of Japan do not require a visa for stays of up to 45 days.')
+    _, accepted, _ = validate_batch(b, strict=False)
+    assert accepted[0]['products'][0]['verdict_unproved'].startswith('disposition:')
+    overlay, reports = convert(build_manifest(b, [layer()]), [layer()])
     assert overlay['entries'][0]['fields']['visa_products'] == []
     assert reports[0]['removed_products'] == [{'type': PRODUCT['type'], 'reason': accepted[0]['products'][0]['verdict_unproved']}]
-    assert reports[0]['unsupported_products'] == []
+    assert reports[0]['route_verdict_products'] == [] and reports[0]['unsupported_products'] == []

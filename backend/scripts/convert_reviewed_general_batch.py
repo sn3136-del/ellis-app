@@ -137,9 +137,12 @@ def _name_pattern(nat):
     inflecting demonym stems (letter boundaries in any script)."""
     pattern = _NAME_PATTERNS.get(nat)
     if pattern is None:
-        parts = [r'(?<![a-z])' + re.escape(a) + r'(?![a-z])' for a in _aliases(nat)]
-        # A stem inside a hyphenated or regional compound ("sud-américains",
-        # "latin american") names a region, not this nationality.
+        # An alias or a stem inside a hyphenated or regional compound
+        # ("sud-américains", "Latin American citizens") names a region, not
+        # this nationality. The longest alias is tried first so "US national"
+        # is read whole rather than as the bare "US".
+        parts = [_COMPOUND_GUARD + r'(?<![a-z])' + re.escape(a) + r'(?![a-z])'
+                 for a in sorted(_aliases(nat), key=len, reverse=True)]
         parts += [_COMPOUND_GUARD + r'(?<![^\W\d_])' + re.escape(_norm(stem)) + r'[^\W\d_]{0,5}(?![^\W\d_])'
                   for stem in _DEMONYM_STEMS.get(nat, ())]
         pattern = _NAME_PATTERNS[nat] = re.compile('|'.join(parts) if parts else r'(?!x)x')
@@ -155,12 +158,33 @@ _NEGATED_PREFIX_RE = re.compile(r"(?:\bnon[- ]?|\bother than\s+|\bexcluding\s+|\
                                 r"\bkecuali\s+|\bкроме\s+|\bне\s+)$")
 
 
+# Aliases that are also everyday words: the English pronoun and currency
+# prefix "us", the Vietnamese pronoun "anh", "pháp" (method), "nga", "úc".
+# They name the nationality only in a nationality-shaped mention: beside a
+# nationality noun ("US citizens", "the US", "công dân Anh"), never before a
+# currency sign, a figure or an institution ("US$50", "the US Embassy").
+_AMBIGUOUS_ALIASES = {'us', 'u.s.', 'u.s', 'anh', 'nga', 'pháp', 'úc'}
+_SHAPED_AFTER_RE = re.compile(r'^\s?(?:citizens?|nationals?|passports?|holders?|residents?|travell?ers?|visitors?|nationality)\b')
+_SHAPED_BEFORE_RE = re.compile(r'(?:(?<![a-z])the|công dân|quốc tịch|nước|người|hộ chiếu|vương quốc|liên bang|cộng hòa)\s$')
+_UNSHAPED_AFTER_RE = re.compile(r'^\s?(?:[$€£\d]|dollars?|embassy|embassies|consulate|consulates|consular|mission|department|'
+                                r'government|state|customs|border|immigration|authorit|visa|market|law|army|military)')
+
+
+def _nationality_shaped(low, start, end):
+    after = low[end:end + 24]
+    if _UNSHAPED_AFTER_RE.match(after):
+        return False
+    return bool(_SHAPED_AFTER_RE.match(after) or _SHAPED_BEFORE_RE.search(low[max(0, start - 16):start]))
+
+
 def _mentions(text, nat):
     """Spans of the nationality's own mentions in the normalized text: fixed
-    aliases and inflected demonyms, negated mentions left out."""
+    aliases and inflected demonyms, negated mentions left out, an ambiguous
+    short alias only when the mention is nationality-shaped."""
     low = _norm(text)
     spans = [m.span() for m in _name_pattern(nat).finditer(low)
-             if not _NEGATED_PREFIX_RE.search(low[max(0, m.start() - 24):m.start()])]
+             if not _NEGATED_PREFIX_RE.search(low[max(0, m.start() - 24):m.start()])
+             and (m.group(0) not in _AMBIGUOUS_ALIASES or _nationality_shaped(low, m.start(), m.end()))]
     tokens = _CAPITAL_TOKENS.get(nat)
     if tokens:
         nfkc = unicodedata.normalize('NFKC', str(text or ''))
@@ -493,6 +517,22 @@ _ENTRY_PROSE_RE = re.compile(
 # sentence's nationality.
 _OWN_SUBJECT_RE = re.compile(r"\b(?:nationals|citizens|holders|residents|ressortissants|ciudadanos|nacionales|cidadãos|citoyens|"
                              r"staatsbürger|bürger|граждане) (?:of|de|du|des|d'|von|der)\b", re.I)
+# A qualifier that turns the name into a dependency or another jurisdiction
+# ("British Virgin Islands", "Îles mineures éloignées des Etats-Unis",
+# "French Polynesia", "Chinese Taipei", "Hong Kong SAR, China").
+_JURISDICTION_RE = re.compile(
+    r"\b(?:islands?|isles?|territory|territories|overseas|polynesia|guiana|guyana|taipei|minor|outlying|virgin|samoa|"
+    r"antarctic|ocean|province|part|dependenc(?:y|ies)|"
+    r"îles?|iles?|territoire|outre-mer|polynésie|polynesie|guyane|vierges|mineures|éloignées|eloignees|antarctiques|australes|partie|"
+    r"islas?|territorio|ultramar|polinesia|guayana|vírgenes|virgenes|menores|alejadas|parte|"
+    r"ilhas?|território|ultramarinas|polinésia|virgens|distantes|"
+    r"inseln?|gebiet|übersee|jungferninseln|острова|территори\w*|заморск\w*|полинези\w*|виргинск\w*)\b", re.I)
+# A sibling jurisdiction beside the name ("Hong Kong SAR, China", "Taiwan,
+# Province of China") makes the entry that jurisdiction's line, unless the
+# entry says it includes the sibling ("China (including Hong Kong and Macau)").
+_SIBLING_RE = re.compile(r"\b(?:hong ?kong|macao|macau|taiwan)\b|香港|澳門|澳门|台灣|台湾", re.I)
+_INCLUSION_RE = re.compile(r"\b(?:includes?|included|including|incl|inclusive|y compris|einschließlich|incluyendo|incluid[oa]s?|"
+                           r"incluindo|termasuk|bao gồm)\b|包括|含", re.I)
 _TERMINATOR_RE = re.compile(r"[.!?。！？;\n|]")
 # Sentence boundaries; "U.S." and " J." are abbreviations, not ends.
 _SENTENCE_SPLIT = re.compile(r"(?<=[.;!?])(?<![A-Z]\.[A-Z]\.)(?<!\s[A-Z]\.)\s+|\n+")
@@ -512,8 +552,11 @@ def _entry_shaped(item, nat):
         return False
     start, end = spans[0]
     lead, trail = low[:start].strip(' ()*'), low[end:].strip(' ()*.')
+    qualifier = lead + ' ' + trail
     return (len(lead) <= 30 and len(trail) <= 40
-            and not _ENTRY_PROSE_RE.search(lead) and not _ENTRY_PROSE_RE.search(trail))
+            and not _ENTRY_PROSE_RE.search(lead) and not _ENTRY_PROSE_RE.search(trail)
+            and not _JURISDICTION_RE.search(qualifier)
+            and not (_SIBLING_RE.search(qualifier) and not _INCLUSION_RE.search(qualifier)))
 
 
 def _list_line(quote, nat):
@@ -545,17 +588,39 @@ def _page_index(text):
     return kept, ''.join(stripped), back, _headings(kept)
 
 
+def _entry_line(piece):
+    """A line that is a list entry: short, no verdict word, no prose."""
+    text = re.sub(r'^\s*(?:\d+[.)]|[-*•])\s*', '', piece).strip(' *()')
+    return bool(0 < len(text) <= 60 and len(text.split()) <= 8 and re.search(r'[^\W\d_]', text)
+                and not _RULE_WORDS.search(text) and not _ENTRY_PROSE_RE.search(text))
+
+
 def _headings(kept):
     """Offsets of the sentences that open a list of nationalities under a
-    verdict ("Countries whose citizens must have a visa:"). They cut the
-    page into sections; a list line proves only the heading of its own
-    section."""
-    starts, pieces, at = [], [], 0
-    for piece in _TERMINATOR_RE.split(kept):
-        if _RULE_WORDS.search(piece) and _LIST_INTRO_RE.search(piece):
-            starts.append(at)
+    verdict: a sentence with list-intro wording ("Countries whose citizens
+    must have a visa:"), or a short verdict line that ends its own line and
+    is followed by two or more entry lines ("Visa-free countries"). They
+    cut the page into sections; a list line proves only the heading of its
+    own section."""
+    parts = re.split(r'([.!?。！？;\n|])', kept)
+    pieces_all = parts[0::2]
+    seps = parts[1::2] + ['']
+    offsets, at = [], 0
+    for piece, sep in zip(pieces_all, seps):
+        offsets.append(at)
+        at += len(piece) + len(sep)
+    starts, pieces = [], []
+    for i, piece in enumerate(pieces_all):
+        if not _RULE_WORDS.search(piece):
+            continue
+        opens = bool(_LIST_INTRO_RE.search(piece))
+        if not opens and seps[i] in ('\n', '') and len(piece.strip()) <= 100:
+            following = pieces_all[i + 1:i + 3]
+            opens = (len(following) == 2 and all(_entry_line(p) for p in following)
+                     and all(s in ('\n', '') for s in seps[i + 1:i + 3]))
+        if opens:
+            starts.append(offsets[i])
             pieces.append(piece)
-        at += len(piece) + 1
     return starts, pieces
 
 
@@ -701,7 +766,8 @@ def _same_list(listed, page, span, backwards, index, value):
 # membership checked against the group's own published list (europa.eu EU
 # member countries; asean.org member states, Timor-Leste admitted 2025).
 _GROUPS = {
-    'EU': (r"\b(?:eu|e\.u\.)(?:-bürger|-citizens| citizens| nationals| member states?| countries)?\b|european union|union européenne|unión europea|união europeia|"
+    'EU': (r"(?<![a-z])(?:eu|e\.u\.)[- ](?:bürger|citizens?|nationals?|member states?|countries|passports?|passport holders?)(?![a-z])|"
+           r"european union|union européenne|unión europea|união europeia|"
            r"europäischen? union|unione europea|европейского союза|uni eropa|liên minh châu âu",
            {'AUT', 'BEL', 'BGR', 'HRV', 'CYP', 'CZE', 'DNK', 'EST', 'FIN', 'FRA', 'DEU', 'GRC', 'HUN', 'IRL', 'ITA', 'LVA', 'LTU',
             'LUX', 'MLT', 'NLD', 'POL', 'PRT', 'ROU', 'SVK', 'SVN', 'ESP', 'SWE'}),
@@ -1236,7 +1302,7 @@ def convert(manifest, current_layers):
         # Products: the current merged list is the starting point.
         products = deepcopy(layer['merged_guidance'].get('visa_products') or [])
         by_name = {p.get('type'): p for p in products}
-        final, unsupported, removed = [], [], []
+        final, unsupported, removed, inherited = [], [], [], []
         seen = set()
         for spec in row.get('products') or []:
             action = spec['action']
@@ -1246,16 +1312,26 @@ def convert(manifest, current_layers):
                 continue
             seen.add(spec.get('current_name'))
             if spec.get('verdict_unproved'):
-                # The reviewer asserted a product verdict its evidence does not
-                # state; neither that verdict nor the current product is served.
-                # On an exemption lane a paid option without its own reviewed
-                # verdict stays a row-level defect, as before.
-                amount = ((spec['product'].get('fee') or {}).get('amount')
-                          if isinstance(spec['product'].get('fee'), dict) else None)
-                if verdict['disposition'] == 'VISA_EXEMPT' and isinstance(amount, (int, float)) and amount > 0:
-                    raise PatchRejected('An optional product needs its own reviewed verdict')
-                removed.append({'type': spec['product'].get('type'), 'reason': spec['verdict_unproved']})
-                continue
+                same_verdict = (spec['product'].get('disposition') == verdict['disposition']
+                                and spec['product'].get('requirement_detail') == verdict['requirement_detail'])
+                if same_verdict:
+                    # The product's own quote does not state the verdict, but
+                    # the product asserts nothing beyond the route's proved
+                    # verdict: it inherits the route proof below, and the
+                    # failure is reported rather than the product erased.
+                    inherited.append({'type': spec['product'].get('type'), 'reason': spec['verdict_unproved']})
+                else:
+                    # The reviewer asserted a product verdict that differs from
+                    # the route's and its evidence does not state it; neither
+                    # that verdict nor the current product is served. On an
+                    # exemption lane a paid option without its own reviewed
+                    # verdict stays a row-level defect, as before.
+                    amount = ((spec['product'].get('fee') or {}).get('amount')
+                              if isinstance(spec['product'].get('fee'), dict) else None)
+                    if verdict['disposition'] == 'VISA_EXEMPT' and isinstance(amount, (int, float)) and amount > 0:
+                        raise PatchRejected('An optional product needs its own reviewed verdict')
+                    removed.append({'type': spec['product'].get('type'), 'reason': spec['verdict_unproved']})
+                    continue
             base = deepcopy(by_name.get(spec.get('current_name')) or {}) if action != 'add' else {}
             product = dict(base)
             pspec = spec['product']
@@ -1370,7 +1446,8 @@ def convert(manifest, current_layers):
                         'review_id': batch['id'], 'cache_key': entry['cache_key']})
         reports.append({'cache_key': entry['cache_key'], 'disposition': fields['disposition'],
                         'products': [p['type'] for p in final], 'unsupported_products': unsupported,
-                        'removed_products': removed, 'unpublished': sorted(unpublished)})
+                        'removed_products': removed, 'route_verdict_products': inherited,
+                        'unpublished': sorted(unpublished)})
     overlay = {'schema_version': 1, 'kind': 'reviewed_overlay_conversion', 'review_id': batch['id'],
                'reviewed_at': today, 'status': 'candidate; registered only after preflight under maintenance',
                'contract': 'Every value carries its own literal official-page quote; verdicts name the nationality; '
