@@ -10,6 +10,7 @@ Everything else is non_authoritative and can never verify a rule.
 """
 from __future__ import annotations
 
+from functools import lru_cache
 from urllib.parse import urlparse
 
 # MECO is the Philippines' representative office in Taiwan. Its exact
@@ -210,7 +211,13 @@ def hostname(url: str) -> str:
 
 
 def is_government_host(host: str) -> bool:
-    host = (host or "").lower()
+    return _is_government_host((host or "").lower())
+
+
+@lru_cache(maxsize=8192)
+def _is_government_host(host: str) -> bool:
+    # Pure in its input and the module constants: memoized because a record
+    # build asks it tens of thousands of times for a few hundred hosts.
     return host in EXACT_OFFICIAL_HOSTS or any(host == s or host.endswith("." + s) for s in GOV_SUFFIXES)
 
 
