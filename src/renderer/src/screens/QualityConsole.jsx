@@ -1716,7 +1716,6 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
               const opened = open === id
               const confKey = 'ops.conf.' + String(rec.confidence_level || '').toLowerCase()
               const confLabel = t(confKey) !== confKey ? t(confKey) : (rec.confidence_level || '·')
-              const pctDone = Math.round(rec.completeness * 100)
               const held = rec.held ?? (rec.confidence_level === 'Low' && !rec.operator_released)
               // A product withheld on its own (an unevidenced optional lane, or a Low
               // sibling beside a published verdict row) is not a route hold: the
@@ -1790,20 +1789,9 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                     <span title={`${checkLabel} · ${checkTip}`} style={{ cursor: 'help' }}>
                       <Chip color={TIER_COLOR[rec.confidence_level] || GRAY} filled={false} wrap>{confLabel}</Chip>
                     </span>
-                    {/* The sub-line appears only when it says something: a
-                        confidence below High, or an incomplete record. A row
-                        that is High and 100% needs no extra annotation. */}
-                    {pctDone < 100 && (
-                      <div style={{ display: 'flex', alignItems: 'center',
-                                    gap: 5, marginTop: 4, fontSize: 10.5,
-                                    color: GRAY }}>
-                        {(
-                          <span style={{ fontWeight: 700, color: AMBER }}>
-                            {pctDone}%
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    {/* Owner request, 11 September 2026: the quality cell
+                        carries only the tier label. The completeness share
+                        stays in the record's field checklist. */}
                   </td>
                   {/* The owner asked on 11 September 2026 that this cell carry
                       only the publish action: no availability label, no
