@@ -1613,12 +1613,13 @@ def _required_values_supported(row: dict, g: dict, checked: set[str], route=None
 # answer conflicting (owner decision, 11 September 2026). Every other field
 # is material (the verdict, its detail, products, fee, stay, validity,
 # entries, documents, channel, passport validity, arrival card, onward
-# travel, health and insurance conditions, exceptions, integrity and source
-# audits), and so is every serve-time problem string: Low and held.
+# travel, funds and accommodation shown at entry, health and insurance
+# conditions, exceptions, integrity and source audits), and so is every
+# serve-time problem string: Low and held.
 ANCILLARY_DISPUTE_FIELDS = frozenset({
     "processing_time", "official_portal_url", "consular_jurisdiction", "biometrics_required",
     "photo_requirements", "payment_process", "account_registration_steps", "submission_process",
-    "appointment_required", "interview_required", "accommodation_evidence", "financial_evidence",
+    "appointment_required", "interview_required",
     "notes", "source_url", "unpublished_fields", "corroborating_sources", "confidence",
 })
 
@@ -1637,7 +1638,10 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     record missing a required field, or carrying one its own official page
     disputes, was still being shown as High.
     """
-    row = dict(row) if disputed else _strip_visa_only_fields(dict(row))
+    # Only a material dispute keeps the row as stored for the conflict view;
+    # a side-field finding must not stop a visa-free record shedding its
+    # visa-only cells (JPN to KOR class).
+    row = dict(row) if material_disputes(disputed) else _strip_visa_only_fields(dict(row))
     if row.get("application_method") == "Other":
         # No path emits this any more. Kept so a stale row can never say it.
         row["application_method"] = None

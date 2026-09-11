@@ -149,3 +149,27 @@ def test_reviewed_table_never_lends_the_parent_documents_to_a_separate_permissio
     assert not visitor.get("required_documents")
     assert tstation.field_status(visitor)["required_documents"] == "missing"
     assert visitor["confidence_level"] == "Medium"
+
+
+def test_side_field_finding_still_strips_visa_only_cells_from_a_visa_free_record():
+    guidance = {
+        "disposition": "VISA_EXEMPT", "requirement_detail": "conditional_visa_free",
+        "visa_category": "No visa needed", "source_url": PAGE, "permitted_stay_days": 90,
+        "processing_time": "5 business days", "validity": "90 days", "entries": "multiple",
+    }
+    provenance = {"fields": ["disposition"], "source_url": PAGE, "verified_at": "2026-09-11",
+                  "verifier": "ai", "note": "Reviewed the official page: visa-free for 90 days.",
+                  "quote": "Visa-free for 90 days."}
+    clean = tstation.records_for_route(ROUTE, guidance, provenance=provenance, valid_until=FRESHNESS)[0]
+    side = tstation.records_for_route(ROUTE, guidance, provenance=provenance, valid_until=FRESHNESS,
+                                      disputed_fields=["processing_time"])[0]
+    for f in ("processing_min_days", "processing_max_days", "validity_duration", "entries"):
+        assert clean.get(f) in (None, ""), f
+        assert side.get(f) in (None, ""), f
+    assert side["confidence_level"] == "Medium" and side["_evidence_low"] is False
+
+
+def test_funds_and_accommodation_findings_are_material():
+    assert tstation.material_disputes(["financial_evidence"]) == ["financial_evidence"]
+    assert tstation.material_disputes(["accommodation_evidence"]) == ["accommodation_evidence"]
+    assert tstation.material_disputes(["processing_time", "notes"]) == []
