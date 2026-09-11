@@ -110,7 +110,7 @@ def test_sqlite_canonical_read_keeps_issues_pending_dates_and_history(data,store
   l=data[1][0]
   db.add(KimiRouteGuidanceCache(cache_key=l['cache_key'],route=deepcopy(l['route']),guidance=deepcopy(l['raw_guidance']),verification={'detail_pending':pending},fresh_until=datetime(2099,1,1,tzinfo=timezone.utc),status='KIMI_PRIMARY'))
   db.add(DatabaseChangeLog(cache_key=l['cache_key'],action='add',origin='fixture',changes={'retained':True}))
-  if issue:db.add(DatabaseIssueReport(cache_key=l['cache_key'],route=deepcopy(l['route']),field='processing_time',status='open',reported_by='freshness_monitor',proposal={'fields':{'processing_time':{'record_holds':'4 working days'}}}))
+  if issue:db.add(DatabaseIssueReport(cache_key=l['cache_key'],route=deepcopy(l['route']),field='government_fee',status='open',reported_by='freshness_monitor',proposal={'fields':{'government_fee':{'record_holds':'4 working days'}}}))
   db.commit()
   def snap():return {m.__name__:[{col.name:deepcopy(getattr(r,col.name)) for col in m.__table__.columns} for r in db.scalars(select(m))] for m in (KimiRouteGuidanceCache,DatabaseIssueReport,DatabaseChangeLog)}
   before=snap();out=kp.get_route_guidance(db,l['route']);assert out['cached']

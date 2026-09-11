@@ -126,7 +126,7 @@ def test_canonical_reader_rebuilds_workflow_without_store_writes(data,stores,mon
         for layer in layers:
             db.add(KimiRouteGuidanceCache(cache_key=layer['cache_key'],route=deepcopy(layer['route']),guidance=deepcopy(layer['raw_guidance']),verification={'fixture':'unchanged'},fresh_until=datetime(2099,1,1,tzinfo=timezone.utc),status='KIMI_PRIMARY'))
             db.add(DatabaseChangeLog(cache_key=layer['cache_key'],action='add',origin='fixture',changes={'history':'retained'}))
-            if with_open_issue:db.add(DatabaseIssueReport(cache_key=layer['cache_key'],route=deepcopy(layer['route']),field='processing_time',status='open',reported_by='freshness_monitor',proposal={'fields':{'processing_time':{'record_holds':'7 calendar days'}}}))
+            if with_open_issue:db.add(DatabaseIssueReport(cache_key=layer['cache_key'],route=deepcopy(layer['route']),field='government_fee',status='open',reported_by='freshness_monitor',proposal={'fields':{'government_fee':{'record_holds':'7 calendar days'}}}))
         db.commit()
         def snapshot():
             return {model.__name__:[{col.name:deepcopy(getattr(r,col.name)) for col in model.__table__.columns} for r in db.scalars(select(model))] for model in (KimiRouteGuidanceCache,DatabaseIssueReport,DatabaseChangeLog)}

@@ -131,7 +131,7 @@ def test_actual_reader_order_and_unchanged_database(data,previews,stores,monkeyp
   for l in layers:
    db.add(KimiRouteGuidanceCache(cache_key=l['cache_key'],route=deepcopy(l['route']),guidance=deepcopy(l['raw_guidance']),verification={'legacy':'unchanged'},fresh_until=datetime(2099,1,1,tzinfo=timezone.utc),status='KIMI_PRIMARY'))
    db.add(DatabaseChangeLog(cache_key=l['cache_key'],action='add',origin='fixture',changes={'history':'preserved'}))
-   if issue:db.add(DatabaseIssueReport(cache_key=l['cache_key'],route=deepcopy(l['route']),field='processing_time',status='open',reported_by='freshness_monitor',proposal={'fields':{'processing_time':{'record_holds':'1 hour'}}}))
+   if issue:db.add(DatabaseIssueReport(cache_key=l['cache_key'],route=deepcopy(l['route']),field='government_fee',status='open',reported_by='freshness_monitor',proposal={'fields':{'government_fee':{'record_holds':'1 hour'}}}))
   db.commit()
   def snapshot():return {m.__name__:[{col.name:deepcopy(getattr(row,col.name)) for col in m.__table__.columns} for row in db.scalars(select(m))] for m in (KimiRouteGuidanceCache,DatabaseIssueReport,DatabaseChangeLog)}
   before=snapshot()
