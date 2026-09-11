@@ -547,3 +547,117 @@ def test_verdict_rules_accept_plain_requirement_wording(sentence):
 def test_verdict_rules_still_refuse_unnamed_or_contrary_sentences(sentence, nat):
     from scripts.convert_reviewed_general_batch import _decision_supported
     assert not _decision_supported('VISA_REQUIRED', [sentence], nat)
+
+
+# Every quote below is a literal passage from a captured official page of the
+# 2026-09-11 station batch; each case is one converter rule.
+@pytest.mark.parametrize('value,quotes,nat', [
+    # Demonym inflection: "canadienses" is Canada; Spanish "no necesitan un visado".
+    ('VISA_EXEMPT', ['Los ciudadanos canadienses no necesitan un visado Schengen para estancias en el área Schengen de hasta 90 días (en cualquier período de 180 días).'], 'CAN'),
+    # Contraction and "one of the following" beside the nationality's own line.
+    ('VISA_EXEMPT', ['a US national or permanent resident', 'You don’t need a visa or an eTA to travel to Canada if you are one of the following:'], 'USA'),
+    # "do not need to apply for a visa".
+    ('VISA_EXEMPT', ['Japanese Nationals do not need to apply for a visa to travel to Singapore for leisure/business.'], 'JPN'),
+    # "generally not required" with an unrelated category exception.
+    ('VISA_EXEMPT', ['A visa is generally not required for Canadian citizens, except those Canadians that fall under nonimmigrant visa categories E, K, S, or V as provided in paragraphs (h), (l), and (m) of this section and 22 CFR 41.2.'], 'CAN'),
+    # A long comma-separated list line beside a "following countries" sentence.
+    ('VISA_EXEMPT', ['Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia',
+                     'Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*.'], 'ESP'),
+    # "List of countries whose citizens ... exempt from the requirement to obtain a visa".
+    ('VISA_EXEMPT', ['United States of America', 'List of countries whose citizens with all types of passports are unilaterally exempt from the requirement to obtain a visa to enter the Republic of Armenia. They can stay in the territory of the Republic of Armenia up to 180 days per year.'], 'USA'),
+    # "these countries" and "do not need to apply for visas".
+    ('VISA_EXEMPT', ['Singapore', 'Citizens of these countries, who hold the appropriate passports, do not need to apply for visas in advance when traveling to China for short terms.'], 'SGP'),
+    # "visa requirements are waived" with an inline comma list naming Hong Kong.
+    ('VISA_EXEMPT', ['Guyana, Honduras, Hong Kong (HKSAR or HK COF I), Hungary, Iceland', 'In accordance with official international visa regulation agreements, Bahamian visa requirements are waived for citizens of the following countries who wish to visit and remain in The Bahamas for a period not exceeding three (3) months or eight (8) months as each individual agreement may dictate:'], 'HKG'),
+    # A country label heading its own entry.
+    ('VISA_EXEMPT', ['Canada: Official passport holders are required to have visa to enter Türkiye. Ordinary passport holders are exempted from visa up to 90 days in any 180-day period.'], 'CAN'),
+    ('VISA_EXEMPT', ['Hong Kong SAR passport . Do not require visa, may stay up to 90 days.'], 'HKG'),
+    # The previous sentence names the nationality; the rule sentence brings no subject of its own.
+    ('VISA_ON_ARRIVAL', ['U.S. citizens are not required to apply for a visa before traveling to the UAE. A visa will be issued upon entry, allowing a maximum stay of 90 days non-renewable, whether continuously or intermittently, within 180 days calculated from the date of first entry.'], 'USA'),
+    # Capitalised USA in a space-separated list, "not requiring a visitor visa".
+    ('VISA_EXEMPT', ['COUNTRIES NOT REQUIRING A VISITOR VISA TO ENTER VANUATU (EXEMPTED COUNTRIES)', 'St Lucia Trinidad & Tobago Uruguay St Vincent & Grenadines USA'], 'USA'),
+    # Slovak, Bosnian, Dutch, Portuguese and French wording.
+    ('VISA_EXEMPT', ['Spojené štáty americké', 'Krajiny, ktorých štátni príslušníci nepodliehajú vízovej povinnosti pri vstupe na územie SR:'], 'USA'),
+    ('VISA_EXEMPT', ['Državljani Sjedinjenih Američkih Država izuzeti su od viznog režima prilikom ulaska, izlaska ili prelaska preko teritorije Bosne i Hercegovine do 90 dana, u periodu od šest mjeseci, počevši od dana prvog ulaska.'], 'USA'),
+    ('VISA_EXEMPT', ['Reizigers vanuit de Verenigde Staten, Nederland, Belgiё, Frankrijk en Canada zullen binnenkort visumvrij naar Suriname kunnen afreizen.'], 'USA'),
+    ('VISA_EXEMPT', ['EUA (Estados Unidos da América)', 'Cidadãos dos seguintes países e territórios podem entrar e permanecer em São Tomé e Príncipe por um período máximo de 15 dias sem visto, com possibilidade de prorrogação até 90 dias, desde que cumpram os requisitos de imigração:'], 'USA'),
+    ('VISA_REQUIRED', ['ETATS-UNIS D\'AMERIQUE', 'Sous réserve des accords bilatéraux et ou multilatéraux, l’entrée des ressortissants des pays ci-après listés est soumise à l\'obtention d\'un visa.'], 'USA'),
+    # Vietnamese name of the Republic of Korea and Chinese "泰方".
+    ('VISA_EXEMPT', ['Về việc miễn thị thực cho công dân các nước: Cộng hòa Liên bang Đức, Cộng hòa Pháp, Cộng hòa I-ta-li-a, Vương quốc Tây Ban Nha, Liên hiệp Vương quốc Anh và Bắc Ai-len, Liên bang Nga, Nhật Bản, Đại hàn Dân Quốc'], 'KOR'),
+    ('VISA_EXEMPT', ['届时，中方持公务普通护照、普通护照人员和泰方持普通护照人员，可免签入境对方国家单次停留不超过30日（每180日累计停留不超过90日）。'], 'THA'),
+    # UK entry clearance is a visa; the nationality is its own list line.
+    ('VISA_REQUIRED', ['Philippines', 'List of nationalities requiring entry clearance prior to travel to the UK as a Visitor, or for any other purpose for less than six months'], 'PHL'),
+    # An ETA list entry longer than a short line, beside "List of nationalities requiring an ETA".
+    ('ELECTRONIC_AUTHORIZATION_REQUIRED', ['Those who hold a passport issued by Taiwan that includes in it the number of the identification card issued by the competent authority in Taiwan',
+                                          'List of nationalities requiring an Electronic Travel Authorisation (ETA) prior to travel to the UK pursuant to Appendix Electronic Travel Authorisation.'], 'TWN'),
+    # Hong Kong's pre-arrival registration for Taiwan residents and Taiwan's online visa for Hong Kong residents.
+    ('ELECTRONIC_AUTHORIZATION_REQUIRED', ['Chinese resident of Taiwan satisfying the following criteria can make use of this online service to apply for pre-arrival registration to visit the HKSAR:'], 'TWN'),
+    ('VISA_REQUIRED', ['香港或澳門居民現行可申請網簽或入出境許可證來臺，'], 'HKG'),
+    # French eVisitor sentence names French passports through the inflected demonym.
+    ('ELECTRONIC_AUTHORIZATION_REQUIRED', ['Visa eVisitor pour les détenteurs de passeports européens (y compris français) et autres nationalités éligibles'], 'FRA'),
+])
+def test_verdict_rules_read_official_wording_from_the_station_batch(value, quotes, nat):
+    from scripts.convert_reviewed_general_batch import _decision_supported
+    assert _decision_supported(value, quotes, nat)
+
+
+@pytest.mark.parametrize('value,quotes,nat', [
+    # A universal statement never names the nationality.
+    ('VISA_REQUIRED', ['All foreign visitors to Papua New Guinea need a visa.'], 'USA'),
+    # VWP boilerplate about designated countries is not a verdict for Taiwan.
+    ('ELECTRONIC_AUTHORIZATION_REQUIRED', ['permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa.'], 'TWN'),
+    # A list line beside a sentence that is not general does not prove an exemption.
+    ('VISA_EXEMPT', ['Hong Kong SAR', 'This Consulate does not issue Electronic Visas, e-visa, Visa On Arrival, etc.'], 'HKG'),
+    # A label lends its nationality only to a sentence with no subject of its own.
+    ('VISA_EXEMPT', ['Information for American citizens. Canadian citizens may enter without a visa.'], 'USA'),
+    ('VISA_EXEMPT', ['Canada: Nationals of Japan are exempted from visa up to 90 days.'], 'CAN'),
+    # The group rule needs a group the nationality belongs to, without a carve-out.
+    ('VISA_EXEMPT', ['Visa is not required for a stay of less than one (1) month for ASEAN nationals except Myanmar.'], 'IND'),
+    ('VISA_EXEMPT', ['Visa is not required for a stay of less than one (1) month for ASEAN nationals except Indonesia.'], 'IDN'),
+    ('VISA_EXEMPT', ['EU-Bürger benötigen generell kein Visum für die Einreise nach Deutschland.'], 'USA'),
+    # A Spanish verb is not the country.
+    ('VISA_REQUIRED', ['Para entrar se usa el visado que requiere visa consular.'], 'USA'),
+    # Vietnamese "không cần xin Visa" says no visa is needed; an exemption for other passport types is not a requirement.
+    ('VISA_REQUIRED', ['Các trường hợp không cần xin Visa vào Hàn Quốc', 'Công dân Việt Nam có Hộ chiếu công vụ, Hộ chiếu ngoại giao và thẻ APEC (đi cùng hộ chiếu phổ thông) nếu đi dưới 90 ngày'], 'VNM'),
+])
+def test_verdict_rules_still_refuse_unnamed_grouped_or_borrowed_sentences(value, quotes, nat):
+    from scripts.convert_reviewed_general_batch import _decision_supported
+    assert not _decision_supported(value, quotes, nat)
+
+
+@pytest.mark.parametrize('value,quotes,nat', [
+    ('VISA_EXEMPT', ['Visa is not required for a stay of less than one (1) month for ASEAN nationals except Myanmar. Visas required for duration of stay exceeds (1) month except for Brunei and Singapore nationals.'], 'IDN'),
+    ('VISA_EXEMPT', ['Visa tidak diperlukan untuk tempoh tinggal kurang daripada satu (1) bulan bagi warganegara negara-negara ASEAN kecuali Myanmar.'], 'THA'),
+    ('VISA_EXEMPT', ['EU-Bürger benötigen generell kein Visum für die Einreise nach Deutschland.'], 'FRA'),
+])
+def test_group_membership_resolves_asean_and_eu_against_the_membership_table(value, quotes, nat):
+    from scripts.convert_reviewed_general_batch import _decision_supported
+    explain = []
+    assert _decision_supported(value, quotes, nat, explain=explain)
+    assert explain and explain[-1].startswith('group membership')
+
+
+def test_quotes_split_across_one_page_sentence_or_table_row_are_read_together():
+    """The captured page shows where the reviewer cut: two quotes inside one
+    sentence, or a country line and its verdict cell in one table row, are one
+    passage; a country line on one page and a rule on another are not."""
+    from scripts.convert_reviewed_general_batch import _decision_supported
+    page = ('Nationals holding valid ordinary passports of 48 countries, namely Brunei, France, Germany, Australia, Poland, '
+            'Portugal, Greece, Cyprus and Croatia, are exempted from visa requirement if coming to China for the purpose of '
+            'business, tourism, family or friends visits, exchange and transit. They can stay in China for no more than 30 days.')
+    quotes = ['Nationals holding valid ordinary passports of 48 countries, namely Brunei, France, Germany, Australia, Poland',
+              'are exempted from visa requirement if coming to China for the purpose of business, tourism, family or friends visits, exchange and transit.']
+    assert not _decision_supported('VISA_EXEMPT', quotes, 'AUS')
+    assert _decision_supported('VISA_EXEMPT', quotes, 'AUS', pages=[('p1', page), ('p1', page)])
+    table = 'VISA REQUIREMENTS\nUNITED KINGDOM\nVisa required\nUNITED STATES OF AMERICA\nNO visa required for 6 months\nURUGUAY\nVisa required\n'
+    row = ['UNITED STATES OF AMERICA', 'NO visa required for 6 months']
+    assert _decision_supported('VISA_EXEMPT', row, 'USA', pages=[('p2', table), ('p2', table)])
+    # The cell of another row does not travel: a line break separates the rows.
+    wrong = ['UNITED KINGDOM', 'NO visa required for 6 months']
+    assert not _decision_supported('VISA_EXEMPT', wrong, 'GBR', pages=[('p2', table), ('p2', table)])
+    # A list line proves a general sentence only on the same captured page.
+    rule = 'Citizens of the following states, holders of all types of passports, do not need visas for the entry.'
+    assert not _decision_supported('VISA_EXEMPT', ['United States of America', rule], 'USA',
+                                   pages=[('p3', 'United States of America\n'), ('p4', rule)])
+    assert _decision_supported('VISA_EXEMPT', ['United States of America', rule], 'USA',
+                               pages=[('p5', rule + '\nCanada\nUnited States of America\n')] * 2)

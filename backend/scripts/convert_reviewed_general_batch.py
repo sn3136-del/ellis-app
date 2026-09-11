@@ -75,12 +75,14 @@ _EXTRA_ALIASES = {
     'HKG': ('гонконг', 'hong-kong', 'hongkong', '홍콩', '香港', 'hồng kông', 'ฮ่องกง', 'هونغ كونغ'),
     'TWN': ('тайвань', 'taïwan', 'taiwán', '대만', '台灣', '台湾', 'đài loan', 'ไต้หวัน', 'تايوان'),
     'JPN': ('япония', 'japon', 'japón', 'japão', 'giappone', '일본', '日本', 'nhật bản', 'ญี่ปุ่น', 'jepang', 'اليابان', 'japonya'),
-    'KOR': ('корея', 'республика корея', 'corée', 'corea', 'coreia', '한국', '대한민국', '韓国', '韩国', '韓國', 'hàn quốc', 'เกาหลี', 'korea selatan', 'كوريا', 'güney kore'),
-    'USA': ('сша', 'соединенные штаты', 'états-unis', 'etats-unis', 'estados unidos', 'stati uniti', 'vereinigte staaten', '미국', 'アメリカ', '米国', '美国', '美國', 'hoa kỳ', 'สหรัฐ', 'amerika serikat', 'الولايات المتحدة', 'amerika birleşik devletleri'),
-    'THA': ('таиланд', 'thaïlande', 'tailandia', 'tailândia', '태국', 'タイ', '泰国', '泰國', 'thái lan', 'ไทย', 'تايلاند', 'tayland'),
+    'KOR': ('корея', 'республика корея', 'corée', 'corea', 'coreia', '한국', '대한민국', '韓国', '韩国', '韓國', 'hàn quốc', 'đại hàn dân quốc', 'đại hàn', 'เกาหลี', 'korea selatan', 'كوريا', 'güney kore'),
+    'USA': ('сша', 'соединенные штаты', 'états-unis', 'etats-unis', 'estados unidos', 'stati uniti', 'vereinigte staaten', '미국', 'アメリカ', '米国', '美国', '美國', 'hoa kỳ', 'สหรัฐ', 'amerika serikat', 'الولايات المتحدة', 'amerika birleşik devletleri',
+            'usa nationals', 'usa national', 'usa citizens', 'usa citizen', 'usa passport', 'the usa', 'ee.uu', 'eeuu', 'spojené štáty americké', 'spojené státy americké',
+            'sjedinjene američke države', 'sjedinjenih američkih država', 'verenigde staten', 'stany zjednoczone', 'アメリカ合衆国'),
+    'THA': ('таиланд', 'thaïlande', 'tailandia', 'tailândia', '태국', 'タイ', '泰国', '泰國', '泰方', 'thái lan', 'ไทย', 'تايلاند', 'tayland'),
     'SGP': ('сингапур', 'singapour', 'singapur', 'singapura', '싱가포르', 'シンガポール', '新加坡', 'สิงคโปร์', 'سنغافورة'),
     'MYS': ('малайзия', 'malaisie', 'malasia', 'malásia', '말레이시아', 'マレーシア', '马来西亚', '馬來西亞', 'มาเลเซีย', 'ماليزيا', 'malezya'),
-    'GBR': ('великобритания', 'соединенное королевство', 'royaume-uni', 'reino unido', 'regno unito', 'vereinigtes königreich', 'großbritannien', '영국', 'イギリス', '英国', '英國', 'anh', 'vương quốc anh', 'สหราชอาณาจักร', 'britania raya', 'inggris', 'المملكة المتحدة', 'birleşik krallık', 'great britain'),
+    'GBR': ('великобритания', 'соединенное королевство', 'royaume-uni', 'reino unido', 'regno unito', 'vereinigtes königreich', 'großbritannien', '영국', 'イギリス', '英国', '英國', 'anh', 'vương quốc anh', 'สหราชอาณาจักร', 'britania raya', 'inggris', 'المملكة المتحدة', 'birleşik krallık', 'great britain', 'britain', 'royaume uni', 'verenigd koninkrijk', 'velika britanija', 'ujedinjeno kraljevstvo', 'spojené kráľovstvo', 'wielka brytania'),
     'RUS': ('россия', 'russie', 'rusia', 'rússia', '러시아', 'ロシア', '俄罗斯', '俄羅斯', 'nga', 'liên bang nga', 'รัสเซีย', 'روسيا', 'rusya'),
     'AUS': ('австралия', 'australie', 'australien', '호주', 'オーストラリア', '澳大利亚', '澳大利亞', '澳洲', 'úc', 'ออสเตรเลีย', 'أستراليا', 'avustralya'),
     'IDN': ('индонезия', 'indonésie', 'indonesien', '인도네시아', 'インドネシア', '印度尼西亚', '印尼', 'อินโดนีเซีย', 'إندونيسيا', 'endonezya'),
@@ -142,9 +144,20 @@ def _name_pattern(nat):
     return pattern
 
 
+# Abbreviations that are the nationality only as capitals: "USA" is the
+# country, "usa" is a Spanish verb. Read on the un-casefolded text.
+_CAPITAL_TOKENS = {'USA': (r'USA', r'EUA', r'EE\.?UU\.?', r'U\.S\.A\.?')}
+
+
 def _named(text, nat):
-    """The normalized text names the nationality (alias or inflected demonym)."""
-    return bool(_name_pattern(nat).search(_norm(text)))
+    """The text names the nationality: a fixed alias, an inflected demonym
+    (after normalization) or a capitalised abbreviation (as written)."""
+    text = str(text or '')
+    if _name_pattern(nat).search(_norm(text)):
+        return True
+    tokens = _CAPITAL_TOKENS.get(nat)
+    return bool(tokens and re.search(r'(?<![A-Za-z])(?:' + '|'.join(tokens) + r')(?![A-Za-z])',
+                                     unicodedata.normalize('NFKC', text)))
 
 
 def _today():
@@ -321,7 +334,8 @@ def _check_proof(proof, sources, route, field, value, *, product=None):
                 value, evidence, sources, route, product):
             raise PatchRejected('disposition: no scoped consular-product eligibility evidence')
     else:
-        _check_value(field, value, passages, route, product)
+        pages = [(item['source_id'], sources[item['source_id']]['text']) for item in evidence]
+        _check_value(field, value, passages, route, product, pages=pages)
     if any(k in proof for k in ('effective_from', 'effective_to', 'policy_interval_evidence')):
         if field != 'disposition':
             raise PatchRejected('Policy bounds belong to the reviewed visa disposition')
@@ -367,68 +381,288 @@ _VERDICT_RULES = {
     # A sentence that states the rule, and the words that flip it.
     'VISA_REQUIRED': (r"(?:e-?visa|visa)s?\b[^.;\n]{0,60}\b(?:is |are )?(?:required|mandatory|needed|necessary|obligatoire|obligatorio|necesario|bắt buộc)|"
                       r"\b(?:need|needs|require|requires|must have|must hold|must obtain|are required to hold|are required to obtain|is subject to|are subject to)\b (?:a |an |the )?(?:valid |prior |entry |tourist |schengen |visitor |short[- ]stay )*(?:e-?visa|visa)s?\b|"
+                      r"\b(?:needs?|requir(?:es|ing|ed))\b (?:an? )?entry clearance|entry clearance \(a visa\)|"
                       r"\bnecesita(?:n|r[áa]n?)? (?:de )?(?:un |el )?visado|\brequiere(?:n)? (?:de )?(?:un |el )?visado|\bont besoin d'un visa|\bdoivent (?:obtenir|demander|solliciter) un visa|\bvisa (?:est |sera )?(?:requis|nécessaire|exigé)|"
+                      r"\b(?:soumis|subordonné)e?s? à l'obtention d'un visa|\bmunie?s? d'un visa|"
                       r"\bnecessitano (?:di )?un visto|\bvisto (?:è )?(?:richiesto|necessario|obbligatorio)|\bbenötigen ein visum|\bvisumpflichtig\b|\bprecisam de visto|\bvisto (?:é )?(?:obrigatório|necessário)|"
-
                       r"\b(?:need|needs|require|requires|must|shall|should|have to|has to|required to|doivent|doit|deben|debe|phải|cần)\b[^.;\n]{0,40}"
                       r"\b(?:obtain|hold|have|apply for|possess|be in possession of|get|obtenir|être munis?|obtener|xin|có)\b[^.;\n]{0,40}\b(?:e-?visa|visa|thị thực)\b|"
-                      r"\b(?:can|may|eligible to|entitled to) apply for (?:an? )?(?:e-?visa|electronic visa)|"
-                      r"\beligible for (?:the |an? )?(?:unified |electronic )?e-?visa|"
-                      r"виз[аы] по всем|требуется виза|необходима виза|нужна виза|оформить визу|получить визу|"
-                      r"需要办理签证|需申请签证|应当申请签证|必须持有签证|需要签证|事前に査証|ビザが必要|签证申请|비자.{0,6}필요|ต้องขอวีซ่า|wajib memiliki visa|harus memiliki visa|يجب الحصول على تأشيرة",
-                      r"visa[- ]free|no visa|without (?:a )?visa|exempt|not required|do(?:es)? not (?:require|need)|без виз|sans visa|sin visa|miễn thị thực|"
+                      r"\b(?:can|may|eligible to|entitled to) apply (?:for )?(?:an? |the )?(?:\w+ ){0,2}(?:e-?visa|electronic visa|visa)\b|"
+                      r"\bmay be (?:granted|issued) (?:an? )?e-?visa|"
+                      r"\beligible for (?:the |an? )?(?:\w+ ){0,2}e-?visa|"
+                      r"\b(?:grant|granted|issue|issued)\b[^.;\n]{0,30}\b(?:visit|tourist|entry|e-?)visas?\b[^.;\n]{0,80}\b(?:to|for) (?:foreigners|nationals|citizens|holders)|"
+                      r"виз[аы] по всем|требуется виза|необходима виза|нужна виза|оформить визу|получить визу|должны иметь[^.;\n]{0,30}визу|"
+                      r"需要办理签证|需申请签证|应当申请签证|必须持有签证|需要签证|事前に査証|ビザが必要|签证申请|網簽|网签|비자.{0,6}필요|ต้องขอวีซ่า|wajib memiliki visa|harus memiliki visa|يجب الحصول على تأشيرة",
+                      r"visa[- ]free|no visa|without (?:a )?visa|exempt|not required|do(?:es)? not (?:require|need)|\b(?:visa )?(?:on|upon) arrival\b|без виз|sans visa|sin visa|miễn thị thực|không cần|không phải xin|không yêu cầu|"
                       r"免签|无需签证|免办签证|査証免除|ビザ免除|무비자|면제|bebas visa|ยกเว้นวีซ่า"),
-    'VISA_EXEMPT': (r"visa[- ]free|visa[- ]exempt|exempt(?:ed|ion)? from (?:the )?(?:visa|obtaining a visa|visa requirement)|do(?:es)? not (?:require|need) (?:a |an |any )?(?:entry |tourist )?visa|"
-                    r"without (?:a |an |the need for a )?(?:entry |tourist )?visa|no visa (?:is )?(?:required|needed|necessary)|not required to (?:obtain|hold) (?:a |an )?visa|"
-                    r"без виз|безвизов|sans visa|dispensés? de visa|exemptés? de visa|sin visa|exento|exención de visa|isento|isenção de visto|visumfrei|ohne visum|senza visto|"
-                    r"miễn thị thực|ยกเว้นวีซ่า|bebas visa|免签|无需签证|免办签证|查証免除|査証免除|ビザ免除|ビザなし|무비자|사증면제|معفى|إعفاء من التأشيرة|vizeden muaf",
+    'VISA_EXEMPT': (r"visa[- ]free|visa[- ]exempt|exempt(?:ed|ion)? from (?:the |a |an )?(?:(?:short[- ]stay|short[- ]term|entry|tourist|visitor|schengen|port of entry) )?(?:visa|obtaining a visa|visas?(?: requirements?)?)|"
+                    r"exempt(?:ed)? from (?:the )?(?:requirement|obligation|need) (?:to obtain|to hold|to get|of obtaining|of holding) (?:a |an )?visa|"
+                    r"do(?:es)? not (?:require|need) (?:a |an |any )?(?:entry |tourist |visitor )?visa|do(?:es)? not (?:require|need) to (?:apply for|obtain|hold|have) (?:a |an )?visa|"
+                    r"do(?:es)?n['’]t (?:require|need) (?:a |an |any |to (?:apply for|obtain|hold|have) (?:a |an )?)?(?:entry |tourist |visitor )?visa|"
+                    r"without (?:a |an |the need for a )?(?:entry |tourist )?visa|no visa (?:is )?(?:required|needed|necessary)|not required to (?:obtain|hold|apply for) (?:a |an )?visa|"
+                    r"visa (?:is |are )?(?:generally |normally |usually )?not required|not requir(?:ing|ed to (?:have|hold|obtain)) (?:a |an )?(?:visitor |tourist |entry )?visa|"
+                    r"visa(?: requirements?)? (?:is |are )?waived|need only (?:a )?valid passport|"
+                    r"без виз|безвизов|sans visa|dispensée?s? de visa|exemptée?s? de visa|n['’](?:ont|avez|a|avons) pas besoin (?:d['’]un |de )?visa|"
+                    r"sin visa(?:do)?|exent[oa]s? de visa(?:do)?|exención de visa(?:do)?|exonerad[oa]s? de visa|no (?:se )?requiere(?:n)?(?: de)? (?:un |una |el |la )?visa(?:do)?|no necesita(?:n)?(?: de)? (?:un |una |el |la )?visa(?:do)?|"
+                    r"isent[oa]s? de vistos?|isenção de visto|sem visto|não precisam? de visto|visumfrei|visumsfrei|ohne visum|kein visum|senza visto|esent[ie] dal visto|non hanno bisogno di visto|"
+                    r"visumvrij|geen visum|nepodliehajú vízovej povinnosti|nepodléhají vízové povinnosti|bez víz|izuzet[ia]? (?:su |je )?od vizn(?:og|e)|bez vize|ne trebaju vizu|oslobođeni (?:su )?(?:od )?viz|"
+                    r"miễn thị thực|không cần (?:xin )?(?:visa|thị thực)|ยกเว้นวีซ่า|bebas visa|visa tidak diperlukan|tidak (?:memerlukan|perlu) visa|免签|无需签证|免办签证|查証免除|査証免除|ビザ免除|ビザなし|무비자|사증면제|معفى|إعفاء من التأشيرة|vizeden muaf",
                     r"\bnot (?:visa[- ]free|exempt|eligible)|do(?:es)? not (?:qualify|benefit)|unless|except(?:ion)? (?:for|of)?\s*(?:holders|nationals|citizens) of|"
-                    r"(?:visa|e-?visa) (?:is |are )?(?:required|mandatory)|must (?:obtain|hold|apply)"),
-    'ELECTRONIC_AUTHORIZATION_REQUIRED': (r"\b(?:eta|etas|esta|k-eta|evisitor|etias|nzeta|e-?ta)\b|electronic travel authori[sz]ation|travel authori[sz]ation|电子旅行授权|電子旅行許可|전자여행허가",
+                    r"(?<!no )(?<!sin )(?<!sans )(?:visa|e-?visa) (?:is |are )?(?:required|mandatory)|must (?:obtain|hold|apply)"),
+    'ELECTRONIC_AUTHORIZATION_REQUIRED': (r"\b(?:eta|etas|esta|k-eta|evisitor|etias|nzeta|e-?ta)\b|electronic travel authori[sz]ation|electronic travel authority|travel authori[sz]ation|pre-arrival registration|电子旅行授权|電子旅行許可|전자여행허가",
                                           r"not required|exempt(?:ed)? from (?:the )?(?:k-eta|eta|esta)|without (?:an? )?(?:k-eta|eta|esta)|do(?:es)? not need"),
-    'VISA_ON_ARRIVAL': (r"visa[- ]on[- ]arrival|on arrival|upon arrival|at the port of entry|落地签|到着ビザ|도착비자|e-?voa",
+    'VISA_ON_ARRIVAL': (r"visa[- ]on[- ]arrival|on arrival|upon arrival|upon entry|on entry|at the port of entry|at the (?:airport|border)|saat kedatangan|à l['’]arrivée|a la llegada|à chegada|по прибытии|落地签|落地簽|到着ビザ|도착비자|e-?voa",
                         r"not (?:available|eligible|issued)|no visa on arrival|cannot obtain"),
 }
 
+# Words that carry a verdict. A list entry (a country's own line in a list
+# or table) must not contain one; the rule sentence does.
+_RULE_WORDS = re.compile(r"visa|visado|visto|visum|víz|viz|виз|签证|簽證|査証|查証|ビザ|비자|thị thực|วีซ่า|تأشيرة|"
+                         r"\b(?:eta|etas|esta|etias|k-eta|nzeta|evisitor)\b|exempt|arrival|免签|免簽|entry clearance|travel authori", re.I)
+# A sentence that speaks about a list of nationalities rather than one.
+_GENERAL_RE = re.compile(
+    r"\b(?:all|any|every|foreign nationals|foreigners|following countries|following states|listed below|eligible countries|countries/territories|"
+    r"the following|list of|lists? [a-z]\b|countries (?:that|which|who|whose|not|requiring|exempt|with|and regions|or regions|and territories)|"
+    r"\d+ countries|these countries|nationalities|in the table|table below|schedule|countries whose (?:citizens|nationals)|"
+    r"liste des pays|pays suivants|pays ci-après|ci-dessous|ci-après|ressortissants des pays|"
+    r"lista de (?:los )?pa[ií]ses|siguientes pa[ií]ses|pa[ií]ses siguientes|seguintes pa[ií]ses|pa[ií]ses cujos|"
+    r"staatenliste|folgenden? (?:staaten|länder)|daftar|negara(?:-negara)? berikut|krajiny, ktorých|список|следующих|danh sách|các nước)\b|"
+    r"以下|下列|上述|次の|下記|国持|\d+国|国・地域", re.I)
+# A sentence that introduces its own subject cannot borrow the previous
+# sentence's nationality.
+_OWN_SUBJECT_RE = re.compile(r"\b(?:nationals|citizens|holders|residents|ressortissants|ciudadanos|nacionales|cidadãos|citoyens|"
+                             r"staatsbürger|bürger|граждане) (?:of|de|du|des|d'|von|der)\b", re.I)
+_TERMINATOR_RE = re.compile(r"[.!?。！？;\n|]")
+# Sentence boundaries; "U.S." and " J." are abbreviations, not ends.
+_SENTENCE_SPLIT = re.compile(r"(?<=[.;!?])(?<![A-Z]\.[A-Z]\.)(?<!\s[A-Z]\.)\s+|\n+")
+
 
 def _list_line(quote, nat):
-    """A quote that is essentially the nationality's own line in a list."""
-    text = _norm(re.sub(r'^\s*(?:\d+[.)]|[-*•])\s*', '', quote))
-    return len(text) <= 60 and _named(text, nat)
+    """A quote that is essentially the nationality's own line in a list: a
+    short line, a run of names separated by commas, dashes or CJK
+    enumerators, or a longer table entry that carries no verdict word."""
+    raw = re.sub(r'^\s*(?:\d+[.)]|[-*•])\s*', '', str(quote or ''))
+    text = _norm(raw)
+    if not _named(raw, nat) or _RULE_WORDS.search(text):
+        return False
+    if len(text) <= 60:
+        return True
+    items = re.split(r'\s*(?:,|;|、|，|/|\||\s[-–—]\s|\s(?:and|und|et|y|e|dan|và|и)\s)\s*', text)
+    if len(items) >= 3 and all(len(item.strip()) <= 45 for item in items):
+        return True
+    return len(text) <= 160 and not re.search(r'[.!?。！？;:]', text[:-1])
 
 
-def _decision_supported(value, evidence_quotes, nat):
+def _page_index(text):
+    """Normalized page text with newlines kept, plus a whitespace-free copy
+    and the map from its offsets back to the kept text."""
+    kept = unicodedata.normalize('NFKC', str(text or '')).casefold().replace('\r', '\n')
+    kept = re.sub(r'[ \t\f\v]+', ' ', kept)
+    kept = re.sub(r'\s*\n\s*', '\n', kept)
+    stripped, back = [], []
+    for i, ch in enumerate(kept):
+        if not ch.isspace():
+            stripped.append(ch); back.append(i)
+    return kept, ''.join(stripped), back
+
+
+def _passages(evidence_quotes, pages):
+    """Group the quotes into passages. Without page texts each quote is its
+    own passage. With them, quotes are located on their captured page and two
+    quotes that the page shows inside one sentence or table row (no sentence
+    terminator or line break between them, at most 400 characters apart), or
+    as consecutive sentences (nothing but the terminator between them), are
+    read as one passage in page order, since the reviewer only split what the
+    page says in one breath. Each passage carries its page id and offset."""
+    if pages is None:
+        return [{'text': q, 'page': None, 'pos': None, 'parts': [{'text': q, 'page': None, 'pos': None}]}
+                for q in evidence_quotes]
+    located, indexes = [], {}
+    for order, (quote, (page_id, page_text)) in enumerate(zip(evidence_quotes, pages, strict=True)):
+        if page_id not in indexes:
+            indexes[page_id] = _page_index(page_text)
+        kept, stripped, back = indexes[page_id]
+        needle = re.sub(r'\s+', '', _norm(quote))
+        hits = [m.start() for m in re.finditer(re.escape(needle), stripped)][:200] if needle else []
+        located.append({'text': quote, 'page': page_id, 'order': order,
+                        'hits': [(back[at], back[at + len(needle) - 1] + 1) for at in hits]})
+    # A repeated cell ("No visa required.") is read at the occurrence that
+    # continues the line or sentence of a quote occurring once on that page
+    # (the country's own line), else at the nearest occurrence to one.
+    def rank(hit, anchors, kept):
+        best = None
+        for start, end in anchors:
+            if hit[0] >= end and hit[0] - end <= 400 and not _TERMINATOR_RE.search(kept[end:hit[0]]):
+                score = (0, hit[0] - end)
+            else:
+                score = (1, min(abs(hit[0] - start), abs(hit[0] - end)))
+            best = score if best is None or score < best else best
+        return best
+    for unit in located:
+        anchors = [other['hits'][0] for other in located
+                   if other is not unit and other['page'] == unit['page'] and len(other['hits']) == 1]
+        hits = unit['hits']
+        if not hits:
+            unit['pos'] = unit['end'] = None
+        elif len(hits) == 1 or not anchors:
+            unit['pos'], unit['end'] = hits[0]
+        else:
+            unit['pos'], unit['end'] = min(hits, key=lambda h: rank(h, anchors, indexes[unit['page']][0]))
+    for unit in located:
+        del unit['hits']
+        unit['parts'] = [{'text': unit['text'], 'page': unit['page'], 'pos': unit['pos']}]
+    located.sort(key=lambda u: (str(u['page']), u['pos'] if u['pos'] is not None else 10 ** 9, u['order']))
+    merged = []
+    for unit in located:
+        last = merged[-1] if merged else None
+        gap = (indexes[unit['page']][0][last['end']:unit['pos']]
+               if last and last['page'] == unit['page'] and last['pos'] is not None
+               and unit['pos'] is not None and unit['pos'] >= last['end'] else None)
+        if gap is not None and ((len(gap) <= 400 and not _TERMINATOR_RE.search(gap))
+                                or (len(gap) <= 20 and not gap.strip(' .!?。！？;:|\n'))):
+            # Across a line break the parts stay separate sentences, so a
+            # table cell can borrow the country line before it, never after.
+            joiner = '\n' if '\n' in gap else ' '
+            last['text'] = last['text'].rstrip() + joiner + unit['text'].lstrip()
+            last['end'] = unit['end']
+            last['parts'].extend(unit['parts'])
+            continue
+        merged.append(dict(unit))
+    return merged
+
+
+def _same_region(listed, unit):
+    """A list line proves a general sentence only on the same captured page,
+    within one list's reach of it."""
+    if unit['page'] is None:
+        return bool(listed)
+    return any(entry['page'] == unit['page'] and entry['pos'] is not None and unit['pos'] is not None
+               and abs(entry['pos'] - unit['pos']) <= 12000 for entry in listed)
+
+
+# Named groups an official page may use instead of the country, with the
+# membership checked against the group's own published list (europa.eu EU
+# member countries; asean.org member states, Timor-Leste admitted 2025).
+_GROUPS = {
+    'EU': (r"\b(?:eu|e\.u\.)(?:-bürger|-citizens| citizens| nationals| member states?| countries)?\b|european union|union européenne|unión europea|união europeia|"
+           r"europäischen? union|unione europea|европейского союза|uni eropa|liên minh châu âu",
+           {'AUT', 'BEL', 'BGR', 'HRV', 'CYP', 'CZE', 'DNK', 'EST', 'FIN', 'FRA', 'DEU', 'GRC', 'HUN', 'IRL', 'ITA', 'LVA', 'LTU',
+            'LUX', 'MLT', 'NLD', 'POL', 'PRT', 'ROU', 'SVK', 'SVN', 'ESP', 'SWE'}),
+    'ASEAN': (r"\basean\b|东盟|東盟|東南アジア諸国連合|아세안",
+              {'BRN', 'KHM', 'IDN', 'LAO', 'MYS', 'MMR', 'PHL', 'SGP', 'THA', 'VNM', 'TLS'}),
+}
+_EXCEPTION_RE = re.compile(r"\b(?:except(?:ing)?|excluding|other than|save for|sauf|excepto|salvo|kecuali|außer|tranne|exceto|osim|kromě|okrem)\b"
+                           r"\s*(?:for|of|de|des|pour|para|bagi|untuk)?\s*([^.;:\n]{0,80})", re.I)
+_ITEM_WORDS = re.compile(r"\b(?:nationals?|citizens?|holders?|passport holders?|passports?|the|of|ressortissants?|ciudadanos|nacionales|"
+                         r"cidadãos|warganegara|warga negara|negara|staatsangehörige)\b")
+
+
+def _carved_out(sentence, nat):
+    """The sentence excludes this nationality by name: a bare item right after
+    an exception word ("except Myanmar", "except for Brunei and Singapore
+    nationals"). A qualified subset ("except those Canadians who ...") is not
+    a carve-out of the nationality."""
+    for clause in _EXCEPTION_RE.finditer(str(sentence or '')):
+        for item in re.split(r"\s*(?:,|;|/|\s(?:and|or|und|et|y|e|dan|và|и)\s)\s*", clause.group(1)):
+            bare = _ITEM_WORDS.sub(' ', _norm(item)).strip(' ()')
+            if bare and len(bare) <= 30 and _named(bare, nat):
+                return True
+    return False
+
+
+def _group_member(sentence, nat):
+    """The sentence names a group the nationality belongs to and does not
+    carve the nationality out of it in the same sentence."""
+    low = _norm(sentence)
+    return any(nat in members and re.search(pattern, low, re.I) for pattern, members in _GROUPS.values()) \
+        and not _carved_out(sentence, nat)
+
+
+def _label(quote, nat):
+    """A quote that opens with the nationality as a label ("Canada: ...",
+    "Hong Kong SAR passport . ...") applies that label to every sentence;
+    returns the quote without its label, or None."""
+    quote = str(quote or '').strip()
+    parts = re.split(r'(?<=[.:：])(?<![A-Z]\.[A-Z]\.)(?<!\s[A-Z]\.)\s+|\n+', quote, maxsplit=1)
+    head = parts[0]
+    text = _norm(head).rstrip('.:： ')
+    if len(parts) < 2 or len(text) > 80 or not _named(head, nat) or _RULE_WORDS.search(text):
+        return None
+    if head.rstrip().endswith((':', '：')) or (len(text.split()) >= 2 and (head.rstrip().endswith('.') or '\n' in quote)):
+        return parts[1]
+    return None
+
+
+def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None):
     """Strict but shaped for real official pages: the nationality must be named
-    in the evidence (in the rule sentence, or as its own list line beside the
-    rule sentence) and a sentence of the evidence must state the rule without
-    flipping it in the same sentence."""
+    in the evidence (in the rule sentence, as a label or antecedent of it, or
+    as its own list line beside the rule sentence on the same page) and a
+    sentence of the evidence must state the rule without flipping it in the
+    same sentence. A group the nationality belongs to (EU, ASEAN) counts
+    only through the explicit membership table. `pages`, when given, is one
+    (page id, page text) pair per quote; `explain`, when given, is a list
+    that receives the path that decided."""
+    def decide(path):
+        if explain is not None:
+            explain.append(path)
+        return True
     from app.visa_snapshot.evidence_validator import supports_disposition, NEGATED_VISA_EXEMPTION
     passages = '\n'.join(evidence_quotes)
     named = _named(passages, nat)
     if value == 'CONDITIONAL':
         return named and bool(_CONDITION_RE.search(passages))
     if supports_disposition(passages, value, nationality=nat):
-        return True
-    if not named:
-        return False
+        return decide('validator: anchored statement')
     positive, negative = _VERDICT_RULES.get(value, (None, None))
     if not positive:
         return False
     if value == 'VISA_EXEMPT':
         negative = '(?:' + negative + ')|(?:' + NEGATED_VISA_EXEMPTION + ')'
-    listed = any(_list_line(q, nat) for q in evidence_quotes)
-    for sentence in re.split(r'(?<=[.;!?])\s+|\n+', passages):
-        sl = _norm(sentence)
-        if not re.search(positive, sl, re.I):
-            continue
-        if negative and re.search(negative, sl, re.I):
-            continue
-        sentence_named = _named(sl, nat)
-        general = bool(re.search(r'\b(?:all|any|every|foreign nationals|foreigners|following countries|following states|listed below|eligible countries|countries/territories)\b', sl))
-        if sentence_named or (listed and general) or (listed and value != 'VISA_EXEMPT'):
-            return True
+    units = _passages(evidence_quotes, pages)
+    listed = [part for unit in units for part in unit['parts'] if _list_line(part['text'], nat)]
+    others = [n for n in _EXTRA_ALIASES if n != nat]
+    seen_positive = False
+    for unit in units:
+        body = _label(unit['text'], nat)
+        labelled = body is not None
+        previous_named = False
+        for sentence in _SENTENCE_SPLIT.split(body if labelled else unit['text']):
+            sl = _norm(sentence)
+            sentence_named = _named(sentence, nat) and not _carved_out(sentence, nat)
+            if _carved_out(sentence, nat):
+                if explain is not None:
+                    explain.append('carved out by name: ' + sl[:120])
+                previous_named = False
+                continue
+            # A label or the previous sentence lends its nationality only to a
+            # sentence that brings no subject of its own.
+            borrowable = (not sentence_named and not _OWN_SUBJECT_RE.search(sl)
+                          and not any(_named(sentence, other) for other in others))
+            carried = borrowable and (labelled or previous_named)
+            previous_named = sentence_named or carried
+            if not re.search(positive, sl, re.I):
+                continue
+            seen_positive = True
+            if negative and re.search(negative, sl, re.I):
+                if explain is not None:
+                    explain.append('flipped in the same sentence: ' + sl[:120])
+                continue
+            if sentence_named:
+                return decide('named in the rule sentence: ' + sl[:120])
+            if carried:
+                return decide(('label' if labelled else 'previous sentence') + ' names the nationality: ' + sl[:120])
+            if _group_member(sentence, nat):
+                return decide('group membership: ' + sl[:120])
+            if listed and _same_region(listed, unit) and (_GENERAL_RE.search(sl) or value != 'VISA_EXEMPT'):
+                return decide('list line beside the rule sentence: ' + sl[:120])
+            if listed and explain is not None:
+                explain.append(('list line on another page or region' if not _same_region(listed, unit)
+                                else 'list line but the rule sentence is not general') + ': ' + sl[:120])
+    if explain is not None:
+        explain.append('rejected: ' + ('nationality never named' if not named else
+                                       'no rule sentence in the evidence' if not seen_positive else
+                                       'rule sentence does not name the nationality'))
     return False
-
 
 
 def _consular_product_eligibility_supported(value, evidence, sources, route, product):
@@ -503,11 +737,14 @@ def _consular_product_eligibility_supported(value, evidence, sources, route, pro
     return False
 
 
-def _check_value(field, value, passages, route, product):
+def _check_value(field, value, passages, route, product, pages=None):
     from app.visa_snapshot.evidence_validator import field_value_supported
     if field == 'disposition':
         quotes = [q for q in passages.split('\n') if q.strip()]
-        if not _decision_supported(value, quotes, route['passport_nationality']):
+        if pages is not None and len(pages) != len(quotes):
+            # A quote with a line break inside cannot keep its page pairing.
+            pages = None
+        if not _decision_supported(value, quotes, route['passport_nationality'], pages=pages):
             raise PatchRejected('disposition: evidence does not state this verdict for this nationality')
         return
     if field in ('permitted_stay_days', 'max_stay_days'):
