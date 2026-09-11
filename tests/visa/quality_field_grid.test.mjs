@@ -64,13 +64,20 @@ test('a genuinely missing stay keeps the gap mark even when stale wording rides 
   assert.ok(html.includes('✗'))
 })
 
-test('a visa-free record keeps Not applicable although validity wording is present', () => {
-  const rec = validityRecord('Up to 3 months at a time', {
+test('a visa-free record shows Not applicable: the backend sends no validity wording for it', () => {
+  const rec = validityRecord(null, {
     field_status: { validity_duration: 'not-applicable', validity_unit: 'not-applicable' } })
   const html = render(rec)
   assert.ok(html.includes(t('en', 'ops.notApplicable')))
-  assert.ok(!html.includes('Up to 3 months at a time'))
   assert.ok(!html.includes(t('en', 'ops.validityTextOnly')))
+})
+
+test('inapplicability stated in the destination words is shown under the Not applicable verdict', () => {
+  const rec = validityRecord('Not applicable. No ordinary travel is possible for US passports', {
+    field_status: { validity_duration: 'not-applicable', validity_unit: 'not-applicable' } })
+  const html = render(rec)
+  assert.ok(html.includes('No ordinary travel is possible for US passports'))
+  assert.ok(!html.includes('✓'))
 })
 
 test('a documented absence stated in the destination words shows that wording without a check', () => {

@@ -540,9 +540,13 @@ export function wordingFor(rec, cell, key) {
   // The backend sends the wording only when the cell shows it (filled by it,
   // pending review, or a documented absence stated in the destination's own
   // words), so any wording present is shown unless the cell cannot apply.
+  // The backend sends wording for an empty numeric cell only when the cell
+  // shows it: filled by it, pending review, or a documented absence or
+  // inapplicability stated in the destination's own words. A missing or
+  // optional-empty cell never carries wording.
   const st = rec?.field_status?.[cell]
-  return ((st === 'filled' || st === 'pending-review' || st === 'not-published') && rec[cell] == null
-    && typeof rec[key] === 'string' && rec[key].trim()) ? rec[key] : null
+  return ((st === 'filled' || st === 'pending-review' || st === 'not-published' || st === 'not-applicable')
+    && rec[cell] == null && typeof rec[key] === 'string' && rec[key].trim()) ? rec[key] : null
 }
 
 export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
@@ -3108,7 +3112,11 @@ function QualityWorkspace() {
               case 'visa_category':
                 return typeNames?.[rec.visa_type_name] || rec.visa_type_name
               case 'permitted_stay': case 'permitted_stay_days':
-                return wordingFor(rec, 'max_stay_duration', 'max_stay_text') || j(rec.max_stay_duration, unitName(rec.max_stay_unit))
+                // Beside a number the stored wording is richer (a rolling
+                // window, a per-entry qualifier), so the chip prefers it.
+                return wordingFor(rec, 'max_stay_duration', 'max_stay_text')
+                  || (rec.max_stay_duration != null && typeof rec.max_stay_text === 'string' && rec.max_stay_text.trim() ? rec.max_stay_text : null)
+                  || j(rec.max_stay_duration, unitName(rec.max_stay_unit))
               case 'government_fee':
                 return publishedFeeText({ amount: rec.visa_fee_amount, currency: rec.visa_fee_currency, qualifier: rec.visa_fee_qualifier }, { zeroLabel: `0 ${rec.visa_fee_currency || ''}`.trim(), fromLabel: t('db.feeFromPrefix') })
               case 'processing_time':

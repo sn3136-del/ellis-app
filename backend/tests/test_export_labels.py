@@ -153,7 +153,9 @@ def test_wording_predicates_follow_the_owner_rule():
         assert tstation.field_status(stay)['max_stay_duration'] == 'not-published'
     val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': 'Not applicable, no visa issued'}
     assert tstation.field_status(val)['validity_duration'] == 'not-applicable'
-    assert dict(zip(tstation.FIELD_ORDER, tstation.export_values(val), strict=True))['validity_duration'] == tstation.NOT_APPLICABLE
+    # Inapplicability stated in the destination's words is shown as stored
+    # under the Not applicable verdict.
+    assert dict(zip(tstation.FIELD_ORDER, tstation.export_values(val), strict=True))['validity_duration'] == 'Not applicable, no visa issued'
     # A processing unit is not a validity.
     val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': '60 Working Day'}
     assert tstation.field_status(val)['validity_duration'] == 'missing'
@@ -213,14 +215,17 @@ def test_acceptance_summary_counts_wording_cells_as_present():
 # The skeptic's classification of the live corpus (11 September 2026): every
 # wording that states no period must not be filled, every wording that
 # states one must be.
-_NO_PERIOD = ["Issued and used at arrival", "Issued at arrival", "Issued at the arrival port", "Issued at the border",
+_NO_PERIOD = ["Set by the consulate from the application and printed on the visa, permitted stay is a separate limit. No grant or fixed duration is guaranteed",
+              "Determined by CBP at the port of entry and recorded on the I-94",
+              "No stay in the territory is authorised - an airport transit visa is valid only for transiting through the international transit areas",
+              "Issued and used at arrival", "Issued at arrival", "Issued at the arrival port", "Issued at the border",
               "issued on arrival", "Issued by a CAR diplomatic/consular mission", "Single transit", "Valid for one entry to Canada",
               "Valid for one visit within the grant period", "Per visit", "As issued", "Runs from date of entry to Djibouti",
               "varies by application, confirm at submission", "varies by mission", "varies by consulate", "Varies by issued visa",
               "n/a - no prior application", "Set by the mission", "Set per trip", "Set case-by-case", "Limited to trip dates",
               "determined by issued visa", "to be determined by issuing office", "As above", "n/a", "See notes", "Unknown", "TBD",
               "-", "60 Working Day", "5 working days"]
-_PERIOD = ["60 calendar days", "Up to 183 calendar days, counted across continuous or consecutive visits within a 12-month period",
+_PERIOD = ["Varies, commonly 30 days from entry", "Unknown, typically 30 days for Mauritania tourist visas", "60 calendar days", "Up to 183 calendar days, counted across continuous or consecutive visits within a 12-month period",
            "Up to 30 calendar days", "Duration of approved course", "Duration of the approved full-time course", "Course duration as approved by ICA",
            "Tied to the duration of the work permit", "Admitted for the time CBP determines is needed for immediate and continuous transit",
            "As decided by the consulate (minimum 15 days)", "12 months or above", "3个月一次有效", "1年多次有效",
@@ -245,3 +250,44 @@ def test_the_corpus_classification_from_the_skeptic_review():
         row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
         assert tstation.field_status(row)['validity_duration'] == 'missing'
         assert tstation.wording_shown(row, 'validity_duration') is None
+
+
+def test_the_third_skeptic_cases():
+    # The 36-row Schengen wording documents that no fixed duration is
+    # guaranteed: a documented absence shown in the destination's words.
+    schengen = ('Set by the consulate from the application and printed on the visa, permitted stay is a separate limit. '
+                'No grant or fixed duration is guaranteed')
+    assert tstation._wording_status(schengen) == 'not-published'
+    row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': schengen}
+    st = tstation.field_status(row)
+    assert st['validity_duration'] == 'not-published' and st['validity_unit'] == 'not-applicable'
+    assert tstation.wording_shown(row, 'validity_duration') == schengen
+    full = {f: 'x' for f in tstation.FIELD_ORDER}
+    full.update(row, validity_duration=None, validity_unit=None)
+    assert tstation.completeness(full) == 1.0  # documented, not filled
+    assert tstation.field_status(full)['validity_duration'] == 'not-published'
+    # A stale not-published marker never outranks the wording's own verdict.
+    prk = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': 'Not applicable. No ordinary travel is possible for US passports',
+           '_unpublished': ['max_stay_duration']}
+    st = tstation.field_status(prk)
+    assert st['max_stay_duration'] == 'not-applicable' and st['max_stay_unit'] == 'not-applicable'
+    assert tstation.wording_shown(prk, 'max_stay_duration') == prk['max_stay_text']
+    cells = dict(zip(tstation.FIELD_ORDER, tstation.export_values(prk), strict=True))
+    assert cells['max_stay_duration'] == prk['max_stay_text'] and cells['max_stay_unit'] == tstation.NOT_APPLICABLE
+    # Present tense counts as a per-application statement.
+    for text in ('The visit pass granted at arrival determines the admitted stay, visa validity does not determine permitted stay',
+                 'As stated on the Visit Pass granted by Singapore immigration at entry',
+                 'Determined by CBP at the port of entry and recorded on the I-94'):
+        assert tstation._wording_status(text) == 'not-published', text
+    assert tstation._wording_status("For the validity of the Student's Pass, the holder must leave on or before the STP expiry date unless another pass is granted") == 'filled'
+    # A digit only counts beside a unit.
+    assert tstation._wording_status('Valid for subclass 600 holders') == 'missing'
+    # The unit verdict is owned by the checklist, the workbook only echoes it.
+    fji = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': 'Visitors Permit issued on arrival, from several days up to a maximum of four months'}
+    st = tstation.field_status(fji)
+    assert st['max_stay_duration'] == 'filled' and st['max_stay_unit'] == 'not-applicable'
+    # A record reaches full completeness only when the duration cell is
+    # filled or documented, never on a unit relabel alone.
+    gap = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': 'Issued at the border'}
+    st = tstation.field_status(gap)
+    assert st['max_stay_duration'] == 'missing' and st['max_stay_unit'] == 'missing'

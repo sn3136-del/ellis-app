@@ -1867,6 +1867,47 @@ def _status_of(r: dict) -> dict:
     return _with_pending(tstation.field_status(r), r.get("_disputed"))
 
 
+def _wording_field(r: dict, cell: str, key: str, statuses: dict):
+    """The wording the payload carries for a duration cell: the wording the
+    cell shows when the numeric cell is empty, or the stored wording beside
+    a number (a rolling-window qualifier such as "90 days in any 180-day
+    period" rides with its figure so the console never loses it)."""
+    from .visa_snapshot import tstation
+    if r.get(cell) not in (None, ""):
+        return r.get(key) or None
+    return tstation.wording_shown(r, cell, statuses)
+
+
+def _record_payload(r: dict) -> dict:
+    """One record of the QC browser payload, its checklist computed once."""
+    from .visa_snapshot import tstation
+    statuses = _status_of(r)
+    return {**{k: r.get(k) for k in tstation.FIELD_ORDER},
+            # The per-source binding of the acceptance standard. Deliberately
+            # outside FIELD_ORDER so the 25-field export shape is untouched,
+            # and present here so a reviewer can open every page a route was
+            # checked against, not just the one that fits field 22.
+            "corroborating_sources": r.get("corroborating_sources") or [],
+            "cache_key": r["_cache_key"],
+            "status": r.get("_status"),
+            "contradictions": r.get("_contradictions") or [],
+            "source_check": r.get("_source_check", "unchecked"),
+            "visa_fee_qualifier": r.get("visa_fee_qualifier"),
+            # Wording beside the numeric cells: what the cell shows when the
+            # number is empty, or the stored wording beside a number.
+            "max_stay_text": _wording_field(r, "max_stay_duration", "max_stay_text", statuses),
+            "validity_text": _wording_field(r, "validity_duration", "validity_text", statuses),
+            "freshness_valid_until": r.get("freshness_valid_until"),
+            "operator_released": r.get("_released", False),
+            "held": r.get("_held", False),
+            "route_held": r.get("_route_held", r.get("_held", False)),
+            "publication_state": r.get("_publication_state"),
+            "publication_reason": r.get("_publication_reason"),
+            "review_required": r.get("_review_required", False),
+            "field_status": statuses,
+            "completeness": round(tstation.completeness(r), 4)}
+
+
 def _with_pending(status: dict, disputed) -> dict:
     """The spec's checklist has THREE states: filled, missing, and 未过审
     (not approved). A filled field the official page disputed, with no human
@@ -1906,34 +1947,7 @@ def travel_database_records(nationality: str = "", destination: str = "",
     return {"fields": list(tstation.FIELD_ORDER),
             "required_fields": sorted(tstation.REQUIRED_FIELDS),
             "acceptance_summary": tstation.acceptance_summary(rows),
-            "records": [{**{k: r.get(k) for k in tstation.FIELD_ORDER},
-                         # §4.2.1's per-source binding. Deliberately outside
-                         # FIELD_ORDER so the 25-field export shape is
-                         # untouched, and present here so a reviewer can open
-                         # every page a route was checked against, not just
-                         # the one that fits field 22.
-                         "corroborating_sources": r.get("corroborating_sources") or [],
-                         "cache_key": r["_cache_key"],
-                         "status": r.get("_status"),
-                         "contradictions": r.get("_contradictions") or [],
-                         "source_check": r.get("_source_check", "unchecked"),
-                         "visa_fee_qualifier": r.get("visa_fee_qualifier"),
-                         # Wording rides beside the numeric cells only when
-                         # the checklist calls the cell filled by it, so no
-                         # consumer sees a validity on a visa-free record.
-                         "max_stay_text": tstation.wording_shown(r, "max_stay_duration", _status_of(r)),
-                         "validity_text": tstation.wording_shown(r, "validity_duration", _status_of(r)),
-                         "freshness_valid_until": r.get("freshness_valid_until"),
-                         "operator_released": r.get("_released", False),
-                         "held": r.get("_held", False),
-                         "route_held": r.get("_route_held", r.get("_held", False)),
-                         "publication_state": r.get("_publication_state"),
-                         "publication_reason": r.get("_publication_reason"),
-                         "review_required": r.get("_review_required", False),
-                         "field_status": _with_pending(tstation.field_status(r),
-                                                       r.get("_disputed")),
-                         "completeness": round(tstation.completeness(r), 4)}
-                        for r in rows],
+            "records": [_record_payload(r) for r in rows],
             "summary": {"total": len(rows), "complete": complete,
                         "completeness_rate": round(complete / len(rows), 4) if rows else None,
                         "high": sum(1 for r in rows if r.get("confidence_level") == "High"),
