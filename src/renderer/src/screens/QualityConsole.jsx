@@ -559,13 +559,16 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
   // Calendar and conditional stays retain their wording even when the
   // external Hour/Day fields cannot express an exact numeric amount. This
   // is display context only: the existing field status remains unchanged.
-  const stayText = rec.max_stay_duration == null && typeof rec.max_stay_text === 'string'
-    && rec.max_stay_text.trim() ? rec.max_stay_text : null
+  // Wording is shown only when the backend checklist calls the cell filled:
+  // a visa-free record keeps its Not applicable label and a documented
+  // absence keeps its label even when wording sits beside them.
+  const wordingFor = (cell, key) => (rec.field_status?.[cell] === 'filled' && rec[cell] == null
+    && typeof rec[key] === 'string' && rec[key].trim()) ? rec[key] : null
+  const stayText = wordingFor('max_stay_duration', 'max_stay_text')
   // A validity the source states in words ("Up to 3 months for a single or
   // double entry visa, up to 6 months for a multiple entry visa") is shown
   // as stored for the same reason: the wording is the value the record holds.
-  const validityText = rec.validity_duration == null && typeof rec.validity_text === 'string'
-    && rec.validity_text.trim() ? rec.validity_text : null
+  const validityText = wordingFor('validity_duration', 'validity_text')
   const show = (f) => {
     const v = rec[f]
     if (v == null || v === '') return '·'

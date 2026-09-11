@@ -20,8 +20,10 @@ new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(
 const { FieldGrid, NextSweepCountdown } = module.exports
 
 function record(text, extra = {}) {
+  // The backend marks a stay stated in words as filled with the unit Not
+  // applicable (owner rule, 11 September 2026).
   return { max_stay_duration: null, max_stay_unit: null, max_stay_text: text,
-    field_status: { max_stay_duration: 'missing', max_stay_unit: 'missing' },
+    field_status: { max_stay_duration: text ? 'filled' : 'missing', max_stay_unit: text ? 'not-applicable' : 'missing' },
     completeness: 0.8, source_check: 'reference', held: true, ...extra }
 }
 function render(rec, lang = 'en', tvv = value => value) {
@@ -37,7 +39,7 @@ for (const text of [
   const html = render(rec, 'en', () => 'A translation must not replace the exact stored stay wording')
   assert.ok(html.includes(text))
   assert.ok(html.includes(t('en', 'ops.stayTextOnly')))
-  assert.ok(html.includes('✗'))
+  assert.ok(html.includes('✓'))
   assert.doesNotMatch(html, /90 days|180 days|A translation must/)
   assert.deepEqual(rec, before)
 })
@@ -46,12 +48,37 @@ test('calendar wording does not promote an unverified or held record', () => {
   const rec = record('6 months')
   Object.freeze(rec.field_status); Object.freeze(rec)
   const html = render(rec)
-  assert.ok(html.includes('✗'))
-  assert.equal(rec.field_status.max_stay_duration, 'missing')
-  assert.equal(rec.field_status.max_stay_unit, 'missing')
+  assert.ok(html.includes('6 months'))
+  assert.equal(rec.field_status.max_stay_duration, 'filled')
+  assert.equal(rec.field_status.max_stay_unit, 'not-applicable')
   assert.equal(rec.completeness, 0.8)
   assert.equal(rec.source_check, 'reference')
   assert.equal(rec.held, true)
+})
+
+test('a genuinely missing stay keeps the gap mark even when stale wording rides along', () => {
+  const rec = record('As above', { field_status: { max_stay_duration: 'missing', max_stay_unit: 'missing' } })
+  const html = render(rec)
+  assert.ok(html.includes(t('en', 'ops.notPublished')))
+  assert.ok(!html.includes(t('en', 'ops.stayTextOnly')))
+  assert.ok(html.includes('✗'))
+})
+
+test('a visa-free record keeps Not applicable although validity wording is present', () => {
+  const rec = validityRecord('Up to 3 months at a time', {
+    field_status: { validity_duration: 'not-applicable', validity_unit: 'not-applicable' } })
+  const html = render(rec)
+  assert.ok(html.includes(t('en', 'ops.notApplicable')))
+  assert.ok(!html.includes('Up to 3 months at a time'))
+  assert.ok(!html.includes(t('en', 'ops.validityTextOnly')))
+})
+
+test('a documented absence keeps its label although wording is present', () => {
+  const rec = validityRecord('6 months', {
+    field_status: { validity_duration: 'not-published', validity_unit: 'not-published' } })
+  const html = render(rec)
+  assert.ok(html.includes(t('en', 'ops.notPublished')))
+  assert.ok(!html.includes(t('en', 'ops.validityTextOnly')))
 })
 
 for (const [duration, unit, label] of [[30, 'Day', '30 days'], [12, 'Hour', '12 hours']]) {
@@ -83,13 +110,14 @@ for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
   })
 }
 
-test('not-published field status is retained while stored calendar wording remains readable', () => {
+test('not-published field status keeps its label over stored calendar wording', () => {
   const rec = record('Up to 6 months at the officer’s discretion', {
     field_status: { max_stay_duration: 'not-published', max_stay_unit: 'not-published' },
   })
   const before = structuredClone(rec)
   const html = render(rec)
-  assert.ok(html.includes('Up to 6 months at the officer’s discretion'))
+  assert.ok(html.includes(t('en', 'ops.notPublished')))
+  assert.ok(!html.includes('Up to 6 months at the officer’s discretion'))
   assert.deepEqual(rec, before)
   assert.ok(!html.includes('✓'))
 })

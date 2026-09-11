@@ -112,3 +112,70 @@ def test_a_validity_stated_in_words_is_a_filled_value_with_no_unit():
     # A numeric validity is untouched.
     numeric = dict(row, validity_duration=6, validity_unit='Month', validity_text=None)
     assert tstation.field_status(numeric)['validity_unit'] == 'filled'
+
+
+def test_wording_predicates_follow_the_owner_rule():
+    # Pointers and placeholders are gaps on both cells.
+    for pointer in ('As above', 'Same as the single-entry visa', 'See notes below', 'n/a', 'Unknown', 'TBD', '-'):
+        stay = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': pointer}
+        assert tstation.field_status(stay)['max_stay_duration'] == 'missing', pointer
+        val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': pointer}
+        assert tstation.field_status(val)['validity_duration'] == 'missing', pointer
+    # Values the source states, including rule wording and short CJK
+    # validities, are filled.
+    for value in ('As decided by the consulate (minimum 15 days)', '12 months or above', '3个月一次有效',
+                  '1年多次有效', 'as granted', 'Granted for the period applied for',
+                  'Determined by consular officials and the visa issued.', 'Limited to the intended trip dates'):
+        val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': value}
+        assert tstation.field_status(val)['validity_duration'] == 'filled', value
+        assert tstation.field_status(val)['validity_unit'] == 'not-applicable', value
+    # Wording that asserts an absence is the documented label, not a value.
+    for absent in ('not published', 'Not published by the Ministry', 'Not published as a fixed number, the period of stay is shown on the visit pass'):
+        val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': absent}
+        st = tstation.field_status(val)
+        assert st['validity_duration'] == 'not-published' and st['validity_unit'] == 'not-published', absent
+        cells = dict(zip(tstation.FIELD_ORDER, tstation.export_values(val), strict=True))
+        assert cells['validity_duration'] == tstation.NOT_PUBLICLY_AVAILABLE
+        stay = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': absent}
+        assert tstation.field_status(stay)['max_stay_duration'] == 'not-published'
+    val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': 'Not applicable, no visa issued'}
+    assert tstation.field_status(val)['validity_duration'] == 'not-applicable'
+    assert dict(zip(tstation.FIELD_ORDER, tstation.export_values(val), strict=True))['validity_duration'] == tstation.NOT_APPLICABLE
+    # A processing unit is not a validity.
+    val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': '60 Working Day'}
+    assert tstation.field_status(val)['validity_duration'] == 'missing'
+
+
+def test_a_visa_free_row_keeps_not_applicable_beside_stay_wording():
+    row = {'visa_requirement': 'Visa-free', 'visa_requirement_detail': 'Conditional Visa-free',
+           'max_stay_text': 'Up to 3 months at a time', 'validity_text': 'Up to 3 months at a time',
+           'validity_duration': None, 'validity_unit': None, 'max_stay_duration': None, 'max_stay_unit': None}
+    st = tstation.field_status(row)
+    assert st['validity_duration'] == 'not-applicable' and st['validity_unit'] == 'not-applicable'
+    cells = dict(zip(tstation.FIELD_ORDER, tstation.export_values(row), strict=True))
+    assert cells['validity_duration'] == tstation.NOT_APPLICABLE
+    assert cells['max_stay_duration'] == 'Up to 3 months at a time' and cells['max_stay_unit'] == tstation.NOT_APPLICABLE
+    # The strip helper clears the wording too.
+    stripped = tstation._strip_visa_only_fields(dict(row, visa_requirement='Visa-free'))
+    assert stripped['validity_text'] is None
+    # A documented not-published cell keeps its label even with wording beside it.
+    doc = {'visa_requirement': 'Visa Required in Advance', 'validity_text': '6 months', '_unpublished': ['validity_duration', 'validity_unit']}
+    cells = dict(zip(tstation.FIELD_ORDER, tstation.export_values(doc), strict=True))
+    assert cells['validity_duration'] == tstation.NOT_PUBLICLY_AVAILABLE
+
+
+def test_acceptance_summary_counts_wording_cells_as_present():
+    row = {f: 'x' for f in tstation.FIELD_ORDER}
+    row.update({'visa_requirement': 'Visa Required in Advance', 'validity_duration': None, 'validity_unit': None,
+                'validity_text': 'Up to 3 months for a single or double entry visa, up to 6 months for a multiple entry visa',
+                'max_stay_duration': None, 'max_stay_unit': None, 'max_stay_text': 'Up to 90 days per visit',
+                'confidence_level': 'High', '_publication_state': 'published'})
+    summary = tstation.acceptance_summary([row])
+    # The wording cells count as filled; the unit cells beside them are the
+    # record's own Not applicable label, so the record is documented
+    # complete (the owner's approved definition) while the literal non-null
+    # diagnostic still shows the two label cells.
+    assert summary['documented_complete_records'] == 1
+    assert summary['filled_cells'] == len(tstation.CONTRACT_FIELDS) - 2
+    assert summary['complete_records'] == 0
+    assert tstation.completeness(row) == 1.0
