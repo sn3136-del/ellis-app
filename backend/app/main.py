@@ -1913,6 +1913,9 @@ def travel_database_records(nationality: str = "", destination: str = "",
                          "source_check": r.get("_source_check", "unchecked"),
                          "visa_fee_qualifier": r.get("visa_fee_qualifier"),
                          "max_stay_text": r.get("max_stay_text"),
+                         # A validity the source states in words rides beside
+                         # the numeric cells for the same reason as the stay.
+                         "validity_text": r.get("validity_text"),
                          "freshness_valid_until": r.get("freshness_valid_until"),
                          "operator_released": r.get("_released", False),
                          "held": r.get("_held", False),

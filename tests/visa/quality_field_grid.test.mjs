@@ -175,3 +175,40 @@ test('QC access cell: published label or publish button, never an empty cell', a
   assert.match(src, /\{held && !productWithheld && \(\s*<button[^]*?data-testid="ops-release"/)
   assert.ok(!src.includes('pctDone'), 'the quality cell must not print a completeness percentage')
 })
+
+
+// A validity the source states in words rides in the validity cell the same
+// way a stay in words does (owner finding, Australia to Russia, 11 September 2026).
+function validityRecord(text, extra = {}) {
+  return { validity_duration: null, validity_unit: null, validity_text: text,
+    field_status: { validity_duration: 'filled', validity_unit: 'not-applicable' },
+    completeness: 1, source_check: 'ai-quote', held: false, ...extra }
+}
+
+test('validity wording is shown as stored with its explanation', () => {
+  const text = 'Up to 3 months for a single or double entry visa, up to 6 months for a multiple entry visa'
+  const rec = validityRecord(text)
+  const before = structuredClone(rec)
+  const html = render(rec, 'en', () => 'A translation must not replace the exact stored validity wording')
+  assert.ok(html.includes(text))
+  assert.ok(html.includes(t('en', 'ops.validityTextOnly')))
+  assert.ok(!html.includes(t('en', 'ops.notPublished')))
+  assert.doesNotMatch(html, /A translation must/)
+  assert.deepEqual(rec, before)
+})
+
+test('a numeric validity keeps its usual rendering and no wording note', () => {
+  const html = render(validityRecord('unneeded fallback', { validity_duration: 6, validity_unit: 'Month',
+    field_status: { validity_duration: 'filled', validity_unit: 'filled' } }))
+  assert.ok(!html.includes(t('en', 'ops.validityTextOnly')))
+  assert.ok(!html.includes('unneeded fallback'))
+})
+
+for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
+  test('validity explanation is localized: ' + lang, () => {
+    const html = render(validityRecord('2 years or until the linked passport expires, whichever is sooner'), lang)
+    assert.ok(html.includes('2 years or until the linked passport expires, whichever is sooner'))
+    assert.ok(html.includes(t(lang, 'ops.validityTextOnly')))
+    assert.ok(!html.includes('ops.validityTextOnly'))
+  })
+}

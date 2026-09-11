@@ -2218,6 +2218,17 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
         elif f == "max_stay_unit" and _stay_in_words(row):
             # A stay in words has no separate unit cell.
             out[f] = "not-applicable"
+        elif f == "validity_duration" and _validity_in_words(row):
+            # The source states the validity in words the Day/Month/Year
+            # contract cannot carry ("Up to 3 months for a single or double
+            # entry visa, up to 6 months for a multiple entry visa", "2 years
+            # or until the linked passport expires"). The wording is the
+            # value: 107 served rows read "Not publicly available" for a
+            # validity their source states (owner finding, Australia to
+            # Russia, 11 September 2026).
+            out[f] = "filled"
+        elif f == "validity_unit" and _validity_in_words(row):
+            out[f] = "not-applicable"
         elif f in REQUIRED_FIELDS:
             out[f] = "missing"
         else:
@@ -2229,6 +2240,21 @@ def _stay_in_words(row: dict) -> bool:
     """True when the record carries the stay as wording and no number."""
     return (row.get("max_stay_duration") in (None, "")
             and bool(str(row.get("max_stay_text") or "").strip()))
+
+
+# Wording that points at another row or another cell is not a value of its
+# own ("As above", "Same as the single-entry visa", "See notes"): such a
+# cell stays a gap until the review states the figure for this product.
+_CROSS_REFERENCE = re.compile(
+    r"^\s*(?:as|same|see|refer|idem|ditto|n/?a|none|unknown|tbd|tba)\b|\babove\b|\bbelow\b",
+    re.I)
+
+
+def _validity_in_words(row: dict) -> bool:
+    """True when the record carries the validity as wording and no number."""
+    text = str(row.get("validity_text") or "").strip()
+    return (row.get("validity_duration") in (None, "") and len(text) >= 8
+            and not _CROSS_REFERENCE.search(text))
 
 
 # A route with no visa cannot have a visa's validity, entry count or
@@ -2271,6 +2297,11 @@ def export_values(row: dict, unpublished: set | None = None) -> list:
         cells[FIELD_ORDER.index("max_stay_duration")] = str(row.get("max_stay_text")).strip()
         if statuses.get("max_stay_unit") != "filled":
             cells[FIELD_ORDER.index("max_stay_unit")] = NOT_APPLICABLE
+    # The same for a validity the source states in words.
+    if _validity_in_words(row):
+        cells[FIELD_ORDER.index("validity_duration")] = str(row.get("validity_text")).strip()
+        if statuses.get("validity_unit") != "filled":
+            cells[FIELD_ORDER.index("validity_unit")] = NOT_APPLICABLE
     return cells
 
 

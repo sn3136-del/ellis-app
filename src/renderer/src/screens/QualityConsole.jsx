@@ -561,6 +561,11 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
   // is display context only: the existing field status remains unchanged.
   const stayText = rec.max_stay_duration == null && typeof rec.max_stay_text === 'string'
     && rec.max_stay_text.trim() ? rec.max_stay_text : null
+  // A validity the source states in words ("Up to 3 months for a single or
+  // double entry visa, up to 6 months for a multiple entry visa") is shown
+  // as stored for the same reason: the wording is the value the record holds.
+  const validityText = rec.validity_duration == null && typeof rec.validity_text === 'string'
+    && rec.validity_text.trim() ? rec.validity_text : null
   const show = (f) => {
     const v = rec[f]
     if (v == null || v === '') return '·'
@@ -642,6 +647,14 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
                   <div style={{ marginTop: 5, fontSize: 11, fontWeight: 400,
                                 fontStyle: 'normal', color: GRAY, lineHeight: 1.45 }}>
                     {t('ops.stayTextOnly')}
+                  </div>
+                </>
+              : f === 'validity_duration' && validityText
+              ? <>
+                  <span>{validityText}</span>
+                  <div style={{ marginTop: 5, fontSize: 11, fontWeight: 400,
+                                fontStyle: 'normal', color: GRAY, lineHeight: 1.45 }}>
+                    {t('ops.validityTextOnly')}
                   </div>
                 </>
               : (rec[f] == null || rec[f] === '')

@@ -93,3 +93,22 @@ def test_a_stay_in_words_does_not_count_as_a_gap_for_completeness():
     assert tstation.field_status(numeric)['max_stay_unit'] == 'filled'
     values = dict(zip(tstation.FIELD_ORDER, tstation.export_values(numeric), strict=True))
     assert values['max_stay_duration'] == 180 and values['max_stay_unit'] == 'Day'
+
+
+def test_a_validity_stated_in_words_is_a_filled_value_with_no_unit():
+    row = {'visa_requirement': 'Visa Required in Advance', 'visa_requirement_detail': 'Paper Visa',
+           'visa_type_name': 'Ordinary tourist visa', 'validity_duration': None, 'validity_unit': None,
+           'validity_text': 'Up to 3 months for a single or double entry visa, up to 6 months for a multiple entry visa'}
+    status = tstation.field_status(row)
+    assert status['validity_duration'] == 'filled' and status['validity_unit'] == 'not-applicable'
+    values = dict(zip(tstation.FIELD_ORDER, tstation.export_values(row), strict=True))
+    assert values['validity_duration'] == row['validity_text']
+    assert values['validity_unit'] == tstation.NOT_APPLICABLE
+    # Wording that only points elsewhere is not a value of its own.
+    for pointer in ('As above', 'Same as the single-entry visa', 'See notes below', 'n/a'):
+        gap = dict(row, validity_text=pointer)
+        assert tstation.field_status(gap)['validity_duration'] == 'missing'
+        assert dict(zip(tstation.FIELD_ORDER, tstation.export_values(gap), strict=True))['validity_duration'] == tstation.NOT_PUBLICLY_AVAILABLE
+    # A numeric validity is untouched.
+    numeric = dict(row, validity_duration=6, validity_unit='Month', validity_text=None)
+    assert tstation.field_status(numeric)['validity_unit'] == 'filled'
