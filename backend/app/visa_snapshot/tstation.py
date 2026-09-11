@@ -1667,7 +1667,7 @@ def _regrade(row: dict, g: dict, disputed: list | None,
         row.get("visa_requirement") == "Visa-free"
         and row.get("visa_requirement_detail") == "Unconditional Visa-free"
         and row.get("application_method") in (None, "", [])
-        and not disputed
+        and not material_disputes(disputed)
         and (verdict_provenance_supported(prov) or grounded)
         and "disposition" in checked)
     timing = row.pop("_processing_note", None)
@@ -2232,8 +2232,11 @@ _NOT_APPLICABLE_WHEN_EXEMPT = frozenset({
 # the honest state for grading, so a labelled gap still holds the grade.
 NOT_PUBLICLY_AVAILABLE = "Not publicly available"
 NOT_APPLICABLE = "Not applicable"
+# An optional cell nobody could fill is a gap too, so it carries the same
+# label as a required one: "Not applicable" is only ever the record's own
+# verdict that the fact cannot exist here.
 _EXPORT_LABELS = {"not-published": NOT_PUBLICLY_AVAILABLE, "not-applicable": NOT_APPLICABLE,
-                  "missing": NOT_PUBLICLY_AVAILABLE, "optional-empty": NOT_APPLICABLE}
+                  "missing": NOT_PUBLICLY_AVAILABLE, "optional-empty": NOT_PUBLICLY_AVAILABLE}
 
 
 def export_values(row: dict, unpublished: set | None = None) -> list:
@@ -2241,8 +2244,15 @@ def export_values(row: dict, unpublished: set | None = None) -> list:
     the label of the cell's field_status verdict (never blank, never a
     "missing" marker). Reuses the record surface's own verdicts."""
     statuses = field_status(row, unpublished)
-    return [row.get(f) if statuses.get(f) == "filled" else _EXPORT_LABELS.get(statuses.get(f))
-            for f in FIELD_ORDER]
+    cells = [row.get(f) if statuses.get(f) == "filled" else _EXPORT_LABELS.get(statuses.get(f))
+             for f in FIELD_ORDER]
+    # A stay the source states in words rather than as a number and a unit
+    # (an e-Pass decided on arrival) is a real value the record holds: the
+    # workbook carries the wording in the stay cell instead of a label.
+    text = row.get("max_stay_text")
+    if text and statuses.get("max_stay_duration") != "filled":
+        cells[FIELD_ORDER.index("max_stay_duration")] = text
+    return cells
 
 
 def completeness(row: dict, unpublished: set | None = None) -> float:

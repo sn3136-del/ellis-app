@@ -167,6 +167,10 @@ def test_side_field_finding_still_strips_visa_only_cells_from_a_visa_free_record
         assert clean.get(f) in (None, ""), f
         assert side.get(f) in (None, ""), f
     assert side["confidence_level"] == "Medium" and side["_evidence_low"] is False
+    # The exemption's own verdict on its visa cells survives the side finding:
+    # "Not applicable", never "Not publicly available".
+    for f in ("validity_duration", "validity_unit", "entries"):
+        assert tstation.field_status(side)[f] == tstation.field_status(clean)[f] == "not-applicable", f
 
 
 def test_funds_and_accommodation_findings_are_material():

@@ -46,8 +46,8 @@ def test_export_labels_documented_blanks_and_keeps_filled_cells(monkeypatch):
     assert cell['max_stay_duration'] == 90 and cell['max_stay_unit'] == 'Day'
     assert cell['source_url'] == 'https://www.mofa.go.kr/' and cell['visa_fee_amount'] == 0
     # A gap is never blank and never invented: the owner's two labels only.
-    assert statuses['consulate_district'] in ('not-applicable', 'optional-empty') and cell['consulate_district'] == 'Not applicable'
-    assert cell['entry_requirements'] == 'Not applicable' and statuses['entry_requirements'] == 'optional-empty'
+    assert cell['consulate_district'] == {'not-applicable': 'Not applicable', 'optional-empty': 'Not publicly available'}[statuses['consulate_district']]
+    assert cell['entry_requirements'] == 'Not publicly available' and statuses['entry_requirements'] == 'optional-empty'
     workbook.close()
 
 
@@ -59,3 +59,11 @@ def test_export_values_match_the_record_surface_verdicts():
     assert values['visa_type_name'] == 'Tourist visa'
     assert values['validity_duration'] == tstation.NOT_PUBLICLY_AVAILABLE  # a gap reads as the label, and stays a gap for grading
     assert tstation.field_status(row)['validity_duration'] == 'missing'
+
+
+def test_a_stay_stated_in_words_is_exported_verbatim_not_labelled():
+    row = {'visa_requirement': 'Visa Required in Advance', 'visa_type_name': 'Tourist visa',
+           'max_stay_text': 'Stay is determined by the e-Pass issued on arrival'}
+    values = dict(zip(tstation.FIELD_ORDER, tstation.export_values(row), strict=True))
+    assert values['max_stay_duration'] == 'Stay is determined by the e-Pass issued on arrival'
+    assert tstation.field_status(row)['max_stay_duration'] == 'missing'

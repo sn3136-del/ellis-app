@@ -648,8 +648,8 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
               /* Owner rule (11 September 2026): a cell reads as a value or
                  as one of two labels, never "Missing information". The
                  status colour underneath still shows the gap. */
-              ? (st === 'missing' || st === 'not-published' ? t('ops.notPublished')
-                 : st === 'not-applicable' || st === 'optional-empty' ? t('ops.notApplicable')
+              ? (st === 'not-applicable' ? t('ops.notApplicable')
+                 : (st === 'missing' || st === 'not-published' || st === 'optional-empty') ? t('ops.notPublished')
                  : tvv(show(f)))
               : /^https?:\/\//.test(String(rec[f]))
                 /* A source is only traceable if it can be OPENED: the
