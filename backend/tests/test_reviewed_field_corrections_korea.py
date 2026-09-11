@@ -22,7 +22,7 @@ def test_full_prepared_rebuild_and_values():
     prov = report['routes'][0]['source_provenance']['field_provenance']
     assert prov['passport_validity_requirement']['source_url'].endswith('hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=160&PARENT_ID=135')
     assert prov['passport_validity']['source_url'].startswith('https://overseas.mofa.go.kr/id-ko/')
-    assert all(row['confidence_level'] == 'Low' for row in report['routes'][0]['records'])
+    assert all(row['confidence_level'] == 'Medium' for row in report['routes'][0]['records'])  # checked, with gaps
 
 
 @pytest.mark.parametrize('field', c.BASELINE_KEYS)

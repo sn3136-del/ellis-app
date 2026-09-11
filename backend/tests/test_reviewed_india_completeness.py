@@ -15,7 +15,7 @@ def test_full_prepared_rebuild_source_scope_and_grades(result):
  o,r=result;assert o==O and c.build_manifest(SPEC,L)==M
  assert len(o['entries'])==16 and len(r['routes'])==17
  assert sum(len(x['records']) for x in r['routes'])==75
- assert all(x['confidence_level']=='Low' for route in r['routes'] for x in route['records'])
+ assert all(x['confidence_level']=='Medium' for route in r['routes'] for x in route['records'])  # checked, with gaps; never High
  assert not any(r[x] for x in ('confidence_changed','raw_writes','operator_writes','issue_changes','renew_fresh_until','new_release'))
 @pytest.mark.parametrize('i',range(17))
 @pytest.mark.parametrize('field',c.BASELINE_KEYS)
@@ -63,7 +63,7 @@ def test_exact_158_documented_cells_no_invented_processing_or_policy_date(result
  rs=[z for route in result[1]['routes'] for z in route['records']];counts=Counter(t.field_status(x)[k] for x in rs for k in t.CONTRACT_FIELDS)
  assert counts=={'filled':1618,'not-published':148,'missing':93,'optional-empty':16}
  assert t.acceptance_summary(rs)['documented_completed_cells']==1766
- assert all(x['info_validity'] is None and x['confidence_level']=='Low' for x in rs)
+ assert all(x['info_validity'] is None and x['confidence_level']=='Medium' for x in rs)
  assert sum(t.field_status(x)['processing_min_days']=='not-published' for x in rs)==72
  assert all(x['processing_min_days'] is None and x['processing_unit'] is None for x in rs)
  assert all(t.field_status(x)['processing_min_days']!='not-published' for x in rs if x['visa_type_name'] in ['Visa on arrival','Regular tourist visa'])
@@ -147,6 +147,6 @@ def test_actual_cached17_readers_preserve_all_independent_guards_and_database(re
    for field in ('entry_requirements','arrival_card','permitted_stay','permitted_stay_days','confidence','insurance_required','government_fee'):assert before['guidance'].get(field)==after['guidance'].get(field)
    if not issue and not pending:
     rows=t.records_for_route(l['route'],after['guidance'],after['source_verified'])
-    assert all(x['confidence_level']=='Low' for x in rows)
+    assert all(x['confidence_level']=='Medium' for x in rows)
     if l['cache_key'].startswith('TWN|'):assert next(x for x in rows if x['visa_type_name']=='1-year e-Tourist Visa')['validity_duration']==365
   assert snapshot()==initial

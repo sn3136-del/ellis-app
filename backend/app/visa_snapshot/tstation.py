@@ -98,8 +98,12 @@ def acceptance_summary(rows: list[dict]) -> dict:
         "confidence_tiers": tiers,
         "medium_or_above_rate": rate(tiers["High"] + tiers["Medium"], total),
         "high_rate": rate(tiers["High"], total),
-        "confidence_policy": "Field 25, three tiers. High: requirement checked against an official page and the record complete. "
-            "Medium: checked, with gaps. Low: disputed, unsourced or unread; blocked until operations confirms.",
+        "confidence_policy": "Field 25, three tiers. High: verified against a named official government page "
+            "(an AI or human quote with supported provenance, or a grounded read found consistent), complete for "
+            "its required fields, and no field disputed. Medium: an official page was checked but some required "
+            "information is missing. Low: not checked against an official page, or disputed, or a public edit, "
+            "or the information is not publicly available. A documented unpublished cell counts as complete. "
+            "Holds are decided by evidence, not by the tier.",
         "phase_one_stations": list(PHASE_ONE_STATIONS),
         "stations_launched": stations_launched,
         "station_coverage_rate": rate(len(stations_launched), len(PHASE_ONE_STATIONS)),
@@ -817,19 +821,30 @@ def _reviewed_policy_end(provenance: dict | None, route: dict) -> str | None:
 def _confidence(guidance: dict, provenance: dict | None,
                 grounded_ok: bool = False, *, complete: bool = True,
                 disputed: bool = False) -> str:
-    """Trip.com's field 25 ladder, three tiers (restored 11 September 2026).
+    """Trip.com's field 25 ladder, three tiers, as the owner fixed them on
+    11 September 2026. The definitions are exhaustive.
 
-    High: the requirement was checked against an official page (a human or
-    AI quote, or a grounded read) and the record is complete, with no
-    dispute. AI and human checks earn the same grade; authorship stays in
-    the provenance.
-    Medium: the requirement was checked the same way (quote or grounded
-    read against an official page) and nothing disputes the record, but the
-    record still has gaps. Shown with its source, never blocked.
-    Low: a dispute or serve-time conflict, a public edit, no official source,
-    or an official link that was never read against the answer. Blocked
-    until operations confirms. A model's self-rating is never evidence, and
-    an official URL alone never makes Medium or High.
+    High: the record was verified against a named official government page
+    (a quote by the AI or a person whose verdict provenance is supported, or
+    a grounded read that found the stored answer consistent), the record is
+    complete for its required fields, and no field is disputed. An AI check
+    against a named official page is enough; a person is not required.
+    Authorship stays in the provenance.
+    Medium: an official page was checked the same way, but some required
+    information is still missing. Shown with its source, never blocked.
+    Low: not checked against an official page (no official source, or a
+    link nobody read against the answer), or disputed (including a
+    serve-time conflict), or a public edit, or the information is not
+    publicly available (no official page exists for the answer, which is
+    the same "no official source" branch below). A cell the destination was
+    checked for and does not publish is a documented absence, counted as
+    complete by the owner's approved completion policy; it does not lower
+    the grade. A model's self-rating is never evidence, and an official URL
+    alone never makes Medium or High.
+
+    The publication hold (_evidence_low) is computed separately and does not
+    move with this label: a gap grades the record Medium, it does not
+    withhold it.
     """
     if disputed:
         return "Low"
@@ -1589,8 +1604,9 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     complete = not any(v == "missing" for v in st.values())
     conflicted = bool(disputed)
     # Keep the pre-existing source/conflict publication boundary separate
-    # from the requested binary display grade. Missing fields never become
-    # invented values, but relabeling Medium must not create a new hold.
+    # from the display grade. Missing fields never become invented values,
+    # and a gap (Medium) may not create a hold that did not exist before
+    # the three tiers.
     row["_evidence_low"] = _confidence(g, prov, grounded, complete=True,
                                        disputed=conflicted) == "Low"
     if not (prov and "disposition" in (prov.get("fields") or ())):

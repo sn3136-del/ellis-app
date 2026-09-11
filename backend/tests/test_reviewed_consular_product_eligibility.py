@@ -82,7 +82,7 @@ def test_supported_optional_consular_lane_preserves_exemption_and_independent_gu
     prov=dict(parsed['field_provenance']['disposition'],fields=list(parsed['fields']),field_provenance=parsed['field_provenance'])
     rows=tstation.records_for_route(ROUTE,g,prov)
     assert len(rows)==2 and all(not r['_evidence_low'] for r in rows)
-    assert all(r['confidence_level']=='Low' for r in rows)
+    assert all(r['confidence_level']=='Medium' for r in rows)  # checked, with gaps; never High
     answer={'guidance':g,'source_verified':prov,'held':False,'review_required':False}
     assert not records_guard.apply_records_hold(ROUTE,answer)['held']
     assert records_guard.apply_records_hold(ROUTE,dict(answer,grounded_check={'disputed_fields':['fee']}))['held']

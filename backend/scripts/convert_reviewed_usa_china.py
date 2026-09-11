@@ -111,7 +111,7 @@ def convert(manifest,layers):
  # Corrected raw invariants may disappear, but no new contradiction is accepted.
  _need(not kp.serve_time_invariants(after),'Correction introduces or retains a serving invariant conflict')
  records=tstation.records_for_route(r,after,ap)
- _need(len(records)==3 and all(x['confidence_level']=='Low' for x in records),'No product removal or High grade is permitted')
+ _need(len(records)==3 and all(x['confidence_level']!='High' for x in records),'No product removal or High grade is permitted')  # checked with gaps is Medium, never High
  _need(all(x.get('info_validity') is None for x in records),'Tariff end must not become whole-product policy expiry')
  _need(all(x.get('max_stay_duration') is None and x.get('validity_duration') is None and x.get('entries') is None for x in records),'Individual grant became a numeric guarantee')
  report={'routes':[{'cache_key':CONTRACT['cache_key'],'route':r,'guidance':after,'source_provenance':ap,'records':records,**kp.application_instructions(after,route=r,source_verified=ap),'workflow_plan':kp.derive_workflow_plan(after,route=r,source_verified=ap)}], 'contexts_checked':1,'route_fields_reviewed':len(CONTRACT['fields']),'existing_products_preserved':3,'product_grants_guaranteed':False,'raw_writes':False,'operator_writes':False,'issue_changes':False,'renew_fresh_until':False,'confidence_changed':False}

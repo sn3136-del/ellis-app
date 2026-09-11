@@ -104,7 +104,7 @@ def test_all_record_cells_and_grades_except_entry_text_unchanged(result):
         for a, b in zip(old,new,strict=True):
             a = deepcopy(a); b = deepcopy(b); a.pop('entry_requirements'); b.pop('entry_requirements'); assert a == b
     assert t.acceptance_summary(old_rows) == t.acceptance_summary(new_rows)
-    assert all(r['confidence_level'] == 'Low' for r in new_rows)
+    assert all(r['confidence_level'] == 'Medium' for r in new_rows)  # checked, with gaps; never High
 
 
 @pytest.mark.parametrize('issue',[False,True])

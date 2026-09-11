@@ -219,7 +219,9 @@ def test_lookup_records_and_freshness_share_the_verdict_evidence_contract(
                          params={"nationality": "ISL", "destination": "NRU"}).json()["records"]
     freshness = client.get("/database/freshness", headers=admin).json()
     record = next(r for r in freshness["answers"] if r["cache_key"] == key)
-    assert records and {r["confidence_level"] for r in records} == {"Low"}  # Partial field verification is Low under binary grading.
+    # Grounded on the verdict: Medium (checked, with gaps). An ancillary
+    # check that never verified the verdict leaves the record Low.
+    assert records and {r["confidence_level"] for r in records} == ({"Medium"} if verdict_supported else {"Low"})
     assert bool(lookup["held"]) == (not verdict_supported)
     assert record["grounded"] == verdict_supported
     assert {r["source_check"] for r in records} == {
@@ -262,7 +264,9 @@ def test_each_product_exposes_the_whole_routes_held_status(client, db, isolated,
         params={"nationality": "USA", "destination": "SGP"}).json()["records"]
     lookup = client.post("/database/lookup", headers=HEADERS,
                          json={"nationality": "USA", "destination": "SGP"}).json()
-    assert {r["confidence_level"] for r in records} == {"Low"}
+    # The evidenced ETA row is Medium (checked, with gaps); the unsupported
+    # paper visa sibling is Low.
+    assert [r["confidence_level"] for r in records] == ["Medium", "Low"]
     assert lookup["held"] == held
     assert (lookup["guidance"] is None) == held
     assert all(r["held"] == held and r["review_required"] == held for r in records)

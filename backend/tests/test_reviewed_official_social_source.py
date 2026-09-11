@@ -34,7 +34,7 @@ def test_current_default_and_accurate_attribution(batch):
  assert kp.validate_answer(deepcopy(g))[0]['source_url']==g['source_url']
  row,=tstation.records_for_route(r,g,p)
  assert row['max_stay_duration']==14 and not row['_evidence_low']
- assert row['confidence_level']=='Low' and row['info_validity'] is None and row['visa_fee_currency'] is None
+ assert row['confidence_level']=='Medium' and row['info_validity'] is None and row['visa_fee_currency'] is None  # checked, with gaps
  assert row['source_url']=='https://www.instagram.com/p/Dab9NF9IILJ/'
  assert not records_guard.apply_records_hold(r,{'guidance':g,'source_verified':p}).get('held',False)
  assert all(k not in batch['routes'][0]['guidance'] for k in ('government_fee','required_documents','passport_validity','unpublished_fields'))

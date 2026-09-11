@@ -59,7 +59,7 @@ def test_registered_loader_projects_exact_qc_row_and_holds_still_apply(inputs,tm
     assert '30-day' not in row['entry_requirements']
     assert 'confirmed lodging' in row['entry_requirements'] and 'is required' in row['entry_requirements']
     assert row['max_stay_duration'] is None and row['max_stay_text']=='Less than 1 month'
-    assert row['confidence_level']==r['before_records'][0]['confidence_level']=='Low'
+    assert row['confidence_level']==r['before_records'][0]['confidence_level']=='Medium'  # checked, with gaps; the correction does not change the tier
     assert row['collected_at']==r['before_records'][0]['collected_at']
     out=records_guard.apply_records_hold(layers[0]['route'],{'guidance':g,'source_verified':prov,'grounded_check':{'disputed_fields':['passport_validity']},'operator_released':True})
     assert out['held'] and records_guard.held_envelope(out)['guidance'] is None

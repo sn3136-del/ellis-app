@@ -72,7 +72,7 @@ def test_requested_options_keep_own_category_without_numeric_grants():
   assert own['subject']['product_type']==product['type'] and own['source_id']=='nia_entry_law'
   assert all(e['source_id']!='fee2026' for e in own['verification_scope']['evidence'])
   assert row['entries'] is row['max_stay_duration'] is row['validity_duration'] is None
-  assert row['confidence_level']=='Low' and not row['_evidence_low'] and row['info_validity'] is None
+  assert row['confidence_level']=='Medium' and not row['_evidence_low'] and row['info_validity'] is None  # checked, with gaps
   assert not set(row['_unpublished']) & {'entries','validity_duration','max_stay_duration'}
 
 def test_fee_scope_does_not_expire_whole_program():
