@@ -10,7 +10,7 @@ import { t as translate } from '../../src/renderer/src/lib/i18n.js'
 // The records list is the operator's first screen. It renders a real
 // component, so a helper that is not in scope there crashes every row.
 const compiled = await build({
-  stdin: { contents: "export { RecordsTable, unitNameOf } from './src/renderer/src/screens/QualityConsole.jsx'",
+  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell } from './src/renderer/src/screens/QualityConsole.jsx'",
     resolveDir: resolve('.'), sourcefile: 'quality-records-table-entry.jsx' },
   bundle: true, write: false, platform: 'node', format: 'cjs', jsx: 'automatic',
   external: ['react', 'react/jsx-runtime'], logLevel: 'silent',
@@ -75,3 +75,44 @@ test('the unit helper is exported and shared', () => {
   assert.equal(unitNameOf(t, null), '')
   assert.equal(unitNameOf(t, 'Fortnight'), 'Fortnight')
 })
+
+test('a long stay note is clamped by the cell and never rewritten', () => {
+  const long = 'Actual permitted stay is determined by the e-Pass issued at entry. The Singapore Consulate-General in Hong Kong publishes visa-free social visits of up to 30 days for HKSAR passports. Depart by the last day stated on your e-Pass'
+  const html = render([record({ max_stay_text: long,
+    field_status: { max_stay_duration: 'not-published', max_stay_unit: 'not-applicable' } })])
+  // The note is shown as the destination wrote it, clamped by the browser,
+  // and the whole of it is one hover away. No figure is lifted out of it.
+  assert.ok(html.includes('Actual permitted stay is determined'))
+  assert.ok(html.includes('text-overflow:ellipsis'))
+  assert.ok(html.includes('aria-label="' + t('ops.noteOpen') + '"'))
+  assert.ok(html.includes('title="' + long + '"'))
+  assert.ok(!html.includes('up to 30 days<'))
+})
+
+test('the cell cannot spill over its neighbour, whatever the note length', () => {
+  for (const note of ['Up to 6 calendar months per visit', 'Visa T: single entry, 3 months validity, 1 month stay',
+                      'x'.repeat(300)]) {
+    const html = render([record({ max_stay_text: note,
+      field_status: { max_stay_duration: 'filled', max_stay_unit: 'not-applicable' } })])
+    // max-width 0 is what makes a fixed table honour the clamp.
+    assert.ok(html.includes('max-width:0'), note.slice(0, 20))
+    assert.ok(html.includes('overflow:hidden'), note.slice(0, 20))
+  }
+})
+
+test('a validity figure inside a stay note is never promoted to the cell', () => {
+  const note = 'Visa T: single entry, 3 months validity, 1 month stay'
+  const html = render([record({ max_stay_text: note,
+    field_status: { max_stay_duration: 'filled', max_stay_unit: 'not-applicable' } })])
+  const shown = html.slice(html.indexOf('data-label="' + t('ops.col.stay') + '"'))
+  assert.ok(shown.includes(note))
+  assert.ok(!shown.startsWith('3 months'))
+})
+
+test('a short stay note is shown as it is, with no button', () => {
+  const html = render([record({ max_stay_text: 'Up to 30 days',
+    field_status: { max_stay_duration: 'filled', max_stay_unit: 'not-applicable' } })])
+  assert.ok(html.includes('Up to 30 days'))
+  assert.ok(!html.includes(t('ops.noteOpen')))
+})
+

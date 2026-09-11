@@ -15,7 +15,7 @@
 // autocomplete from the registry (name, alias or either ISO form) and the
 // server resolves whatever is typed. The chrome translates with the app's
 // language picker; record VALUES stay as stored — they are the dataset.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 // Console-wide motion and polish. Bars grow, numbers count, cards lift —
 // all suppressed for readers who ask for reduced motion.
@@ -540,6 +540,77 @@ function fx(t, f) {
 // field grid, the records list and the change log all name a unit the same
 // way. It lived inside one component's closure, which made the list column
 // throw as soon as it used it.
+// A cell that may hold a whole sentence. The sentence is never re-written
+// and never summarised: lifting a figure out of a note is how a validity
+// ends up printed as a stay. The cell clamps the note to its column with
+// the browser's own ellipsis, carries the whole note in its tooltip, and
+// opens it in a small panel behind an information button.
+export function NoteCell({ text, t = (k) => k, title }) {
+  const [open, setOpen] = useState(false)
+  const [spot, setSpot] = useState(null)
+  const button = useRef(null)
+  const panel = useRef(null)
+  useEffect(() => {
+    if (!open) return undefined
+    const away = (e) => {
+      if (panel.current && panel.current.contains(e.target)) return
+      if (button.current && button.current.contains(e.target)) return
+      setOpen(false)
+    }
+    const key = (e) => { if (e.key === 'Escape') { setOpen(false); if (button.current) button.current.focus() } }
+    document.addEventListener('mousedown', away)
+    document.addEventListener('keydown', key)
+    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', key) }
+  }, [open])
+  useLayoutEffect(() => {
+    // The list sits inside a scrolling card, so a panel positioned inside
+    // the row is clipped. It is placed against the viewport instead, and
+    // flipped above the button when the room below runs out.
+    if (!open || !button.current || typeof window === 'undefined') { setSpot(null); return }
+    const r = button.current.getBoundingClientRect()
+    const below = window.innerHeight - r.bottom
+    const width = Math.min(340, window.innerWidth - 24)
+    setSpot({ left: Math.max(12, Math.min(r.right - width, window.innerWidth - width - 12)),
+              top: below > 190 ? r.bottom + 8 : null,
+              bottom: below > 190 ? null : Math.max(12, window.innerHeight - r.top + 8),
+              width })
+  }, [open])
+  const value = typeof text === 'string' ? text.trim() : ''
+  const long = value.length > 30
+  const stop = (e) => { e.stopPropagation() }
+  return (
+    <span style={{ display: 'flex', alignItems: 'baseline', gap: 6, minWidth: 0 }}>
+      <span title={value} style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {value || '·'}
+      </span>
+      {long && (
+        <button ref={button} type="button" onMouseDown={stop}
+                onClick={(e) => { stop(e); setOpen((v) => !v) }}
+                aria-expanded={open} aria-haspopup="dialog" aria-label={t('ops.noteOpen')}
+                style={{ flex: '0 0 auto', width: 17, height: 17, borderRadius: 9, cursor: 'pointer',
+                         border: `1px solid ${open ? BLUE : BORDER}`, background: open ? BLUE : '#fff',
+                         color: open ? '#fff' : GRAY, fontSize: 10.5, fontWeight: 700, lineHeight: '15px',
+                         padding: 0, fontStyle: 'italic', fontFamily: 'Georgia, serif', alignSelf: 'center' }}>i</button>
+      )}
+      {open && spot && (
+        <span ref={panel} role="dialog" aria-label={title || t('ops.noteTitle')} tabIndex={-1}
+              onMouseDown={stop} onClick={stop}
+              style={{ position: 'fixed', left: spot.left, top: spot.top ?? undefined,
+                       bottom: spot.bottom ?? undefined, width: spot.width, zIndex: 80,
+                       background: '#fff', color: NAVY, border: `1px solid ${BORDER}`, borderRadius: 10,
+                       padding: '12px 14px', boxSizing: 'border-box',
+                       boxShadow: '0 12px 32px rgba(15,41,77,0.18)', textAlign: 'left',
+                       fontSize: 12.5, lineHeight: 1.5, fontWeight: 400, whiteSpace: 'normal',
+                       overflowWrap: 'anywhere' }}>
+          <span style={{ display: 'block', fontSize: 10.5, letterSpacing: 0.6, textTransform: 'uppercase',
+                         color: GRAY, fontWeight: 700, marginBottom: 6 }}>{title || t('ops.noteTitle')}</span>
+          {value}
+        </span>
+      )}
+    </span>
+  )
+}
+
 export function unitNameOf(t, u) {
   return ({ Day: t('ops.u.day'), Hour: t('ops.u.hour'),
             Month: t('ops.u.month'), Year: t('ops.u.year'),
@@ -1735,8 +1806,8 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
             <tr>
               <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width="15%" />
               <SortHeader label={t('ops.col.requirement')} k="requirement" sort={sort} onSort={onSort} width="11%" />
-              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} width="24%" />
-              <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width="9%" />
+              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} width="19%" />
+              <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width="17%" />
               <SortHeader label={t('ops.col.fee')} k="fee" sort={sort} onSort={onSort} align="right" width="11%" />
               <SortHeader label={t('ops.col.quality')} k="check" sort={sort} onSort={onSort} width="14%" />
               <th style={{ position: 'sticky', top: 0, background: '#fff',
@@ -1744,7 +1815,7 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
                            padding: '10px 12px', fontSize: 10.5,
                            fontWeight: 800, letterSpacing: 0.8,
                            textTransform: 'uppercase', color: GRAY,
-                           whiteSpace: 'nowrap', width: '16%',
+                           whiteSpace: 'nowrap', width: '13%',
                            textAlign: 'left' }}>
                 {t('ops.col.site')}
               </th>
@@ -1803,20 +1874,25 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
                   </td>
                   <td className="ops-cell" data-label={t('ops.col.type')}
                       style={{ padding: '10px 12px', color: NAVY, fontWeight: 600,
-                               lineHeight: 1.45, overflowWrap: 'anywhere' }}>
-                    {typeNames[rec.visa_type_name] || rec.visa_type_name || '·'}
+                               lineHeight: 1.45, maxWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    <NoteCell text={typeNames[rec.visa_type_name] || rec.visa_type_name || ''}
+                              t={t} title={t('ops.col.type')} />
                   </td>
                   <td className="ops-cell" data-label={t('ops.col.stay')}
-                      style={{ padding: '10px 12px', textAlign: 'right',
-                               color: NAVY,
-                               whiteSpace: rec.max_stay_duration != null ? 'nowrap' : 'normal',
-                               lineHeight: 1.45, overflowWrap: 'anywhere',
-                               fontVariantNumeric: 'tabular-nums' }}>
+                      style={{ padding: '10px 12px', color: NAVY,
+                               textAlign: rec.max_stay_duration != null ? 'right' : 'left',
+                               lineHeight: 1.45, fontVariantNumeric: 'tabular-nums',
+                               // A fixed table only honours a clamp when the cell may
+                               // shrink, and without it a long note paints over the fee.
+                               maxWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}>
                     {rec.max_stay_duration != null
                       ? `${rec.max_stay_duration} ${unitNameOf(t, rec.max_stay_unit)}`
-                      : wordingFor(rec, 'max_stay_duration', 'max_stay_text')
-                        || (rec.field_status?.max_stay_duration === 'not-applicable' ? t('ops.notApplicable')
-                          : rec.field_status?.max_stay_duration ? t('ops.notPublished') : '·')}
+                      : (() => {
+                          const note = wordingFor(rec, 'max_stay_duration', 'max_stay_text')
+                          if (note) return <NoteCell text={note} t={t} title={t('ops.noteTitle')} />
+                          return rec.field_status?.max_stay_duration === 'not-applicable' ? t('ops.notApplicable')
+                            : rec.field_status?.max_stay_duration ? t('ops.notPublished') : '·'
+                        })()}
                   </td>
                   <td className="ops-cell" data-label={t('ops.col.fee')}
                       style={{ padding: '10px 12px', textAlign: 'right',
