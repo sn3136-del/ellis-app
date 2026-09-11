@@ -324,3 +324,33 @@ def test_the_fourth_skeptic_cases():
     st = tstation.field_status(agreement)
     assert st['validity_duration'] == 'not-applicable' and st['entries'] == 'not-applicable'
     assert tstation._strip_visa_only_fields(agreement)['validity_text'] is None
+
+
+def test_the_fifth_skeptic_cases():
+    # A word confirmed by its own numeral in brackets, whatever the word.
+    for text in ("an initial stay of fourteen (14) days", "stay of up to fourteen (14) days",
+                 "an initial stay of thirty (30) days", "maximum of six (6) months"):
+        assert tstation._wording_status(text) == 'filled', text
+    # A period named by the thing it runs with.
+    for text in ("Valid for the organised tour period", "Valid for the tour period", "Duration of approved course"):
+        assert tstation._wording_status(text) == 'filled', text
+    # Wording that declares itself unverified documents the gap, with or
+    # without a figure after it.
+    for text in ("Not verified", "Not verified, usually 1-3 months from issue"):
+        assert tstation._wording_status(text) == 'not-published', text
+        row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
+        assert tstation.wording_shown(row, 'validity_duration') == text
+    # Consular discretion without the preposition.
+    for text in ("Consulate-determined, normally aligned with itinerary", "Decided per applicant by the consular officer"):
+        assert tstation._wording_status(text) == 'not-published', text
+    # A working or business day figure is a processing time wherever it sits.
+    for text in ("60 Working Day", "5 working days", "Processing takes 10 working days"):
+        assert tstation._wording_status(text) == 'missing', text
+    # Beside a number the record's own caveat rides along, a pointer does not.
+    assert tstation.states_something('Airside transit only, covers the immediate onward connection')
+    for text in ('unknown', 'as granted', 'As issued', 'n/a', 'Set per trip', ''):
+        assert not tstation.states_something(text), text
+    # completeness accepts a checklist that was already computed.
+    row = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': 'Up to 6 calendar months per visit'}
+    st = tstation.field_status(row)
+    assert tstation.completeness(row, statuses=st) == tstation.completeness(row)

@@ -2265,7 +2265,7 @@ _PLACEHOLDER_OPENING = re.compile(r"^\s*(?:n/?a|none|unknown|tbd|tba|varies|vari
 # available" label); wording that asserts the figure cannot apply is the
 # "Not applicable" label.
 _ABSENCE_WORDING = re.compile(
-    r"\b(?:not\s+(?:published|specified|stated|available|provided|disclosed|listed|fixed|guaranteed)|unpublished|"
+    r"\b(?:not\s+(?:published|specified|stated|available|provided|disclosed|listed|fixed|guaranteed|verified|confirmed|checked)|unpublished|"
     r"no\s+(?:fixed|published|stated|specific)\b|\bno\b[^.;]{0,30}\b(?:fixed|published|stated|guaranteed)\b)", re.I)
 _INAPPLICABLE_WORDING = re.compile(r"^\s*not\s+applicable\b", re.I)
 # Wording that says the figure is set per application, by the mission or
@@ -2275,6 +2275,8 @@ _VARIABLE_WORDING = re.compile(
     r"\b(?:(?:decided|decides?|determined|determines?|set|sets|fixed|established)\s+"
     r"(?:by|at|on|in accordance|according|case[- ]by[- ]case|individually|per application)|"
     r"(?:determines?|decides?)\s+(?:the|your|its|each)\b|"
+    r"(?:consulate|consular|embassy|mission|officer|office|authority|immigration)[- ](?:determined|decided|set|assessed)|"
+    r"(?:decided|determined|set|assessed)\s+per\s+(?:applicant|application|traveller|traveler|case|trip)|"
     r"(?:varies|vary|variable|depends|depending)\s+(?:by|on|with|according|per)|"
     r"discretion|discretionary|case[- ]by[- ]case|per application|"
     r"as stated (?:in|on) the|as shown on the|as printed on the|as endorsed|"
@@ -2298,11 +2300,17 @@ _PERIOD_WORDING = re.compile(
     # "30 days", "6-12 months", "30-day", "1 to 3 months", "six (6) months"
     r"(?<!\w)\d+(?:[.,]\d+)?(?:\s*(?:[-\u2013\u2014]|to|or|à|a|/)\s*\d+(?:[.,]\d+)?)?\s*[-\u2013\u2014]?\s*" + _LATIN_UNITS + r"\b|"
     r"\b" + _NUMBER_WORDS + r"(?:\s*\(\d+\))?(?:\s*(?:to|or|[-\u2013\u2014])\s*" + _NUMBER_WORDS + r"(?:\s*\(\d+\))?)?\s*[-\u2013\u2014]?\s*" + _LATIN_UNITS + r"\b|"
+    # Any word followed by its own numeral in brackets, the way official
+    # pages write "fourteen (14) days" for every number they spell out.
+    r"\b\w+\s*\(\s*\d+\s*\)\s*[-\u2013\u2014]?\s*" + _LATIN_UNITS + r"\b|"
     r"[\d一二三四五六七八九十百千两兩]+\s*(?:日間|日|天|周|週|个月|個月|ヶ月|か月|月|年|時間|时间|개월|일|년|주|วัน|เดือน|ปี)|"
     r"\b(?:duration of|for the duration|tied to the duration|course duration|tour duration|programme duration|"
     r"program duration|until (?:the )?passport (?:expires|expiry)|until expiry|whichever is (?:sooner|earlier|shorter|less)|"
     r"for the period applied|period applied for|validity of the passport|"
     r"length of the (?:approved |booked )?(?:course|tour|programme|program|stay|permit)|"
+    r"(?:for|of|matches|matching) the (?:approved |booked |organised |organized |authorised |authorized )?"
+    r"(?:tour|course|programme|program|trip|travel|study|employment|contract|visit|stay|permit|pass)\s+period|"
+    r"period of the (?:approved |booked |organised |organized )?(?:tour|course|programme|program|trip|visit|stay|permit|pass)|"
     r"for the time (?:cbp|the officer|immigration) determines|for the validity of|on or before the [^.]{0,40}expiry|"
     r"long[- ]term|unlimited|indefinite|lifetime|permanent)\b", re.I)
 # A unit that belongs to processing time is not a stay or validity value
@@ -2312,9 +2320,14 @@ _PROCESSING_UNIT_WORDING = re.compile(r"\d+\s*(?:working|business)\s+days?\b", r
 
 
 def _states_period(text: str) -> bool:
-    """True when the wording states a period of its own."""
-    stripped = _PROCESSING_UNIT_WORDING.sub(" ", text)
-    return bool(_PERIOD_WORDING.search(stripped))
+    """True when the wording states a period of its own.
+
+    A working or business day figure belongs to processing time, so it is
+    set aside before the test wherever it sits: a validity cell reading
+    "60 Working Day" states a processing unit, not a validity, and stays a
+    gap until a review restates it.
+    """
+    return bool(_PERIOD_WORDING.search(_PROCESSING_UNIT_WORDING.sub(" ", text)))
 
 
 def _wording_status(text) -> str:
@@ -2345,23 +2358,6 @@ def _wording_status(text) -> str:
     return "missing"
 
 
-def _states_a_value(text) -> bool:
-    """True when wording carries a stated period of its own."""
-    return _wording_status(text) == "filled"
-
-
-def _stay_in_words(row: dict) -> bool:
-    """True when the record carries the stay as stated wording and no number."""
-    return (row.get("max_stay_duration") in (None, "")
-            and _states_a_value(row.get("max_stay_text")))
-
-
-def _validity_in_words(row: dict) -> bool:
-    """True when the record carries the validity as stated wording and no number."""
-    return (row.get("validity_duration") in (None, "")
-            and _states_a_value(row.get("validity_text")))
-
-
 def _no_visa_issued(row: dict) -> bool:
     """True on an exemption lane where nothing is applied for: a plain
     visa-free route, or a Conditional or Transit exemption with no
@@ -2382,6 +2378,15 @@ def _permission_applied_for(row: dict) -> bool:
             or row.get("processing_min_days") not in (None, "")
             or (row.get("visa_fee_amount") not in (None, "") and row.get("visa_fee_amount") != 0)
             or row.get("validity_duration") not in (None, ""))
+
+
+def states_something(text) -> bool:
+    """True when wording says anything of its own: not a pointer, not a
+    placeholder. Such wording rides beside a number too, because a caveat
+    ("Airside transit only, covers the immediate onward connection") is
+    what an operator needs to see next to the figure."""
+    text = str(text or "").strip()
+    return bool(text) and not _POINTER_WORDING.match(text) and not _PLACEHOLDER_OPENING.match(text)
 
 
 def wording_shown(row: dict, cell: str, statuses: dict | None = None) -> str | None:
@@ -2466,7 +2471,7 @@ def export_values(row: dict, unpublished: set | None = None) -> list:
     return cells
 
 
-def completeness(row: dict, unpublished: set | None = None) -> float:
+def completeness(row: dict, unpublished: set | None = None, statuses: dict | None = None) -> float:
     """Share of required fields filled, out of those that could be filled.
 
     A field the destination does not publish, or that cannot apply to a
@@ -2474,7 +2479,7 @@ def completeness(row: dict, unpublished: set | None = None) -> float:
     a gap. Counting them punished the database for being accurate: blanking a
     validity that France genuinely does not publish made the metric fall.
     """
-    st = field_status(row, unpublished)
+    st = statuses or field_status(row, unpublished)
     need = [f for f in FIELD_ORDER if f in REQUIRED_FIELDS
             and st[f] not in ("not-applicable", "not-published")]
     if not need:

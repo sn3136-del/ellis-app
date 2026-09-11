@@ -1874,11 +1874,11 @@ def _wording_field(r: dict, cell: str, key: str, statuses: dict):
     period" rides with its figure so the console never loses it)."""
     from .visa_snapshot import tstation
     if r.get(cell) not in (None, ""):
-        # Beside a number only wording that states something (a period, a
-        # per-application rule) rides along, never a pointer or a
-        # placeholder or another product's sentence.
+        # Beside a number the record's own caveat rides along (a rolling
+        # window, an airside-transit restriction), but never a pointer or a
+        # placeholder.
         text = r.get(key)
-        return text if text and tstation._wording_status(text) != "missing" else None
+        return text if tstation.states_something(text) else None
     return tstation.wording_shown(r, cell, statuses)
 
 
@@ -1909,7 +1909,7 @@ def _record_payload(r: dict) -> dict:
             "publication_reason": r.get("_publication_reason"),
             "review_required": r.get("_review_required", False),
             "field_status": statuses,
-            "completeness": round(tstation.completeness(r), 4)}
+            "completeness": round(tstation.completeness(r, statuses=statuses), 4)}
 
 
 def _with_pending(status: dict, disputed) -> dict:

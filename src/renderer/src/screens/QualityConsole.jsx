@@ -536,6 +536,17 @@ function fx(t, f) {
 // when the backend checklist calls the cell filled by it, or pending review:
 // a visa-free record keeps its Not applicable label and a documented absence
 // keeps its label on every surface (grid, list column, change log).
+// The stay and processing unit vocabulary, shared by every surface: the
+// field grid, the records list and the change log all name a unit the same
+// way. It lived inside one component's closure, which made the list column
+// throw as soon as it used it.
+export function unitNameOf(t, u) {
+  return ({ Day: t('ops.u.day'), Hour: t('ops.u.hour'),
+            Month: t('ops.u.month'), Year: t('ops.u.year'),
+            'Calendar Day': t('ops.u.calDay'),
+            'Working Day': t('ops.u.workDay') }[u] || u || '')
+}
+
 export function wordingFor(rec, cell, key) {
   // The backend sends the wording only when the cell shows it (filled by it,
   // pending review, or a documented absence stated in the destination's own
@@ -664,7 +675,7 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
                   <span>{stayText}</span>
                   <div style={{ marginTop: 5, fontSize: 11, fontWeight: 400,
                                 fontStyle: 'normal', color: GRAY, lineHeight: 1.45 }}>
-                    {st === 'filled' || st === 'pending-review' ? t('ops.stayTextOnly') : t('ops.wordingAbsence')}
+                    {st === 'not-published' ? t('ops.wordingAbsence') : t('ops.stayTextOnly')}
                   </div>
                 </>
               : f === 'validity_duration' && validityText
@@ -672,7 +683,7 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
                   <span>{validityText}</span>
                   <div style={{ marginTop: 5, fontSize: 11, fontWeight: 400,
                                 fontStyle: 'normal', color: GRAY, lineHeight: 1.45 }}>
-                    {st === 'filled' || st === 'pending-review' ? t('ops.validityTextOnly') : t('ops.wordingAbsence')}
+                    {st === 'not-published' ? t('ops.wordingAbsence') : t('ops.validityTextOnly')}
                   </div>
                 </>
               : (rec[f] == null || rec[f] === '')
@@ -1673,7 +1684,7 @@ function AskCard({ ask, onReview, t }) {
   )
 }
 
-function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t, flagOf, typeNames = {}, tvv = (x) => x }) {
+export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t, flagOf, typeNames = {}, tvv = (x) => x }) {
   const [sort, setSort] = useState({ key: 'route', dir: 1 })
   const [open, setOpen] = useState(null)
   const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
@@ -1802,7 +1813,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                                lineHeight: 1.45, overflowWrap: 'anywhere',
                                fontVariantNumeric: 'tabular-nums' }}>
                     {rec.max_stay_duration != null
-                      ? `${rec.max_stay_duration} ${unitName(rec.max_stay_unit)}`
+                      ? `${rec.max_stay_duration} ${unitNameOf(t, rec.max_stay_unit)}`
                       : wordingFor(rec, 'max_stay_duration', 'max_stay_text')
                         || (rec.field_status?.max_stay_duration === 'not-applicable' ? t('ops.notApplicable')
                           : rec.field_status?.max_stay_duration ? t('ops.notPublished') : '·')}
@@ -3088,12 +3099,7 @@ function QualityWorkspace() {
             'Visa Required in Advance': t('ops.req.advance'),
             Conditional: t('ops.req.conditional'),
           }[v] || v)
-          const unitName = (u) => ({
-            Day: t('ops.u.day'), Hour: t('ops.u.hour'),
-            Month: t('ops.u.month'), Year: t('ops.u.year'),
-            'Calendar Day': t('ops.u.calDay'),
-            'Working Day': t('ops.u.workDay'),
-          }[u] || u || '')
+          const unitName = (u) => unitNameOf(t, u)
           const methodName = (v) => ({
             'Online Application': t('ops.ch.online'),
             'Embassy Submission': t('ops.ch.embassy'),
