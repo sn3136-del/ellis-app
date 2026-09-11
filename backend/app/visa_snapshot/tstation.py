@@ -2242,7 +2242,9 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
         elif (f == "visa_fee_currency" and row.get("visa_fee_amount") == 0
               and _reviewed_no_visa_product(row)):
             out[f] = "not-applicable"
-        elif (exempt or no_visa) and f in _NOT_APPLICABLE_WHEN_EXEMPT and (exempt or f != "application_method"):
+        elif (exempt or no_visa) and f in _NOT_APPLICABLE_WHEN_EXEMPT:
+            # application_method never reaches here on a no-visa lane: no
+            # visa implies no application, settled above.
             out[f] = "not-applicable"
         elif f == "consulate_district" and _no_consular_application(row):
             out[f] = "not-applicable"
@@ -2265,9 +2267,22 @@ _PLACEHOLDER_OPENING = re.compile(r"^\s*(?:n/?a|none|unknown|tbd|tba|varies|vari
 # available" label); wording that asserts the figure cannot apply is the
 # "Not applicable" label.
 _ABSENCE_WORDING = re.compile(
-    r"\b(?:not\s+(?:published|specified|stated|available|provided|disclosed|listed|fixed|guaranteed|verified|confirmed|checked)|unpublished|"
+    r"\b(?:not\s+(?:published|specified|stated|available|provided|disclosed|listed|fixed|guaranteed)|unpublished|"
     r"no\s+(?:fixed|published|stated|specific)\b|\bno\b[^.;]{0,30}\b(?:fixed|published|stated|guaranteed)\b)", re.I)
 _INAPPLICABLE_WORDING = re.compile(r"^\s*not\s+applicable\b", re.I)
+# Wording about Ellis's own checking ("Not verified", "unconfirmed", "not
+# stated on the pages read") is neither a value nor the destination's
+# statement, so it is never shown as the cell and never counts as a value:
+# a figure it carries is one the record itself calls unverified. Such a
+# cell shows the label. Where the wording also asserts that the pages
+# state nothing, the checklist keeps the documented absence underneath
+# (the destination was checked and does not publish); otherwise the cell
+# stays a gap (sixth skeptic, 11 September 2026).
+_SELF_CHECK_WORDING = re.compile(
+    r"\b(?:not\s+(?:yet\s+)?(?:verified|confirmed|checked|validated)|unverified|unconfirmed|unchecked|"
+    r"(?:pages?|sources?|sites?|documents?)\s+(?:we\s+|i\s+)?(?:read|checked|consulted|reviewed|visited)|"
+    r"could\s+not\s+(?:be\s+)?(?:verif|confirm|locat|find)\w*|unable\s+to\s+(?:verify|confirm|locate|find)|"
+    r"(?:pending|awaiting)\s+(?:verification|confirmation))\b", re.I)
 # Wording that says the figure is set per application, by the mission or
 # case by case, with no figure of its own, documents an absence as well:
 # the destination publishes no fixed period.
@@ -2346,6 +2361,11 @@ def _wording_status(text) -> str:
     if _INAPPLICABLE_WORDING.match(text):
         return "not-applicable"
     absence = _ABSENCE_WORDING.search(text)
+    if _SELF_CHECK_WORDING.search(text):
+        # "Not verified, usually 1-3 months from issue" states no value
+        # of its own; "not stated on the pages read" documents the
+        # absence the checker found.
+        return "not-published" if absence and absence.start() <= 4 else "missing"
     if absence and absence.start() <= 4:
         # The absence governs the whole statement ("not stated on the pages
         # read, stay limited to 90 days" documents the validity, the 90
@@ -2407,11 +2427,22 @@ def wording_shown(row: dict, cell: str, statuses: dict | None = None) -> str | N
     text = str(row.get(key) or "").strip()
     if not text:
         return None
+    if _SELF_CHECK_WORDING.search(text):
+        return None
     if status in ("filled", "pending-review"):
         return text
-    if status in ("not-published", "not-applicable") and _wording_status(text) == status:
+    if status in ("not-published", "not-applicable") and _wording_status(text) == status \
+            and not _bare_fragment(text):
         return text
     return None
+
+
+def _bare_fragment(text: str) -> bool:
+    """True when an absence wording is a two-word shorthand ("not published",
+    "Consular discretion") rather than a statement with a subject or a
+    clause of its own ("not published by MPPRE", "At consular discretion,
+    normally aligned with the itinerary"). A shorthand shows the label."""
+    return len(re.findall(r"\w+", text)) < 3
 
 
 # The two duration cells wording can carry, with their unit cell, mapped to

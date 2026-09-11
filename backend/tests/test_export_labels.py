@@ -147,8 +147,10 @@ def test_wording_predicates_follow_the_owner_rule():
         assert st['validity_duration'] == 'not-published' and st['validity_unit'] == 'not-applicable', absent
         cells = dict(zip(tstation.FIELD_ORDER, tstation.export_values(val), strict=True))
         # The destination's own statement of the absence is shown, never
-        # dropped for a bare label, and the cell counts as documented.
-        assert cells['validity_duration'] == absent and cells['validity_unit'] == tstation.NOT_APPLICABLE
+        # dropped for a bare label, and the cell counts as documented. A
+        # two-word shorthand is not a statement: it shows the label.
+        shown = tstation.NOT_PUBLICLY_AVAILABLE if absent == 'not published' else absent
+        assert cells['validity_duration'] == shown and cells['validity_unit'] == tstation.NOT_APPLICABLE
         stay = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': absent}
         assert tstation.field_status(stay)['max_stay_duration'] == 'not-published'
     val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': 'Not applicable, no visa issued'}
@@ -334,12 +336,13 @@ def test_the_fifth_skeptic_cases():
     # A period named by the thing it runs with.
     for text in ("Valid for the organised tour period", "Valid for the tour period", "Duration of approved course"):
         assert tstation._wording_status(text) == 'filled', text
-    # Wording that declares itself unverified documents the gap, with or
-    # without a figure after it.
+    # Wording that declares itself unverified is Ellis's own checking
+    # state, not the destination's statement: a gap shown as the label,
+    # with or without a figure after it (sixth skeptic).
     for text in ("Not verified", "Not verified, usually 1-3 months from issue"):
-        assert tstation._wording_status(text) == 'not-published', text
+        assert tstation._wording_status(text) == 'missing', text
         row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
-        assert tstation.wording_shown(row, 'validity_duration') == text
+        assert tstation.wording_shown(row, 'validity_duration') is None
     # Consular discretion without the preposition.
     for text in ("Consulate-determined, normally aligned with itinerary", "Decided per applicant by the consular officer"):
         assert tstation._wording_status(text) == 'not-published', text
@@ -354,3 +357,51 @@ def test_the_fifth_skeptic_cases():
     row = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': 'Up to 6 calendar months per visit'}
     st = tstation.field_status(row)
     assert tstation.completeness(row, statuses=st) == tstation.completeness(row)
+
+
+def test_the_sixth_skeptic_cases():
+    # Ellis's own checking state is never a value and never the destination's
+    # absence statement: the cell shows the label, whatever figure follows.
+    for text in ("Not verified", "Not verified, usually 1-3 months from issue", "unconfirmed",
+                 "90 days from issue (not confirmed)", "per reciprocity schedule (unverified)",
+                 "Could not be verified on the embassy site", "not yet checked"):
+        assert tstation._wording_status(text) == 'missing', text
+        row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
+        assert tstation.wording_shown(row, 'validity_duration') is None, text
+        cells = tstation.export_values(row)
+        assert cells[tstation.FIELD_ORDER.index('validity_duration')] == tstation.NOT_PUBLICLY_AVAILABLE, text
+    # A checker's note that the pages state nothing documents the absence
+    # underneath, but the cell still shows the label, not the note.
+    text = "not stated on the pages read, stay limited to 90 days in any 180 consecutive days"
+    assert tstation._wording_status(text) == 'not-published'
+    row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
+    assert tstation.field_status(row)['validity_duration'] == 'not-published'
+    assert tstation.wording_shown(row, 'validity_duration') is None
+    assert tstation.export_values(row)[tstation.FIELD_ORDER.index('validity_duration')] == tstation.NOT_PUBLICLY_AVAILABLE
+    # The destination's own absence statement is still shown in its words,
+    # a two-word shorthand is the label.
+    for text in ("not published by MPPRE", "At consular discretion, normally aligned with the itinerary",
+                 "Not published by the Congolese government"):
+        row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
+        assert tstation.wording_shown(row, 'validity_duration') == text, text
+    for text in ("not published", "Consular discretion", "unpublished"):
+        row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
+        assert tstation.field_status(row)['validity_duration'] == 'not-published', text
+        assert tstation.wording_shown(row, 'validity_duration') is None, text
+        assert tstation.export_values(row)[tstation.FIELD_ORDER.index('validity_duration')] == tstation.NOT_PUBLICLY_AVAILABLE, text
+    # A stated period beside a plain absence remark is still a value.
+    assert tstation._wording_status("90 days from issue, extension not guaranteed") == 'filled'
+
+
+def test_record_completeness_ignores_pending_disputes():
+    # The served checklist marks a disputed filled cell pending; the
+    # completeness figure reads the raw checklist so the record agrees with
+    # the summary and the workbook (sixth skeptic, minor).
+    from app import main as m
+    row = {'visa_requirement': 'Visa Required in Advance', 'visa_fee_amount': 50, 'visa_fee_currency': 'USD',
+           'max_stay_text': 'Up to 6 calendar months per visit', '_disputed': ['visa_fee_amount']}
+    served, raw = m._served_and_raw_status(row)
+    assert served['visa_fee_amount'] == 'pending-review' and raw['visa_fee_amount'] == 'filled'
+    assert m._status_of(row) == served
+    assert tstation.completeness(row, statuses=raw) == tstation.completeness(row)
+    assert tstation.completeness(row, statuses=served) < tstation.completeness(row)

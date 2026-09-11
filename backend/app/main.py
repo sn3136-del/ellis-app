@@ -1863,8 +1863,17 @@ def _dedupe_dataset_rows(rows: list[dict]) -> list[dict]:
 
 def _status_of(r: dict) -> dict:
     """The served checklist of one row, with disputed cells pending."""
+    return _served_and_raw_status(r)[0]
+
+
+def _served_and_raw_status(r: dict) -> tuple:
+    """The served checklist (disputed cells pending) beside the raw one the
+    completeness figure, the acceptance summary and the workbook all read,
+    computed once. A disputed cell is a pending bucket of its own, never a
+    gap: the record's completeness must agree with the summary's."""
     from .visa_snapshot import tstation
-    return _with_pending(tstation.field_status(r), r.get("_disputed"))
+    raw = tstation.field_status(r)
+    return _with_pending(dict(raw), r.get("_disputed")), raw
 
 
 def _wording_field(r: dict, cell: str, key: str, statuses: dict):
@@ -1885,7 +1894,7 @@ def _wording_field(r: dict, cell: str, key: str, statuses: dict):
 def _record_payload(r: dict) -> dict:
     """One record of the QC browser payload, its checklist computed once."""
     from .visa_snapshot import tstation
-    statuses = _status_of(r)
+    statuses, raw = _served_and_raw_status(r)
     return {**{k: r.get(k) for k in tstation.FIELD_ORDER},
             # The per-source binding of the acceptance standard. Deliberately
             # outside FIELD_ORDER so the 25-field export shape is untouched,
@@ -1909,7 +1918,7 @@ def _record_payload(r: dict) -> dict:
             "publication_reason": r.get("_publication_reason"),
             "review_required": r.get("_review_required", False),
             "field_status": statuses,
-            "completeness": round(tstation.completeness(r, statuses=statuses), 4)}
+            "completeness": round(tstation.completeness(r, statuses=raw), 4)}
 
 
 def _with_pending(status: dict, disputed) -> dict:
