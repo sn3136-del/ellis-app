@@ -92,21 +92,45 @@ test('a long stay note is clamped by the cell and never rewritten', () => {
 test('the cell cannot spill over its neighbour, whatever the note length', () => {
   for (const note of ['Up to 6 calendar months per visit', 'Visa T: single entry, 3 months validity, 1 month stay',
                       'x'.repeat(300)]) {
-    const html = render([record({ max_stay_text: note,
-      field_status: { max_stay_duration: 'filled', max_stay_unit: 'not-applicable' } })])
+    const cell = stayCell(render([record({ max_stay_text: note,
+      field_status: { max_stay_duration: 'filled', max_stay_unit: 'not-applicable' } })]))
     // max-width 0 is what makes a fixed table honour the clamp.
-    assert.ok(html.includes('max-width:0'), note.slice(0, 20))
-    assert.ok(html.includes('overflow:hidden'), note.slice(0, 20))
+    assert.ok(cell.includes('max-width:0'), note.slice(0, 20))
+    assert.ok(cell.includes('overflow:hidden'), note.slice(0, 20))
   }
 })
 
+// The stay cell alone, so an assertion cannot be satisfied by another column.
+function stayCell(html) {
+  const at = html.indexOf('data-label="' + t('ops.col.stay') + '"')
+  assert.ok(at > 0, 'the stay cell is in the row')
+  return html.slice(at, html.indexOf('</td>', at))
+}
+
 test('a validity figure inside a stay note is never promoted to the cell', () => {
   const note = 'Visa T: single entry, 3 months validity, 1 month stay'
-  const html = render([record({ max_stay_text: note,
-    field_status: { max_stay_duration: 'filled', max_stay_unit: 'not-applicable' } })])
-  const shown = html.slice(html.indexOf('data-label="' + t('ops.col.stay') + '"'))
-  assert.ok(shown.includes(note))
-  assert.ok(!shown.startsWith('3 months'))
+  const cell = stayCell(render([record({ max_stay_text: note,
+    field_status: { max_stay_duration: 'filled', max_stay_unit: 'not-applicable' } })]))
+  // The note is rendered whole and nothing is lifted out of it.
+  assert.ok(cell.includes(note))
+  assert.ok(cell.includes('title="' + note + '"'))
+  assert.ok(!/>\s*3 months\s*</.test(cell))
+})
+
+test('the stay cell itself carries the clamp, not merely some cell on the row', () => {
+  const cell = stayCell(render([record({ max_stay_text: 'Up to 6 calendar months per visit',
+    field_status: { max_stay_duration: 'filled', max_stay_unit: 'not-applicable' } })]))
+  assert.ok(cell.includes('max-width:0'))
+  assert.ok(cell.includes('overflow:hidden'))
+  assert.ok(cell.includes('text-overflow:ellipsis'))
+})
+
+test('a numeric stay keeps its ellipsis and its tooltip too', () => {
+  const cell = stayCell(render([record({ max_stay_duration: 90, max_stay_unit: 'Day',
+    field_status: { max_stay_duration: 'filled', max_stay_unit: 'filled' } })]))
+  assert.ok(cell.includes('90 days'))
+  assert.ok(cell.includes('title="90 days"'))
+  assert.ok(cell.includes('text-overflow:ellipsis'))
 })
 
 test('a short stay note is shown as it is, with no button', () => {
@@ -116,3 +140,17 @@ test('a short stay note is shown as it is, with no button', () => {
   assert.ok(!html.includes(t('ops.noteOpen')))
 })
 
+
+
+test('the stacked card layout undoes the table clamp on both clamped columns', async () => {
+  const css = await import('node:fs').then((fs) => fs.readFileSync(
+    'src/renderer/src/screens/QualityConsole.jsx', 'utf8'))
+  // Several blocks share that width, so find the one that stacks the table.
+  const card = css.slice(css.lastIndexOf('@media (max-width: 760px)', css.indexOf('.ops-rt thead { display: none; }')))
+  const block = card.slice(0, card.indexOf('@media', 10))
+  // Under 760px a cell has the whole width, so the clamp must be undone or
+  // the value collapses to nothing on every row.
+  assert.match(block, /\.ops-rt td \{[^}]*max-width: none !important/)
+  assert.match(block, /overflow: visible !important/)
+  assert.match(block, /\.ops-notetext \{[^}]*white-space: normal !important/)
+})

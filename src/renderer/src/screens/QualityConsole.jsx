@@ -90,6 +90,11 @@ const OPS_CSS = `
   }
   .ops-rt td.ops-route { padding-top: 10px; }
   .ops-rt td.ops-route strong { font-size: 14px; white-space: normal; }
+  /* A card has the whole width, so the clamp a fixed table needs would
+     collapse the cell to nothing. Both declarations it undoes are inline,
+     which is why these need the same !important the text-align rule needs. */
+  .ops-rt td { max-width: none !important; overflow: visible !important; white-space: normal !important; }
+  .ops-rt .ops-notetext { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ops-fade { animation: none; }
@@ -545,11 +550,31 @@ function fx(t, f) {
 // ends up printed as a stay. The cell clamps the note to its column with
 // the browser's own ellipsis, carries the whole note in its tooltip, and
 // opens it in a small panel behind an information button.
+// Only one note is read at a time. Without this a second panel opens on top
+// of the first, because the button stops its own click before the open
+// panel's document listener can hear it.
+let closeOpenNote = null
+
 export function NoteCell({ text, t = (k) => k, title }) {
   const [open, setOpen] = useState(false)
   const [spot, setSpot] = useState(null)
+  const [clipped, setClipped] = useState(false)
   const button = useRef(null)
   const panel = useRef(null)
+  const lead = useRef(null)
+  const place = useCallback(() => {
+    // The list sits inside a scrolling card, so a panel positioned inside
+    // the row is clipped. It is placed against the viewport instead, and
+    // flipped above the button when the room below runs out.
+    if (!button.current || typeof window === 'undefined') return
+    const r = button.current.getBoundingClientRect()
+    const width = Math.min(340, window.innerWidth - 24)
+    const room = window.innerHeight - r.bottom
+    setSpot({ left: Math.max(12, Math.min(r.right - width, window.innerWidth - width - 12)),
+              top: room > 190 ? Math.max(12, r.bottom + 8) : null,
+              bottom: room > 190 ? null : Math.max(12, window.innerHeight - r.top + 8),
+              width, room: Math.max(120, window.innerHeight - 24) })
+  }, [])
   useEffect(() => {
     if (!open) return undefined
     const away = (e) => {
@@ -558,34 +583,53 @@ export function NoteCell({ text, t = (k) => k, title }) {
       setOpen(false)
     }
     const key = (e) => { if (e.key === 'Escape') { setOpen(false); if (button.current) button.current.focus() } }
+    // A note read while the list moves would end up over another route, so
+    // scrolling or resizing closes it rather than leaving it behind.
+    const moved = () => setOpen(false)
     document.addEventListener('mousedown', away)
     document.addEventListener('keydown', key)
-    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', key) }
+    window.addEventListener('scroll', moved, true)
+    window.addEventListener('resize', moved)
+    return () => {
+      document.removeEventListener('mousedown', away)
+      document.removeEventListener('keydown', key)
+      window.removeEventListener('scroll', moved, true)
+      window.removeEventListener('resize', moved)
+    }
   }, [open])
+  useLayoutEffect(() => { if (open) place(); else setSpot(null) }, [open, place])
   useLayoutEffect(() => {
-    // The list sits inside a scrolling card, so a panel positioned inside
-    // the row is clipped. It is placed against the viewport instead, and
-    // flipped above the button when the room below runs out.
-    if (!open || !button.current || typeof window === 'undefined') { setSpot(null); return }
-    const r = button.current.getBoundingClientRect()
-    const below = window.innerHeight - r.bottom
-    const width = Math.min(340, window.innerWidth - 24)
-    setSpot({ left: Math.max(12, Math.min(r.right - width, window.innerWidth - width - 12)),
-              top: below > 190 ? r.bottom + 8 : null,
-              bottom: below > 190 ? null : Math.max(12, window.innerHeight - r.top + 8),
-              width })
-  }, [open])
+    // Whether the value fits is a question about pixels, not characters, so
+    // the button appears exactly when the text is actually cut off.
+    const measure = () => {
+      const el = lead.current
+      setClipped(!!el && el.scrollWidth > el.clientWidth + 1)
+    }
+    measure()
+    if (typeof window === 'undefined') return undefined
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [text])
   const value = typeof text === 'string' ? text.trim() : ''
-  const long = value.length > 30
+  const long = clipped || value.length > 30
   const stop = (e) => { e.stopPropagation() }
   return (
     <span style={{ display: 'flex', alignItems: 'baseline', gap: 6, minWidth: 0 }}>
-      <span title={value} style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span ref={lead} className="ops-notetext" title={value}
+            style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {value || '·'}
       </span>
       {long && (
         <button ref={button} type="button" onMouseDown={stop}
-                onClick={(e) => { stop(e); setOpen((v) => !v) }}
+                onClick={(e) => {
+                  stop(e)
+                  setOpen((v) => {
+                    if (v) { closeOpenNote = null; return false }
+                    if (closeOpenNote) closeOpenNote()
+                    closeOpenNote = () => setOpen(false)
+                    return true
+                  })
+                }}
                 aria-expanded={open} aria-haspopup="dialog" aria-label={t('ops.noteOpen')}
                 style={{ flex: '0 0 auto', width: 17, height: 17, borderRadius: 9, cursor: 'pointer',
                          border: `1px solid ${open ? BLUE : BORDER}`, background: open ? BLUE : '#fff',
@@ -599,6 +643,7 @@ export function NoteCell({ text, t = (k) => k, title }) {
                        bottom: spot.bottom ?? undefined, width: spot.width, zIndex: 80,
                        background: '#fff', color: NAVY, border: `1px solid ${BORDER}`, borderRadius: 10,
                        padding: '12px 14px', boxSizing: 'border-box',
+                       maxHeight: spot.room, overflowY: 'auto',
                        boxShadow: '0 12px 32px rgba(15,41,77,0.18)', textAlign: 'left',
                        fontSize: 12.5, lineHeight: 1.5, fontWeight: 400, whiteSpace: 'normal',
                        overflowWrap: 'anywhere' }}>
@@ -1804,12 +1849,12 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
                         tableLayout: 'fixed', fontSize: 13 }}>
           <thead>
             <tr>
-              <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width="15%" />
-              <SortHeader label={t('ops.col.requirement')} k="requirement" sort={sort} onSort={onSort} width="11%" />
-              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} width="19%" />
+              <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width="14%" />
+              <SortHeader label={t('ops.col.requirement')} k="requirement" sort={sort} onSort={onSort} width="10%" />
+              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} width="22%" />
               <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width="17%" />
-              <SortHeader label={t('ops.col.fee')} k="fee" sort={sort} onSort={onSort} align="right" width="11%" />
-              <SortHeader label={t('ops.col.quality')} k="check" sort={sort} onSort={onSort} width="14%" />
+              <SortHeader label={t('ops.col.fee')} k="fee" sort={sort} onSort={onSort} align="right" width="10%" />
+              <SortHeader label={t('ops.col.quality')} k="check" sort={sort} onSort={onSort} width="13%" />
               <th style={{ position: 'sticky', top: 0, background: '#fff',
                            zIndex: 5, borderBottom: `2px solid ${BORDER}`,
                            padding: '10px 12px', fontSize: 10.5,
@@ -1886,7 +1931,8 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
                                // shrink, and without it a long note paints over the fee.
                                maxWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}>
                     {rec.max_stay_duration != null
-                      ? `${rec.max_stay_duration} ${unitNameOf(t, rec.max_stay_unit)}`
+                      ? <NoteCell text={`${rec.max_stay_duration} ${unitNameOf(t, rec.max_stay_unit)}`}
+                                  t={t} title={t('ops.col.stay')} />
                       : (() => {
                           const note = wordingFor(rec, 'max_stay_duration', 'max_stay_text')
                           if (note) return <NoteCell text={note} t={t} title={t('ops.noteTitle')} />
