@@ -222,7 +222,7 @@ def test_lookup_records_and_freshness_share_the_verdict_evidence_contract(
     # Grounded on the verdict with every required cell filled or documented:
     # High. An ancillary check that never verified the verdict leaves the
     # record Low.
-    assert records and {r["confidence_level"] for r in records} == ({"High"} if verdict_supported else {"Low"})
+    assert records and {r["confidence_level"] for r in records} == ({"High"} if verdict_supported else {"Medium"})
     assert bool(lookup["held"]) == (not verdict_supported)
     assert record["grounded"] == verdict_supported
     assert {r["source_check"] for r in records} == {

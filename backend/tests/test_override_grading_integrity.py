@@ -48,7 +48,9 @@ def test_high_allows_ai_with_evidence_and_complete_record():
     historical = {k: v for k, v in PROV.items() if k != "verifier"}
     assert record(prov=historical)["confidence_level"] == "High"
     assert record(prov=dict(PROV, fields=["arrival_card"]))["confidence_level"] != "High"
-    assert record(prov=dict(PROV, note=""))["confidence_level"] == "Low"
+    # An unsupported proof beside a cited official page: Medium on display, still held.
+    assert record(prov=dict(PROV, note=""))["confidence_level"] == "Medium"
+    assert record(prov=dict(PROV, note=""))["_evidence_low"] is True
     assert record(prov=dict(PROV, source_url="https://blog.example.com/"))["confidence_level"] == "Low"
     assert record(prov=dict(PROV, note=""), grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == "High"
     assert record(g={k: v for k, v in FREE.items() if not k.startswith("permitted_stay")})["confidence_level"] == "Medium"
@@ -62,7 +64,9 @@ def test_high_allows_ai_with_evidence_and_complete_record():
 ])
 def test_imported_verdict_provenance_requires_note_and_actual_verification_date(patch):
     prov = dict(PROV, **patch)
-    assert record(prov=prov)["confidence_level"] == "Low"
+    # The cited official page keeps the display grade at Medium; the unsupported proof still holds the row.
+    assert record(prov=prov)["confidence_level"] == "Medium"
+    assert record(prov=prov)["_evidence_low"] is True
     assert record(prov=prov, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == ("Medium" if patch.get("verified_at", "present") in (None, "") else "High")  # No collection date: grounded but incomplete.
 
 
@@ -78,7 +82,8 @@ def test_model_only_source_label_does_not_claim_verification():
 
 def test_official_homepage_alone_cannot_verify_a_productless_exemption():
     g = dict(FREE, source_url="https://www.mofa.go.jp/", visa_products=[])
-    assert record(g, prov=None)["confidence_level"] == "Low"
+    assert record(g, prov=None)["confidence_level"] == "Medium"  # cited, never read: shown with its source, held
+    assert record(g, prov=None)["_evidence_low"] is True
     assert record(g, prov=None, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == "Medium"  # Grounded, but the collection date is still missing.
     assert record(g, prov=dict(PROV, verifier="ai"))["confidence_level"] == "High"
 

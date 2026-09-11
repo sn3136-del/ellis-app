@@ -39,12 +39,13 @@ def test_checked_answer_without_a_published_end_date_is_a_documented_absence():
     assert row["confidence_level"] == "High"
 
 
-def test_unchecked_answer_keeps_the_gap_and_a_medium_grade_at_best():
+def test_unchecked_answer_keeps_the_gap_and_reads_medium_but_stays_held():
     row = _row(provenance=None)
     assert row["info_validity"] is None
     assert tstation.field_status(row)["info_validity"] == "missing"
     assert "info_validity" not in (row.get("_unpublished") or [])
-    assert row["confidence_level"] == "Low"
+    assert row["confidence_level"] == "Medium"  # a cited official page, never read
+    assert row["_evidence_low"] is True
 
 
 def test_a_published_end_date_is_still_the_value_itself():

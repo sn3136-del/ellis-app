@@ -119,7 +119,8 @@ def test_low_verdict_row_keeps_the_whole_route_hold(reason, monkeypatch):
     else:
         raw['grounded_check'] = {'disputed_fields': ['permitted_stay_days']}
     if reason in ('no_source', 'public_edit'):
-        assert grades(route, raw)[0][1] == 'Low'
+        # A cited page nobody read displays Medium; a public edit is Low. Both hold.
+        assert grades(route, raw)[0][1] == ('Medium' if reason == 'no_source' else 'Low')
     elif reason == 'disputed':
         disputed = tstation.records_for_route(route, raw['guidance'], raw['source_verified'],
                                               disputed_fields=['permitted_stay_days'])
@@ -135,7 +136,7 @@ def test_low_only_route_serves_exactly_what_it_served_before(monkeypatch):
     route, raw = high_exemption_case()
     raw['source_verified'] = None
     raw['guidance']['visa_products'] = []
-    assert grades(route, raw) == [('No visa needed', 'Low', True)]
+    assert grades(route, raw) == [('No visa needed', 'Medium', True)]
     out = apply_records_hold(route, raw)
     assert out['held'] is True and out.get('publication_state') != 'partial'
     monkeypatch.setenv('ELLIS_DATABASE_HOLD_LOW_CONFIDENCE', '0')
@@ -149,7 +150,7 @@ def test_two_evidenced_defaults_publish_and_withhold_each_low_sibling(monkeypatc
     route, raw = two_default_evisa_case()
     before = deepcopy(raw)
     graded = grades(route, raw)
-    assert [g[1] for g in graded] == ['Medium', 'Medium', 'Low', 'Low']
+    assert [g[1] for g in graded] == ['Medium', 'Medium', 'Medium', 'Medium']  # the unread siblings display Medium and stay withheld
     out = apply_records_hold(route, raw)
     assert out['held'] is False and out['publication_state'] == 'partial'
     assert out['withheld_product_count'] == 2
@@ -214,6 +215,6 @@ def test_qc_records_expose_each_products_own_publication_state(db, client, monke
     assert [r['publication_state'] for r in records] == [
         'published', 'published', 'withheld', 'withheld']
     assert [r['publication_reason'] for r in records[2:]] == ['product_evidence_low'] * 2
-    assert [r['confidence_level'] for r in records] == ['Medium', 'Medium', 'Low', 'Low']
+    assert [r['confidence_level'] for r in records] == ['Medium', 'Medium', 'Medium', 'Medium']
     # QC keeps the withheld products' values; only the reader loses them.
     assert all(r['visa_type_name'] for r in records)

@@ -840,7 +840,7 @@ def _reviewed_policy_end(provenance: dict | None, route: dict) -> str | None:
 
 def _confidence(guidance: dict, provenance: dict | None,
                 grounded_ok: bool = False, *, complete: bool = True,
-                disputed: bool = False) -> str:
+                disputed: bool = False, hold: bool = False) -> str:
     """Trip.com's field 25 ladder, three tiers, as the owner fixed them on
     11 September 2026. The definitions are exhaustive.
 
@@ -852,11 +852,11 @@ def _confidence(guidance: dict, provenance: dict | None,
     Authorship stays in the provenance.
     Medium: an official page was checked the same way, but some required
     information is still missing. Shown with its source, never blocked.
-    Low: not checked against an official page (no official source, or a
-    link nobody read against the answer), or disputed (including a
-    serve-time conflict), or a public edit, or the information is not
-    publicly available (no official page exists for the answer, which is
-    the same "no official source" branch below). A cell the destination was
+    Low: no official source at all (the model's memory alone, or a page
+    that is not a government page and carries no binding), or disputed
+    (including a serve-time conflict), or a public edit. A cited official
+    page nobody has read against the answer is Medium, not Low: it is an
+    official source, its check state stays "reference" in the console. A cell the destination was
     checked for and does not publish is a documented absence, counted as
     complete by the owner's approved completion policy; it does not lower
     the grade. A model's self-rating is never evidence, and an official URL
@@ -879,7 +879,14 @@ def _confidence(guidance: dict, provenance: dict | None,
         return "Low"
     if verdict_provenance_supported(provenance) or grounded_ok:
         return "High" if complete else "Medium"
-    return "Low"
+    # An answer that cites an official government page nobody has yet read
+    # against it is neither conflicting nor unofficial, so its display grade
+    # is Medium (owner decision, 11 September 2026), shown with its source,
+    # and the QC console labels its check state "reference" until a quote
+    # or a grounded read lifts it. The publication hold (hold=True, used
+    # for _evidence_low) still treats an unread link as no evidence: an
+    # unverified answer is not served to travellers until its review lands.
+    return "Low" if hold else "Medium"
 
 
 def _clean_text(v):
@@ -1652,7 +1659,7 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     # and a gap (Medium) may not create a hold that did not exist before
     # the three tiers.
     row["_evidence_low"] = _confidence(g, prov, grounded, complete=True,
-                                       disputed=conflicted) == "Low"
+                                       disputed=conflicted, hold=True) == "Low"
     if not (prov and "disposition" in (prov.get("fields") or ())):
         row["_evidence_low"] = row["_evidence_low"] or str(g.get("confidence") or "").lower() == "low"
     # Their ladder grades the record: one official source checked for the
