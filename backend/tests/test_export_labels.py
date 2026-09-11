@@ -67,4 +67,29 @@ def test_a_stay_stated_in_words_is_exported_verbatim_not_labelled():
     values = dict(zip(tstation.FIELD_ORDER, tstation.export_values(row), strict=True))
     assert values['max_stay_duration'] == 'Stay is determined by the e-Pass issued on arrival'
     assert values['max_stay_unit'] == tstation.NOT_APPLICABLE
-    assert tstation.field_status(row)['max_stay_duration'] == 'missing'
+    # The wording is the value the record holds, so it is filled for grading
+    # too, and the unit cell is the record's own "Not applicable" verdict.
+    status = tstation.field_status(row)
+    assert status['max_stay_duration'] == 'filled'
+    assert status['max_stay_unit'] == 'not-applicable'
+    assert 'max_stay' not in [f for f, v in status.items() if v == 'missing']
+
+
+def test_a_stay_in_words_does_not_count_as_a_gap_for_completeness():
+    row = {'visa_requirement': 'Visa Required in Advance', 'visa_requirement_detail': 'eVisa',
+           'visa_type_name': 'Standard Visitor', 'validity_duration': 6, 'validity_unit': 'Month',
+           'entries': 'Multiple', 'visa_fee_amount': 135, 'visa_fee_currency': 'GBP',
+           'application_method': 'Online Application', 'required_documents': 'Passport',
+           'consulate_district': 'Any', 'entry_requirements': 'x', 'special_conditions': 'y',
+           'data_source': 'Ellis AI official-source field review', 'source_url': 'https://www.gov.uk/standard-visitor',
+           'collected_at': '2026-09-11', 'info_validity': '2027-09-11', 'confidence_level': 'High',
+           'travel_document_type': 'ordinary_passport', 'travel_document_country': 'RUS',
+           'destination_country': 'GBR', 'travel_purpose': 'tourism',
+           'max_stay_duration': None, 'max_stay_unit': None,
+           'max_stay_text': 'Up to 6 calendar months per visit'}
+    assert tstation.completeness(row) == 1.0
+    numeric = dict(row, max_stay_duration=180, max_stay_unit='Day', max_stay_text=None)
+    assert tstation.field_status(numeric)['max_stay_duration'] == 'filled'
+    assert tstation.field_status(numeric)['max_stay_unit'] == 'filled'
+    values = dict(zip(tstation.FIELD_ORDER, tstation.export_values(numeric), strict=True))
+    assert values['max_stay_duration'] == 180 and values['max_stay_unit'] == 'Day'

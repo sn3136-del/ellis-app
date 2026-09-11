@@ -2207,11 +2207,28 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
             out[f] = "not-applicable"
         elif f == "consulate_district" and _no_consular_application(row):
             out[f] = "not-applicable"
+        elif f == "max_stay_duration" and _stay_in_words(row):
+            # The source states the stay in words ("Up to 6 calendar months
+            # per visit", "Stay is determined by the e-Pass issued on
+            # arrival"). That wording is the value the record holds and the
+            # workbook exports, so it is filled, not a gap: 166 served rows
+            # were graded Medium and counted as incomplete for a stay they
+            # actually state (owner finding, 11 September 2026).
+            out[f] = "filled"
+        elif f == "max_stay_unit" and _stay_in_words(row):
+            # A stay in words has no separate unit cell.
+            out[f] = "not-applicable"
         elif f in REQUIRED_FIELDS:
             out[f] = "missing"
         else:
             out[f] = "optional-empty"
     return out
+
+
+def _stay_in_words(row: dict) -> bool:
+    """True when the record carries the stay as wording and no number."""
+    return (row.get("max_stay_duration") in (None, "")
+            and bool(str(row.get("max_stay_text") or "").strip()))
 
 
 # A route with no visa cannot have a visa's validity, entry count or
@@ -2248,10 +2265,10 @@ def export_values(row: dict, unpublished: set | None = None) -> list:
              for f in FIELD_ORDER]
     # A stay the source states in words rather than as a number and a unit
     # (an e-Pass decided on arrival) is a real value the record holds: the
-    # workbook carries the wording in the stay cell instead of a label.
-    text = row.get("max_stay_text")
-    if text and statuses.get("max_stay_duration") != "filled":
-        cells[FIELD_ORDER.index("max_stay_duration")] = text
+    # workbook carries the wording in the stay cell, and the unit cell reads
+    # "Not applicable" because wording has no unit.
+    if _stay_in_words(row):
+        cells[FIELD_ORDER.index("max_stay_duration")] = str(row.get("max_stay_text")).strip()
         if statuses.get("max_stay_unit") != "filled":
             cells[FIELD_ORDER.index("max_stay_unit")] = NOT_APPLICABLE
     return cells
