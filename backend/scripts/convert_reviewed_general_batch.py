@@ -58,16 +58,40 @@ _CONDITION_RE = re.compile(r"hold(?:er|ers|ing)?\b|valid (?:visa|permit|residenc
 _HOLD_OBJECT = (r"\bhold(?:er|ers|ing|s)?\b(?:\s+(?!(?:do|does|not|no|require|requires|need|needs|must|are|is|will|may|can|"
                 r"shall|should|obtain|apply|be|been|who|which|that)\b)[a-z.'’-]+){0,5}\s+"
                 r"(?:visas?|permits?|residence|residents?|residency|green cards?|identity cards?|id cards?|tickets?|proof)\b")
-_CONDITIONAL_MARK_RE = re.compile(
-    _HOLD_OBJECT + r"|\bwho\s+" + _HOLD_OBJECT[2:] +
+_CONDITIONAL_CORE = (
+    r"|\bwho\s+" + _HOLD_OBJECT[2:] +
     r"|\bwho (?:are|is) (?:a |an |the )?(?:permanent |lawful |legal |ordinary )?resident|\bwho (?:are|is) (?:crew|members?|part of)|"
-    r"\bvalid (?:visa|permit|residence|residency)|\bprovided\b|\bonly if\b|\bsubject to\b|\bon condition\b|\bconditional\b|\bunless\b|"
-    r"\bregist(?:er|ered|ration)\b|\btour group|\bgroup (?:tour|visa|travel)|\baccompan|"
+    r"\bprovided\b|\bonly if\b|\bsubject to\b(?!\s+(?:the\s+)?(?:requirement|obligation|need|visa|entry clearance|eta|k-eta|esta|etias|nzeta|evisitor)\b)|"
+    r"\bon condition\b|\bconditional\b|\bunless\b|"
+    r"\btour group|\bgroup (?:tour|visa|travel)|\baccompan|"
     r"\bpermanent resident|\bresidence permit|\bresidency\b|\bcrew\b|"
     r"(?<!need )(?<!needs )(?<!require )(?<!requires )\b(?:only|solely|exclusively)\b(?!\s+(?:a |an |the |their |your )?(?:valid |current )?passport)|"
     r"\b(?:solo|sólo|solamente|únicamente|unicamente|seulement|uniquement|nur|apenas|somente|hanya|chỉ)\b|仅限|僅限|限り|のみ|에 한해|에 한함|"
     r"\b(?:biometric|e-?passports?|electronic passports?|machine[- ]readable|chip)\b|biométrique|biométrico|biometrisch|biometrik|生物识别|電子旅券|전자여권|"
-    r"\bsi\b[^.;\n]{0,30}\bpasaporte|\bif\b[^.;\n]{0,40}\bpassport", re.I)
+    r"\bsi\b[^.;\n]{0,30}\bpasaporte|"
+    # "if you hold a passport from one of the following countries" opens a
+    # list; "if your passport is biometric" states a condition.
+    r"\bif\b(?![^.;\n]{0,40}\bpassports?\s+(?:from|of|issued by)\s+(?:any of |one of )?(?:the following|these|those|one of the)\b)[^.;\n]{0,40}\bpassport")
+_CONDITIONAL_MARK_RE = re.compile(
+    _HOLD_OBJECT + r"|\bvalid (?:visa|permit|residence|residency)|\bregist(?:er|ered|ration)\b" + _CONDITIONAL_CORE, re.I)
+# The same gate for a visa, an arrival visa or an authorisation: there the
+# document the traveller must hold is the verdict itself ("must hold a valid
+# visa", "must complete pre-arrival registration"), so only a holding that
+# is not the requirement, and no registration word, marks a condition.
+_HOLD_REQUIREMENT_GUARD = (r"(?<!must )(?<!should )(?<!shall )(?<!need to )(?<!needs to )(?<!have to )(?<!has to )"
+                           r"(?<!required to )(?<!obliged to )(?<!able to )(?<!doivent )(?<!deben )(?<!devem )")
+_CONDITIONAL_MARK_OTHER_RE = re.compile(_HOLD_REQUIREMENT_GUARD + _HOLD_OBJECT + _CONDITIONAL_CORE, re.I)
+# The subcategories under which a conditional sentence may stand. Every
+# other subcategory of every disposition is unconditional: a condition,
+# footnote or example in its deciding sentence refuses it.
+_CONDITIONAL_DETAILS = frozenset({'conditional_visa_free', 'transit_visa_free'})
+
+
+def _conditional_marker(low, value):
+    pattern = _CONDITIONAL_MARK_RE if value == 'VISA_EXEMPT' else _CONDITIONAL_MARK_OTHER_RE
+    return bool(pattern.search(low))
+
+
 _EXAMPLE_BEFORE_RE = re.compile(r"(?:\bfor example|\be\.g\.?|\bsuch as|\bpar exemple|\bpor ejemplo|\bzum beispiel|例如|例えば|예를 들어)\s*[,:]?\s*(?:[a-z]+\s+){0,3}$", re.I)
 # A footnote mark right after the nationality's own name ("United States of
 # America*", "Japan (1)") or closing the verdict cell ("No necesita Visa (4)").
@@ -79,12 +103,82 @@ _TRANSIT_RE = re.compile(r"\bin (?:direct |immediate )?transit\b|\btransit(?:ing
                          r"\bvisa[- ]free transit|\btransit (?:visa )?(?:exemption|waiver|policy|passengers?|facility|scheme)|"
                          r"\b(?:\d+|twenty[- ]four|seventy[- ]two)[- ]hours? (?:visa[- ]free )?transit|过境免签|過境免簽|过境|過境|通過|乗り継ぎ|환승|통과|quá cảnh|"
                          r"\btr[aâ]nsito\b|\btransitreis|транзит", re.I)
-_PURPOSE_RE = re.compile(r"touris|\bvisit|leisure|holiday|vacation|business|commerc|\btrade\b|family|friends|relatives|sightseeing|conference|exchange|"
-                         r"旅游|旅遊|観光|관광|du lịch|wisata|ท่องเที่ยว|séjour|estancia|turismo|tourisme|geschäft|affaires|negocios|negócios|kinh doanh|bisnis|"
-                         r"商务|商務|ビジネス|사업|探亲|探親|访友|訪問|"
-                         # A sentence that also speaks of entering is not transit-only.
-                         r"\benter(?:ing|s)?\b|\bentry\b|\bexit(?:ing)?\b|\bleav(?:e|ing)\b|entrée|entrer|entrada|entrar|ingresso|einreise|"
-                         r"入境|入国|nhập cảnh|입국|\bmasuk\b|въезд|въезж|\bulaz|\bvstup", re.I)
+# The purposes an official sentence scopes a rule to, in the languages of
+# the captured pages. A sentence that names one or more purposes proves the
+# verdict for those purposes only; a sentence naming none, or naming every
+# purpose, is general. Entering, leaving and staying are not purposes: the
+# bare verbs describe the travel, so they never rescue a transit-only rule.
+_PURPOSE_PATTERNS = {key: re.compile(pattern, re.I) for key, pattern in {
+    'tourism': r"\btouris\w*|\bleisure\b|\bholidays?\b|\bvacations?\b|\bsightseeing\b|\btourisme\b|\bturismo\b|\bturístic\w*|\bturistic\w*|"
+               r"\burlaub\b|\bwisata\b|\bpelancong\w*|\bmelancong\b|\bdu lịch\b|\btoerisme\b|\bvakantie\b|旅游|旅遊|观光|觀光|観光|관광|ท่องเที่ยว|туризм\w*|туристич\w*|отдых\w*",
+    'visit': r"\bvisitors?\b|\bvisits?\b(?!\s+(?:the\s+|our\s+)?(?:website|web ?site|webpage|page|portal|link|embassy|consulate|office|mission|centre|center))|"
+             r"\bvisiting\b(?!\s+(?:the\s+|our\s+)?(?:website|web ?site|webpage|page|portal|link|embassy|consulate|office|mission|centre|center))|"
+             r"\bsocial visit|\bvisite\b|\bvisita\b|\bvisitas?\b|\bbesuch\w*|\bkunjungan\b|\bmelawat\b|\bthăm\b|\bviếng thăm\b|訪問|访问|방문|เยี่ยม|เยือน|посещени\w*|визит\w*",
+    'business': r"\bbusiness\b|\bcommerc\w*|\btrade\b|\baffaires\b|\bnegocios?\b|\bnegócios?\b|\bgeschäft\w*|\baffari\b|\bbisnis\b|\bperniagaan\b|\bkinh doanh\b|\bthương mại\b|\bzaken\b|"
+                r"商务|商務|经商|經商|ビジネス|商用|사업|비즈니스|상용|ธุรกิจ|деловы\w*|бизнес\w*|коммерческ\w*",
+    'family_visit': r"\bfamily (?:visits?|reunion|reunification)\b|\bvisit(?:ing|s)? (?:family|relatives|friends)\b|\brelatives\b|\bfriends\b|\bvisite familiale\b|\bvisita familiar\b|\bfamiliares\b|"
+                    r"\bfamilienbesuch\w*|\bverwandt\w*|\bthăm thân\b|\bkunjungan keluarga\b|探亲|探親|访友|訪友|親族訪問|친지 방문|가족 방문|친척|เยี่ยมญาติ|родственник\w*",
+    'transit': _TRANSIT_RE.pattern,
+    'study': r"\bstud(?:y|ies|ying|ent|ents)\b|\beducation(?:al)?\b|\benrol\w*|\bdegree programmes?\b|\bdegree programs?\b|\bétudes?\b|\bétudiants?\b|\bestudios?\b|\bestudiantes?\b|"
+             r"\bstudium\b|\bstudieren\b|\bstudi\b|\bbelajar\b|\bpelajar\b|\bdu học\b|\bhọc tập\b|留学|留學|学习|學習|就学|유학|학업|ศึกษา|เรียน|учеб\w*|обучени\w*|студент\w*",
+    'work': r"\b(?:for|to) work\b|\bworking\b(?! (?:holiday|days?|hours?|weeks?))|\bemployment\b|\bemployed\b|\bwork (?:permits?|visas?|purposes?)\b|\btravail\w*|\btrabaj\w*|\btrabalh\w*|"
+            r"\barbeit\w*|\blavor\w*|\bbekerja\b|\bpekerjaan\b|\blàm việc\b|\blao động\b|工作|就业|就業|就労|취업|근로|ทำงาน|работ\w*|трудов\w*",
+    'medical': r"\bmedical\b|\btreatment\b|\bhospital\w*|\bhealth ?care\b|\bmédical\w*|\bmédic\w*|\bmedizinisch\w*|\bmedis\b|\bpengobatan\b|\by tế\b|\bchữa bệnh\b|\bkhám bệnh\b|"
+               r"医疗|醫療|就医|就醫|医療|治療|의료|치료|รักษา|แพทย์|лечени\w*|медицинск\w*",
+    'official': r"\bofficial (?:missions?|visits?|duty|duties|business|purposes?|delegations?|trips?)\b|\bgovernment (?:missions?|business|delegations?)\b|\bdiplomatic visits?\b|"
+                r"\bmission officielle\b|\bmisión oficial\b|\bmissão oficial\b|\bdienstreise\b|\bcông vụ\b|\btugas (?:resmi|dinas)\b|公务访问|公務訪問|公务活动|公務活動|공무|공식 방문|ราชการ|"
+                r"официальн\w* (?:визит\w*|мисси\w*|цел\w*)|служебн\w* (?:поездк\w*|цел\w*)",
+    'conference': r"\bconferences?\b|\bseminars?\b|\bconventions?\b(?! travel document)|\bexchanges?\b|\bconférence\b|\bconferencia\b|\bconferência\b|\bkonferenz\b|\bkonferensi\b|"
+                  r"\bhội nghị\b|\bhội thảo\b|\btrao đổi\b|会议|會議|交流|会議|학술|회의|교류|ประชุม|конференци\w*|обмен\w*",
+    'religious': r"\bpilgrim\w*|\breligious\b|\bhajj\b|\bumrah\b|\bpèlerinage\b|\bperegrin\w*|\bziarah\b|\bhành hương\b|朝圣|朝聖|巡礼|성지순례|แสวงบุญ|паломнич\w*",
+    'journalism': r"\bjournalis\w*|\bpress\b|\breporters?\b|\bjournaliste\w*|\bperiodist\w*|\bjornalist\w*|\bjurnalis\w*|\bbáo chí\b|记者|記者|報道|기자|언론|สื่อมวลชน|журналист\w*",
+}.items()}
+# Wording that covers every purpose, or the short stay every purpose shares.
+_GENERAL_PURPOSE_RE = re.compile(
+    r"\b(?:all|any|whatever the|every|all types of|irrespective of the|regardless of the) purposes?\b|\bfor any purpose of entry\b|"
+    r"\bshort[- ](?:stays?|term stays?|term visits?)\b|\bcourt séjour\b|\bséjour\b|\bestancia\b|\bestadia\b|\bkurzaufenthalt\w*|\bkurzfristig\w*|\bsoggiorno\b|"
+    r"\btous (?:les )?motifs\b|\bcualquier (?:motivo|propósito|fin)\b|\btodos os (?:fins|propósitos)\b|\bqualquer (?:motivo|fim)\b|\bjeden zweck\b|\balle zwecke\b|"
+    r"\bbất kỳ mục đích\b|\bmọi mục đích\b|\bsemua tujuan\b|\bapa ?pun tujuan\b|任何目的|所有目的|各种目的|一切目的|短期滞在|短期停留|모든 목적|어떤 목적|단기 체류|"
+    r"ทุกวัตถุประสงค์|любых целях|всех целей|независимо от цели", re.I)
+# A rule stated for entry, exit and transit alike ("when entering, exiting
+# and transiting through the territory") is not a transit-only rule.
+_ENTRY_EXIT_TRANSIT_RE = re.compile(
+    r"(?:\b(?:enter\w*|entry|entrance|einreise|entrée|entrada|ingresso|ulaz\w*|vstup\w*|nhập cảnh|masuk|въезд\w*)\b|入境|入国|입국)[^.;\n]{0,25}"
+    r"(?:\b(?:exit\w*|leav\w*|departure|ausreise|sortie|salida|saída|uscita|izlaz\w*|výstup\w*|xuất cảnh|keluar|выезд\w*)\b|出境|出国|출국)[^.;\n]{0,25}"
+    r"(?:\btransit\w*|\bdurchreise|\bprelaz\w*|\bquá cảnh|\bтранзит\w*|过境|過境|通過|통과|환승)", re.I)
+# The purposes a route purpose is proved by. Visit wording covers a tourist
+# and a family visit alike; nothing else covers another purpose.
+_ROUTE_PURPOSES = {'tourism': {'tourism', 'visit'}, 'family_visit': {'family_visit', 'visit'}, 'business': {'business'},
+                   'transit': {'transit'}, 'study': {'study'}, 'work': {'work'}, 'medical': {'medical'},
+                   'official': {'official'}, 'conference': {'conference'}, 'religious': {'religious'},
+                   'journalism': {'journalism'}}
+# A rule for a longer stay than the exemption covers ("must obtain a visa
+# for stays longer than 30 days") does not contradict the exemption.
+_LONGER_STAY_RE = re.compile(
+    r"\b(?:longer|exceed\w*|more than|beyond|over|in excess of|extension|extend\w*|prolong\w*|above)\b[^.;\n]{0,30}\b(?:days?|months?|weeks?|stays?|period)\b|"
+    r"\bstays? (?:longer|exceeding|of more than|beyond|over)\b|\blonger (?:stays?|periods?|visits?)\b|\bwish(?:ing|es)? to stay longer\b|"
+    r"超过|超過|以上|逾|plus de \d+ jours|más de \d+ días|mais de \d+ dias|länger als|hơn \d+ ngày|lebih dari \d+ hari|이상|초과|เกิน", re.I)
+
+
+def _stated_purposes(low):
+    stated = {key for key, pattern in _PURPOSE_PATTERNS.items() if pattern.search(low)}
+    if 'transit' in stated and _ENTRY_EXIT_TRANSIT_RE.search(low):
+        stated.discard('transit')
+    return stated
+
+
+def _purpose_block(low, purpose):
+    """Why the purposes the normalized sentence states do not cover the
+    route's purpose, or None when the sentence is general or names it."""
+    if _GENERAL_PURPOSE_RE.search(low):
+        return None
+    stated = _stated_purposes(low)
+    if not stated:
+        return None
+    accepted = _ROUTE_PURPOSES.get(purpose, {purpose})
+    if stated & accepted:
+        return None
+    return 'scoped to ' + ', '.join(sorted(stated)) + ', not the route purpose ' + str(purpose)
 # Passport classes an official page scopes a rule to. A sentence scoped to a
 # class the route is not proves nothing for the route unless it also names
 # the route's own class ("national passport (diplomatic, official, or
@@ -99,9 +193,35 @@ _DOCUMENT_CLASSES = {
                          r"公务护照|公務護照|公務旅券|公用旅券|hộ chiếu công vụ|paspor dinas|관용 ?여권|หนังสือเดินทางราชการ|служебн\w* паспорт\w*",
     'special_passport': r"special passports?|laissez[- ]passer|\bbn ?\(?o\)?\b|british national \(?overseas\)?|document of identity|"
                         r"emergency passports?|passeports? spéciaux|pasaportes? especial(?:es)?|特别护照|特別護照|hộ chiếu đặc biệt|paspor khusus",
+    # Travel documents that are not a national passport at all: refugee and
+    # Convention documents, alien's passports, certificates of identity,
+    # seafarer and crew documents, re-entry permits.
+    'travel_document': r"refugee(?:s|'s|s'|’s)? travel documents?|convention travel documents?|travel documents? (?:for|issued to) (?:refugees|stateless)|"
+                       r"\b(?:stateless|refugees?)\b|alien(?:s|'s|s'|’s)? passports?|passports? for aliens|foreigner(?:s|'s|s'|’s)? passports?|"
+                       r"certificates? of identity|identity certificates?|seafarer(?:s|'s|s'|’s)? (?:identity documents?|identity cards?|books?|cards?)|"
+                       r"seam[ae]n(?:'s|s'|’s)? (?:books?|cards?|identity documents?)|crew member(?:s|'s|s'|’s)? certificates?|crew cards?|re-?entry permits?|"
+                       r"travel documents? in lieu of|(?:emergency|temporary) travel documents?|titres? de voyage|documents? de voyage|"
+                       r"passeports? (?:pour )?étrangers?|passeport d[’']étranger|documentos? de viaje|pasaportes? de extranjero|documentos? de viagem|"
+                       r"passaport[oi] per stranieri|documento di viaggio|reiseausweis(?:e)?|fremdenp[aä]ss(?:e)?|reisedokument(?:e)?|"
+                       r"旅行证|旅行證|难民|難民|无国籍|無国籍|外国人护照|外國人護照|再入国許可|再入國許可|再入境许可|船员证|船員證|海员证|海員證|船員手帳|"
+                       r"재입국허가|난민여행증명서|외국인여권|선원신분증명서|선원수첩|giấy thông hành|giấy tờ đi lại|hộ chiếu (?:người )?nước ngoài|thuyền viên|"
+                       r"surat perjalanan laksana paspor|dokumen perjalanan|paspor orang asing|buku pelaut|เอกสารเดินทาง|หนังสือเดินทางคนต่างด้าว|หนังสือคนประจำเรือ|"
+                       r"проездно\w* документ\w*|паспорт\w* иностранц\w*|удостоверени\w* личности моряка|паспорт\w* моряка",
 }
 _DOCUMENT_CLASSES['service_passport'] = _DOCUMENT_CLASSES['official_passport']
+_DOCUMENT_CLASS_LABELS = {'diplomatic_passport': 'diplomatic passports', 'official_passport': 'official passports',
+                          'service_passport': 'service passports', 'special_passport': 'special passports',
+                          'travel_document': 'travel documents other than a passport', 'ordinary_passport': 'ordinary passports'}
+# "Holders of <some document> ..." scopes the rule to that document. When
+# the document is not the route's own passport class the sentence proves
+# nothing for the route, whatever the document is called.
+_HOLDERS_OF_DOCUMENT_RE = re.compile(
+    r"\b(?:holders?|bearers?|titulaires?|titulares|portadores|inhaber|pemegang|người mang|người có) (?:of |de |des |du |d[’']|von |eines? |einer )?"
+    r"(?:a |an |the |their |valid |a valid |any |all )?(?:[a-z\-’']+ ){0,3}"
+    r"(?:travel documents?|identity documents?|identity cards?|id cards?|certificates?|seaman'?s'? books?|seafarer'?s'? books?)\b", re.I)
 _ORDINARY_CLASS_RE = re.compile(r"\b(?:ordinary|regular|normal|common|standard)\b(?: (?:and|or) (?:ordinary|regular|normal|official|service))? passports?|"
+                                # The Special Administrative Region passport is Hong Kong's and Macao's ordinary passport.
+                                r"\b(?:hong kong |hk|macao |macau )?(?:sar|s\.a\.r\.|special administrative region)(?: \([a-z. ]{1,10}\))? passports?|\bhksar passports?|"
                                 r"\bordinary\b|passeports? ordinaires?|pasaportes? ordinarios?|passaport[oi] ordinar[io]|gewöhnlich\w* (?:reise)?p[aä]ss|"
                                 r"普通护照|普通護照|一般旅券|普通旅券|hộ chiếu phổ thông|paspor biasa|일반 ?여권|หนังสือเดินทางธรรมดา|общегражданск\w*|"
                                 r"all types of passports?|any type of passports?|tous (?:les )?types de passeports?|todos los tipos de pasaporte|"
@@ -190,6 +310,14 @@ _EXTRA_ALIASES = {
     'MMR': ('myanmar', 'burma', 'birmanie', 'birmania', 'mianmar', 'ミャンマー', '缅甸', '緬甸', '미얀마'),
     'TLS': ('timor-leste', 'timor leste', 'east timor', 'timor oriental', 'osttimor', 'timor est', 'timor-est',
             '東ティモール', '东帝汶', '東帝汶', '동티모르'),
+    # Names the captured pages carve out beside the station nationalities
+    # ("except those nationals from the FSM, RMI and USA", "except New
+    # Zealand citizens"): a carve-out is read only through a known name.
+    'FSM': ('micronesia', 'federated states of micronesia', 'fsm', 'micronésie', 'mikronesien', 'ミクロネシア', '密克罗尼西亚', '密克羅尼西亞', '미크로네시아'),
+    'MHL': ('marshall islands', 'republic of the marshall islands', 'rmi', 'îles marshall', 'islas marshall', 'marshallinseln',
+            'マーシャル諸島', '马绍尔群岛', '馬紹爾群島', '마셜 제도'),
+    'NZL': ('new zealand', 'nz', 'nouvelle-zélande', 'nouvelle zélande', 'nueva zelanda', 'nova zelândia', 'neuseeland', 'nuova zelanda',
+            'selandia baru', 'ニュージーランド', '新西兰', '紐西蘭', '뉴질랜드', 'นิวซีแลนด์', 'новая зеландия', 'новой зеландии'),
 }
 
 
@@ -251,6 +379,9 @@ _DEMONYM_STEMS = {
     'LAO': ('laotian', 'laotien', 'laosian', 'laotisch'),
     'MMR': ('burmese', 'birman', 'myanmarese'),
     'TLS': ('timorese', 'timorais', 'timorens'),
+    'FSM': ('micronesian',),
+    'MHL': ('marshallese',),
+    'NZL': ('new zealander', 'néo-zélandais', 'neo-zelandais', 'neozelandés', 'neozelandes', 'neuseeländisch', 'neozelandese', 'новозеланд'),
 }
 # Inflected forms of the stems that were retired for colliding with other
 # words. They are fixed aliases: whole words only.
@@ -304,9 +435,13 @@ def _compound_guard(aliases):
     return ''.join(f'(?<!{p})' for p in _COMPOUND_PREFIXES if not any(a.startswith(p) for a in aliases))
 # A mention right after a negating prefix ("non-US citizens", "other than
 # Indian nationals") speaks about everyone but this nationality.
-_NEGATED_PREFIX_RE = re.compile(r"(?:\bnon[- ]?|\bother than\s+|\bexcluding\s+|\bexcept(?:ing)?(?:\s+for)?\s+|\bnot\s+|\bno\s+|"
-                                r"\bsauf\s+|\bhors\s+|\bexcepto\s+|\bsalvo\s+|\bexceto\s+|\baußer\s+|\btranne\s+|\bnicht[- ]|"
-                                r"\bkecuali\s+|\bbukan\s+|không phải\s*|\bкроме\s+|\bне\s+|非)$")
+_NEGATED_PREFIX_RE = re.compile(
+    r"(?:\bnon[- ]?|\bnicht[- ]|非|"
+    r"\b(?:other than|excluding|except(?:ing)?(?: for)?|not|no|apart from|aside from|with the (?:\w+ )?exception of|to the exclusion of|"
+    r"not including|but not|barring|unless|sauf|hors|hormis|excepté|[àa] l['’]exception d(?:e|es|u)|excepto|salvo|con excepci[oó]n de|"
+    r"a excepci[oó]n de|exceto|com exce[cç][aã]o d[eoa]s?|außer|ausser|ausgenommen|mit ausnahme von|tranne|eccetto|ad eccezione d\w+|"
+    r"kecuali|selain|bukan|ngoại trừ|không phải|кроме|не|за исключением|ยกเว้น)"
+    r"\s+(?:the\s+|les\s+|des\s+|los\s+|las\s+|die\s+|der\s+|den\s+|dem\s+|of\s+|de\s+|du\s+|del\s+|dei\s+|degli\s+|delle\s+|von\s+)?)$")
 
 
 # Aliases that are also everyday words: the English pronoun and currency
@@ -444,6 +579,71 @@ def _named(text, nat):
     return bool(_mentions(text, nat))
 
 
+# A mention in a traveller role: beside a traveller noun ("Japanese
+# nationals", "citizens of Japan", "holders of passports issued by Japan"),
+# or the subject of the sentence. A mention governed by a destination frame
+# ("travelling to Japan", "a visa for Japan", "in Japan", "赴日本", "日本へ")
+# names where the traveller goes, never who the traveller is.
+_STATE_PREFIX = (r"(?:(?:the|la|le|les|l['’]|el|los|las|o|os|as|die|der|das|den|dem|il|lo|gli|i)\s+)?"
+                 r"(?:(?:federal |people'?s |socialist |united |democratic |islamic |arab |hashemite )?"
+                 r"(?:republic|kingdom|state|states|federation|commonwealth|union|sultanate|emirates|principality|grand duchy) of |"
+                 r"république (?:de |du |des |d['’])|royaume (?:de |du |d['’])|reino (?:de |da |do |de la )|república (?:de |da |do |de la |dos |das )|"
+                 r"federación de |federação da |repubblica (?:di |del |della |dei )|regno (?:di |del )|bundesrepublik |königreich |republik |"
+                 r"республик[аи] |федерац\w* |королевств\w* |nước |cộng hòa |vương quốc |liên bang |negara |kerajaan |สาธารณรัฐ|ราชอาณาจักร)?")
+_TRAVELLER_AFTER_RE = re.compile(
+    r"^\s?(?:(?:sar|s\.a\.r\.|special administrative region|ordinary|regular|national|biometric|valid|diplomatic|official|service)\s+)?"
+    r"(?:citizens?|nationals?|passports?|passport[- ]holders?|holders?|residents?|travell?ers?|visitors?|nationality|subjects?|people|persons?|"
+    r"applicants?|tourists?|students?|workers?|visa applicants?|citoyens?|ressortissants?|nationaux|titulaires|ciudadan[oa]s?|nacionales|titulares|"
+    r"cidadãos?|nacionais|portadores|cittadin[oi]|staatsangehörige\w*|staatsbürger\w*|bürger\w*|inhaber|граждан\w*|подданн\w*|"
+    r"công dân|người|hộ chiếu|quốc tịch|warga ?negara|warganegara|paspor|pemegang|พลเมือง|คน|ผู้ถือ|สัญชาติ)\b|"
+    r"^(?:国民|公民|人|人员|人員|人士|籍|国籍|旅券|护照|護照|方|の国民|の方|の旅券|여권|국민|인|국적|人民|持)")
+_TRAVELLER_BEFORE_RE = re.compile(
+    r"\b(?:citizens?|nationals?|holders?|passports?|residents?|subjects?|people|persons?|travell?ers?|visitors?|natives?|applicants?|tourists?|"
+    r"citoyens?|ressortissants?|nationaux|titulaires|ciudadan[oa]s?|nacionales|titulares|cidadãos?|nacionais|portadores|cittadin[oi]|titolari|"
+    r"staatsangehörige\w*|staatsbürger\w*|bürger\w*|inhaber|angehörige|граждан\w*|подданн\w*|владельц\w*|уроженц\w*|"
+    r"công dân|người|hộ chiếu|quốc tịch|mang quốc tịch|warga ?negara|warganegara|pemegang paspor|paspor|พลเมือง|คนสัญชาติ|สัญชาติ|ผู้ถือหนังสือเดินทาง|บุคคลสัญชาติ)"
+    r"\s+(?:(?:of|de|du|des|d['’]|da|do|dos|das|di|dell['’]|della|dei|degli|del|von|der|aus|from|từ|dari|mang|nước|of the)\s+)?"
+    r"(?:(?:the|a|an|la|le|les|el|los|las|o|os|as|die|der|den|dem|il|lo|gli|i)\s+)?" + _STATE_PREFIX + r"$|"
+    r"\bpassports?\s+(?:issued|delivered|délivrés?|expedidos?|emitidos?|ausgestellt)\s+(?:by|in|par|por|von|from)\s+(?:the\s+)?"
+    r"(?:government of |authorities of |immigration authorities of )?" + _STATE_PREFIX + r"$|"
+    r"(?:国籍|籍|持|来自|來自|居民|公民|国民|人员|人員|旅券を所持する|の国籍|여권을 소지한|국적의|국적|국민|출신|người mang hộ chiếu|hộ chiếu|quốc tịch|công dân|dân|"
+    r"dari|ke ?warganegaraan|berpaspor|berkewarganegaraan|สัญชาติ|ชาว|ผู้ถือหนังสือเดินทาง)\s*$", re.I)
+_DESTINATION_BEFORE_RE = re.compile(
+    r"(?:\b(?:to|into|towards?|onto|throughout|across|within|inside|in|at)\s+|"
+    r"\b(?:visit|visiting|visits|enter|entering|enters|entry to|entry into|entering into|travel(?:ling|ing)? to|travels? to|trips? to|journey to|"
+    r"arriv(?:e|al|ing) (?:in|at)|stay(?:ing|s)? in|leaving|departing|departure from|exit(?:ing)? from|resid(?:e|ing|ent|ents) in|located in|based in|born in|"
+    r"admission to|admitted to|going to|come to|coming to|fly(?:ing)? to|flights? to)\s+|"
+    r"\b(?:visas?|e-?visas?|visado|visto|visum|permits?|admission|entry)\s+(?:for|to|pour|para|per|für|untuk|cho)\s+|"
+    r"\b(?:pour (?:entrer|se rendre|voyager|séjourner) (?:en|au|aux|à|dans)|à destination d(?:e|u|es)|vers|en|au|aux|dans|sur le territoire (?:de|du|des|d['’]))\s+|"
+    r"\b(?:para (?:entrar|viajar|ingresar|visitar|llegar) (?:a|en|al|en el|en la)|hacia|rumbo a|en|en el|en la|en los|en las|ao|à|na|nas|nos|em|para o|para a|"
+    r"per (?:entrare|recarsi|viaggiare) (?:in|a|nel|nella)|nel|nella|negli|nelle|nach|in die|in den|in das|ins|im|in der|в|во|на|до|"
+    r"đến|tới|vào|sang|tại|ở|nhập cảnh|ke|di|menuju|masuk ke|ไป|ยัง|เข้า|สู่|เดินทางไป)\s+)"
+    r"(?:(?:the|la|le|les|l['’]|el|los|las|o|os|as|die|der|das|den|dem|il|lo|gli|i)\s+)?" + _STATE_PREFIX + r"$", re.I)
+_DESTINATION_CJK_BEFORE_RE = re.compile(r"(?:赴|前往|前赴|到|去|来|來|入境|進入|进入|访问|訪問|访|飞往|飛往|抵达|抵達|進出|进出|渡航先|行き先|목적지)\s*$")
+_DESTINATION_AFTER_RE = re.compile(r"^\s*(?:へ|への|に入国|へ入国|に渡航|へ渡航|に行く|に来る|に滞在|に入る|に|에 입국|에 방문|으로|로 입국|을 방문|를 방문|에 가|에 체류|에|境内|境內|国内|國內|入境|을 여행|를 여행)")
+
+
+def _traveller_mentions(text, nat):
+    low = _norm(text)
+    spans = []
+    for start, end in _mentions(text, nat):
+        before, after = low[max(0, start - 48):start], low[end:end + 24]
+        if start == end == 0 or _TRAVELLER_AFTER_RE.match(after) or _TRAVELLER_BEFORE_RE.search(before):
+            spans.append((start, end))
+        elif (_DESTINATION_BEFORE_RE.search(before) or _DESTINATION_CJK_BEFORE_RE.search(before)
+              or _DESTINATION_AFTER_RE.match(after)):
+            continue
+        else:
+            spans.append((start, end))
+    return spans
+
+
+def _named_as_traveller(text, nat):
+    """The text names the nationality in a traveller role, not only as a
+    destination of travel."""
+    return bool(_traveller_mentions(text, nat))
+
+
 def _today():
     return date.today()
 
@@ -463,14 +663,16 @@ def _policy_bound_statement(quote, forms, key):
     if key == 'effective_from':
         relation = (r'(?:effective\s*(?:from|on|as of)?|(?:comes?|enters?)\s+into\s+force\s*(?:on|from)?|'
                     r'takes?\s+effect\s*(?:on|from)?|(?:starts?|begins?|commences?)\s*(?:on|from)?|'
-                    r'appl(?:y|ies)\s+from|with\s+effect\s+from|as\s+(?:of|from)|from|since|'
-                    r'à\s+(?:partir|compter)\s+d[ue]|a\s+partir\s+de|desde(?:\s+el)?|ab(?:\s+dem)?|seit|dal|с)\s*[:,]?\s*' + clock + dates)
+                    r'appl(?:y|ies)\s+from|with\s+effect\s+from|as\s+(?:of|from)|on\s+or\s+after|from|since|'
+                    r'à\s+(?:partir|compter)\s+d[ue]|a\s+partir\s+de|desde(?:\s+el)?|ab(?:\s+dem)?|seit|dal|с|начиная\s+с|'
+                    r'kể\s+từ(?:\s+ngày)?|từ(?:\s+ngày)?|mulai(?:\s+dari)?|sejak|ตั้งแต่(?:วันที่)?)\s*[:,]?\s*' + clock + dates)
         chinese = (r'(?:自|從|从|於|于|实施期限为|實施期限為|有效期为|有效期為)\s*' + dates + r'[^。；\n]{0,60}(?:起|生效|實施|实施|至|到|止)|'
                    + dates + r'\s*(?:부터|以降|이후|よ り|より)')
     else:
         relation = (r'(?:until|till|through|thru|to|ends?\s*(?:on)?|ending\s+on|expires?\s*(?:on)?|expiring\s+on|'
                     r'valid\s+(?:until|through|to)|extended\s+(?:until|to|through)|prolonged\s+(?:until|to)|in\s+force\s+until|'
-                    r'ceases?\s+to\s+(?:apply|have\s+effect)\s*(?:on)?|jusqu[\'’](?:au|à)|hasta(?:\s+el)?|até|bis(?:\s+zum)?|fino\s+al|до|по)\s*[:,]?\s*'
+                    r'ceases?\s+to\s+(?:apply|have\s+effect)\s*(?:on)?|jusqu[\'’](?:au|à)|hasta(?:\s+el)?|até|bis(?:\s+zum)?|fino\s+al|до|по|'
+                    r'đến(?:\s+hết|\s+ngày)?|tới(?:\s+ngày)?|hingga|sampai(?:\s+dengan)?|(?:จน)?ถึง(?:วันที่)?)\s*[:,]?\s*'
                     r'(?:and\s+including\s+)?' + clock + dates)
         chinese = (r'(?:至|截至|到|有效至|延期至|延長至|延长至|施行至|有效期至|截止)\s*' + dates + r'|' + dates
                    + r'\s*(?:止|屆滿|届满|到期|까지|まで)')
@@ -492,8 +694,9 @@ _WINDOW_SKIP_RE = re.compile(r'\b(?:holiday|closed|closure|issued|issuance|updat
 # A sentence about a rule: policy language, or a verdict statement of its own.
 _POLICY_WORD_RE = re.compile(r'\b(?:polic(?:y|ies)|regulations?|rules?|resolutions?|agreements?|decrees?|schemes?|programmes?|programs?|'
                              r'arrangements?|measures?|visa[- ]?exemption|visa[- ]?free|exemption|exempt\w*|waive\w*|visas?|entry|'
-                             r'visado|visto|visum|dispens\w*|exent\w*)\b|'
-                             r'政策|免簽|免签|規定|规定|法規|法规|辦法|办法|措置|措施|签证|簽證|査証|ビザ|비자|무비자|사증|thị thực|виз', re.I)
+                             r'visado|visto|visum|dispens\w*|exent\w*|kebijakan|peraturan|ketentuan|dasar|bebas\s+visa|chính\s+sách|quy\s+định|miễn\s+thị\s+thực)\b|'
+                             r'政策|免簽|免签|規定|规定|法規|法规|辦法|办法|措置|措施|签证|簽證|査証|ビザ|비자|무비자|사증|thị thực|виз|'
+                             r'วีซ่า|ตรวจลงตรา|ยกเว้น|นโยบาย|ระเบียบ|มาตรการ', re.I)
 _MONTH_NUMBERS = {
     'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6, 'july': 7, 'august': 8, 'september': 9,
     'october': 10, 'november': 11, 'december': 12, 'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'jun': 6, 'jul': 7, 'aug': 8,
@@ -506,56 +709,189 @@ _MONTH_NUMBERS = {
     'novembro': 11, 'dezembro': 12,
     'januar': 1, 'februar': 2, 'märz': 3, 'maerz': 3, 'juni': 6, 'juli': 7, 'oktober': 10, 'dezember': 12,
     'gennaio': 1, 'febbraio': 2, 'aprile': 4, 'maggio': 5, 'giugno': 6, 'luglio': 7, 'settembre': 9, 'ottobre': 10, 'dicembre': 12,
+    # Indonesian, Malay and Dutch
+    'januari': 1, 'februari': 2, 'maret': 3, 'maart': 3, 'mac': 3, 'mei': 5, 'julai': 7, 'agustus': 8, 'ogos': 8, 'augustus': 8,
+    'desember': 12, 'disember': 12,
+    # Turkish
+    'ocak': 1, 'şubat': 2, 'subat': 2, 'mart': 3, 'nisan': 4, 'mayıs': 5, 'mayis': 5, 'haziran': 6, 'temmuz': 7, 'ağustos': 8,
+    'agustos': 8, 'eylül': 9, 'eylul': 9, 'ekim': 10, 'kasım': 11, 'kasim': 11, 'aralık': 12, 'aralik': 12,
+    # Russian, genitive as dates are written and nominative
+    'января': 1, 'февраля': 2, 'марта': 3, 'апреля': 4, 'мая': 5, 'июня': 6, 'июля': 7, 'августа': 8, 'сентября': 9, 'октября': 10,
+    'ноября': 11, 'декабря': 12, 'январь': 1, 'февраль': 2, 'март': 3, 'апрель': 4, 'май': 5, 'июнь': 6, 'июль': 7, 'август': 8,
+    'сентябрь': 9, 'октябрь': 10, 'ноябрь': 11, 'декабрь': 12,
+    # Thai, full and abbreviated; the year beside them is the Buddhist era
+    'มกราคม': 1, 'กุมภาพันธ์': 2, 'มีนาคม': 3, 'เมษายน': 4, 'พฤษภาคม': 5, 'มิถุนายน': 6, 'กรกฎาคม': 7, 'สิงหาคม': 8, 'กันยายน': 9,
+    'ตุลาคม': 10, 'พฤศจิกายน': 11, 'ธันวาคม': 12, 'ม.ค.': 1, 'ก.พ.': 2, 'มี.ค.': 3, 'เม.ย.': 4, 'พ.ค.': 5, 'มิ.ย.': 6, 'ก.ค.': 7,
+    'ส.ค.': 8, 'ก.ย.': 9, 'ต.ค.': 10, 'พ.ย.': 11, 'ธ.ค.': 12,
 }
 _MONTH_ALT = '(?:' + '|'.join(sorted(map(re.escape, _MONTH_NUMBERS), key=len, reverse=True)) + ')'
+# Japanese era years: 令和6年 is 2024.
+_ERA_BASE = {'令和': 2018, '平成': 1988, '昭和': 1925, '大正': 1911}
+# Every date shape the captured pages write, with the order of its groups.
 _DATE_RES = (
-    re.compile(r'(?<!\d)(\d{4})-(\d{1,2})-(\d{1,2})(?!\d)'),
-    re.compile(r'(?<![\d:])(\d{1,2})(?:st|nd|rd|th|er|º|°)?\.?\s+(?:of\s+|de\s+)?(' + _MONTH_ALT + r')\.?,?\s+(?:de\s+)?(\d{4})(?!\d)'),
-    re.compile(r'(?<![a-z])(' + _MONTH_ALT + r')\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})(?!\d)'),
-    re.compile(r'(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日'),
-    re.compile(r'(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일'),
-    re.compile(r'(?<![\d:])(\d{1,2})[./](\d{1,2})[./](\d{4})(?!\d)'),
+    (re.compile(r'(?<!\d)(\d{4})-(\d{1,2})-(\d{1,2})(?!\d)'), 'ymd'),
+    (re.compile(r'(?<![\d:])(\d{1,2})(?:st|nd|rd|th|er|º|°)?\.?\s*(?:of\s+|de\s+|del\s+)?(' + _MONTH_ALT + r')\.?,?\s*(?:de\s+|del\s+|พ\.?ศ\.?\s*|г\.?\s*)?(\d{4})(?!\d)'), 'dmy'),
+    (re.compile(r'(?<![a-z])(' + _MONTH_ALT + r')\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})(?!\d)'), 'mdy'),
+    (re.compile(r'(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日'), 'ymd'),
+    (re.compile(r'(令和|平成|昭和|大正)\s*(\d{1,2}|元)\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日'), 'era'),
+    (re.compile(r'(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일'), 'ymd'),
+    (re.compile(r'(?:ngày\s*)?(\d{1,2})\s*tháng\s*(\d{1,2})\s*năm\s*(\d{4})'), 'dmy'),
+    (re.compile(r'(?<![\d/.])(\d{4})\s*[/.]\s*(\d{1,2})\s*[/.]\s*(\d{1,2})(?!\d)(?![/.]\d)'), 'ymd'),
+    (re.compile(r'(?<![\d:/.])(\d{1,2})[./](\d{1,2})[./](\d{4})(?!\d)(?![/.]\d)'), 'dmy'),
 )
-_RANGE_BETWEEN_RE = re.compile(r'\s*(?:to|till|until|through|thru|and|-|–|—|~|至|到|bis|à|au|al|a|hasta|até|e|по|до|부터|까지|から)\s*'
+# A date expression by shape, whatever the parser makes of it: an era or
+# calendar year, a numeric date, a month name with a day or a year, a
+# Vietnamese day-month, or a bare year governed by a time relation. Every
+# such expression in a rule sentence must parse, or the sentence cannot be
+# dated and proves nothing.
+_YEAR = r'(?:1[89]\d{2}|20\d{2}|2[45]\d{2})'
+_DATE_LIKE_RE = re.compile(
+    r'(?:令和|平成|昭和|大正)\s*(?:\d{1,2}|元)\s*年|'
+    r'(?<!\d)' + _YEAR + r'\s*(?:年|년)|'
+    r'(?:พ\.?ศ\.?|ค\.?ศ\.?)\s*\d{4}|'
+    r'(?<![\d/.:-])\d{1,2}[./-]\d{1,2}[./-](?:\d{4}|\d{2})(?!\d)(?![/.-]\d)|'
+    r'(?<![\d/.:-])\d{4}\s*[/.-]\s*\d{1,2}\s*[/.-]\s*\d{1,2}(?!\d)(?![/.-]\d)|'
+    r'(?<![a-z])' + _MONTH_ALT + r'\.?\s*(?:\d{1,2}(?:st|nd|rd|th)?,?\s*)?(?:de\s+|del\s+)?' + _YEAR + r'(?!\d)|'
+    r'\bngày\s*\d{1,2}\s*tháng\s*\d{1,2}|\btháng\s*\d{1,2}\s*(?:năm|/)\s*' + _YEAR + r'|'
+    r'(?:\b(?:until|till|through|thru|from|since|by|before|after|as of|effective|expires?|expiring|to|hasta|jusqu[\'’]?(?:au|à|en)?|'
+    r'desde|bis|ab|seit|до|по|с|начиная с|đến|tới|từ|hingga|sampai|sejak|ถึง|จนถึง|ตั้งแต่)\s+(?:the\s+)?'
+    r'(?:end of\s+|start of\s+|beginning of\s+|early\s+|late\s+|mid-?\s*)?|(?:至|截至|到|自|从|從|於|于|まで|から|까지|부터)\s*)' + _YEAR + r'(?!\d)(?!\s*[/-]\d)',
+    re.I)
+_RANGE_BETWEEN_RE = re.compile(r'\s*(?:to|till|until|through|thru|and|-|–|—|~|至|到|bis|à|au|al|a|hasta|até|e|по|до|부터|까지|から|'
+                               r'đến(?:\s+hết|\s+ngày)?|tới|hingga|sampai(?:\s+dengan)?|s/d|(?:จน)?ถึง(?:วันที่)?)\s*'
                                r'(?:\d{1,2}[:.]\d{2}\s*(?:on|hrs?|h|時|时)?\s*)?(?:the\s+)?$', re.I)
-_START_BEFORE_RE = re.compile(r'(?:\bfrom|\bas\s+of|\bas\s+from|\bwith\s+effect\s+from|\beffective(?:\s+from|\s+on|\s+as\s+of)?|\bstarting(?:\s+from|\s+on)?|'
+_START_BEFORE_RE = re.compile(r'(?:\bfrom|\bas\s+of|\bas\s+from|\bon\s+or\s+after|\bwith\s+effect\s+from|\beffective(?:\s+from|\s+on|\s+as\s+of)?|\bstarting(?:\s+from|\s+on)?|'
                               r'\bbeginning(?:\s+from|\s+on)?|\bcommencing(?:\s+from|\s+on)?|\bsince|\bw\.e\.f\.?|\bà\s+(?:partir|compter)\s+d[ue]|'
-                              r'\ba\s+partir\s+de[l]?|\bdesde(?:\s+el)?|\bab(?:\s+dem)?|\bseit|\bdal|\bс|自|从|從|於|于|实施期限为|實施期限為|有效期为|有效期為)'
+                              r'\ba\s+partir\s+de[l]?|\bdesde(?:\s+el)?|\bab(?:\s+dem)?|\bseit|\bdal|\bс|\bначиная\s+с|\bkể\s+từ(?:\s+ngày)?|\btừ(?:\s+ngày)?|'
+                              r'\bmulai(?:\s+dari)?|\bsejak|ตั้งแต่(?:วันที่)?|自|从|從|於|于|实施期限为|實施期限為|有效期为|有效期為)'
                               r'\s*[:,]?\s*(?:\d{1,2}[:.]\d{2}\s*(?:on|hrs?|h|時|时)?\s*)?(?:the\s+)?$', re.I)
 _START_AFTER_RE = re.compile(r'^\s*(?:起|부터|以降|이후|より|onwards?|onward)')
 _END_BEFORE_RE = re.compile(r'(?:\buntil|\btill|\bthrough|\bthru|\bup\s+to|\bends?(?:\s+on)?|\bending(?:\s+on)?|\bexpires?(?:\s+on)?|\bexpiring(?:\s+on)?|'
                             r'\bvalid\s+(?:until|through|to)|\bextended\s+(?:until|to|through)|\bprolonged\s+(?:until|to)|\bin\s+force\s+until|'
-                            r'\bjusqu[\'’](?:au|à)|\bhasta(?:\s+el)?|\baté|\bbis(?:\s+zum)?|\bfino\s+al|\bдо|\bпо|至|截至|到|有效至|延期至|延長至|延长至|施行至|有效期至|截止)'
+                            r'\bjusqu[\'’](?:au|à)|\bhasta(?:\s+el)?|\baté|\bbis(?:\s+zum)?|\bfino\s+al|\bдо|\bпо|\bđến(?:\s+hết|\s+ngày)?|\btới(?:\s+ngày)?|'
+                            r'\bhingga|\bsampai(?:\s+dengan)?|(?:จน)?ถึง(?:วันที่)?|至|截至|到|有效至|延期至|延長至|延长至|施行至|有效期至|截止)'
                             r'\s*[:,]?\s*(?:\d{1,2}[:.]\d{2}\s*(?:on|hrs?|h|時|时)?\s*)?(?:the\s+)?$', re.I)
 _END_AFTER_RE = re.compile(r'^\s*(?:止|屆滿|届满|到期|까지|まで)')
 
 
 def _dates_in(low):
     """Every calendar date in the normalized sentence with its span, in
-    text order. Slash and dot forms read day first, as the bound forms do."""
+    text order. Day-month-year forms read day first, as the bound forms
+    do; a Thai year beyond 2400 is the Buddhist era; a Japanese era year
+    is counted from the era's base."""
     found = {}
-    for pattern in _DATE_RES:
+    for pattern, order in _DATE_RES:
         for m in pattern.finditer(low):
-            a, b, c = m.groups()
+            groups = m.groups()
             try:
-                if a.isdigit() and len(a) == 4:
-                    day = date(int(a), int(b), int(c))
-                elif b in _MONTH_NUMBERS:
-                    day = date(int(c), _MONTH_NUMBERS[b], int(a))
-                elif a in _MONTH_NUMBERS:
-                    day = date(int(c), _MONTH_NUMBERS[a], int(b))
+                if order == 'era':
+                    era, number, month, day_of_month = groups
+                    year = _ERA_BASE[era] + (1 if number == '元' else int(number))
+                    day = date(year, int(month), int(day_of_month))
                 else:
-                    day = date(int(c), int(b), int(a))
-            except ValueError:
+                    if order == 'ymd':
+                        year, month, day_of_month = groups
+                    elif order == 'dmy':
+                        day_of_month, month, year = groups
+                    else:
+                        month, day_of_month, year = groups
+                    year = int(year)
+                    if year > 2400:
+                        year -= 543
+                    month = _MONTH_NUMBERS[month] if month in _MONTH_NUMBERS else int(month)
+                    day = date(year, month, int(day_of_month))
+            except (ValueError, KeyError):
                 continue
             if not any(s <= m.start() < e or s < m.end() <= e for s, e in found):
                 found[m.span()] = day
     return sorted((s, e, d) for (s, e), d in found.items())
 
 
+def _unreadable_date(low):
+    """The first date expression of the normalized sentence the parser
+    cannot read, or None. A rule sentence carrying one cannot be dated."""
+    dates = _dates_in(low)
+    for m in _DATE_LIKE_RE.finditer(low):
+        covered = any(s <= m.start() < e or s < m.end() <= e or (m.start() <= s and e <= m.end()) for s, e, _ in dates)
+        if not covered:
+            return m.group(0).strip()
+    return None
+
+
+def _dated_rule_sentence(low):
+    """A sentence whose date would be a rule's date: about a rule and not
+    an office, issue, update or passport-validity notice."""
+    return bool(low) and not _WINDOW_SKIP_RE.search(low) and bool(
+        _POLICY_WORD_RE.search(low) or any(re.search(p, low, re.I) for p, _ in _VERDICT_RULES.values()))
+
+
+def _clause(low, start, end):
+    """The comma-delimited clause of the normalized sentence that holds the
+    span: a sentence that states one window per clause ("... for Russian
+    passport holders until 2027-12-31, for the other 48 countries until
+    2026-12-31") is read clause by clause."""
+    lo = max((m.end() for m in re.finditer(r'[,，;；:：]', low[:start])), default=0)
+    hi = next((m.start() for m in re.finditer(r'[,，;；:：]', low[end:])), None)
+    return low[lo:end + hi] if hi is not None else low[lo:]
+
+
+# A bound in a parenthesis attached to one entry of a list run ("...,
+# North Macedonia*(effective until March 31, 2030), Norway, ...") bounds
+# that entry alone. The parenthesis may hold nothing but the bound: a
+# relation word and its date, or a date range. Any other word in it, an
+# entry that is not a bare list entry, an entry the sentence does not
+# reach through an item separator, or an entry with a quantifier or
+# anaphora ("all of the above (until ...)") leaves the window on the
+# whole sentence, where it must be current and recorded.
+_BOUND_ONLY_RE = re.compile(
+    r"^[\s,:;]*(?:(?:effective|valid|in force|in effect|applicable|applies|applied|valable|válido|válida|vigente|gültig|有効|有效|유효)\s*)?"
+    r"(?:(?:until|till|through|thru|up to|to|from|since|as of|as from|starting|beginning|commencing|ending|expires?|expiring|"
+    r"jusqu[’'](?:au|à)|hasta|desde|à partir d[ue]|a partir de[l]?|até|bis|ab|seit|dal|fino al|до|по|с|đến|từ|tới|hingga|sampai|sejak|"
+    r"ถึง|จนถึง|ตั้งแต่|至|到|自|从|從|まで|から|까지|부터|起|止|and|-|–|—|~)[\s,:;]*)*$", re.I)
+_ITEM_BEFORE_RE = re.compile(r"(?:[,;:，、；：]|\b(?:and|or|und|et|y|e|dan|và|и)\b)\s*$", re.I)
+_ENTRY_SCOPE_RE = re.compile(
+    r"\b(?:all|every|each|any|other|others|remaining|rest|listed|above|following|these|those|such|everyone|"
+    r"countries|nationals|citizens|holders|persons|people|members?)\b|上述|以上|其他|其它|以下|各国|모든|기타|すべて|その他|以下の", re.I)
+# A clause that names another nationality but speaks of everyone ("the
+# programme agreed with Japan applies to all listed nationals until ...")
+# is not that nationality's alone.
+_CLAUSE_GENERAL_RE = re.compile(
+    r"\b(?:all|every|each|any|other|others|remaining|rest|listed|above|following|these|those|such|everyone|everybody)\b|"
+    r"上述|以上|其他|其它|以下|各国|모든|기타|すべて|その他|以下の", re.I)
+
+
+def _window_entry(low, start, end):
+    """The list entry a parenthesised bound is attached to, or None when
+    the bound is not in a parenthesis of its own after an entry of a run."""
+    open_at = max(low.rfind('(', 0, start), low.rfind('（', 0, start))
+    if open_at < 0 or ')' in low[open_at:start] or '）' in low[open_at:start]:
+        return None
+    close_candidates = [i for i in (low.find(')', end), low.find('）', end)) if i >= 0]
+    if not close_candidates:
+        return None
+    close_at = min(close_candidates)
+    if '(' in low[end:close_at] or '（' in low[end:close_at]:
+        return None
+    inside = low[open_at + 1:close_at]
+    for s, e, _ in reversed(_dates_in(inside)):
+        inside = inside[:s] + ' ' + inside[e:]
+    if not _BOUND_ONLY_RE.fullmatch(inside):
+        return None
+    lead = low[:open_at]
+    lo = max((m.end() for m in re.finditer(r'[,;:，、；：]|\b(?:and|or|und|et|y|e|dan|và|и)\b', lead)), default=None)
+    if lo is None or not _ITEM_BEFORE_RE.search(lead[:lo]):
+        return None
+    entry = lead[lo:].strip(' *†‡')
+    if not entry or not _entry_line(entry) or _ENTRY_SCOPE_RE.search(entry):
+        return None
+    return entry
+
+
 def _policy_windows(text):
     """Every dated bound a rule sentence of the text states: (start, end,
-    sentence) with either side None when the sentence gives only one.
+    sentence, clause, entry) with either side None when the bound gives
+    only one, and `entry` the list entry a parenthesised bound is attached
+    to, or None. A sentence stating several bounds yields each of them.
     Only a sentence about a rule counts, and never an office, issue,
     update or passport-validity date."""
     for sentence in re.split(r'(?<=[.!?])\s+|[;。；！？\n]+', str(text or '')):
@@ -567,41 +903,61 @@ def _policy_windows(text):
         dates = _dates_in(low)
         if not dates:
             continue
-        start = end = None
+        used = set()
         for (s1, e1, d1), (s2, e2, d2) in zip(dates, dates[1:]):
-            if d1 <= d2 and _RANGE_BETWEEN_RE.fullmatch(low[e1:s2]):
-                start, end = d1, d2
-                break
-        if start is None and end is None:
-            for s, e, d in dates:
-                before, after = low[max(0, s - 40):s], low[e:e + 12]
-                if _START_BEFORE_RE.search(before) or _START_AFTER_RE.match(after):
-                    start = d if start is None else start
-                elif _END_BEFORE_RE.search(before) or _END_AFTER_RE.match(after):
-                    end = d if end is None else end
-        if start is not None or end is not None:
-            yield start, end, low
+            if s1 not in used and d1 <= d2 and _RANGE_BETWEEN_RE.fullmatch(low[e1:s2]):
+                used.update((s1, s2))
+                yield d1, d2, low, _clause(low, s1, e2), _window_entry(low, s1, e2)
+        for s, e, d in dates:
+            if s in used:
+                continue
+            before, after = low[max(0, s - 40):s], low[e:e + 12]
+            if _START_BEFORE_RE.search(before) or _START_AFTER_RE.match(after):
+                yield d, None, low, _clause(low, s, e), _window_entry(low, s, e)
+            elif _END_BEFORE_RE.search(before) or _END_AFTER_RE.match(after):
+                yield None, d, low, _clause(low, s, e), _window_entry(low, s, e)
 
 
-def _window_violation(quotes, bounds=None):
+def _window_violation(quotes, bounds=None, where='the quoted policy window', value=None, nat=None):
     """Why the dated policy window in the evidence cannot serve today's
     verdict: it has ended, it has not started, or the reviewer did not
     record the bound the page states. An end date must always be recorded
     (it is what expires the served verdict), and so must the start of a
     full interval. A start alone that has already passed says the rule is
     in force and needs no record. None when every window is current and
-    recorded."""
+    recorded. `where` names the text the window was read from. `nat`
+    lets a window that another entry or clause of the sentence scopes to
+    another nationality pass this one by; without it every window of the
+    text bounds the verdict."""
     bounds = bounds or {}
     today = _today()
-    for start, end, low in _policy_windows('\n'.join(quotes)):
+    for start, end, low, clause, entry in _policy_windows('\n'.join(quotes)):
+        if value is not None and not _concerns_verdict(low, value):
+            # A window of another verdict's rule on the captured page (a
+            # K-ETA waiver under a visa requirement) does not bound this
+            # verdict; the reviewer's own quotes are always read.
+            continue
+        if nat is not None and entry is not None and not _named(entry, nat) and not _group_named(entry, nat):
+            # A bound in a parenthesis on one entry of the list ("North
+            # Macedonia*(effective until March 31, 2030)") is that entry's
+            # alone; on this nationality's own entry, or on a group it
+            # belongs to, it bounds this verdict.
+            continue
+        if (nat is not None and not _named(clause, nat) and not _CLAUSE_GENERAL_RE.search(clause)
+                and any(_named(clause, other) for other in _known_nationalities() if other != nat)):
+            # A window whose clause names another nationality ("the policy
+            # for Russian passport holders runs until ...") is theirs; a
+            # window whose clause names no one, or speaks of everyone,
+            # covers this nationality too.
+            continue
         if end is not None and end < today:
-            return f'the quoted policy window ended on {end.isoformat()}: {low[:100]}'
+            return f'{where} ended on {end.isoformat()}: {low[:100]}'
         if start is not None and start > today:
-            return f'the quoted policy window starts on {start.isoformat()}: {low[:100]}'
+            return f'{where} starts on {start.isoformat()}: {low[:100]}'
         if end is not None and bounds.get('effective_to') != end.isoformat():
-            return f'the quoted policy window until {end.isoformat()} is not recorded as effective_to: {low[:100]}'
+            return f'{where} until {end.isoformat()} is not recorded as effective_to: {low[:100]}'
         if end is not None and start is not None and bounds.get('effective_from') != start.isoformat():
-            return f'the quoted policy window from {start.isoformat()} is not recorded as effective_from: {low[:100]}'
+            return f'{where} from {start.isoformat()} is not recorded as effective_from: {low[:100]}'
     return None
 
 
@@ -707,12 +1063,15 @@ def _empty_value(value):
     return value in (None, [], {}, '') or (isinstance(value, dict) and all(v is None for v in value.values()))
 
 
-def _check_proof(proof, sources, route, field, value, *, product=None, detail=None):
+def _check_proof(proof, sources, route, field, value, *, product=None, detail=None, page_gates=False):
     """Return the validated proof or None for an explicit unknown/not_published.
     The prose a proof key covers (permitted_stay under permitted_stay_days)
     is emptied by _validate_row before this check when the proof is unknown
     or unpublished. That pop is the single mechanism. `detail` is the
-    requirement subcategory a disposition proof must also support."""
+    requirement subcategory a disposition proof must also support.
+    `page_gates` reads the captured page sections and windows around the
+    quotes as well (the general batch path); the pinned converters that
+    reuse this reading were reviewed on their quotes and keep that."""
     if not isinstance(proof, dict) or proof.get('verifier', 'ai') != 'ai':
         raise PatchRejected(f'{field}: the source review must be attributed to AI')
     status = proof.get('status')
@@ -757,7 +1116,9 @@ def _check_proof(proof, sources, route, field, value, *, product=None, detail=No
         pages = [(item['source_id'], sources[item['source_id']]['text'])
                  for item in evidence for line in item['quote'].split('\n') if line.strip()]
         bounds = {k: proof.get(k) for k in ('effective_from', 'effective_to') if proof.get(k) is not None}
-        _check_value(field, value, passages, route, product, pages=pages, detail=detail, bounds=bounds)
+        urls = [item['source_url'] for item in evidence if jurisdiction_matches(item['source_url'], destination)]
+        _check_value(field, value, passages, route, product, pages=pages, detail=detail, bounds=bounds, evidence_urls=urls,
+                     page_gates=page_gates)
     if any(k in proof for k in ('effective_from', 'effective_to', 'policy_interval_evidence')):
         if field != 'disposition':
             raise PatchRejected('Policy bounds belong to the reviewed visa disposition')
@@ -765,16 +1126,43 @@ def _check_proof(proof, sources, route, field, value, *, product=None, detail=No
     return proof
 
 
+# A bare dollar sign is the claimed dollar currency only when no letter
+# qualifies it: "HK$500" is Hong Kong dollars whatever currency is claimed.
+_BARE_DOLLAR = r'(?<![A-Za-z])\$'
 _CURRENCY_SYMBOLS = {
-    'USD': (r'US\$', r'U\.S\.\$', r'\$'), 'EUR': (r'€', r'\beuros?\b'), 'GBP': (r'£',),
+    'USD': (r'US\$', r'U\.S\.\$', _BARE_DOLLAR), 'EUR': (r'€', r'\beuros?\b'), 'GBP': (r'£',),
     'JPY': (r'¥', r'円', r'\byen\b'), 'CNY': (r'¥', r'元', r'\bRMB\b', r'人民币'), 'KRW': (r'₩', r'원', r'\bwon\b'),
     'INR': (r'₹', r'\bRs\.?', r'\brupees?\b'), 'THB': (r'฿', r'\bbaht\b'), 'IDR': (r'\bRp\.?', r'\brupiah\b'),
-    'MYR': (r'\bRM\b', r'\bringgit\b'), 'SGD': (r'S\$', r'SG\$', r'\$'), 'HKD': (r'HK\$', r'\$', r'元?港币', r'元?港幣'), 'AUD': (r'A\$', r'AU\$', r'\$'),
-    'CAD': (r'C\$', r'CA\$', r'CAN\$', r'\$'), 'TWD': (r'NT\$', r'\$'), 'RUB': (r'₽', r'руб\.?', r'\brub\b'),
-    'VND': (r'₫', r'đ', r'VNĐ', r'\bdong\b'), 'PHP': (r'₱', r'\bpesos?\b'), 'NZD': (r'NZ\$', r'\$'), 'MXN': (r'MX\$', r'\$'),
+    'MYR': (r'\bRM\b', r'\bringgit\b'), 'SGD': (r'S\$', r'SG\$', _BARE_DOLLAR), 'HKD': (r'HK\$', _BARE_DOLLAR, r'元?港币', r'元?港幣'),
+    'AUD': (r'A\$', r'AU\$', _BARE_DOLLAR),
+    'CAD': (r'C\$', r'CA\$', r'CAN\$', _BARE_DOLLAR), 'TWD': (r'NT\$', _BARE_DOLLAR), 'RUB': (r'₽', r'руб\.?', r'\brub\b'),
+    'VND': (r'₫', r'đ', r'VNĐ', r'\bdong\b'), 'PHP': (r'₱', r'\bpesos?\b'), 'NZD': (r'NZ\$', _BARE_DOLLAR), 'MXN': (r'MX\$', _BARE_DOLLAR),
     'MOP': (r'MOP\$',), 'CHF': (r'\bfrancs?\b', r'\bFr\.'), 'AED': (r'\bdirhams?\b', r'\bDhs?\b'),
     'SAR': (r'\briyals?\b', r'\bSR\b'), 'TRY': (r'₺', r'\blira\b'), 'EGP': (r'\bE£', r'\bLE\b'), 'BRL': (r'R\$'),
 }
+# The dollar currency a qualified dollar sign names.
+_DOLLAR_PREFIXES = {'us': 'USD', 'u.s.': 'USD', 's': 'SGD', 'sg': 'SGD', 'hk': 'HKD', 'a': 'AUD', 'au': 'AUD', 'c': 'CAD', 'ca': 'CAD',
+                    'can': 'CAD', 'nt': 'TWD', 'nz': 'NZD', 'mx': 'MXN', 'r': 'BRL', 'mop': 'MOP', 'b': 'BND', 'bz': 'BZD', 'fj': 'FJD',
+                    'j': 'JMD', 'tt': 'TTD', 'bds': 'BBD', 'ec': 'XCD', 'na': 'NAD', 'z': 'ZWL'}
+
+
+def _foreign_dollar_amount(passages, code, amount):
+    """The qualified dollar figure of another currency that equals the
+    claimed amount ("HK$500" under a claimed USD 500), or None."""
+    try:
+        claimed = float(amount)
+    except (TypeError, ValueError):
+        return None
+    low = _norm(passages)
+    for m in re.finditer(r'(?<![a-z])([a-z.]{1,3})\$\s*(\d[\d,]*(?:\.\d+)?)', low):
+        currency = _DOLLAR_PREFIXES.get(m.group(1))
+        try:
+            figure = float(m.group(2).replace(',', ''))
+        except ValueError:
+            continue
+        if currency and currency != code and figure == claimed:
+            return m.group(0)
+    return None
 
 
 def _monetary_text(passages, code):
@@ -827,17 +1215,33 @@ _SUSPENDED = (r"\bsuspend\w*|\bsuspens\w*|\bterminat\w*|\bdiscontinu\w*|\brevoke
               r"\b(?:has|have|had|is|are) expired\b|\bexpired on\b|\bsuspendu\w*|\bsuspendid[oa]s?\b|\bsuspensión|\bsuspensão|\bsospes\w*|"
               r"\bsospensione|\bausgesetzt|\baufgehoben|\bbeendet|\bwiderrufen|\bdihentikan|\bditangguhkan|\bdibatalkan|\bdicabut|"
               r"đình chỉ|tạm dừng|tạm ngừng|chấm dứt|bãi bỏ|thu hồi|停止|中止|中断|中斷|暂停|暫停|终止|終止|取消|廃止|廢止|停用|终了|終了|失効|"
-              r"중단|중지|정지|폐지|종료|취소|ระงับ|ยกเลิก|สิ้นสุด|приостановлен\w*|отменен\w*|прекращ\w*|аннулирован\w*|отозван\w*")
+              r"중단|중지|정지|폐지|종료|취소|ระงับ|ยกเลิก|สิ้นสุด|приостановлен\w*|отменен\w*|прекращ\w*|аннулирован\w*|отозван\w*|"
+              # A temporary measure or one in force until further notice is
+              # not a rule that can be served without its own dated window.
+              r"\buntil further notice\b|\btill further notice\b|\bpending further notice\b|"
+              r"\btemporar(?:y|ily)\b\s+(?:suspend\w*|halt\w*|stopp?\w*|lift\w*|waiv\w*|exempt\w*|extend\w*|allow\w*|permit\w*|grant\w*|implement\w*|"
+              r"introduc\w*|ceas\w*|discontinu\w*|reintroduc\w*|imposed?|in (?:force|effect)|applicable|available|unavailable|admit\w*|restrict\w*|"
+              r"clos\w*|open\w*|relax\w*|relief|arrangement|measure|policy|exemption|waiver|scheme|visa[- ]free|visa[- ]exempt\w*)|"
+              r"\btemporary (?:suspension|measures?|polic(?:y|ies)|exemptions?|waivers?|arrangements?|schemes?|visa[- ]free|visa exemptions?|lifting|halt|ban|"
+              r"closure|restrictions?|relief|entry (?:permit|arrangement))|"
+              r"\btemporairement\b|\bà titre temporaire\b|\bjusqu[’']à nouvel ordre\b|\bprovisoirement\b|\btemporalmente\b|\bhasta nuevo aviso\b|"
+              r"\bprovisionalmente\b|\btemporariamente\b|\baté novo aviso\b|\bvorübergehend\b|\bbis auf weiteres\b|\bвременно\b|\bдо дальнейшего уведомления\b|"
+              r"\bдо особого распоряжения\b|\buntuk sementara\b|\bsementara waktu\b|\bhingga pemberitahuan lebih lanjut\b|\bsampai pemberitahuan lebih lanjut\b|"
+              r"\btạm thời (?:miễn|dừng|ngừng|đình chỉ|áp dụng|cho phép|không)|\bcho đến khi có thông báo mới\b|"
+              r"(?:ระงับ|ยกเว้น|ยกเลิก|มีผล|บังคับใช้|อนุญาต|ผ่อนผัน)[^.\n]{0,12}ชั่วคราว|จนกว่าจะมีประกาศ|一時的|当面の間|追って通知|"
+              r"暂时|暫時|另行通知|另有通知|일시적|추후 공지|별도 공지")
 _PAST_OR_FUTURE = (r"\b(?:was|were|had been|used to be)\s+(?:visa[- ]?free|visa[- ]?exempt|exempt(?:ed)?)\b|"
                    r"\bwill\s+(?:be|become)\s+(?:visa[- ]?free|visa[- ]?exempt|exempt(?:ed)?|eligible|able|entitled)\b|\bwill no longer\b|"
-                   r"\b(?:applied|applies|applicable)\s+(?:until|through|to)\b|\bformerly\b|\bpreviously\b|"
+                   r"\b(?:applied|applies|applicable)\s+(?:until|through|up to|till)\b|"
+                   r"\b(?:formerly|previously)\s+(?:visa[- ]?free|visa[- ]?exempt|exempt(?:ed)?|eligible|entitled|required|applicable|in force|available|allowed|permitted)\b|"
                    r"即将|將於|将于|将自|將自|予定|예정|sẽ được miễn|akan dibebaskan")
 _NOT_TODAYS_RULE = _SUSPENDED + '|' + _PAST_OR_FUTURE
 
 _VERDICT_RULES = {
     # A sentence that states the rule, and the words that flip it.
     'VISA_REQUIRED': (r"(?:e-?visa|visa)s?\b[^.;\n]{0,60}\b(?:is |are )?(?:required|mandatory|needed|necessary|obligatoire|obligatorio|necesario|bắt buộc)|"
-                      r"\b(?:need|needs|require|requires|must have|must hold|must obtain|are required to hold|are required to obtain|is subject to|are subject to)\b (?:a |an |the )?(?:valid |prior |entry |tourist |schengen |visitor |short[- ]stay )*(?:e-?visa|visa)s?\b|"
+                      r"\b(?:need|needs|require|requires|must have|must hold|must obtain|are required to hold|are required to obtain|is subject to|are subject to|"
+                      r"remains? subject to|stays? subject to|continues? to be subject to|still subject to|still (?:need|needs|require|requires))\b (?:a |an |the )?(?:valid |prior |entry |tourist |schengen |visitor |short[- ]stay )*(?:e-?visa|visa)s?\b|"
                       r"\b(?:needs?|requir(?:es|ing|ed))\b (?:an? )?entry clearance|entry clearance \(a visa\)|"
                       r"\bnecesita(?:n|r[áa]n?)? (?:de )?(?:un |el )?visado|\brequiere(?:n)? (?:de )?(?:un |el )?visado|\bont besoin d['’]un visa|\bdoivent (?:obtenir|demander|solliciter) un visa|\bvisa (?:est |sera )?(?:requis|nécessaire|exigé)|"
                       r"\b(?:soumis|subordonné)e?s? à l['’]obtention d['’]un visa|\bmunie?s? d['’]un visa|"
@@ -858,15 +1262,18 @@ _VERDICT_RULES = {
                       r"需要办理签证|需申请签证|应当申请签证|必须持有签证|需要签证|事前に査証|ビザが必要|签证申请|"
                       r"(?:需要|必須|必须|應|应|須|须|需)[^。；;\n]{0,20}(?:網簽|网签)|(?:網簽|网签)[^。；;\n]{0,20}(?:需要|必須|必须|應|应|須|须|需)|"
                       r"비자.{0,6}필요|ต้องขอวีซ่า|wajib memiliki visa|harus memiliki visa|يجب الحصول على تأشيرة",
-                      r"visa[- ]free|no visa|without (?:a )?visa|exempt|not required|do(?:es)? not (?:require|need)|\b(?:visa )?(?:on|upon) arrival\b|без виз|sans visa|sin visa|miễn thị thực|không cần|không phải xin|không yêu cầu|"
+                      r"visa[- ]free|no visa|without (?:a )?visa|exempt|not required|do(?:es)? not (?:require|need)|\bnot (?:need|require)\b|\bneed not\b|\bnot needed\b|"
+                      r"\b(?:visa )?(?:on|upon) arrival\b|без виз|sans visa|sin visa|miễn thị thực|không cần|không phải xin|không yêu cầu|"
                       r"免签|无需签证|免办签证|査証免除|ビザ免除|무비자|면제|bebas visa|ยกเว้นวีซ่า|不需|無需|无需|毋須|毋须|免辦|免办|"
-                      r"\bno longer\b|\blifted\b|\babolished\b|\bwaived\b|\bscrapped\b"),
+                      r"\bno longer\b|\blifted\b|\babolished\b|\bwaived\b|\bscrapped\b|\bunless\b|\bsauf si\b|\ba menos que\b|\bes sei denn\b|\btrừ khi\b|\bkecuali jika\b"),
     'VISA_EXEMPT': (r"visa[- ]free|visa[- ]exempt|exempt(?:ed|ion)? from (?:the |a |an )?(?:(?:short[- ]stay|short[- ]term|entry|tourist|visitor|schengen|port of entry) )?(?:visa|obtaining a visa|visas?(?: requirements?)?)|"
                     r"exempt(?:ed)? from (?:the )?(?:requirement|obligation|need) (?:to obtain|to hold|to get|of obtaining|of holding) (?:a |an )?visa|"
                     r"do(?:es)? not (?:require|need) (?:a |an |any )?(?:entry |tourist |visitor )?visa|do(?:es)? not (?:require|need) to (?:apply for|obtain|hold|have) (?:a |an )?visa|"
+                    r"\b(?:will|shall|would) (?:therefore |also |thus |then |generally )?not (?:require|need) (?:a |an |any )?(?:schengen |short[- ]stay |entry |tourist |visitor )*visa|"
+                    r"\bneed not (?:obtain|apply for|hold|have) (?:a |an )?visa|"
                     r"do(?:es)?n['’]t (?:require|need) (?:a |an |any |to (?:apply for|obtain|hold|have) (?:a |an )?)?(?:entry |tourist |visitor )?visa|"
                     r"without (?:a |an |the need for a )?(?:entry |tourist )?visa|no visa (?:is )?(?:required|needed|necessary)|not required to (?:obtain|hold|apply for) (?:a |an )?visa|"
-                    r"visa (?:is |are )?(?:generally |normally |usually )?not required|not requir(?:ing|ed to (?:have|hold|obtain)) (?:a |an )?(?:visitor |tourist |entry )?visa|"
+                    r"visas? (?:is |are )?(?:generally |normally |usually )?not required|not requir(?:ing|ed to (?:have|hold|obtain)) (?:a |an )?(?:visitor |tourist |entry )?visa|"
                     r"no longer (?:need|needs|require|requires) (?:to (?:obtain|apply for|hold|have) )?(?:a |an |any )?(?:entry |tourist |visitor )?visa|"
                     r"visa(?: requirements?)? (?:is |are )?waived|need only (?:a )?valid passport|"
                     r"без виз|безвизов|sans visa|dispensée?s? de visa|exemptée?s? de visa|n['’](?:ont|avez|a|avons) pas besoin (?:d['’]un |de )?visa|"
@@ -875,7 +1282,8 @@ _VERDICT_RULES = {
                     r"visumvrij|geen visum|nepodliehajú vízovej povinnosti|nepodléhají vízové povinnosti|bez víz|izuzet[ia]? (?:su |je )?od vizn(?:og|e)|bez vize|ne trebaju vizu|oslobođeni (?:su )?(?:od )?viz|"
                     r"miễn thị thực|không cần (?:xin )?(?:visa|thị thực)|ยกเว้นวีซ่า|bebas visa|visa tidak diperlukan|tidak (?:memerlukan|perlu) visa|免签|无需签证|免办签证|查証免除|査証免除|ビザ免除|ビザなし|무비자|사증면제|معفى|إعفاء من التأشيرة|vizeden muaf",
                     r"\bnot (?:visa[- ]free|exempt|eligible)|do(?:es)? not (?:qualify|benefit)|unless|except(?:ion)? (?:for|of)?\s*(?:holders|nationals|citizens) of|"
-                    r"(?<!no )(?<!sin )(?<!sans )(?:visa|e-?visa) (?:is |are )?(?:required|mandatory)|must (?:obtain|hold|apply)|" + _NOT_TODAYS_RULE),
+                    r"(?<!no )(?<!sin )(?<!sans )(?:visa|e-?visa) (?:is |are )?(?:required|mandatory)|must (?:obtain|hold|apply)|"
+                    r"\bremains? subject to\b|\bstill (?:require|requires|need|needs)\b|\bcontinues? to (?:require|need)\b|\bineligible\b|" + _NOT_TODAYS_RULE),
     # The authorisation token must sit in the same clause as a requirement
     # word, with no comma, colon or coordinating conjunction between them:
     # a sentence that offers the online service, names a product or a
@@ -892,6 +1300,88 @@ _VERDICT_RULES = {
                         r"落地签|落地簽|到着ビザ|도착비자|e-?voa",
                         r"not (?:available|eligible|issued)|no visa on arrival|cannot obtain|do(?:es)? not (?:need|require)|visa[- ]free|without (?:a |an )?visa|exempt|" + _NOT_TODAYS_RULE),
 }
+
+# A statement that removes the nationality from a rule without an
+# exception word: "not covered by this arrangement", "excluded from the
+# scheme", "removed from the visa-free list", "does not extend to", "not
+# eligible for". Read with the verdict noun it excludes from.
+_EXCLUSION_RE = re.compile(
+    r"\b(?:does|do|did|will|would|shall|can|could)\s+not\s+(?:currently\s+|yet\s+|presently\s+)?(?:apply|extend|cover|include|benefit|qualify|concern|pertain)\b|"
+    r"\bnot\s+(?:be\s+)?(?:covered|included|listed|applicable|eligible|entitled|concerned|admitted|accepted|qualified)\b|"
+    r"\b(?:is|are|was|were|has been|have been|remains?|stays?|be)\s+(?:excluded|removed|struck|deleted|withdrawn|omitted|dropped|delisted|barred)\b|"
+    r"\b(?:excluded|removed|struck|deleted|withdrawn|omitted|delisted|barred)\s+from\b|\bexclusion\s+of\b|"
+    r"\bnot\s+(?:on|in|among|within)\s+(?:the\s+|this\s+|that\s+|our\s+)?(?:[a-z\-]+\s+){0,3}(?:lists?|annex|schedule|table|scheme|programme|program|arrangement|agreement|category|categories|countries|nationalities)\b|"
+    r"\b(?:ineligible|not eligible|no longer eligible|not entitled|no longer entitled)\b|"
+    r"\bremains?\s+subject\s+to\b|\bstill\s+(?:require|requires|need|needs|subject)\b|\bcontinues?\s+to\s+(?:require|need)\b|"
+    r"\bunder\s+review\b|\bno\s+longer\s+(?:appl\w+|cover\w*|includ\w*|extend\w*|available|valid|in force|in effect|eligible|entitled|benefit\w*)\b|"
+    r"\bne\s+s['’]applique(?:nt)?\s+pas\b|\bne\s+(?:sont|est)\s+pas\s+(?:concerné|couvert|inclus|admis|éligible)|\bexclu[es]?\s+(?:de|du|des)\b|\bretiré[es]?\s+(?:de|du|des)\b|"
+    r"\bne\s+bénéficie(?:nt)?\s+pas\b|\bne\s+figure(?:nt)?\s+pas\b|"
+    r"\bno\s+(?:se\s+)?aplica(?:n)?\b|\bno\s+(?:está|están|es|son)\s+(?:incluid|cubiert|exent|comprendid)|\bexcluid[oa]s?\s+(?:de|del)\b|\bretirad[oa]s?\s+(?:de|del)\b|"
+    r"\bno\s+figura(?:n)?\b|\bno\s+se\s+benefician?\b|"
+    r"\bnão\s+se\s+aplica(?:m)?\b|\bnão\s+(?:está|estão|é|são)\s+(?:incluíd|abrangid|contemplad)|\bexcluíd[oa]s?\s+(?:de|do|da|dos|das)\b|\bretirad[oa]s?\s+(?:de|do|da)\b|\bnão\s+constam?\b|"
+    r"\bnon\s+si\s+applica(?:no)?\b|\besclus[oiae]\s+(?:da|dal|dalla|dai|dagli|dalle)\b|\brimoss[oiae]\b|\bnon\s+(?:sono|è)\s+(?:inclus|compres)|"
+    r"\bgilt\s+nicht\b|\bgelten\s+nicht\b|\bnicht\s+(?:erfasst|einbezogen|enthalten|aufgeführt|berechtigt|umfasst)\b|\bausgeschlossen\b|\bgestrichen\b|\bnicht\s+mehr\s+(?:gilt|gelten|aufgeführt)|"
+    r"\bне\s+распространяется\b|\bне\s+применяется\b|\bне\s+применяются\b|\bисключен\w*\b|\bне\s+входит\b|\bне\s+входят\b|\bне\s+включен\w*\b|\bне\s+имеют?\s+права\b|\bне\s+подпадают?\b|"
+    r"\btidak\s+berlaku\b|\bdikecualikan\b|\btidak\s+termasuk\b|\bdihapus(?:kan)?\b|\bdicoret\b|\btidak\s+berhak\b|\btidak\s+mencakup\b|"
+    r"\bkhông\s+áp\s+dụng\b|\bbị\s+loại\b|\bloại\s+trừ\b|\bkhông\s+bao\s+gồm\b|\bkhông\s+thuộc\b|\bkhông\s+được\s+hưởng\b|\bbị\s+đưa\s+ra\s+khỏi\b|\bbị\s+xóa\b|"
+    r"ไม่รวม|ไม่ใช้บังคับ|ถูกถอด|ไม่มีสิทธิ|ไม่อยู่ในรายชื่อ|ไม่ครอบคลุม|ถูกตัดออก|"
+    r"適用されません|適用されない|適用外|対象外|対象となりません|対象とならない|除外|含まれません|含まれない|削除|除かれ|"
+    r"不适用|不適用|不包括|不包含|不含|不在.{0,12}(?:之列|名单|名單|范围|範圍)|已被移除|已移除|已删除|已刪除|不享受|不享有|不属于|不屬於|"
+    r"적용되지\s*않|적용\s*대상이\s*아니|제외|포함되지\s*않|삭제|해당되지\s*않|해당\s*없|대상이\s*아닙니다", re.I)
+# The noun each verdict is known by, so an exclusion reads as an exclusion
+# from this verdict, not from another.
+_VERDICT_NOUNS = {
+    'VISA_EXEMPT': r"visa[- ]?free|\bexempt\w*|waiver|免签|免簽|査証免除|ビザ免除|무비자|사증면제|miễn thị thực|bebas visa|ยกเว้นวีซ่า|"
+                   r"без виз|безвиз\w*|sans visa|exención|isenção|visumfrei\w*|dispense",
+    'VISA_ON_ARRIVAL': r"visa[- ]on[- ]arrival|(?:on|upon) arrival|落地签|落地簽|到着ビザ|도착비자|\bvoa\b",
+    'ELECTRONIC_AUTHORIZATION_REQUIRED': _EAR_TOKEN,
+    'VISA_REQUIRED': r"(?<!no )(?<!without )(?<!sans )(?<!sin )\bvisas?\b(?![- ]?(?:free|exempt|waiver|on[- ]arrival))|visado|visto|visum|签证|簽證|査証|ビザ|비자|thị thực|วีซ่า|виз\w*",
+}
+# A sentence whose subject is the rule stated before it.
+_ANAPHOR_RE = re.compile(r"^\s*(?:this|these|that|those|it|they|the (?:above|foregoing|said|same)|such)\b|"
+                         r"\b(?:this|these|that|those|such|the (?:above|foregoing|said|same))\s+(?:arrangement|scheme|programme|program|policy|measure|facility|"
+                         r"list|rule|provision|regime|agreement|treatment|category|benefit|exemption|waiver|requirement|facilit\w+)s?\b|"
+                         r"^\s*(?:ceci|cela|celui-ci|esto|esta|ello|isto|isso|dies|dieses|это|này|ini|นี้|これ|この|上記|上述|이는|이것)", re.I)
+
+
+def _states_opposite(low, value):
+    """The normalized sentence states another verdict in rule words and
+    not this one: a carve-out or an exclusion in it is from that other
+    rule, which is consistent with this verdict."""
+    positive, _ = _VERDICT_RULES.get(value, (None, None))
+    if positive and re.search(positive, low, re.I):
+        return False
+    for key, (other, negative) in _VERDICT_RULES.items():
+        if key != value and re.search(other, low, re.I) and not (negative and re.search(negative, low, re.I)):
+            return True
+    return False
+
+
+def _concerns_verdict(low, value):
+    """The normalized sentence speaks of this verdict: it names this
+    verdict's noun, names no verdict noun but speaks of a rule (a policy
+    word, or the rule before it by anaphora), or refers to the rule by
+    anaphora. A suspension of another verdict's benefit ("visa on arrival
+    is suspended" under an exemption) or of something that is no rule
+    ("the reciprocity fee has been suspended") is not a suspension of this
+    verdict."""
+    present = {key for key, noun in _VERDICT_NOUNS.items() if re.search(noun, low, re.I)}
+    if present:
+        return value in present or bool(_ANAPHOR_RE.search(low))
+    return bool(_POLICY_WORD_RE.search(low) or _ANAPHOR_RE.search(low))
+
+
+def _excluded_by_statement(sentence, nat, value):
+    """The sentence names the nationality and removes it from this verdict:
+    an exclusion predicate applied to this verdict's noun, to a rule
+    referred to by anaphora, or to nothing named at all."""
+    if not _named(sentence, nat):
+        return False
+    low = _norm(sentence)
+    if not _EXCLUSION_RE.search(low) or _states_opposite(low, value):
+        return False
+    return _concerns_verdict(low, value)
+
 
 # Words that carry a verdict. A list entry (a country's own line in a list
 # or table) must not contain one; the rule sentence does.
@@ -961,11 +1451,15 @@ _SIBLING_RE = re.compile(r"\b(?:hong ?kong|macao|macau|taiwan)\b|香港|澳門|�
 _INCLUSION_RE = re.compile(r"\b(?:includes?|included|including|incl|inclusive|y compris|einschließlich|incluyendo|incluid[oa]s?|"
                            r"incluindo|termasuk|bao gồm)\b|包括|含", re.I)
 _TERMINATOR_RE = re.compile(r"[.!?。！？;\n|]")
-# Sentence boundaries; "U.S." and " J." are abbreviations, not ends.
-_SENTENCE_SPLIT = re.compile(r"(?<=[.;!?])(?<![A-Z]\.[A-Z]\.)(?<!\s[A-Z]\.)\s+|\n+")
+# Sentence boundaries; "U.S.", " J.", "e.g.", "i.e.", "etc.", "No." and "cf."
+# are abbreviations, not ends.
+_SENTENCE_SPLIT = re.compile(r"(?<=[.;!?])(?<![A-Z]\.[A-Z]\.)(?<!\s[A-Z]\.)(?<![eE]\.[gG]\.)(?<![iI]\.[eE]\.)(?<!\betc\.)(?<!\b[Nn]o\.)(?<!\b[Cc]f\.)\s+|\n+")
 
 
-_ITEM_SPLIT_RE = re.compile(r'\s*(?:,|;|、|，|/|\||&|\s[-–—]\s|\s(?:and|und|et|y|e|dan|và|и)\s)\s*', re.I)
+# An ampersand is part of a name ("Trinidad & Tobago", "St Vincent &
+# Grenadines"), never a list separator: a run that needs it to split is
+# not a list the converter can read.
+_ITEM_SPLIT_RE = re.compile(r'\s*(?:,|;|、|，|/|\||\s[-–—]\s|\s(?:and|und|et|y|e|dan|và|и)\s)\s*', re.I)
 
 
 def _document_class_restriction(low, document_type):
@@ -982,9 +1476,11 @@ def _document_class_restriction(low, document_type):
         return None
     for name, pattern in _DOCUMENT_CLASSES.items():
         if name != route_class and re.search(pattern, low, re.I):
-            return name.replace('_passport', '')
+            return _DOCUMENT_CLASS_LABELS[name]
     if route_class != 'ordinary_passport' and _ORDINARY_CLASS_RE.search(low):
-        return 'ordinary'
+        return _DOCUMENT_CLASS_LABELS['ordinary_passport']
+    if _HOLDERS_OF_DOCUMENT_RE.search(low):
+        return _DOCUMENT_CLASS_LABELS['travel_document']
     return None
 
 
@@ -1092,25 +1588,56 @@ def _headings(kept):
     parts = re.split(r'([.!?。！？;\n|])', kept)
     pieces_all = parts[0::2]
     seps = parts[1::2] + ['']
+    count = len(pieces_all)
     offsets, at = [], 0
     for piece, sep in zip(pieces_all, seps):
         offsets.append(at)
         at += len(piece) + len(sep)
+    # A heading is decided by the shape of its line, not by the terminator
+    # that follows it: a piece that starts its own line and ends it (with
+    # the line break, or with a period, semicolon or pipe and nothing but
+    # blanks before the break) stands alone in its block; a piece that
+    # starts its line and is closed by a pipe is a table's first cell.
+    starts_line = [False] * count
+    for i in range(count):
+        starts_line[i] = i == 0 or seps[i - 1] == '\n' or (not pieces_all[i - 1].strip() and starts_line[i - 1])
+    ends_line = [False] * count
+    for i in range(count - 1, -1, -1):
+        ends_line[i] = seps[i] in ('\n', '') or (seps[i] in '.;|' and i + 1 < count
+                                                and not pieces_all[i + 1].strip() and ends_line[i + 1])
+    content = [j for j in range(count) if pieces_all[j].strip()]
+    position = {j: k for k, j in enumerate(content)}
     starts, pieces = [], []
     for i, piece in enumerate(pieces_all):
-        short = seps[i] in ('\n', '') and len(piece.strip()) <= 100
-        following = pieces_all[i + 1:i + 3] if short else []
-        before_run = short and len(following) >= 1 and seps[i + 1] in ('\n', '') and _entry_run(following[0])
-        before_lines = (short and len(following) == 2 and all(_entry_line(p) for p in following)
-                        and all(s in ('\n', '') for s in seps[i + 1:i + 3]))
+        short = len(piece.strip()) <= 100 and starts_line[i] and (ends_line[i] or seps[i] == '|')
+        following, following_ends = [], []
+        if short:
+            j = i + 1
+            while j < count and len(following) < 2:
+                if pieces_all[j].strip():
+                    following.append(pieces_all[j]); following_ends.append(ends_line[j])
+                elif seps[j] == '|' or (j and seps[j - 1] == '|'):
+                    # A blank piece at a cell boundary: the next cell is not
+                    # a line under this heading.
+                    break
+                j += 1
+        before_run = short and len(following) >= 1 and following_ends[0] and _entry_run(following[0])
+        before_lines = (short and len(following) == 2 and all(_entry_line(p) for p in following) and all(following_ends))
+        text = piece.strip()
+        # A line standing alone in its own block that is neither a list
+        # entry, a comma run of entries nor a region sub-heading is a
+        # section boundary whatever it says: a title, a rule sentence or a
+        # note between two lists ends the reach of the list before it.
+        standalone = (short and ends_line[i] and 0 < len(text) and bool(re.search(r'[^\W\d_]', text))
+                      and not _entry_line(piece) and not _entry_run(piece) and not _REGION_LINE_RE.match(text))
         if _RULE_WORDS.search(piece):
-            opens = bool(_LIST_INTRO_RE.search(piece)) or (short and bool(_VERDICT_LINE_RE.search(piece))) or before_run or before_lines
+            opens = (bool(_LIST_INTRO_RE.search(piece)) or (short and bool(_VERDICT_LINE_RE.search(piece)))
+                     or before_run or before_lines or standalone)
         else:
-            text = piece.strip()
             titled = (0 < len(text) <= 60 and len(text.split()) <= 8 and re.search(r'[^\W\d_]', text)
                       and not _REGION_LINE_RE.match(text))
-            opens = titled and (before_run or ((before_lines or before_run)
-                                               and bool(_HEADING_VOCAB_RE.search(text) or _LIST_INTRO_RE.search(text))))
+            opens = standalone or (titled and (before_run or ((before_lines or before_run)
+                                                              and bool(_HEADING_VOCAB_RE.search(text) or _LIST_INTRO_RE.search(text)))))
         if opens:
             starts.append(offsets[i])
             pieces.append(piece)
@@ -1146,7 +1673,24 @@ def _boundary(piece, value):
     low = _norm(piece)
     positive, negative = _VERDICT_RULES[value]
     restates = bool(re.search(positive, low, re.I)) and not (negative and re.search(negative, low, re.I))
+    if not restates and _dated_start_heading(low):
+        return False
     return not restates or _states_other_verdict(piece, value)
+
+
+def _dated_start_heading(low):
+    """A sub-heading that only dates the start of the rule above it ("(c)
+    for travel to the UK on or after 8 January 2025:") continues that
+    rule's list when its date has passed; a future date, any other date
+    relation, or any verdict word of its own makes it a boundary."""
+    if _RULE_WORDS.search(low) or any(re.search(p, low, re.I) for p, _ in _VERDICT_RULES.values()):
+        return False
+    dates = _dates_in(low)
+    if len(dates) != 1:
+        return False
+    start, end, day = dates[0]
+    before = low[max(0, start - 40):start]
+    return bool(_START_BEFORE_RE.search(before)) and not _END_BEFORE_RE.search(before) and day <= _today()
 
 
 def _section(headings, pos):
@@ -1336,31 +1880,42 @@ def _build_name_pattern(nat):
 
 _check_group_names()
 
-# An exception clause, in the languages of the captured pages: the word
-# that opens it and the item it carves out. Preposed forms capture the item
-# after the word ("except Myanmar", "à l'exception des Bulgares", "除了缅甸
-# 之外") and postposed CJK forms capture it before ("缅甸除外", "ミャンマーを
-# 除く", "미얀마는 제외"). Thai ยกเว้น is also the exemption noun before วีซ่า.
+# An exception clause, in the languages of the captured pages: the
+# construction that opens it and the item it carves out. The openers are
+# read as a construction (any "exception of", "exclusion of", "but not",
+# "unless", "save ...", "bar" shape), not as a closed list, so a wording
+# outside the list still opens a clause whose item must resolve or the
+# sentence proves nothing. Preposed forms capture the item after the word
+# ("except Myanmar", "à l'exception des Bulgares", "除了缅甸之外"),
+# postposed CJK forms capture it before ("缅甸除外", "ミャンマーを除く",
+# "미얀마는 제외"), and ", less X" needs its comma. Thai ยกเว้น is also the
+# exemption noun before วีซ่า.
 _EXCEPTION_RE = re.compile(
-    r"(?:(?<![^\W\d_])(?:except(?:ing)?|excluding|other than|save for|apart from|aside from|with the exception of|barring|"
-    r"sauf|[àa] l['’]exception d(?:e|es|u)|hormis|excepté|exceptés|"
-    r"excepto|salvo|con excepci[oó]n de|a excepci[oó]n de|exceptuando|"
-    r"exceto|com exce[cç][aã]o d(?:e|os|as|o|a)|[àa] exce[cç][aã]o d(?:e|os|as|o|a)|"
-    r"tranne|ad eccezione d(?:i|ei|elle|egli|el|ella)|eccetto|escluso|esclusi|"
-    r"außer|ausser|mit ausnahme (?:von|der|des)|ausgenommen|"
-    r"kecuali|selain|terkecuali|ngoại trừ|(?<!miễn )trừ|osim|kromě|okrem|za isključenjem|за исключением|кроме)(?![^\W\d_])|"
-    r"ยกเว้น(?!วีซ่า|การตรวจลงตรา))"
+    r"(?:(?<![^\W\d_])(?:except(?:ing)?|excluding|exclusive of|other than|save for|save in the case of|save that|save where|saving|"
+    r"apart from|aside from|with the (?:\w+ ){0,2}exceptions? (?:of|for|being)|with the (?:\w+ ){0,2}exclusion of|to the exclusion of|"
+    r"exceptions? (?:being|for|of|:)|exceptions?(?= ?:)|but not|not including|not counting|barring|bar(?! ?codes?)|unless|"
+    r"sauf|[àa] l['’]exception d(?:e|es|u)|[àa] l['’]exclusion d(?:e|es|u)|hormis|excepté|exceptés|exception faite d(?:e|es|u)|en dehors d(?:e|es|u)|mis [àa] part|[àa] moins que|"
+    r"excepto|salvo|con excepci[oó]n de|a excepci[oó]n de|exceptuando|excluyendo|con exclusi[oó]n de|a menos que|salvo que|"
+    r"exceto|com exce[cç][aã]o d(?:e|os|as|o|a)|[àa] exce[cç][aã]o d(?:e|os|as|o|a)|excluindo|salvo se|"
+    r"tranne|ad eccezione d(?:i|ei|elle|egli|el|ella)|eccetto|escluso|esclusi|esclusa|escluse|fatta eccezione per|a meno che|"
+    r"außer|ausser|mit ausnahme (?:von|der|des|dem)|ausgenommen|abgesehen von|bis auf|unter ausschluss (?:von|der)|es sei denn|"
+    r"kecuali|selain|terkecuali|tidak termasuk|di luar|ngoại trừ|(?<!miễn )trừ|trừ khi|loại trừ|không bao gồm|osim|kromě|okrem|za isključenjem|"
+    r"за исключением|кроме|помимо|исключая|не считая|если не)(?![^\W\d_])|"
+    r"ยกเว้น(?!วีซ่า|การตรวจลงตรา)|เว้นแต่|นอกจาก|ไม่รวม)"
     r"\s*(?:for|of|de|des|du|del|dei|degli|delle|den|der|die|das|pour|para|bagi|untuk|les|los|las|the)?\s*([^.;:\n]{0,80})"
-    r"|除了?\s*([^.;:\n。；，、,()（）]{1,40}?)\s*(?:之外|以外|外)"
-    r"|([^\s.;:\n。；，、,()（）]{1,40}?)\s*(?:(?:는|은|이|가|을|를|도|만)\s*)?(?:除外|は除く|を除く|を除き|を除いて|제외)", re.I)
+    r"|(?<![免解削排控驱驅])除了?\s*([^.;:\n。；，、,()（）]{1,40}?)\s*(?:之外|以外|外(?![国國交人籍币幣汇匯出]))"
+    r"|([^\s.;:\n。；，、,()（）]{1,40}?)\s*(?:(?:는|은|이|가|을|를|도|만)\s*)?(?:除外|は除く|を除く|を除き|を除いて|以外|제외|이외)"
+    r"|(?<=,)\s*less(?!\s+than)\s*(?:the\s+)?([^.;:\n]{0,80})", re.I)
 # An exception-only sentence that follows a rule sentence binds to it
 # ("아세안 국민은 무비자입니다. 미얀마는 제외합니다.").
 _EXCEPTION_LEAD_RE = re.compile(
-    r"^\s*(?:except|excluding|other than|save for|apart from|aside from|with the exception of|barring|sauf|à l['’]exception|hormis|excepté|"
-    r"excepto|salvo|con excepci[oó]n|a excepci[oó]n|exceptuando|exceto|com exce[cç][aã]o|tranne|ad eccezione|eccetto|escluso|außer|ausser|"
-    r"mit ausnahme|ausgenommen|kecuali|selain|terkecuali|ngoại trừ|trừ|osim|kromě|okrem|за исключением|кроме|ยกเว้น(?!วีซ่า)|除了|但)", re.I)
+    r"^\s*(?:except|excluding|other than|save for|save in the case of|apart from|aside from|with the (?:\w+ ){0,2}exceptions?|exceptions?\b|barring|"
+    r"but not|not including|unless|sauf|à l['’]exception|à l['’]exclusion|hormis|excepté|exception faite|"
+    r"excepto|salvo|con excepci[oó]n|a excepci[oó]n|exceptuando|excluyendo|exceto|com exce[cç][aã]o|excluindo|tranne|ad eccezione|eccetto|escluso|außer|ausser|"
+    r"mit ausnahme|ausgenommen|abgesehen von|kecuali|selain|terkecuali|tidak termasuk|ngoại trừ|trừ|loại trừ|osim|kromě|okrem|за исключением|кроме|"
+    r"ยกเว้น(?!วีซ่า)|เว้นแต่|除了|但|ただし|단,)", re.I)
 _EXCEPTION_TAIL_RE = re.compile(r"(?:除外|を除く|を除き|を除いて|제외)(?:합니다|됩니다|된다|함|입니다|됨|です|とする|する)?\s*[.。]?\s*$")
-_ITEM_WORDS = re.compile(r"\b(?:nationals?|citizens?|holders?|passport holders?|passports?|those|persons?|people|"
+_ITEM_WORDS = re.compile(r"\b(?:nationals?|citizens?|holders?|passport holders?|passports?|those|persons?|people|from|of|the|"
                          r"ressortissants?|citoyens|titulaires|ciudadanos|nacionales|titulares|cidadãos|portadores|cittadini|titolari|"
                          r"staatsangehörige|staatsbürger|bürger|inhaber|warganegara|warga negara|negara|công dân|người)\b|"
                          r"国民|公民|人员|人員|国籍|旅券|护照|護照|여권|국민|시민|공민")
@@ -1371,9 +1926,10 @@ def _exception_items(sentence, following=None):
     of the adjacent following sentence when that sentence is nothing but an
     exception clause."""
     for clause in _EXCEPTION_RE.finditer(str(sentence or '')):
-        text = clause.group(1) or clause.group(2) or clause.group(3) or ''
+        text = next((g for g in clause.groups() if g is not None), '')
         for item in re.split(r"\s*(?:,|;|/|、|，|\s(?:and|or|und|et|y|e|dan|và|hoặc|atau|и|или)\s)\s*", text):
-            yield _ITEM_WORDS.sub(' ', _norm(item)).strip(' ()（）')
+            # Capitals are kept: "USA" is the country, "usa" a Spanish verb.
+            yield _ITEM_WORDS.sub(' ', ' '.join(unicodedata.normalize('NFKC', item).split())).strip(' ()（）')
     low = _norm(following)
     if low and (_EXCEPTION_LEAD_RE.match(low) or _EXCEPTION_TAIL_RE.search(low)):
         yield from _exception_items(following)
@@ -1385,6 +1941,11 @@ def _resolves_to_nationality(bare):
     words remain, none of them prose, a figure or a verdict word."""
     if not bare:
         return False
+    if bare.islower() and re.fullmatch(r'[a-z.]{2,5}', bare):
+        # A captured page is read casefolded, so "USA" and "FSM" arrive as
+        # "usa" and "fsm"; as a whole exception item a short abbreviation is
+        # the country, never the Spanish verb.
+        bare = bare.upper()
     rest, matched = bare, False
     for nat in _known_nationalities():
         spans = _mentions(bare, nat)
@@ -1438,7 +1999,7 @@ def _exception_opens_list(sentence, positive, negative):
     group, but a list line under it on the same page proves the verdict
     stated inside the clause."""
     for clause in _EXCEPTION_RE.finditer(str(sentence or '')):
-        item = _norm(clause.group(1) or clause.group(2) or clause.group(3) or '')
+        item = _norm(next((g for g in clause.groups() if g is not None), ''))
         if (_LIST_INTRO_RE.search(item) and re.search(positive, item, re.I)
                 and not (negative and re.search(negative, item, re.I))):
             return True
@@ -1460,7 +2021,7 @@ def _label(quote, nat):
     parts = re.split(r'(?<=[.:：])(?<![A-Z]\.[A-Z]\.)(?<!\s[A-Z]\.)\s+|\n+', quote, maxsplit=1)
     head = parts[0]
     text = _norm(head).rstrip('.:： ')
-    if len(parts) < 2 or len(text) > 80 or not _named(head, nat) or _RULE_WORDS.search(text):
+    if len(parts) < 2 or len(text) > 80 or not _named_as_traveller(head, nat) or _RULE_WORDS.search(text):
         return None
     if head.rstrip().endswith((':', '：')) or (len(text.split()) >= 2 and (head.rstrip().endswith('.') or '\n' in quote)):
         return parts[1]
@@ -1480,15 +2041,31 @@ def _footnote_marked(text, nat):
     return any(_FOOTNOTE_AFTER_RE.match(low[tail.match(low, m.end()).end():][:6]) for m in _name_pattern(nat).finditer(low))
 
 
+# The example marker alone, and the run of items it opens: names separated
+# by commas, slashes or a conjunction, with no terminator or closing
+# parenthesis between the marker and the mention. "(e.g. UK citizens,
+# Americans, Australians, etc.)" names every one of them as an example, not
+# only the first.
+_EXAMPLE_MARK_RE = re.compile(r"(?:\bfor example|\be\.g\.?|\bsuch as|\bpar exemple|\bpor ejemplo|\bzum beispiel|例如|例えば|예를 들어)", re.I)
+_EXAMPLE_RUN_RE = re.compile(r"\s*[,:]?\s*(?:[^.;:!?()\n,/、，]{0,60}(?:,|/|、|，|\s(?:and|or|und|et|y|e|o|ou|oder)\s)\s*)*(?:[^\W\d_][^\s.;:!?()\n,/、，]*\s+){0,3}", re.I)
+
+
+def _in_example_run(low, start):
+    marks = list(_EXAMPLE_MARK_RE.finditer(low, 0, start))
+    return bool(marks) and bool(_EXAMPLE_RUN_RE.fullmatch(low[marks[-1].end():start]))
+
+
 def _example_only(sentence, nat):
     """Every mention of the nationality follows an example marker ("for
-    example Indian nationals resident in Germany")."""
+    example Indian nationals resident in Germany"), as the first item after
+    it or as a later item of the run it opens."""
     low = _norm(sentence)
     spans = _mentions(sentence, nat)
-    return bool(spans) and all(_EXAMPLE_BEFORE_RE.search(low[max(0, start - 40):start]) for start, _ in spans)
+    return bool(spans) and all(_EXAMPLE_BEFORE_RE.search(low[max(0, start - 40):start]) or _in_example_run(low, start)
+                               for start, _ in spans)
 
 
-def _sentence_block(sentence, following, value, nat, negative, document_type, purpose, unconditional):
+def _sentence_block(sentence, following, value, nat, negative, document_type, purpose, conditional_ok):
     """Why this sentence cannot decide the verdict for this route, or None.
     Every path that reads a verdict out of a sentence (the validator's
     anchored statement, a named or carried rule sentence, a group sentence,
@@ -1496,6 +2073,8 @@ def _sentence_block(sentence, following, value, nat, negative, document_type, pu
     sl = _norm(sentence)
     if negative and re.search(negative, sl, re.I):
         return 'flipped in the same sentence'
+    if _excluded_by_statement(sentence, nat, value):
+        return 'negated or removed in the same sentence'
     if _fee_row(sl):
         return 'fee or price row, not a rule sentence'
     if _carved_out(sentence, nat, following):
@@ -1506,18 +2085,117 @@ def _sentence_block(sentence, following, value, nat, negative, document_type, pu
                 else 'exception clause cannot be read: ') + unreadable[:80]
     restricted = _document_class_restriction(sl, document_type)
     if restricted:
-        return 'scoped to ' + restricted + ' passports, not the route document'
-    if purpose != 'transit' and _TRANSIT_RE.search(sl) and not _PURPOSE_RE.search(sl):
-        return 'scoped to transit, not the route purpose'
-    if unconditional and (_CONDITIONAL_MARK_RE.search(sl) or _footnote_marked(sentence, nat)):
+        return 'scoped to ' + restricted + ', not the route document'
+    scoped = _purpose_block(sl, purpose)
+    if scoped:
+        return scoped
+    if _dated_rule_sentence(sl):
+        undated = _unreadable_date(sl)
+        if undated:
+            return 'a date in the sentence cannot be read: ' + undated
+    if not conditional_ok and (_conditional_marker(sl, value) or _footnote_marked(sentence, nat)):
         return 'conditional wording under an unconditional verdict'
-    if unconditional and _example_only(sentence, nat):
+    if not conditional_ok and _example_only(sentence, nat):
         return 'nationality named only as an example'
     return None
 
 
+def _about_rule(low):
+    """The normalized sentence speaks of a rule: policy or rule words, or a
+    subject that refers back to the rule before it."""
+    return bool(_POLICY_WORD_RE.search(low) or _RULE_WORDS.search(low) or _ANAPHOR_RE.search(low))
+
+
+def _passage_block(text, value, nat, positive, negative, document_type, purpose, where, quoted):
+    """Why the sentences of this text refuse the verdict for this route, or
+    None. Every sentence is read, not only the deciding one: a suspension,
+    withdrawal or dated-out rule anywhere in it, a carve-out or an
+    exclusion that names this nationality, an exception clause that
+    cannot be resolved to nationalities, a flip that names this
+    nationality, or a date the parser cannot read in a rule sentence.
+    `quoted` says the text is the reviewer's evidence, where every
+    sentence counts; on a captured page section only sentences about a
+    rule or naming the nationality are read."""
+    for sentence in re.split(r'(?<=[.!?])\s+|[;。；！？\n]+', str(text or '')):
+        low = _norm(sentence)
+        if not low:
+            continue
+        names = _named(sentence, nat)
+        if not quoted and not (_about_rule(low) or names):
+            continue
+        if (not _WINDOW_SKIP_RE.search(low) and (_about_rule(low) or names)
+                and re.search(_NOT_TODAYS_RULE, low, re.I) and _concerns_verdict(low, value)):
+            return f'suspended, withdrawn or dated out in {where}: {low[:100]}'
+        opposite = _states_opposite(low, value)
+        # A question ("Do US citizens need a visa?") states nothing.
+        question = bool(re.search(r'[?？]\s*$', sentence.rstrip()))
+        if not opposite and _carved_out(sentence, nat):
+            return f'carved out by name in {where}: {low[:100]}'
+        if _excluded_by_statement(sentence, nat, value):
+            return f'excluded from the rule in {where}: {low[:100]}'
+        unreadable = _unreadable_exception(sentence)
+        if unreadable is not None and not (positive and _exception_opens_list(sentence, positive, negative)):
+            return f'an exception clause in {where} cannot be read: {unreadable[:80]}'
+        # A sentence that states the opposite verdict for this nationality
+        # as a traveller, for the route's own document and purpose and not
+        # for a longer stay, contradicts the verdict.
+        if (names and opposite and not question and _named_as_traveller(sentence, nat) and not _carved_out(sentence, nat)
+                and not _LONGER_STAY_RE.search(low) and _document_class_restriction(low, document_type) is None
+                and _purpose_block(low, purpose) is None):
+            return f'the opposite verdict is stated for this nationality in {where}: {low[:100]}'
+        if _dated_rule_sentence(low):
+            undated = _unreadable_date(low)
+            if undated:
+                return f'a date in {where} cannot be read: {undated}'
+    return None
+
+
+def _section_text(index, part):
+    """The captured page's section (between two headings) that holds the
+    located quote part, or None when the part is not located."""
+    kept, _, _, (starts, pieces) = index
+    section = part.get('section')
+    if part.get('pos') is None or section is None:
+        return None
+    lo = starts[section - 1] if section else 0
+    # The heading that closes the section is read with it: a note standing
+    # alone after a list ("Note: the exemption for Japan is suspended")
+    # bounds the list and speaks about it.
+    hi = starts[section] + len(pieces[section]) if section < len(starts) else len(kept)
+    return kept[lo:hi]
+
+
+def _sections_block(units, indexes, value, nat, positive, negative, document_type, purpose, bounds):
+    """Why the captured page sections that hold the quotes refuse the
+    verdict, or None: the same reading as the evidence, plus a dated
+    policy window on the page that has ended, has not started, or is not
+    recorded by the reviewer."""
+    seen = set()
+    for unit in units:
+        for part in unit['parts']:
+            if part.get('page') is None or part.get('pos') is None:
+                continue
+            index = indexes[part['page']]
+            text = _section_text(index, part)
+            key = (part['page'], part.get('section'))
+            if text is None or key in seen:
+                continue
+            seen.add(key)
+            reason = _passage_block(text, value, nat, positive, negative, document_type, purpose, 'the same page section', quoted=False)
+            if reason:
+                return reason
+    # A dated window of this verdict's rule anywhere on a captured page the
+    # quotes come from must be current and recorded: the sunset a page
+    # states two sections below the quoted list still expires the verdict.
+    for page in {part['page'] for unit in units for part in unit['parts'] if part.get('page') is not None}:
+        window = _window_violation([indexes[page][0]], bounds, where='a policy window on the captured page', value=value, nat=nat)
+        if window:
+            return window
+    return None
+
+
 def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None, *,
-                        document_type='ordinary_passport', purpose='tourism', detail=None, bounds=None):
+                        document_type='ordinary_passport', purpose='tourism', detail=None, bounds=None, page_gates=True):
     """Strict but shaped for real official pages: the nationality must be named
     in the evidence (in the rule sentence, as a label or antecedent of it, or
     as its own list line beside the rule sentence on the same page) and a
@@ -1545,21 +2223,40 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None, *
     positive, negative = _VERDICT_RULES.get(value, (None, None))
     if positive and value == 'VISA_EXEMPT':
         negative = '(?:' + negative + ')|(?:' + NEGATED_VISA_EXEMPTION + ')'
-    window = _window_violation(evidence_quotes, bounds)
+    window = _window_violation(evidence_quotes, bounds, nat=nat)
     if window:
         note('rejected: ' + window)
         return False
-    unconditional = bool(detail) and str(detail).startswith('unconditional')
+    # The batch path always names the subcategory, so every unconditional
+    # one is gated; a caller that names none (the pinned converters that
+    # reuse this reading) asserts no subcategory and keeps its contract.
+    conditional_ok = detail is None or detail in _CONDITIONAL_DETAILS
+    # The whole evidence is read before any sentence decides: a suspension,
+    # a carve-out, an exclusion, an unreadable exception, a flip or an
+    # unreadable date anywhere in the quotes refuses the row.
+    blocked_all = _passage_block(passages, value, nat, positive, negative, document_type, purpose, 'the evidence', quoted=True)
+    if blocked_all:
+        note('rejected: ' + blocked_all)
+        return False
+    units, indexes = _passages(evidence_quotes, pages, nat)
+    if pages is not None and page_gates:
+        # The captured page sections the quotes sit in are read the same
+        # way, and a dated policy window there must be current and recorded.
+        blocked_page = _sections_block(units, indexes, value, nat, positive, negative, document_type, purpose, bounds)
+        if blocked_page:
+            note('rejected: ' + blocked_page)
+            return False
 
     def block(sentence, following):
-        return _sentence_block(sentence, following, value, nat, negative, document_type, purpose, unconditional)
+        return _sentence_block(sentence, following, value, nat, negative, document_type, purpose, conditional_ok)
     # The validator's anchored statement still needs a sentence of its own
-    # that states the rule, names the nationality and passes the gate.
+    # that states the rule, names the nationality as a traveller and passes
+    # the gate.
     if positive:
         sentences = _SENTENCE_SPLIT.split(passages)
         for i, sentence in enumerate(sentences):
             following = sentences[i + 1] if i + 1 < len(sentences) else None
-            if (re.search(positive, _norm(sentence), re.I) and _named(sentence, nat)
+            if (re.search(positive, _norm(sentence), re.I) and _named_as_traveller(sentence, nat)
                     and block(sentence, following) is None
                     and supports_disposition(sentence, value, nationality=nat)):
                 return decide('validator: anchored statement')
@@ -1567,7 +2264,6 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None, *
         return decide('validator: anchored statement')
     if not positive:
         return False
-    units, indexes = _passages(evidence_quotes, pages, nat)
     listed = [part for unit in units for part in unit['parts']
               if not part['ambiguous'] and not part['boilerplate'] and _list_line(part['text'], nat, document_type)]
     for unit in units:
@@ -1586,10 +2282,13 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None, *
             sl = _norm(sentence)
             following = sentences[i + 1] if i + 1 < len(sentences) else None
             blocked = block(sentence, following)
-            sentence_named = _named(sentence, nat)
+            # The nationality must be named as the traveller: a country named
+            # as the destination of travel never proves a verdict for its own
+            # nationals.
+            sentence_named = _named_as_traveller(sentence, nat)
             # A label or the previous sentence lends its nationality only to a
             # sentence that brings no subject of its own.
-            borrowable = (not sentence_named and not _OWN_SUBJECT_RE.search(sl)
+            borrowable = (not _named(sentence, nat) and not _OWN_SUBJECT_RE.search(sl)
                           and not any(_named(sentence, other) for other in others))
             carried = borrowable and (labelled or previous_named)
             # A blocked sentence cannot lend its nationality to the next one:
@@ -1619,7 +2318,7 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None, *
                 index = indexes.get(unit['page']) if unit['page'] is not None else None
                 span = _sentence_span(index, sentence, unit) if index else None
                 entry = _same_list(listed, unit['page'], span, bool(_LIST_ABOVE_RE.search(sl)), index, value)
-                if entry is not None and unconditional and _footnote_marked(entry['text'], nat):
+                if entry is not None and not conditional_ok and _footnote_marked(entry['text'], nat):
                     note('footnote on the list line under an unconditional verdict: ' + _norm(entry['text'])[:120])
                 elif entry is not None:
                     return decide('list line beside the rule sentence: ' + sl[:120])
@@ -1705,38 +2404,98 @@ def _consular_product_eligibility_supported(value, evidence, sources, route, pro
     return False
 
 
-def _check_value(field, value, passages, route, product, pages=None, detail=None, bounds=None):
+# An explicit statement that nothing is charged, or a zero standing in the
+# fee column of the quoted row: a pipe-separated "| 0 |" cell, a zero
+# beside a currency, or a tariff row (a name followed by figure cells
+# only) with a zero cell ("70 Indonesia 00 00 00 00", "Malaysia 00 00 40
+# 200"). A bare "0" inside "30 days" or a tariff row without a zero cell
+# ("Malaysia 10 25 40 200") proves nothing.
+_ZERO_FEE_RE = re.compile(
+    r"\bfree\b|\bfree of charge\b|\bno fee\b|\bno fees\b|\bno charge\b|\bgratis\b|\bgratuit\w*|\bkostenlos\b|\bwaived\b|"
+    r"\bexempt(?:ed)? from (?:the |any |all )?(?:visa )?fees?\b|\bno visa\b|\bvisa[- ]free\b|\bwithout (?:a )?visa\b|\bexempt\b|"
+    r"免费|免費|無料|무료|miễn phí|percuma|ฟรี|бесплатно|"
+    r"(?:^|\|)\s*(?:0|0[.,]00)\s*(?:\||$)|(?<![\d.,])(?:usd|eur|gbp|aud|cad|sgd|nzd|\$|€|£)\s*0(?:[.,]00)?(?!\d)(?![.,]\d)|"
+    r"(?<![\d.,])0(?:[.,]00)?\s*(?:usd|eur|gbp|aud|cad|sgd|nzd|dollars?|euros?|pounds?)\b|"
+    r"^\s*(?:\d{1,3}[.)]?\s+)?[^\d\n|]{2,60}?(?:[\s|]+\d+(?:[.,]\d+)?)*[\s|]+0+(?:[.,]0+)?(?:[\s|]+\d+(?:[.,]\d+)?)*[\s|]*$", re.I | re.M)
+_NUMBER_WORDS_RE = re.compile(
+    r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|same[- ]day|immediate\w*|instant\w*|"
+    r"varies|variable|weeks?|months?|days?|hours?|minutes?)\b", re.I)
+
+
+def _url_key(url):
+    """The address without scheme, leading www and trailing slash."""
+    key = _norm(url).split('#')[0].strip()
+    key = re.sub(r'^https?://', '', key)
+    key = re.sub(r'^www\.', '', key)
+    return key.rstrip('/')
+
+
+def _portal_url_in_evidence(value, passages, pages, evidence_urls):
+    """The portal address occurs literally in the quote or on a captured
+    destination page of the evidence, or is itself the address of such a
+    page (or a parent path of it on the same host)."""
+    key = _url_key(value)
+    if not key or '.' not in key.split('/')[0]:
+        return False
+    haystacks = [_norm(passages)] + [_norm(text) for _, text in (pages or [])]
+    if any(key in re.sub(r'\s+', '', h) for h in haystacks):
+        return True
+    for url in evidence_urls or []:
+        other = _url_key(url)
+        if other == key or other.startswith(key + '/'):
+            return True
+    return False
+
+
+def _check_value(field, value, passages, route, product, pages=None, detail=None, bounds=None, evidence_urls=None, page_gates=False):
     from app.visa_snapshot.evidence_validator import field_value_supported
     if field == 'disposition':
         quotes = [q for q in passages.split('\n') if q.strip()]
         if pages is not None and len(pages) != len(quotes):
             # A quote with a line break inside cannot keep its page pairing.
             pages = None
-        window = _window_violation(quotes, bounds)
+        window = _window_violation(quotes, bounds, nat=route['passport_nationality'])
         if window:
             raise PatchRejected('disposition: ' + window)
-        if not _decision_supported(value, quotes, route['passport_nationality'], pages=pages,
+        explain = []
+        if not _decision_supported(value, quotes, route['passport_nationality'], pages=pages, explain=explain,
                                    document_type=route.get('travel_document_type') or 'ordinary_passport',
-                                   purpose=route.get('travel_purpose') or 'tourism', detail=detail, bounds=bounds):
-            raise PatchRejected('disposition: evidence does not state this verdict for this nationality')
+                                   purpose=route.get('travel_purpose') or 'tourism', detail=detail, bounds=bounds,
+                                   page_gates=page_gates):
+            # The refusal names the gate that closed, so a reviewer can act on it.
+            reason = next((e[len('rejected: '):] for e in reversed(explain) if e.startswith('rejected: ')), '')
+            raise PatchRejected('disposition: evidence does not state this verdict for this nationality' + (f' ({reason[:160]})' if reason else ''))
         return
     if field in ('permitted_stay_days', 'max_stay_days'):
         if value is not None and not field_value_supported(field, value, passages):
             raise PatchRejected(f'{field}: the figure is not in its evidence')
     elif field in ('government_fee', 'fee'):
         if isinstance(value, dict) and value.get('amount') not in (None, 0):
-            text = _monetary_text(passages, str(value.get('currency') or '').upper())
+            code = str(value.get('currency') or '').upper()
+            foreign = _foreign_dollar_amount(passages, code, value.get('amount'))
+            if foreign:
+                raise PatchRejected(f'{field}: the amount is stated in another dollar currency ({foreign})')
+            text = _monetary_text(passages, code)
             if not field_value_supported(field, value, text):
                 raise PatchRejected(f'{field}: the fee amount is not in its evidence')
         elif isinstance(value, dict) and value.get('amount') == 0:
-            if not re.search(r'free|no fee|no charge|gratis|waived|exempt|0\b|no visa', passages, re.I):
+            if not _ZERO_FEE_RE.search(passages):
                 raise PatchRejected(f'{field}: a zero fee needs an explicit free, waived or no-visa statement')
     elif field == 'processing_time':
         if value and not field_value_supported(field, value, passages):
-            # Working-day and calendar figures must appear in the evidence.
+            # Working-day and calendar figures must appear in the evidence;
+            # a value without a figure must occur in the quote in its own
+            # words, so "same day" or "varies" is never served unsupported.
             digits = re.findall(r'\d+', str(value))
-            if digits and not all(d in passages for d in digits):
-                raise PatchRejected('processing_time: the figure is not in its evidence')
+            low_value, low_passages = _norm(value), _norm(passages)
+            if digits:
+                if not all(d in passages for d in digits):
+                    raise PatchRejected('processing_time: the figure is not in its evidence')
+            else:
+                words = _NUMBER_WORDS_RE.findall(low_value)
+                if not words or not all(re.search(r'\b' + re.escape(w) + r'\b', low_passages) for w in words):
+                    if low_value not in low_passages:
+                        raise PatchRejected('processing_time: a value without a figure must occur in its evidence')
     elif field == 'application_channel':
         if value and not field_value_supported(field, {'online_portal': 'online', 'embassy_or_consulate': 'embassy',
                                                        'embassy_designated_agency': 'authorised_agent',
@@ -1744,8 +2503,11 @@ def _check_value(field, value, passages, route, product, pages=None, detail=None
                                                        'not_required': 'none'}.get(value, value), passages):
             raise PatchRejected('application_channel: the channel is not described in its evidence')
     elif field == 'official_portal_url':
-        if value and _norm(value) not in _norm(passages) and not re.search(r'apply|portal|online|website|e-?visa', passages, re.I):
-            raise PatchRejected('official_portal_url: the portal is not described in its evidence')
+        # The address itself must be on the captured destination page or in
+        # the quote; a quote that merely describes an application proves no
+        # address.
+        if value and not _portal_url_in_evidence(value, passages, pages, evidence_urls):
+            raise PatchRejected('official_portal_url: the portal address is not in its quote or on its captured page')
     elif field == 'entry':
         if value and not re.search({'single': r'single|one entry|一次', 'double': r'double|two entries|二次|兩次|两次',
                                     'multiple': r'multiple|multi|数次|多次'}[value], passages, re.I):
@@ -1810,7 +2572,7 @@ def _validate_row(row, sources):
         disp, detail = verdict.get('disposition'), verdict.get('requirement_detail')
         if disp not in DISPOSITIONS or detail not in _DETAIL_FAMILY.get(disp, ()):
             raise PatchRejected('Verdict outside the disposition and subcategory vocabulary')
-        if _check_proof(verdict.get('proof'), sources, route, 'disposition', disp, detail=detail) is None:
+        if _check_proof(verdict.get('proof'), sources, route, 'disposition', disp, detail=detail, page_gates=True) is None:
             raise PatchRejected('A published verdict cannot be unknown')
         proofs = row.get('route_field_proofs')
         if not isinstance(proofs, dict):
@@ -1829,7 +2591,7 @@ def _validate_row(row, sources):
                             _record_drop(dropped, f'{c}: a value under an unknown or unpublished {key} proof')
                             values.pop(c, None)
                 try:
-                    _check_proof(proofs[key], sources, route, key, values.get(key))
+                    _check_proof(proofs[key], sources, route, key, values.get(key), page_gates=True)
                 except PatchRejected as exc:
                     # An ancillary value that cannot be proved is not asserted;
                     # the verdict is the only field that decides the row. The
@@ -1863,7 +2625,7 @@ def _validate_row(row, sources):
                 value = spec.get(field)
                 try:
                     if field in pproofs:
-                        _check_proof(pproofs[field], sources, route, field, value, product=spec, detail=pdet)
+                        _check_proof(pproofs[field], sources, route, field, value, product=spec, detail=pdet, page_gates=True)
                     elif field == 'disposition' and product.get('verdict_unproved'):
                         # Recorded on an earlier pass over this row: the batch
                         # is validated again at conversion and must not report
@@ -1981,12 +2743,12 @@ def _reviewed_optional_products(products, specs, verdict, sources, route):
                 if evidence.get('subject') == _subject(route):
                     evidence['subject'] = _subject(route, product)
         if _check_proof(decision, sources, route, 'disposition', product.get('disposition'), product=product,
-                        detail=product.get('requirement_detail')) is None:
+                        detail=product.get('requirement_detail'), page_gates=True) is None:
             raise PatchRejected('An optional product needs its own reviewed verdict')
         for field in PRODUCT_PROOF_FIELDS[1:]:
             value = product.get(field)
             empty = value in (None, '', {}) or (isinstance(value, dict) and all(v is None for v in value.values()))
-            if not empty and _check_proof(proofs.get(field), sources, route, field, value, product=product) is None:
+            if not empty and _check_proof(proofs.get(field), sources, route, field, value, product=product, page_gates=True) is None:
                 raise PatchRejected('An optional product value needs its own reviewed proof: ' + field)
 
     free_lanes = [p for p in products
