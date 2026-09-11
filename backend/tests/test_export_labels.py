@@ -45,9 +45,9 @@ def test_export_labels_documented_blanks_and_keeps_filled_cells(monkeypatch):
     assert cell['processing_min_days'] == 'Not applicable'
     assert cell['max_stay_duration'] == 90 and cell['max_stay_unit'] == 'Day'
     assert cell['source_url'] == 'https://www.mofa.go.kr/' and cell['visa_fee_amount'] == 0
-    # A gap is still a gap: never a label, never an invented value.
-    assert statuses['consulate_district'] == 'not-applicable' or cell['consulate_district'] is None
-    assert cell['entry_requirements'] is None and statuses['entry_requirements'] == 'optional-empty'
+    # A gap is never blank and never invented: the owner's two labels only.
+    assert statuses['consulate_district'] in ('not-applicable', 'optional-empty') and cell['consulate_district'] == 'Not applicable'
+    assert cell['entry_requirements'] == 'Not applicable' and statuses['entry_requirements'] == 'optional-empty'
     workbook.close()
 
 
@@ -57,4 +57,5 @@ def test_export_values_match_the_record_surface_verdicts():
     values = dict(zip(tstation.FIELD_ORDER, tstation.export_values(row), strict=True))
     assert values['visa_fee_amount'] == values['visa_fee_currency'] == tstation.NOT_PUBLICLY_AVAILABLE
     assert values['visa_type_name'] == 'Tourist visa'
-    assert values['validity_duration'] is None  # missing, not labelled
+    assert values['validity_duration'] == tstation.NOT_PUBLICLY_AVAILABLE  # a gap reads as the label, and stays a gap for grading
+    assert tstation.field_status(row)['validity_duration'] == 'missing'

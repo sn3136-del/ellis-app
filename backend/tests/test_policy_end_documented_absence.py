@@ -120,3 +120,32 @@ def test_product_row_keeps_the_per_field_proof_gate():
     st = tstation.field_status(product)
     assert not any(v == "missing" for v in st.values()), st
     assert product["confidence_level"] == "Medium"
+
+
+def test_reviewed_table_never_lends_the_parent_documents_to_a_separate_permission():
+    # USA to GBR class: the ETA review checked the product table, so the
+    # Standard Visitor visa row keeps the review's verdict credit, but the
+    # ETA document list is not that visa's document list and the row grades
+    # on the gap instead of serving another permission's papers.
+    guidance = {
+        "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+        "requirement_detail": "eta_electronic_authorization",
+        "visa_category": "Electronic Travel Authorisation", "source_url": PAGE,
+        "required_documents": ["Valid passport", "Digital photo taken in the ETA app"],
+        "permitted_stay": "6 months",
+        "visa_products": [
+            {"type": "Electronic Travel Authorisation", "requirement_detail": "eta_electronic_authorization"},
+            {"type": "Standard Visitor visa", "requirement_detail": "paper_visa"},
+        ],
+    }
+    provenance = {"fields": ["disposition", "visa_products"], "source_url": PAGE, "verified_at": "2026-09-11",
+                  "verifier": "ai", "note": "Reviewed the official page: US citizens need an ETA; a Standard Visitor visa is the alternative.",
+                  "quote": "US citizens need an ETA to visit the UK."}
+    rows = tstation.records_for_route(ROUTE, guidance, provenance=provenance, valid_until=FRESHNESS)
+    separate = [r for r in rows if r.get("_separate_permission")]
+    assert len(separate) == 1
+    visitor = separate[0]
+    assert visitor.get("_table_reviewed") is True
+    assert not visitor.get("required_documents")
+    assert tstation.field_status(visitor)["required_documents"] == "missing"
+    assert visitor["confidence_level"] == "Medium"

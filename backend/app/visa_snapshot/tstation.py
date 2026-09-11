@@ -1946,10 +1946,13 @@ def records_for_route(route: dict, guidance: dict,
                 # verified this permission with it: a verified table replaces
                 # the model's list wholesale, so every product here is the
                 # review's own. It keeps the review's page, date and
-                # authorship, the review's checked fields for grading, and
-                # the route's document list unless it states its own. A
-                # product the model added on its own has no such review and
-                # stays a reference-only row (the ETA 601 for Thailand class).
+                # authorship and the review's checked fields for grading.
+                # The parent permission's document list is not one of this
+                # product's stated terms (ETA papers are not visitor-visa
+                # papers), so it stays blank here and the row grades on the
+                # gap. A product the model added on its own has no such
+                # review and stays a reference-only row (the ETA 601 for
+                # Thailand class).
                 page = own_url if is_government_host(hostname(own_url)) else str(product_prov.get("source_url") or "")
                 row["source_url"] = page or None
                 row["collected_at"] = p.get("verified_at") or product_prov.get("verified_at")
@@ -1958,7 +1961,6 @@ def records_for_route(route: dict, guidance: dict,
                 row["_grade_checked_fields"] = sorted(set((provenance or {}).get("fields") or ()))
                 row["_table_reviewed"] = True
                 row["data_source"] = product_prov.get("verified_by") or "Ellis product source check"
-                row["required_documents"] = base.get("required_documents")
         # A product may have a different policy interval from the route's
         # default permission. An explicitly unknown product date also must
         # not inherit the route date. Separate permission families already
@@ -2219,16 +2221,21 @@ _NOT_APPLICABLE_WHEN_EXEMPT = frozenset({
 # The two documented labels an exported cell can carry instead of a value:
 # the destination was checked and does not publish the fact, or the fact
 # cannot apply to this record (a visa-free route has no visa validity).
-# Missing and optional-empty cells stay blank: an export never invents.
+# The owner's rule (11 September 2026): a cell is a value or one of these
+# two labels, never a "missing" marker. A gap nobody could fill from an
+# official page reads "Not publicly available" and an optional cell left
+# blank reads "Not applicable"; the field_status verdicts underneath keep
+# the honest state for grading, so a labelled gap still holds the grade.
 NOT_PUBLICLY_AVAILABLE = "Not publicly available"
 NOT_APPLICABLE = "Not applicable"
-_EXPORT_LABELS = {"not-published": NOT_PUBLICLY_AVAILABLE, "not-applicable": NOT_APPLICABLE}
+_EXPORT_LABELS = {"not-published": NOT_PUBLICLY_AVAILABLE, "not-applicable": NOT_APPLICABLE,
+                  "missing": NOT_PUBLICLY_AVAILABLE, "optional-empty": NOT_APPLICABLE}
 
 
 def export_values(row: dict, unpublished: set | None = None) -> list:
-    """The 25 cells of one workbook row: a filled value verbatim, the
-    documented label for a not-published or not-applicable cell, blank
-    otherwise. Reuses the record surface's own field_status verdicts."""
+    """The 25 cells of one workbook row: a filled value verbatim, otherwise
+    the label of the cell's field_status verdict (never blank, never a
+    "missing" marker). Reuses the record surface's own verdicts."""
     statuses = field_status(row, unpublished)
     return [row.get(f) if statuses.get(f) == "filled" else _EXPORT_LABELS.get(statuses.get(f))
             for f in FIELD_ORDER]

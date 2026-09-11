@@ -65,9 +65,11 @@ for (const [duration, unit, label] of [[30, 'Day', '30 days'], [12, 'Hour', '12 
   })
 }
 
-test('an entirely unknown stay remains visibly missing', () => {
+test('an entirely unknown stay reads Not publicly available and keeps the gap mark', () => {
+  // Owner rule (11 September 2026): never "Missing information" in a cell.
   const html = render(record(null))
-  assert.ok(html.includes(t('en', 'ops.missingCounts')))
+  assert.ok(html.includes(t('en', 'ops.notPublished')))
+  assert.ok(!html.includes(t('en', 'ops.missingCounts')))
   assert.ok(html.includes('✗'))
   assert.ok(!html.includes(t('en', 'ops.stayTextOnly')))
 })
@@ -93,14 +95,14 @@ test('not-published field status is retained while stored calendar wording remai
 })
 
 for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
-  test('missing, authority-unpublished and optional-empty states have distinct copy: ' + lang, () => {
+  test('gaps read as one of the two owner labels only: ' + lang, () => {
     const rec = { field_status: { required_documents: 'missing', info_validity: 'not-published',
-      consulate_district: 'optional-empty' } }
+      consulate_district: 'optional-empty', visa_fee_amount: 'not-applicable' } }
     const before = structuredClone(rec)
     const html = render(rec, lang)
-    const labels = ['ops.missingCounts', 'ops.notPublished', 'ops.optionalEmpty'].map(key => t(lang, key))
-    assert.equal(new Set(labels).size, 3)
-    for (const label of labels) assert.ok(html.includes(label))
+    assert.ok(html.includes(t(lang, 'ops.notPublished')))
+    assert.ok(html.includes(t(lang, 'ops.notApplicable')))
+    for (const key of ['ops.missingCounts', 'ops.optionalEmpty']) assert.ok(!html.includes(t(lang, key)))
     assert.deepEqual(rec, before)
   })
 }
