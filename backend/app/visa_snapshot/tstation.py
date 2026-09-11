@@ -74,11 +74,36 @@ def acceptance_summary(rows: list[dict]) -> dict:
             statuses.get(f) in {"not-applicable", "not-published"} for f in CONTRACT_FIELDS)
         documented_cells += documented
         documented_records += documented == len(CONTRACT_FIELDS)
+    # Trip.com's own scored metrics beside the completeness formulas: the
+    # three confidence tiers (field 25; at least 90% of records Medium or
+    # above, red-line policy fields at High), station coverage (Phase 1 is
+    # the 18 origin markets of REQ p2; a station counts as launched when it
+    # serves at least one published record), and the two documented labels.
+    tiers = {"High": 0, "Medium": 0, "Low": 0}
+    for row in rows:
+        tiers[str(row.get("confidence_level") or "Low")] = tiers.get(str(row.get("confidence_level") or "Low"), 0) + 1
+    launched = {str(row.get("travel_document_country") or "").upper() for row in rows
+                if str(row.get("_publication_state") or "published") == "published"}
+    stations_launched = sorted(s for s in PHASE_ONE_STATIONS if s in launched)
+    label_cells = {"not_publicly_available": 0, "not_applicable": 0}
+    for row in rows:
+        statuses = field_status(row)
+        label_cells["not_publicly_available"] += sum(v == "not-published" for v in statuses.values())
+        label_cells["not_applicable"] += sum(v == "not-applicable" for v in statuses.values())
     return {
         "field_names": list(CONTRACT_FIELDS),
         "field_count": len(CONTRACT_FIELDS),
         "dictionary_required_field_count": len(REQUIRED_FIELDS),
         "record_count": total,
+        "confidence_tiers": tiers,
+        "medium_or_above_rate": rate(tiers["High"] + tiers["Medium"], total),
+        "high_rate": rate(tiers["High"], total),
+        "confidence_policy": "Field 25, three tiers. High: requirement checked against an official page and the record complete. "
+            "Medium: checked, with gaps. Low: disputed, unsourced or unread; blocked until operations confirms.",
+        "phase_one_stations": list(PHASE_ONE_STATIONS),
+        "stations_launched": stations_launched,
+        "station_coverage_rate": rate(len(stations_launched), len(PHASE_ONE_STATIONS)),
+        "label_cells": label_cells,
         "filled_cells": filled,
         "required_cells": total * len(CONTRACT_FIELDS),
         "field_completeness_rate": rate(filled, total * len(CONTRACT_FIELDS)),
@@ -92,14 +117,21 @@ def acceptance_summary(rows: list[dict]) -> dict:
         "documented_complete_records": documented_records,
         "documented_field_completeness_rate": rate(documented_cells, total * len(CONTRACT_FIELDS)),
         "documented_record_completeness_rate": rate(documented_records, total),
-        "documented_completion_policy": "All 25 dictionary fields. Recorded Not applicable and Not published "
-            "count as complete; missing, optional-empty and pending review do not. Completion does not certify accuracy.",
+        "documented_completion_policy": "All 25 dictionary fields. Recorded Not applicable and Not publicly available "
+            "count as complete; missing, optional-empty and pending review do not. This is the owner's approved reading "
+            "of the dictionary, pending Trip.com's written confirmation; the strict non-null figures stand beside it. "
+            "Completion does not certify accuracy.",
         "source_url_presence_rate": rate(sum(present(r.get("source_url")) for r in rows), total),
         "requirement_support_rate": rate(sum(r.get("_source_check") in
             {"human-quote", "ai-quote", "grounded-consistent"} for r in rows), total),
         "accuracy_certified": False,
         "denominator_policy": "All 25 dictionary fields; no blank-field exclusions. Subcategory is part of field 5.",
     }
+
+# Trip.com's Phase 1 stations (REQ p2): the passport markets whose holders
+# travel worldwide. Coverage is measured as stations launched over 18.
+PHASE_ONE_STATIONS = ("HKG", "TWN", "JPN", "KOR", "USA", "THA", "SGP", "MYS", "GBR",
+                      "RUS", "AUS", "IDN", "PHL", "FRA", "VNM", "ESP", "IND", "CAN")
 
 # 6 core + the detail/source fields their completeness metric counts as
 # required. "Provide if available" fields (12, 13, 18, 19, 20) are excluded
@@ -785,13 +817,21 @@ def _reviewed_policy_end(provenance: dict | None, route: dict) -> str | None:
 def _confidence(guidance: dict, provenance: dict | None,
                 grounded_ok: bool = False, *, complete: bool = True,
                 disputed: bool = False) -> str:
-    """Two grades: complete official-source-checked records are High.
+    """Trip.com's field 25 ladder, three tiers (restored 11 September 2026).
 
-    AI and human source checks use the same grade. Authorship stays in the
-    provenance; public edits, missing evidence, gaps and disputes remain Low.
-    A model's self-rating or an official URL alone is never verification.
+    High: the requirement was checked against an official page (a human or
+    AI quote, or a grounded read) and the record is complete, with no
+    dispute. AI and human checks earn the same grade; authorship stays in
+    the provenance.
+    Medium: the requirement was checked the same way (quote or grounded
+    read against an official page) and nothing disputes the record, but the
+    record still has gaps. Shown with its source, never blocked.
+    Low: a dispute or serve-time conflict, a public edit, no official source,
+    or an official link that was never read against the answer. Blocked
+    until operations confirms. A model's self-rating is never evidence, and
+    an official URL alone never makes Medium or High.
     """
-    if disputed or not complete:
+    if disputed:
         return "Low"
     if isinstance(provenance, dict) and (provenance.get("verifier") == "public" or
             any(isinstance(proof, dict) and proof.get("verifier") == "public"
@@ -803,7 +843,7 @@ def _confidence(guidance: dict, provenance: dict | None,
     if not is_government_host(hostname(str(source or ""))) and not binding_for(provenance):
         return "Low"
     if verdict_provenance_supported(provenance) or grounded_ok:
-        return "High"
+        return "High" if complete else "Medium"
     return "Low"
 
 

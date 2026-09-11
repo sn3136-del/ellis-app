@@ -698,7 +698,7 @@ function siteOf(url) {
   try { return new URL(url).hostname.replace(/^www\./, '') } catch { return url }
 }
 
-const CONF_RANK = { High: 2, Low: 1 }
+const CONF_RANK = { High: 3, Medium: 2, Low: 1 }
 const CHECK_RANK = { 'human-quote': 4, 'grounded-consistent': 3, 'ai-quote': 2,
                      reference: 1, unchecked: 0 }
 
@@ -1645,7 +1645,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
   const val = (r, k) => {
     if (k === 'route') return `${r.travel_document_country}${r.destination_country}`
     if (k === 'confidence') return CONF_RANK[r.confidence_level] || 0
-    if (k === 'check') return CHECK_RANK[r.source_check] ?? 0
+    if (k === 'check') return (CONF_RANK[r.confidence_level] || 0) * 10 + (CHECK_RANK[r.source_check] ?? 0)
     if (k === 'stay') return r.max_stay_duration ?? -1
     if (k === 'fee') return r.visa_fee_amount ?? -1
     if (k === 'complete') return r.completeness
@@ -1708,12 +1708,12 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
             {sorted.map((rec, i) => {
               const id = rec.cache_key + (rec.visa_type_name || '') + i
               const [reqLabel, reqColor] = REQ[rec.visa_requirement] || ['·', GRAY]
-              const [checkLabel, checkColor, checkTip] = CHECKS[rec.source_check] || CHECKS.reference
+              const [checkLabel, , checkTip] = CHECKS[rec.source_check] || CHECKS.reference
               const missing = Object.entries(rec.field_status)
                 .filter(([, v]) => v === 'missing').map(([k]) => k)
               const opened = open === id
               const confKey = 'ops.conf.' + String(rec.confidence_level || '').toLowerCase()
-              const confLabel = t(confKey) !== confKey ? t(confKey) : rec.confidence_level
+              const confLabel = t(confKey) !== confKey ? t(confKey) : (rec.confidence_level || '·')
               const pctDone = Math.round(rec.completeness * 100)
               const held = rec.held ?? (rec.confidence_level === 'Low' && !rec.operator_released)
               return [
@@ -1791,7 +1791,7 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                       <div style={{ display: 'flex', alignItems: 'center',
                                     gap: 5, marginTop: 4, fontSize: 10.5,
                                     color: GRAY }}>
-                        {pctDone < 100 && (
+                        {(
                           <span style={{ fontWeight: 700, color: AMBER }}>
                             {pctDone}%
                           </span>

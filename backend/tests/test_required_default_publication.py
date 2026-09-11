@@ -36,7 +36,7 @@ def test_live_required_default_and_qc_preservation(case,monkeypatch):
     assert steps == set()  # Independent visa fields do not establish a filing order.
     assert 'prepare_entry_documents' not in steps and raw==before
     rows=tstation.records_for_route(case['route'],raw['guidance'],raw['source_verified'])
-    assert not rows[0]['_evidence_low'] and rows[0]['confidence_level']=='Low'
+    assert not rows[0]['_evidence_low'] and rows[0]['confidence_level']=='Medium'
     assert all(r['_evidence_low'] for r in rows[1:])
 
 def test_real_st_lucia_default_stay_is_not_passport_note():

@@ -16,7 +16,7 @@ def test_exact_social_exemption_stay_retained_and_no_unreviewed_product_created(
     old=deepcopy(source); r=row(source)
     assert r['max_stay_duration']==14 and r['max_stay_unit']=='Day'
     assert all(r[f] is None for f in ['validity_duration','validity_unit','entries','required_documents','entry_requirements','visa_fee_currency'])
-    assert r['visa_fee_amount']==0 and r['confidence_level']=='Low'
+    assert r['visa_fee_amount']==0 and r['confidence_level']=='Medium'
     assert source==old
 
 @pytest.mark.parametrize('disputed',[['source_audit'],['passport_validity'],['disposition']])

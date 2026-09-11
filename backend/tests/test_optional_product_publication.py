@@ -21,7 +21,7 @@ def test_seven_live_shapes_preserve_qc_and_publish_only_separable_defaults(case,
     monkeypatch.setenv('ELLIS_HOLD_UNCERTAIN','1')
     raw=envelope(case);before=deepcopy(raw)
     records=tstation.records_for_route(case['route'],raw['guidance'],raw['source_verified'])
-    assert records[0]['confidence_level']=='Low'  # gaps do not certify High
+    assert records[0]['confidence_level']=='Medium'  # a checked requirement with gaps is Medium, never High
     assert not records[0]['_evidence_low']
     quarantined=[r['visa_type_name'] for r in records if r['_evidence_low']]
     assert quarantined
@@ -76,7 +76,7 @@ def test_plain_low_completeness_or_documented_absence_is_not_a_hold(monkeypatch)
     raw['guidance']['visa_products']=[]
     raw['guidance']['unpublished_fields']=['info_validity','consulate_district']
     row=tstation.records_for_route(case['route'],raw['guidance'],raw['source_verified'])[0]
-    assert row['confidence_level']=='Low'
+    assert row['confidence_level']=='Medium'
     assert row['_evidence_low'] is False
     assert apply_records_hold(case['route'],raw)['held'] is False
 

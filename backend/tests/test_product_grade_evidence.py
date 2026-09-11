@@ -1,4 +1,11 @@
-"""Display-grade regressions; detached data only, never source certification."""
+"""Display-grade regressions; detached data only, never source certification.
+
+Field 25 ladder: a record whose requirement was checked against an official
+page is High when every filled value is supported and Medium when any value
+is not; Low is reserved for disputes, public edits, missing official sources
+and requirements never read against the page. Holds (_evidence_low) do not
+move with the display grade.
+"""
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -70,7 +77,7 @@ def test_documented_absence_cannot_certify_unrelated_unknown_documents():
         product['required_documents'] = ['A deliberately unverified test-only document']
         product['field_provenance']['required_documents'] = {'status': 'unknown', 'reason': 'Not verified'}
     result = rows(layer)
-    assert [r['confidence_level'] for r in result] == ['Low'] * 4
+    assert [r['confidence_level'] for r in result] == ['Medium'] * 4
     assert all(r['required_documents'] == 'A deliberately unverified test-only document' for r in result)
     assert [r['_evidence_low'] for r in result] == [r['_evidence_low'] for r in old]
     assert all(t.completeness(r) == 1 for r in result)
@@ -83,7 +90,7 @@ def test_explicit_product_field_disposition_cannot_borrow_container_credit(field
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     product['field_provenance'][field]['status'] = status
     result = rows(layer)
-    assert result[0]['confidence_level'] == 'Low'
+    assert result[0]['confidence_level'] == 'Medium'
     assert [r['confidence_level'] for r in result[1:]] == ['High'] * 3
     assert not result[0]['_evidence_low']
 
@@ -102,7 +109,7 @@ def test_explicit_owned_documents_require_current_qualified_scope(mutation):
     elif mutation == 'public': p['verifier'] = 'public'
     elif mutation == 'empty_note': p['note'] = ''
     product['field_provenance']['required_documents'] = p
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_exact_owned_subject_and_full_list_review_remain_supported():
@@ -112,14 +119,14 @@ def test_exact_owned_subject_and_full_list_review_remain_supported():
     product['field_provenance']['required_documents'] = p
     assert rows(layer)[0]['confidence_level'] == 'High'
     p['verified_elements'].pop()
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_unreviewed_filled_product_value_cannot_borrow_a_different_parent_value():
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     product['required_documents'] = ['A new unreviewed product document']
     del product['field_provenance']['required_documents']
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_equal_same_permission_documents_can_inherit_individually_checked_parent():
@@ -128,14 +135,14 @@ def test_equal_same_permission_documents_can_inherit_individually_checked_parent
     del product['field_provenance']['required_documents']
     assert rows(layer)[0]['confidence_level'] == 'High'
     layer['source_provenance']['field_provenance']['required_documents']['status'] = 'unknown'
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_unknown_own_empty_documents_cannot_inherit_parent_list():
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     del product['required_documents']
     product['field_provenance']['required_documents']['status'] = 'unknown'
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_duplicate_names_do_not_borrow_first_product_field_evidence():
@@ -145,7 +152,7 @@ def test_duplicate_names_do_not_borrow_first_product_field_evidence():
     products[1]['field_provenance']['required_documents']['status'] = 'unknown'
     result = rows(layer)
     assert result[0]['confidence_level'] == 'High'
-    assert result[1]['confidence_level'] == 'Low'
+    assert result[1]['confidence_level'] == 'Medium'
 
 
 def test_disputes_remain_low_without_changing_values_or_publication_boundary():
@@ -162,7 +169,7 @@ def test_disputes_remain_low_without_changing_values_or_publication_boundary():
 def test_own_field_review_outside_its_explicit_interval_cannot_certify(bounds):
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     product['field_provenance']['required_documents'].update(bounds)
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
     assert not rows(layer)[0]['_evidence_low']
 
 
@@ -172,7 +179,7 @@ def test_own_field_interval_uses_actual_selected_arrival_scope():
     layer['route']['arrival_date'] = '2026-10-15'
     assert rows(layer)[0]['confidence_level'] == 'High'
     layer['route']['arrival_date'] = '2026-11-01'
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 @pytest.mark.parametrize('reviewed', [['Correct supported document'], None, 'Correct supported document'])
@@ -180,7 +187,7 @@ def test_explicit_reviewed_value_binds_the_owned_field(reviewed):
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     product['required_documents'] = ['Completely invented test-only document']
     product['field_provenance']['required_documents']['reviewed_value'] = reviewed
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_explicit_reviewed_value_accepts_exact_typed_value():
@@ -197,7 +204,7 @@ def test_actual_legacy_stay_quote_does_not_certify_product_documents(invented):
     layer = complete_case(illustrative_field_quotes=False)
     if invented:
         layer['merged_guidance']['visa_products'][0]['required_documents'] = ['Pay a fictional agent 999 USD for an entry permit']
-    assert [r['confidence_level'] for r in rows(layer)] == ['Low'] * 4
+    assert [r['confidence_level'] for r in rows(layer)] == ['Medium'] * 4
     assert all(not r['_evidence_low'] for r in rows(layer))
 
 
@@ -207,7 +214,7 @@ def test_contrary_or_conditional_document_evidence_does_not_certify_unconditiona
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     product['required_documents'] = ['Passport required']
     product['field_provenance']['required_documents'].update(quote=quote)
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_scope_annotation_is_not_quoted_document_evidence():
@@ -215,14 +222,14 @@ def test_scope_annotation_is_not_quoted_document_evidence():
     product['required_documents'] = ['Passport required']
     product['field_provenance']['required_documents'].pop('quote')
     product['field_provenance']['required_documents']['note'] = 'Quote: Maximum stay is 180 days. Scope: Passport required.'
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 @pytest.mark.parametrize('malformed', [7, 'text', {}, [None], [{'quote': 'Passport required'}]])
 def test_malformed_quote_containers_lower_grade_without_crashing(malformed):
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     product['field_provenance']['required_documents']['quotes'] = malformed
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_legacy_parent_checked_list_cannot_certify_new_unsupported_value():
@@ -230,14 +237,14 @@ def test_legacy_parent_checked_list_cannot_certify_new_unsupported_value():
     layer['merged_guidance']['required_documents'] = product['required_documents'] = ['An invented agent registration receipt']
     del product['field_provenance']['required_documents']
     del layer['source_provenance']['field_provenance']['required_documents']
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_conflicting_document_statements_cannot_select_only_positive_sentence():
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     product['required_documents'] = ['Passport required']
     product['field_provenance']['required_documents']['quote'] = 'A passport is required. A passport is not required.'
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_named_human_legacy_parent_note_must_match_inherited_value():
@@ -248,7 +255,7 @@ def test_named_human_legacy_parent_note_must_match_inherited_value():
     layer['source_provenance'].update(verifier='human', note='Official page confirms a valid passport is required.')
     assert rows(layer)[0]['confidence_level'] == 'High'
     product['required_documents'] = layer['merged_guidance']['required_documents'] = ['A fictional agent receipt']
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 @pytest.mark.parametrize(('field', 'quote'), [
@@ -260,7 +267,7 @@ def test_named_human_legacy_parent_note_must_match_inherited_value():
 def test_direct_contrary_filled_product_value_cannot_grade_high(field, quote):
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     product['field_provenance'][field]['quote'] = quote
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
 
 
 def test_no_refunds_does_not_negate_an_explicit_payable_fee():
@@ -272,4 +279,4 @@ def test_no_refunds_does_not_negate_an_explicit_payable_fee():
 def test_not_charged_is_not_evidence_for_a_positive_fee():
     layer = complete_case(); product = layer['merged_guidance']['visa_products'][0]
     product['field_provenance']['fee']['quote'] = 'A visa fee is not charged.'
-    assert rows(layer)[0]['confidence_level'] == 'Low'
+    assert rows(layer)[0]['confidence_level'] == 'Medium'
