@@ -2145,7 +2145,7 @@ def _no_consular_application(row: dict) -> bool:
             or row.get("_route_held", row.get("route_held", False)) is True
             or row.get("_source_check", row.get("source_check")) not in {
                 "human-quote", "ai-quote", "grounded-consistent"}
-            or row.get("_disputed") or row.get("_contradictions")
+            or material_disputes(row.get("_disputed")) or row.get("_contradictions")
             or row.get("contradictions")):
         return False
     statuses = row.get("field_status")
@@ -2166,7 +2166,7 @@ def _reviewed_no_visa_product(row: dict) -> bool:
     if (row.get("visa_requirement") != "Visa-free"
             or row.get("visa_requirement_detail") != "Unconditional Visa-free"
             or row.get("application_method") not in (None, "", [])
-            or row.get("_disputed_fields") or row.get("_disputed")
+            or material_disputes(row.get("_disputed_fields")) or material_disputes(row.get("_disputed"))
             or row.get("_contradictions") or row.get("contradictions")):
         return False
     if any(k in row for k in ("_held", "held", "_route_held", "route_held")):
@@ -2226,10 +2226,10 @@ _NOT_APPLICABLE_WHEN_EXEMPT = frozenset({
 # the destination was checked and does not publish the fact, or the fact
 # cannot apply to this record (a visa-free route has no visa validity).
 # The owner's rule (11 September 2026): a cell is a value or one of these
-# two labels, never a "missing" marker. A gap nobody could fill from an
-# official page reads "Not publicly available" and an optional cell left
-# blank reads "Not applicable"; the field_status verdicts underneath keep
-# the honest state for grading, so a labelled gap still holds the grade.
+# two labels, never a "missing" marker. Any gap nobody could fill from an
+# official page, required or optional, reads "Not publicly available"; the
+# field_status verdicts underneath keep the honest state for grading, so a
+# labelled gap still holds the grade.
 NOT_PUBLICLY_AVAILABLE = "Not publicly available"
 NOT_APPLICABLE = "Not applicable"
 # An optional cell nobody could fill is a gap too, so it carries the same
@@ -2252,6 +2252,8 @@ def export_values(row: dict, unpublished: set | None = None) -> list:
     text = row.get("max_stay_text")
     if text and statuses.get("max_stay_duration") != "filled":
         cells[FIELD_ORDER.index("max_stay_duration")] = text
+        if statuses.get("max_stay_unit") != "filled":
+            cells[FIELD_ORDER.index("max_stay_unit")] = NOT_APPLICABLE
     return cells
 
 

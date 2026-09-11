@@ -66,4 +66,5 @@ def test_a_stay_stated_in_words_is_exported_verbatim_not_labelled():
            'max_stay_text': 'Stay is determined by the e-Pass issued on arrival'}
     values = dict(zip(tstation.FIELD_ORDER, tstation.export_values(row), strict=True))
     assert values['max_stay_duration'] == 'Stay is determined by the e-Pass issued on arrival'
+    assert values['max_stay_unit'] == tstation.NOT_APPLICABLE
     assert tstation.field_status(row)['max_stay_duration'] == 'missing'

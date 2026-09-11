@@ -153,7 +153,7 @@ def test_reviewed_table_never_lends_the_parent_documents_to_a_separate_permissio
 
 def test_side_field_finding_still_strips_visa_only_cells_from_a_visa_free_record():
     guidance = {
-        "disposition": "VISA_EXEMPT", "requirement_detail": "conditional_visa_free",
+        "disposition": "VISA_EXEMPT", "requirement_detail": "unconditional_visa_free",
         "visa_category": "No visa needed", "source_url": PAGE, "permitted_stay_days": 90,
         "processing_time": "5 business days", "validity": "90 days", "entries": "multiple",
     }
@@ -169,8 +169,22 @@ def test_side_field_finding_still_strips_visa_only_cells_from_a_visa_free_record
     assert side["confidence_level"] == "Medium" and side["_evidence_low"] is False
     # The exemption's own verdict on its visa cells survives the side finding:
     # "Not applicable", never "Not publicly available".
-    for f in ("validity_duration", "validity_unit", "entries"):
+    assert clean["visa_requirement_detail"] == side["visa_requirement_detail"] == "Unconditional Visa-free"
+    assert tstation._reviewed_no_visa_product(clean) and tstation._reviewed_no_visa_product(side)
+    for f in ("validity_duration", "validity_unit", "entries", "visa_fee_currency"):
         assert tstation.field_status(side)[f] == tstation.field_status(clean)[f] == "not-applicable", f
+    clean_cells = dict(zip(tstation.FIELD_ORDER, tstation.export_values(clean), strict=True))
+    side_cells = dict(zip(tstation.FIELD_ORDER, tstation.export_values(side), strict=True))
+    for f in ("validity_duration", "validity_unit", "entries"):
+        assert side_cells[f] == clean_cells[f] == tstation.NOT_APPLICABLE, f
+    assert tstation.completeness(side) == tstation.completeness(clean)
+    # The served-row shape carries the finding as _disputed and the
+    # publication metadata: the consular district stays Not applicable too.
+    served = dict(side, _disputed=["processing_time"], _held=False, held=False,
+                  _source_check="ai-quote", source_check="ai-quote")
+    assert tstation._reviewed_no_visa_product(served) and tstation._no_consular_application(served)
+    assert tstation.field_status(served)["consulate_district"] == "not-applicable"
+    assert dict(zip(tstation.FIELD_ORDER, tstation.export_values(served), strict=True))["consulate_district"] == tstation.NOT_APPLICABLE
 
 
 def test_funds_and_accommodation_findings_are_material():
