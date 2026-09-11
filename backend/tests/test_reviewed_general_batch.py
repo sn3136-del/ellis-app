@@ -2279,14 +2279,27 @@ def test_another_schemes_footnote_window_does_not_expire_our_footnotes_verdict()
     assert not ok and any('ended on 2025-12-31' in e for e in explain), explain
 
 
-def test_a_closing_footnote_mark_on_another_entry_of_the_line_is_not_ours():
-    """A mark that closes the line closes the entry it sits on. "Japan,
-    Thailand (1)" says more about Thailand, nothing about Japan."""
+def test_a_closing_footnote_mark_belongs_to_every_entry_until_the_footnote_hands_it_to_one():
+    """Round eight, BLOCKING-3. A mark that closes a cell holding several
+    entries is every entry's. Position is not evidence: only the footnote the
+    mark points to can hand it to one of them, and then only when that body
+    names the neighbour and nobody else."""
     from scripts.convert_reviewed_general_batch import _footnote_marked
-    assert _footnote_marked('Japan, Thailand (1)', 'THA') and not _footnote_marked('Japan, Thailand (1)', 'JPN')
+    assert _footnote_marked('Japan, Thailand (1)', 'THA') and _footnote_marked('Japan, Thailand (1)', 'JPN')
     assert _footnote_marked('Japan (1)', 'JPN') and _footnote_marked('No necesita Visa (4)', 'JPN')
+    theirs = 'Japan, Thailand (1)\n(1) Thailand nationals must hold a biometric passport.\n'
+    assert not _footnote_marked('Japan, Thailand (1)', 'JPN', theirs)
+    assert _footnote_marked('Japan, Thailand (1)', 'THA', theirs)
+    # A body that speaks of the whole list, or of this entry too, is ours.
+    ours = 'Japan, Thailand (1)\n(1) The exemption applies only to holders of biometric passports.\n'
+    assert _footnote_marked('Japan, Thailand (1)', 'JPN', ours)
     rule = 'Nationals of the following countries do not need a visa for stays of up to 90 days:'
     page = rule + '\nJapan, Thailand (1)\n'
+    for nat in ('JPN', 'THA'):
+        ok, explain = supported('VISA_EXEMPT', [rule, 'Japan, Thailand (1)'], nat, pages=[('p', page)] * 2,
+                                detail='unconditional_visa_free')
+        assert not ok and any(e.startswith('footnote on the list line') for e in explain), explain
+    page = rule + '\nJapan, Thailand (1)\n(1) Thailand nationals must hold a biometric passport.\n'
     ok, explain = supported('VISA_EXEMPT', [rule, 'Japan, Thailand (1)'], 'JPN', pages=[('p', page)] * 2,
                             detail='unconditional_visa_free')
     assert ok, explain
