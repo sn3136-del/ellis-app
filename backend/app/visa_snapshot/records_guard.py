@@ -60,10 +60,14 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
         # verdict row falls through to the whole-route hold below.
         scope = (scoped_exemption(route, out, rows, conflict=conflict, pending=pending)
                  or scoped_required_evisa(route, out, rows, conflict=conflict, pending=pending)
-                 or scoped_by_grade(route, out, rows, conflict=conflict, pending=pending,
-                                    grounded_ok=grounded_verdict_supported(gc),
-                                    disputed_fields=disputed + problems,
-                                    grounded_fields=gc.get("verified_fields")))
+                 or (scoped_by_grade(route, out, rows, conflict=conflict, pending=pending,
+                                     grounded_ok=grounded_verdict_supported(gc),
+                                     disputed_fields=disputed + problems,
+                                     grounded_fields=gc.get("verified_fields"))
+                     # With the hold switch off every product is served, as
+                     # before the per-product rule; the broad projection only
+                     # narrows what a hold would otherwise withhold whole.
+                     if kimi_primary.hold_enabled() else None))
         if scope is not None:
             return project_insurance(route, project_reader(route, out, scope))
     if conflict or pending or (low and not out.get("operator_released")):

@@ -35,6 +35,18 @@ FIELD_ORDER = (
 CONTRACT_FIELDS = tuple(f for f in FIELD_ORDER if f != "visa_requirement_detail")
 
 
+def _published_row(row: dict) -> bool:
+    """A record counts as published on either the build surface (private
+    _publication_state) or the public records payload (publication_state
+    and the plain held flag). A missing state never defaults to published."""
+    state = row.get("_publication_state") or row.get("publication_state")
+    if state:
+        return str(state) == "published"
+    if "held" in row or "_held" in row:
+        return not (row.get("held") or row.get("_held"))
+    return False
+
+
 def acceptance_summary(rows: list[dict]) -> dict:
     """Literal acceptance measurements, separate from fillable completeness.
 
@@ -83,13 +95,17 @@ def acceptance_summary(rows: list[dict]) -> dict:
     for row in rows:
         tiers[str(row.get("confidence_level") or "Low")] = tiers.get(str(row.get("confidence_level") or "Low"), 0) + 1
     launched = {str(row.get("travel_document_country") or "").upper() for row in rows
-                if str(row.get("_publication_state") or "published") == "published"}
+                if _published_row(row)}
     stations_launched = sorted(s for s in PHASE_ONE_STATIONS if s in launched)
+    # Counted over the same 25 dictionary cells, with the same disputed-field
+    # exclusion, as documented_cells below, so the numbers reconcile.
     label_cells = {"not_publicly_available": 0, "not_applicable": 0}
     for row in rows:
         statuses = field_status(row)
-        label_cells["not_publicly_available"] += sum(v == "not-published" for v in statuses.values())
-        label_cells["not_applicable"] += sum(v == "not-applicable" for v in statuses.values())
+        disputed = set(row.get("_disputed") or row.get("_disputed_fields") or ())
+        cells = [statuses[f] for f in CONTRACT_FIELDS if f in statuses and f not in disputed]
+        label_cells["not_publicly_available"] += sum(v == "not-published" for v in cells)
+        label_cells["not_applicable"] += sum(v == "not-applicable" for v in cells)
     return {
         "field_names": list(CONTRACT_FIELDS),
         "field_count": len(CONTRACT_FIELDS),
@@ -102,8 +118,10 @@ def acceptance_summary(rows: list[dict]) -> dict:
             "(an AI or human quote with supported provenance, or a grounded read found consistent), complete for "
             "its required fields, and no field disputed. Medium: an official page was checked but some required "
             "information is missing. Low: not checked against an official page, or disputed, or a public edit, "
-            "or the information is not publicly available. A documented unpublished cell counts as complete. "
-            "Holds are decided by evidence, not by the tier.",
+            "or the information is not publicly available. Owner decision of 11 September 2026: a cell the "
+            "destination was checked for and does not publish is exported as 'Not publicly available' and counts "
+            "as complete, so a documented absence never lowers the tier; the Low clause applies to an answer with "
+            "no official source. Holds are decided by evidence, not by the tier.",
         "phase_one_stations": list(PHASE_ONE_STATIONS),
         "stations_launched": stations_launched,
         "station_coverage_rate": rate(len(stations_launched), len(PHASE_ONE_STATIONS)),
@@ -180,9 +198,10 @@ FIELD_DESCRIPTIONS = {
     "source_url": "Specific page link",
     "collected_at": "Data collection date",
     "info_validity": "Published policy validity end date, when known. "
-                     "Blank when no policy end date is available; the separate "
-                     "freshness_valid_until metadata is an internal recheck deadline, "
-                     "not the policy's expiry date",
+                     "'Not publicly available' when the answer was checked against "
+                     "its official page and that page states no end date; blank when "
+                     "the answer was never checked. The separate freshness_valid_until "
+                     "metadata is an internal recheck deadline, not the policy's expiry date",
     "confidence_level": "High / Low",
 }
 
@@ -1586,6 +1605,18 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     grade_provenance = row.pop("_grade_provenance", None)
     if verdict_provenance_supported(prov):
         checked.update((prov or {}).get("fields") or ())
+    unpublished = set(unpublished or ())
+    if (row.get("info_validity") in (None, "") and "info_validity" not in unpublished
+            and (verdict_provenance_supported(prov) or grounded)):
+        # Field 24 is the policy's own published end date. When the answer
+        # was checked against its official page (a quote, or a grounded read
+        # that found it consistent) and no end date came back, the date is a
+        # documented absence, "Not publicly available", by the same standard
+        # every other unpublished cell meets. An answer nobody checked keeps
+        # the gap: no page was read that could have stated the date. A
+        # recheck deadline still never fills this cell.
+        unpublished.add("info_validity")
+        row["_unpublished"] = sorted(set(row.get("_unpublished") or ()) | {"info_validity"})
     row["_reviewed_pure_exemption"] = bool(
         row.get("visa_requirement") == "Visa-free"
         and row.get("visa_requirement_detail") == "Unconditional Visa-free"
@@ -1611,8 +1642,18 @@ def _regrade(row: dict, g: dict, disputed: list | None,
                                        disputed=conflicted) == "Low"
     if not (prov and "disposition" in (prov.get("fields") or ())):
         row["_evidence_low"] = row["_evidence_low"] or str(g.get("confidence") or "").lower() == "low"
-    row["confidence_level"] = _confidence(g, prov,
-                                          grounded, complete=complete and _required_values_supported(row, g, checked, grade_route, grade_provenance),
+    # Their ladder grades the record: one official source checked for the
+    # verdict, every required cell filled or documented, no conflict. The
+    # per-field proof gate stays on product rows only, where a product's own
+    # fee, validity or entry count can be inherited from a parent page that
+    # never described that product (the ETA 601 for Thailand class). A
+    # productless answer is the page's own answer: its verdict quote is the
+    # single official source the ladder asks for, and a documented absence
+    # counts as complete by the owner's completion policy.
+    product_row = row.get("_product_index") is not None or bool(row.get("_separate_permission"))
+    supported = (_required_values_supported(row, g, checked, grade_route, grade_provenance)
+                 if product_row else True)
+    row["confidence_level"] = _confidence(g, prov, grounded, complete=complete and supported,
                                           disputed=conflicted)
     return row
 
@@ -1841,12 +1882,12 @@ def records_for_route(route: dict, guidance: dict,
             row["data_source"] = "Ellis product information (reference only)"
             from .authority import hostname, is_government_host
             own_url = str(p.get("source_url") or "")
+            product_prov = ((provenance or {}).get("field_provenance") or {}).get("visa_products")
+            if not product_prov and "visa_products" in ((provenance or {}).get("fields") or []):
+                product_prov = provenance
             if is_government_host(hostname(own_url)):
                 row["source_url"] = own_url
                 row["collected_at"] = p.get("verified_at")
-                product_prov = ((provenance or {}).get("field_provenance") or {}).get("visa_products")
-                if not product_prov and "visa_products" in ((provenance or {}).get("fields") or []):
-                    product_prov = provenance
                 if product_prov and p.get("source_quote"):
                     row["_prov"] = dict(product_prov, source_url=own_url,
                                         note=p["source_quote"],
@@ -1854,6 +1895,24 @@ def records_for_route(route: dict, guidance: dict,
                                         fields=["disposition", "visa_products"])
                     row["_product_source_verified"] = row["_prov"]
                     row["data_source"] = product_prov.get("verified_by") or "Ellis product source check"
+            if row["_prov"] is None and product_prov and verdict_provenance_supported(product_prov):
+                # The source review that verified the route's product table
+                # verified this permission with it: a verified table replaces
+                # the model's list wholesale, so every product here is the
+                # review's own. It keeps the review's page, date and
+                # authorship, the review's checked fields for grading, and
+                # the route's document list unless it states its own. A
+                # product the model added on its own has no such review and
+                # stays a reference-only row (the ETA 601 for Thailand class).
+                page = own_url if is_government_host(hostname(own_url)) else str(product_prov.get("source_url") or "")
+                row["source_url"] = page or None
+                row["collected_at"] = p.get("verified_at") or product_prov.get("verified_at")
+                row["_prov"] = dict(product_prov, source_url=page, fields=["disposition", "visa_products"])
+                row["_product_source_verified"] = row["_prov"]
+                row["_grade_checked_fields"] = sorted(set((provenance or {}).get("fields") or ()))
+                row["_table_reviewed"] = True
+                row["data_source"] = product_prov.get("verified_by") or "Ellis product source check"
+                row["required_documents"] = base.get("required_documents")
         # A product may have a different policy interval from the route's
         # default permission. An explicitly unknown product date also must
         # not inherit the route date. Separate permission families already

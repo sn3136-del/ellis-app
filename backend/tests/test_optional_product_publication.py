@@ -76,7 +76,10 @@ def test_plain_low_completeness_or_documented_absence_is_not_a_hold(monkeypatch)
     raw['guidance']['visa_products']=[]
     raw['guidance']['unpublished_fields']=['info_validity','consulate_district']
     row=tstation.records_for_route(case['route'],raw['guidance'],raw['source_verified'])[0]
-    assert row['confidence_level']=='Medium'
+    # Documented absences are complete by the owner's completion policy, so
+    # the route's own checked answer grades High; a gap would grade Medium.
+    # Neither is a hold.
+    assert row['confidence_level']=='High'
     assert row['_evidence_low'] is False
     assert apply_records_hold(case['route'],raw)['held'] is False
 

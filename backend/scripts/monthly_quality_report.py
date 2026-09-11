@@ -69,7 +69,7 @@ def quality_metrics(payload: dict, at: datetime) -> dict:
                 or not isinstance(row.get('review_required'), bool)):
             raise ValueError('A record has incomplete quality metadata')
         grade = str(row.get('confidence_level') or '').lower()
-        if grade not in {'high', 'low'}:
+        if grade not in {'high', 'medium', 'low'}:
             raise ValueError('A record has an unknown confidence level')
         all_counts.update(statuses[f] for f in fields)
         required_counts.update(statuses[f] for f in required)
@@ -114,7 +114,7 @@ def quality_metrics(payload: dict, at: datetime) -> dict:
         'pending_review_records': pending_records,
         'field_counts': {s: all_counts[s] for s in STATES},
         'required_field_counts': {s: required_counts[s] for s in STATES},
-        'confidence_counts': {s: confidence[s] for s in ('high', 'low')},
+        'confidence_counts': {s: confidence[s] for s in ('high', 'medium', 'low')},
         'contract_acceptance_metrics': contract,
         'scope': 'Snapshot of records/products, not unique routes. Completeness counts filled applicable '
             'required fields; pending review is not filled. Source coverage counts supported visa-verdict '

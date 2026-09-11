@@ -2083,6 +2083,16 @@ def travel_database_export(nationality: str = "", destination: str = "",
     for i, f in enumerate(tstation.FIELD_ORDER, 1):
         ws0.append([i, f, "Yes" if f in tstation.REQUIRED_FIELDS else "If available",
                     tstation.FIELD_DESCRIPTIONS[f]])
+    # The two documented labels a cell can carry instead of a value.
+    ws0.append([])
+    ws0.append(["Label", "Meaning", "", ""])
+    ws0.append([tstation.NOT_PUBLICLY_AVAILABLE,
+                "The destination's official page was checked for this fact and does not publish it. "
+                "The cell counts as complete (owner decision, 11 September 2026).", "", ""])
+    ws0.append([tstation.NOT_APPLICABLE,
+                "The fact cannot apply to this record, for example a visa's validity on a visa-free route. "
+                "The cell counts as complete.", "", ""])
+    ws0.append(["(blank)", "Not yet documented: a gap, never an invented value.", "", ""])
     buf = io.BytesIO()
     wb.save(buf)
     buf.seek(0)

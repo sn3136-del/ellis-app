@@ -139,8 +139,17 @@ def required_values_supported(row, g, checked, route, provenance):
     route_proofs = (provenance or {}).get('field_provenance')
     route_proofs = route_proofs if isinstance(route_proofs, dict) else {}
 
+    # A product table the source review verified replaces the model's list
+    # wholesale, so a product's own stated terms are that review's facts.
+    # A converter-reviewed product carries its own per-field proofs and is
+    # judged on them alone; a table with no per-field proofs is the review's
+    # own list, and a product's stated terms are that review's facts.
+    table_reviewed = (product is not None and product is not g and 'visa_products' in checked
+                      and not own_proofs
+                      and (not row.get('_separate_permission') or bool(row.get('_table_reviewed'))))
+
     def parent(field):
-        if row.get('_separate_permission') or field not in checked:
+        if (row.get('_separate_permission') and not row.get('_table_reviewed')) or field not in checked:
             return False
         # Productless route grounding retains its existing contract. This
         # guard addresses product wrappers and parent-to-product inheritance.
@@ -152,6 +161,8 @@ def required_values_supported(row, g, checked, route, provenance):
         return _proof_supported(provenance, route, None, field, g.get(field))
 
     def own(field):
+        if table_reviewed and product.get(field) not in _EMPTY and field not in own_proofs:
+            return True
         return bool(product is not None and product.get(field) not in _EMPTY
                     and field in own_proofs
                     and _proof_supported(own_proofs[field], route, product, field, product[field]))

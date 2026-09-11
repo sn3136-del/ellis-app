@@ -598,7 +598,11 @@ def scoped_by_grade(route, out, rows, *, conflict=False, pending=False,
             return None
     if kimi_primary.serve_time_invariants(safe_g):
         return None
-    return {'guidance': safe_g, 'source_verified': deepcopy(prov),
+    # The served proof is trimmed exactly like the two narrow projections:
+    # a quotation or note must never carry a withheld product out with it.
+    proof = {k: deepcopy(prov[k]) for k in _PROOF_META if k in prov}
+    proof['fields'] = ['disposition']
+    return {'guidance': safe_g, 'source_verified': proof,
             'product_publication': [
                 {'product_index': i, 'held': i in blocked,
                  'state': 'withheld' if i in blocked else 'published',

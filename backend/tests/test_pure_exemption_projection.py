@@ -47,7 +47,9 @@ def test_supported_published_plain_exemption_has_no_visa_currency_or_entry_count
     assert all(statuses[f]=='not-applicable' for f in ['validity_duration','validity_unit','entries','visa_fee_currency'])
     assert statuses['required_documents']=='missing'
     assert statuses['entry_requirements']=='optional-empty'
-    assert statuses['info_validity']=='missing'
+    # A checked answer whose page states no policy end date documents the
+    # absence (field 24 is "Not publicly available", never a gap).
+    assert statuses['info_validity']=='not-published'
 
 
 def test_explicit_passport_and_other_conditions_remain_exact():

@@ -219,9 +219,10 @@ def test_lookup_records_and_freshness_share_the_verdict_evidence_contract(
                          params={"nationality": "ISL", "destination": "NRU"}).json()["records"]
     freshness = client.get("/database/freshness", headers=admin).json()
     record = next(r for r in freshness["answers"] if r["cache_key"] == key)
-    # Grounded on the verdict: Medium (checked, with gaps). An ancillary
-    # check that never verified the verdict leaves the record Low.
-    assert records and {r["confidence_level"] for r in records} == ({"Medium"} if verdict_supported else {"Low"})
+    # Grounded on the verdict with every required cell filled or documented:
+    # High. An ancillary check that never verified the verdict leaves the
+    # record Low.
+    assert records and {r["confidence_level"] for r in records} == ({"High"} if verdict_supported else {"Low"})
     assert bool(lookup["held"]) == (not verdict_supported)
     assert record["grounded"] == verdict_supported
     assert {r["source_check"] for r in records} == {

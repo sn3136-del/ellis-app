@@ -372,6 +372,9 @@ def _load_table() -> dict:
     return _VerificationTable(table, errors)
 
 
+UNANCHORED_ERROR = "fee/products need a verified disposition or requirement_detail"
+
+
 def _field_errors(fields: dict) -> list[str]:
     """Pure structural lint. A named product is not proof of a route's rule."""
     from .kimi_primary import DISPOSITIONS
@@ -407,7 +410,7 @@ def _field_errors(fields: dict) -> list[str]:
     if verdict in _DETAIL_FAMILY and detail is not None and detail not in _DETAIL_FAMILY[verdict]:
         errors.append("requirement_detail contradicts disposition")
     if any(k in fields for k in ("government_fee", "visa_products")) and not (verdict or detail):
-        errors.append("fee/products need a verified disposition or requirement_detail")
+        errors.append(UNANCHORED_ERROR)
     def valid_fee(fee):
         if fee is None:
             return True
@@ -559,6 +562,12 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
                          route.get("travel_document_type", ""))
         previous = (inherited or {}).get(route_key, {}).get("fields", {})
         errors = _field_errors(dict(previous, **clean))
+        # A fee or product audit that does not restate the verdict is kept
+        # and anchored at serve time to the answer it sits beside: applied
+        # next to a visa, arrival or authorisation verdict, dropped next to
+        # an exemption (see apply). Every other lint error quarantines.
+        unanchored = any(UNANCHORED_ERROR in e for e in errors)
+        errors = [e for e in errors if UNANCHORED_ERROR not in e]
         if errors:
             # Keep safe ancillary facts (arrival cards, processing times,
             # citations) while quarantining unanchored application claims.
@@ -567,12 +576,11 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             invalid_decision = bool(set(errors) & {
                 "unknown disposition", "unknown requirement_detail",
                 "requirement_detail contradicts disposition"})
-            unanchored = any("need a verified" in e for e in errors)
             if invalid_decision:
                 clean.pop("disposition", None)
                 clean.pop("requirement_detail", None)
             for k in ("government_fee", "visa_products"):
-                if invalid_decision or unanchored or any(e.startswith(k) for e in errors):
+                if invalid_decision or any(e.startswith(k) for e in errors):
                     clean.pop(k, None)
             for k in _BOOLEAN_FIELDS + ("passport_validity_requirement",
                                        "account_registration_steps", "payment_process",
@@ -629,9 +637,41 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             "field_provenance": per_field,
             "note": str(r.get("note") or "").strip()[:400],
         }
+        if unanchored and any(k in clean for k in _PERMISSION_MACHINERY):
+            table[route_key]["unanchored_products"] = True
         if applicability:
             table[route_key]["field_applicability"] = applicability
     return table
+
+
+# The two fields that describe a permission rather than the route's rule.
+_PERMISSION_MACHINERY = ("government_fee", "visa_products")
+
+
+def anchored_to(hit: dict | None, guidance: dict | None) -> dict | None:
+    """Bind a fee or product audit that did not restate the verdict to the
+    answer it is served beside.
+
+    Next to a visa, arrival or authorisation verdict the audited fee and
+    products are that permission's own facts and apply. Next to an exemption,
+    or an answer with no verdict, they would put a priced product beside
+    "no visa needed" (the Hong Kong to Vietnam class), so they are dropped
+    and the audit's other facts stay. The verdict itself is never verified by
+    such an entry: its provenance fields never gain "disposition"."""
+    if not hit or not hit.get("unanchored_products"):
+        return hit
+    verdict = str((guidance or {}).get("disposition") or "").upper()
+    anchored = dict(hit)
+    anchored.pop("unanchored_products", None)
+    if verdict and verdict != "VISA_EXEMPT":
+        return anchored
+    fields = {k: v for k, v in (hit.get("fields") or {}).items() if k not in _PERMISSION_MACHINERY}
+    if not fields:
+        return None
+    anchored["fields"] = fields
+    anchored["field_provenance"] = {k: v for k, v in (hit.get("field_provenance") or {}).items()
+                                    if k not in _PERMISSION_MACHINERY}
+    return anchored
 
 
 def reload() -> None:
@@ -693,6 +733,10 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
         existing = current_table.get(route_key) or {}
         checked = dict(existing.get("fields") or {}, **clean)
         errors = _field_errors(checked)
+        if guidance is not None and str(guidance.get("disposition") or "").upper() not in ("", "VISA_EXEMPT"):
+            # A fee or product edit beside a cached visa, arrival or
+            # authorisation verdict is that permission's own fact (anchored_to).
+            errors = [e for e in errors if UNANCHORED_ERROR not in e]
         if errors:
             raise ValueError("; ".join(errors))
         from .kimi_primary import serve_time_invariants
@@ -1123,6 +1167,7 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     if isinstance(guidance, dict) and guidance.get('source_verification_store_unavailable'):
         return guidance, None
     guidance = _normalise_legacy_shapes(guidance)
+    hit = anchored_to(hit, guidance if isinstance(guidance, dict) else None)
     if not hit or not isinstance(guidance, dict):
         result, provenance = scheduled_policies.apply(guidance, None, route)
         result = policy_intervals.annotate(annotate(result, route), provenance, route)
