@@ -31,7 +31,7 @@ DUE_AFTER_HOURS = 0.25  # exclude only very recent on-demand duplicate reads
 _COUNTS = ("attempted", "read", "verified", "renewed", "partial", "corrected", "disputed",
            "unreadable", "skipped_pending", "deferred", "errors", "insufficient_evidence",
            "provider_failed", "no_official_source", "source_reads", "source_fetch_failures",
-           "model_comparisons", "model_comparisons_reused")
+           "model_comparisons", "model_comparisons_reused", "provider_suspended")
 
 
 def _utc():
@@ -72,7 +72,7 @@ def _continuation(previous, now):
     state = previous.get('state')
     finished_with_backlog = (state in {'complete', 'complete_with_errors'}
                              and _positive_backlog(previous))
-    if state not in {'running', 'interrupted', 'failed', 'budget_exhausted'} \
+    if state not in {'running', 'interrupted', 'failed', 'budget_exhausted', 'provider_suspended'} \
             and not finished_with_backlog:
         return None
     if previous.get('schema_version') not in (2, 3):
@@ -191,6 +191,15 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
             delta["insufficient_evidence"] = 1
         elif outcome == "provider_error":
             delta["provider_failed"] = 1
+            # An account suspension is not one failed route: every further
+            # route would fail the same way until the account is recharged.
+            # The worker reports it so the coordinator stops the cycle and
+            # the Freshness tab names the reason instead of a wall of
+            # provider failures.
+            suspended = kimi_primary.provider_suspension()
+            if suspended:
+                delta["provider_suspended"] = 1
+                delta["provider_notice"] = suspended.get("reason") or "provider account suspended"
         elif outcome == "no_official_source":
             delta["no_official_source"] = 1
         delta["corrected"] = int(bool(report.get("changed")))
@@ -255,6 +264,16 @@ def _run_workers(keys: list[str], deadline: float, stop: threading.Event, status
                         "message": type(exc).__name__ + ": " + str(exc)[:250], "at": _utc()}}
                 for counter in _COUNTS:
                     status[counter] += delta.get(counter, 0)
+                if delta.get("provider_suspended") and not stop.is_set():
+                    # Stop dispatching: the provider account is suspended.
+                    # Routes not attempted stay due and are picked up by the
+                    # next cycle after the account is recharged.
+                    status["state"] = "provider_suspended"
+                    status["provider_notice"] = str(delta.get("provider_notice") or
+                                                    "provider account suspended")[:240]
+                    status["provider_suspended_at"] = _utc()
+                    log.warning("sweep stopped: %s", status["provider_notice"])
+                    stop.set()
                 if delta.get("attempted"):
                     attempted_keys.add(key)
                 if delta.get("last_error"):
@@ -365,7 +384,9 @@ def main() -> int:
             if status["state"] == "running":
                 status["state"] = ("interrupted" if stop.is_set() else
                     "complete_with_errors" if status["errors"] else "complete")
-            if status["errors"] or status["state"] in {"failed", "interrupted"}:
+            if status["errors"] or status["state"] in {"failed", "interrupted", "provider_suspended"}:
+                # A suspended provider exits non-zero on purpose: systemd
+                # records the failure, which is the alert an operator sees.
                 result = 1
         except BaseException as exc:
             stop.set()

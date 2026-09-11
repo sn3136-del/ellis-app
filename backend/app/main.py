@@ -9,6 +9,7 @@ import json
 import os
 import re
 import threading
+import time as _time
 
 from typing import Annotated, Any, Optional
 
@@ -121,6 +122,32 @@ def _startup():
     # Background portal-run executor (no-op in test runtime): live portal work
     # never runs inside an HTTP request.
     portal_queue.start_executor()
+    # Warm the QC record browser so the first tester after a restart is not
+    # the one who pays the 48 second cold build against a 30 second deadline.
+    if not os.environ.get("PYTEST_CURRENT_TEST"):
+        _refresh_records_cache_in_background()
+
+
+@app.middleware("http")
+async def _records_cache_invalidation(request: Request, call_next):
+    """Every successful operator write under /database/ (edits, approvals,
+    issue rulings, research, drills) makes the cached record set stale at
+    once; reads keep serving the last good copy while it rebuilds."""
+    response = await call_next(request)
+    if request.method in ("POST", "PUT", "DELETE") and request.url.path.startswith("/database/") \
+            and response.status_code < 400:
+        invalidate_records_cache()
+        _refresh_records_cache_in_background_if_warm()
+    return response
+
+
+def _refresh_records_cache_in_background_if_warm() -> None:
+    """Rebuild after a write only when a copy already exists and this is a
+    real runtime; the test runtime builds on demand inside the request."""
+    with _RECORDS_CACHE_LOCK:
+        warm = _RECORDS_CACHE["rows"] is not None
+    if warm and not os.environ.get("PYTEST_CURRENT_TEST"):
+        _refresh_records_cache_in_background()
 
 
 @app.get("/health")
@@ -969,14 +996,14 @@ def travel_database_freshness(db=Depends(get_session),
     override covers it. Admin only; read only."""
     from datetime import datetime, timezone
     from sqlalchemy import select as _select
-    from .visa_snapshot import verified_overrides, tstation
+    from .visa_snapshot import verified_overrides, tstation, kimi_primary
     from .visa_snapshot.models import KimiRouteGuidanceCache
     require_quality_control(p)
     now = datetime.now(timezone.utc)
     rows = []
     for r in db.execute(_select(KimiRouteGuidanceCache).order_by(
             KimiRouteGuidanceCache.fresh_until)).scalars():
-        from .visa_snapshot import freshness as _fresh, kimi_primary
+        from .visa_snapshot import freshness as _fresh
         if not kimi_primary.is_canonical_key(r.cache_key):
             continue
         # The latest attempt, for the sweep's own bookkeeping, and the
@@ -1027,6 +1054,10 @@ def travel_database_freshness(db=Depends(get_session),
                 "next_sweep_at": timer.get("next_sweep_at"),
                 "scheduler": timer,
                 "last_run": _last_sweep_status(),
+                # The AI provider's own state: a suspended account (out of
+                # balance) stops every check, and the operator must see that
+                # named here rather than infer it from a wall of failures.
+                "provider": kimi_primary.provider_status(),
                 "sweep_interval_hours": 6,
                 "attempt_target_hours": 6,
                 # Current six-hour attempt/read/verdict coverage and legacy
@@ -1141,7 +1172,8 @@ def _last_sweep_status() -> dict | None:
         "route_budget_seconds", "integrity_resolved", "insufficient_evidence", "provider_failed",
         "no_official_source", "source_reads", "source_fetch_failures",
         "model_comparisons", "model_comparisons_reused", "cycle_started_at",
-        "cycle_time_budget_seconds", "resumed_from_started_at", "prior_attempt_results")
+        "cycle_time_budget_seconds", "resumed_from_started_at", "prior_attempt_results",
+        "provider_suspended", "provider_notice", "provider_suspended_at")
     result = {k: data[k] for k in allowed if k in data}
     result.update(status=data.get("state"), checked=data.get("attempted", 0))
     if data.get("running") is True:
@@ -1352,11 +1384,117 @@ def travel_database_issues(db=Depends(get_session),
                         "created_at": _iso(r.created_at)} for r in rows]}
 
 
+# The QC record browser rebuilds every 25-field record from the cache on
+# each read: 1,442 records took 48 seconds on 11 September 2026 against the
+# console's 30 second read deadline, so testers saw "the Quality Control
+# read timed out" before any record. The full unfiltered set is built once,
+# kept for a short while, invalidated by every operator write in this
+# process, and refreshed in the background while the stale copy is served
+# (the sweep writes from another process, so the time bound covers it).
+# Filters then run over the cached set in memory, which is milliseconds.
+_RECORDS_CACHE: dict = {"rows": None, "built_at": 0.0, "building": False}
+_RECORDS_CACHE_LOCK = threading.Lock()
+RECORDS_CACHE_SECONDS = float(os.getenv("ELLIS_RECORDS_CACHE_SECONDS", "120") or 120)
+
+
+def invalidate_records_cache() -> None:
+    with _RECORDS_CACHE_LOCK:
+        _RECORDS_CACHE["built_at"] = 0.0
+
+
+def _build_records_cache(db) -> list[dict]:
+    rows = _build_tstation_rows(db)
+    with _RECORDS_CACHE_LOCK:
+        _RECORDS_CACHE["rows"] = rows
+        _RECORDS_CACHE["built_at"] = _time.monotonic()
+        _RECORDS_CACHE["building"] = False
+    return rows
+
+
+def _refresh_records_cache_in_background() -> None:
+    with _RECORDS_CACHE_LOCK:
+        if _RECORDS_CACHE["building"]:
+            return
+        _RECORDS_CACHE["building"] = True
+
+    def _work():
+        from .db import SessionLocal
+        session = SessionLocal()
+        try:
+            _build_records_cache(session)
+        except Exception:  # noqa: BLE001 - the stale copy stays served
+            with _RECORDS_CACHE_LOCK:
+                _RECORDS_CACHE["building"] = False
+        finally:
+            session.close()
+    threading.Thread(target=_work, name="records-cache", daemon=True).start()
+
+
+def _all_tstation_rows(db) -> list[dict]:
+    """The complete record set, cached. A fresh copy is built synchronously
+    only when nothing is cached yet; a stale copy is served at once and
+    rebuilt behind the reader."""
+    if RECORDS_CACHE_SECONDS <= 0 or (os.environ.get("PYTEST_CURRENT_TEST")
+                                      and not _RECORDS_CACHE.get("test_enabled")):
+        # Tests seed and mutate state inside one request sequence, in every
+        # runtime mode they emulate; they read the truth each time unless a
+        # test opts into the cache explicitly.
+        return _build_tstation_rows(db)
+    with _RECORDS_CACHE_LOCK:
+        rows = _RECORDS_CACHE["rows"]
+        age = _time.monotonic() - _RECORDS_CACHE["built_at"]
+    if rows is None:
+        return _build_records_cache(db)
+    if age > RECORDS_CACHE_SECONDS:
+        _refresh_records_cache_in_background()
+    return rows
+
+
 def _tstation_rows(db, *, nationality: str = "", destination: str = "",
                    purpose: str = "", document: str = "",
                    requirement: str = "", confidence: str = ""):
+    """Every served answer as Trip.com 25-field records, filters combined —
+    their "multi-dimensional spot check": slice by station (the nationality a
+    T-site serves), passport type, destination, visa requirement, field."""
     from .visa_snapshot.registry import iso3
     from .visa_snapshot import kimi_primary as _kp
+
+    def _resolve(term: str) -> str:
+        term = re.sub(r"^[^\w\u4e00-\u9fff]+", "", term.strip())
+        got = iso3(term, default=None)
+        if got:
+            return got
+        low = term.lower()
+        for code, names in getattr(_kp, "_ALIASES", {}).items():
+            if low in names or term in names:
+                return code
+        return term.upper()
+    nationality = _resolve(nationality) if nationality else ""
+    destination = _resolve(destination) if destination else ""
+    out = []
+    for rec in _all_tstation_rows(db):
+        if nationality and str(rec.get("travel_document_country") or "").upper() != nationality.upper():
+            continue
+        if destination and str(rec.get("destination_country") or "").upper() != destination.upper():
+            continue
+        if purpose and str(rec.get("travel_purpose") or "tourism").lower() != purpose.lower():
+            continue
+        if document and str(rec.get("travel_document_type") or "") != document:
+            continue
+        if requirement and str(rec.get("visa_requirement") or "") != requirement:
+            continue
+        if confidence and str(rec.get("confidence_level") or "").lower() != confidence.strip().lower():
+            continue
+        # A copy per read: callers annotate and re-shape records, and the
+        # cached set must stay exactly what the builder produced.
+        out.append(dict(rec))
+    return out
+
+
+def _build_tstation_rows(db):
+    from .visa_snapshot.registry import iso3
+    from .visa_snapshot import kimi_primary as _kp
+    nationality = destination = purpose = document = requirement = confidence = ""
 
     def _resolve(term: str) -> str:
         # The spot-check accepts "China", "CHN", "CN" and Chinese names like

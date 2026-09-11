@@ -251,3 +251,34 @@ def test_non_transport_failure_cannot_file_source_unreadable_issue(outcome):
         def execute(self, *_):
             raise AssertionError('a readable-but-insufficient page is not an outage')
     freshness.note_unreadable(UnusableDB(), None, {'outcome':outcome, 'source_reads':1})
+
+
+def test_a_suspended_provider_stops_the_cycle_and_names_the_reason(sweep, monkeypatch):
+    """One suspension notice ends dispatch: the remaining routes stay due for
+    the next cycle instead of each failing in turn, the status names the
+    reason for the Freshness tab, the exit is non-zero so systemd records
+    the alert, and the next invocation treats the cycle as resumable."""
+    rows = [SimpleNamespace(cache_key=str(i), route={}, guidance={"disposition": "VISA_REQUIRED"}, verification={}) for i in range(6)]
+    setup(monkeypatch, rows)
+    kp.clear_provider_suspension()
+    attempted = []
+
+    def check(_db, row, **_kwargs):
+        attempted.append(row.cache_key)
+        kp.note_provider_suspension("account suspended due to insufficient balance, please recharge")
+        return {"outcome": "provider_error"}
+    monkeypatch.setattr(freshness, "recheck_row", check)
+    try:
+        assert sweep.main() == 1
+        status = freshness.read_sweep_status()
+        assert status["state"] == "provider_suspended"
+        assert "insufficient balance" in status["provider_notice"]
+        assert status["provider_suspended"] >= 1 and status["provider_failed"] >= 1
+        assert status["verified"] == 0 and not status["running"] and status["finished_at"]
+        assert len(attempted) < 6, "dispatch stopped before every route failed the same way"
+        assert status["backlog_remaining"] >= 1
+        from datetime import datetime, timezone
+        plan = sweep._continuation(status, datetime.now(timezone.utc))
+        assert plan is not None and plan["cycle_started_at"], "a suspended cycle resumes inside its own budget"
+    finally:
+        kp.clear_provider_suspension()

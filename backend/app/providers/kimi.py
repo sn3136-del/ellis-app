@@ -192,11 +192,60 @@ def _extract_json(text: str) -> dict:
 class KimiHttpError(Exception):
     """A Moonshot/Kimi HTTP failure with its status code, so callers can map
     401 / 402 / 429 / 5xx to precise applicant-facing provider messages. The
-    raw response body is never attached — only the status."""
+    raw response body is never attached: only the status, the provider's own
+    error type (for example ``exceeded_current_quota_error``) and a short
+    message with any key-like token removed, so a suspended account can be
+    told apart from a momentary rate limit without leaking anything."""
 
-    def __init__(self, status: int):
+    def __init__(self, status: int, error_type: str | None = None,
+                 message: str | None = None, retry_after: float | None = None):
         self.status = int(status)
-        super().__init__(f"kimi moonshot HTTP {status}")
+        self.error_type = str(error_type or "")[:80]
+        self.message = _scrub(message)
+        self.retry_after = retry_after
+        super().__init__(f"kimi moonshot HTTP {status}"
+                         + (f" ({self.error_type})" if self.error_type else ""))
+
+    @property
+    def account_suspended(self) -> bool:
+        """The account itself is out of balance or suspended: retrying, or
+        letting three more workers try, only burns the sweep's budget."""
+        low = f"{self.error_type} {self.message}".lower()
+        return (self.error_type == "exceeded_current_quota_error"
+                or "insufficient balance" in low or "is suspended" in low
+                or "recharge" in low)
+
+
+def _scrub(message) -> str:
+    """Keep a provider message readable for an operator, never a secret:
+    anything that looks like a key or bearer token is replaced."""
+    import re as _re
+    text = str(message or "")[:240]
+    text = _re.sub(r"(?i)bearer\s+[A-Za-z0-9._\-]+", "bearer <redacted>", text)
+    text = _re.sub(r"\b(?:sk|ak)-[A-Za-z0-9]{8,}\b", "<redacted>", text)
+    text = _re.sub(r"<[^<>]*(?:sk|ak)-[A-Za-z0-9]{6,}[^<>]*>", "<redacted>", text)
+    return text
+
+
+def _http_error(response) -> KimiHttpError:
+    """Read the provider's error envelope without ever attaching the body."""
+    error_type = message = None
+    try:
+        data = response.json()
+        err = data.get("error") if isinstance(data, dict) else None
+        if isinstance(err, dict):
+            error_type = err.get("type")
+            message = err.get("message")
+    except Exception:  # noqa: BLE001 - a non-JSON body carries no envelope
+        pass
+    retry_after = None
+    try:
+        raw = response.headers.get("retry-after")
+        if raw is not None:
+            retry_after = min(120.0, max(0.0, float(raw)))
+    except (TypeError, ValueError):
+        retry_after = None
+    return KimiHttpError(response.status_code, error_type, message, retry_after)
 
 
 class KimiTimeout(Exception):
@@ -238,7 +287,7 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
         except self._httpx.TimeoutException as e:
             raise KimiTimeout(f"kimi call exceeded its {timeout or self._timeout}s budget") from e
         if r.status_code >= 400:
-            raise KimiHttpError(r.status_code)
+            raise _http_error(r)
         msg = r.json()["choices"][0]["message"]
         # K3 is a reasoning model: under json_mode it occasionally leaves
         # "content" empty and puts the answer in "reasoning_content"

@@ -792,3 +792,46 @@ def test_a_blocked_page_never_demotes_a_grounded_record_to_low(client):
     after = client.post("/database/lookup", headers=READER,
                         json={"nationality": "ISL", "destination": "TON"}).json()
     assert after["held"] is False and after["guidance"]["disposition"] == "VISA_REQUIRED"
+
+
+def test_the_record_browser_is_served_from_a_cache_that_writes_invalidate(client, monkeypatch):
+    """The 1,442-record browser took 48 seconds to rebuild per read on
+    11 September 2026 and the console gave up at 30. The full set is built
+    once, repeat reads are served from it, and an operator write makes it
+    stale immediately so the next read rebuilds."""
+    from app import main as m
+    _provide(ANSWER)
+    m.invalidate_records_cache()
+    with m._RECORDS_CACHE_LOCK:
+        m._RECORDS_CACHE["rows"] = None
+    look = client.post("/database/lookup", headers=READER,
+                       json={"nationality": "ISL", "destination": "FSM"}).json()
+    builds = {"n": 0}
+    real_builder = m._build_tstation_rows
+
+    def counted(db):
+        builds["n"] += 1
+        return real_builder(db)
+    monkeypatch.setattr(m, "_build_tstation_rows", counted)
+    monkeypatch.setattr(m, "RECORDS_CACHE_SECONDS", 3600.0)
+    monkeypatch.setitem(m._RECORDS_CACHE, "test_enabled", True)
+    monkeypatch.setitem(m._RECORDS_CACHE, "rows", None)  # restored to None afterwards: no carry-over into other tests
+    first = client.get("/database/records", headers=OTHER_ORG_ADMIN).json()
+    second = client.get("/database/records?nationality=ISL", headers=OTHER_ORG_ADMIN).json()
+    assert builds["n"] == 1, "the second read, filtered or not, is served from the cache"
+    assert any(r["cache_key"] == look["cache_key"] for r in first["records"])
+    assert all(r["travel_document_country"] == "ISL" for r in second["records"]) and second["records"]
+    # A write under /database/ (a reader's issue report here) invalidates.
+    rep = client.post("/database/report-issue", headers=READER,
+                      json={"nationality": "ISL", "destination": "FSM",
+                            "field": "government_fee", "note": "fee looks wrong",
+                            "cache_key": look["cache_key"]})
+    assert rep.status_code == 200
+    client.get("/database/records", headers=OTHER_ORG_ADMIN)
+    assert builds["n"] == 2, "an operator write makes the cached set stale at once"
+    # Records handed out are copies: mutating one never changes the cache.
+    with m._RECORDS_CACHE_LOCK:
+        cached = m._RECORDS_CACHE["rows"][0]
+    served = client.get("/database/records", headers=OTHER_ORG_ADMIN).json()["records"][0]
+    assert served["travel_document_country"] == cached["travel_document_country"]
+    assert builds["n"] == 2
