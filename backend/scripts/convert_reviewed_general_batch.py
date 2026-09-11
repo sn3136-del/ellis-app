@@ -93,6 +93,43 @@ _EXTRA_ALIASES = {
     'IND': ('индия', 'inde', 'índia', 'indien', '인도', 'インド', '印度', 'ấn độ', 'อินเดีย', 'الهند', 'hindistan'),
     'CAN': ('канада', 'canadá', 'kanada', '캐나다', 'カナダ', '加拿大', 'كندا'),
     'CHN': ('китай', 'кнр', 'chine', 'china', '중국', '中国', '中國', 'trung quốc', 'จีน', 'tiongkok', 'الصين', 'çin'),
+    # The other members of the groups in _GROUPS. A group sentence can only
+    # be read when every carve-out in it can be resolved by name, so each
+    # member needs its own names here even when it is not a station
+    # nationality. Names, not inflecting demonyms. Those sit in the stems.
+    'AUT': ('austria', 'autriche', 'österreich', 'oesterreich', 'áustria'),
+    'BEL': ('belgium', 'belgique', 'belgië', 'belgien', 'bélgica', 'belgio'),
+    'BGR': ('bulgaria', 'bulgarie', 'bulgarien', 'bulgária'),
+    'HRV': ('croatia', 'croatie', 'kroatien', 'croacia', 'croácia', 'croazia', 'hrvatska'),
+    'CYP': ('cyprus', 'chypre', 'zypern', 'chipre', 'cipro'),
+    'CZE': ('czech republic', 'czechia', 'république tchèque', 'tchéquie', 'tschechien', 'tschechische republik',
+            'república checa', 'chequia', 'repubblica ceca', 'česko', 'česká republika'),
+    'DNK': ('denmark', 'danemark', 'dänemark', 'dinamarca', 'danimarca', 'danmark'),
+    'EST': ('estonia', 'estonie', 'estland', 'estónia', 'estônia', 'eesti'),
+    'FIN': ('finland', 'finlande', 'finnland', 'finlandia', 'finlândia', 'suomi'),
+    'DEU': ('germany', 'german', 'germans', 'allemagne', 'deutschland', 'alemania', 'alemanha', 'germania'),
+    'GRC': ('greece', 'grèce', 'griechenland', 'grecia', 'grécia', 'hellas', 'hellenic republic'),
+    'HUN': ('hungary', 'hongrie', 'ungarn', 'hungría', 'hungria', 'ungheria', 'magyarország'),
+    'IRL': ('ireland', 'irlande', 'irland', 'irlanda', 'éire'),
+    'ITA': ('italy', 'italie', 'italien', 'italia', 'itália'),
+    'LVA': ('latvia', 'lettonie', 'lettland', 'letonia', 'letónia', 'lettonia', 'latvija'),
+    'LTU': ('lithuania', 'lituanie', 'litauen', 'lituania', 'lituânia', 'lietuva'),
+    'LUX': ('luxembourg', 'luxemburg', 'luxemburgo', 'lussemburgo'),
+    'MLT': ('malta', 'malte'),
+    'NLD': ('netherlands', 'the netherlands', 'holland', 'pays-bas', 'niederlande', 'países bajos', 'paises bajos',
+            'países baixos', 'paesi bassi', 'nederland'),
+    'POL': ('poland', 'polish', 'pologne', 'polen', 'polonia', 'polónia', 'polônia', 'polska'),
+    'PRT': ('portugal',),
+    'ROU': ('romania', 'romanian', 'romanians', 'roumanie', 'rumänien', 'rumanía', 'rumania', 'roménia', 'romênia', 'românia'),
+    'SVK': ('slovakia', 'slovak republic', 'slovaquie', 'slowakei', 'eslovaquia', 'eslováquia', 'slovacchia', 'slovensko'),
+    'SVN': ('slovenia', 'slovénie', 'slowenien', 'eslovenia', 'eslovénia', 'slovenija'),
+    'SWE': ('sweden', 'suède', 'schweden', 'suecia', 'suécia', 'svezia', 'sverige'),
+    'BRN': ('brunei', 'brunei darussalam', 'brunéi', 'ブルネイ', '文莱', '汶萊', '브루나이'),
+    'KHM': ('cambodge', 'camboya', 'camboja', 'kambodscha', 'cambogia', 'kamboja', 'campuchia', 'カンボジア', '柬埔寨', '캄보디아'),
+    'LAO': ('laos', 'lao pdr', "lao people's democratic republic", 'lao', 'lào', 'ラオス', '老挝', '寮國', '라오스'),
+    'MMR': ('myanmar', 'burma', 'birmanie', 'birmania', 'mianmar', 'ミャンマー', '缅甸', '緬甸', '미얀마'),
+    'TLS': ('timor-leste', 'timor leste', 'east timor', 'timor oriental', 'osttimor', 'timor est', 'timor-est',
+            '東ティモール', '东帝汶', '東帝汶', '동티모르'),
 }
 
 
@@ -101,7 +138,9 @@ _EXTRA_ALIASES = {
 # A stem matches with up to five further letters, so one stem covers
 # indien/indienne/indiens/indiennes without listing every form. Stems are
 # the adjective root only; a country name that is already an alias is not
-# repeated here.
+# repeated here. A stem that is itself a complete word and swallows other
+# words with that allowance ("indian" in Indiana, "frances" in Francesca,
+# "russe" in Russell) is listed as fixed aliases instead.
 _DEMONYM_STEMS = {
     'HKG': ('hongkongais', 'hongkon', 'hongkonger', 'гонконг'),
     'TWN': ('taïwanais', 'taiwanais', 'taiwan', 'taiwanisch', 'тайван'),
@@ -112,23 +151,71 @@ _DEMONYM_STEMS = {
     'SGP': ('singapourien', 'singapurense', 'singaporean', 'singapurisch', 'сингапур'),
     'MYS': ('malaisien', 'malasio', 'malese', 'malaysisch', 'malaysian', 'малайзи'),
     'GBR': ('britannique', 'británico', 'britanico', 'britannico', 'britisch', 'british', 'britânico', 'британ', 'великобритани'),
-    'RUS': ('russe', 'ruso', 'rusa', 'russo', 'russisch', 'russian', 'росси', 'русск'),
+    'RUS': ('ruso', 'rusa', 'russo', 'russisch', 'russian', 'росси', 'русск'),
     'AUS': ('australien', 'australiano', 'australisch', 'australian', 'австрали'),
     'IDN': ('indonésien', 'indonesien', 'indonesio', 'indonesiano', 'indonesisch', 'indonesian', 'индонези'),
     'PHL': ('philippin', 'filipino', 'filipina', 'filippino', 'philippinisch', 'филиппин'),
-    'FRA': ('français', 'francais', 'francés', 'frances', 'francese', 'französisch', 'french', 'francês', 'франци', 'француз'),
+    'FRA': ('français', 'francais', 'francés', 'französisch', 'french', 'francês', 'франци', 'француз'),
     'VNM': ('vietnamien', 'vietnamita', 'vietnamesisch', 'vietnamese', 'вьетнам'),
     'ESP': ('espagnol', 'español', 'espanol', 'spagnolo', 'spanisch', 'spanish', 'espanhol', 'испан'),
-    'IND': ('indien', 'indio', 'indiano', 'indisch', 'indian', 'инди'),
+    'IND': ('indien', 'indio', 'indiano', 'indisch', 'инди'),
     'CAN': ('canadien', 'canadiense', 'canadese', 'kanadisch', 'canadian', 'canadiano', 'канад'),
     'CHN': ('chinois', 'chino', 'cinese', 'chinesisch', 'chinese', 'chinês', 'chines', 'китай', 'китая'),
+    'AUT': ('austrian', 'autrichien', 'austriac', 'österreichisch', 'austríac'),
+    'BEL': ('belgian', 'belge', 'belgisch', 'belga'),
+    'BGR': ('bulgarian', 'bulgare', 'bulgarisch', 'búlgar', 'bulgar'),
+    'HRV': ('croatian', 'croate', 'kroatisch', 'croat'),
+    'CYP': ('cypriot', 'chypriote', 'zypriotisch', 'chipriot', 'cipriot'),
+    'CZE': ('czech', 'tchèque', 'tschechisch', 'checo', 'ceco', 'cechi'),
+    'DNK': ('danish', 'danois', 'dänisch', 'danés', 'danes', 'danese'),
+    'EST': ('estonian', 'estonien', 'estnisch', 'estonio', 'estone'),
+    'FIN': ('finnish', 'finlandais', 'finnisch', 'finlandés', 'finlandes', 'finlandese'),
+    'DEU': ('allemand', 'deutsch', 'alemán', 'aleman', 'alemã', 'tedesc'),
+    'GRC': ('greek', 'grec', 'griechisch', 'griego', 'grego'),
+    'HUN': ('hungarian', 'hongrois', 'ungarisch', 'húngar', 'hungar', 'ungheres', 'magyar'),
+    'IRL': ('irish', 'irlandais', 'irisch', 'irlandés', 'irlandes', 'irlandese'),
+    'ITA': ('italian', 'italien', 'italienisch', 'italiano'),
+    'LVA': ('latvian', 'letton', 'lettisch', 'letón', 'leton', 'lettone'),
+    'LTU': ('lithuanian', 'lituanien', 'litauisch', 'lituano'),
+    'LUX': ('luxembourgish', 'luxembourgeois', 'luxemburgisch', 'luxemburgués', 'luxemburgues', 'lussemburghes'),
+    'MLT': ('maltese', 'maltais', 'maltesisch', 'maltés', 'maltes'),
+    'NLD': ('dutch', 'néerlandais', 'neerlandais', 'niederländisch', 'neerlandés', 'neerlandes', 'holandés', 'holandes', 'olandes', 'nederlands'),
+    'POL': ('polonais', 'polnisch', 'polac'),
+    'PRT': ('portuguese', 'portugais', 'portugiesisch', 'portugués', 'portugues', 'português', 'portoghes'),
+    'ROU': ('roumain', 'rumänisch', 'rumano', 'romen'),
+    'SVK': ('slovak', 'slovaque', 'slowakisch', 'eslovac', 'slovacc'),
+    'SVN': ('slovenian', 'slovene', 'slovène', 'slowenisch', 'esloven'),
+    'SWE': ('swedish', 'suédois', 'suedois', 'schwedisch', 'sueco', 'svedes'),
+    'BRN': ('bruneian', 'brunéien', 'bruneien'),
+    'KHM': ('cambodgien', 'camboyan', 'cambojan', 'kambodschan', 'cambogian', 'khmer'),
+    'LAO': ('laotian', 'laotien', 'laosian', 'laotisch'),
+    'MMR': ('burmese', 'birman', 'myanmarese'),
+    'TLS': ('timorese', 'timorais', 'timorens'),
+}
+# Inflected forms of the stems that were retired for colliding with other
+# words. They are fixed aliases: whole words only.
+_INFLECTED_ALIASES = {
+    'IND': ('indians',),
+    'FRA': ('frances', 'francesa', 'francesas', 'franceses', 'francese', 'francesi'),
+    'RUS': ('russe', 'russes'),
 }
 _NAME_PATTERNS = {}
+_KNOWN_NATIONALITIES = []
 
 
 def _aliases(nat):
     from app.visa_snapshot.evidence_validator import _NATIONALITY_NAMES
-    return sorted({_norm(a) for a in (*_NATIONALITY_NAMES.get(nat, ()), *_EXTRA_ALIASES.get(nat, ())) if _norm(a)})
+    return sorted({_norm(a) for a in (*_NATIONALITY_NAMES.get(nat, ()), *_EXTRA_ALIASES.get(nat, ()),
+                                       *_INFLECTED_ALIASES.get(nat, ())) if _norm(a)})
+
+
+def _known_nationalities():
+    """Every nationality the converter can name: the validator's table plus
+    the converter's own alias and stem tables."""
+    if not _KNOWN_NATIONALITIES:
+        from app.visa_snapshot.evidence_validator import _NATIONALITY_NAMES
+        _KNOWN_NATIONALITIES.extend(sorted(set(_NATIONALITY_NAMES) | set(_EXTRA_ALIASES) | set(_DEMONYM_STEMS)))
+    return _KNOWN_NATIONALITIES
 
 
 def _name_pattern(nat):
@@ -141,16 +228,25 @@ def _name_pattern(nat):
         # ("sud-américains", "Latin American citizens") names a region, not
         # this nationality. The longest alias is tried first so "US national"
         # is read whole rather than as the bare "US".
-        parts = [_COMPOUND_GUARD + r'(?<![a-z])' + re.escape(a) + r'(?![a-z])'
-                 for a in sorted(_aliases(nat), key=len, reverse=True)]
-        parts += [_COMPOUND_GUARD + r'(?<![^\W\d_])' + re.escape(_norm(stem)) + r'[^\W\d_]{0,5}(?![^\W\d_])'
+        aliases = sorted(_aliases(nat), key=len, reverse=True)
+        guard = _compound_guard(aliases)
+        parts = [guard + r'(?<![a-z])' + re.escape(a) + r'(?![a-z])' for a in aliases]
+        parts += [guard + r'(?<![^\W\d_])' + re.escape(_norm(stem)) + r'[^\W\d_]{0,5}(?![^\W\d_])'
                   for stem in _DEMONYM_STEMS.get(nat, ())]
         pattern = _NAME_PATTERNS[nat] = re.compile('|'.join(parts) if parts else r'(?!x)x')
     return pattern
 
 
-_COMPOUND_GUARD = ''.join(f'(?<!{p})' for p in ('-', 'sud ', 'nord ', 'south ', 'north ', 'latin ', 'latino ',
-                                                 'hispano ', 'afro ', 'anglo ', 'central ', 'indo '))
+_COMPOUND_PREFIXES = ('-', 'sud ', 'nord ', 'south ', 'north ', 'latin ', 'latino ',
+                      'hispano ', 'afro ', 'anglo ', 'central ', 'indo ')
+
+
+def _compound_guard(aliases):
+    """Lookbehinds that refuse a regional compound before the name. A prefix
+    that opens one of the nationality's own names ("south " for "south
+    korea") is part of the name, so "South Korean" still names Korea while
+    "North Korean" does not."""
+    return ''.join(f'(?<!{p})' for p in _COMPOUND_PREFIXES if not any(a.startswith(p) for a in aliases))
 # A mention right after a negating prefix ("non-US citizens", "other than
 # Indian nationals") speaks about everyone but this nationality.
 _NEGATED_PREFIX_RE = re.compile(r"(?:\bnon[- ]?|\bother than\s+|\bexcluding\s+|\bexcept(?:ing)?(?:\s+for)?\s+|\bnot\s+|"
@@ -163,7 +259,7 @@ _NEGATED_PREFIX_RE = re.compile(r"(?:\bnon[- ]?|\bother than\s+|\bexcluding\s+|\
 # They name the nationality only in a nationality-shaped mention: beside a
 # nationality noun ("US citizens", "the US", "công dân Anh"), never before a
 # currency sign, a figure or an institution ("US$50", "the US Embassy").
-_AMBIGUOUS_ALIASES = {'us', 'u.s.', 'u.s', 'anh', 'nga', 'pháp', 'úc'}
+_AMBIGUOUS_ALIASES = {'us', 'u.s.', 'u.s', 'anh', 'nga', 'pháp', 'úc', 'lao'}
 _SHAPED_AFTER_RE = re.compile(r'^\s?(?:citizens?|nationals?|passports?|holders?|residents?|travell?ers?|visitors?|nationality)\b')
 _SHAPED_BEFORE_RE = re.compile(r'(?:(?<![a-z])the|công dân|quốc tịch|nước|người|hộ chiếu|vương quốc|liên bang|cộng hòa)\s$')
 _UNSHAPED_AFTER_RE = re.compile(r'^\s?(?:[$€£\d]|dollars?|embassy|embassies|consulate|consulates|consular|mission|department|'
@@ -180,11 +276,14 @@ def _nationality_shaped(low, start, end):
 def _mentions(text, nat):
     """Spans of the nationality's own mentions in the normalized text: fixed
     aliases and inflected demonyms, negated mentions left out, an ambiguous
-    short alias only when the mention is nationality-shaped."""
+    short alias only when the mention is nationality-shaped, and never a
+    name that its neighbours turn into a dependency or another jurisdiction
+    ("British Virgin Islands passports", "Chinese Taipei nationals")."""
     low = _norm(text)
     spans = [m.span() for m in _name_pattern(nat).finditer(low)
              if not _NEGATED_PREFIX_RE.search(low[max(0, m.start() - 24):m.start()])
-             and (m.group(0) not in _AMBIGUOUS_ALIASES or _nationality_shaped(low, m.start(), m.end()))]
+             and (m.group(0) not in _AMBIGUOUS_ALIASES or _nationality_shaped(low, m.start(), m.end()))
+             and not _other_jurisdiction(low, m.start(), m.end())]
     tokens = _CAPITAL_TOKENS.get(nat)
     if tokens:
         nfkc = unicodedata.normalize('NFKC', str(text or ''))
@@ -194,8 +293,64 @@ def _mentions(text, nat):
             # Locate the same token in the normalized text for a span.
             low_token = re.escape(_norm(m.group(0)))
             at = re.search(r'(?<![a-z])' + low_token + r'(?![a-z])', low)
-            spans.append(at.span() if at else (0, 0))
+            if at is None:
+                spans.append((0, 0))
+            elif not _other_jurisdiction(low, at.start(), at.end()):
+                spans.append(at.span())
     return spans
+
+
+# The name's own item ends at a list separator or a sentence terminator, and
+# the compound name ends at a prose word: "British Virgin Islands passports
+# do not ..." qualifies "British" with "Virgin Islands passports", while
+# "Indian nationals who are part of a tour group" stops at "who".
+_QUALIFIER_BOUNDARY_RE = re.compile(r"[.!?。！？;:,，、/|()\[\]\n]|\s(?:and|or|und|et|y|e|o|dan|và|и|или|或|及|和)\s")
+_QUALIFIER_STOP_RE = re.compile(
+    r"^(?:as|who|whose|which|that|do|does|did|not|is|are|was|were|be|must|may|can|shall|should|will|need|needs|"
+    r"require|requires|required|requiring|with|without|for|to|in|into|from|at|on|by|if|when|unless|hold|holders|"
+    r"holding|residing|travel|travelling|traveling|enter|entering|entry|visit|visiting|stay|apply|applying|"
+    r"pour|para|por|con|sin|avec|dans|für|mit|bei|nach|qui|que)$")
+# The ISO and UN naming of the special administrative regions puts the
+# parent after a comma: "Hong Kong SAR, China", "China, Hong Kong SAR". An
+# enumeration ("Hong Kong, Macau and China") carries no SAR qualifier.
+_SAR_BEFORE_RE = re.compile(r"(?:hong ?kong|macao|macau)\s*\(?\s*(?:sar|s\.a\.r\.?|special administrative region)\s*\)?\s*[,，]\s*$")
+_SAR_AFTER_RE = re.compile(r"^\s*[,，(]\s*(?:hong ?kong|macao|macau)\s*\(?\s*(?:sar|s\.a\.r\.?|special administrative region)")
+
+
+def _qualifier_words(text, *, before):
+    """Up to four words of the name's own item next to the name, in text
+    order, cut at the nearest boundary and at the first prose word."""
+    if before:
+        cuts = list(_QUALIFIER_BOUNDARY_RE.finditer(text))
+        words = text[cuts[-1].end():].split() if cuts else text.split()
+        kept = []
+        for word in reversed(words):
+            if _QUALIFIER_STOP_RE.match(word) or len(kept) == 4:
+                break
+            kept.insert(0, word)
+        return kept
+    cut = _QUALIFIER_BOUNDARY_RE.search(text)
+    words = text[:cut.start()].split() if cut else text.split()
+    kept = []
+    for word in words:
+        if _QUALIFIER_STOP_RE.match(word) or len(kept) == 4:
+            break
+        kept.append(word)
+    return kept
+
+
+def _other_jurisdiction(low, start, end):
+    """The neighbours of the name make it a dependency or another
+    jurisdiction, the same test a list entry gets in _entry_shaped: a
+    territory word beside the name, or a sibling jurisdiction beside it
+    that the text does not say it includes."""
+    before, after = low[max(0, start - 40):start], low[end:end + 40]
+    qualifier = ' '.join(_qualifier_words(before, before=True) + _qualifier_words(after, before=False))
+    if _JURISDICTION_RE.search(qualifier):
+        return True
+    if _INCLUSION_RE.search(before + ' ' + after):
+        return False
+    return bool(_SIBLING_RE.search(qualifier) or _SAR_BEFORE_RE.search(before) or _SAR_AFTER_RE.match(after))
 
 
 # Abbreviations that are the nationality only as capitals: "USA" is the
@@ -348,20 +503,17 @@ def _empty_value(value):
     return value in (None, [], {}, '') or (isinstance(value, dict) and all(v is None for v in value.values()))
 
 
-def _check_proof(proof, sources, route, field, value, *, product=None, covered=None):
+def _check_proof(proof, sources, route, field, value, *, product=None):
     """Return the validated proof or None for an explicit unknown/not_published.
-    `covered` carries the other values this proof key covers (the prose
-    permitted_stay under the permitted_stay_days proof); an unknown or
-    unpublished proof leaves every one of them empty."""
+    The prose a proof key covers (permitted_stay under permitted_stay_days)
+    is emptied by _validate_row before this check when the proof is unknown
+    or unpublished. That pop is the single mechanism."""
     if not isinstance(proof, dict) or proof.get('verifier', 'ai') != 'ai':
         raise PatchRejected(f'{field}: the source review must be attributed to AI')
     status = proof.get('status')
     if status in ('unknown', 'not_published'):
         if not _empty_value(value):
             raise PatchRejected(f'{field}: an unknown or unpublished value must be empty')
-        for key, other in (covered or {}).items():
-            if not _empty_value(other):
-                raise PatchRejected(f'{field}: an unknown or unpublished proof cannot cover a stated {key}')
         if not str(proof.get('reason') or '').strip():
             raise PatchRejected(f'{field}: an unknown or unpublished value needs a reason')
         return None
@@ -440,13 +592,28 @@ def _monetary_text(passages, code):
     return text
 
 
+# An electronic travel authorisation by name. The bare token "esta" is also
+# the Spanish demonstrative, so it counts only in an English frame ("an
+# ESTA", "ESTA approval"), never on its own.
+_EAR_TOKEN = (r"\b(?:eta|etas|k-eta|evisitor|etias|nzeta|e-?ta)\b|"
+              r"\b(?:an|the|valid|approved|your|their|with|without|via|through|obtain|obtaining|apply for|denied|approve)\s+esta\b|"
+              r"\besta\s+(?:approval|applications?|authori[sz]ation|registration|fee|website|is|are|will|before|prior|or|and|for|to)\b|"
+              r"electronic travel authori[sz]ation|electronic travel authority|electronic system for travel authori[sz]ation|"
+              r"travel authori[sz]ation|pre-arrival registration|电子旅行授权|電子旅行許可|전자여행허가|케이이티에이")
+# A word that states a requirement, in the languages of the captured pages.
+_REQUIREMENT_WORD = (r"\b(?:required|require|requires|requiring|requirement|must|need|needs|needed|mandatory|compulsory|obligatory|"
+                     r"obligation|necessary|obligatoire|obligatoirement|nécessaire|doivent|doit|devez|obligatori[oa]s?|necesari[oa]s?|"
+                     r"deben|debe|necesita|necesitan|erforderlich|benötigen|müssen|verpflichtend|obbligatori[oa]|devono|deve|"
+                     r"necessário|obrigatório|devem|precisam|phải|cần|bắt buộc|wajib|harus|diperlukan|требуется|необходим\w*|"
+                     r"должны|обязательн\w*)\b|必要|必須|必须|需要|需|须|義務|义务|필요|필수|의무|ต้อง|จำเป็น|يجب|ضروري|إلزامي")
+
 _VERDICT_RULES = {
     # A sentence that states the rule, and the words that flip it.
     'VISA_REQUIRED': (r"(?:e-?visa|visa)s?\b[^.;\n]{0,60}\b(?:is |are )?(?:required|mandatory|needed|necessary|obligatoire|obligatorio|necesario|bắt buộc)|"
                       r"\b(?:need|needs|require|requires|must have|must hold|must obtain|are required to hold|are required to obtain|is subject to|are subject to)\b (?:a |an |the )?(?:valid |prior |entry |tourist |schengen |visitor |short[- ]stay )*(?:e-?visa|visa)s?\b|"
                       r"\b(?:needs?|requir(?:es|ing|ed))\b (?:an? )?entry clearance|entry clearance \(a visa\)|"
-                      r"\bnecesita(?:n|r[áa]n?)? (?:de )?(?:un |el )?visado|\brequiere(?:n)? (?:de )?(?:un |el )?visado|\bont besoin d'un visa|\bdoivent (?:obtenir|demander|solliciter) un visa|\bvisa (?:est |sera )?(?:requis|nécessaire|exigé)|"
-                      r"\b(?:soumis|subordonné)e?s? à l'obtention d'un visa|\bmunie?s? d'un visa|"
+                      r"\bnecesita(?:n|r[áa]n?)? (?:de )?(?:un |el )?visado|\brequiere(?:n)? (?:de )?(?:un |el )?visado|\bont besoin d['’]un visa|\bdoivent (?:obtenir|demander|solliciter) un visa|\bvisa (?:est |sera )?(?:requis|nécessaire|exigé)|"
+                      r"\b(?:soumis|subordonné)e?s? à l['’]obtention d['’]un visa|\bmunie?s? d['’]un visa|"
                       r"\bnecessitano (?:di )?un visto|\bvisto (?:è )?(?:richiesto|necessario|obbligatorio)|\bbenötigen ein visum|\bvisumpflichtig\b|\bprecisam de visto|\bvisto (?:é )?(?:obrigatório|necessário)|"
                       r"\b(?:need|needs|require|requires|must|shall|should|have to|has to|required to|doivent|doit|deben|debe|phải|cần)\b[^.;\n]{0,40}"
                       r"\b(?:obtain|hold|have|apply for|possess|be in possession of|get|obtenir|être munis?|obtener|xin|có)\b[^.;\n]{0,40}\b(?:e-?visa|visa|thị thực)\b|"
@@ -459,9 +626,13 @@ _VERDICT_RULES = {
                       r"\beligible for (?:the |an? )?(?:\w+ ){0,2}e-?visa|"
                       r"\b(?:grant|granted|issue|issued)\b[^.;\n]{0,30}\b(?:visit|tourist|entry|e-?)visas?\b[^.;\n]{0,80}\b(?:to|for) (?:foreigners|nationals|citizens|holders)|"
                       r"виз[аы] по всем|требуется виза|необходима виза|нужна виза|оформить визу|получить визу|должны иметь[^.;\n]{0,30}визу|"
-                      r"需要办理签证|需申请签证|应当申请签证|必须持有签证|需要签证|事前に査証|ビザが必要|签证申请|網簽|网签|비자.{0,6}필요|ต้องขอวีซ่า|wajib memiliki visa|harus memiliki visa|يجب الحصول على تأشيرة",
+                      # An online visa (網簽) is a requirement only beside a requirement marker.
+                      # "可申請網簽" offers the option.
+                      r"需要办理签证|需申请签证|应当申请签证|必须持有签证|需要签证|事前に査証|ビザが必要|签证申请|"
+                      r"(?:需要|必須|必须|應|应|須|须|需)[^。；;\n]{0,20}(?:網簽|网签)|(?:網簽|网签)[^。；;\n]{0,20}(?:需要|必須|必须|應|应|須|须|需)|"
+                      r"비자.{0,6}필요|ต้องขอวีซ่า|wajib memiliki visa|harus memiliki visa|يجب الحصول على تأشيرة",
                       r"visa[- ]free|no visa|without (?:a )?visa|exempt|not required|do(?:es)? not (?:require|need)|\b(?:visa )?(?:on|upon) arrival\b|без виз|sans visa|sin visa|miễn thị thực|không cần|không phải xin|không yêu cầu|"
-                      r"免签|无需签证|免办签证|査証免除|ビザ免除|무비자|면제|bebas visa|ยกเว้นวีซ่า"),
+                      r"免签|无需签证|免办签证|査証免除|ビザ免除|무비자|면제|bebas visa|ยกเว้นวีซ่า|不需|無需|无需|毋須|毋须|免辦|免办"),
     'VISA_EXEMPT': (r"visa[- ]free|visa[- ]exempt|exempt(?:ed|ion)? from (?:the |a |an )?(?:(?:short[- ]stay|short[- ]term|entry|tourist|visitor|schengen|port of entry) )?(?:visa|obtaining a visa|visas?(?: requirements?)?)|"
                     r"exempt(?:ed)? from (?:the )?(?:requirement|obligation|need) (?:to obtain|to hold|to get|of obtaining|of holding) (?:a |an )?visa|"
                     r"do(?:es)? not (?:require|need) (?:a |an |any )?(?:entry |tourist |visitor )?visa|do(?:es)? not (?:require|need) to (?:apply for|obtain|hold|have) (?:a |an )?visa|"
@@ -476,8 +647,11 @@ _VERDICT_RULES = {
                     r"miễn thị thực|không cần (?:xin )?(?:visa|thị thực)|ยกเว้นวีซ่า|bebas visa|visa tidak diperlukan|tidak (?:memerlukan|perlu) visa|免签|无需签证|免办签证|查証免除|査証免除|ビザ免除|ビザなし|무비자|사증면제|معفى|إعفاء من التأشيرة|vizeden muaf",
                     r"\bnot (?:visa[- ]free|exempt|eligible)|do(?:es)? not (?:qualify|benefit)|unless|except(?:ion)? (?:for|of)?\s*(?:holders|nationals|citizens) of|"
                     r"(?<!no )(?<!sin )(?<!sans )(?:visa|e-?visa) (?:is |are )?(?:required|mandatory)|must (?:obtain|hold|apply)"),
-    'ELECTRONIC_AUTHORIZATION_REQUIRED': (r"\b(?:eta|etas|esta|k-eta|evisitor|etias|nzeta|e-?ta)\b|electronic travel authori[sz]ation|electronic travel authority|travel authori[sz]ation|pre-arrival registration|电子旅行授权|電子旅行許可|전자여행허가",
-                                          r"not required|exempt(?:ed)? from (?:the )?(?:k-eta|eta|esta)|without (?:an? )?(?:k-eta|eta|esta)|do(?:es)? not need"),
+    # The authorisation token must sit in the same clause as a requirement
+    # word: a sentence that offers the online service, names a product or
+    # prices it states no requirement.
+    'ELECTRONIC_AUTHORIZATION_REQUIRED': (r"(?:" + _REQUIREMENT_WORD + r")[^.;\n]{0,80}(?:" + _EAR_TOKEN + r")|(?:" + _EAR_TOKEN + r")[^.;\n]{0,80}(?:" + _REQUIREMENT_WORD + r")",
+                                          r"not required|not need|no need|n['’]t need|exempt(?:ed)? from|without (?:an? )?(?:k-eta|eta|esta|electronic)|do(?:es)? not need|不需|無需|无需|免除|필요 없|không cần"),
     # The arrival wording must sit beside a visa noun in the same clause; a
     # stamp, card or check "on entry" carries no visa meaning of its own.
     'VISA_ON_ARRIVAL': (r"visa[- ]on[- ]arrival|visas?\b[^.;,\n]{0,60}\b(?:on|upon) (?:arrival|arriving|entry|entering)\b|\b(?:on|upon) (?:arrival|entry)\b[^.;,\n]{0,25}\bvisas?\b|"
@@ -492,6 +666,28 @@ _VERDICT_RULES = {
 # or table) must not contain one; the rule sentence does.
 _RULE_WORDS = re.compile(r"visa|visado|visto|visum|víz|viz|виз|签证|簽證|査証|查証|ビザ|비자|thị thực|วีซ่า|تأشيرة|"
                          r"\b(?:eta|etas|esta|etias|k-eta|nzeta|evisitor)\b|exempt|arrival|免签|免簽|entry clearance|travel authori", re.I)
+# A short line that states a verdict on its own ("Visa-free countries",
+# "Visa required", "ETA nationals") is a section heading whatever follows.
+_VERDICT_LINE_RE = re.compile('|'.join([positive for positive, _ in _VERDICT_RULES.values()]
+                                       + [_VERDICT_RULES['VISA_REQUIRED'][1], _EAR_TOKEN,
+                                          r"visa nationals|visa waiver|visa[- ]required|visa[- ]needed"]), re.I)
+# A price or fee row: an amount of money and no word that states a rule.
+# "USA 5-year multiple entry eTA $185" prices a product and carries no
+# verdict for anyone.
+_MONEY_RE = re.compile(r"[$€£¥₩₹₺₽₫₱฿]\s*\d|\d[\d,.]*\s*(?:[$€£¥₩₹元円원]|usd|eur|gbp|aud|cad|nzd|sgd|hkd|twd|jpy|cny|rmb|krw|inr|thb|idr|myr|php|"
+                       r"vnd|kes|zar|aed|sar|try|rub|brl|mxn|chf|dollars?|euros?|pounds?|yen|won|baht|rupees?|ringgit|pesos?|rupiah|"
+                       r"shillings?|dong|đồng|dirhams?|riyals?|lira|rands?|francs?)\b|"
+                       r"\b(?:usd|eur|gbp|kes|aud|cad|nzd|sgd|hkd|twd|jpy|cny|krw|inr|thb|idr|myr|php|vnd|zar|aed|sar|rub|brl|mxn|chf)\s*\d")
+_STATEMENT_VERB_RE = re.compile(
+    r"\b(?:must|need|needs|needed|require|requires|required|requiring|mandatory|compulsory|obligatory|exempt|exempted|exemption|"
+    r"eligible|entitled|may|can|shall|should|have to|has to|issued|granted|available|obtain|obtains|apply|applies|do not|does not|"
+    r"don['’]t|doesn['’]t|without|necessary|waived|allowed|permitted|doivent|doit|peuvent|peut|deben|debe|pueden|puede|necesita|"
+    r"necesitan|besoin|exent[oa]s?|dispens\w*|wajib|harus|phải|cần)\b|需要|必須|必须|免签|免簽|免除|需|须|須|필요|ต้อง")
+
+
+def _fee_row(low):
+    """The normalized sentence is a fee or price row, not a rule."""
+    return bool(_MONEY_RE.search(low)) and not _STATEMENT_VERB_RE.search(low)
 # A sentence that opens a list of nationalities: only such a sentence can be
 # proved by a nationality's own list line. A universal statement ("all
 # foreigners") opens no list and names no one.
@@ -595,13 +791,21 @@ def _entry_line(piece):
                 and not _RULE_WORDS.search(text) and not _ENTRY_PROSE_RE.search(text))
 
 
+def _entry_run(piece):
+    """A line that is a run of three or more comma-separated list entries:
+    one line that holds a whole list ("Albania, Andorra, ..., Uruguay")."""
+    items = [item for item in _ITEM_SPLIT_RE.split(piece) if item.strip()]
+    return len(items) >= 3 and all(_entry_line(item) for item in items)
+
+
 def _headings(kept):
     """Offsets of the sentences that open a list of nationalities under a
     verdict: a sentence with list-intro wording ("Countries whose citizens
-    must have a visa:"), or a short verdict line that ends its own line and
-    is followed by two or more entry lines ("Visa-free countries"). They
-    cut the page into sections; a list line proves only the heading of its
-    own section."""
+    must have a visa:"), a short line that ends its own line and states a
+    verdict ("Visa-free countries") whatever follows it, or a short line with
+    a verdict word that ends its own line and is followed by entry lines or
+    by one line holding a comma-separated list. They cut the page into
+    sections. A list line proves only the heading of its own section."""
     parts = re.split(r'([.!?。！？;\n|])', kept)
     pieces_all = parts[0::2]
     seps = parts[1::2] + ['']
@@ -616,8 +820,10 @@ def _headings(kept):
         opens = bool(_LIST_INTRO_RE.search(piece))
         if not opens and seps[i] in ('\n', '') and len(piece.strip()) <= 100:
             following = pieces_all[i + 1:i + 3]
-            opens = (len(following) == 2 and all(_entry_line(p) for p in following)
-                     and all(s in ('\n', '') for s in seps[i + 1:i + 3]))
+            opens = (bool(_VERDICT_LINE_RE.search(piece))
+                     or (len(following) >= 1 and seps[i + 1] in ('\n', '') and _entry_run(following[0]))
+                     or (len(following) == 2 and all(_entry_line(p) for p in following)
+                         and all(s in ('\n', '') for s in seps[i + 1:i + 3])))
         if opens:
             starts.append(offsets[i])
             pieces.append(piece)
@@ -774,10 +980,31 @@ _GROUPS = {
     'ASEAN': (r"\basean\b|东盟|東盟|東南アジア諸国連合|아세안",
               {'BRN', 'KHM', 'IDN', 'LAO', 'MYS', 'MMR', 'PHL', 'SGP', 'THA', 'VNM', 'TLS'}),
 }
+# Every member of every group must have names in the converter's own tables:
+# a carve-out ("except Myanmar") is read through those names, and a member
+# without names could never be carved out.
+for _pattern, _members in _GROUPS.values():
+    for _member in _members:
+        assert _EXTRA_ALIASES.get(_member) or _DEMONYM_STEMS.get(_member), \
+            'group member without a name pattern: ' + _member
+del _pattern, _members, _member
+
 _EXCEPTION_RE = re.compile(r"\b(?:except(?:ing)?|excluding|other than|save for|sauf|excepto|salvo|kecuali|außer|tranne|exceto|osim|kromě|okrem)\b"
                            r"\s*(?:for|of|de|des|pour|para|bagi|untuk)?\s*([^.;:\n]{0,80})", re.I)
 _ITEM_WORDS = re.compile(r"\b(?:nationals?|citizens?|holders?|passport holders?|passports?|the|of|ressortissants?|ciudadanos|nacionales|"
                          r"cidadãos|warganegara|warga negara|negara|staatsangehörige)\b")
+
+
+def _exception_items(sentence):
+    """The bare items of every exception clause in the sentence."""
+    for clause in _EXCEPTION_RE.finditer(str(sentence or '')):
+        for item in re.split(r"\s*(?:,|;|/|\s(?:and|or|und|et|y|e|dan|và|и)\s)\s*", clause.group(1)):
+            yield _ITEM_WORDS.sub(' ', _norm(item)).strip(' ()')
+
+
+def _resolves_to_nationality(bare):
+    """The bare exception item is a nationality the converter can name."""
+    return bool(bare) and len(bare) <= 30 and any(_named(bare, n) for n in _known_nationalities())
 
 
 def _carved_out(sentence, nat):
@@ -785,20 +1012,30 @@ def _carved_out(sentence, nat):
     an exception word ("except Myanmar", "except for Brunei and Singapore
     nationals"). A qualified subset ("except those Canadians who ...") is not
     a carve-out of the nationality."""
-    for clause in _EXCEPTION_RE.finditer(str(sentence or '')):
-        for item in re.split(r"\s*(?:,|;|/|\s(?:and|or|und|et|y|e|dan|và|и)\s)\s*", clause.group(1)):
-            bare = _ITEM_WORDS.sub(' ', _norm(item)).strip(' ()')
-            if bare and len(bare) <= 30 and _named(bare, nat):
-                return True
-    return False
+    return any(bare and len(bare) <= 30 and _named(bare, nat) for bare in _exception_items(sentence))
+
+
+def _group_named(sentence, nat):
+    """The sentence names a group the nationality belongs to."""
+    low = _norm(sentence)
+    return any(nat in members and re.search(pattern, low, re.I) for pattern, members in _GROUPS.values())
+
+
+def _unreadable_exception(sentence):
+    """The first exception item the converter cannot resolve to a nationality,
+    or None. A group sentence with such an item may except this nationality
+    in words the converter cannot read, so it proves nothing for any member."""
+    for bare in _exception_items(sentence):
+        if not _resolves_to_nationality(bare):
+            return bare or '(empty)'
+    return None
 
 
 def _group_member(sentence, nat):
-    """The sentence names a group the nationality belongs to and does not
-    carve the nationality out of it in the same sentence."""
-    low = _norm(sentence)
-    return any(nat in members and re.search(pattern, low, re.I) for pattern, members in _GROUPS.values()) \
-        and not _carved_out(sentence, nat)
+    """The sentence names a group the nationality belongs to, every carve-out
+    in it resolves to a nationality by name, and none of them is this one."""
+    return (_group_named(sentence, nat) and _unreadable_exception(sentence) is None
+            and not _carved_out(sentence, nat))
 
 
 def _label(quote, nat):
@@ -840,6 +1077,7 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None):
     # The validator's anchored statement still needs a non-negated mention of
     # the nationality and a sentence that states the rule without flipping it.
     unflipped = (not positive or any(re.search(positive, _norm(s), re.I) and not (negative and re.search(negative, _norm(s), re.I))
+                                     and not _fee_row(_norm(s))
                                      for s in _SENTENCE_SPLIT.split(passages)))
     if named and unflipped and supports_disposition(passages, value, nationality=nat):
         return decide('validator: anchored statement')
@@ -872,10 +1110,12 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None):
                           and not any(_named(sentence, other) for other in others))
             carried = borrowable and (labelled or previous_named)
             flipped = bool(negative and re.search(negative, sl, re.I))
+            priced = _fee_row(sl)
             # A sentence that flips this verdict cannot lend its nationality
             # to the next one: "do not need a visa" followed by an optional
-            # "may apply for a visa" is still an exemption.
-            previous_named = (sentence_named or carried) and not flipped
+            # "may apply for a visa" is still an exemption. A price row names
+            # a product's buyer, not a rule's subject, and lends nothing.
+            previous_named = (sentence_named or carried) and not flipped and not priced
             if not re.search(positive, sl, re.I):
                 continue
             seen_positive = True
@@ -883,12 +1123,20 @@ def _decision_supported(value, evidence_quotes, nat, pages=None, explain=None):
                 if explain is not None:
                     explain.append('flipped in the same sentence: ' + sl[:120])
                 continue
+            if priced:
+                if explain is not None:
+                    explain.append('fee or price row, not a rule sentence: ' + sl[:120])
+                continue
             if sentence_named:
                 return decide('named in the rule sentence: ' + sl[:120])
             if carried:
                 return decide(('label' if labelled else 'previous sentence') + ' names the nationality: ' + sl[:120])
             if _group_member(sentence, nat):
                 return decide('group membership: ' + sl[:120])
+            if explain is not None and _group_named(sentence, nat):
+                unreadable = _unreadable_exception(sentence)
+                if unreadable is not None:
+                    explain.append('group named but an exception cannot be read: ' + unreadable[:80])
             if listed and _LIST_INTRO_RE.search(sl):
                 index = indexes.get(unit['page']) if unit['page'] is not None else None
                 span = _sentence_span(index, sentence, unit) if index else None
@@ -1048,6 +1296,20 @@ def validate_batch(batch, *, strict=True):
     return sources, accepted, rejected
 
 
+def _dropped_proof(reason):
+    """The explicit unknown a field becomes when its proof fails: served as
+    null with the rejection reason, never as the earlier layer's value."""
+    return {'status': 'unknown', 'verifier': 'ai', 'reason': 'Not asserted by this review: ' + reason}
+
+
+def _record_drop(dropped, message):
+    """Record a dropped value once per row. The batch is validated again at
+    conversion, and product names are unique within a row, so a repeated
+    message can only be the same drop seen on a later pass."""
+    if message not in dropped:
+        dropped.append(message)
+
+
 def _validate_row(row, sources):
     from app.visa_snapshot.kimi_primary import DISPOSITIONS
     from app.visa_snapshot.verified_overrides import _DETAIL_FAMILY
@@ -1062,7 +1324,11 @@ def _validate_row(row, sources):
             raise PatchRejected('Verdict outside the disposition and subcategory vocabulary')
         if _check_proof(verdict.get('proof'), sources, route, 'disposition', disp) is None:
             raise PatchRejected('A published verdict cannot be unknown')
-        proofs = row.get('route_field_proofs') or {}
+        proofs = row.get('route_field_proofs')
+        if not isinstance(proofs, dict):
+            # A dropped value is recorded here as an explicit unknown, so the
+            # table must be the row's own.
+            proofs = row['route_field_proofs'] = {}
         values = row.get('route_fields') or {}
         dropped = row.setdefault('dropped', [])
         for key, covered in ROUTE_PROOF_COVERS.items():
@@ -1072,20 +1338,23 @@ def _validate_row(row, sources):
                     # the prose it covers is unproved too and is not asserted.
                     for c in covered:
                         if c != key and not _empty_value(values.get(c)):
-                            dropped.append(f'{c}: a value under an unknown or unpublished {key} proof')
+                            _record_drop(dropped, f'{c}: a value under an unknown or unpublished {key} proof')
                             values.pop(c, None)
                 try:
-                    _check_proof(proofs[key], sources, route, key, values.get(key),
-                                 covered={c: values.get(c) for c in covered if c != key})
+                    _check_proof(proofs[key], sources, route, key, values.get(key))
                 except PatchRejected as exc:
                     # An ancillary value that cannot be proved is not asserted;
-                    # the verdict is the only field that decides the row.
-                    dropped.append(str(exc))
-                    proofs.pop(key, None)
+                    # the verdict is the only field that decides the row. The
+                    # field becomes an explicit unknown carrying the reason, so
+                    # the served entry cannot keep an earlier value for it.
+                    _record_drop(dropped, str(exc))
+                    proofs[key] = _dropped_proof(str(exc))
                     for c in covered:
                         values.pop(c, None)
             elif any(values.get(c) not in (None, [], '') for c in covered):
-                dropped.append(f'{key}: a value without a proof')
+                reason = f'{key}: a value without a proof'
+                _record_drop(dropped, reason)
+                proofs[key] = _dropped_proof(reason)
                 for c in covered:
                     values.pop(c, None)
         for product in row.get('products') or []:
@@ -1107,10 +1376,17 @@ def _validate_row(row, sources):
                 try:
                     if field in pproofs:
                         _check_proof(pproofs[field], sources, route, field, value, product=spec)
+                    elif field == 'disposition' and product.get('verdict_unproved'):
+                        # Recorded on an earlier pass over this row: the batch
+                        # is validated again at conversion and must not report
+                        # the same unproved verdict twice.
+                        continue
                     elif value not in (None, '', {}) and not (isinstance(value, dict) and value.get('amount') is None):
-                        raise PatchRejected(f'{spec["type"]}: {field} has a value but no proof')
+                        raise PatchRejected(f'{field}: has a value but no proof')
                 except PatchRejected as exc:
-                    dropped.append(str(exc))
+                    # Reported under the product's name, so two products that
+                    # drop the same field stay distinguishable in the report.
+                    _record_drop(dropped, f'product {spec["type"]}: {exc}')
                     if field == 'disposition' and field in pproofs:
                         # A product verdict whose own proof fails is unproved:
                         # the product is not served with an asserted verdict.
@@ -1447,7 +1723,10 @@ def convert(manifest, current_layers):
         reports.append({'cache_key': entry['cache_key'], 'disposition': fields['disposition'],
                         'products': [p['type'] for p in final], 'unsupported_products': unsupported,
                         'removed_products': removed, 'route_verdict_products': inherited,
-                        'unpublished': sorted(unpublished)})
+                        'unpublished': sorted(unpublished),
+                        # Every field or product value the review asserted but
+                        # could not prove, with the reason it was not served.
+                        'dropped': list(row.get('dropped') or [])})
     overlay = {'schema_version': 1, 'kind': 'reviewed_overlay_conversion', 'review_id': batch['id'],
                'reviewed_at': today, 'status': 'candidate; registered only after preflight under maintenance',
                'contract': 'Every value carries its own literal official-page quote; verdicts name the nationality; '
@@ -1469,4 +1748,5 @@ if __name__ == '__main__':
     if len(sys.argv) > 5:
         json.dump(manifest, open(sys.argv[5], 'w'), ensure_ascii=False)
     print(json.dumps({'entries': len(overlay['entries']), 'rejected': len(manifest['rejected']),
-                      'unsupported_products': sum(len(r['unsupported_products']) for r in reports)}))
+                      'unsupported_products': sum(len(r['unsupported_products']) for r in reports),
+                      'dropped_values': sum(len(r['dropped']) for r in reports)}))
