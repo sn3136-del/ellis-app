@@ -106,7 +106,7 @@ def test_invalid_explicit_product_review_cannot_fallback_to_valid_parent(manifes
  else:proof['source_url']='https://eviza.mae.ro/TypeOfVisa'
  rows=tstation.records_for_route(old['route'],g,prov)
  assert rows[-1]['_product_source_verified'] is None
- assert rows[-1]['confidence_level']=='Low' and rows[-1]['visa_requirement']=='Visa Required in Advance'
+ assert rows[-1]['confidence_level']=='Medium' and rows[-1]['_evidence_low'] is True and rows[-1]['visa_requirement']=='Visa Required in Advance'  # an unread official link reads Medium and stays held
  assert tstation.verdict_provenance_supported(rows[0]['_product_source_verified'])
 
 def test_existing_dispute_still_holds_independently_reviewed_child(manifest,converted):

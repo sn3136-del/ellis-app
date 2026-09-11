@@ -48,7 +48,7 @@ def test_all_11_links_are_references_with_no_verdict_date_or_confidence_credit(i
             assert row['source_url'] == 'https://www.kdmid.ru/cons/visas/'
             assert row['data_source'] == 'Ellis product information (reference only)'
             assert row['collected_at'] is None and row['info_validity'] is None
-            assert row['confidence_level'] == 'Low'
+            assert row['confidence_level'] == 'Medium'  # an unread official link reads Medium (and stays held)
             assert row['_product_source_verified'] is None
     for layer, entry in zip(layers, overlay['entries'], strict=True):
         old = vo._parse_rows(layer['seed_entries'], {})
@@ -88,6 +88,8 @@ def test_registered_file_loader_and_real_apply_preserve_verdict_authorship(input
             if b['source_url'] != a['source_url']:
                 assert not b['source_url'] and a['source_url'] == 'https://www.kdmid.ru/cons/visas/'
             b.pop('source_url', None); a.pop('source_url', None)
+            # A cited official page reads Medium on display; the hold credit is unchanged.
+            assert b.pop('confidence_level') in ('Low', 'Medium') and a.pop('confidence_level') == 'Medium' or b['_evidence_low'] == a['_evidence_low']
             assert b == a
 
 

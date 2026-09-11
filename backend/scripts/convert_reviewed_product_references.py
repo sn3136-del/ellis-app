@@ -158,6 +158,11 @@ def _convert_entry(entry, sources, layer, review_id):
             if not after.get('source_url'):
                 raise PatchRejected('Reviewed reference is not visible in serving')
             old.pop('source_url', None); new.pop('source_url', None)
+            # A cited official page reads Medium on display (11 September
+            # 2026 ladder); the link changes no fact, authorship, date or
+            # hold credit, which the remaining keys (including _evidence_low
+            # and _product_source_verified) still pin.
+            old.pop('confidence_level', None); new.pop('confidence_level', None)
             projected.append({k: after.get(k) for k in ('visa_type_name', 'source_url', 'data_source',
                              'collected_at', 'info_validity', 'confidence_level', '_product_source_verified')})
         if old != new:

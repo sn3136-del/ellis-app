@@ -70,10 +70,19 @@ def test_imported_verdict_provenance_requires_note_and_actual_verification_date(
     assert record(prov=prov, grounded_ok=True, grounded_fields=["disposition", "permitted_stay_days", "required_documents"])["confidence_level"] == ("Medium" if patch.get("verified_at", "present") in (None, "") else "High")  # No collection date: grounded but incomplete.
 
 
-@pytest.mark.parametrize("field", ["permitted_stay_days", "arrival_card", "official_portal_url",
-                                   "application_channel_detail", "processing_time", "new_future_field"])
-def test_any_disputed_field_prevents_release(field):
-    assert record(disputed_fields=[field])["confidence_level"] == "Low"
+@pytest.mark.parametrize("field", ["permitted_stay_days", "arrival_card", "passport_validity",
+                                   "application_channel_detail", "exceptions", "new_future_field"])
+def test_a_material_disputed_field_prevents_release(field):
+    r = record(disputed_fields=[field])
+    assert r["confidence_level"] == "Low" and r["_evidence_low"] is True
+
+
+@pytest.mark.parametrize("field", ["official_portal_url", "processing_time", "photo_requirements"])
+def test_a_side_field_dispute_reads_medium_and_does_not_hold(field):
+    # A finding that cannot refuse a traveller boarding or entry marks the
+    # field pending and grades Medium; the route stays published.
+    r = record(disputed_fields=[field])
+    assert r["confidence_level"] == "Medium" and r["_evidence_low"] is False
 
 
 def test_model_only_source_label_does_not_claim_verification():
@@ -142,51 +151,16 @@ def test_invalid_decision_or_unanchored_machinery_is_refused(files, fields):
     assert vo.find(ROUTE) is None
 
 
-def test_loader_keeps_a_fee_audit_and_anchors_it_to_the_served_verdict(files):
-    # A fee or product audit that does not restate the verdict is kept and
-    # bound at serve time: applied beside a visa, arrival or authorisation
-    # answer, dropped beside an exemption (a priced product next to "no visa
-    # needed" was the Hong Kong to Vietnam class). It never verifies the verdict.
+def test_loader_quarantines_only_unsafe_fields_and_retains_raw_evidence(files):
     seed, _ = files
-    audit = entry({"government_fee": {"amount": 25, "currency": "USD"},
-                   "visa_products": [{"type": "e-Visa"}],
-                   "processing_time": "3 working days"})
-    seed.write_text(json.dumps([audit]))
+    unsafe = entry({"government_fee": {"amount": 25, "currency": "USD"},
+                    "visa_products": [{"type": "e-Visa"}],
+                    "processing_time": "3 working days"})
+    seed.write_text(json.dumps([unsafe]))
     hit = vo.find(ROUTE)
-    assert hit["unanchored_products"] is True
-    assert set(hit["fields"]) == {"government_fee", "visa_products", "processing_time"}
-    assert json.loads(seed.read_text())[0] == audit
-    assert vo.lint_rows([audit])[0]["errors"] == [vo.UNANCHORED_ERROR]
-    g, p = vo.apply(FREE, ROUTE)
-    assert g["disposition"] == "VISA_EXEMPT" and "government_fee" not in g and "visa_products" not in g
-    assert p["fields"] == ["processing_time"] and "government_fee" not in p["field_provenance"]
-    required = dict(FREE, disposition="VISA_REQUIRED", requirement_detail="evisa")
-    g, p = vo.apply(required, ROUTE)
-    assert g["government_fee"] == {"amount": 25, "currency": "USD"}
-    assert g["visa_products"] == [{"type": "e-Visa"}]
-    assert sorted(p["fields"]) == ["government_fee", "processing_time", "visa_products"]
-    assert "disposition" not in p["fields"] and not tstation.verdict_provenance_supported(p)
-
-
-def test_a_fee_only_audit_beside_a_missing_verdict_is_dropped(files):
-    seed, _ = files
-    seed.write_text(json.dumps([entry({"government_fee": {"amount": 25, "currency": "USD"}})]))
-    assert vo.anchored_to(vo.find(ROUTE), {"permitted_stay": "30 days"}) is None
-    assert vo.anchored_to(vo.find(ROUTE), None) is None
-    g, p = vo.apply({"permitted_stay": "30 days"}, ROUTE)
-    assert "government_fee" not in g and p is None
-
-
-def test_operator_fee_edit_is_accepted_beside_a_cached_visa_verdict(files):
-    fee = {"government_fee": {"amount": 25, "currency": "USD"}}
-    with pytest.raises(ValueError):
-        vo.append_operator_entry(entry(fee))  # no cached answer to anchor to
-    with pytest.raises(ValueError):
-        vo.append_operator_entry(entry(fee), guidance=FREE)  # beside an exemption
-    vo.append_operator_entry(entry(fee), guidance=dict(FREE, disposition="VISA_REQUIRED",
-                                                        requirement_detail="paper_visa"))
-    g, _ = vo.apply(dict(FREE, disposition="VISA_REQUIRED", requirement_detail="paper_visa"), ROUTE)
-    assert g["government_fee"] == {"amount": 25, "currency": "USD"}
+    assert hit["fields"] == {"processing_time": "3 working days"}
+    assert json.loads(seed.read_text())[0] == unsafe
+    assert vo.lint_rows([unsafe])[0]["errors"]
 
 
 def test_verified_detail_anchors_fee_and_defaults_to_ai(files):
@@ -265,9 +239,7 @@ def test_shipped_effective_overrides_have_valid_vocabulary_and_anchored_fees():
     assert raw
     table = vo._parse_rows(raw, {})
     for key, hit in table.items():
-        # A fee or product audit without a restated verdict is anchored at
-        # serve time (anchored_to); every other lint error must be absent.
-        assert not [e for e in vo._field_errors(hit["fields"]) if e != vo.UNANCHORED_ERROR], key
+        assert not vo._field_errors(hit["fields"]), key
         assert hit["verifier"] in ("ai", "human")
     # Raw vocabulary errors must be fixed mechanically, never hidden by the
     # quarantine intended solely for unverified route verdicts.

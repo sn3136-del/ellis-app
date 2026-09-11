@@ -2037,8 +2037,7 @@ def test_only_a_verified_verdict_releases_a_held_answer(db, tmp_path, monkeypatc
     vo.reload()
     try:
         g = kimi_primary.get_route_guidance(db, ROUTE)
-        # The fee audit applies beside the visa verdict but verifies only the fee.
-        assert g["source_verified"]["fields"] == ["government_fee"], "fee-only evidence anchors to the verdict it sits beside"
+        assert not g.get("source_verified"), "fee-only evidence is quarantined"
         assert g["review_required"] is True, "a fee alone verifies nothing about the verdict"
         f.write_text(_json.dumps([{
             "route": {"nationality": "USA", "destination": "JPN"},

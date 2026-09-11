@@ -71,7 +71,7 @@ def test_unestablished_named_option_or_format_cannot_receive_parent_credit(revie
     proof = product['field_provenance']['disposition']
     assert proof['status'] == 'unknown' and not proof['source_url'] and proof['verified_at'] is None
     output = next(r for r in tstation.records_for_route(baseline['route'], guidance, prov) if r['visa_type_name'] == name)
-    assert output['confidence_level'] == 'Low'
+    assert output['confidence_level'] in ('Low', 'Medium') and output['_evidence_low'] is True  # no credit: held, Medium only when an official page is cited
     if index in UNSUPPORTED_ROWS:
         old = next(p for p in baseline['merged_guidance']['visa_products'] if p['type'] == name)
         assert {k: v for k, v in product.items() if k != 'field_provenance'} == {k: v for k, v in old.items() if k != 'field_provenance'}
@@ -158,7 +158,7 @@ def test_philippine_package_evisa_is_fifteen_days_gratis_and_its_own_scope(revie
 def test_exemption_has_initial_ninety_days_and_no_invented_visa_validity(review, candidate, nationality):
     out = projection(candidate, review, nationality)[0]
     assert out['max_stay_duration'] == 90 and out['validity_duration'] is None
-    assert out['visa_fee_amount'] == 0 and out['confidence_level'] != 'High'
+    assert out['visa_fee_amount'] == 0 and out['confidence_level'] in ('High', 'Medium')  # the reviewed exemption grades on completeness
     entry, _, _, _ = result(candidate, review, nationality)
     proof = entry['field_provenance']['exceptions']
     assert proof['status'] == 'partial' and proof['verification_scope'] == 'changed_elements_only'

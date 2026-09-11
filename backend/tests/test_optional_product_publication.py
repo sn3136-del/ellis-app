@@ -55,7 +55,7 @@ def test_partial_publication_never_clears_other_holds(reason,monkeypatch):
     case=CASES[0];raw=envelope(case)
     if reason=='unsupported_default':raw['source_verified']=None
     elif reason=='invariant':raw['guidance']['government_fee']={'amount':999,'currency':'USD'}
-    elif reason=='dispute':raw['grounded_check']={'disputed_fields':['passport_validity']}
+    elif reason=='dispute':raw['grounded_check']={'disputed_fields':['permitted_stay_days']}  # a material dispute (a side field alone no longer holds)
     elif reason=='validation':raw['contradictions']=['application channel conflicts with official instructions']
     elif reason=='pending':raw['detail_pending']=True
     elif reason=='stale':raw['stale']=True

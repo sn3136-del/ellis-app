@@ -1606,6 +1606,28 @@ def _required_values_supported(row: dict, g: dict, checked: set[str], route=None
     return required_values_supported(row, g, checked, route or {}, provenance)
 
 
+# Fields whose open monitor finding cannot get a traveller refused boarding
+# or entry: a processing time, a portal link or an application step under
+# review. A finding on one of these marks that field pending review and
+# grades the record Medium; it neither withholds the route nor calls the
+# answer conflicting (owner decision, 11 September 2026). Every other field
+# is material (the verdict, its detail, products, fee, stay, validity,
+# entries, documents, channel, passport validity, arrival card, onward
+# travel, health and insurance conditions, exceptions, integrity and source
+# audits), and so is every serve-time problem string: Low and held.
+ANCILLARY_DISPUTE_FIELDS = frozenset({
+    "processing_time", "official_portal_url", "consular_jurisdiction", "biometrics_required",
+    "photo_requirements", "payment_process", "account_registration_steps", "submission_process",
+    "appointment_required", "interview_required", "accommodation_evidence", "financial_evidence",
+    "notes", "source_url", "unpublished_fields", "corroborating_sources", "confidence",
+})
+
+
+def material_disputes(fields) -> list:
+    """The disputed fields that conflict with the answer itself."""
+    return [f for f in (fields or []) if f not in ANCILLARY_DISPUTE_FIELDS]
+
+
 def _regrade(row: dict, g: dict, disputed: list | None,
              unpublished: set | None = None) -> dict:
     """Apply their §4.2.3 ladder to the finished row.
@@ -1653,7 +1675,11 @@ def _regrade(row: dict, g: dict, disputed: list | None,
             row["special_conditions"] = (current.rstrip(". ") + ". " + note) if current else note
     st = field_status(row, unpublished)
     complete = not any(v == "missing" for v in st.values())
-    conflicted = bool(disputed)
+    conflicted = bool(material_disputes(disputed))
+    # A finding on a side field alone: that field is pending review, so the
+    # record is not complete (Medium), but the answer is not in conflict.
+    if disputed and not conflicted:
+        complete = False
     # Keep the pre-existing source/conflict publication boundary separate
     # from the display grade. Missing fields never become invented values,
     # and a gap (Medium) may not create a hold that did not exist before

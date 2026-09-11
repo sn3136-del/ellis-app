@@ -33,7 +33,7 @@ def test_actual_mixed_french_study_timing_never_becomes_48_working_days_for_both
         assert row["visa_requirement"] == "Visa Required in Advance"
         assert row["application_method"] == "Agency Service"
         assert row["source_url"] == "https://france-visas.gouv.fr/"
-        assert row["confidence_level"] == "Low"  # projection is not new proof
+        assert row["confidence_level"] == "Medium" and row["_evidence_low"] is True  # projection is not new proof: held
         assert tstation.field_status(row)["processing_min_days"] == "optional-empty"
         assert "_processing_note" not in row
 

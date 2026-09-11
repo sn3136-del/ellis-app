@@ -206,7 +206,7 @@ def test_new_product_proof_cannot_certify_a_later_permission_change(manifest,fie
     p=out['effective_guidance']['visa_products'][1];p[field]=value
     rows=projected(out,e['route'])
     assert rows[1]['_product_source_verified'] is None
-    assert rows[1]['confidence_level']=='Low'
+    assert rows[1]['confidence_level']=='Medium' and rows[1]['_evidence_low'] is True  # an unread official link reads Medium and stays held
 
 
 @pytest.mark.parametrize('fault',['source_duplicate','current_duplicate','manifest_duplicate','same_authority_wrong_page'])

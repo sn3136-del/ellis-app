@@ -43,7 +43,7 @@ def test_six_validity_bounds_change_without_review_credit_or_history_mutation(in
             assert p['validity_duration'] == 3 and p['validity_unit'] == 'Month'
             assert p['source_url'] == converter.RULE_URL
             assert p['data_source'] == 'Ellis product information (reference only)'
-            assert p['confidence_level'] == 'Low'
+            assert p['confidence_level'] == 'Medium'  # an unread official link reads Medium (and stays held)
             assert p['collected_at'] is None and p['info_validity'] is None
             assert p['_product_source_verified'] is None
     for entry, layer in zip(overlay['entries'], layers, strict=True):

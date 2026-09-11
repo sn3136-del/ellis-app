@@ -141,11 +141,16 @@ def required_values_supported(row, g, checked, route, provenance):
 
     # A product table the source review verified replaces the model's list
     # wholesale, so a product's own stated terms are that review's facts.
-    # A converter-reviewed product carries its own per-field proofs and is
-    # judged on them alone; a table with no per-field proofs is the review's
-    # own list, and a product's stated terms are that review's facts.
+    # A converter-reviewed product carries its own per-field proofs for the
+    # graded terms and is judged on them alone; a table whose products carry
+    # no such proof (a side proof for an entry card or a note does not count)
+    # is the review's own list, and a product's stated terms are that
+    # review's facts.
+    graded_proofs = {'type', 'disposition', 'requirement_detail', 'fee', 'validity', 'entry',
+                     'max_stay_days', 'permitted_stay', 'required_documents',
+                     'application_channel', 'application_channel_detail'}
     table_reviewed = (product is not None and product is not g and 'visa_products' in checked
-                      and not own_proofs
+                      and not (set(own_proofs) & graded_proofs)
                       and (not row.get('_separate_permission') or bool(row.get('_table_reviewed'))))
 
     def parent(field):

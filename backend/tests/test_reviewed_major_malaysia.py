@@ -25,7 +25,7 @@ def test_actual_result_preserves_raw_unreviewed_scope_and_explicit_unknown(input
   assert p['verified_at']=='2026-09-10' and 'effective_to' not in p and 'effective_from' not in p
   for f in ('photo_requirements','biometrics_required'):
    fp=p['field_provenance'][f];assert g[f] is None and fp['status']=='unknown' and not fp['source_url'] and fp['verified_at'] is None
-  row,=x['records'];assert row['confidence_level']=='Medium' and row['max_stay_duration']==90 and not row.get('info_validity')  # checked, with gaps
+  row,=x['records'];assert row['confidence_level']=='High' and row['max_stay_duration']==90 and not row.get('info_validity')  # checked and complete (documented absences count)
  assert not any(r[k] for k in ('new_grounded_check','renew_fresh_until','new_release','raw_or_issue_writes'))
 
 def test_mdac_and_documents_keep_conditions_without_false_child_exception(inputs):

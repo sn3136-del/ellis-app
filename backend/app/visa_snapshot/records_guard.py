@@ -44,7 +44,7 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
         disputed_fields=disputed + problems, grounded_fields=gc.get("verified_fields"))
     # An operator release cannot make a self-contradiction or a later
     # official-page dispute safe. All product rows count, not just the first.
-    conflict = bool(problems or disputed or any(
+    conflict = bool(problems or tstation.material_disputes(disputed) or any(
         "no visa_products were listed" not in issue
         for issue in (out.get("contradictions") or [])))
     low = any(r.get("_evidence_low", r.get("confidence_level") == "Low") for r in rows)
@@ -73,6 +73,10 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
     if conflict or pending or (low and not out.get("operator_released")):
         out["review_required"] = True
         out["held"] = True if conflict or pending else kimi_primary.hold_enabled()
+    # A payload that reaches here with only a side-field finding is served:
+    # readers always get an explicit hold state.
+    out.setdefault("held", False)
+    out.setdefault("review_required", False)
     return project_insurance(route, out)
 
 

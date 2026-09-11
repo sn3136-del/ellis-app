@@ -19,7 +19,7 @@ def test_exact_social_exemption_stay_retained_and_no_unreviewed_product_created(
     assert r['visa_fee_amount']==0 and r['confidence_level']=='Medium'
     assert source==old
 
-@pytest.mark.parametrize('disputed',[['source_audit'],['passport_validity'],['disposition']])
+@pytest.mark.parametrize('disputed',[['source_audit'],['permitted_stay_days'],['disposition']])
 def test_disputed_qc_does_not_restore_generated_product_facts(source,disputed):
     r=row(source,disputed)
     assert r['max_stay_duration']==14

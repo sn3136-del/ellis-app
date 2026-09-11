@@ -36,7 +36,7 @@ def test_actual_schengen_child_fee_waiver_preserves_visa_requirement_and_procedu
     assert row["source_url"] == GUIDANCE["source_url"]
     assert row["processing_min_days"] == 15
     assert not row.get("_separate_permission")
-    assert row["confidence_level"] == "Low"  # projection is not new proof
+    assert row["confidence_level"] == "Medium" and row["_evidence_low"] is True  # projection is not new proof: shown with its source, held
     assert CHILD == before
 
 
@@ -100,7 +100,7 @@ def test_explicit_group_entry_exemption_does_not_require_a_fee_cell(fee):
     row, = rows(product, disposition="CONDITIONAL", requirement_detail=None)
     assert row["visa_requirement_detail"] == "Conditional Visa-free"
     assert tstation.field_status(row)["application_method"] == "not-applicable"
-    assert row["confidence_level"] == "Low"  # classification cannot manufacture proof
+    assert row["confidence_level"] == "Medium" and row["_evidence_low"] is True  # classification cannot manufacture proof: held
 
 
 @pytest.mark.parametrize("amount", [25, "0", True])

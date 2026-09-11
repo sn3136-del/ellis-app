@@ -37,7 +37,7 @@ def test_explicit_free_lane_and_optional_evisas_survive_projection_independently
         assert row['required_documents'] is None
         assert row['collected_at'] is None
         assert row['_product_source_verified'] is None
-        assert row['confidence_level'] == 'Low'
+        assert row['confidence_level'] == 'Medium' and row['_evidence_low'] is True  # an unread official link reads Medium and stays held
 
 
 def test_priced_products_without_a_free_lane_remain_an_integrity_conflict():
