@@ -479,8 +479,23 @@ def _concession_stem(word):
 
 # Temporal scope. An exception, a closed period or a suspension is not the
 # current rule, whatever figure the sentence carries.
+# A discretion leaves the value to the officer: "at the discretion of",
+# "determined by consular officials", "on a case by case basis". The forms
+# stand in the exception vocabulary of the fill path and, on their own, in
+# the absence path, where a discretion sentence that names no one value
+# publishes no value.
+_DISCRETION_FORMS = (
+    r'at (?:the |its |their |his |her |our )?(?:sole |absolute )?discretion|discretion(?:ary)?|'
+    r'(?:determined|decided|assessed|set|fixed|established) (?:solely |only )?(?:by|at) (?:the )?(?:consular|visa|immigration|'
+    r'border|competent) (?:officials?|officers?|section|post|authorit(?:y|ies)|department)|'
+    r'(?:on an? |on a )?case[- ]by[- ]case(?: basis)?|a discreción|discrecional(?:mente)?|caso por caso|'
+    r'à la discrétion|discrétionnaire|au cas par cas|nach ermessen|im ermessen|einzelfall(?:prüfung)?|'
+    r'по усмотрению|на усмотрение|в индивидуальном порядке|tùy theo|tùy thuộc vào quyết định|kebijaksanaan|'
+    r'ดุลยพินิจ|เป็นรายกรณี',
+    r'酌情|裁量|个案|個案|재량|사안별|個別に判断|ケースバイケース')
+_DISCRETION_RE = re.compile(_words(*_DISCRETION_FORMS), re.I)
 _EXCEPTION_RE = re.compile(_words(
-    r'exceptional(?:ly)?|exceptions?|in special cases|special cases|at the discretion|discretion(?:ary)?|'
+    r'exceptional(?:ly)?|exceptions?|in special cases|special cases|' + _DISCRETION_FORMS[0] + '|'
     r'(?:may|can|could|might|shall) be (?:extended|prolonged|renewed)|extendable|extensions?|'
     r'excepcional(?:mente|es)?|casos especiales|a discreción|discrecional|podrá (?:ser )?prorrogar|prorrogable|prórroga|'
     r'exceptionnel(?:le|les|lement)?|cas particuliers|cas exceptionnels|à la discrétion|discrétionnaire|peut être prolongé|'
@@ -517,6 +532,161 @@ _SUSPENSION_RE = re.compile(_words(
     r'จนกว่าจะมีประกาศ|приостановлен[аоы]?|приостановк|'
     r'временно не|до особого распоряжения|до дальнейшего уведомления',
     r'暂停|暫停|暂缓|暫緩|中止|停止受理|暂不|暫不|另行通知|一時停止|停止中|当面の間|再開|중단|일시 중지|잠정 중단|추후 공지|재개'), re.I)
+# A cap or a hedge governs a figure. "Generally, a visitor visa may be
+# valid for up to a maximum of 10 years, or until the expiry of your
+# passport, whichever comes first" states a ceiling on a discretionary
+# grant, not the validity a traveller receives, so the figure is refused as
+# a value and, on the absence path, is not a stated value. The forms are
+# the ones the captured corpus prints. A bare "up to" is how a fixed
+# validity is commonly worded ("valid for up to 30 days") and is not a cap.
+_CAP_RE = re.compile(_words(
+    r'up to a maximum of|a maximum of|maximum of|at (?:the )?most|no more than|not more than|not (?:to )?exceed(?:ing|s)?|'
+    # "as long as one year", "as much as 10 years" cap a figure. The same
+    # words with no figure after them are a condition ("valid for 30 days
+    # as long as your passport stays valid") and cap nothing.
+    r'as (?:much|long|many) as(?=\s+(?:\d|(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|a|an)(?![^\W_])))|'
+    r'(?:shall|must|may|can|will|does|do|should|cannot|can ?not) not exceed|no longer than|not longer than|'
+    r'whichever (?:comes|is|occurs|happens) (?:first|earlier|sooner|shorter|the (?:earlier|sooner|shorter))|'
+    r'au maximum|un maximum de|jusqu[’\']à un maximum|ne (?:peut|pourra|doit|devra) (?:pas )?(?:excéder|dépasser)|n[’\']excédant pas|'
+    r'hasta un máximo de|un máximo de|como máximo|máximo de|no (?:será|sera|podrá|podra|puede|deberá|debera) (?:ser )?superior a|'
+    r'no (?:podrá|podra|puede|deberá|debera) exceder|höchstens|maximal|nicht länger als|nicht mehr als|'
+    r'paling lama|maksimal|maksimum|tidak lebih dari|tidak melebihi|tối đa|không quá|không vượt quá|'
+    r'ไม่เกิน|สูงสุด|не более|не свыше|не дольше|не может превышать|не превыша|максимум|максимальн',
+    r'最长|最長|最多|不超过|不得超过|不超過|不得超過|最大|を超えない|上限|최대|최장|초과하지'), re.I)
+# "Non-extendable", "cannot be extended" state a firm rule, not an
+# extension, so they are blanked before the exception vocabulary is read.
+_NOT_EXTENDABLE_RE = re.compile(_words(
+    r'non[- ]?(?:extendable|extendible|renewable|convertible|prolongeable|prorrogable|verlängerbar)|not (?:extendable|renewable|convertible)|'
+    r'can ?not be (?:extended|prolonged|renewed)|may not be (?:extended|prolonged|renewed)|no extensions?|no extension is|'
+    r'no (?:se )?(?:podrá|puede) prorrogar|no prorrogable|non prolongeable|nicht verlängerbar|không (?:được |thể )?gia hạn|'
+    r'tidak dapat diperpanjang|tidak bisa diperpanjang',
+    r'不可延长|不可延長|不得延长|不得延長|不能延长|不能延長|延長不可|延長できません|연장 불가|연장할 수 없'), re.I)
+# A sentence whose subject is a pronoun or a pointer ("They must carry",
+# "Such applicants") takes its subject from the sentence before it.
+_ANAPHORA_RE = re.compile(
+    r'^\W*(?:they|these|those|such|the (?:latter|former|above|aforementioned|same)|said|ils|elles|ceux-ci|celles-ci|'
+    r'ces derni(?:ers|ères)|ellos|ellas|estos|estas|éstos|éstas|dichos|dichas|они|эти|такие|указанные|последние|'
+    r'mereka|họ|những người này|diese|solche|letztere)(?![^\W_])', re.I)
+# A stream named only after unless, except or other than is carved out of
+# the rule, not the rule's subject.
+_CARVED_RE = re.compile(_words(
+    r'unless|except(?:ing)?|except for|other than|save for|but not|excluding|apart from|à moins (?:que|de)|sauf|hormis|'
+    r'excepté|salvo|excepto|a menos que|a excepción de|außer|ausgenommen|mit ausnahme|kecuali|selain|trừ|ngoại trừ|'
+    r'ยกเว้น|за исключением|кроме|исключая',
+    r'除非|除了|除外|を除き|を除く|以外|제외|를 제외'), re.I)
+# An explicit age threshold on a fee: "a partir de los 12 años", "aged 12
+# and over". A threshold at or under the age of majority is the standard
+# adult fee and travels into the note. Any other age scope is a concession.
+_AGE_THRESHOLD_RE = re.compile(
+    r'a partir de (?:los |las )?(\d{1,2}) años|à partir de (\d{1,2}) ans|from (?:the age of )?(\d{1,2})(?: years)?(?: of age)?(?: (?:and|or) (?:over|above|older|up(?:wards)?))?|'
+    r'aged (\d{1,2}) (?:and|or) (?:over|above|older)|(\d{1,2}) years (?:of age )?(?:and|or) (?:over|above|older)|(?:over|above) (?:the age of )?(\d{1,2})|'
+    r'mayores de (\d{1,2})|de más de (\d{1,2}) años|plus de (\d{1,2}) ans|über (\d{1,2}) jahren?|'
+    r'ab (\d{1,2}) jahren|dari usia (\d{1,2})|berusia (\d{1,2}) tahun (?:ke atas|atau lebih)|từ (\d{1,2}) tuổi|старше (\d{1,2})|от (\d{1,2}) лет|'
+    r'(\d{1,2})\s*(?:岁|歲|周岁)(?:及)?以上|(\d{1,2})\s*歳以上|(\d{1,2})\s*세 이상|อายุ\s*(\d{1,2})\s*ปีขึ้นไป', re.I)
+_ADULT_AGE = 18
+# The documents whose own duration a page states beside a visa's: a
+# passport's remaining validity, a certificate's shelf life, an insurance
+# policy's cover. A figure that follows one of these, with no visa word
+# between, is that document's duration and never the visa's.
+_DOCUMENT_SUBJECT_RE = re.compile(_words(
+    r'passports?|travel documents?|passeports?|pasaportes?|paspor|hộ chiếu|certificates?|certificats?|certificados?|sertifikat|'
+    r'chứng nhận|giấy chứng nhận|insurance|assurance|seguro|asuransi|bảo hiểm|polic(?:y|ies)|tickets?|billets?|billetes?|tiket|'
+    r'photos?|photographs?|bank statements?|statements?|invitations?|letters?|forms?|receipts?|biometrics|tests?|résultats?|'
+    r'результат|справк|сертификат|страхов|полис|билет|паспорт|приглашени|анкет',
+    r'护照|護照|パスポート|旅券|여권|证明|證明|証明|保险|保險|保険|보험|증명서|ประกัน|หนังสือเดินทาง|ใบรับรอง'), re.I)
+
+# Requirement position. A document a traveller must present stands as the
+# object of a requirement cue (present, submit, need, must carry, a
+# "documents required" heading, a list marker) at the head of an
+# enumeration piece. Anything inside a clause describing another party
+# ("from a hosting agency or a hotel, which is registered with the
+# Ministry and has a valid reference number") is that party's, never the
+# applicant's document.
+_REQUIREMENT_CUE_RE = re.compile(_words(
+    r'documents? (?:required|needed|necessary|to (?:be )?(?:submit(?:ted)?|present(?:ed)?|provided?|upload(?:ed)?|attach(?:ed)?))|'
+    r'(?:required|necessary|supporting|following) documents?|list of (?:required )?documents|checklist|documents? checklist|'
+    r'(?:must|should|shall|need to|needs to|have to|has to|are required to|is required to|required to|will need to|will have to|'
+    r'are (?:also )?requested to|is (?:also )?requested to|are expected to|are asked to)\s+(?:(?:also|then|always|still|first|only|either)\s+)?'
+    r'(?:present|submit|upload|provide|carry|bring|hold|have|attach|enclose|produce|show|supply|furnish|possess|be in possession of|'
+    r'be accompanied by|include|obtain)|'
+    r'(?:you|applicants?|travell?ers?|visitors?|holders?|passengers?|persons?|nationals?|citizens?) (?:will |may |can |also )?(?:need|require)|'
+    r'will need|needed|need|requires?d?|required|(?:please|kindly) (?:present|submit|upload|provide|attach|bring|enclose)|'
+    r'to (?:hold|present|submit|upload|provide|carry|bring|show|produce|possess|have|attach|enclose|supply|furnish)|'
+    r'present(?:ed|ing)?|submit(?:ted|ting)?|upload(?:ed|ing)?|attach(?:ed|ing)?|enclose[d]?|enclosing|'
+    r'accompanied by|together with|along with|in possession of|'
+    r'presentar|aportar|adjuntar|entregar|acompañar|disponer de|estar en posesión de|en posesión de|se requiere[n]?|'
+    r'deberá(?:n)? (?:presentar|aportar|adjuntar|entregar|acompañar)|necesita(?:rá|rán|n)?|documentos? (?:necesarios|requeridos|exigidos|a presentar)|'
+    r'présenter|fournir|joindre|munir|munis? de|produire|être en possession de|il faut|pièces (?:justificatives|à fournir|requises)|'
+    r'vorlegen|einreichen|beifügen|mitbringen|benötigen|benötigt|erforderlich(?:e)? (?:unterlagen|dokumente)|unterlagen|'
+    r'menyerahkan|melampirkan|membawa|menunjukkan|menyertakan|wajib|harus|diperlukan|dibutuhkan|persyaratan(?: dokumen)?|'
+    r'syarat|dokumen yang (?:diperlukan|dibutuhkan|harus)|'
+    r'nộp|xuất trình|mang theo|cần (?:có|nộp|xuất trình)|phải (?:có|nộp|xuất trình)|hồ sơ (?:gồm|bao gồm)|giấy tờ (?:cần|bao gồm)|'
+    r'предостав(?:ить|ляет|ляются|ляемые|ляются)|представ(?:ить|ляет|ляются|ляемые)|прилож(?:ить|ены|ена)|подать|необходимо|'
+    r'требуется|требуются|перечень документов|необходимые документы|документы,? необходимые',
+    r'提交|提供|出示|携带|攜帶|需要|须|須|必须|必須|所需材料|所需文件|材料|提出|提示|必要書類|必要な書類|持参|'
+    r'제출|제시|지참|필요|구비서류|ยื่น|แสดง|ต้องมี|เอกสารที่ต้อง|เอกสารประกอบ'), re.I)
+# "Prove your identity with a valid passport", "acreditar la identidad con
+# un documento de viaje": the document is the instrument of a proving verb.
+_INSTRUMENT_CUE_RE = re.compile(
+    r'(?<![^\W_])(?:prove|proving|proof of|demonstrate|demonstrating|justify|justifying|evidence|attest|establish|'
+    r'acreditar|justificar|probar|demostrar|acreditando|prouver|justifier|attester|nachweisen|belegen|membuktikan|chứng minh)'
+    r'(?![^\W_])[^.;:!?]{0,60}?(?<![^\W_])(?:with|by means of|by way of|using|through|con|mediante|avec|au moyen de|par|mit|durch|'
+    r'dengan|bằng)(?![^\W_])', re.I)
+# The separators between the pieces of an enumeration, and the words that
+# open a clause about another party inside a piece.
+_PIECE_SEP_RE = re.compile(
+    r'[,;:，、；：]|(?<![^\W_])(?:and|or|et|ou|und|oder|или|dan|atau|serta|và|hoặc|hay)(?![^\W_])|(?<=\s)(?:y|e|o|u|и)(?=\s)|及|和|或|또는|및|และ|หรือ|'
+    r'(?<=\s)(?:0\d|\d{1,2}[.)]|\(\d{1,2}\)|[a-z][.)])\s+(?=[^\W\d_])|(?<=\s)[-–—•*·▪■●○◦]\s+', re.I)
+_TAIL_OPENER_RE = re.compile(_words(
+    r'which|that|who|whom|whose|where|wherein|from|by|issued|registered|obtained|provided|certified|approved|recognised|recognized|'
+    r'qui|que|dont|lequel|laquelle|lesquels|lesquelles|délivrée?s?|émise?s?|reconnue?s?|par|cual|cuales|cuyo|cuya|quien|quienes|'
+    r'expedid[oa]s?|emitid[oa]s?|reconocid[oa]s?|por|welche[rs]?|ausgestellt|anerkannt|yang|dari|oleh|diterbitkan|dikeluarkan|'
+    r'mà|do|từ|được cấp|котор|выданн|зарегистрирован|от|со стороны',
+    r'由|所|签发|發給|颁发|に登録|が発行|から|에서 발급|ที่|ซึ่ง|จาก|โดย'), re.I)
+_RELATIVE_START_RE = re.compile(
+    r'^\W*(?:which|that|who|whom|whose|where|when|if|unless|provided|except|for those|for applicants|for persons|for visitors|'
+    r'for residents|for holders|for citizens|for nationals|qui|que|dont|lequel|laquelle|lorsque|si|pour les|pour ceux|cual|cuales|'
+    r'cuyo|cuya|quien|quienes|cuando|para los|para las|para quienes|welche[rs]?|der|die|das|wenn|falls|für|yang|jika|apabila|bagi|'
+    r'untuk|mà|nếu|đối với|котор\w*|если|когда|для|ซึ่ง|ที่|หาก|สำหรับ)(?![^\W_])', re.I)
+# A bare line that carries a finite or modal verb explains an item. It is
+# not an item of the list itself ("Application form must be signed").
+_BARE_VERB_RE = re.compile(_words(
+    r'must|should|shall|may|can|will|would|is|are|was|were|be|has|have|had|do|does|need|needs|please|make sure|note|'
+    r'deberá|deberán|debe|deben|puede|pueden|es|son|doit|doivent|peut|peuvent|est|sont|muss|müssen|kann|können|ist|sind|'
+    r'harus|wajib|dapat|adalah|phải|có thể|là|должен|должны|может|могут|является',
+    r'必须|必須|应当|應當|需要|可以|是|なければ|してください|해야|필요합니다|ต้อง'), re.I)
+_LIST_MARKER_RE = re.compile(
+    r'^\s*(?:[-–—•*·▪■●○◦]+|\(?\d{1,2}[.)]|\d{1,2}(?=\s\D)|\(?[a-z][.)]|[ivx]{1,4}[.)]|<[^>]{0,40}>|[①-⑳]|[•·]|[\[（(]\s*\d{1,2}\s*[\]）)])\s*', re.I)
+_DETERMINER_RE = re.compile(
+    r'(?:a|an|the|one|two|three|your|their|his|her|its|my|our|each|every|any|all|both|un|una|unos|unas|el|la|los|las|su|sus|'
+    r'le|les|des|du|votre|vos|ein|eine|einen|einem|einer|der|die|das|ihr|ihre|ihren|một|các|những|sebuah|satu|dua|ваш|ваша|'
+    r'ваше|ваши|один|одна|одну|две|два|copie|copia)(?![^\W_])\W*', re.I)
+_ITEM_STOPWORDS = frozenset(
+    'the and for with are was were can may must as at by of or to a an is in be up per your their its de del la el los las un una '
+    'y o e du des le les et ou und der die das và của dan yang atau serta и или в на с для от из để cho'.split())
+# An aside that opens with an inclusion cue names the documents the
+# requirement itself asks for ("upload the required documents (including a
+# valid passport)"), so its words stand in requirement position. Any other
+# aside is a description and opens no head.
+_INCLUSION_RE = re.compile(
+    r'\s*(?:including|includes?|such as|e\.?g\.?|i\.?e\.?|namely|in particular|notably|inter alia|'
+    r'incluyendo|incluid[oa]s?|por ejemplo|en particular|en concreto|y compris|notamment|par exemple|'
+    r'einschließlich|insbesondere|z\.? ?b\.?|termasuk|antara lain|misalnya|bao gồm|ví dụ|trong đó có|'
+    r'включая|в том числе|например|เช่น|รวมถึง|包括|包含|例如|など|포함|예를 들어)\s*[,:]?\s*', re.I)
+
+# A delimited table row binds to its header. A reciprocity schedule prints
+# "Visa Classification | Fee | Number of Entries | Validity Period" above
+# "B-1/B-2 | None | Multiple | 120 Months": the entries cell is the entry
+# statement of the class the first cell names, and the validity cell is
+# its validity, whatever the row's words alone would say.
+_HEADER_KINDS = {
+    'class': re.compile(r'classification|visa type|type of visa|\bclass\b|category|\bvisa\b', re.I),
+    'entries': re.compile(r'number of entries|no\.? of entries|entries|entry', re.I),
+    'validity': re.compile(r'validity|valid for|period of validity|duration', re.I),
+    'fee': re.compile(r'\bfees?\b', re.I),
+}
+_CELL_ENTRIES = {'multiple': 'multiple', 'multi': 'multiple', 'm': 'multiple', 'single': 'single', 's': 'single',
+                 'one': 'single', '1': 'single', 'double': 'double', 'd': 'double', 'two': 'double', '2': 'double'}
 
 # A restrictive stream of the product family (a group tour, a cruise, the
 # electronic lane of a paper visa) is not the plain product. The families
@@ -1195,12 +1365,36 @@ def _temporal_problem(sentence, unit=None):
         return 'the sentence describes a suspended or resumed issuance, not the current rule'
     if _PAST_RE.search(sentence):
         return 'the sentence describes a past or closed period, not the current rule'
-    if _EXCEPTION_RE.search(sentence):
+    # "Non-extendable" is a firm rule, not an extension.
+    if _EXCEPTION_RE.search(_NOT_EXTENDABLE_RE.sub(' ', sentence)):
         return 'the sentence states an exception, a discretion or an extension beside the value'
     figures = {_figure_of(m.group()) for m in _DURATION_RE.finditer(sentence)}
     if _NORMALLY_RE.search(sentence) and len(figures - {None}) > 1:
         return 'the sentence states a normal figure beside a second figure, not one value'
     return None
+
+
+def _governed_problem(sentence):
+    """Why a duration in this sentence is governed by a hedge or a cap
+    rather than stated: "Generally ... up to a maximum of 10 years ...
+    whichever comes first" is a ceiling on a discretionary grant."""
+    hedge = _NORMALLY_RE.search(sentence)
+    cap = _CAP_RE.search(sentence)
+    if hedge and cap:
+        return 'the figure is governed by a hedge (%s) and a cap (%s), not stated as the value' % (hedge.group().strip(), cap.group().strip())
+    if hedge:
+        return 'the figure is governed by a hedge (%s), not stated as the value' % hedge.group().strip()
+    if cap:
+        return 'the figure is governed by a cap (%s), not stated as the value' % cap.group().strip()
+    return None
+
+
+def _carved(sentence, match):
+    """Whether this stream word is carved out of the rule by an unless,
+    except or other-than connective standing before it in the same clause."""
+    before = sentence[max(0, match.start() - 45):match.start()]
+    before = re.split(r'[.;!?]', before)[-1]
+    return bool(_CARVED_RE.search(before))
 
 
 def _electronic(product):
@@ -1216,7 +1410,9 @@ def _restrictive_problem(sentence, product, products):
     subjects = [product] if product is not None else [p for p in (products or []) if isinstance(p, dict) and p.get('type')]
     types = [str(p.get('type') or '') for p in subjects]
     for family, pattern in _RESTRICTIVE_FAMILIES.items():
-        if not pattern.search(sentence):
+        # A stream named only after unless or except is carved out of the
+        # rule ("unless in transit to the Mainland"), not its subject.
+        if not any(not _carved(sentence, m) for m in pattern.finditer(sentence)):
             continue
         if family == 'electronic':
             if any(_electronic(p) for p in subjects):
@@ -1356,12 +1552,29 @@ def _names_nationality(normalised, code):
     return False
 
 
+def _destination_as_subject(normalised, code):
+    """Whether the destination's own people are the subject: a citizens,
+    nationals or passport-holders word stands beside its name ("Canadian
+    citizens, including dual citizens, need a valid Canadian passport"). A
+    bare destination name is a place (a visa to Canada)."""
+    for alias in _aliases(code):
+        if len(alias) < 4 and alias.isascii():
+            continue
+        pattern = re.compile(_alias_pattern(alias), re.I)
+        if pattern.search(normalised) and _qualifies(normalised, pattern, _BLOC_SUBJECT_WORDS, extra=_BLOC_LINK_WORDS.pattern, links=4):
+            return True
+    return False
+
+
 def _foreign_subject(sentence, route):
     """The other nationalities a sentence is about, when it is not also about
-    this route's nationality. The destination is a place, never a subject."""
+    this route's nationality. The destination is a place, never a subject,
+    until its own citizens, nationals or passport holders are named."""
     normalised = _norm(sentence)
     named = {code for code in _known_nationalities() if _names_nationality(normalised, code)}
-    named.discard(route['destination_country'])
+    destination = route['destination_country']
+    if destination in named and not _destination_as_subject(normalised, destination):
+        named.discard(destination)
     if named and route['passport_nationality'] not in named:
         return sorted(named)
     return []
@@ -1492,30 +1705,156 @@ def _fee_sentence_problem(sentence, route, product, products, merged):
         return 'the amount is a computed total, not the fee per application'
     if _FUNDS_WORDS.search(sentence):
         return 'the sentence is about the applicant\'s funds or income, not the fee'
+    return _age_threshold_problem(sentence, names)
+
+
+def _age_thresholds(sentence):
+    return [int(g) for m in _AGE_THRESHOLD_RE.finditer(sentence) for g in m.groups() if g]
+
+
+def _age_threshold_problem(sentence, names):
+    """An explicit age threshold scopes the fee. At or under the age of
+    majority ("a partir de los 12 años") it is the standard adult fee and
+    is recorded in the note. Above it, or on a row that is itself an age
+    class, the fee belongs to another applicant."""
+    ages = _age_thresholds(sentence)
+    if not ages:
+        return None
+    if any(_ANCHOR_TYPE_RES['minor'].search(n) or _ANCHOR_TYPE_RES['adult'].search(n) for n in names):
+        return None
+    if max(ages) > _ADULT_AGE:
+        return 'the fee is stated for applicants aged %d and over, not the product\'s own fee' % max(ages)
     return None
 
 
+def _age_scope_note(passages):
+    """The age scope a fee quote states, for the stored note."""
+    ages = _age_thresholds(passages)
+    if not ages:
+        return None
+    return 'Fee stated for applicants aged %d and over.' % max(ages)
+
+
+def _document_owns(before):
+    """Whether the text before a figure makes it a document's duration: a
+    passport, certificate or insurance word stands there with no visa word
+    after it."""
+    docs = list(_DOCUMENT_SUBJECT_RE.finditer(before))
+    if not docs:
+        return False
+    visas = list(_VISA_WORDS.finditer(before))
+    return not visas or visas[-1].start() < docs[-1].start()
+
+
+def _figure_unit(match_text):
+    for unit, pattern in _UNIT_FIGURE_RES.items():
+        if pattern.fullmatch(match_text):
+            return unit
+    return None
+
+
+def _owned_by_document(sentence, n, unit):
+    """Whether every occurrence of the figure in this sentence is a
+    document's duration (a passport valid for six months, a certificate
+    valid for three months), never the visa's."""
+    hits = list(_figure_re(n, unit).finditer(sentence))
+    return bool(hits) and all(_document_owns(sentence[max(0, m.start() - 90):m.start()]) for m in hits)
+
+
+def _duration_states(field, sentence):
+    """Whether this sentence states a validity or a stay: some duration
+    figure is bound to the field's own word, is not a document's duration,
+    and is not governed by a hedge or a cap."""
+    own, other = (_VALIDITY_WORDS, _STAY_WORDS) if field == 'validity' else (_STAY_WORDS, _VALIDITY_WORDS)
+    if _governed_problem(sentence):
+        return False
+    for m in _DURATION_RE.finditer(sentence):
+        n, unit = _figure_of(m.group()), _figure_unit(m.group())
+        if n is None or unit is None:
+            continue
+        before = sentence[max(0, m.start() - 90):m.start()]
+        owned = list(own.finditer(before))
+        bound = bool(owned) and not other.search(before[owned[-1].end():])
+        if not bound:
+            after = sentence[m.end():m.end() + 16]
+            owned_after = own.search(after)
+            bound = bool(owned_after) and bool(re.fullmatch(r"[\s'’]*(?:of|de|di|d')?\s*", after[:owned_after.start()]))
+        if bound and not _document_owns(before):
+            return True
+    return False
+
+
+def _entry_states(sentence):
+    """Whether this sentence states an entry type. A discretion sentence
+    that names two types or none ("the officer has discretion to issue a
+    single-entry or multiple entry visa") publishes no value."""
+    stated = _entry_types(sentence)
+    if not stated:
+        return False
+    return not (_DISCRETION_RE.search(sentence) and len(stated) != 1)
+
+
 def _sentence_states(field, s):
+    """Whether one sentence states a value for the field. A validity or a
+    stay needs a figure bound to its own word that is no document's
+    duration and is not governed by a hedge or a cap. An entry type needs
+    a definite statement, never a discretion between two."""
     if field in ('fee', 'government_fee'):
         return bool(_FEE_WORDS.search(s) and _money_anywhere(s))
     if field == 'validity':
-        return bool(_VALIDITY_WORDS.search(s) and _DURATION_RE.search(s)
-                    and not (_PASSPORT_WORDS.search(s) and not _VISA_WORDS.search(s)))
+        return _duration_states('validity', s)
     if field in ('max_stay_days', 'permitted_stay_days', 'permitted_stay'):
-        return bool(_STAY_WORDS.search(s) and _DURATION_RE.search(s))
+        return _duration_states('stay', s)
     if field == 'entry':
-        return bool(_entry_types(s))
+        return _entry_states(s)
     if field == 'required_documents':
-        return bool(_DOCUMENT_CUES.search(s) and _DOCUMENT_WORDS.search(s))
+        return bool(_DOCUMENT_CUES.search(s) and _DOCUMENT_WORDS.search(s) and not _question(s))
     if field == 'application_channel':
-        return bool(_APPLY_WORDS.search(s) and _CHANNEL_WORDS.search(s))
+        return bool(_APPLY_WORDS.search(s) and _CHANNEL_WORDS.search(s) and not _question(s))
     raise PatchRejected('no value detector exists for ' + str(field) + ', so it cannot be declared absent')
 
 
-def _first_sentence(text, pattern):
-    for s in _sentences(text):
-        if pattern.search(s):
-            return s.strip()
+def _page_lines(text):
+    return [line.strip() for line in str(text or '').splitlines() if line.strip()]
+
+
+def _lines_state(lines, subject, states, span=1):
+    """A value a page splits across adjacent lines: the field's subject word
+    on one line and the figure on the same line or the next ("Validity |
+    Entries" above "30 days | Single"). The lines are reported as they
+    stand, never a splice of two distant sentences."""
+    for i, line in enumerate(lines):
+        if not subject.search(line):
+            continue
+        window = '\n'.join(lines[i:i + 1 + span])
+        if states(window):
+            return window.replace('\n', ' / ')
+    return None
+
+
+def _amount_cells(line):
+    """The amounts a table line carries. A figure bound to a duration word
+    is a column label ("30 days e-TV", "01 year e-TV"), never an amount, so
+    a fee table's own header line is not mistaken for its first row."""
+    return _NUMBER_TOKEN_RE.findall(_DURATION_RE.sub(' ', line))
+
+
+def _fee_table_state(lines):
+    """A fee table: a heading names the fee, a bare currency marker stands
+    on the heading or within two lines of it ("(in US $)"), and rows of
+    amounts follow within a dozen lines."""
+    for i, line in enumerate(lines):
+        if not _FEE_WORDS.search(line):
+            continue
+        for j in range(i, min(i + 3, len(lines))):
+            if not _BARE_MARKER_RE.search(lines[j]):
+                continue
+            rows = lines[j + 1:j + 14]
+            row = next((r for r in rows if _NUMBER_CELL_RE.search(r) or len(_amount_cells(r)) >= 3), None)
+            if row is None:
+                row = next((r for r in rows if len(_amount_cells(r)) >= 2), None)
+            if row is not None:
+                return ' / '.join(dict.fromkeys([line, lines[j], row]))
     return None
 
 
@@ -1524,30 +1863,24 @@ def _states_value(field, text):
     or None. Conservative in the rejecting direction: any stated value,
     for any product, refuses an absence claimed over this page. A value a
     table splits across a header line and a row line still counts, so
-    after the sentences the whole page is read: the field's subject word
-    anywhere plus a figure with a unit, or a money amount, anywhere."""
+    after the sentences the page is read line by line: the field's subject
+    word with its figure on the same line or the next, or a fee heading
+    with its currency marker and its rows of amounts."""
     text = str(text or '')
     for s in _sentences(text):
         if _sentence_states(field, s):
             return s
+    lines = _page_lines(text)
     if field in ('fee', 'government_fee'):
-        for m in _FEE_WORDS.finditer(text):
-            window = text[max(0, m.start() - 160):m.end() + 160]
-            money = _money_anywhere(window)
-            if money:
-                return _first_sentence(window, _FEE_WORDS) + ' ... ' + money
-        money = _money_anywhere(text)
-        if _FEE_WORDS.search(text) and money:
-            return _first_sentence(text, _FEE_WORDS) + ' ... ' + money
+        return (_lines_state(lines, _FEE_WORDS, lambda w: bool(_money_anywhere(w)))
+                or _fee_table_state(lines))
     elif field == 'validity':
-        if _VALIDITY_WORDS.search(text) and _DURATION_RE.search(text):
-            return _first_sentence(text, _VALIDITY_WORDS) + ' ... ' + _first_sentence(text, _DURATION_RE)
+        return _lines_state(lines, _VALIDITY_WORDS, lambda w: _duration_states('validity', w))
     elif field in ('max_stay_days', 'permitted_stay_days', 'permitted_stay'):
-        if _STAY_WORDS.search(text) and _DURATION_RE.search(text):
-            return _first_sentence(text, _STAY_WORDS) + ' ... ' + _first_sentence(text, _DURATION_RE)
+        return _lines_state(lines, _STAY_WORDS, lambda w: _duration_states('stay', w))
     elif field == 'entry':
-        if _ENTRY_SUBJECT_WORDS.search(text) and (_entry_types(text) or _BARE_ENTRY_WORDS.search(text)):
-            return _first_sentence(text, _ENTRY_SUBJECT_WORDS) + ' ... ' + (_first_sentence(text, _BARE_ENTRY_WORDS) or '')
+        return _lines_state(lines, _ENTRY_SUBJECT_WORDS,
+                            lambda w: _entry_states(w) or bool(_BARE_ENTRY_WORDS.search(w) and not _DISCRETION_RE.search(w)))
     elif field == 'required_documents':
         return _list_states(text, _DOCUMENT_CUES, _DOCUMENT_WORDS)
     elif field == 'application_channel':
@@ -1555,17 +1888,24 @@ def _states_value(field, text):
     return None
 
 
+def _question(line):
+    return line.rstrip().endswith(('?', '？'))
+
+
 def _list_states(text, cue, words, span=5):
     """A value a page writes as a list: a line carrying the field's cue
     ("Required documents:") followed within a few lines by a line carrying
     a value word ("Passport valid for six months"). No single sentence
-    states anything, and the page still publishes the value."""
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    states anything, and the page still publishes the value. A cue line
+    that is a question ("What are the required documents?") is an index
+    entry, not a list, and a follower that is itself a question is another
+    entry."""
+    lines = _page_lines(text)
     for i, line in enumerate(lines):
-        if not cue.search(line):
+        if not cue.search(line) or _question(line):
             continue
         for follower in lines[i + 1:i + 1 + span]:
-            if words.search(follower):
+            if words.search(follower) and not _question(follower):
                 return line[:80] + ' ... ' + follower[:80]
     return None
 
@@ -1626,8 +1966,314 @@ def _absence_reason(proof, sources, field, product, products=None):
         _field_page_id(proof, sources, field, product, products))
 
 
-def _sentence_supports(field, value, sentence):
+def _cell_entry(cell):
+    """The entry type a bare table cell states ("Multiple", "M", "Single")."""
+    return _CELL_ENTRIES.get(_norm(cell))
+
+
+def _row_key(line):
+    """A row line as a lookup key, so the page's own spacing and the quote's
+    find each other."""
+    return re.sub(r'\s+', ' ', str(line or '')).strip()
+
+
+def _row_context(proof, sources):
+    """Each quote with the lines the captured page prints above it and the
+    rest of its own last line, so a table row quoted on its own is still
+    read against the column names the page gives it. The line is the page's,
+    not the quote's, so a quote that stops before a footnote marker never
+    reads as the row. A quote the page does not print stands alone."""
+    out = []
+    for item in proof['evidence']:
+        quote = item['quote']
+        page = (sources or {}).get(item.get('source_id')) or {}
+        text = str(page.get('text') or '')
+        span = quote if quote and quote in text else (_page_span(quote, text) if text else None)
+        if not span:
+            out.append(quote)
+            continue
+        start = text.find(span)
+        head = max(0, start - 1200)
+        stop = text.find('\n', start + len(span))
+        window = text[head:len(text) if stop < 0 else stop]
+        out.append(window[window.find('\n') + 1:] if head and '\n' in window else window)
+    return '\n'.join(out)
+
+
+def _delimited_rows(passages):
+    """The rows of a delimited table in the quoted passages, keyed by the
+    row line as _sentences yields it, each mapped to its header-named
+    cells. A header may run over several physical lines ("Visa" /
+    "Classification | Fee | Number" / "of Entries | Validity" / "Period");
+    the lines above the first row are joined and read as one header. A run
+    of rows counts only when a header names an entries or a validity
+    column and has exactly the rows' number of cells."""
+    lines = str(passages or '').split('\n')
+    rows = {}
+    is_row = [line.count('|') >= 2 and not any(k.search(line) for k in (_HEADER_KINDS['entries'], _HEADER_KINDS['validity'])) for line in lines]
+    i = 0
+    while i < len(lines):
+        if not is_row[i]:
+            i += 1
+            continue
+        start = i
+        while i < len(lines) and is_row[i]:
+            i += 1
+        run = lines[start:i]
+        cells = [c.strip() for c in run[0].split('|')]
+        head = []
+        for j in range(start - 1, max(-1, start - 7), -1):
+            if not lines[j].strip():
+                break
+            head.insert(0, lines[j].strip())
+            joined = ' '.join(head)
+            if joined.count('|') == len(cells) - 1:
+                break
+        joined = ' '.join(head)
+        if joined.count('|') != len(cells) - 1:
+            continue
+        columns = {}
+        for index, cell in enumerate(c.strip() for c in joined.split('|')):
+            for kind, pattern in _HEADER_KINDS.items():
+                if kind not in columns and pattern.search(cell) and not (kind == 'class' and index > 0 and 'entr' in cell.lower()):
+                    columns[kind] = index
+                    break
+        if 'class' not in columns or not ({'entries', 'validity'} & set(columns)):
+            continue
+        for line in run:
+            parts = [c.strip() for c in line.split('|')]
+            if len(parts) != len(cells):
+                continue
+            rows[_row_key(line)] = {kind: parts[index] for kind, index in columns.items()}
+    return rows
+
+
+def _row_binding_problem(cells, product):
+    """A header-bound row states values for the class its first cell
+    names: that cell must carry a class-code anchor of the product."""
+    codes = {k: v for k, v in _product_anchors(product).items() if k[0] in ('code', 'subclass')}
+    if not codes or not _anchors_in(cells.get('class') or '', codes):
+        return 'the row\'s class cell (%s) carries no class code of the product' % (cells.get('class') or '')
+    return None
+
+
+def _plain_heads(sentence):
+    """The sentence in NFKC form with its parentheticals blanked to spaces,
+    so a document named only in an aside ("(fax copy, click here to view
+    the sample)") never stands at a head and positions stay aligned, and
+    the positions where an inclusion aside names the very documents the
+    requirement asks for ("upload the required documents (including a
+    valid passport)"). Those words stay and open a head of their own."""
+    import unicodedata
+    text = unicodedata.normalize('NFKC', str(sentence))
+    out = list(text)
+    depth, keeping, opened = 0, [], []
+    for i, ch in enumerate(text):
+        if ch in '(（[［':
+            cue = _INCLUSION_RE.match(text, i + 1) if depth == 0 else None
+            depth += 1
+            keeping.append(bool(cue))
+            if cue:
+                opened.append(cue.end())
+            out[i] = ' '
+        elif ch in ')）]］':
+            if keeping:
+                keeping.pop()
+            depth = max(0, depth - 1)
+            out[i] = ' '
+        elif depth and not (len(keeping) == 1 and keeping[0]):
+            out[i] = ' '
+    return ''.join(out), opened
+
+
+def _plain(sentence):
+    return _plain_heads(sentence)[0]
+
+
+def _piece_heads(text, start, end):
+    """The positions where enumeration pieces begin between start and end.
+    A comma or a conjunction starts a new piece unless the piece so far
+    has opened a clause about another party (from, by, which, issued) and
+    no comma list stands before it in this region: "a confirmation from
+    an agency or a hotel, which is registered ..." is one piece, "a
+    passport, one photo, a confirmation from an operator and an insurance
+    policy" is four. A piece that opens with a relative or conditional
+    word always continues the piece before it."""
+    heads = [start]
+    piece_start, listed, open_tail, in_clause = start, 0, False, False
+    for m in _PIECE_SEP_RE.finditer(text, start, end):
+        if m.start() < piece_start:
+            continue
+        # A separator that follows another separator (", and") is the
+        # same break, not an empty piece.
+        if not re.search(r'[^\W_]', text[piece_start:m.start()]):
+            if heads and heads[-1] == piece_start:
+                heads[-1] = m.end()
+                piece_start = m.end()
+            continue
+        open_tail = open_tail or bool(_TAIL_OPENER_RE.search(text[piece_start:m.start()]))
+        follower = text[m.end():end]
+        hard = m.group()[0] in ';；' or m.group().strip()[:1].isdigit() or m.group().strip()[:1] in '-–—•*·▪■●○◦'
+        if not hard and _RELATIVE_START_RE.match(follower):
+            # A relative or conditional clause runs on through its own
+            # commas and conjunctions ("unless in transit to the Mainland
+            # or the Macao Special Administrative Region").
+            in_clause = True
+            continue
+        # After a clause about another party, a conjunction or a comma
+        # resumes the list only when a comma list stands before it ("a
+        # passport, one photo, a confirmation from an operator and an
+        # insurance policy"), while "a confirmation from an agency or a hotel"
+        # stays one piece.
+        if not hard and (in_clause or (open_tail and listed == 0)):
+            continue
+        heads.append(m.end())
+        if hard or m.group()[0] in ',，、':
+            listed += 1
+        piece_start, open_tail, in_clause = m.end(), False, False
+    # A head with no word after it (a trailing "and", a heading's colon)
+    # opens no piece.
+    return [h for i, h in enumerate(heads)
+            if re.search(r'[^\W_]', _PIECE_SEP_RE.sub(' ', text[h:heads[i + 1] if i + 1 < len(heads) else end]))]
+
+
+def _sentence_heads(sentence, bare_ok=False):
+    """The NFKC form of a sentence and the positions where a document may
+    stand in requirement position: the pieces after each requirement cue,
+    after an inclusion aside's cue, after an opening list marker, or the
+    head of a bare list line when the passage is a list."""
+    import unicodedata
+    plain, included = _plain_heads(sentence)
+    text = unicodedata.normalize('NFKC', str(sentence))
+    cues = sorted({m.end() for m in _REQUIREMENT_CUE_RE.finditer(plain)} | {m.end() for m in _INSTRUMENT_CUE_RE.finditer(plain)})
+    marker = _LIST_MARKER_RE.match(plain)
+    starts = []
+    if marker and marker.end() > 0:
+        starts.append(marker.end())
+    elif not cues and bare_ok and len(plain.split()) <= 12 and not _BARE_VERB_RE.search(plain):
+        starts.append(0)
+    # An inclusion aside only names documents the requirement already asks
+    # for, so it opens a head where a requirement cue stands before it.
+    starts += [position for position in included if any(cue <= position for cue in cues)]
+    starts = sorted(set(starts + cues))
+    heads = []
+    for index, start in enumerate(starts):
+        end = starts[index + 1] if index + 1 < len(starts) else len(plain)
+        heads += _piece_heads(plain, start, end)
+    # The heads are read on the blanked text. An item is matched on the
+    # page's own text, so a parenthetical description of a document counts
+    # towards its name while never opening a head of its own.
+    return text, heads
+
+
+def _item_tokens(item):
+    import unicodedata
+    norm = unicodedata.normalize('NFKC', str(item)).casefold()
+    if not _spaced_script(norm):
+        return None
+    return [t for t in re.findall(r'[^\W_]+', norm) if t not in _ITEM_STOPWORDS]
+
+
+def _token_pattern(token):
+    base = token[:-1] if token.endswith('s') and len(token) > 3 and token[:-1].isalpha() else token
+    return re.escape(base) + (r'(?:s|es)?' if base.isalpha() else '') + r'(?![^\W_])'
+
+
+def _head_span(item, plain, head):
+    """The span of the item when it stands at this head: its first content
+    token opens the piece (after at most three determiners) and each
+    further token follows within four words, in order. None otherwise."""
+    import unicodedata
+    tokens = _item_tokens(item)
+    text = plain.casefold()
+    pos = head
+    if tokens is None:
+        needle = unicodedata.normalize('NFKC', str(item)).casefold().strip()
+        stripped = text[pos:].lstrip(' \t-–—•*·▪:：、，,')
+        pos += len(text[pos:]) - len(stripped)
+        return (pos, pos + len(needle)) if needle and text.startswith(needle, pos) else None
+    if not tokens:
+        return None
+    first = re.compile(r'\W*' + _token_pattern(tokens[0]), re.I)
+    for _ in range(4):
+        m = first.match(text, pos)
+        if m:
+            break
+        skip = _DETERMINER_RE.match(text, pos) if not text[pos:pos + 1].isspace() else re.compile(r'\W+').match(text, pos)
+        if not skip or skip.end() == pos:
+            return None
+        pos = skip.end()
+    else:
+        return None
+    end = m.end()
+    for token in tokens[1:]:
+        m = re.compile(r'(?:\W+[^\W_]+){0,4}?\W+' + _token_pattern(token), re.I).match(text, end)
+        if not m:
+            return None
+        end = m.end()
+    return head, end
+
+
+def _document_span(item, sentence, bare_ok=False):
+    """The span of the item at a head of this sentence, or None when the
+    item stands nowhere in requirement position."""
+    plain, heads = _sentence_heads(sentence, bare_ok)
+    for head in heads:
+        span = _head_span(item, plain, head)
+        if span:
+            return span
+    return None
+
+
+def _list_passage(passages):
+    """Whether the quoted passages read as a document list, so a bare line
+    ("Hotel reservation") is an item of it: a documents cue somewhere, or
+    three or more short lines."""
+    if _DOCUMENT_CUES.search(passages) or _REQUIREMENT_CUE_RE.search(passages):
+        return True
+    short = [s for s in _sentences(passages) if len(s.split()) <= 12]
+    return len(short) >= 3
+
+
+def _enumeration_coverage(value, sentences, bare_ok):
+    """How many enumeration pieces the quoted enumeration carries and how
+    many of them a stored item opens or covers. The enumeration is every
+    sentence where a stored item stands at a head, every sentence that
+    states documents of its own, and, in a list passage, every list line
+    (a marker line or a bare line) beside them. A whole sentence of the
+    quote the stored list never touches counts against it, so a list
+    cannot drop one and still read as complete."""
+    total = covered = 0
+    previous = None
+    for sentence in sentences:
+        plain, heads = _sentence_heads(sentence, bare_ok)
+        # A sub-bullet under a line that ends with a colon ("Proof of
+        # funds:" / "* tax return" / "* bank statement") is part of that
+        # item, not an item of its own.
+        marker = _LIST_MARKER_RE.match(_plain(sentence))
+        above = _LIST_MARKER_RE.match(_plain(previous)) if previous is not None else None
+        sub_item = bool(marker and above and previous.rstrip().endswith((':', '：'))
+                        and marker.group().strip()[:1] != above.group().strip()[:1])
+        if not sub_item:
+            previous = sentence
+        if not heads or sub_item:
+            continue
+        spans = [span for item in value for span in [_head_span(item, plain, head) for head in heads] if span]
+        listed = bare_ok and (bool(_LIST_MARKER_RE.match(plain)) or not _REQUIREMENT_CUE_RE.search(_plain(sentence)))
+        if not spans and not listed and not _sentence_states('required_documents', sentence):
+            continue
+        total += len(heads)
+        covered += sum(1 for head in heads if any(start <= head < end for start, end in spans))
+    return total, covered
+
+
+def _sentence_supports(field, value, sentence, cells=None):
     from app.visa_snapshot.evidence_validator import field_value_supported
+    if cells:
+        if field == 'entry':
+            return _cell_entry(cells.get('entries') or '') == value
+        if field == 'validity':
+            return field_value_supported(field, value, cells.get('validity') or '')
     if field in ('fee', 'government_fee'):
         return field_value_supported(field, value, _monetary_text(sentence, value['currency']))
     if field == 'entry':
@@ -1639,12 +2285,35 @@ def _sentence_supports(field, value, sentence):
     return field_value_supported(field, value, sentence)
 
 
-def _sentence_problem(field, value, sentence, route, product, products, merged=None):
+def _duration_problem(field, sentence, n, unit, own, other, product, products, merged, cells=None):
+    """The gates a validity or stay figure passes in its sentence, or in
+    its header-named table cell."""
+    noun = 'validity' if field == 'validity' else 'stay'
+    if cells is not None:
+        cell = cells.get('validity') or ''
+        if field != 'validity' or not _figure_re(n, unit).search(cell):
+            return 'the row\'s validity cell (%s) does not state this figure' % cell
+        if _range_or_choice(cell, n):
+            return 'the row\'s validity cell states a range or a choice, not this one value'
+        return _several_figures_problem(cell, n, unit, product, products, merged)
+    if _range_or_choice(sentence, n):
+        return 'the sentence states a range or a choice of %s, not this one value' % ('validities' if noun == 'validity' else 'stays')
+    if not _bound(sentence, n, unit, own, other):
+        return 'the figure is not bound to a %s word in the sentence (%s)' % (
+            noun, 'a stay is not a validity' if noun == 'validity' else 'a validity is not a stay')
+    if _owned_by_document(sentence, n, unit):
+        return 'the figure is a passport\'s, certificate\'s or other document\'s duration, not the visa\'s'
+    return _governed_problem(sentence) or _several_figures_problem(sentence, n, unit, product, products, merged)
+
+
+def _sentence_problem(field, value, sentence, route, product, products, merged=None, cells=None):
     """Why this supporting sentence cannot prove the value for this cell, or
     None when every gate passes. The gates run from the sentence's subject
     outwards: whose sentence it is, when it applies, which stream of the
     product it restricts, which entry type it qualifies, then the field's
-    own binding, and last whether it names a visa class the route serves."""
+    own binding, and last whether it names a visa class the route serves.
+    A header-bound table row is read through its cells: the entries cell
+    is the entry statement and never a qualifier on the other columns."""
     from app.visa_snapshot.tstation import _num_unit, _validity_num_unit
     merged = merged if isinstance(merged, dict) else {}
     foreign = _foreign_subject(sentence, route)
@@ -1653,8 +2322,15 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
     problem = _scope_problem(sentence, route) or _temporal_problem(sentence) or _restrictive_problem(sentence, product, products)
     if problem:
         return problem
+    if cells is not None and product is not None:
+        problem = _row_binding_problem(cells, product)
+        if problem:
+            return problem
     if field != 'entry':
-        qualified = _entry_types(sentence, qualifiers=True)
+        qualified_in = sentence
+        if cells is not None and cells.get('entries'):
+            qualified_in = sentence.replace(cells['entries'], ' ', 1)
+        qualified = _entry_types(qualified_in, qualifiers=True)
         if qualified:
             known = _known_entries(product, products)
             if not known:
@@ -1664,21 +2340,13 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
                     '/'.join(sorted(qualified)), '/'.join(sorted(known)))
     if field == 'validity':
         n, unit = _validity_num_unit(value)
-        if _range_or_choice(sentence, n):
-            return 'the sentence states a range or a choice of validities, not this one value'
-        if not _bound(sentence, n, unit, _VALIDITY_WORDS, _STAY_WORDS):
-            return 'the figure is not bound to a validity word in the sentence (a stay is not a validity)'
-        problem = _several_figures_problem(sentence, n, unit, product, products, merged)
+        problem = _duration_problem(field, sentence, n, unit, _VALIDITY_WORDS, _STAY_WORDS, product, products, merged, cells)
         if problem:
             return problem
     elif field in ('max_stay_days', 'permitted_stay_days'):
         if not _figure_re(value, 'Day').search(sentence):
             return 'the figure does not stand beside a day word in the sentence (months or years are never converted)'
-        if _range_or_choice(sentence, value):
-            return 'the sentence states a range or a choice of stays, not this one value'
-        if not _bound(sentence, value, 'Day', _STAY_WORDS, _VALIDITY_WORDS):
-            return 'the figure is not bound to a stay word in the sentence (a validity is not a stay)'
-        problem = _several_figures_problem(sentence, value, 'Day', product, products, merged)
+        problem = _duration_problem(field, sentence, value, 'Day', _STAY_WORDS, _VALIDITY_WORDS, product, products, merged, cells)
         if problem:
             return problem
     elif field == 'permitted_stay':
@@ -1686,33 +2354,85 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
         if n:
             if not _figure_re(n, unit).search(sentence):
                 return 'the stay figure does not stand beside its unit word in the sentence'
-            if _range_or_choice(sentence, n):
-                return 'the sentence states a range or a choice of stays, not this one value'
-            if not _bound(sentence, n, unit, _STAY_WORDS, _VALIDITY_WORDS):
-                return 'the figure is not bound to a stay word in the sentence (a validity is not a stay)'
-            problem = _several_figures_problem(sentence, n, unit, product, products, merged)
+            problem = _duration_problem(field, sentence, n, unit, _STAY_WORDS, _VALIDITY_WORDS, product, products, merged, cells)
             if problem:
                 return problem
         elif _VALIDITY_WORDS.search(sentence):
             return 'the sentence states a validity, and the stay wording cannot be told apart from it'
+        elif _governed_problem(sentence):
+            return _governed_problem(sentence)
     elif field in ('fee', 'government_fee'):
         problem = (_fee_sentence_problem(sentence, route, product, products, merged)
                    or _currency_beside(sentence, value['amount'], value['currency'], route['destination_country']))
         if problem:
             return problem
     elif field == 'entry':
-        stated = _entry_types(sentence)
+        stated = {_cell_entry(cells.get('entries') or '')} - {None} if cells is not None else _entry_types(sentence)
         if stated != {value}:
             return 'the sentence states %s entries, not only %s' % ('/'.join(sorted(stated)) or 'no', value)
     return _class_problem(sentence, route, product, products, merged)
 
 
-def _check_fill_binding(field, value, proof, route, merged, product, label):
+_MARKER_ONLY_RE = re.compile(r'^\s*(?:\(?\d{1,2}[.)]|\(?[a-z][.)]|[ivx]{1,4}[.)])\s*$', re.I)
+
+
+def _list_sentences(text):
+    """The sentences of a quote, with a numbered marker the splitter cut
+    off ("2." before "One photo") joined back to its item."""
+    out = []
+    for sentence in _sentences(text):
+        if out and _MARKER_ONLY_RE.match(out[-1]):
+            out[-1] = out[-1].rstrip() + ' ' + sentence.lstrip()
+        else:
+            out.append(sentence)
+    return out
+
+
+def _quote_sentences(proof):
+    """The sentences of each quote in order, each with the sentences of the
+    same quote that stand before it (empty for a quote's first sentence).
+    A pronoun subject is read against all of them, not only the nearest,
+    because the splitter cuts an abbreviation into a piece of its own
+    ("... valid status in the U.S." / "are exempt from the requirement.")
+    and the subject then sits two pieces back."""
+    out = []
+    for item in proof['evidence']:
+        quoted = _list_sentences(item['quote'])
+        for index, sentence in enumerate(quoted):
+            out.append((sentence, tuple(quoted[:index])))
+    return out
+
+
+def _anaphora_problem(sentence, before, route, product, products, binding):
+    """Why a sentence whose subject points back to the sentence before it
+    cannot stand alone: the quote must include that sentence, and it must
+    pass the subject gates and bind to the product itself."""
+    if not _ANAPHORA_RE.match(sentence):
+        return None
+    if not before:
+        return 'the sentence\'s subject refers to the sentence before it, which the quote does not include'
+    text = ' '.join(s.strip() for s in before)
+    foreign = _foreign_subject(text, route)
+    unbound = [binding.get(s) for s in before] if product is not None else []
+    problem = ('the sentence before it is about %s, not %s' % ('/'.join(foreign), route['passport_nationality']) if foreign else
+               _scope_problem(text, route) or _restrictive_problem(text, product, products)
+               # The subject's own sentence must bind to the product too,
+               # and any of the quote's earlier sentences may carry it.
+               or (next((p for p in unbound if p), None) if unbound and all(unbound) else None))
+    if problem:
+        return 'the sentence\'s subject refers to the sentence before it, and ' + problem
+    return None
+
+
+def _check_fill_binding(field, value, proof, route, merged, product, label, sources=None):
     """Bind the quote to the cell's own subject. The general batch already
     proved the quote is literal and the figure occurs somewhere in it. This
     proves it is this product's, this nationality's and this field's value.
     A product fill is read sentence by sentence: the sentence that states
-    the value must itself bind to the product through its anchors."""
+    the value must itself bind to the product through its anchors. A
+    document must stand in the requirement position of its sentence, and
+    a table row is read through the header it stands under, which the
+    captured page supplies when the quote is the row alone."""
     passages = '\n'.join(item['quote'] for item in proof['evidence'])
     products = merged.get('visa_products') if isinstance(merged.get('visa_products'), list) else []
     product_type = product.get('type') if product is not None else None
@@ -1722,20 +2442,32 @@ def _check_fill_binding(field, value, proof, route, merged, product, label):
             raise PatchRejected('%s: the channel %s contradicts the served %s verdict' % (
                 label, value, merged.get('disposition') or 'unknown'))
     items = value if field == 'required_documents' else [value]
-    sentences = _sentences(passages)
+    rows = _delimited_rows(_row_context(proof, sources))
+    ordered = _quote_sentences(proof)
+    sentences = [s for s, _ in ordered]
+    before = dict(ordered)
     binding = {s: (_binding_problem(s, product, products) if product is not None else None) for s in sentences}
     bound = [s for s in sentences if binding[s] is None]
+    bare_ok = _list_passage(passages)
     for item in items:
-        candidates = [s for s in bound if _sentence_supports(field, item, s)]
+        candidates = [s for s in bound if _sentence_supports(field, item, s, rows.get(_row_key(s)))]
         if not candidates:
             what = 'the document "%s"' % item if field == 'required_documents' else 'this value'
-            stating = [s for s in sentences if binding[s] is not None and _sentence_supports(field, item, s)]
+            stating = [s for s in sentences if binding[s] is not None and _sentence_supports(field, item, s, rows.get(_row_key(s)))]
             if stating:
                 raise PatchRejected('%s: the sentence that states %s does not bind to the product: %s' % (
                     label, what, binding[stating[0]]))
             raise PatchRejected('%s: no quoted sentence %sstates %s' % (
                 label, 'bound to the product ' if product_type else '', what))
-        problems = [_sentence_problem(field, item, s, route, product, products, merged) for s in candidates]
+        if field == 'required_documents':
+            positioned = [s for s in candidates if _document_span(item, s, bare_ok)]
+            if not positioned:
+                raise PatchRejected('%s: the document "%s" does not stand in the requirement position of its sentence (inside a '
+                                    'clause describing another party, an aside, or beside no requirement cue)' % (label, item))
+            candidates = positioned
+        problems = [_anaphora_problem(s, before[s], route, product, products, binding)
+                    or _sentence_problem(field, item, s, route, product, products, merged, rows.get(_row_key(s)))
+                    for s in candidates]
         if all(problems):
             raise PatchRejected(label + ': ' + problems[0])
 
@@ -1839,7 +2571,7 @@ def _validate_fill(fill, layer, sources, prior):
         raise PatchRejected(label + ': a fill needs a reviewed proof')
     _review_date(proof, label)
     _check_fill_value(field, fill['value'], proof, label)
-    _check_fill_binding(field, fill['value'], proof, route, merged, product, label)
+    _check_fill_binding(field, fill['value'], proof, route, merged, product, label, sources)
     return 'fill'
 
 
@@ -1932,6 +2664,51 @@ def _mask_product(product, fields):
     return out
 
 
+def _page_span(quote, text):
+    """The captured page's own spelling of a quote that quote_literal
+    accepted through its whitespace-free fallback: the first span of the
+    page whose non-blank characters are the quote's, or None."""
+    compact = re.sub(r'\s+', '', str(quote or ''))
+    if not compact or len(compact) > 4000:
+        return None
+    pattern = r'\s*'.join(re.escape(ch) for ch in compact)
+    m = re.search(pattern, text, re.I)
+    return m.group() if m else None
+
+
+def _aligned_proof(proof, sources):
+    """The proof with each quote rewritten to the span as the captured page
+    prints it, so the served citation is searchable on the page. A quote
+    the page prints verbatim stays as it is."""
+    from scripts.convert_reviewed_general_batch import quote_literal
+    proof = deepcopy(proof)
+    for item in proof.get('evidence') or []:
+        page = sources.get(item.get('source_id'))
+        if not page or item['quote'] in page['text']:
+            continue
+        span = _page_span(item['quote'], page['text'])
+        if span and quote_literal(span, page['text']):
+            item['quote'] = span.strip()
+    return proof
+
+
+def _partial_reason(fill, sources):
+    """Why a document list is stored partial: one quoted document is not
+    the destination's list, and a list shorter than the enumeration it
+    quotes is known to be incomplete. None for a complete list."""
+    value = fill['value']
+    if fill['field'] != 'required_documents' or not isinstance(value, list):
+        return None
+    if len(value) == 1:
+        return 'a single quoted document is stored as a partial list and is never credited'
+    passages = '\n'.join(item['quote'] for item in fill['proof']['evidence'])
+    total, covered = _enumeration_coverage(value, [s for item in fill['proof']['evidence'] for s in _list_sentences(item['quote'])],
+                                           _list_passage(passages))
+    if total and covered < total:
+        return 'the list covers %d of the %d items of the enumeration it quotes and is stored as a partial list, never credited' % (covered, total)
+    return None
+
+
 def _apply_fills(out, fills, route, sources):
     """Write the fills into the seed entry copy. Returns the applied fills
     and the route-level fields whose value changed."""
@@ -1947,11 +2724,23 @@ def _apply_fills(out, fills, route, sources):
             reason = _absence_reason(fill['proof'], sources, field, product, fields.get('visa_products'))
             record['checked_source_urls'] = [sources[i]['url'] for i in fill['proof']['source_ids']]
             record['field_page_id'] = _field_page_id(fill['proof'], sources, field, product, fields.get('visa_products'))
-        # A single quoted document is not the destination's list. Its proof
-        # is stored as partial with no verified element, so the grader never
-        # credits the cell and the record's grade cannot rise on it.
-        partial = field == 'required_documents' and isinstance(fill['value'], list) and len(fill['value']) == 1
+            reviewed = None
+        else:
+            # The stored quote is the page's own text, and a fee quote
+            # carries its age scope into the note.
+            reviewed = _aligned_proof(fill['proof'], sources)
+            if field in ('fee', 'government_fee'):
+                scope = _age_scope_note('\n'.join(item['quote'] for item in reviewed['evidence']))
+                if scope:
+                    reviewed['scope_note'] = (str(reviewed.get('scope_note') or '').strip() + ' ' + scope).strip()
+        # A single quoted document is not the destination's list, and a list
+        # shorter than the enumeration it quotes is known to be incomplete.
+        # Either proof is stored as partial with no verified element, so the
+        # grader never credits the cell and the record's grade cannot rise.
+        partial_reason = None if absence else _partial_reason(fill, sources)
+        partial = partial_reason is not None
         record['partial'] = partial
+        record['partial_reason'] = partial_reason
         if fill['target'] == 'product':
             index = _product_index(fields['visa_products'], fill['product_type'], label)
             record['product_index'] = index
@@ -1965,7 +2754,7 @@ def _apply_fills(out, fills, route, sources):
             else:
                 product[field] = deepcopy(fill['value'])
                 unpublished.difference_update(CELLS[field])
-                proof = _proof_for(fill['proof'], route, field, product)
+                proof = _proof_for(reviewed, route, field, product)
                 if partial:
                     proof.update(status='partial', verified_elements=[], retained_unverified_elements=[])
             proof['verification_scope'] = SCOPE
@@ -1988,7 +2777,7 @@ def _apply_fills(out, fills, route, sources):
             else:
                 fields[field] = deepcopy(fill['value'])
                 unpublished.difference_update(CELLS[field])
-                proof = _proof_for(fill['proof'], route, field)
+                proof = _proof_for(reviewed, route, field)
                 proof['verification_scope'] = SCOPE
                 if partial:
                     proof.update(status='partial', verified_elements=[], retained_unverified_elements=[])
@@ -2104,7 +2893,7 @@ def _grade_verdict(a, guidance, provenance, route):
     if not isinstance(proof, dict):
         return False, 'no stored proof for the field'
     if a.get('partial'):
-        return False, 'a single quoted document is stored as a partial list and is never credited'
+        return False, a.get('partial_reason') or 'a single quoted document is stored as a partial list and is never credited'
     if proof.get('status') not in (None, 'reviewed', 'verified'):
         return False, 'the stored proof status %r is not a review' % proof.get('status')
     if not tstation.verdict_provenance_supported(dict(proof, fields=['disposition'])):

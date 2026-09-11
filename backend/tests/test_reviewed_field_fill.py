@@ -1211,3 +1211,338 @@ def test_an_anchorless_sentence_refuses_on_a_two_product_route():
     fill = product_fill('fee', None, absence('The fee page states no amount.', source_ids=('anchor5c',)))
     with pytest.raises(PatchRejected, match='none of the pages checked mentions the product Tourist visa \\(by name or by an anchor: paper, tourist, tourist visa, single entry\\)'):
         run(fill, current=current, sources=SOURCES + [quiet])
+
+
+# Round 5. The fourth review served "reference number" as a required
+# document, accepted a hedged cap as a flat validity, credited a list
+# shorter than the enumeration it quotes, bound a sentence about the
+# destination's own citizens and a pronoun-subject sentence to a foreign
+# applicant, and refused decidable rows. Each is pinned here.
+
+RU_TOURIST_CONFIRMATION = ('To obtain a Russian tourist visa an applicant should, besides documents listed in the previous paragraph, '
+                           'present a standard tourist confirmation (fax copy, click here to view the sample ) from a hosting '
+                           'authorized Russian travel agency or a hotel, which is registered with the Russian Ministry of Foreign '
+                           'Affairs and has a valid reference number.')
+
+
+def test_a_document_must_stand_in_the_requirement_position_of_its_sentence():
+    for item in ('reference number', 'hotel', 'travel agency', 'fax copy', 'Russian Ministry of Foreign Affairs', 'sample', 'applicant'):
+        assert c._document_span(item, RU_TOURIST_CONFIRMATION) is None, item
+        fill, sources = on_page('required_documents', [item], RU_TOURIST_CONFIRMATION, 'r5doc')
+        with pytest.raises(PatchRejected, match='the document "%s" does not stand in the requirement position of its sentence' % item):
+            run(fill, sources=sources)
+    assert c._document_span('Standard tourist confirmation', RU_TOURIST_CONFIRMATION) is not None
+    fill, sources = on_page('required_documents', ['Standard tourist confirmation'], RU_TOURIST_CONFIRMATION, 'r5doc')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    assert report['routes'][0]['records'][0]['required_documents'] == 'Standard tourist confirmation'
+    # The fixture's own comma list keeps every item at a head, and an item
+    # the sentence never names is still refused for absence, not position.
+    sentence = ('Documents required: a valid passport, a completed visa application form, one photo, '
+                'a tourist confirmation from a registered Russian tour operator and a medical insurance policy.')
+    for item in ('Valid passport', 'Completed visa application form', 'One photo',
+                 'Tourist confirmation from a registered Russian tour operator', 'Medical insurance policy'):
+        assert c._document_span(item, sentence), item
+    assert c._document_span('Bank statement', sentence) is None
+    with pytest.raises(PatchRejected, match='no quoted sentence states the document "Bank statement'):
+        run(route_fill('required_documents', ['Valid passport', 'Bank statement'], proof(sentence)))
+    # An aside that opens with an inclusion cue names the very documents the
+    # requirement asks for, so they do stand in position. Any other aside
+    # still opens no head, which is what refuses "fax copy" above.
+    somali = ('Applicants should complete the digital form, upload the required documents (including a valid passport), '
+              'pay the applicable fee, and await approval by email, which must be presented upon arrival.')
+    assert c._document_span('Valid passport', somali, True) is not None
+    assert c._document_span('Valid passport', somali.replace('including a valid passport', 'a valid passport'), True) is None
+    fill, sources = on_page('required_documents', ['Valid passport'], somali, 'r5incl')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    assert report['routes'][0]['records'][0]['required_documents'] == 'Valid passport'
+    # A third party's verb never opens a requirement region.
+    assert c._document_span('reference number', 'The confirmation carries a reference number.') is None
+    assert c._document_span('tourist confirmation', 'The travel agency provides a tourist confirmation.') is None
+    # A numbered list keeps its items at their markers and an aside in
+    # brackets never opens a head of its own.
+    numbered = ('1.    Double sided completed application form http://visa.kdmid.ru, one per person.\n'
+                '2.    One professional passport sized photo (3,5 x 4.5 cm) The photo should be glued to the form.\n'
+                '3.    National passport (original) valid for at least 6 months after the intended date of departure from Russia.')
+    for item in ('Double sided completed application form', 'One professional passport sized photo',
+                 'National passport (original) valid for at least 6 months after the intended date of departure from Russia'):
+        assert any(c._document_span(item, s, True) for s in c._list_sentences(numbered)), item
+
+
+def test_a_hedged_cap_is_refused_as_a_validity_and_does_not_block_the_absence():
+    sentence = ('Generally, a visitor visa may be valid for up to a maximum of 10 years, or until the expiry of either your '
+                'passport or biometrics, whichever comes first.')
+    assert c._governed_problem(sentence) == 'the figure is governed by a hedge (Generally) and a cap (up to a maximum of), not stated as the value'
+    assert c._states_value('validity', sentence) is None
+    src, url = page('r5cap', 'Tourist visa. ' + sentence, path='visas/validity')
+    fill = product_fill('validity', '10 years', proof('Tourist visa. ' + sentence, sid='r5cap', url=url))
+    with pytest.raises(PatchRejected, match='governed by a hedge \\(Generally\\) and a cap \\(up to a maximum of\\)'):
+        run(fill, sources=SOURCES + [src])
+    absent = product_fill('validity', None, absence('The page states a discretionary ceiling, not a validity.', source_ids=('r5cap',)))
+    (overlay, report), manifest, current = run(absent, sources=SOURCES + [src])
+    assert report['absences'] == 1 and report['routes'][0]['fills'][0]['field_page_id'] == 'r5cap'
+    assert t.field_status(report['routes'][0]['records'][0])['validity_duration'] == 'not-published'
+    # A bare "up to" is the fixture's wording of a fixed validity, not a cap.
+    assert c._governed_problem('A tourist visa is valid for up to 30 days') is None
+    # An "as long as" that governs a figure is a cap; with no figure after
+    # it the same words are a condition and cap nothing.
+    assert c._governed_problem('There is a difference between the validity of your visa (which may be as long as one year for '
+                               'Vietnamese applicants) and the length of time you may stay in the United States.') == \
+        'the figure is governed by a cap (as long as), not stated as the value'
+    assert c._governed_problem('A tourist visa is valid for 30 days as long as your passport stays valid.') is None
+    for hedged in ('A tourist visa is usually valid for 30 days.', 'La validez no será superior a 90 días.',
+                   'Thị thực có thời hạn không quá 30 ngày.', 'Виза действительна не более 90 дней.', 'Visa berlaku maksimal 30 hari.',
+                   '签证有效期最长为90天。'):
+        assert c._governed_problem(hedged), hedged
+        assert c._states_value('validity', hedged) is None, hedged
+    fill, sources = on_page('validity', '30 days', 'A tourist visa is usually valid for 30 days.', 'r5hedge')
+    with pytest.raises(PatchRejected, match='governed by a hedge \\(usually\\)'):
+        run(fill, sources=sources)
+    fill, sources = on_page('max_stay_days', 30, 'A tourist visa holder may stay for a period not exceeding 30 days.', 'r5stay')
+    with pytest.raises(PatchRejected, match='governed by a cap \\(not exceeding\\)'):
+        run(fill, current=stayless_layer(), sources=sources)
+
+
+def test_a_list_shorter_than_the_enumeration_it_quotes_is_stored_partial():
+    sentence = 'To complete the form, you will need your passport, a credit card, and an email address.'
+    short, sources = on_page('required_documents', ['Passport', 'Credit card'], sentence, 'r5list')
+    (overlay, report), manifest, current = run(short, sources=sources)
+    applied = report['routes'][0]['fills'][0]
+    assert applied['partial'] is True and applied['grade_credited'] is False
+    assert applied['partial_reason'] == 'the list covers 2 of the 3 items of the enumeration it quotes and is stored as a partial list, never credited'
+    assert applied['grade_reason'] == applied['partial_reason']
+    stored = report['routes'][0]['guidance']['visa_products'][0]['field_provenance']['required_documents']
+    assert stored['status'] == 'partial' and stored['verified_elements'] == []
+    assert report['routes'][0]['records'][0]['required_documents'] == 'Passport, Credit card'
+    whole, sources = on_page('required_documents', ['Passport', 'Credit card', 'Email address'], sentence, 'r5list')
+    (overlay, report), manifest, current = run(whole, sources=sources)
+    applied = report['routes'][0]['fills'][0]
+    assert applied['partial'] is False and applied['grade_credited'] is True and applied['partial_reason'] is None
+    # A numbered enumeration counts its items too, sub-bullets under a colon
+    # belong to their item, and a bare list line with a verb is an explanation.
+    keta = '01 Valid passport 02 Valid e-mail address 03 ID photo 04 Credit or debit cards that can be used to pay the fee'
+    assert c._enumeration_coverage(['Valid passport', 'Valid e-mail address', 'ID photo'], c._list_sentences(keta), True)[1] < \
+        c._enumeration_coverage(['Valid passport', 'Valid e-mail address', 'ID photo'], c._list_sentences(keta), True)[0]
+    nested = '- Fotokopi Bukti Keuangan:\n* Surat Pajak Tahunan (SPT PPH-21)\n* Rekening koran tabungan 3 bulan terakhir'
+    assert c._enumeration_coverage(['Fotokopi Bukti Keuangan'], c._list_sentences(nested), True) == (1, 1)
+    explained = 'Copy of the passport.\nApplication form must be signed and dated.\nHotel reservation.\nRecent face photo'
+    assert c._enumeration_coverage(['Copy of passport', 'Hotel reservation', 'Recent face photo'], c._list_sentences(explained), True) == (3, 3)
+    # A whole requirement sentence of the quote the list never touches
+    # counts against it too, so a list cannot drop one and read complete.
+    two = 'You must present a valid passport and one photo. Applicants must also submit a bank statement.'
+    fill, sources = on_page('required_documents', ['Valid passport', 'One photo'], two, 'r5two')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    applied = report['routes'][0]['fills'][0]
+    assert applied['partial'] is True and applied['grade_credited'] is False
+    assert applied['partial_reason'].startswith('the list covers 2 of the 3 items')
+    fill, sources = on_page('required_documents', ['Valid passport', 'One photo', 'Bank statement'], two, 'r5two')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    assert report['routes'][0]['fills'][0]['partial'] is False
+    # On a productless route where the list is the last empty cell, a
+    # multi-item list that is shorter than its own quote cannot lift the
+    # grade either, although the single-item rule does not touch it.
+    current = exempt_layer()
+    sources = [source('es_entry', ES_URL, ES_TEXT)]
+    with pytest.raises(PatchRejected, match='the grade would rise on JPN\\|JPN\\|ESP\\S* although the grader did not credit the fill \\(the list covers 2 of the 3'):
+        run(es_fill(['Documento de viaje', 'Reserva de hotel']), current=current, sources=sources)
+
+
+def test_the_destinations_own_citizens_are_a_subject_not_a_place():
+    route = dict(ROUTE, travel_document_type='ordinary_passport')
+    assert c._foreign_subject('Russian citizens, including dual citizens, need a valid Russian passport.', route) == ['RUS']
+    assert c._foreign_subject('Holders of a Russian passport do not need a visa.', route) == ['RUS']
+    assert c._foreign_subject('A visa to Russia is valid for 30 days.', route) == []
+    assert c._foreign_subject('The Russian tourist visa is valid for 30 days.', route) == []
+    fill, sources = on_page('required_documents', ['Valid Russian passport'],
+                            'Russian citizens, including dual citizens, need a valid Russian passport.', 'r5own')
+    with pytest.raises(PatchRejected, match='the sentence is about RUS, not AUS'):
+        run(fill, sources=sources)
+
+
+def test_a_pronoun_subject_takes_its_sentence_from_the_quote():
+    alone = 'They must carry official proof of status and a valid passport from their country of nationality.'
+    fill, sources = on_page('required_documents', ['Official proof of status', 'Valid passport'], alone, 'r5they')
+    with pytest.raises(PatchRejected, match="the sentence's subject refers to the sentence before it, which the quote does not include"):
+        run(fill, sources=sources)
+    exempt = ('Lawful permanent residents of the United States who hold valid status in the U.S. are exempt from the visa requirement. '
+              + alone)
+    fill, sources = on_page('required_documents', ['Official proof of status', 'Valid passport'], exempt, 'r5they2')
+    with pytest.raises(PatchRejected, match="the sentence's subject refers to the sentence before it, and the sentence before it is about USA, not AUS"):
+        run(fill, sources=sources)
+    own = 'Australian citizens need a visa. They must present a valid passport and one photo.'
+    fill, sources = on_page('required_documents', ['Valid passport', 'One photo'], own, 'r5they3')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    assert report['routes'][0]['records'][0]['required_documents'] == 'Valid passport, One photo'
+    assert c._ANAPHORA_RE.match('Such applicants need a passport') and c._ANAPHORA_RE.match('Those travellers must')
+    assert c._ANAPHORA_RE.match('The applicant must present a passport') is None
+
+
+RECIPROCITY = ('Visa\nClassification | Fee | Number\nof Entries | Validity\nPeriod\n'
+               'A-1 | None | Multiple | 24 Months\nB-1 | None | Multiple | 120 Months\nB-1/B-2 | None | Multiple | 120 Months')
+
+
+def test_a_reciprocity_row_binds_to_its_header():
+    rows = c._delimited_rows(RECIPROCITY)
+    assert rows['B-1/B-2 | None | Multiple | 120 Months'] == {'class': 'B-1/B-2', 'fee': 'None', 'entries': 'Multiple', 'validity': '120 Months'}
+    assert c._delimited_rows('B-1/B-2 | None | Multiple | 120 Months') == {}
+    label = 'Visitor visa (B-2 or B-1/B-2)'
+    current = labelled_layer(label, entry=None)
+    src, url = page('r5recip', 'Visa reciprocity schedule.\n' + RECIPROCITY)
+    entry = product_fill('entry', 'multiple', proof(RECIPROCITY, sid='r5recip', url=url), product_type=label)
+    (overlay, report), manifest, current = run(entry, current=current, sources=SOURCES + [src])
+    row = report['routes'][0]['records'][0]
+    assert row['entries'] == 'Multiple' and t.field_status(row)['entries'] == 'filled'
+    validity = product_fill('validity', '120 months', proof(RECIPROCITY, sid='r5recip', url=url), product_type=label)
+    (overlay, report), manifest, current = run(validity, current=labelled_layer(label, entry=None), sources=SOURCES + [src])
+    assert (report['routes'][0]['records'][0]['validity_duration'], report['routes'][0]['records'][0]['validity_unit']) == (120, 'Month')
+    # The row may be quoted on its own when the captured page prints the
+    # header above it, which is how the reciprocity schedules are quoted.
+    bare = 'B-1/B-2 | None | Multiple | 120 Months'
+    src4, url4 = page('r5row', 'Visa reciprocity schedule.\n' + RECIPROCITY, path='reciprocity-row')
+    alone = product_fill('entry', 'multiple', proof(bare, sid='r5row', url=url4), product_type=label)
+    (overlay, report), manifest, current = run(alone, current=labelled_layer(label, entry=None), sources=SOURCES + [src4])
+    assert report['routes'][0]['records'][0]['entries'] == 'Multiple'
+    # A quote that stops before the footnote marker the page prints on that
+    # row is not the row, so it proves nothing.
+    footnoted = RECIPROCITY.replace('B-1/B-2 | None | Multiple | 120 Months', 'B-1/B-2 | None | Multiple | 120 Months ▲')
+    src5, url5 = page('r5foot', 'Visa reciprocity schedule.\n' + footnoted, path='reciprocity-footnote')
+    with pytest.raises(PatchRejected, match='no quoted sentence bound to the product states this value'):
+        run(product_fill('entry', 'multiple', proof(bare, sid='r5foot', url=url5), product_type=label),
+            current=labelled_layer(label, entry=None), sources=SOURCES + [src5])
+    # Without its header anywhere the row is words: a bare "Multiple" states
+    # no entry type and 120 Months is bound to no validity word.
+    src2, url2 = page('r5bare', 'Visa reciprocity schedule.\n' + bare)
+    with pytest.raises(PatchRejected, match='no quoted sentence bound to the product states this value'):
+        run(product_fill('entry', 'multiple', proof(bare, sid='r5bare', url=url2), product_type=label),
+            current=labelled_layer(label, entry=None), sources=SOURCES + [src2])
+    with pytest.raises(PatchRejected, match='qualified by a multiple entry type the subject does not state'):
+        run(product_fill('validity', '120 months', proof(bare, sid='r5bare', url=url2), product_type=label),
+            current=labelled_layer(label, entry=None), sources=SOURCES + [src2])
+    # Another class's row never states this product's entries, and prose
+    # "multiple" is still no entry statement.
+    other = 'Visa\nClassification | Fee | Number\nof Entries | Validity\nPeriod\nC-1 | None | Multiple | 60 Months'
+    src3, url3 = page('r5other', 'Visa reciprocity schedule.\n' + other)
+    with pytest.raises(PatchRejected, match="the row's class cell \\(C-1\\) carries no class code of the product"):
+        run(product_fill('entry', 'multiple', proof(other, sid='r5other', url=url3), product_type=label),
+            current=labelled_layer(label, entry=None), sources=SOURCES + [src3])
+    with pytest.raises(PatchRejected, match='no quoted sentence bound to the product states this value'):
+        fill, sources = on_page('entry', 'multiple', 'The B-1/B-2 visa is issued as Multiple.', 'r5prose', product_type=label)
+        run(fill, current=labelled_layer(label, entry=None), sources=sources)
+
+
+def test_an_adult_age_threshold_fee_records_its_scope_and_an_older_band_is_refused():
+    sentence = 'A partir de los 12 años de edad, deberá abonar una tasa de visado de 90 EUROS.'
+    fill, sources = on_page('fee', {'amount': 90, 'currency': 'EUR'}, sentence, 'r5age')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    product = report['routes'][0]['guidance']['visa_products'][0]
+    assert product['fee'] == {'amount': 90, 'currency': 'EUR'}
+    assert product['field_provenance']['fee']['note'].endswith('Fee stated for applicants aged 12 and over.')
+    older = 'Los solicitantes mayores de 21 años abonan una tasa de visado de 120 euros.'
+    fill, sources = on_page('fee', {'amount': 120, 'currency': 'EUR'}, older, 'r5age2')
+    with pytest.raises(PatchRejected, match="the fee is stated for applicants aged 21 and over, not the product's own fee"):
+        run(fill, sources=sources)
+    with pytest.raises(PatchRejected, match='prices a concession or an eligibility class'):
+        fill, sources = on_page('fee', {'amount': 45, 'currency': 'EUR'}, 'Los menores de 6 a 12 años abonan una tasa de visado de 45 euros.', 'r5age3')
+        run(fill, sources=sources)
+
+
+def test_a_stored_quote_is_the_pages_own_text():
+    text = 'Tourist visa. Documents required: a valid passport (see sample) and one photo.'
+    src, url = page('r5align', text)
+    written = 'Documents required: a valid passport (see sample ) and one photo.'
+    assert written not in text and c._page_span(written, text) == 'Documents required: a valid passport (see sample) and one photo.'
+    fill = product_fill('required_documents', ['Valid passport', 'One photo'], proof(written, sid='r5align', url=url))
+    (overlay, report), manifest, current = run(fill, sources=SOURCES + [src])
+    stored = report['routes'][0]['guidance']['visa_products'][0]['field_provenance']['required_documents']
+    assert stored['quote'] == 'Documents required: a valid passport (see sample) and one photo.' and stored['quote'] in text
+    assert manifest['specification']['routes'][0]['fills'][0]['proof']['evidence'][0]['quote'] == written
+    assert c.verify_prepared(manifest['specification'], [current], manifest, overlay)['fills'] == 1
+
+
+def test_a_stream_named_only_after_unless_is_not_the_subject():
+    sentence = ('Visitors are required to have adequate funds to cover the duration of their stay without working and, unless in '
+                'transit to Chinese Mainland or the Macao Special Administrative Region, to hold onward or return tickets.')
+    products = layer()['merged_guidance']['visa_products']
+    assert c._restrictive_problem(sentence, None, products) is None
+    assert c._restrictive_problem('Transit passengers must hold onward tickets.', None, products) == \
+        'the sentence is about a transit stream the served product is not'
+    assert c._restrictive_problem('Except for tourists, transit passengers need a transit visa.', None, products)
+    fill, sources = on_page('required_documents', ['Adequate funds to cover the duration of their stay without working', 'Onward or return tickets'],
+                            sentence, 'r5unless', target='route')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    assert report['routes'][0]['records'][0]['required_documents'].startswith('Adequate funds')
+
+
+def test_a_discretion_sentence_does_not_block_an_entry_absence():
+    discretion = ('A visa officer has discretion to issue you a single-entry visa or multiple entry visa, and decide how long it '
+                  'will be valid for.')
+    assert c._states_value('entry', 'Tourist visa. ' + discretion) is None
+    assert c._states_value('validity', 'Tourist visa. ' + discretion) is None
+    assert c._temporal_problem('The number of entries is determined by consular officials.')
+    assert c._temporal_problem('We determine the length of your visa on a case by case basis.')
+    firm = 'Multiple Entry, non-extendable and non-convertible'
+    assert c._states_value('entry', firm) == firm and c._temporal_problem(firm) is None
+    assert c._states_value('entry', 'Visas are issued as multiple entry at the discretion of the officer.')
+    current = labelled_layer('Tourist visa', entry=None)
+    src, url = page('r5disc', 'Tourist visa. ' + discretion, path='visas/entries')
+    absent = product_fill('entry', None, absence('The officer decides the entry type.', source_ids=('r5disc',)))
+    (overlay, report), manifest, current = run(absent, current=current, sources=SOURCES + [src])
+    assert report['absences'] == 1 and t.field_status(report['routes'][0]['records'][0])['entries'] == 'not-published'
+    src2, url2 = page('r5firm', 'Tourist visa. ' + firm, path='visas/entries2')
+    with pytest.raises(PatchRejected, match='which states a value: "Multiple Entry, non-extendable'):
+        run(product_fill('entry', None, absence('No entry type.', source_ids=('r5firm',))), current=labelled_layer('Tourist visa', entry=None),
+            sources=SOURCES + [src2])
+
+
+def test_a_documents_duration_never_states_the_visas():
+    for sentence in ('справку об отсутствии ВИЧ-инфекции (действительна 3 месяца).',
+                     'menunjukkan paspor yang sah dan masih berlaku paling singkat 6 bulan sebelum masa berlakunya habis',
+                     "Applicant's passport should have at least six months validity at the time of making application.",
+                     'The medical insurance policy must be valid for 90 days.'):
+        assert c._states_value('validity', sentence) is None, sentence
+    for sentence in ('Masa berlaku visa kunjungan saat kedatangan elektronik (e-voa) adalah 90 hari sejak diterbitkan.',
+                     'The visa is valid for 90 days and the passport must be valid for six months.',
+                     'For e-Tourist Visa (30 days), the validity would be 30 days from the date of your first arrival'):
+        assert c._states_value('validity', sentence), sentence
+    fill, sources = on_page('validity', '6 months', 'The passport must be valid for 6 months beyond the tourist visa.', 'r5doc6')
+    with pytest.raises(PatchRejected, match="the figure is a passport's, certificate's or other document's duration, not the visa's"):
+        run(fill, sources=sources)
+
+
+def test_a_question_cue_line_is_not_a_document_list():
+    index = ('Frequently asked questions\nQ28\nHow can I apply for an eVISA?\nQ29\nWhat are the required documents to apply for an eVISA?\n'
+             'Q30\nWhat are the photo requirements?\nQ31\nDo I have to buy a confirmed ticket before applying for an eVISA?\n')
+    assert c._states_value('required_documents', index) is None
+    assert c._states_value('required_documents', 'Tourist visa\nDocuments required:\n- Passport valid for six months\n- One photo\n')
+    src, url = page('r5faq', 'Tourist visa. ' + index, path='faq2')
+    fill = route_fill('required_documents', None, absence('The FAQ index lists the question and no answer.', source_ids=('r5faq',)))
+    (overlay, report), manifest, current = run(fill, sources=SOURCES + [src])
+    assert report['absences'] == 1
+
+
+def test_a_fee_table_states_a_fee_and_distant_sentences_do_not():
+    table = ('Country/Territory Wise e-Tourist Visa Fee \n(in US $) \n \nSl No. Countries 30 days e-TV 01 year e-TV 05 years e-TV \n'
+             '1 Albania 10 25 40 200 \n2 Andorra 10 25 40 200 \n')
+    assert c._states_value('fee', table) == 'Country/Territory Wise e-Tourist Visa Fee / (in US $) / 1 Albania 10 25 40 200'
+    far = 'Tourist visa. The validity of your passport matters.\n' + 'Other text.\n' * 30 + 'Processing takes 30 days.'
+    assert c._states_value('validity', far) is None
+    assert c._states_value('fee', 'Tourist visa. Consular fee\n' + 'Other text.\n' * 30 + 'Tourist | USD | 160') is None
+    assert c._states_value('fee', 'Consular fee\nTourist visa | USD | 160')
+    assert c._states_value('entry', 'Tourist visa\nNumber of entries\nMultiple') and c._states_value('entry', 'Number of entries\n' + 'x\n' * 5 + 'Multiple') is None
+
+
+def test_a_visa_application_centre_is_an_authorised_agent_channel():
+    from app.visa_snapshot.evidence_validator import field_value_supported
+    assert field_value_supported('application_channel', 'authorised_agent',
+                                 'La solicitud de visado se presenta ante Indonesia BLS Visa Spain, Unit 1001, Piso 10, Palma One Building, Jakarta Selatan.')
+    assert field_value_supported('application_channel', 'authorised_agent', 'Applications are lodged at the VFS visa application centre.')
+    assert not field_value_supported('application_channel', 'authorised_agent', 'Applications are lodged at the Embassy in Canberra.')
+    # A sentence that only says where an application goes is as often about
+    # the embassy itself, so the centre or the provider has to be named.
+    assert not field_value_supported('application_channel', 'authorised_agent',
+                                     'La solicitud de visado se presenta ante la Embajada de España en Yakarta.')
+    raw = deepcopy(RAW)
+    raw.pop('application_channel'); raw.pop('application_channel_detail')
+    fill, sources = on_page('application_channel', 'authorised_agent', 'Tourist visa applications are lodged at the VFS visa application centre in Canberra.',
+                            'r5vac', target='route')
+    (overlay, report), manifest, current = run(fill, current=layer(raw=raw), sources=sources)
+    assert report['routes'][0]['records'][0]['application_method'] == 'Agency Service'

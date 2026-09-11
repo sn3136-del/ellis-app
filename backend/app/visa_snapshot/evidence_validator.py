@@ -377,7 +377,16 @@ def field_value_supported(name: str, value, text: str) -> bool:
                 # procedure cannot prove a general no-application route.
                 return bool(re.fullmatch(r"(?:" + canonical[value] + r")[.!]?", low))
             return bool(re.search(canonical[value], low))
-        pattern = {"authorised_agent": r"accredited (?:travel )?agen|authori[sz]ed agen",
+        # An outsourced visa application centre (BLS, VFS, TLScontact, a
+        # "centro de solicitud de visados") is the authorised agent the
+        # application is lodged with: "la solicitud de visado se presenta
+        # ante Indonesia BLS Visa Spain". The centre or the provider has to
+        # be named, because a sentence that only says where an application
+        # is submitted is as often about the embassy itself.
+        pattern = {"authorised_agent": r"accredited (?:travel )?agen|authori[sz]ed agen|\bbls\b|\bvfs\b|tls ?contact|"
+                                       r"(?:visa )?application cent(?:re|er)|centro de solicitud de visados?|"
+                                       r"centre de (?:demande|dépôt|réception) (?:de|des) (?:visas?|demandes)|"
+                                       r"agencia (?:autorizada|acreditada)|agente (?:autorizado|acreditado)",
                    "embassy": r"embassy|consulate|mission", "visa_application_centre": r"visa application cent",
                    "evisa": r"e-?visa|electronic visa", "online": r"online|electronic|e-?visa",
                    "none": r"no application|visa[- ]free|without a visa", "on_arrival": r"on arrival|upon arrival"}.get(str(value))
