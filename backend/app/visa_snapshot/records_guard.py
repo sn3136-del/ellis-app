@@ -52,9 +52,18 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
     out = preserve_unresolved_pending(route, out, db)
     pending = bool(out.get("detail_pending"))
     if low:
-        from .publication_scope import scoped_exemption, scoped_required_evisa, project_reader
+        from .publication_scope import (scoped_exemption, scoped_required_evisa,
+                                        scoped_by_grade, project_reader)
+        # The narrow allowlisted projections first; then the general rule:
+        # a route whose verdict-bearing row is not Low is published, with
+        # only its Low sibling products withheld, each individually. A Low
+        # verdict row falls through to the whole-route hold below.
         scope = (scoped_exemption(route, out, rows, conflict=conflict, pending=pending)
-                 or scoped_required_evisa(route, out, rows, conflict=conflict, pending=pending))
+                 or scoped_required_evisa(route, out, rows, conflict=conflict, pending=pending)
+                 or scoped_by_grade(route, out, rows, conflict=conflict, pending=pending,
+                                    grounded_ok=grounded_verdict_supported(gc),
+                                    disputed_fields=disputed + problems,
+                                    grounded_fields=gc.get("verified_fields")))
         if scope is not None:
             return project_insurance(route, project_reader(route, out, scope))
     if conflict or pending or (low and not out.get("operator_released")):

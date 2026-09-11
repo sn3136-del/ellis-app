@@ -699,6 +699,8 @@ function siteOf(url) {
 }
 
 const CONF_RANK = { High: 3, Medium: 2, Low: 1 }
+// Publication reasons that withhold one product row while the route stays live.
+const PRODUCT_WITHHELD_REASONS = ['optional_product_evidence_pending', 'product_evidence_low']
 const CHECK_RANK = { 'human-quote': 4, 'grounded-consistent': 3, 'ai-quote': 2,
                      reference: 1, unchecked: 0 }
 
@@ -1716,6 +1718,10 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
               const confLabel = t(confKey) !== confKey ? t(confKey) : (rec.confidence_level || '·')
               const pctDone = Math.round(rec.completeness * 100)
               const held = rec.held ?? (rec.confidence_level === 'Low' && !rec.operator_released)
+              // A product withheld on its own (an unevidenced optional lane, or a Low
+              // sibling beside a published verdict row) is not a route hold: the
+              // default route is live and a whole-route release does not apply.
+              const productWithheld = PRODUCT_WITHHELD_REASONS.includes(rec.publication_reason)
               return [
                 <tr key={id} onClick={() => setOpen(opened ? null : id)}
                     style={{ cursor: 'pointer',
@@ -1807,12 +1813,12 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                       <span style={{ fontSize: 11, fontWeight: 700, color: BLUE }}>
                         {t('ops.qcAvailable')}
                       </span>
-                      {rec.publication_reason === 'optional_product_evidence_pending' && (
+                      {productWithheld && (
                         <span data-testid="ops-product-withheld" style={{ color: '#866000', fontSize: 11 }}>
                           {t('ops.productWithheld')}
                         </span>
                       )}
-                      {held && rec.publication_reason !== 'optional_product_evidence_pending' && (
+                      {held && !productWithheld && (
                         <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
                                 data-testid="ops-release"
                                 title={t('ops.heldTip')}

@@ -478,6 +478,136 @@ def scoped_required_evisa(route, out, rows, *, conflict=False, pending=False):
             'publication_state': 'partial', 'withheld_product_count': len(blocked)}
 
 
+def verdict_row_index(rows):
+    """The row that carries the route's own verdict.
+
+    Product rows of a separate permission family answer for themselves; the
+    first row of the route's own family is the one whose grade speaks for
+    the disposition. A product-less route has exactly one row.
+    """
+    return next((i for i, r in enumerate(rows) if not r.get('_separate_permission')), None)
+
+
+def _row_low(row):
+    return bool(row.get('_evidence_low')) or row.get('confidence_level') == 'Low'
+
+
+def scoped_by_grade(route, out, rows, *, conflict=False, pending=False,
+                    grounded_ok=False, disputed_fields=None, grounded_fields=None):
+    """Publish a route whose verdict-bearing row is not Low, withholding
+    only the sibling product rows that are Low, each on its own.
+
+    This is the general per-product rule the owner asked for on 11 September
+    2026. The narrow exemption and e-visa projections above run first and
+    keep their stricter allowlists; this one serves the route exactly as it
+    would be served with the Low products never listed, so no route field is
+    stripped or rewritten. It fails closed, keeping today's whole-route hold,
+    whenever the published text still offers a withheld product (by name or
+    as a separate visa lane), or an exemption default mixes a mandatory
+    condition into a sentence about a withheld option. A route whose
+    verdict-bearing row is Low keeps today's whole-route hold.
+    """
+    from . import tstation, policy_intervals, kimi_primary
+    g = out.get('guidance') or {}
+    if (conflict or pending or out.get('held') or out.get('stale')
+            or out.get('operator_released')):
+        return None
+    products = g.get('visa_products')
+    if (not isinstance(products, list) or len(products) != len(rows)
+            or any(not isinstance(p, dict) or not p.get('type') for p in products)):
+        return None
+    verdict = verdict_row_index(rows)
+    if verdict is None or _row_low(rows[verdict]):
+        return None
+    blocked = [i for i, r in enumerate(rows) if _row_low(r)]
+    published = [i for i in range(len(products)) if i not in blocked]
+    if not blocked or verdict not in published:
+        return None
+    prov = out.get('source_verified')
+    # The same critical-fact guards as the narrow projections, generalised:
+    # the verdict and its subcategory are reviewed route values, every
+    # entry condition and the application channel are reviewed for the
+    # published products' scope, fees are quoted, an online portal is bound
+    # to its proof, and each published product's own explicit proofs hold.
+    # A route reviewed only by a grounded read carries no field proofs to
+    # check and keeps today's whole-route hold.
+    if not isinstance(prov, dict) or not tstation.verdict_provenance_supported(prov):
+        return None
+    if _reviewed_route_value(g, prov, 'disposition') != g.get('disposition'):
+        return None
+    if (g.get('requirement_detail') not in (None, '')
+            and _reviewed_route_value(g, prov, 'requirement_detail') != g.get('requirement_detail')):
+        return None
+    if policy_intervals.annotate(g, prov, route).get(policy_intervals.MARKER):
+        return None
+    # The route verdict must stand on its own evidence; a quoted product
+    # cannot establish an unsupported route disposition.
+    parent = tstation.records_for_route(route, dict(g, visa_products=[]), prov,
+                                        grounded_ok=grounded_ok,
+                                        disputed_fields=list(disputed_fields or []),
+                                        grounded_fields=grounded_fields)
+    if not parent or any(_row_low(r) for r in parent):
+        return None
+    from .evidence_validator import jurisdiction_matches
+    destination = route.get('destination_country', '')
+    field_proofs = prov.get('field_provenance') or {}
+    channel = g.get('application_channel')
+    for i in published:
+        product = products[i]
+        if not _product_interval_current(product, route):
+            return None
+        for key in _REQUIRED_CONDITIONS:
+            if (g.get(key) not in (None, '', [], {})
+                    and _required_route_value(g, prov, key, route, product) != g[key]):
+                return None
+        if (channel not in (None, '', 'not_required')
+                and _required_route_value(g, prov, 'application_channel', route, product) != channel):
+            return None
+        if not jurisdiction_matches(product.get('source_url') or prov.get('source_url') or '', destination):
+            return None
+        if not _explicit_product_values_supported(product, route):
+            return None
+    fee = g.get('government_fee')
+    if (not _fee_supported(fee, field_proofs.get('government_fee'))
+            or (not _empty_fee(fee)
+                and _required_route_value(g, prov, 'government_fee', route, products[verdict]) != fee)):
+        return None
+    if channel == 'online_portal':
+        portal = g.get('official_portal_url')
+        if (not jurisdiction_matches(portal or '', destination)
+                or not _portal_bound(portal, field_proofs.get('official_portal_url'))):
+            return None
+    if len({str(products[i]['type']).casefold() for i in published}) != len(published):
+        # A duplicated default is a data defect for review, not two products.
+        return None
+    safe_g = deepcopy(g)
+    safe_g['visa_products'] = [deepcopy(products[i]) for i in published]
+    blocked_names = [str(products[i]['type']).casefold() for i in blocked]
+    if _contains_withheld_offer(safe_g, blocked_names):
+        return None
+    if g.get('disposition') == 'VISA_EXEMPT' and any(rows[i].get('_separate_permission') for i in blocked):
+        # An exemption default whose withheld option shares a sentence with
+        # a mandatory condition cannot be published untouched, and this
+        # projection never trims: keep the route held for review.
+        try:
+            for key in _ROUTE_FIELDS:
+                _default_text(safe_g.get(key))
+            for product in safe_g['visa_products']:
+                _default_text(product.get('notes'))
+        except _MixedDefaultCondition:
+            return None
+    if kimi_primary.serve_time_invariants(safe_g):
+        return None
+    return {'guidance': safe_g, 'source_verified': deepcopy(prov),
+            'product_publication': [
+                {'product_index': i, 'held': i in blocked,
+                 'state': 'withheld' if i in blocked else 'published',
+                 'reason': 'product_evidence_low' if i in blocked else 'default_or_product_evidence_supported',
+                 'review_required': i in blocked}
+                for i in range(len(products))],
+            'publication_state': 'partial', 'withheld_product_count': len(blocked)}
+
+
 def project_reader(route, out, scope):
     """Allowlist claim containers so raw alternatives cannot leak indirectly."""
     from . import kimi_primary
