@@ -1861,6 +1861,12 @@ def _dedupe_dataset_rows(rows: list[dict]) -> list[dict]:
     return [best[k] for k in order]
 
 
+def _status_of(r: dict) -> dict:
+    """The served checklist of one row, with disputed cells pending."""
+    from .visa_snapshot import tstation
+    return _with_pending(tstation.field_status(r), r.get("_disputed"))
+
+
 def _with_pending(status: dict, disputed) -> dict:
     """The spec's checklist has THREE states: filled, missing, and 未过审
     (not approved). A filled field the official page disputed, with no human
@@ -1912,10 +1918,11 @@ def travel_database_records(nationality: str = "", destination: str = "",
                          "contradictions": r.get("_contradictions") or [],
                          "source_check": r.get("_source_check", "unchecked"),
                          "visa_fee_qualifier": r.get("visa_fee_qualifier"),
-                         "max_stay_text": r.get("max_stay_text"),
-                         # A validity the source states in words rides beside
-                         # the numeric cells for the same reason as the stay.
-                         "validity_text": r.get("validity_text"),
+                         # Wording rides beside the numeric cells only when
+                         # the checklist calls the cell filled by it, so no
+                         # consumer sees a validity on a visa-free record.
+                         "max_stay_text": tstation.wording_shown(r, "max_stay_duration", _status_of(r)),
+                         "validity_text": tstation.wording_shown(r, "validity_duration", _status_of(r)),
                          "freshness_valid_until": r.get("freshness_valid_until"),
                          "operator_released": r.get("_released", False),
                          "held": r.get("_held", False),

@@ -1498,10 +1498,19 @@ def _strip_visa_only_fields(row: dict) -> dict:
     validity and no entry count, and nothing is applied for. The stay and the
     entry rules live in max_stay and entry_requirements, where they belong.
     """
-    if str(row.get("visa_requirement") or "") != "Visa-free":
+    if not _no_visa_issued(row):
         return row
     row = dict(row)
-    for f in ("validity_duration", "validity_unit", "validity_text", "entries",
+    # No exemption lane states a visa validity in words: the wording that
+    # reaches a Conditional lane is the permission's own (a bilateral
+    # agreement window, an e-passport registration), never a visa's.
+    row["validity_text"] = None
+    if str(row.get("visa_requirement") or "") != "Visa-free":
+        # A Conditional lane may carry a real permission with its own
+        # numeric terms (the Mainland Travel Permit's 10-year validity,
+        # multiple entries and processing time): those stay.
+        return row
+    for f in ("validity_duration", "validity_unit", "entries",
               "processing_min_days", "processing_unit"):
         row[f] = None
     # Their enum has no "not applicable", so an empty cell carries it and the
@@ -2202,10 +2211,26 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
     # nowhere, exactly like a visa-free route.
     no_application = exempt or str(
         row.get("visa_requirement_detail") or "") in _VISA_FREE_DETAILS
+    # No visa is issued on any exemption lane, the Conditional ones included,
+    # so the visa's own cells (validity, entries, processing) cannot apply.
+    no_visa = _no_visa_issued(row)
     for f in FIELD_ORDER:
         v = row.get(f)
         if v not in (None, "", []):
             out[f] = "filled"
+        elif f in _WORDING_CELLS and not (no_visa and f.startswith("validity")) \
+                and row.get(_WORDING_CELLS[f][0]) in (None, "") \
+                and _wording_status(row.get(_WORDING_CELLS[f][1])) == "filled":
+            # The source states the figure in words the numeric contract
+            # cannot carry ("Up to 6 calendar months per visit", "Up to 3
+            # months for a single or double entry visa, up to 6 months for
+            # a multiple entry visa"). The wording is the value the record
+            # holds and the workbook exports, so the cell is filled even
+            # beside a stale not-published marker: a stated value is never
+            # dropped in favour of a label (owner finding, Australia to
+            # Russia, 11 September 2026). The unit cell beside it cannot
+            # apply: wording has no unit.
+            out[f] = "filled" if f.endswith("_duration") else "not-applicable"
         elif f in unpublished:
             out[f] = "not-published"
         elif f == "application_method" and no_application:
@@ -2217,31 +2242,27 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
         elif (f == "visa_fee_currency" and row.get("visa_fee_amount") == 0
               and _reviewed_no_visa_product(row)):
             out[f] = "not-applicable"
-        elif exempt and f in _NOT_APPLICABLE_WHEN_EXEMPT:
+        elif (exempt or no_visa) and f in _NOT_APPLICABLE_WHEN_EXEMPT and (exempt or f != "application_method"):
             out[f] = "not-applicable"
         elif f == "consulate_district" and _no_consular_application(row):
             out[f] = "not-applicable"
-        elif f in ("max_stay_duration", "max_stay_unit") and _stay_in_words(row):
-            # The source states the stay in words ("Up to 6 calendar months
-            # per visit", "Stay is determined by the e-Pass issued on
-            # arrival"). That wording is the value the record holds and the
-            # workbook exports, so the duration cell is filled and the unit
-            # cell is the record's own Not applicable verdict: 166 served
-            # rows were graded Medium and counted as incomplete for a stay
-            # they actually state (owner finding, 11 September 2026).
-            # Wording that itself asserts an absence ("Not published as a
-            # fixed number") is a documented absence, and wording that
-            # asserts inapplicability is the Not applicable label.
-            out[f] = _wording_status(row.get("max_stay_text"), f == "max_stay_duration")
-        elif f in ("validity_duration", "validity_unit") and _validity_in_words(row):
-            # The source states the validity in words the Day/Month/Year
-            # contract cannot carry ("Up to 3 months for a single or double
-            # entry visa, up to 6 months for a multiple entry visa", "2 years
-            # or until the linked passport expires"). The wording is the
-            # value: 107 served rows read "Not publicly available" for a
-            # validity their source states (owner finding, Australia to
-            # Russia, 11 September 2026).
-            out[f] = _wording_status(row.get("validity_text"), f == "validity_duration")
+        elif f == "max_stay_unit" and _stay_in_words(row):
+            # The stay is carried by wording (the duration cell is filled by
+            # it above): wording has no unit, so the unit cell is the
+            # record's own Not applicable verdict.
+            out[f] = "not-applicable"
+        elif f == "validity_unit" and not no_visa and _validity_in_words(row):
+            out[f] = "not-applicable"
+        elif f in ("max_stay_duration", "max_stay_unit") and _wording_status(row.get("max_stay_text")) != "missing" \
+                and row.get("max_stay_duration") in (None, ""):
+            # Wording that asserts an absence ("Not published as a fixed
+            # number") documents the gap: the duration cell carries the
+            # label and the unit cell cannot apply. Wording that asserts
+            # inapplicability is the Not applicable label on both.
+            out[f] = _wording_status(row.get("max_stay_text")) if f == "max_stay_duration" else "not-applicable"
+        elif f in ("validity_duration", "validity_unit") and not no_visa \
+                and _wording_status(row.get("validity_text")) != "missing" and row.get("validity_duration") in (None, ""):
+            out[f] = _wording_status(row.get("validity_text")) if f == "validity_duration" else "not-applicable"
         elif f in REQUIRED_FIELDS:
             out[f] = "missing"
         else:
@@ -2253,65 +2274,125 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
 # not a value of its own: such a cell stays a gap until the review states
 # the figure for this product. The pattern must match the WHOLE string, so
 # "As decided by the consulate (minimum 15 days)" and "12 months or above"
-# stay values.
+# stay values, and a string that merely OPENS with a placeholder token
+# ("n/a - no prior application") is a placeholder too.
 _POINTER_WORDING = re.compile(
     r"^\s*(?:as above|as below|same as\b.*|see\b.*|refer\b.*|idem|ditto|n/?a|none|unknown|tbd|tba|"
     r"varies|variable|-+|\?+)\s*\.?\s*$", re.I)
-# Wording that asserts the destination does not publish the figure is a
-# documented absence (the "Not publicly available" label), and wording that
-# asserts the figure cannot apply is the "Not applicable" label.
+_PLACEHOLDER_OPENING = re.compile(r"^\s*(?:n/?a|none|unknown|tbd|tba|varies|variable|as above|as below)\b\s*(?:[-:;,.]|$)", re.I)
+# Wording that asserts, anywhere in the string, that the destination does
+# not publish the figure is a documented absence (the "Not publicly
+# available" label); wording that asserts the figure cannot apply is the
+# "Not applicable" label.
 _ABSENCE_WORDING = re.compile(
-    r"^\s*(?:not\s+(?:published|specified|stated|available|provided|disclosed|listed)|unpublished|"
-    r"no\s+(?:fixed|published|stated)\b)", re.I)
+    r"\b(?:not\s+(?:published|specified|stated|available|provided|disclosed|listed|fixed)|unpublished|"
+    r"no\s+(?:fixed|published|stated|specific)\b)", re.I)
 _INAPPLICABLE_WORDING = re.compile(r"^\s*not\s+applicable\b", re.I)
-# A duration or a stated rule: a digit, a CJK numeral, a unit word in any of
-# the corpus languages, or a rule word (decided by the consulate, granted
-# for the period applied for, until the passport expires).
-_VALUE_WORDING = re.compile(
+# Wording that says the figure is set per application, by the mission or
+# case by case, with no figure of its own, documents an absence as well:
+# the destination publishes no fixed period.
+_VARIABLE_WORDING = re.compile(
+    r"\b(?:decided|determined|set|fixed|established|varies|vary|variable|depends|depending|discretion|discretionary|"
+    r"case[- ]by[- ]case|per application|per trip|per visit|as issued|as granted|as stated in the grant|"
+    r"to be determined|limited to (?:the )?(?:intended |approved )?(?:trip|travel) dates|trip dates|travel dates)\b", re.I)
+# A period actually stated: a figure or a numeral in any of the corpus
+# scripts, a duration unit, or a phrase that describes a period.
+_PERIOD_WORDING = re.compile(
     r"\d|[一二三四五六七八九十百千两兩]|"
     r"\b(?:day|days|week|weeks|month|months|year|years|hour|hours|jour|jours|mois|an|ans|semaine|semaines|"
     r"d[ií]a|d[ií]as|mes|meses|a[ñn]o|a[ñn]os|hari|minggu|bulan|tahun|ng[àa]y|tu[ầa]n|th[áa]ng|n[ăa]m|"
     r"дн[ейя]+|недел[яьи]|мес[яе]ц[аев]*|год[а]?|лет|"
-    r"determined|decided|granted|issued|set|discretion|case|consulate|consular|officer|mission|"
-    r"application|applied|until|expires|expiry|whichever|depends|period|trip|stay|entry|entries|"
-    r"single|double|multiple|visit|visits|valid|validity|long|unlimited|indefinite)\b|"
+    r"duration of|for the duration|until the passport expires|until (?:the )?passport expiry|until expiry|"
+    r"whichever is (?:sooner|earlier|shorter|less)|for the period applied|period applied for|duration|"
+    r"validity of the passport|length of the (?:approved |booked )?(?:course|tour|programme|program|stay|permit)|"
+    r"tied to the (?:duration|validity|length)|for the time (?:cbp|the officer|immigration) determines|"
+    r"long[- ]term|unlimited|indefinite|lifetime|permanent)\b|"
     r"[日天周週月年时時個个개월일년주วันเดือนปี]", re.I)
-# A unit that belongs to another field (processing time) is not a validity
-# or stay value, however it is worded.
-_FOREIGN_UNIT_WORDING = re.compile(r"\b(?:working|business|calendar)\s+days?\b", re.I)
+# A unit that belongs to processing time is not a stay or validity value
+# unless the wording also states a period of its own ("30 calendar days" is
+# a stay, "5 working days" is a processing time).
+_PROCESSING_UNIT_WORDING = re.compile(r"\b(?:working|business)\s+days?\b", re.I)
+
+
+def _wording_status(text) -> str:
+    """The checklist verdict a duration cell earns from its wording alone:
+    filled (a period is stated), not-published (the wording documents that
+    no fixed period is published, or says it is set per application),
+    not-applicable (the wording says the figure cannot apply), or missing
+    (a pointer, a placeholder, or wording that states no period at all,
+    such as "Issued at the border")."""
+    text = str(text or "").strip()
+    if not text or _POINTER_WORDING.match(text) or _PLACEHOLDER_OPENING.match(text):
+        return "missing"
+    if _INAPPLICABLE_WORDING.match(text):
+        return "not-applicable"
+    if _ABSENCE_WORDING.search(text):
+        return "not-published"
+    stated = _PERIOD_WORDING.search(re.sub(_PROCESSING_UNIT_WORDING, " ", text))
+    if stated and not (_PROCESSING_UNIT_WORDING.search(text) and not _PERIOD_WORDING.search(re.sub(_PROCESSING_UNIT_WORDING, " ", re.sub(r"\d+\s*(?=working|business)", " ", text, flags=re.I)))):
+        return "filled"
+    if _VARIABLE_WORDING.search(text):
+        return "not-published"
+    return "missing"
 
 
 def _states_a_value(text) -> bool:
-    """True when wording carries a value of its own (a figure or a stated
-    rule), not a pointer, a placeholder or another field's unit."""
-    text = str(text or "").strip()
-    if not text or _POINTER_WORDING.match(text) or _FOREIGN_UNIT_WORDING.search(text):
-        return False
-    if _ABSENCE_WORDING.match(text) or _INAPPLICABLE_WORDING.match(text):
-        return True   # a documented label, mapped by _wording_status
-    return bool(_VALUE_WORDING.search(text))
-
-
-def _wording_status(text, duration_cell: bool) -> str:
-    """The checklist verdict for a cell carried by wording."""
-    text = str(text or "").strip()
-    if _INAPPLICABLE_WORDING.match(text):
-        return "not-applicable"
-    if _ABSENCE_WORDING.match(text):
-        return "not-published"
-    return "filled" if duration_cell else "not-applicable"
+    """True when wording carries a stated period of its own."""
+    return _wording_status(text) == "filled"
 
 
 def _stay_in_words(row: dict) -> bool:
-    """True when the record carries the stay as wording and no number."""
+    """True when the record carries the stay as stated wording and no number."""
     return (row.get("max_stay_duration") in (None, "")
             and _states_a_value(row.get("max_stay_text")))
 
 
 def _validity_in_words(row: dict) -> bool:
-    """True when the record carries the validity as wording and no number."""
+    """True when the record carries the validity as stated wording and no number."""
     return (row.get("validity_duration") in (None, "")
             and _states_a_value(row.get("validity_text")))
+
+
+def _no_visa_issued(row: dict) -> bool:
+    """True on every exemption lane, Conditional and Transit included: no
+    visa is issued, so no visa validity or entry count can exist."""
+    return (str(row.get("visa_requirement") or "") == "Visa-free"
+            or str(row.get("visa_requirement_detail") or "") in _VISA_FREE_DETAILS)
+
+
+def wording_shown(row: dict, cell: str, statuses: dict | None = None) -> str | None:
+    """The wording a duration cell shows on every surface (workbook, records
+    payload, QC grid, list column), or None when the cell shows a label.
+
+    Wording is shown when the numeric cell is empty and the wording either
+    states the period (the cell is filled by it) or documents in the
+    destination's own words that no fixed period is published (the cell is
+    a documented absence carrying its statement). A pointer, a placeholder,
+    a visa-free lane's validity, or a label-only absence shows the label.
+    """
+    key = "max_stay_text" if cell == "max_stay_duration" else "validity_text"
+    if row.get(cell) not in (None, ""):
+        return None
+    statuses = statuses or field_status(row)
+    status = statuses.get(cell)
+    text = str(row.get(key) or "").strip()
+    if not text or status == "not-applicable":
+        return None
+    if status in ("filled", "pending-review"):
+        return text
+    if status == "not-published" and _wording_status(text) == "not-published":
+        return text
+    return None
+
+
+# The two duration cells wording can carry, with their unit cell, mapped to
+# (the numeric duration cell, the wording key).
+_WORDING_CELLS = {
+    "max_stay_duration": ("max_stay_duration", "max_stay_text"),
+    "max_stay_unit": ("max_stay_duration", "max_stay_text"),
+    "validity_duration": ("validity_duration", "validity_text"),
+    "validity_unit": ("validity_duration", "validity_text"),
+}
 
 
 # A route with no visa cannot have a visa's validity, entry count or
@@ -2354,10 +2435,10 @@ def export_values(row: dict, unpublished: set | None = None) -> list:
     # visa-free row keeps its Not applicable label even when the guidance
     # carries stay wording beside it, and a documented absence keeps its own
     # label.
-    for text_key, duration, unit in (("max_stay_text", "max_stay_duration", "max_stay_unit"),
-                                     ("validity_text", "validity_duration", "validity_unit")):
-        if statuses.get(duration) == "filled" and row.get(duration) in (None, ""):
-            cells[FIELD_ORDER.index(duration)] = str(row.get(text_key) or "").strip()
+    for duration, unit in (("max_stay_duration", "max_stay_unit"), ("validity_duration", "validity_unit")):
+        shown = wording_shown(row, duration, statuses)
+        if shown:
+            cells[FIELD_ORDER.index(duration)] = shown
             if statuses.get(unit) != "filled":
                 cells[FIELD_ORDER.index(unit)] = NOT_APPLICABLE
     return cells

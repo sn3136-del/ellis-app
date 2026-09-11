@@ -67,12 +67,15 @@ def test_a_stay_stated_in_words_is_exported_verbatim_not_labelled():
     values = dict(zip(tstation.FIELD_ORDER, tstation.export_values(row), strict=True))
     assert values['max_stay_duration'] == 'Stay is determined by the e-Pass issued on arrival'
     assert values['max_stay_unit'] == tstation.NOT_APPLICABLE
-    # The wording is the value the record holds, so it is filled for grading
-    # too, and the unit cell is the record's own "Not applicable" verdict.
+    # The wording says the stay is set by the pass, so the cell is a
+    # documented absence that still shows the destination's own statement,
+    # and the unit cell is the record's own "Not applicable" verdict.
     status = tstation.field_status(row)
-    assert status['max_stay_duration'] == 'filled'
+    assert status['max_stay_duration'] == 'not-published'
     assert status['max_stay_unit'] == 'not-applicable'
-    assert 'max_stay' not in [f for f, v in status.items() if v == 'missing']
+    assert tstation.wording_shown(row, 'max_stay_duration') == row['max_stay_text']
+    stated = dict(row, max_stay_text='Up to 6 calendar months per visit')
+    assert tstation.field_status(stated)['max_stay_duration'] == 'filled'
 
 
 def test_a_stay_in_words_does_not_count_as_a_gap_for_completeness():
@@ -124,18 +127,28 @@ def test_wording_predicates_follow_the_owner_rule():
     # Values the source states, including rule wording and short CJK
     # validities, are filled.
     for value in ('As decided by the consulate (minimum 15 days)', '12 months or above', '3个月一次有效',
-                  '1年多次有效', 'as granted', 'Granted for the period applied for',
-                  'Determined by consular officials and the visa issued.', 'Limited to the intended trip dates'):
+                  '1年多次有效', 'Granted for the period applied for'):
         val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': value}
         assert tstation.field_status(val)['validity_duration'] == 'filled', value
         assert tstation.field_status(val)['validity_unit'] == 'not-applicable', value
+    # Wording that only says the period is decided per application documents
+    # the absence in the destination's words: shown, counted as documented,
+    # never filled (skeptic classification, 11 September 2026).
+    for value in ('as granted', 'Determined by consular officials and the visa issued.', 'As issued', 'Limited to the intended trip dates'):
+        val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': value}
+        st = tstation.field_status(val)
+        assert st['validity_duration'] == 'not-published' and st['validity_unit'] == 'not-applicable', value
+        assert tstation.wording_shown(val, 'validity_duration') == value
     # Wording that asserts an absence is the documented label, not a value.
-    for absent in ('not published', 'Not published by the Ministry', 'Not published as a fixed number, the period of stay is shown on the visit pass'):
+    for absent in ('not published', 'Not published by the Ministry', 'Not published as a fixed number, the period of stay is shown on the visit pass',
+                   'single entry; explicit validity window not published on the official portal'):
         val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': absent}
         st = tstation.field_status(val)
-        assert st['validity_duration'] == 'not-published' and st['validity_unit'] == 'not-published', absent
+        assert st['validity_duration'] == 'not-published' and st['validity_unit'] == 'not-applicable', absent
         cells = dict(zip(tstation.FIELD_ORDER, tstation.export_values(val), strict=True))
-        assert cells['validity_duration'] == tstation.NOT_PUBLICLY_AVAILABLE
+        # The destination's own statement of the absence is shown, never
+        # dropped for a bare label, and the cell counts as documented.
+        assert cells['validity_duration'] == absent and cells['validity_unit'] == tstation.NOT_APPLICABLE
         stay = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': absent}
         assert tstation.field_status(stay)['max_stay_duration'] == 'not-published'
     val = {'visa_requirement': 'Visa Required in Advance', 'validity_text': 'Not applicable, no visa issued'}
@@ -158,10 +171,26 @@ def test_a_visa_free_row_keeps_not_applicable_beside_stay_wording():
     # The strip helper clears the wording too.
     stripped = tstation._strip_visa_only_fields(dict(row, visa_requirement='Visa-free'))
     assert stripped['validity_text'] is None
-    # A documented not-published cell keeps its label even with wording beside it.
+    # A stated figure wins over a stale not-published marker: the record's
+    # own value is never dropped for a label, and the grade may rise only
+    # because the value is stated.
     doc = {'visa_requirement': 'Visa Required in Advance', 'validity_text': '6 months', '_unpublished': ['validity_duration', 'validity_unit']}
+    st = tstation.field_status(doc)
+    assert st['validity_duration'] == 'filled' and st['validity_unit'] == 'not-applicable'
     cells = dict(zip(tstation.FIELD_ORDER, tstation.export_values(doc), strict=True))
-    assert cells['validity_duration'] == tstation.NOT_PUBLICLY_AVAILABLE
+    assert cells['validity_duration'] == '6 months'
+    # A label-only absence (pointer wording beside the marker) keeps its label.
+    lab = {'visa_requirement': 'Visa Required in Advance', 'max_stay_text': 'As above', '_unpublished': ['max_stay_duration']}
+    st = tstation.field_status(lab)
+    assert st['max_stay_duration'] == 'not-published' and st['max_stay_unit'] == 'missing'
+    assert dict(zip(tstation.FIELD_ORDER, tstation.export_values(lab), strict=True))['max_stay_duration'] == tstation.NOT_PUBLICLY_AVAILABLE
+    # Conditional visa-free lanes issue no visa either.
+    cond = {'visa_requirement': 'Conditional', 'visa_requirement_detail': 'Conditional Visa-free',
+            'validity_text': '3 years or until the passport expires, whichever is shorter', 'max_stay_text': 'Up to 15 days'}
+    st = tstation.field_status(cond)
+    assert st['validity_duration'] == 'not-applicable' and st['max_stay_duration'] == 'filled'
+    assert dict(zip(tstation.FIELD_ORDER, tstation.export_values(cond), strict=True))['validity_duration'] == tstation.NOT_APPLICABLE
+    assert tstation._strip_visa_only_fields(cond)['validity_text'] is None
 
 
 def test_acceptance_summary_counts_wording_cells_as_present():
@@ -179,3 +208,40 @@ def test_acceptance_summary_counts_wording_cells_as_present():
     assert summary['filled_cells'] == len(tstation.CONTRACT_FIELDS) - 2
     assert summary['complete_records'] == 0
     assert tstation.completeness(row) == 1.0
+
+
+# The skeptic's classification of the live corpus (11 September 2026): every
+# wording that states no period must not be filled, every wording that
+# states one must be.
+_NO_PERIOD = ["Issued and used at arrival", "Issued at arrival", "Issued at the arrival port", "Issued at the border",
+              "issued on arrival", "Issued by a CAR diplomatic/consular mission", "Single transit", "Valid for one entry to Canada",
+              "Valid for one visit within the grant period", "Per visit", "As issued", "Runs from date of entry to Djibouti",
+              "varies by application, confirm at submission", "varies by mission", "varies by consulate", "Varies by issued visa",
+              "n/a - no prior application", "Set by the mission", "Set per trip", "Set case-by-case", "Limited to trip dates",
+              "determined by issued visa", "to be determined by issuing office", "As above", "n/a", "See notes", "Unknown", "TBD",
+              "-", "60 Working Day", "5 working days"]
+_PERIOD = ["60 calendar days", "Up to 183 calendar days, counted across continuous or consecutive visits within a 12-month period",
+           "Up to 30 calendar days", "Duration of approved course", "Duration of the approved full-time course", "Course duration as approved by ICA",
+           "Tied to the duration of the work permit", "Admitted for the time CBP determines is needed for immediate and continuous transit",
+           "As decided by the consulate (minimum 15 days)", "12 months or above", "3个月一次有效", "1年多次有效",
+           "2 years or until the linked passport expires, whichever is sooner",
+           "Up to 3 months for a single or double entry visa, up to 6 months for a multiple entry visa", "Up to 6 calendar months per visit",
+           "Up to 6 months per admission (CBP discretion)", "One month in the first instance, extendable twice by one month each"]
+
+
+def test_the_corpus_classification_from_the_skeptic_review():
+    for text in _NO_PERIOD:
+        assert tstation._wording_status(text) != 'filled', text
+    for text in _PERIOD:
+        assert tstation._wording_status(text) == 'filled', text
+    # Wording that says the figure is set per application documents the
+    # absence in the destination's words and is shown, but never filled.
+    for text in ("Set by the mission", "varies by consulate", "determined by issued visa", "Set case-by-case"):
+        assert tstation._wording_status(text) == 'not-published', text
+        row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
+        assert tstation.wording_shown(row, 'validity_duration') == text
+    # Wording that states nothing about the period is a gap and is hidden.
+    for text in ("Issued at the border", "Single transit", "n/a - no prior application"):
+        row = {'visa_requirement': 'Visa Required in Advance', 'validity_text': text}
+        assert tstation.field_status(row)['validity_duration'] == 'missing'
+        assert tstation.wording_shown(row, 'validity_duration') is None

@@ -73,8 +73,19 @@ test('a visa-free record keeps Not applicable although validity wording is prese
   assert.ok(!html.includes(t('en', 'ops.validityTextOnly')))
 })
 
-test('a documented absence keeps its label although wording is present', () => {
-  const rec = validityRecord('6 months', {
+test('a documented absence stated in the destination words shows that wording without a check', () => {
+  // The backend only sends wording for a not-published cell when the
+  // wording itself documents the absence ("Set by the mission").
+  const rec = validityRecord('Set by the mission', {
+    field_status: { validity_duration: 'not-published', validity_unit: 'not-applicable' } })
+  const html = render(rec)
+  assert.ok(html.includes('Set by the mission'))
+  assert.ok(html.includes(t('en', 'ops.validityTextOnly')))
+  assert.ok(!html.includes('✓'))
+})
+
+test('a label-only absence shows the label', () => {
+  const rec = validityRecord(null, {
     field_status: { validity_duration: 'not-published', validity_unit: 'not-published' } })
   const html = render(rec)
   assert.ok(html.includes(t('en', 'ops.notPublished')))
@@ -110,14 +121,13 @@ for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
   })
 }
 
-test('not-published field status keeps its label over stored calendar wording', () => {
+test('not-published field status shows the stored wording the backend chose to send, without a check', () => {
   const rec = record('Up to 6 months at the officer’s discretion', {
-    field_status: { max_stay_duration: 'not-published', max_stay_unit: 'not-published' },
+    field_status: { max_stay_duration: 'not-published', max_stay_unit: 'not-applicable' },
   })
   const before = structuredClone(rec)
   const html = render(rec)
-  assert.ok(html.includes(t('en', 'ops.notPublished')))
-  assert.ok(!html.includes('Up to 6 months at the officer’s discretion'))
+  assert.ok(html.includes('Up to 6 months at the officer’s discretion'))
   assert.deepEqual(rec, before)
   assert.ok(!html.includes('✓'))
 })
@@ -240,3 +250,11 @@ for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
     assert.ok(!html.includes('ops.validityTextOnly'))
   })
 }
+
+
+test('a disputed wording cell still shows the stored wording under the pending mark', () => {
+  const rec = validityRecord('Up to 3 months for a single or double entry visa', {
+    field_status: { validity_duration: 'pending-review', validity_unit: 'not-applicable' } })
+  const html = render(rec)
+  assert.ok(html.includes('Up to 3 months for a single or double entry visa'))
+})

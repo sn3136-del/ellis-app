@@ -532,6 +532,19 @@ function fx(t, f) {
   return t(k) !== k ? t(k) : f.replace(/_/g, ' ')
 }
 
+// Wording (a stay or a validity the source states in words) is shown only
+// when the backend checklist calls the cell filled by it, or pending review:
+// a visa-free record keeps its Not applicable label and a documented absence
+// keeps its label on every surface (grid, list column, change log).
+export function wordingFor(rec, cell, key) {
+  // The backend sends the wording only when the cell shows it (filled by it,
+  // pending review, or a documented absence stated in the destination's own
+  // words), so any wording present is shown unless the cell cannot apply.
+  const st = rec?.field_status?.[cell]
+  return ((st === 'filled' || st === 'pending-review' || st === 'not-published') && rec[cell] == null
+    && typeof rec[key] === 'string' && rec[key].trim()) ? rec[key] : null
+}
+
 export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
   const UNIT = { Day: t('ops.u.day'), Hour: t('ops.u.hour'),
                  Month: t('ops.u.month'), Year: t('ops.u.year'),
@@ -562,13 +575,11 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
   // Wording is shown only when the backend checklist calls the cell filled:
   // a visa-free record keeps its Not applicable label and a documented
   // absence keeps its label even when wording sits beside them.
-  const wordingFor = (cell, key) => (rec.field_status?.[cell] === 'filled' && rec[cell] == null
-    && typeof rec[key] === 'string' && rec[key].trim()) ? rec[key] : null
-  const stayText = wordingFor('max_stay_duration', 'max_stay_text')
+  const stayText = wordingFor(rec, 'max_stay_duration', 'max_stay_text')
   // A validity the source states in words ("Up to 3 months for a single or
   // double entry visa, up to 6 months for a multiple entry visa") is shown
   // as stored for the same reason: the wording is the value the record holds.
-  const validityText = wordingFor('validity_duration', 'validity_text')
+  const validityText = wordingFor(rec, 'validity_duration', 'validity_text')
   const show = (f) => {
     const v = rec[f]
     if (v == null || v === '') return '·'
@@ -1789,7 +1800,9 @@ function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t,
                     {rec.max_stay_duration != null
                       ? `${rec.max_stay_duration} ${rec.max_stay_unit === 'Hour'
                           ? t('ops.u.hour') : t('ops.u.day')}`
-                      : rec.max_stay_text || '·'}
+                      : wordingFor(rec, 'max_stay_duration', 'max_stay_text')
+                        || (rec.field_status?.max_stay_duration === 'not-applicable' ? t('ops.notApplicable')
+                          : rec.field_status?.max_stay_duration ? t('ops.notPublished') : '·')}
                   </td>
                   <td className="ops-cell" data-label={t('ops.col.fee')}
                       style={{ padding: '10px 12px', textAlign: 'right',
@@ -3095,7 +3108,7 @@ function QualityWorkspace() {
               case 'visa_category':
                 return typeNames?.[rec.visa_type_name] || rec.visa_type_name
               case 'permitted_stay': case 'permitted_stay_days':
-                return rec.max_stay_text || j(rec.max_stay_duration, unitName(rec.max_stay_unit))
+                return wordingFor(rec, 'max_stay_duration', 'max_stay_text') || j(rec.max_stay_duration, unitName(rec.max_stay_unit))
               case 'government_fee':
                 return publishedFeeText({ amount: rec.visa_fee_amount, currency: rec.visa_fee_currency, qualifier: rec.visa_fee_qualifier }, { zeroLabel: `0 ${rec.visa_fee_currency || ''}`.trim(), fromLabel: t('db.feeFromPrefix') })
               case 'processing_time':
