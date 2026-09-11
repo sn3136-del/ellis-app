@@ -32,6 +32,14 @@ _WATCHED = (
     "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
     "insurance_required", "biometrics_required", "health_requirements",
     "policy_valid_until",
+    # Every field an operator may correct has to be nameable here, or the
+    # correction lands on the record and the finding that asked for it can
+    # never reach "corrected": the status gate in main.py needs a change-log
+    # row naming each field of the finding's column. Sixteen reviewed
+    # corrections were stuck behind exactly that on 11 September 2026.
+    "passport_validity_requirement", "photo_requirements", "appointment_required",
+    "interview_required", "submission_process", "payment_process",
+    "account_registration_steps", "corroborating_sources",
 )
 
 
