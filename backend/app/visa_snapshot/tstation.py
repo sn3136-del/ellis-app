@@ -1441,6 +1441,38 @@ def _product_detail(product: dict, route_detail=None) -> str | None:
     return _subcategory_for(product, None, None)
 
 
+def _unknown_product_subtype(product: dict) -> bool:
+    """A recorded unknown must not become a physical visa by default."""
+    if _key_of(product.get("requirement_detail")):
+        return False
+    raw = product.get("requirement_detail")
+    if "requirement_detail" in product and (raw is None or isinstance(raw, str) and
+            raw.strip().lower() in {"", "unknown", "not publicly available",
+                                  "not published", "not_published", "not-published"}):
+        return True
+    proofs = product.get("field_provenance")
+    proof = proofs.get("requirement_detail") if isinstance(proofs, dict) else None
+    return isinstance(proof, dict) and proof.get("status") in {
+        "unknown", "not_published", "not-published"}
+
+
+def _named_physical_visa(product: dict) -> bool:
+    """Preserve a named physical product, not generic visa/agency wording."""
+    name = str(product.get("type") or "").lower()
+    for match in re.finditer(r"\b(?:paper|sticker|vignette|physical)\s+visa\b|"
+                             r"\bvisa\s+(?:sticker|vignette)\b", name):
+        before = name[:match.start()]
+        after = name[match.end():]
+        negated_after = re.match(
+            r"\s*(?:-free\b|(?:(?:is|are)\s+)?(?:not|never)\s+"
+            r"(?:required|needed|issued|provided|available|used|applicable|permitted|allowed)\b)",
+            after)
+        if (not re.search(r"\b(?:no|not|without)\b(?:\s+\w+){0,2}\s*$", before)
+                and not negated_after):
+            return True
+    return False
+
+
 def _product_fields(row: dict, product: dict) -> None:
     """Read explicit product facts; missing facts never borrow another visa."""
     for key in ("required_documents", "entry_requirements"):
@@ -2267,6 +2299,13 @@ def records_for_route(route: dict, guidance: dict,
             stated_fee = stated_fee or product_g.get("government_fee")
             if not isinstance(stated_fee, dict) or not stated_fee.get("currency"):
                 row["visa_fee_currency"] = None
+        if (row.get("visa_requirement_detail") == "Paper Visa"
+                and _unknown_product_subtype(p) and not _named_physical_visa(p)):
+            # Keep the existing permission-family/evidence separation above:
+            # a missing subtype is not permission to inherit another product's
+            # source or filing terms. Only the unsupported physical-issuance
+            # display claim is removed; the visa-required verdict remains.
+            row["visa_requirement_detail"] = None
         rows.append(_regrade({k: _clean_text(v) for k, v in row.items()}, product_g,
                              disputed_fields, product_unpublished))
     return rows
