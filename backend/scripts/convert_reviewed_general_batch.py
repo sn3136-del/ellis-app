@@ -671,7 +671,14 @@ def _policy_bound_statement(quote, forms, key):
     else:
         relation = (r'(?:until|till|through|thru|to|ends?\s*(?:on)?|ending\s+on|expires?\s*(?:on)?|expiring\s+on|'
                     r'valid\s+(?:until|through|to)|extended\s+(?:until|to|through)|prolonged\s+(?:until|to)|in\s+force\s+until|'
-                    r'ceases?\s+to\s+(?:apply|have\s+effect)\s*(?:on)?|jusqu[\'’](?:au|à)|hasta(?:\s+el)?|até|bis(?:\s+zum)?|fino\s+al|до|по|'
+                    r'ceases?\s+to\s+(?:apply|have\s+effect|be\s+(?:valid|in\s+force))\s*(?:on|from)?|'
+                    # The same end relations the window reader knows, so a
+                    # bound one reader expires the verdict on is a bound the
+                    # other lets the reviewer record.
+                    r'(?:shall\s+|will\s+|to\s+|would\s+)?ceases?(?:\s+on)?|ceasing(?:\s+on)?|lapses?(?:\s+on)?|lapsing(?:\s+on)?|'
+                    r'terminates?(?:\s+on)?|terminating(?:\s+on)?|runs?\s+(?:to|until|through)|running\s+(?:to|until|through)|'
+                    r'(?:arrivals?|entries|entry|stays?|travel|visits?|applications?|departures?)\s+(?:before|up\s+to|until)|'
+                    r'no\s+later\s+than|not\s+later\s+than|at\s+the\s+latest(?:\s+on)?|jusqu[\'’](?:au|à)|hasta(?:\s+el)?|até|bis(?:\s+zum)?|fino\s+al|до|по|'
                     r'đến(?:\s+hết)?(?:\s+ngày)?|tới(?:\s+ngày)?|hingga|sampai(?:\s+dengan)?|(?:จน)?ถึง(?:วันที่)?)\s*[:,]?\s*'
                     r'(?:and\s+including\s+)?' + clock + dates)
         chinese = (r'(?:至|截至|到|有效至|延期至|延長至|延长至|施行至|有效期至|截止)\s*' + dates + r'|' + dates
@@ -790,6 +797,54 @@ _END_BEFORE_RE = re.compile(r'(?:\buntil|\btill|\bthrough|\bthru|\bup\s+to|\bend
                             r'\bhingga|\bsampai(?:\s+dengan)?|(?:จน)?ถึง(?:วันที่)?|至|截至|到|有效至|延期至|延長至|延长至|施行至|有效期至|截止)'
                             r'\s*[:,]?\s*(?:\d{1,2}[:.]\d{2}\s*(?:on|hrs?|h|時|时)?\s*)?(?:the\s+)?$', re.I)
 _END_AFTER_RE = re.compile(r'^\s*(?:止|屆滿|届满|到期|까지|まで)')
+# The date of the instrument that states a rule is not a bound of the rule:
+# "Resolution No. 44/NQ-CP of the Government dated 07 March 2025", "nghị
+# quyết số 44/NQ-CP ngày 7/3/2025", "нота от 16.06.2014", "Regulation (EU)
+# 2018/1806 of the European Parliament and of the Council of 14 November
+# 2018", "2003年6月30日付緊急政令第196号", the Official Journal issue that
+# printed it ("L 32, 1, 3.2.2023"), or the day it was signed, adopted or
+# promulgated. The designation has to stand before the date, or the dating
+# word itself ("dated", "en date du", "vom", "z dnia"), so a bare "on <date>"
+# or "of <date>" after no instrument stays an unreadable bound, and so does
+# "the end of <date>" however near an instrument noun it stands.
+_INSTRUMENT_NOUN = (
+    r"(?:resolutions?|decrees?|decisions?|regulations?|directives?|laws?|acts?|orders?|ordinances?|circulars?|notifications?|"
+    r"notices?|notes?|memorand(?:um|a)|protocols?|agreements?|treat(?:y|ies)|conventions?|gazettes?|instructions?|announcements?|"
+    r"proclamations?|statutes?|amendments?|letters?|communiqu[ée]s?|"
+    r"notas?|resoluci[oó]n(?:es)?|decretos?|ley(?:es)?|[oó]rden(?:es)?|acuerdos?|reglamentos?|"
+    r"d[ée]crets?|arr[êe]t[ée]s?|lois?|ordonnances?|circulaires?|r[èe]glements?|accords?|"
+    r"verordnung(?:en)?|gesetz(?:es)?|erlass(?:es)?|beschl(?:uss|üsse)|bekanntmachung(?:en)?|verf[üu]gung(?:en)?|abkommen|"
+    r"deliber[ae]|decreto-legge|legg[ei]|regolament[oi]|accord[oi]|portarias?|leis?|despachos?|"
+    r"нот[аы]|постановлени[еяю]|приказа?|указа?|распоряжени[еяю]|закона?|решени[еяю]|соглашени[еяю]|письм[оа]|протокола?|"
+    r"nghị quyết|nghị định|quyết định|thông tư|công văn|luật|hiệp định|thỏa thuận|"
+    r"peraturan|keputusan|undang-undang|surat(?: edaran)?|perjanjian|kanun|karar(?:name)?|genelge|yönetmelik|tebliğ|anlaşma|"
+    r"พระราชบัญญัติ|กฎกระทรวง|ประกาศ|คำสั่ง|ระเบียบ|ความตกลง)")
+_INSTRUMENT_DATE_BEFORE_RE = re.compile(
+    r"(?:\b" + _INSTRUMENT_NOUN + r"\b[^;\n]{0,80}?(?<!\bend)(?<!\bstart)(?<!\bclose)(?<!\bmiddle)(?<!\bbeginning)"
+    r"\s(?:of|dated|du|de|del|vom|von|от|ngày|của ngày|d\.d\.|dd\.|z dnia|dnia|din|van|af|dari|tanggal|tertanggal)|"
+    r"\b(?:dated|signed|adopted|approved|promulgated|enacted|ratified|gazetted|notified|announced|concluded|amended|passed|issued|published|"
+    r"en date du|datée? du|de fecha|con fecha|datado de|com data de|vom|d\.d\.|dd\.|z dnia|"
+    r"подписан\w*|принят\w*|утвержд[её]н\w*|издан\w*|опубликован\w*|ban hành|ký ngày|ký kết|ditandatangani|ditetapkan|diterbitkan|disahkan)"
+    r"(?:\s+(?:on|at|le|el|am|в|du|de|ngày|tanggal|pada|pada tanggal))?|"
+    r"\b(?:signed|adopted|approved|promulgated|enacted|ratified|gazetted|notified|announced|concluded|amended|passed)\b[^;\n]{0,80}?\s(?:on|le|el|am|в)|"
+    r"\b(?:oj|jo|abl|gu|guue|do|dou|official journal|journal officiel)\.?\s*[lc]?\s*\d+[,\s]*(?:p\.?\s*\d+[,\s]*)?(?:of|du|vom|de|del)?|"
+    r"\bl\s+(?:\d{1,4}\s+){1,4})"
+    r"\s*[:,]?\s*(?:«|\"|“)?\s*$", re.I)
+_INSTRUMENT_DATE_AFTER_RE = re.compile(
+    r"^\s*(?:付(?:け)?|자\s*(?:고시|공고|법률|시행령|시행규칙|훈령|예규|지침|결정|공문|령)|"
+    r"に?\s*(?:发布|發布|公布|颁布|頒布|签署|簽署|签订|簽訂|通过|通過|制定|印发|印發|批准|署名|採択|改正|発表)|"
+    r"(?:에\s*)?(?:발표|공포|제정|개정|서명|채택|공표))")
+
+
+def _instrument_date(low, start, end, lead=''):
+    """The date at this span of the normalized sentence dates the instrument
+    that states the rule, or the journal that printed it, and bounds nothing.
+    The designation may stand in the fragment before this one when the
+    sentence splitter cut it off the date ("Regulation (EC) No." / "810/2009
+    ... of the Council of 13 July 2009")."""
+    before = low[:start]
+    context = (lead[-120:] + ' ' + before) if lead and len(before) <= 90 else before
+    return bool(_INSTRUMENT_DATE_BEFORE_RE.search(context[-200:]) or _INSTRUMENT_DATE_AFTER_RE.match(low[end:end + 16]))
 
 
 def _dates_in(low):
@@ -1045,9 +1100,14 @@ def _policy_windows(text):
     A date in a rule sentence is always a bound of something. When no start
     or end relation in the vocabulary reaches it, that is a bound the
     converter cannot read and not the absence of one, so it fails closed.
+    The one date that is no bound is the instrument's own: the day the
+    resolution, decree or regulation stating the rule was dated, signed or
+    printed, which the converter reads as such and passes over.
     """
+    lead = ''
     for sentence in re.split(r'(?<=[.!?])\s+|[;。；！？\n]+', str(text or '')):
         low = _norm(sentence)
+        previous, lead = lead, low
         if not low or _WINDOW_SKIP_RE.search(low):
             continue
         if not (_POLICY_WORD_RE.search(low) or any(re.search(p, low, re.I) for p, _ in _VERDICT_RULES.values())):
@@ -1068,6 +1128,8 @@ def _policy_windows(text):
                 yield d, None, low, _clause(low, s, e), _window_entry(low, s, e), None
             elif _END_BEFORE_RE.search(before) or _END_AFTER_RE.match(after):
                 yield None, d, low, _clause(low, s, e), _window_entry(low, s, e), None
+            elif _instrument_date(low, s, e, previous):
+                continue
             else:
                 yield None, None, low, _clause(low, s, e), _window_entry(low, s, e), low[s:e]
 
@@ -1575,13 +1637,38 @@ _MEMBERSHIP_DEFERRED_RE = re.compile(
 # ("nationals who do not hold a machine readable passport are members of
 # the scheme").
 _MEMBERSHIP_REACH = 48
+# The words that may stand between a negator and the membership word it
+# negates ("is not YET A party", "will not BE added", "are not, AT PRESENT,
+# members"). Any other word between them is a predicate of its own, so the
+# negator is that predicate's ("nationals who do not HOLD A MACHINE-READABLE
+# PASSPORT ARE members of the scheme").
+_MEMBERSHIP_GAP_WORDS = frozenset(
+    'a an the be been being yet currently presently present moment time for longer still among one of to part in on any all as at '
+    'this that these those such its their formally officially fully full now then also even ever considered deemed regarded '
+    'listed counted included covered eligible entitled'.split())
+
+
+def _membership_started(low):
+    """The membership the normalized sentence defers has a stated start that
+    has passed ("starting from 1 January 2021 the United Kingdom will be
+    added to the list"), so it is a membership today. A deferral with no
+    start, or with a start still to come, stays a deferral."""
+    today = _today()
+    return any(day <= today and _START_BEFORE_RE.search(low[max(0, s - 40):s])
+               for s, _, day in _dates_in(low))
 
 
 def _membership_negated(clause, at):
     """The membership word at this offset of the clause is the one the clause
     negates: a negator stands between the subject and the word, inside the
-    clause and within the reach of the predicate."""
-    return bool(_MEMBERSHIP_NEGATOR_RE.search(clause[max(0, at - _MEMBERSHIP_REACH):at]))
+    clause, within the reach of the predicate, and with nothing but function
+    words between it and the membership word."""
+    window = clause[max(0, at - _MEMBERSHIP_REACH):at]
+    for negator in _MEMBERSHIP_NEGATOR_RE.finditer(window):
+        between = re.findall(r"[^\W\d_]+(?:['’-][^\W\d_]+)*", window[negator.end():])
+        if all(word in _MEMBERSHIP_GAP_WORDS for word in between):
+            return True
+    return False
 
 
 def _membership_denied(low):
@@ -1603,12 +1690,13 @@ def _membership_denied(low):
         return True
     for mark in _MEMBERSHIP_WORD_RE.finditer(low):
         clause = _clause(low, mark.start(), mark.end())
-        if _MEMBERSHIP_DEFERRED_RE.search(clause):
+        if _MEMBERSHIP_DEFERRED_RE.search(clause) and not _membership_started(low):
             return True
-        # The clause is cut out of the sentence, so the word sits at the
-        # offset the cut left it at.
-        at = clause.find(low[mark.start():mark.end()])
-        if at >= 0 and _membership_negated(clause, at):
+        # The negator is looked for in the sentence, not the comma clause: a
+        # parenthetical between them ("are not, at present, parties") is
+        # crossed, while any content word in between belongs to another
+        # predicate and stops the reading.
+        if _membership_negated(low, mark.start()):
             return True
     return False
 
@@ -2150,7 +2238,7 @@ _EXCEPTION_RE = re.compile(
     r"kecuali|selain|terkecuali|tidak termasuk|di luar|ngoại trừ|(?<!miễn )trừ|trừ khi|loại trừ|không bao gồm|osim|kromě|okrem|za isključenjem|"
     r"за исключением|кроме|помимо|исключая|не считая|если не)(?![^\W\d_])|"
     r"ยกเว้น(?!วีซ่า|การตรวจลงตรา)|เว้นแต่|นอกจาก|ไม่รวม)"
-    r"\s*(?:for|of|de|des|du|del|dei|degli|delle|den|der|die|das|pour|para|bagi|untuk|les|los|las|the)?\s*([^.;:\n]{0,80})"
+    r"\s*(?:for|of|de|des|du|del|dei|degli|delle|den|der|die|das|pour|para|bagi|untuk|les|los|las|the)?\s*([^.;:\n]{0,80}[^\s.;:\n,，、()（）]*)"
     r"|(?<![免解削排控驱驅])除了?\s*([^.;:\n。；，、,()（）]{1,40}?)\s*(?:之外|以外|外(?![国國交人籍币幣汇匯出]))"
     r"|([^\s.;:\n。；，、,()（）]{1,40}?)\s*(?:(?:는|은|이|가|을|를|도|만)\s*)?(?:除外|は除く|を除く|を除き|を除いて|以外|제외|이외)"
     r"|(?<=,)\s*less(?!\s+than)\s*(?:the\s+)?([^.;:\n]{0,80})", re.I)
@@ -2185,6 +2273,17 @@ def _clause_text(clause):
     predicate; a clause in the middle of a sentence stops at the comma that
     closes it, so the rest of the rule is not read as an excepted item."""
     text = next((g for g in clause.groups() if g is not None), '')
+    depth = 0
+    for i, ch in enumerate(text):
+        if ch in '(（':
+            depth += 1
+        elif ch in ')）':
+            if depth == 0:
+                # The clause was opened inside a parenthesis ("(not including
+                # Iceland) within 6 months ...") and closes with it.
+                text = text[:i]
+                break
+            depth -= 1
     for mark in re.finditer(r'[,，;；]', text):
         if _CLAUSE_RESUMES_RE.match(text[mark.end():]):
             return text[:mark.start()]
@@ -2312,20 +2411,46 @@ def _group_named(sentence, nat):
 _ITEM_TRAVELLER_RE = re.compile(
     r"\b(?:nationals?|citizens?|holders?|bearers?|persons?|people|those|anyone|everyone|travell?ers?|visitors?|passengers?|"
     r"applicants?|tourists?|residents?|foreigners?|aliens?|subjects?|countr(?:y|ies)|nationalit(?:y|ies)|states?|territories|"
+    r"crews?|seafarers?|seam[ae]n|sailors?|staff|personnel|employees?|workers?|students?|spouses?|child(?:ren)?|famil(?:y|ies)|"
+    r"dependants?|dependents?|members?|individuals?|he|she|they|them|their|his|her|who|whoever|"
+    r"awak|pelaut|penumpang|orang|thuyền viên|"
     r"ressortissants?|citoyens?|titulaires?|ciudadanos?|nacionales|titulares|cidadãos?|portadores|cittadin[oi]|pa[ií]ses|pays|"
     r"staatsangehörige\w*|staatsb[üu]rger\w*|b[üu]rger\w*|inhaber|l[äa]nder|warga ?negara|warganegara|negara|c[ôo]ng d[âa]n|ng[ưu][ờo]i|"
     r"qu[ốo]c gia|граждан\w*|стран\w*|พลเมือง|ผู้ถือ|ประเทศ)\b|"
-    r"国民|公民|人员|人員|国籍|国家|國家|여권|국민|시민|공민|국가|旅券|护照|護照", re.I)
+    r"国民|公民|人员|人員|国籍|国家|國家|여권|국민|시민|공민|국가|旅券|护照|護照|船员|船員|乗客|乘客|승무원|선원|승객", re.I)
+# What an exception item is when it excepts no traveller: a day, a date, a
+# period, a fee or an office matter ("excluding the day of submission",
+# "except weekends and public holidays", "excluding VAT"). The item has to be
+# READ as one of these; an item that is none of them and names no traveller
+# either ("unless any of the following applies", "other than where VN 2.3
+# applies", "unless otherwise exempt") is a condition on travellers the
+# converter cannot read, and refuses.
+_ITEM_NON_TRAVELLER_RE = re.compile(
+    r"\b(?:days?|dates?|periods?|hours?|minutes?|weeks?|weekends?|months?|years?|holidays?|time|times|working days|business days|"
+    r"public holidays|seasons?|monday|tuesday|wednesday|thursday|friday|saturday|sunday|"
+    r"fees?|charges?|costs?|amounts?|tax|taxes|vat|duty|duties|prices?|surcharges?|deposits?|payments?|"
+    r"jours?|d[ée]lais?|frais|taxes?|d[ií]as?|fechas?|plazos?|tasas?|dias?|prazos?|taxas?|tage?|datum|geb[üu]hren?|"
+    r"giorn[oi]|data|tass[ae]|hari|tanggal|biaya|ngày|phí|lệ phí|thời hạn|дн[яеи]й?|дней|дня|дата|даты|срок\w*|сбор\w*|"
+    r"วัน|ค่าธรรมเนียม)\b|"
+    r"日以内|日間|営業日|平日|休日|祝日|天内|工作日|节假日|節假日|费用|費用|手数料|料金|일 이내|영업일|공휴일|수수료|요금", re.I)
+# A day or a fee that belongs to a document, an entry or a stay ("the
+# passport has at least 6 months remaining", "stays exceeding 90 days") is a
+# condition on the traveller, not a calendar matter.
+_ITEM_CONDITION_RE = re.compile(
+    r"\b(?:passports?|permits?|documents?|entry|entries|stays?|arrivals?|purposes?|validity|valid|remaining|exceed\w*)\b|"
+    r"paspor|passeport|pasaporte|hộ chiếu|여권|护照|護照|旅券", re.I)
 
 
 def _exception_elsewhere(piece, bare, phrase, nat, document_type):
     """This one exception item is resolved to a subject that is not this
     row's: it is scoped to a document class the route is not ("except those
-    holding diplomatic or official/service passports"), or it names no
-    traveller at all ("excluding the day of submission"). An item that speaks
-    of travellers without naming them keeps refusing, and so does every item
-    when there is no nationality to compare against, because nothing about it
-    is resolved."""
+    holding diplomatic or official/service passports"), or it is read as a
+    day, a period, a fee or an office matter and so excepts no traveller at
+    all ("excluding the day of submission"). An item that speaks of
+    travellers without naming them keeps refusing, and so does an item the
+    converter can read as nothing in particular ("unless any of the following
+    applies"), and so does every item when there is no nationality to compare
+    against, because nothing about it is resolved."""
     if nat is None:
         return False
     low = _norm(piece)
@@ -2335,7 +2460,9 @@ def _exception_elsewhere(piece, bare, phrase, nat, document_type):
         return True
     if _named(piece, nat) or _group_named(piece, nat) or _GENERAL_TRAVELLER_RE.search(low):
         return False
-    return not _ITEM_TRAVELLER_RE.search(low) and not _ITEM_TRAVELLER_RE.search(_norm(bare))
+    if _ITEM_TRAVELLER_RE.search(low) or _ITEM_TRAVELLER_RE.search(_norm(bare)):
+        return False
+    return bool(_ITEM_NON_TRAVELLER_RE.search(low)) and not _ITEM_CONDITION_RE.search(low) and not _RULE_WORDS.search(low)
 
 
 def _unreadable_exception(sentence, following=None, *, nat=None, document_type=None):
@@ -2539,6 +2666,74 @@ def _about_verdict(low, value, negative):
                 or (_EXCLUSION_RE.search(low) and _concerns_verdict(low, value)))
 
 
+# A predicate about a matter that is not the verdict: converting or
+# extending a stay, processing an application, the validity or entries of
+# the document issued, how days of stay are counted, the papers and fees an
+# application needs, whom to contact. An exception hanging off such a
+# predicate modifies that matter ("visa-exempt entry cannot be converted to
+# visa-based stay, unless any of the following applies") and not the rule
+# the verdict rests on.
+_OTHER_MATTER_RE = re.compile(
+    r"\b(?:cannot|can(?:not)?|could|may|might|must|shall|will|would|should|is|are|was|were|be|been|being|have|has|had)\s+"
+    r"(?:not\s+|be\s+|not\s+be\s+|also\s+)?"
+    r"(?:converted|convertible|extended|extendable|changed|renewed|prolonged|switched|transferred|processed|successful|refunded|"
+    r"refundable|deducted|counted|reckoned|calculated|computed|paid|payable|charged|submitted|uploaded|attached|enclosed)\b|"
+    r"\b(?:conversion|extension|renewal|prolongation)\s+of\s+(?:status|stay|the\s+(?:stay|visa|permit))\b|\bchange\s+of\s+status\b|"
+    r"\b(?:processed|issued|delivered|sent|answered)\s+(?:within|in)\b|\bprocessing\s+(?:time|times|period|takes)\b|\b(?:working|business)\s+days\b|"
+    r"\bvalid\s+for\s+(?:a\s+)?(?:\d+|one|single|multiple|two|three|several)\b|\b(?:multiple|single|double)[- ]entr(?:y|ies)\b|"
+    r"\bvalidity\s+(?:of|is|shall|period)\b|"
+    r"\b(?:period|duration|length)\s+of\s+(?:the\s+)?(?:stay|visit|residence)\s+(?:is|shall|will|starts|begins|ends)\b|"
+    r"\b(?:standard|maximum|permitted)\s+period\s+(?:is|of)\b|"
+    r"\b(?:return|onward|round[- ]trip)\s+tickets?\b|\btickets?\s+(?:to|for)\b|\btiket\b|\bbillets?\b|\bboletos?\b|\bproof\s+of\b|"
+    r"\bhotel\s+(?:booking|reservation)\b|\baccommodation\b|\bsufficient\s+funds\b|\btravel\s+insurance\b|\bphotographs?\b|"
+    r"\bpassport\s+(?:must|should|has|have|needs|is|be)\s+(?:be\s+)?(?:valid|at\s+least|remaining)\b|\bpassport\s+(?:validity|with\s+at\s+least)\b|"
+    r"\b(?:fees?|payments?)\s+(?:are|is|must|shall|may|can)\b|\bpay(?:able|ment)?\s+(?:in|by|at|online)\b|\bcontact\b|\bopening\s+hours\b|\be-?mail\b", re.I)
+# A verdict adjective on a noun ("visa-exempt entry", "visa-free stay") names
+# the traveller's status, not the sentence's rule; the predicate is what
+# states a rule.
+_ATTRIBUTIVE_VERDICT_RE = re.compile(
+    r"\bvisa[- ](?:free|exempt(?:ion)?|waiver)\s+(?:entry|entries|stay|stays|status|period|periods|visit|visits|visitors?|travell?ers?|"
+    r"arrivals?|admission|regime|scheme|program(?:me)?|arrangement|policy|list|countries|nationals?|citizens?|holders?|passport holders?|"
+    r"treatment|access|days|basis|entrants?|foreigners?|category|categories)\b", re.I)
+
+
+def _host_text(sentence):
+    """The normalized sentence without its exception clauses: the rule the
+    clauses hang off."""
+    low = _norm(sentence)
+    for clause in reversed(list(_EXCEPTION_RE.finditer(low))):
+        item = _clause_text(clause)
+        full = clause.group(0)
+        cut = full.find(item) + len(item) if item and item in full else len(full)
+        low = low[:clause.start()] + ' ' + low[clause.start() + cut:]
+    return ' '.join(low.split())
+
+
+def _host_states_rule(host, value, negative):
+    """The host states, flips or contradicts this verdict, excludes from it,
+    or speaks of membership in the scheme it rests on."""
+    stripped = _ATTRIBUTIVE_VERDICT_RE.sub(' ', host)
+    positive, _ = _VERDICT_RULES.get(value, (None, None))
+    return bool((positive and re.search(positive, stripped, re.I)) or (negative and re.search(negative, stripped, re.I))
+                or _states_opposite(stripped, value) or (_EXCLUSION_RE.search(stripped) and _concerns_verdict(stripped, value))
+                or (_SCHEME_NOUN_RE.search(stripped) and _MEMBERSHIP_WORD_RE.search(stripped)))
+
+
+def _exception_on_another_rule(sentence, nat, value, negative, document_type=None):
+    """The rule this sentence's exception clauses hang off is not this row's:
+    the sentence is scoped to a document class the route is not, its
+    traveller subject is another nationality alone, or its predicate is about
+    another matter and states no rule of this verdict."""
+    low = _norm(sentence)
+    if _document_class_restriction(low, document_type) is not None:
+        return True
+    if (not _named(sentence, nat) and not _group_named(sentence, nat) and not _GENERAL_TRAVELLER_RE.search(low)
+            and any(_named_as_traveller(sentence, other) for other in _known_nationalities() if other != nat)):
+        return True
+    host = _host_text(sentence)
+    return bool(host and _OTHER_MATTER_RE.search(host) and not _host_states_rule(host, value, negative))
+
+
 def _exception_binds(sentence, nat, value, negative, document_type=None, following=None):
     """An exception clause or a carve-out in this sentence can refuse this row.
 
@@ -2548,17 +2743,23 @@ def _exception_binds(sentence, nat, value, negative, document_type=None, followi
     item that names this nationality binds, and so does an item the converter
     can resolve to nobody.
 
-    The verdict vocabulary is left as a dismissal for the rest: a sentence
-    whose clauses all resolve elsewhere, to other nationalities, to a
-    document class the route is not, or to no traveller at all ("the
-    application is processed within three days, excluding the day of
-    submission"), and whose own subject is another nationality's entry,
-    governs that entry and not this one.
+    What the clause excepts FROM decides the rest. A clause whose items all
+    resolve elsewhere, to other nationalities, to a document class the route
+    is not, or to a day or a fee ("processed within three days, excluding the
+    day of submission"), binds nothing. A clause the converter cannot read
+    still binds nothing when the rule it hangs off is not this row's: a
+    sentence scoped to another document class, a sentence whose traveller is
+    another nationality alone, or a predicate about converting a stay,
+    processing an application, the validity of the document issued, how days
+    are counted, or the papers an application needs. Such a clause modifies
+    that rule and not the verdict; on a sentence that states, flips or
+    contradicts this verdict, or speaks of the scheme's membership, it
+    refuses.
     """
     if _carved_out(sentence, nat, following):
         return True
     if _unreadable_exception(sentence, following, nat=nat, document_type=document_type) is not None:
-        return True
+        return not _exception_on_another_rule(sentence, nat, value, negative, document_type)
     low = _norm(sentence)
     return bool(_about_verdict(low, value, negative)
                 and (_named(sentence, nat) or _group_named(sentence, nat) or _GENERAL_TRAVELLER_RE.search(low)))

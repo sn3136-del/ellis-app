@@ -2306,3 +2306,284 @@ def test_a_closing_footnote_mark_belongs_to_every_entry_until_the_footnote_hands
     ok, explain = supported('VISA_EXEMPT', [rule, 'Japan, Thailand (1)'], 'THA', pages=[('p', page)] * 2,
                             detail='unconditional_visa_free')
     assert not ok and any(e.startswith('footnote on the list line') for e in explain), explain
+
+
+# Round-eight regressions. Each test carries the round-seven reviewer's own
+# sentences: refused at ca24a10 the way the review found them, refusing now,
+# and beside each the clean row the review lists as correct, still proving.
+
+
+def test_b1_each_exception_item_answers_for_itself():
+    """BLOCKING-1: one clause, two items. "Myanmar nationals" resolves and
+    "persons from the countries listed in Annex III" does not; the readable
+    item never dismisses its sibling."""
+    from scripts.convert_reviewed_general_batch import _unreadable_exception
+    quote = ('Visa-free entry for stays of up to 30 days applies to ASEAN nationals, except Myanmar nationals '
+             'and persons from the countries listed in Annex III.')
+    assert 'annex iii' in (_unreadable_exception(quote, nat='LAO', document_type='ordinary_passport') or '').lower()
+    ok, explain = supported('VISA_EXEMPT', [quote], 'LAO')
+    assert not ok and any('cannot be read' in e for e in explain), explain
+    # The clean row: the same rule with only the readable item still proves
+    # Laos and still carves Myanmar out.
+    ok, explain = supported('VISA_EXEMPT', [ASEAN_SENTENCE], 'LAO')
+    assert ok, explain
+    ok, explain = supported('VISA_EXEMPT', [ASEAN_SENTENCE], 'MMR')
+    assert not ok and any('carved out' in e for e in explain), explain
+
+
+def test_b2_a_carve_out_binds_on_whom_it_names_not_on_verdict_words():
+    """BLOCKING-2: a carve-out that names this nationality refuses the row
+    whether or not the sentence spends a verdict word."""
+    from scripts.convert_reviewed_general_batch import _exception_binds
+    rule = 'Visa is not required for a stay of less than one (1) month for ASEAN nationals.'
+    for extra in ('The arrangement covers all ASEAN members except Myanmar.',
+                  'Participation is limited to the ASEAN members other than Myanmar.'):
+        assert _exception_binds(extra, 'MMR', 'VISA_EXEMPT', None), extra
+        ok, explain = supported('VISA_EXEMPT', [rule], 'MMR', pages=[('p', rule + '\n' + extra + '\n')])
+        assert not ok and any('carved out by name in the same page section' in e for e in explain), (extra, explain)
+        # Laos is not the one named, so the same page still proves Laos.
+        ok, explain = supported('VISA_EXEMPT', [rule], 'LAO', pages=[('p', rule + '\n' + extra + '\n')])
+        assert ok, (extra, explain)
+
+
+def test_b3_a_mark_on_a_multi_entry_cell_is_read_through_its_footnote():
+    """BLOCKING-3: the mark on "Japan and Thailand (1)" is Japan's too until
+    the footnote it points to hands it to Thailand alone."""
+    intro = 'Nationals of the following countries do not require a visa for stays of up to 45 days:'
+    body = '(1) The exemption applies only to holders of biometric passports.'
+    for cell in ('Japan and Thailand (1)', 'Japan, Korea, Singapore (1)', 'Japan / Thailand (1)', 'Japan,\nThailand (1)'):
+        page = intro + '\n' + cell + '\n' + body + '\n'
+        ok, explain = supported('VISA_EXEMPT', [intro, cell], 'JPN', pages=[('p', page)] * 2, detail='unconditional_visa_free')
+        assert not ok, (cell, explain)
+    control = intro + '\nJapan and Thailand (1)\n(1) Thailand nationals must hold a biometric passport.\n'
+    ok, explain = supported('VISA_EXEMPT', [intro, 'Japan and Thailand (1)'], 'JPN', pages=[('p', control)] * 2,
+                            detail='unconditional_visa_free')
+    assert ok, explain
+
+
+def test_b4_a_numbered_or_starred_list_row_opens_no_footnote_body():
+    """BLOCKING-4: "1) Japan" and "* Japan" are list rows, so the scheme-wide
+    sunset under them bounds Japan whatever shape the rows take."""
+    from scripts.convert_reviewed_general_batch import _defines_mark, _scope_blocks
+    intro = 'Nationals of the following countries do not require a visa for stays of up to 45 days:'
+    sunset = 'The visa exemption scheme ends on 31 December 2025.'
+    for a, b in (('Japan', 'Poland'), ('1) Japan', '2) Poland'), ('* Japan', '* Poland')):
+        page = intro + '\n' + a + '\n' + b + '\n' + sunset + '\n'
+        assert len(list(_scope_blocks(page))) == 1, a
+        ok, explain = supported('VISA_EXEMPT', [intro, a], 'JPN', pages=[('p', page)] * 2)
+        assert not ok and any('ended on 2025-12-31' in e for e in explain), (a, explain)
+    # Only a line that defines a mark the page has used, and says something
+    # of its own, opens a footnote body.
+    assert _defines_mark('Japan*\nPoland', '*', 'Holders of biometric passports only.')
+    assert not _defines_mark('Japan\nPoland', '*', 'Holders of biometric passports only.')
+    assert not _defines_mark('Japan*\nPoland', '*', 'Poland')
+
+
+def test_b5_a_bound_after_the_closing_item_of_a_conjunction_run_is_the_whole_runs():
+    """BLOCKING-5: "Brunei, the Philippines and Thailand (effective until
+    July 31, 2022)" bounds all three, not Thailand alone."""
+    from scripts.convert_reviewed_general_batch import _norm, _window_entry, _window_violation
+    quote = 'Nationals of Brunei, the Philippines and Thailand (effective until July 31, 2022) are eligible for visa-free entry.'
+    low = _norm(quote)
+    start = low.find('july 31, 2022')
+    assert _window_entry(low, start, start + len('july 31, 2022')) is None
+    for nat in ('BRN', 'PHL', 'THA'):
+        assert 'ended on 2022-07-31' in (_window_violation([quote], nat=nat) or ''), nat
+        ok, explain = supported('VISA_EXEMPT', [quote], nat)
+        assert not ok and any('ended on 2022-07-31' in e for e in explain), (nat, explain)
+    # The entry-scoped reading of round six still holds for a comma-opened
+    # entry in the middle of a run.
+    run = ('Nationals of the following countries are eligible for the visa-exemption program: '
+           'Albania, North Macedonia (effective until March 31, 2030), Norway, United States.')
+    assert _window_violation([run], nat='USA') is None
+    assert 'until 2030-03-31 is not recorded as effective_to' in _window_violation([run])
+
+
+@pytest.mark.parametrize('relation', [
+    'ceases to apply on', 'shall cease on', 'lapses on', 'applies for arrivals before', 'runs to',
+    'terminates on', 'ceases to be valid on', 'no later than', 'at the latest on', 'will cease on',
+])
+def test_m1_every_end_relation_is_read_by_both_readers(relation):
+    """MAJOR-1: the window reader and the recorder's bound reader carry one
+    end-of-window vocabulary, so a bound that expires the verdict for one is
+    a bound the reviewer may record for the other."""
+    from scripts.convert_reviewed_general_batch import _policy_bound_statement, _policy_windows
+    sentence = 'The visa exemption scheme ' + relation + ' 31 December 2025.'
+    assert [(w[0], str(w[1]), w[5]) for w in _policy_windows(sentence)] == [(None, '2025-12-31', None)], relation
+    assert _policy_bound_statement(sentence, ['31 December 2025', '2025-12-31'], 'effective_to'), relation
+    ok, explain = supported('VISA_EXEMPT', ['Nationals of Japan do not require a visa. ' + sentence], 'JPN')
+    assert not ok and any('ended on 2025-12-31' in e for e in explain), (relation, explain)
+
+
+def test_m1_a_date_no_relation_reaches_is_an_unreadable_bound_not_no_bound():
+    """MAJOR-1, the fail-closed half: a readable date in a rule sentence
+    that no relation reaches refuses the row instead of bounding nothing."""
+    from scripts.convert_reviewed_general_batch import _policy_windows, _window_violation
+    for sentence in ('The visa exemption scheme changed on 31 December 2025.',
+                     'The visa exemption of 31 December 2025 applies to Japan.',
+                     'Under the visa waiver agreement, Japanese nationals are exempt until the end of 31 December 2025.'):
+        assert [w[5] for w in _policy_windows(sentence)] == ['31 december 2025'], sentence
+        assert 'no relation reaches' in _window_violation([sentence]), sentence
+        ok, explain = supported('VISA_EXEMPT', ['Nationals of Japan do not require a visa. ' + sentence], 'JPN')
+        assert not ok and any('no relation reaches' in e for e in explain), (sentence, explain)
+    # An office, issue, update or passport date is still no window at all.
+    assert list(_policy_windows('This page was updated on 31 December 2025.')) == []
+
+
+@pytest.mark.parametrize('sentence', [
+    'In accordance with Resolution No. 44/NQ-CP of the Government dated 07 March 2025, citizens of 12 countries enjoy visa exemption.',
+    'Chính phủ vừa ban hành Nghị quyết số 44/NQ-CP ngày 7/3/2025 về việc miễn thị thực cho công dân 12 nước.',
+    'Сотрудники, аккредитованные в госпротоколе МИД России, находятся по визам (нота от 16.06.2014г.).',
+    'Regulation (EU) 2018/1806 of the European Parliament and of the Council of 14 November 2018 listing the third countries whose nationals must be in possession of visas.',
+    'Regulation (EC) No. 810/2009 of the European Parliament and of the Council of 13 July 2009 establishing a Community Code on Visas applies.',
+    '►M2 Commission Delegated Regulation (EU) 2023/222 of 1 December 2022 L 32 1 3.2.2023',
+    'GDPRの規定、2003年6月30日付緊急政令第196号の規定に基づく個人情報取り扱いを許可します',
+    'Palau signed a mutual visa-waiver agreement with the European Union on 7 December 2015.',
+    'The visa waiver programme was announced on 1 March 2026.',
+])
+def test_m1_an_instruments_own_date_is_no_bound(sentence):
+    """The date of the resolution, decree, regulation or journal that states
+    the rule, or the day it was signed, is a relation the converter reads
+    and not a bound; the dry runs lost thirteen correct rows to it."""
+    from scripts.convert_reviewed_general_batch import _policy_windows, _window_violation
+    assert list(_policy_windows(sentence)) == [], sentence
+    assert _window_violation([sentence]) is None
+
+
+def test_m1_an_instrument_date_hides_no_bound_beside_it():
+    from scripts.convert_reviewed_general_batch import _policy_windows, _window_violation
+    assert [(w[0], str(w[1]), w[5]) for w in _policy_windows('The decree of 1 March 2025 applies until 31 December 2026.')] == [(None, '2026-12-31', None)]
+    assert [(w[0], str(w[1]), w[5]) for w in _policy_windows('The agreement signed on 7 December 2015 ceases to apply on 31 December 2025.')] == [(None, '2025-12-31', None)]
+    quote = ('Under Resolution No. 44/NQ-CP dated 07 March 2025, Japanese nationals enjoy visa exemption '
+             'from 15 March 2025 until 14 March 2028.')
+    assert 'until 2028-03-14 is not recorded as effective_to' in _window_violation([quote], nat='JPN')
+    bounds = {'effective_from': '2025-03-15', 'effective_to': '2028-03-14'}
+    assert _window_violation([quote], bounds, nat='JPN') is None
+    ok, explain = supported('VISA_EXEMPT', [quote], 'JPN')
+    assert not ok, explain
+    ok, explain = supported('VISA_EXEMPT', [quote], 'JPN', bounds=bounds)
+    assert ok, explain
+
+
+M2_RULE = 'Visa is not required for a stay of less than one (1) month for ASEAN nationals.'
+
+
+@pytest.mark.parametrize('extra', [
+    'Myanmar is not a party to the arrangement.',
+    'The list of beneficiary countries does not include Myanmar.',
+    'Myanmar was left out of the 2026 arrangement.',
+    'Myanmar joins the arrangement at a later date.',
+    'Myanmar is not among the beneficiaries of the arrangement.',
+    'Myanmar is excluded from the scheme.',
+    'Cambodia, Laos and Myanmar are not parties to the arrangement.',
+    'Cambodia, Laos and Myanmar are not, at present, parties to the arrangement.',
+    'Myanmar will be added to the list of exempt countries from 1 January 2027.',
+])
+def test_m2_a_denial_of_membership_refuses_the_named_nationality_wherever_it_sits(extra):
+    """MAJOR-2: a sentence whose subject is this nationality, or a list
+    holding it, and whose predicate negates membership, coverage,
+    participation or eligibility in the scheme refuses the exemption, before
+    the rule or after it in the same page section, or inside the evidence.
+    A membership deferred to a start still to come is refused by the window
+    gate first, which is the same refusal."""
+    from scripts.convert_reviewed_general_batch import _excluded_by_statement
+    assert _excluded_by_statement(extra, 'MMR', 'VISA_EXEMPT'), extra
+    refused = ('excluded from the rule', 'starts on 2027-01-01')
+    for page in ('Visa exemption\n' + M2_RULE + ' ' + extra + '\n', 'Visa exemption\n' + extra + ' ' + M2_RULE + '\n'):
+        ok, explain = supported('VISA_EXEMPT', [M2_RULE], 'MMR', pages=[('p', page)])
+        assert not ok and any(r in e for e in explain for r in refused), (extra, explain)
+    ok, explain = supported('VISA_EXEMPT', [M2_RULE, extra], 'MMR')
+    assert not ok and any(r in e for e in explain for r in refused), (extra, explain)
+    # Thailand is named by none of them, so the same page still proves Thailand.
+    ok, explain = supported('VISA_EXEMPT', [M2_RULE], 'THA', pages=[('p', 'Visa exemption\n' + M2_RULE + ' ' + extra + '\n')])
+    assert ok, (extra, explain)
+
+
+@pytest.mark.parametrize('sentence,nat', [
+    ('Myanmar is a party to the arrangement.', 'MMR'),
+    ('Nationals who do not hold a machine-readable passport are members of the scheme.', 'MMR'),
+    ('Myanmar is not a party to the dispute.', 'MMR'),
+    ('In accordance with the provisions of the EU Regulation 2019/592, starting from 1 January 2021 (the end of the transition '
+     'period) the United Kingdom will be added to the list of third countries whose nationals are exempt from the visa requirement.', 'GBR'),
+])
+def test_m2_a_negation_about_something_else_denies_no_membership(sentence, nat):
+    """A negated passport, another party's membership, a dispute, or a
+    membership whose stated start has passed is no denial."""
+    from scripts.convert_reviewed_general_batch import _excluded_by_statement, _membership_denied, _norm
+    assert not _membership_denied(_norm(sentence)), sentence
+    assert not _excluded_by_statement(sentence, nat, 'VISA_EXEMPT'), sentence
+
+
+def test_the_imi_india_sunset_is_read_from_its_own_line_whatever_the_page_split():
+    """MAJOR-3: imi.gov.my keeps IDN, THA, VNM and GBR to MYS because the
+    clause "India** citizen: visa exempts until 31st December 2026" names
+    India, read from its own line, not because a block split parts it from
+    the ASEAN rule. The page read whole, with no split at all, says the same."""
+    from scripts.convert_reviewed_general_batch import _scope_blocks, _window_violation
+    page = ('Countries required to apply for a visa to enter Malaysia (List of involved countries)\n'
+            'Afghanistan***\nBangladesh\nIndia**\nNepal\nNOTE\n'
+            'For countries marked as (*) are allowed to enter Malaysia by air only.\n'
+            'India** citizen: visa exempts until 31st December 2026.\n'
+            '***Afghanistan nationals who wish to enter Malaysia for social visit purposes must obtain a visa approval '
+            'letter before applying for a VTR.\n' + ASEAN_SENTENCE + '\n')
+    blocks = list(_scope_blocks(page))
+    assert len(blocks) == 2
+    assert not any('India** citizen' in block and 'ASEAN nationals' in block for block, _ in blocks)
+    for nat in ('IDN', 'THA', 'VNM', 'GBR'):
+        assert _window_violation([page], nat=nat) is None, nat
+        assert all(_window_violation([block], nat=nat, scope=scope) is None for block, scope in blocks), nat
+    assert 'until 2026-12-31 is not recorded as effective_to' in _window_violation([page], nat='IND')
+    assert 'until 2026-12-31 is not recorded as effective_to' in _window_violation([page])
+    assert _window_violation([page], {'effective_to': '2026-12-31'}, nat='IND') is None
+
+
+def test_an_unreadable_exception_binds_only_on_the_rule_this_verdict_rests_on():
+    """Round eight, on the reviewer's BLOCKING-2 rule. An item the converter
+    cannot read refuses on a sentence that states, flips or contradicts the
+    verdict or speaks of the scheme's membership, and binds nothing on a rule
+    about another matter: converting a stay, processing an application, the
+    validity of the document issued, how days of stay are counted, the papers
+    an application needs, another document class's rule, or another
+    nationality's own entry. An item excepts nobody only when it is read as
+    a day, a period, a fee or an office matter."""
+    from scripts.convert_reviewed_general_batch import _exception_binds, _exception_elsewhere, _unreadable_exception
+    rule = 'Nationals of the following countries are eligible for the visa-exemption program: Japan, Korea, Singapore.'
+    conversion = 'Visa-exempt entry cannot be converted to visa-based stay, unless any of the following applies:'
+    assert _unreadable_exception(conversion, nat='JPN', document_type='ordinary_passport') is not None
+    assert not _exception_binds(conversion, 'JPN', 'VISA_EXEMPT', None)
+    ok, explain = supported('VISA_EXEMPT', [rule], 'JPN', pages=[('p', rule + '\n' + conversion + '\n')])
+    assert ok, explain
+    for other in (
+        'Your visa application will be processed within three working days (excluding the day of submission).',
+        'The standard period is 90 days on arrival unless otherwise specified in the applicable waiver agreement.',
+        'Nationals of Malaysia may stay in Denmark for up to 3 months reckoned from the date of their first entry into '
+        'Denmark or another Nordic country (not including Iceland).',
+        'The time you have stayed in Denmark or another Nordic country (not including Iceland) within 6 months preceding '
+        'any such entry shall be deducted from the mentioned 3 months.',
+        'c. tiket kembali atau tiket terusan ke negara lain, kecuali bagi awak alat angkut yang akan singgah untuk '
+        'bergabung dengan kapalnya dan melanjutkan perjalanan ke negara lain',
+        'Orang asing pemegang dokumen perjalanan (bukan paspor kebangsaan) berupa paspor sementara, paspor darurat, '
+        'titre du voyage, certificate of identity, laissez passer harus melampirkan dokumen izin (kecuali awak alat angkut).',
+    ):
+        assert not _exception_binds(other, 'USA', 'VISA_EXEMPT', None), other
+    ours = (
+        'Visa-free entry applies to ASEAN nationals, unless any of the following applies:',
+        'The following people do not need a visit visa before they travel to the UK as a visitor, other than where VN 2.3. applies:',
+        'A person who meets one or more of the criteria below needs entry clearance (a visa) in advance of travel to the UK '
+        'for any purpose, unless they meet one of the exceptions set out in VN2.1 and VN2.2.',
+        'Such aliens must secure a visa in order to be admitted to the United States as nonimmigrants, unless otherwise exempt.',
+        'Anyone wishing to enter the Kingdom for tourism purposes shall obtain a valid visa, unless his entry does not require it.',
+        'The arrangement covers all ASEAN members except those listed in Annex III.',
+        'ASEAN nationals are exempt from the visa requirement, except crew members.',
+        'Nationals of Japan do not need a visa, except stays exceeding 90 days.',
+    )
+    for sentence in ours:
+        assert _exception_binds(sentence, 'JPN', 'VISA_EXEMPT', None), sentence
+    for sentence in ours[1:2] + ours[3:4]:
+        ok, explain = supported('VISA_EXEMPT', [rule], 'JPN', pages=[('p', rule + '\n' + sentence + '\n')])
+        assert not ok and any('cannot be read' in e for e in explain), (sentence, explain)
+    for item in ('the day of submission', 'weekends and public holidays', 'VAT'):
+        assert _exception_elsewhere(item, item, item, 'JPN', 'ordinary_passport'), item
+    for item in ('any of the following applies', 'where VN 2.3 applies', 'the passport has at least 6 months remaining',
+                 'otherwise exempt', 'stays exceeding 90 days', 'crew members'):
+        assert not _exception_elsewhere(item, item, item, 'JPN', 'ordinary_passport'), item
