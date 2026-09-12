@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createLatestLoader, readQualityTab, refreshQualityRecord, qualityRefreshOutcome } from '../../src/renderer/src/lib/qualityLoader.js'
+import { createLatestLoader, readQualityTab, refreshQualityRecord, publishQualityRecord, qualityRefreshOutcome } from '../../src/renderer/src/lib/qualityLoader.js'
 import { createVisaClient } from '../../src/renderer/src/lib/visaBackend.js'
 
 function deferred() { let resolve, reject; const promise = new Promise((a,b) => { resolve=a; reject=b }); return { promise, resolve, reject } }
@@ -177,4 +177,90 @@ test('a stalled primary QC read exits loading with an error and permits a later 
     await loader.run('records')
     assert.deepEqual(state.data,{}); assert.equal(state.busy,false)
   } finally {globalThis.fetch=original}
+})
+
+test('publishing waits for current records and rejects pre-approval reads', async () => {
+  const old = deferred(), post = deferred(), fresh = deferred()
+  let reads = 0, writes = 0
+  const { loader, state } = harness(() => ++reads === 1 ? old.promise : fresh.promise)
+  const original = loader.run('records')
+  const payload = { cache_key: 'THA|THA|CHN|tourism|default|unknown|v6' }
+  const pending = publishQualityRecord({ databaseApprove(body) {
+    writes++; assert.deepEqual(body, payload); return post.promise
+  } }, payload, loader, 'records')
+  old.resolve({ held: true }); await original
+  assert.equal(state.data, null)
+  post.resolve({ ok: true, published: true, held: false })
+  await Promise.resolve(); await Promise.resolve()
+  fresh.resolve({ held: false }); await pending
+  assert.deepEqual(state.data, { held: false }); assert.equal(writes, 1)
+})
+
+test('a blocked publication retains the actionable backend reason and reloads without retrying', async () => {
+  const blocked = Object.assign(new Error('Resolve the conflicting visa requirement in the Correction queue.'), {
+    detail: { code: 'publication_blocked', published: false, held: true },
+  })
+  let writes = 0
+  const { loader, state } = harness(async () => ({ held: true }))
+  await assert.rejects(publishQualityRecord({ databaseApprove: async () => { writes++; throw blocked } },
+    {}, loader, 'records'), error => error === blocked)
+  assert.equal(writes, 1); assert.deepEqual(state.data, { held: true })
+})
+
+test('legacy approval acknowledgements cannot be reported as publication', async () => {
+  for (const response of [{ ok: true }, { ok: true, published: false, held: true }, { published: true, held: true }]) {
+    const { loader } = harness(async () => ({ held: true }))
+    await assert.rejects(publishQualityRecord({ databaseApprove: async () => response }, {}, loader, 'records'),
+      error => error.code === 'publication_unconfirmed')
+  }
+})
+
+test('publication never retries an ambiguous POST or a committed write whose reload failed', async () => {
+  for (const ambiguous of [true, false]) {
+    let writes = 0
+    const { loader } = harness(async () => { throw new Error('HTTP 503') })
+    await assert.rejects(publishQualityRecord({ databaseApprove: async () => {
+      writes++
+      if (ambiguous) throw new Error('Network failed while publishing')
+      return { published: true, held: false }
+    } }, {}, loader, 'records'), error => ambiguous
+      ? error.message === 'Network failed while publishing' : error.code === 'publication_reload_failed')
+    assert.equal(writes, 1)
+  }
+})
+
+test('publication reloads the newly selected tab and cannot resurrect a stale record view', async () => {
+  const post = deferred(); let tab = 'records'; const reads = []
+  const { loader, state } = harness(async which => { reads.push(which); return { view: which } })
+  const pending = publishQualityRecord({ databaseApprove: () => post.promise }, {}, loader, () => tab)
+  tab = 'issues'; await loader.run(tab)
+  post.resolve({ published: true, held: false }); await pending
+  assert.deepEqual(reads, ['issues', 'issues']); assert.deepEqual(state.data, { view: 'issues' })
+})
+
+test('a newer visible view may supersede publication reload without a false error', async () => {
+  const old = deferred()
+  const { loader, state } = harness(which => which === 'records' ? old.promise : Promise.resolve({ view: which }))
+  const pending = publishQualityRecord({ databaseApprove: async () => ({ published: true, held: false }) }, {}, loader, 'records')
+  await Promise.resolve(); await Promise.resolve()
+  await loader.run('freshness'); old.resolve({ view: 'records' })
+  assert.equal((await pending).quality_reload, 'superseded')
+  assert.deepEqual(state.data, { view: 'freshness' })
+})
+
+test('locale or client changes cannot reactivate an old loader after publish or refresh', async () => {
+  for (const operation of [publishQualityRecord, refreshQualityRecord]) {
+    const post = deferred(), newerRead = deferred(); let oldReads = 0
+    const prior = harness(async () => { oldReads++; return { locale: 'old' } })
+    const newer = harness(async () => newerRead.promise)
+    let current = prior.loader
+    const pending = operation({ databaseApprove: () => post.promise, post: () => post.promise },
+      {}, () => current, () => 'records')
+    prior.loader.invalidate(); current = newer.loader
+    post.resolve({ published: true, held: false, research: { outcome: 'checked' } })
+    await Promise.resolve(); await Promise.resolve()
+    newerRead.resolve({ locale: 'new', held: false }); await pending
+    assert.equal(oldReads, 0); assert.equal(prior.state.data, null)
+    assert.deepEqual(newer.state.data, { locale: 'new', held: false })
+  }
 })

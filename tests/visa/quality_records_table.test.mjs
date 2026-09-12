@@ -31,10 +31,10 @@ function record(extra = {}) {
     max_stay_duration: null, max_stay_unit: null, max_stay_text: null,
     visa_fee_amount: null, visa_fee_currency: null, ...extra }
 }
-function render(records) {
+function render(records, extra = {}) {
   return renderToStaticMarkup(createElement(RecordsTable, {
     records, total: records.length, onFlag: () => {}, onRelease: () => {}, onEdit: () => {},
-    onRefresh: () => {}, t, flagOf: () => null }))
+    onRefresh: () => {}, t, flagOf: () => null, ...extra }))
 }
 
 test('publication sorting uses per-product access even when route and confidence differ', () => {
@@ -225,4 +225,23 @@ test('unpublished alternatives never display the published product badge', () =>
 test('Excel receives the same publication, product and missing-field selections as QC', () => {
   const params = new URLSearchParams(qualityFilterQuery({ nationality: 'IND', destination: 'JPN', visaType: 'Multiple-entry', fieldMissing: 'visa_fee_amount', publication: 'unpublished', confidence: '' }))
   assert.deepEqual(Object.fromEntries(params), { nationality: 'IND', destination: 'JPN', visa_type: 'Multiple-entry', field_missing: 'visa_fee_amount', publication: 'unpublished' })
+})
+
+test('publish pending state disables every sibling button for the same canonical route', () => {
+  const a = record({ held: true }), b = record({ held: true, visa_type_name: 'Multiple-entry tourist visa' })
+  const html = render([a, b], { releaseStates: { [a.cache_key]: { pending: true } } })
+  assert.equal((html.match(/data-testid="ops-release" disabled="" aria-busy="true"/g) || []).length, 2)
+  assert.equal((html.match(/Publishing…/g) || []).length, 2)
+  assert.ok(!html.includes('data-testid="ops-published"'))
+})
+
+test('publish rejection is visible beside its route instead of a silent unchanged button', () => {
+  const a = record({ held: true })
+  const html = render([a], { releaseStates: { [a.cache_key]: {
+    pending: false, error: true, message: 'Resolve the conflicting visa requirement in the Correction queue.',
+  } } })
+  assert.ok(html.includes('role="alert" data-testid="ops-release-message"'))
+  assert.ok(html.includes('Resolve the conflicting visa requirement'))
+  assert.ok(!html.includes('data-testid="ops-published"'))
+  assert.ok(!html.includes('disabled=""'))
 })

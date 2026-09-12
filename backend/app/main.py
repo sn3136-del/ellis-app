@@ -631,7 +631,9 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
         raise HTTPException(422, "the correction has to be reviewed by someone "
                                  "other than the person who wrote it")
     from .visa_snapshot import sweep_issues
-    sweep = sweep_issues.sweep_meta(row) if row.reported_by == sweep_issues.REPORTER else None
+    legacy_integrity = sweep_issues.legacy_integrity_meta(row)
+    sweep = legacy_integrity or (sweep_issues.sweep_meta(row)
+                                if row.reported_by == sweep_issues.REPORTER else None)
     dismissal = _dismissal_gate(db, row, body, p, sweep) if status == "dismissed" else None
     written_evidence = set()
     if status in ("corrected", "reviewed", "published"):
@@ -690,6 +692,7 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
             DatabaseChangeLog.created_at >= row.created_at,
             DatabaseChangeLog.origin.in_(("operator-edit", "grounded_recheck")))).scalars()
         corrected_fields = set()
+        legacy_changed_fields = set()
         for change in changes:
             # A field counts as corrected only when its value actually
             # changed: writing the same wrong value back is not a correction
@@ -698,16 +701,23 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
                 if not isinstance(delta, dict) or json.dumps(delta.get("from"), sort_keys=True, default=str) \
                         != json.dumps(delta.get("to"), sort_keys=True, default=str):
                     corrected_fields.add(name)
+                    if isinstance(delta, dict) and "from" in delta and "to" in delta:
+                        legacy_changed_fields.add(name)
         accepted = (row.proposal or {}).get("correction_evidence") or {}
         corrected_fields.update(accepted.get("fields") or [])
         fieldless = sweep is None and requested <= {"", "record", "ai_answer"}
-        if (fieldless or sweep is not None) and body.correction_evidence is not None:
+        if (fieldless or (sweep is not None and legacy_integrity is None)) and body.correction_evidence is not None:
             written_evidence = _valid_correction_evidence(body.correction_evidence, row.route)
         if fieldless:
             # A reader reported the whole answer. Preserve that scope: later
             # research proposals must not silently narrow it to another field.
             # The sourced change and separate operations review are still required.
             covered = bool(corrected_fields or written_evidence or accepted.get("fields"))
+        elif legacy_integrity is not None:
+            # The old audit named no proposal fields. It still needs an
+            # actual sourced policy delta, not a status label, provenance
+            # assertion, unrelated edit, or an old passing-check marker.
+            covered = bool(requested & legacy_changed_fields)
         elif sweep is not None:
             covered = bool(requested & corrected_fields) or bool(written_evidence) or bool(accepted.get("fields"))
         else:
@@ -776,14 +786,88 @@ class DatabaseApproveIn(BaseModel):
     cache_key: str = ""
 
 
+def _database_publication_result(db, row, verification=None) -> tuple[dict, list]:
+    """Inspect the actual QC/product publication path, without changing it.
+
+    A release is permission to serve soft Low evidence, not permission to
+    suppress a dispute, unfinished extraction, or a contradictory product.
+    The same projection is checked on a proposed copy and on the written row.
+    """
+    from types import SimpleNamespace
+    from .visa_snapshot import kimi_primary, row_projection, tstation
+    snapshot = SimpleNamespace(**{c.key: getattr(row, c.key) for c in row.__table__.columns})
+    if verification is not None:
+        snapshot.verification = verification
+    route = row_projection.canonical_route(snapshot) if isinstance(snapshot.route, dict) else {}
+    if not route or kimi_primary.cache_key(route) != row.cache_key:
+        raise HTTPException(422, {
+            "code": "publication_route_mismatch", "cache_key": row.cache_key,
+            "published": False, "held": True, "publication_state": "withheld",
+            "message": "The cached answer's route or travel document does not match its key. Reload and correct the record before publishing.",
+            "reasons": ["The stored route or travel document does not match the requested answer."],
+            "blocked_fields": ["route"],
+        })
+    records = row_projection.records_projection(db, snapshot, route)
+    held = [record for record in records if record.get("_held")]
+    has_answer = any(record.get("visa_requirement") for record in records)
+    published = has_answer and not held
+    reasons, fields = [], set()
+    if not published:
+        for record in held:
+            disputed = tstation.material_disputes(record.get("_disputed"))
+            fields.update(str(field) for field in disputed)
+            if disputed:
+                reasons.append("Resolve the open dispute for: " + ", ".join(map(str, disputed)) + ".")
+            for problem in record.get("_contradictions") or []:
+                reasons.append("Correct the conflicting answer: " + str(problem))
+            reason = record.get("_publication_reason")
+            if reason in ("optional_product_evidence_pending", "product_evidence_low"):
+                reasons.append("Complete the source evidence for the withheld visa product before publishing it.")
+            elif reason:
+                reasons.append(str(reason))
+        if (snapshot.verification or {}).get("detail_pending"):
+            reasons.append("The detail check is still pending; finish it before publishing.")
+        if not has_answer:
+            reasons.append("There is no visa-requirement answer to publish; refresh or correct this route first.")
+        if not reasons:
+            reasons.append("The current publication checks still withhold this answer; resolve its source or policy conflict before publishing.")
+    return {
+        "cache_key": row.cache_key, "published": published, "held": not published,
+        "publication_state": ("published" if published else
+                              "partially_published" if has_answer and held and len(held) < len(records) else "withheld"),
+        "reasons": list(dict.fromkeys(reasons)), "blocked_fields": sorted(fields),
+    }, records
+
+
+def _publication_values(records: list) -> list:
+    """Pin projected facts even when an override changes outside the cache."""
+    return [{key: value for key, value in record.items()
+             if not key.startswith("_") and key != "confidence_level"}
+            for record in records]
+
+
+def _publication_changed(key: str) -> None:
+    raise HTTPException(409, {
+        "code": "publication_changed", "cache_key": key, "published": False,
+        "message": "The answer changed during publication; reload and review the current answer before publishing.",
+    })
+
+
+def _require_database_publication(result: dict) -> None:
+    if not result["published"]:
+        raise HTTPException(409, dict(result, code="publication_blocked",
+            message="Publication was not completed. " + " ".join(result["reasons"])))
+
+
 @app.post("/database/approve")
 def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
                             p: Principal = Depends(get_principal)):
-    """Release a held answer. The engine holds back anything it rates LOW
-    confidence; a person who has checked it against the official source marks
-    it releasable here. The approval is recorded on the cached answer with WHO
-    released it and WHEN, and it dies with the answer: a refresh writes a new
-    row, which is held again on its own merits."""
+    """Publish an operator-reviewed answer only when the shared reader agrees.
+
+    Manual release can clear a soft Low hold; conflicts, unresolved disputes,
+    and pending checks continue to apply. The response confirms the current
+    product publication state, not merely that release metadata was saved.
+    """
     from datetime import datetime, timezone
     from sqlalchemy import select as _select
     from .visa_snapshot import kimi_primary
@@ -811,44 +895,74 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
     if key != expected:
         raise HTTPException(422, "cache_key does not match the requested route")
     row = db.execute(_select(KimiRouteGuidanceCache).where(
-        KimiRouteGuidanceCache.cache_key == key)).scalars().first()
+        KimiRouteGuidanceCache.cache_key == key).execution_options(populate_existing=True)).scalars().first()
     if row is None:
         raise HTTPException(404, "no cached answer for that route")
     release = {
         "by": p.user_id, "at": datetime.now(timezone.utc).isoformat(),
         "note": (body.note or "")[:500]}
-    # The API and freshness sweep are separate processes. Compare the exact
-    # metadata read immediately before the write, so a concurrent page check
-    # or detail-stage update cannot be replaced by a stale ORM dictionary.
+    # The API and freshness sweep are separate processes. Pin both facts and
+    # metadata to the inspected generation, then check the actual projection
+    # again before committing. A new issue is not necessarily a cache write.
     from sqlalchemy import update as _update
     from .visa_snapshot.freshness import json_unchanged
+    from copy import deepcopy
     row_id = row.id
+    reviewed_generation = {name: deepcopy(getattr(row, name)) for name in (
+        "route", "guidance", "generated_at", "status", "missing_fields", "contradictions", "model")}
+    reviewed_values = None
     for attempt in range(3):
         with db.no_autoflush:
-            current = db.execute(_select(KimiRouteGuidanceCache.verification).where(
-                KimiRouteGuidanceCache.id == row_id)).first()
+            current = db.execute(_select(KimiRouteGuidanceCache).where(
+                KimiRouteGuidanceCache.id == row_id,
+                KimiRouteGuidanceCache.cache_key == key
+            ).execution_options(populate_existing=True)).scalar_one_or_none()
         if current is None:
             raise HTTPException(404, "no cached answer for that route")
+        if any(getattr(current, name) != value for name, value in reviewed_generation.items()):
+            _publication_changed(key)
         previous = current.verification
         merged = dict(previous) if isinstance(previous, dict) else {}
         merged["operator_released"] = release
-        statement = _update(KimiRouteGuidanceCache).where(
-            KimiRouteGuidanceCache.id == row_id,
-            json_unchanged(db, KimiRouteGuidanceCache.verification, previous)
-        ).values(verification=merged).execution_options(synchronize_session=False)
         with db.no_autoflush:
+            proposed, records = _database_publication_result(db, current, merged)
+            _require_database_publication(proposed)
+            values = _publication_values(records)
+            if reviewed_values is not None and reviewed_values != values:
+                _publication_changed(key)
+            reviewed_values = deepcopy(values)
+            unchanged = []
+            for column in KimiRouteGuidanceCache.__table__.columns:
+                value = getattr(current, column.key)
+                unchanged.append(json_unchanged(db, column, value) if column.key in {
+                    "route", "guidance", "missing_fields", "contradictions", "verification"
+                } else column == value)
+            statement = _update(KimiRouteGuidanceCache).where(*unchanged).values(
+                verification=merged).execution_options(synchronize_session=False)
             written = db.execute(statement)
         if written.rowcount == 1:
-            db.commit()
-            db.expire(row, ["verification"])
+            # Keep this write uncommitted until both the saved release and
+            # every live dispute have passed the same checks readers use.
+            try:
+                with db.no_autoflush:
+                    db.refresh(current)
+                    publication, records = _database_publication_result(db, current)
+                    _require_database_publication(publication)
+                    if _publication_values(records) != reviewed_values:
+                        _publication_changed(key)
+            except Exception:
+                db.rollback()
+                raise
             break
         db.rollback()
     else:
         raise HTTPException(409, "the route was updated concurrently; reload it before releasing")
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_answer_released",
-                 detail={"nationality": nat, "destination": dest}, actor=p.user_id)
-    return {"ok": True, "cache_key": key, "released_by": p.user_id}
+                 detail={"nationality": nat, "destination": dest,
+                         "cache_key": key, "publication_state": publication["publication_state"]},
+                 actor=p.user_id)
+    return {"ok": True, **publication, "released_by": p.user_id}
 
 
 # One in-flight page check per route at a time; re-ground when the last check

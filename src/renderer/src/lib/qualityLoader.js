@@ -42,11 +42,12 @@ export function createLatestLoader(read, { onStart, onData, onError, onFinish,
 }
 
 export async function refreshQualityRecord(client, route, loader, currentTab) {
-  loader.invalidate()
+  const activeLoader = () => typeof loader === 'function' ? loader() : loader
+  activeLoader().invalidate()
   const response = await client.post('/database/routes/research', route)
   // Resolve the visible tab after the mutation: an old Records closure must
   // not replace a Freshness view the operator selected while it was running.
-  const reloaded = await loader.run(typeof currentTab === 'function' ? currentTab() : currentTab)
+  const reloaded = await activeLoader().run(typeof currentTab === 'function' ? currentTab() : currentTab)
   if (reloaded?.status === 'superseded') return { ...response, quality_reload: 'superseded' }
   if (reloaded?.status !== 'loaded') {
     // The source operation may have committed. Do not repeat it automatically
@@ -56,6 +57,29 @@ export async function refreshQualityRecord(client, route, loader, currentTab) {
     throw error
   }
   return response
+}
+
+export async function publishQualityRecord(client, route, loader, currentTab) {
+  const activeLoader = () => typeof loader === 'function' ? loader() : loader
+  activeLoader().invalidate()
+  let response, failure
+  try {
+    // A recorded approval is not proof that the traveler answer was released.
+    // Never retry this write automatically, including after a network error.
+    response = await client.databaseApprove(route)
+    if (response?.published !== true || response?.held !== false) {
+      failure = new Error('Publication was not confirmed. Check the current record before trying again.')
+      failure.code = 'publication_unconfirmed'
+    }
+  } catch (error) { failure = error }
+  const reloaded = await activeLoader().run(typeof currentTab === 'function' ? currentTab() : currentTab)
+  if (failure) throw failure
+  if (!['loaded', 'superseded'].includes(reloaded?.status)) {
+    const error = new Error('The answer was published, but the Quality Control list did not reload. Reload the page to see its current status.')
+    error.code = 'publication_reload_failed'
+    throw error
+  }
+  return { ...response, quality_reload: reloaded.status }
 }
 
 export function qualityRefreshOutcome(research) {

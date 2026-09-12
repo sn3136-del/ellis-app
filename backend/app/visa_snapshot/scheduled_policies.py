@@ -271,6 +271,49 @@ def _exceptions(existing, additions, superseded):
     return list(dict.fromkeys(kept + list(additions)))
 
 
+def _protect_competing_source(source, policy, selected):
+    """A recheck clock is not evidence that a current rule applies in future.
+
+    Before a reviewed change takes effect, an undated baseline reread still
+    describes the current rule. Only newer evidence explicitly spanning the
+    future interval can compete with the schedule. Bounds inherited from an
+    older source keep their own evidence clock instead of borrowing the new
+    recheck date. Once the change is effective, a newer current contradiction
+    remains a conflict for review, as does an explicit human correction.
+    """
+    if source.get("verifier") == "human":
+        return True
+    checked, scheduled_checked = _date(source.get("verified_at")), _date(policy["verified_at"])
+    if not checked or checked <= scheduled_checked:
+        return False
+    start = _date(policy["effective_from"])
+    # Blank optional form values provide no claim about future applicability.
+    # Keep nonempty malformed bounds protected; do not rewrite saved evidence.
+    raw_from, raw_to = (None if isinstance(value, str) and not value.strip() else value
+                        for value in (source.get("effective_from"), source.get("effective_to")))
+    effective_from, effective_to = _date(raw_from), _date(raw_to)
+    if ((raw_from is not None and effective_from is None)
+            or (raw_to is not None and effective_to is None)
+            or (effective_from and effective_to and effective_to < effective_from)):
+        # Malformed explicit applicability cannot be silently discarded.
+        return True
+    if ((effective_from and selected < effective_from)
+            or (effective_to and selected > effective_to)):
+        return False
+    if checked >= start:
+        return True
+    evidence = source.get("policy_interval_evidence")
+    evidence = evidence if isinstance(evidence, dict) else {}
+    for key, bound in (("effective_from", effective_from), ("effective_to", effective_to)):
+        if not bound or bound < start:
+            continue
+        proof = evidence.get(key) or source
+        when = _date(proof.get("verified_at")) if isinstance(proof, dict) else None
+        if when and when > scheduled_checked:
+            return True
+    return False
+
+
 def apply(guidance, provenance, route):
     """Return copies with an applicable source-quoted date policy, never a
     second cached decision. Invalid/missing arrival dates use today's rule.
@@ -326,8 +369,7 @@ def apply(guidance, provenance, route):
     conflicts = []
     for field, value in candidate.items():
         source = prior.get(field) or (prov if field in (prov.get("fields") or []) else {})
-        when = _date(source.get("verified_at"))
-        protected = source.get("verifier") == "human" or (when and when > _date(row["verified_at"]))
+        protected = _protect_competing_source(source, row, selected)
         if protected and g.get(field) != value:
             conflicts.append(field)
     if conflicts:

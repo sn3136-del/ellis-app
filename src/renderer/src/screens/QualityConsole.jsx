@@ -132,7 +132,7 @@ function useCountUp(target, ms = 700) {
 const SEQ = { high: '#0b7a44', medium: '#2563eb', low: '#d97706' }
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newQualitySession, qualityRecordRoute } from '../lib/visaSession.js'
-import { createLatestLoader, readQualityTab, refreshQualityRecord, qualityRefreshOutcome } from '../lib/qualityLoader.js'
+import { createLatestLoader, readQualityTab, refreshQualityRecord, publishQualityRecord, qualityRefreshOutcome } from '../lib/qualityLoader.js'
 import { indexRecoveredRecords, recoveredForRecord } from '../lib/qualityRecovery.js'
 import { useLocale } from '../lib/locale.jsx'
 import { registerOpenNote } from '../lib/openNote.js'
@@ -1881,7 +1881,7 @@ export function sortQualityRecords(records, sort) {
   })
 }
 
-export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t, flagOf, typeNames = {}, tvv = (x) => x }) {
+export function RecordsTable({ records, total, onFlag, onRelease, releaseStates = {}, onEdit, onRefresh, t, flagOf, typeNames = {}, tvv = (x) => x }) {
   const [sort, setSort] = useState({ key: 'route', dir: 1 })
   const [open, setOpen] = useState(null)
   const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
@@ -2063,12 +2063,21 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
                       {held && !productWithheld && (
                         <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
                                 data-testid="ops-release"
+                                disabled={!!releaseStates[rec.cache_key]?.pending}
+                                aria-busy={!!releaseStates[rec.cache_key]?.pending}
                                 title={t('ops.heldTip')}
                                 style={{ border: `1px solid ${GREEN}`, background: '#fff',
                                          color: GREEN, borderRadius: 8, fontSize: 11,
-                                         padding: '4px 12px', cursor: 'pointer' }}>
-                          {t('ops.releaseAction')}
+                                         padding: '4px 12px', cursor: releaseStates[rec.cache_key]?.pending ? 'wait' : 'pointer' }}>
+                          {t(releaseStates[rec.cache_key]?.pending ? 'ops.publishing' : 'ops.releaseAction')}
                         </button>
+                      )}
+                      {releaseStates[rec.cache_key]?.message && (
+                        <span role={releaseStates[rec.cache_key].error ? 'alert' : 'status'}
+                              data-testid="ops-release-message"
+                              style={{ fontSize: 12, color: releaseStates[rec.cache_key].error ? RED : GREEN }}>
+                          {releaseStates[rec.cache_key].message}
+                        </span>
                       )}
                     </div>
                   </td>
@@ -2553,6 +2562,8 @@ function QualityWorkspace() {
   const [tab, setTab] = useState('records')
   const currentTab = useRef(tab)
   currentTab.current = tab
+  const releasing = useRef(new Set())
+  const [releaseStates, setReleaseStates] = useState({})
   const [filters, setFilters] = useState(EMPTY_FILTERS)
   const activeFilters = Object.values(filters).filter(Boolean).length
   const [reg, setReg] = useState(null)
@@ -2689,6 +2700,8 @@ function QualityWorkspace() {
       },
       onFinish: () => setBusy(false),
     }), [client, t])
+  const currentLoader = useRef(loader)
+  currentLoader.current = loader
   const load = useCallback(() => loader.run(tab), [loader, tab])
   useEffect(() => {
     load()
@@ -2720,17 +2733,23 @@ function QualityWorkspace() {
   }
 
   async function release(rec) {
-    // Approving releases THIS cached answer to the main site: the customer
-    // hold lifts for the exact row the operator reviewed.
-    if (!window.confirm(t('ops.releaseConfirm'))) return
+    const key = rec.cache_key
+    if (releasing.current.has(key)) return
+    releasing.current.add(key)
+    setReleaseStates(states => ({ ...states, [key]: { pending: true } }))
     try {
-      await client.databaseApprove({
+      await publishQualityRecord(client, {
         ...qualityRecordRoute(rec),
-        cache_key: rec.cache_key,
+        cache_key: key,
         note: 'released from the quality console',
-      })
-      load()
-    } catch (e) { setError(String(e?.message || e)) }
+      }, () => currentLoader.current, () => currentTab.current)
+      setReleaseStates(states => ({ ...states, [key]: { pending: false } }))
+    } catch (e) {
+      const message = e?.code === 'publication_reload_failed' ? t('ops.publishReloadFailed')
+        : e?.code === 'publication_unconfirmed' ? t('ops.publishUnconfirmed')
+          : String(e?.message || e)
+      setReleaseStates(states => ({ ...states, [key]: { pending: false, error: true, message } }))
+    } finally { releasing.current.delete(key) }
   }
 
   const [adding, setAdding] = useState(false)
@@ -2787,7 +2806,7 @@ function QualityWorkspace() {
   }
 
   async function refreshRecord(rec) {
-    return refreshQualityRecord(client, qualityRecordRoute(rec), loader, () => currentTab.current)
+    return refreshQualityRecord(client, qualityRecordRoute(rec), () => currentLoader.current, () => currentTab.current)
   }
 
   async function acceptProposal(id) {
@@ -3177,7 +3196,7 @@ function QualityWorkspace() {
             <AddRouteCard countries={countries} t={t} onAdd={addRoute}
                           onManualAdd={manualAddRoute}
                           adding={adding} addMsg={addMsg} />
-            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} onEdit={editRecord} onRefresh={refreshRecord} t={t} flagOf={flagOf} typeNames={typeNames} tvv={tv} />
+            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} releaseStates={releaseStates} onEdit={editRecord} onRefresh={refreshRecord} t={t} flagOf={flagOf} typeNames={typeNames} tvv={tv} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}

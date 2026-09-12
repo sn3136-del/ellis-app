@@ -124,6 +124,16 @@ page states for all applicants (an ESTA, an ETA, an e-visa) is not
 nationality-specific; a country-wise fee table is, so read THIS nationality's
 row and no other.
 
+GOVERNMENT AND AGENCY FEES. A published official fee remains available when
+an agency's additional charge is unpublished: retain the official amount and
+state "Agency fee not included" when the source explicitly separates them.
+Keep nationality, application-location, product and effective-date conditions.
+Uncertain travel-document acceptance is a separate field; it does not erase
+an independently applicable published tariff or become verified by that tariff.
+An empty fee extraction is not evidence that a fee was withdrawn. Propose an
+actual sourced amount (including an explicit zero waiver); source silence must
+leave the existing official fee alone.
+
 Reply STRICT JSON:
 {"page_relevant": true|false  (does this page actually cover this route/topic?),
  "page_is_nationality_specific": true|false  (does the page state rules FOR
@@ -434,6 +444,21 @@ def _empty_workflow_proposal_errors(raw):
                   (v is None or isinstance(v, (str, list, dict)) and not v))
 
 
+def _empty_official_fee_proposal_errors(raw):
+    """Missing extraction cannot withdraw a separately published tariff.
+
+    Explicit not-published findings use the reviewed absence pathway. A page
+    about agency charges or document acceptance cannot prove an empty
+    government-fee correction merely because its quote was fetched.
+    """
+    fields = raw.get("corrected_fields")
+    if not isinstance(fields, dict) or "government_fee" not in fields:
+        return []
+    fee = fields["government_fee"]
+    return ["government_fee"] if (fee in (None, "", [], {}) or
+        isinstance(fee, dict) and fee.get("amount") is None) else []
+
+
 def _equivalent_workflow_aliases(guidance, quoted, evidence):
     # One observed legacy spelling, not a policy change. Do not normalize raw
     # storage or grant verification/TTL credit as a side effect of comparison.
@@ -453,10 +478,11 @@ def _quoted_proposals(raw: dict, text: str, route: dict | None = None) -> tuple[
     quoted, unquoted = {}, []
     invalid_enums = set(_enum_proposal_errors(raw))
     empty_workflow = set(_empty_workflow_proposal_errors(raw))
+    empty_fees = set(_empty_official_fee_proposal_errors(raw))
     for k, v in fields.items():
         if k not in OVERRIDABLE:
             continue
-        if k in invalid_enums or k in empty_workflow:
+        if k in invalid_enums or k in empty_workflow or k in empty_fees:
             unquoted.append(k)
             continue
         if k == 'passport_validity_requirement':
@@ -703,6 +729,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text, route)
         invalid_enums = _enum_proposal_errors(answer)
         empty_workflow = _empty_workflow_proposal_errors(answer)
+        empty_fees = _empty_official_fee_proposal_errors(answer)
         equivalent = _equivalent_workflow_aliases(guidance, quoted, evidence)
         quoted = {k:v for k,v in quoted.items() if k not in equivalent}
         workflow_candidate = dict(guidance, **({"disposition": quoted["disposition"]}
@@ -715,15 +742,17 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                                 for k, v in quoted.items() if k in unresolved_fields}
         quoted = {k: v for k, v in quoted.items() if k not in unresolved_fields}
         unquoted_all.update(unquoted)
-        check = {'source_url': fr.final_url, 'outcome': 'validation_error' if invalid_enums or empty_workflow or equivalent or workflow_rejected else 'page_not_relevant', 'at': when,
+        check = {'source_url': fr.final_url, 'outcome': 'validation_error' if invalid_enums or empty_workflow or empty_fees or equivalent or workflow_rejected else 'page_not_relevant', 'at': when,
             'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
             'comparison_reused': reused, 'content_hash': fr.content_hash, 'verified_fields': [],
             'unquoted_fields': unquoted,
             'validation_errors': ([f'invalid enum proposal: {k}' for k in invalid_enums]
                 + [f'unscoped default workflow evidence: {k}' for k in sorted(workflow_rejected)]
                 + [f'empty workflow proposal: {k}' for k in empty_workflow]
+                + [f'empty official fee proposal: {k}' for k in empty_fees]
                 + [f'legacy workflow alias requires normalization: {k}' for k in sorted(equivalent)]),
             'empty_workflow_fields': {k: {'value': (answer.get('corrected_fields') or {}).get(k), 'quote': evidence.get(k)} for k in empty_workflow},
+            'empty_official_fee_fields': {k: {'value': (answer.get('corrected_fields') or {}).get(k), 'quote': evidence.get(k)} for k in empty_fees},
             'equivalent_legacy_fields': equivalent,
             'rejected_workflow_fields': workflow_rejected,
             'awaiting_adjudication': awaiting_adjudication,
@@ -1260,10 +1289,12 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
             continue
         quoted, evidence, unquoted = _quoted_proposals(raw, fr.content_text, route)
         empty_workflow = _empty_workflow_proposal_errors(raw)
+        empty_fees = _empty_official_fee_proposal_errors(raw)
         equivalent = _equivalent_workflow_aliases(guidance, quoted, evidence)
-        if empty_workflow or equivalent:
+        if empty_workflow or empty_fees or equivalent:
             workflow_rejections.append({'source_url': fr.final_url,
                 'empty_fields': {k: {'value': (raw.get('corrected_fields') or {}).get(k), 'quote': evidence.get(k)} for k in empty_workflow},
+                'empty_official_fee_fields': {k: {'value': (raw.get('corrected_fields') or {}).get(k), 'quote': evidence.get(k)} for k in empty_fees},
                 'equivalent_legacy_fields': equivalent})
         quoted = {k:v for k,v in quoted.items() if k not in equivalent}
         workflow_candidate = dict(guidance, **({"disposition": quoted["disposition"]}

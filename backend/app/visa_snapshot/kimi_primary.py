@@ -457,7 +457,7 @@ required_documents, forms, account_registration_steps, payment_process,
 submission_process, exceptions: arrays of short strings
 application_channel: online_portal | embassy | visa_center | authorised_agent | on_arrival | not_required — use authorised_agent when individuals may NOT file directly and a designated agency must lodge for them (e.g. Chinese nationals applying for Japan); never call that a visa_center
 official_portal_url: the official GOVERNMENT portal URL or null (NEVER invent one) — for THIS destination and visa type, on a government domain; contractor or commercial sites (VFS, BLS, "visa service" sites) are never accepted here
-government_fee: {"amount": number|null, "currency": string|null} — the OFFICIAL consular fee only; if a service/agency fee also applies say so in application_channel_detail, never fold it in
+government_fee: {"amount": number|null, "currency": string|null} — the OFFICIAL consular fee only; if the official source says a separate service/agency fee applies, retain the published government amount and say "Agency fee not included" in application_channel_detail and the relevant product notes. An unpublished agency charge does not make the government fee unknown. Keep the fee's nationality, application location, product and effective-date conditions. Uncertain travel-document acceptance belongs in its own uncertainty field; it must not erase an independently applicable published fee, nor may that fee imply that the document is accepted.
 visa_products: array of EVERY visa product available for this nationality + destination + purpose — each {"type": e.g. "Single-entry tourist"|"3-year multiple"|"5-year multiple"|"B1/B2", "entry": "single"|"multiple"|null, "validity": short string, "max_stay_days": integer|null, "fee": {"amount": number|null, "currency": string|null}, "notes": short string|null}; list them ALL; when only one product exists, still list that one, never an empty array for a route that needs a visa
 application_channel_detail: one honest sentence naming WHO may lodge and HOW — e.g. "Individuals cannot apply directly; the application must go through a designated authorised agent" or "Apply yourself on the official portal" — never claim a walk-in visa centre where the destination refuses individual filings
 source_url: the single official government page these facts come from, or null (NEVER invent one)
@@ -883,6 +883,99 @@ def _iso(v) -> date | None:
         return None
 
 
+def _channel_requirement_text(guidance: dict, detail: str) -> str:
+    """Keep agency assertions scoped to the permission the channel describes.
+
+    This only narrows the prose diagnostic. It never changes an application
+    channel, a product, its evidence, or the separate eligibility checks.
+    Unscoped/ambiguous instructions remain subject to the original diagnostic.
+    """
+    import re
+    # A denial of an agency-only rule is not that rule. Remove only the
+    # directly negated phrase, so a later mandatory instruction still counts.
+    agency_pronoun = re.search(
+        r"\b(?:must|shall|are required to|have to) (?:use|apply through|apply via|submit through|submit via) "
+        r"(?:one|them|it|(?:that|this|the) (?:agency|agent))\b", detail)
+    if not agency_pronoun:
+        detail = re.sub(
+            r"\b(?:does not|do not|doesn't|don't) (?:restrict|limit) "
+            r"(?:all )?(?:individual |personal )?applicants to (?:using |use )?"
+            r"(?:an? |the )?(?:accredited|authori[sz]ed|designated) "
+            r"(?:travel )?(?:agency|agent)\b(?=\s*(?:[.;]|$))", "", detail)
+    products = guidance.get("visa_products")
+    if not isinstance(products, list) or not products or not isinstance(products[0], dict):
+        return detail
+    baseline = products[0]
+    exemption = {"unconditional_visa_free", "conditional_visa_free", "transit_visa_free"}
+    # An online waiver registration and a separate required eVisa application
+    # are different permissions. Require both structured product branches and
+    # affirmative online registration wording before separating their clauses.
+    if not (guidance.get("disposition") in {"CONDITIONAL", "VISA_EXEMPT"}
+            and guidance.get("requirement_detail") in exemption
+            and guidance.get("application_channel") == "online_portal"
+            and baseline.get("disposition") == guidance.get("disposition")
+            and baseline.get("requirement_detail") == guidance.get("requirement_detail")
+            and re.search(r"\bonline registration\b", str(baseline.get("notes") or "").lower())
+            and re.search(r"\b(?:can|may) register (?:on|online)\b", detail)):
+        return detail
+    separate_evisa = any(isinstance(product, dict)
+                        and product.get("disposition") == "VISA_REQUIRED"
+                        and product.get("requirement_detail") == "evisa"
+                        for product in products[1:])
+    if not separate_evisa:
+        return detail
+    kept = []
+    for clause in re.split(r"[.;]\s+", detail):
+        explicit_evisa = re.match(
+            r"^(?:for [^,.;]{1,80} )?(?:the )?(?:touris(?:t|m) )?e-?visa applications? "
+            r"(?:go(?:es)?|must go|must be (?:lodged|submitted)|are (?:lodged|submitted)) through\b", clause)
+        mixed_scope = re.search(r"\b(?:registration|waiver|exemption|visa[- ]free|but|however|and|also)\b", clause)
+        if explicit_evisa and not mixed_scope:
+            continue
+        kept.append(clause)
+    return ". ".join(kept)
+
+
+def _named_stay_limits(note: str) -> list[int]:
+    """Extract asserted stay limits; a minimum eligibility threshold is no cap."""
+    import re
+    limits = []
+    lower = note.lower()
+
+    def lower_bound(number_start):
+        prefix = lower[max(0, number_start - 100):number_start]
+        threshold = re.search(r"\b(?:exceed(?:ing|s)?|more than|longer than|over|at least|minimum(?: of)?)\s*$", prefix)
+        if not threshold:
+            return False
+        before = prefix[:threshold.start()]
+        # Negation can govern the threshold or the stay verb. Both 'not
+        # exceeding 15' and 'must never stay over 15' assert an upper cap.
+        negated = re.search(r"\b(?:not|no|never|cannot|can't|may not|must not)\s*$", before)
+        negated = negated or re.search(
+            r"\b(?:may not|must not|never|cannot|can't|not (?:allowed|permitted) to|does not permit|do not permit)"
+            r"(?:\s+\w+){0,5}\s*$", before)
+        return not negated
+
+    for match in re.finditer(r"(?:stay|granted|allowed|permit)[^.;]{0,30}?(\d{1,3})\s*days?", lower):
+        if not lower_bound(match.start(1)):
+            limits.append(int(match.group(1)))
+        else:
+            # A lower and upper bound can share one 'stay' noun. Keep its
+            # explicit upper cap without borrowing a processing-time number.
+            upper = re.match(
+                r"\s*,?\s*(?:but|and)\s+(?:no more than|not exceeding|at most|up to)\s*(\d{1,3})\s*days?",
+                lower[match.end():])
+            if upper:
+                limits.append(int(upper.group(1)))
+    for match in re.finditer(r"(\d{1,3})\s*days?[^.;]{0,20}?(?:stay|granted|per visit|per entry)", lower):
+        # The reverse phrasing must respect the same lower bound; otherwise
+        # 'stays exceeding 15 days per visit' incorrectly reintroduces 15.
+        if not lower_bound(match.start(1)):
+            limits.append(int(match.group(1)))
+    limits.extend(int(n) for n in re.findall(r"停留(\d{1,3})天", note))
+    return limits
+
+
 def _direct_visa_centre_option(detail: str) -> bool:
     """Recognize affirmative personal filing with explicitly optional agents.
 
@@ -1081,7 +1174,7 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     # (iii) The headline channel must not contradict the honest sentence. If
     # the detail says individuals cannot file directly, calling it a visa
     # centre or an embassy counter is the exact mislabel they rejected.
-    detail = str(clean.get("application_channel_detail") or "").lower()
+    detail = _channel_requirement_text(clean, str(clean.get("application_channel_detail") or "").lower())
     channel = str(clean.get("application_channel") or "").lower()
     # Only an AGENCY requirement contradicts a direct channel. "Must apply
     # through the official portal" is a direct channel and was being read as
@@ -1091,7 +1184,8 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
         "through a designated", "through an authorised", "through an authorized",
         "accredited travel agency", "designated agency", "designated travel",
         "authorised agent", "authorized agent", "accredited agency",
-        "authorised representative", "authorized representative", "accredited agencies"))
+        "authorised representative", "authorized representative", "accredited agencies",
+        "accredited travel agencies"))
     if channel == "visa_center" and cannot_self_file and _direct_visa_centre_option(detail):
         cannot_self_file = False
     if cannot_self_file and channel in ("visa_center", "embassy", "online_portal"):
@@ -1114,12 +1208,7 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
             continue
         # Only a number that describes the STAY counts ("stay of 15 days",
         # "granted 15 days", 停留15天). "Apply 45 days before travel" does not.
-        nl = note.lower()
-        named = [int(n) for n in _re.findall(
-            r"(?:stay|granted|allowed|permit)[^.;]{0,30}?(\d{1,3})\s*days?", nl)]
-        named += [int(n) for n in _re.findall(
-            r"(\d{1,3})\s*days?[^.;]{0,20}?(?:stay|granted|per visit|per entry)", nl)]
-        named += [int(n) for n in _re.findall(r"停留(\d{1,3})天", note)]
+        named = _named_stay_limits(note)
         if named and max(named) < d:
             contradictions.append(
                 f"visa product '{vp.get('type')}' says {d} days but its note "

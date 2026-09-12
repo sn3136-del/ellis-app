@@ -56,8 +56,50 @@ def is_sweep_issue(issue) -> bool:
     return getattr(issue, "reported_by", "") == REPORTER and sweep_meta(issue) is not None
 
 
+def legacy_integrity_meta(issue) -> dict | None:
+    """Recognise only the old deterministic freshness audit's report shape.
+
+    Its display field was ``integrity`` and its proposal intentionally had
+    no field edits. Treating that label as a factual field made the five-stage
+    loop impossible to complete. Keep the original report intact and recover
+    the actual invariant inputs from its recorded contradictions instead.
+    A reader's free-text integrity flag is not this machine-owned check.
+    """
+    import re
+    proposal = issue.proposal if isinstance(getattr(issue, "proposal", None), dict) else {}
+    contradictions = proposal.get("contradictions")
+    if (getattr(issue, "reported_by", "") != "freshness_monitor"
+            or getattr(issue, "field", "") != "integrity"
+            or not str(getattr(issue, "note", "")).startswith("Deterministic integrity check: ")
+            or proposal.get("outcome") != "integrity_failed"
+            or proposal.get("fields") != {}
+            or not isinstance(proposal.get("checked_at"), str)
+            or not proposal["checked_at"].strip()
+            or not isinstance(contradictions, list) or not contradictions
+            or not all(isinstance(item, str) and item.strip() for item in contradictions)):
+        return None
+    # These are the policy inputs read by serve_time_invariants. Do not let
+    # an unrelated edit or a confidence change stand in for fixing them.
+    candidates = (
+        "disposition", "requirement_detail", "government_fee", "visa_products",
+        "application_channel", "forms", "required_documents", "exceptions",
+        "account_registration_steps", "payment_process", "submission_process",
+        "health_requirements", "passport_validity_requirement", "source_url",
+        "official_portal_url", "visa_category", "route_workflow_type", "processing_time",
+    )
+    text = "\n".join(contradictions)
+    fields = {name for name in candidates if re.search(r"\b" + re.escape(name) + r"\b", text)}
+    if "visa products" in text or "visa product" in text:
+        fields.add("visa_products")
+    if "government fee" in text:
+        fields.add("government_fee")
+    if "cited page" in text:
+        fields.update(("source_url", "official_portal_url", "visa_category"))
+    return {"code": "legacy_integrity", "severity": "blocking", "fields": sorted(fields)}
+
+
 def sweep_fields(issue) -> list[str]:
-    meta = sweep_meta(issue) or {}
+    meta = legacy_integrity_meta(issue) or sweep_meta(issue) or {}
     return [str(f) for f in (meta.get("fields") or []) if str(f).strip()]
 
 
@@ -223,7 +265,8 @@ def recheck(db, issue) -> tuple[bool, str]:
     from sqlalchemy import select
     from . import kimi_primary
     from .models import KimiRouteGuidanceCache
-    meta = sweep_meta(issue)
+    legacy = legacy_integrity_meta(issue)
+    meta = legacy or sweep_meta(issue)
     if meta is None:
         return False, "not a sweep issue: there is no check to rerun"
     code = str(meta.get("code"))
@@ -237,6 +280,25 @@ def recheck(db, issue) -> tuple[bool, str]:
         KimiRouteGuidanceCache.cache_key == canonical)).scalars().first()
     if row is None:
         return False, f"no canonical row {canonical} to recheck"
+    if legacy is not None:
+        # Read the same merged facts the traveler sees, without a provider
+        # request, policy write, or trusting the old resolution_check marker.
+        from copy import deepcopy
+        from .row_projection import canonical_route
+        if (not isinstance(row.route, dict) or not row.route
+                or not isinstance(row.guidance, dict) or not row.guidance):
+            return False, "canonical route and guidance must be nonempty objects"
+        route = canonical_route(row)
+        if kimi_primary.canonical_key(kimi_primary.cache_key(route)) != canonical:
+            return False, "canonical row route does not match the issue"
+        merged = kimi_primary.apply_verified_overrides(
+            {"guidance": deepcopy(kimi_primary.served_guidance(row))}, route).get("guidance")
+        if not isinstance(merged, dict) or not merged:
+            return False, "canonical merged guidance is missing"
+        failures = kimi_primary.serve_time_invariants(merged)
+        if failures:
+            return False, "legacy integrity still fails: " + "; ".join(failures)
+        return True, "current canonical merged guidance passes the deterministic integrity checks"
     still = [f for f in _route_findings(db, row, now) if f.code == code and f.field in fields]
     if still:
         first = still[0]
