@@ -82,6 +82,7 @@ def _reset(request, monkeypatch, tmp_path):
         "test_uncertain_results_are_cached_briefly_and_replaced_when_complete",
         "test_malformed_disposition_rejected", "test_contradictory_answer_flagged_precisely",
         "test_travel_authorization_page_cannot_prove_a_visa_requirement",
+        "test_a_stay_page_in_spanish_is_not_read_as_the_us_travel_authorisation",
     }:
         f = tmp_path / "no_seed.json"
         f.write_text("[]")
@@ -376,16 +377,25 @@ def test_a_stay_page_in_spanish_is_not_read_as_the_us_travel_authorisation(db):
               source_url="https://www.exteriores.gob.es/consulados/visados/estancia",
               official_portal_url="https://www.exteriores.gob.es/estancia/visa_fees_en",
               visa_category="Visado de estancia (short stay, up to 90 days)",
+              application_channel="embassy", appointment_required=True,
+              government_fee={"amount": 90, "currency": "EUR"},
+              processing_time="15 days", forms=["Schengen visa application form"],
+              route_workflow_type="embassy_submission", arrival_card=None,
               visa_products=[{"type": "Schengen C", "entry": "single",
                               "validity": "90 days", "max_stay_days": 90,
                               "fee": {"amount": 90, "currency": "EUR"},
                               "notes": None}])
     kimi_primary.set_provider(single_pass(ok))
     g = kimi_primary.get_route_guidance(db, ROUTE)
+    # Positive control: the route has no verified override in this test, so
+    # the served verdict is the model's own visa-required answer and the
+    # page name check is the only thing that could hold it.
+    assert g["guidance"]["disposition"] == "VISA_REQUIRED"
+    assert g["status"] == "KIMI_PRIMARY", g["contradictions"]
     assert not any("travel authorisation" in c
                    for c in (g.get("contradictions") or []))
     assert not any("travel authorisation" in c
-                   for c in kimi_primary.serve_time_invariants(g))
+                   for c in kimi_primary.serve_time_invariants(g["guidance"]))
 
 
 @pytest.mark.parametrize("cited", [
