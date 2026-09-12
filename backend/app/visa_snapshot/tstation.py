@@ -114,7 +114,11 @@ def acceptance_summary(rows: list[dict]) -> dict:
         cells = [statuses[f] for f in CONTRACT_FIELDS if f in statuses and f not in disputed]
         label_cells["not_publicly_available"] += sum(v == "not-published" for v in cells)
         label_cells["not_applicable"] += sum(v == "not-applicable" for v in cells)
+    absence = absence_summary(rows)
     return {
+        # guard-20260912 T8: the four honest populations behind the two
+        # labels, so a relabel can never raise completeness unseen.
+        "absence_populations": absence,
         "field_names": list(CONTRACT_FIELDS),
         "field_count": len(CONTRACT_FIELDS),
         "dictionary_required_field_count": len(REQUIRED_FIELDS),
@@ -1683,6 +1687,16 @@ def _regrade(row: dict, g: dict, disputed: list | None,
         # recheck deadline still never fills this cell.
         unpublished.add("info_validity")
         row["_unpublished"] = sorted(set(row.get("_unpublished") or ()) | {"info_validity"})
+        # The owner's rule of 11 September documents this absence by the
+        # verdict read itself; T8 keeps it apart from a quoted absence so the
+        # evidence can report it separately.
+        row["_unpublished_inferred"] = ["info_validity"]
+    # guard-20260912 T8: which absences carry their own proof on a page
+    # competent for the destination (unpublished_evidence). The label a cell
+    # prints does not change; the population it is counted in does.
+    row["_unpublished_proven"] = sorted(
+        proven_absences(_absence_evidence(g, row), grade_route)
+        & (unpublished | set(row.get("_unpublished") or ())))
     row["_reviewed_pure_exemption"] = bool(
         row.get("visa_requirement") == "Visa-free"
         and row.get("visa_requirement_detail") == "Unconditional Visa-free"
@@ -2212,14 +2226,21 @@ def _reviewed_no_visa_product(row: dict) -> bool:
     return row.get("_reviewed_pure_exemption") is True
 
 
-def field_status(row: dict, unpublished: set | None = None) -> dict:
+def field_status(row: dict, unpublished: set | None = None, *, strict: bool | None = None) -> dict:
     """Their per-field checklist verdict, with the three kinds of blank kept apart.
 
     A visa exemption has no visa validity. A documented unpublished value
     remains distinct from that inapplicability. Missing facts stay incomplete
     unless the record holds evidence for an explicit disposition.
+
+    ``strict`` (default: ELLIS_ABSENCE_STRICT, shipped off) counts an
+    absence as documented only when it carries its own proof or is the
+    owner-approved inferred info_validity absence (guard-20260912 T8).
     """
     unpublished = set(unpublished or ()) | set(row.get("_unpublished") or ())
+    if absence_strict_enabled() if strict is None else strict:
+        unpublished &= (set(row.get("_unpublished_proven") or ())
+                        | set(row.get("_unpublished_inferred") or ()))
     out = {}
     exempt = str(row.get("visa_requirement") or "") == "Visa-free"
     # A conditional exemption product ("Free Entry for 14 Days") is filed
@@ -2521,7 +2542,8 @@ def export_values(row: dict, unpublished: set | None = None) -> list:
     return cells
 
 
-def completeness(row: dict, unpublished: set | None = None, statuses: dict | None = None) -> float:
+def completeness(row: dict, unpublished: set | None = None, statuses: dict | None = None,
+                 *, strict: bool | None = None) -> float:
     """Share of required fields filled, out of those that could be filled.
 
     A field the destination does not publish, or that cannot apply to a
@@ -2529,9 +2551,131 @@ def completeness(row: dict, unpublished: set | None = None, statuses: dict | Non
     a gap. Counting them punished the database for being accurate: blanking a
     validity that France genuinely does not publish made the metric fall.
     """
-    st = statuses or field_status(row, unpublished)
+    st = statuses or field_status(row, unpublished, strict=strict)
     need = [f for f in FIELD_ORDER if f in REQUIRED_FIELDS
             and st[f] not in ("not-applicable", "not-published")]
     if not need:
         return 1.0
     return sum(1 for f in need if st[f] == "filled") / len(need)
+
+
+
+# ---------------------------------------------------------------------------
+# guard-20260912 T8: four honest populations behind the two labels.
+#
+# The owner's two-label rule for the 25 contract cells does not change: a
+# cell is a value, "Not publicly available" or "Not applicable", never the
+# word Missing. What changes is the counting. _EXPORT_LABELS maps a checked
+# absence, an unresearched gap and an optional-empty cell onto the same
+# label, and completeness() drops a documented absence from its
+# denominator, so relabelling a gap raised the metric. The partition below
+# keeps them apart:
+#   value               the cell holds a value (or wording that states one)
+#   not_applicable      the fact cannot exist for this record
+#   documented_absence  the destination was checked and does not publish
+#                       it: an unpublished_evidence proof on a competent
+#                       page, the wording the record states, or the
+#                       owner-approved inferred info_validity absence
+#   undocumented_gap    everything else: an absence asserted without proof
+#                       ("asserted_absence") or a cell nobody researched
+#                       ("not_researched")
+# ---------------------------------------------------------------------------
+ABSENCE_POPULATIONS = ("value", "not_applicable", "documented_absence", "undocumented_gap")
+
+
+def absence_strict_enabled() -> bool:
+    """ELLIS_ABSENCE_STRICT, shipped off; the switch T14 flips."""
+    import os
+    return str(os.environ.get("ELLIS_ABSENCE_STRICT") or "").strip().lower() in (
+        "1", "on", "true", "yes", "strict")
+
+
+def _absence_evidence(g: dict, row: dict) -> dict:
+    """The absence proofs that apply to one row: the answer's own, and for a
+    product row the product's own on top."""
+    evidence = {}
+    if isinstance(g, dict) and isinstance(g.get("unpublished_evidence"), dict):
+        evidence.update(g["unpublished_evidence"])
+    index = row.get("_product_index")
+    products = g.get("visa_products") if isinstance(g, dict) else None
+    if isinstance(index, int) and isinstance(products, list) and 0 <= index < len(products) \
+            and isinstance(products[index], dict) and isinstance(products[index].get("unpublished_evidence"), dict):
+        evidence.update(products[index]["unpublished_evidence"])
+    return evidence
+
+
+def proven_absences(evidence: dict, route: dict | None) -> set:
+    """The fields whose absence proof stands: a page competent for the
+    destination under source_authority, a quote, a past check date."""
+    if not isinstance(evidence, dict) or not evidence:
+        return set()
+    from .verified_overrides import _absence_proof_problem
+    route = route or {}
+    return {str(f) for f, proof in evidence.items()
+            if _absence_proof_problem(proof, route, str(f)) is None}
+
+
+def absence_populations(row: dict, unpublished: set | None = None) -> dict:
+    """Partition the 25 contract cells of one record into the four
+    populations, whatever ELLIS_ABSENCE_STRICT says (the counting is the
+    honest one in every state; the switch only moves the denominator)."""
+    statuses = field_status(row, unpublished, strict=False)
+    listed = set(unpublished or ()) | set(row.get("_unpublished") or ())
+    proven = set(row.get("_unpublished_proven") or ())
+    inferred = set(row.get("_unpublished_inferred") or ())
+    populations, reasons, documented_by = {}, {}, {}
+    for f in CONTRACT_FIELDS:
+        state = statuses.get(f)
+        if state == "filled":
+            populations[f] = "value"
+        elif state == "not-applicable":
+            populations[f] = "not_applicable"
+        elif state == "not-published":
+            if f in proven:
+                populations[f], documented_by[f] = "documented_absence", "evidence"
+            elif f in inferred:
+                populations[f], documented_by[f] = "documented_absence", "inferred_from_verdict_read"
+            elif f not in listed:
+                # The record's own wording states the absence (the owner's
+                # wording rule, reviewed in the skeptic passes).
+                populations[f], documented_by[f] = "documented_absence", "wording"
+            else:
+                populations[f], reasons[f] = "undocumented_gap", "asserted_absence"
+        else:
+            populations[f], reasons[f] = "undocumented_gap", "not_researched"
+    counts = {name: sum(1 for v in populations.values() if v == name) for name in ABSENCE_POPULATIONS}
+    return {"populations": populations, "counts": counts, "undocumented_reasons": reasons,
+            "documented_by": documented_by}
+
+
+def absence_summary(rows: list[dict]) -> dict:
+    """The four populations over a set of records, info_validity reported on
+    its own (the single cell capping the four corrected Trip.com routes at
+    Medium), and the report phase of ELLIS_ABSENCE_STRICT: how many records
+    are complete now and how many would be under the strict denominator."""
+    totals = {name: 0 for name in ABSENCE_POPULATIONS}
+    reasons: dict = {}
+    documented_by: dict = {}
+    info_validity = {name: 0 for name in ABSENCE_POPULATIONS}
+    complete_now = complete_strict = 0
+    for row in rows:
+        result = absence_populations(row)
+        for name, n in result["counts"].items():
+            totals[name] += n
+        for reason in result["undocumented_reasons"].values():
+            reasons[reason] = reasons.get(reason, 0) + 1
+        for how in result["documented_by"].values():
+            documented_by[how] = documented_by.get(how, 0) + 1
+        info_validity[result["populations"]["info_validity"]] += 1
+        complete_now += completeness(row, strict=False) == 1.0
+        complete_strict += completeness(row, strict=True) == 1.0
+    return {"record_count": len(rows), "populations": totals, "undocumented_reasons": reasons,
+            "documented_by": documented_by, "info_validity": info_validity,
+            "strict_switch": {"enabled": absence_strict_enabled(),
+                              "records_complete_now": complete_now,
+                              "records_complete_under_strict": complete_strict},
+            "policy": "The workbook prints only a value, Not publicly available or Not applicable. An "
+                      "absence counts as documented when it carries a proof on a page competent for the "
+                      "destination, when the record's own wording states it, or when it is the inferred "
+                      "info_validity absence of a checked verdict. Any other blank is an undocumented gap, "
+                      "whatever label it prints."}

@@ -46,7 +46,9 @@ def test_records_projection_is_byte_identical_for_twelve_seeded_routes(db, monke
     regenerates the file and records the delta here):
       T2  captured at 7010800, byte identical after the extraction
       T6  HKG to KOR (No visa needed): held, Low, withheld, one contradiction
-          naming the K-ETA list (rule 3 of permission_eligibility)"""
+          naming the K-ETA list (rule 3 of permission_eligibility)
+      T7  HKG to KOR gains the second contradiction: an unconditional
+          exemption cited on the K-ETA portal (serve_time_invariants)"""
     from app.visa_snapshot import verified_overrides as vo
     monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES", str(tmp_path / "operator.json"))
     vo.reload()

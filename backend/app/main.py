@@ -1848,7 +1848,12 @@ def _record_payload(r: dict) -> dict:
             "publication_reason": r.get("_publication_reason"),
             "review_required": r.get("_review_required", False),
             "field_status": statuses,
-            "completeness": round(tstation.completeness(r, statuses=raw), 4)}
+            "completeness": round(tstation.completeness(r, statuses=raw), 4),
+            # guard-20260912 T8: the population each blank belongs to (the
+            # workbook still prints only the two labels) and the completeness
+            # the strict denominator would give.
+            "absence": tstation.absence_populations(r)["populations"],
+            "completeness_strict": round(tstation.completeness(r, strict=True), 4)}
 
 
 def _with_pending(status: dict, disputed) -> dict:

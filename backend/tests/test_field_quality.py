@@ -847,3 +847,35 @@ def test_a_spec_may_narrow_the_ask_without_weakening_the_verdict(monkeypatch):
         "BackgroundUniformity", "MouthOpen"]
     assert res["compliant"] is True
     assert res["checks_not_performed"] == []
+
+
+# ---------------------------------------------------------------------------
+# guard-20260912 T8: relabelling a gap as "not published" cannot raise
+# completeness under the strict denominator; only a proof can.
+# ---------------------------------------------------------------------------
+
+def test_completeness_cannot_be_improved_by_relabelling(monkeypatch):
+    from app.visa_snapshot import tstation
+    rt = {"passport_nationality": "HKG", "destination_country": "VNM", "travel_purpose": "tourism",
+          "travel_document_type": "ordinary_passport"}
+    base = {"disposition": "VISA_REQUIRED", "requirement_detail": "evisa", "visa_category": "tourist e-Visa",
+            "source_url": "https://evisa.gov.vn/", "application_channel": "online_portal",
+            "government_fee": {"amount": 25, "currency": "USD"}, "permitted_stay_days": 90,
+            "permitted_stay": "90 days",
+            "visa_products": [{"type": "Tourist e-Visa", "entry": "single", "validity": "90 days",
+                               "max_stay_days": 90, "fee": {"amount": 25, "currency": "USD"}}]}
+    proof = {"source_url": "https://evisa.gov.vn/", "quote": "No document list is published on the portal.",
+             "checked_at": "2026-09-01"}
+    gap = tstation.records_for_route(rt, dict(base), None, "2026-09-01")[0]
+    relabelled = tstation.records_for_route(rt, dict(base, unpublished_fields=["required_documents"]),
+                                            None, "2026-09-01")[0]
+    proven = tstation.records_for_route(rt, dict(base, unpublished_fields=["required_documents"],
+                                                 unpublished_evidence={"required_documents": proof}),
+                                        None, "2026-09-01")[0]
+    # The strict figure, computed in every switch state, never moves on a relabel.
+    assert tstation.completeness(relabelled, strict=True) == tstation.completeness(gap, strict=True) < 1.0
+    assert tstation.completeness(proven, strict=True) > tstation.completeness(gap, strict=True)
+    # With the switch on it is the served figure.
+    monkeypatch.setenv("ELLIS_ABSENCE_STRICT", "1")
+    assert tstation.completeness(relabelled) == tstation.completeness(gap)
+    assert tstation.completeness(proven) > tstation.completeness(gap)
