@@ -1039,7 +1039,11 @@ def _verdict_implied_by_detail(fields: dict, guidance: dict) -> str | None:
     verdict is outside that family, else None (nothing to correct)."""
     if "disposition" in fields:
         return None
-    detail = str(fields.get("requirement_detail") or "").strip()
+    # Read case-insensitively (guard-20260912 T7): an operator's "EVISA" is
+    # the same subcategory, and a detail-only override must be able to
+    # correct a row whose verdict carries no detail at all (the 48 rows the
+    # sweep files as verdict_detail_missing).
+    detail = str(fields.get("requirement_detail") or "").strip().lower()
     if not detail:
         return None
     for verdict, family in _DETAIL_FAMILY.items():

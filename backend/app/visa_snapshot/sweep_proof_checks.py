@@ -121,7 +121,8 @@ def check_route(route: dict, merged: dict, provenance: dict | None, qc_rows: lis
     if disposition and merged.get("requirement_detail") in (None, ""):
         add("verdict_detail_missing", "requirement_detail", None,
             list(kimi_primary.DETAIL_FAMILY.get(disposition, ())),
-            {"source_url": merged.get("source_url") or ""})
+            {"source_url": merged.get("source_url") or "",
+             "diagnostics": [d for d in (merged.get("_diagnostics") or []) if "requirement_detail" in str(d)]})
     # 5. an unconditional exemption on a scheme page
     detail = str(merged.get("requirement_detail") or "")
     if disposition == "VISA_EXEMPT" and detail in ("", "unconditional_visa_free"):
@@ -133,7 +134,10 @@ def check_route(route: dict, merged: dict, provenance: dict | None, qc_rows: lis
             add("verdict_page_scheme_conflict", "disposition", disposition,
                 "a conditional exemption or the scheme itself",
                 {"source_url": pages[0], "cited_pages": pages,
-                 "authority_kind": "scheme_page"})
+                 "authority_kind": "scheme_page",
+                 # Whether the serve-time rule withholds this row (T7): only a
+                 # scheme whose list the registry holds as established does.
+                 "scheme_list_established": kimi_primary.established_scheme_page(*pages)})
     # 1 to 3. the verdict proof
     proof = verdict_proof(provenance)
     if proof is None:
@@ -185,6 +189,14 @@ def check_rows(rows: list[tuple], *, now: datetime) -> dict:
             high[f.code] += 1
         if f.code == "proof_off_jurisdiction":
             kinds[f.evidence.get("authority_kind")] = kinds.get(f.evidence.get("authority_kind"), 0) + 1
+    # The report phase of ELLIS_REQUIRE_DETAIL (T7): what each switch state
+    # would do to the rows filed here, measured before T14 flips it.
+    detail_rows = [f for f in findings if f.code == "verdict_detail_missing"
+                   and f.evidence.get("disposition") in kimi_primary.DETAIL_FAMILY]
+    switch = {"mode": kimi_primary.require_detail_mode(), "routes": len(detail_rows),
+              "cap_would_regrade_high_routes": sum("High" in (f.evidence.get("grades") or []) for f in detail_rows),
+              "on_would_hold_published_routes": sum(bool(f.evidence.get("published")) for f in detail_rows)}
     return {"findings": findings,
             "summary": {"counts": by_code, "published": published, "high": high,
-                        "off_jurisdiction_by_kind": kinds, "provenance_quality": quality}}
+                        "off_jurisdiction_by_kind": kinds, "provenance_quality": quality,
+                        "require_detail_switch": switch}}

@@ -2259,3 +2259,78 @@ def test_an_esta_is_applied_for_online_never_not_required():
             "government_fee": {"amount": 40.27, "currency": "USD"}}
     assert inv(dict(esta, application_channel="online_portal")) == []
     assert any("application_channel is not_required" in p for p in inv(dict(esta, application_channel="not_required")))
+
+
+# ---------------------------------------------------------------------------
+# guard-20260912 T7: the authorisation-page judgement matches whole tokens,
+# an unrecognised requirement_detail is reported, and a verdict with no
+# detail contradicts only under ELLIS_REQUIRE_DETAIL.
+# ---------------------------------------------------------------------------
+
+def _authorisation_problems(problems):
+    return [p for p in problems if "travel authorisation" in p or "travel " "authorisation" in p]
+
+
+def test_estancia_does_not_trip_the_authorisation_rule():
+    g = {"disposition": "VISA_REQUIRED", "requirement_detail": "paper_visa",
+         "visa_category": "Visado de estancia por estudios",
+         "source_url": "https://www.exteriores.gob.es/Consulados/pekin/es/ServiciosConsulares/Paginas/Consular/Visado-de-estudios.aspx",
+         "application_channel": "embassy_or_consulate"}
+    assert _authorisation_problems(kimi_primary.serve_time_invariants(g)) == []
+    _, _, contradictions = kimi_primary.validate_answer(dict(g, confidence="high"))
+    assert not [c for c in contradictions if "ETIAS/ESTA/eTA/EES" in c]
+    assert not kimi_primary.is_authorization_page(g["visa_category"], g["source_url"])
+    # The standalone token still counts.
+    assert kimi_primary.is_authorization_page("ESTA (Visa Waiver Program)")
+    assert kimi_primary.is_authorization_page("https://esta.cbp.dhs.gov/")
+
+
+def test_etapa_path_does_not_trip():
+    g = {"disposition": "VISA_REQUIRED", "requirement_detail": "paper_visa",
+         "source_url": "https://www.exteriores.gob.es/etapa/visados/solicitud.html",
+         "official_portal_url": "https://www.exteriores.gob.es/etapa/", "visa_category": "Schengen visa (C)",
+         "application_channel": "embassy_or_consulate"}
+    assert _authorisation_problems(kimi_primary.serve_time_invariants(g)) == []
+    assert not kimi_primary.is_authorization_page(g["source_url"])
+    # A real ETA path segment still trips it.
+    assert kimi_primary.is_authorization_page(
+        "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html")
+    assert kimi_primary.is_authorization_page("https://immi.homeaffairs.gov.au/visas/getting-a-visa/"
+                                              "visa-listing/electronic-travel-authority-601")
+
+
+def test_unrecognised_detail_is_reported_not_swallowed():
+    raw = dict(GOOD_ANSWER, disposition="VISA_REQUIRED", requirement_detail="tourist_evisa_plus",
+               application_channel="online_portal", government_fee={"amount": 25, "currency": "USD"},
+               processing_time="3 days", route_workflow_type=None)
+    clean, _missing, _contradictions = kimi_primary.validate_answer(raw)
+    # Still never served ...
+    assert clean["requirement_detail"] is None
+    # ... but no longer silently.
+    assert any("tourist_evisa_plus" in d for d in clean.get("_diagnostics") or [])
+    ok, _, _ = kimi_primary.validate_answer(dict(raw, requirement_detail="evisa"))
+    assert ok["requirement_detail"] == "evisa" and not ok.get("_diagnostics")
+
+
+def test_missing_detail_contradicts_only_under_the_switch(monkeypatch):
+    from app.visa_snapshot import tstation
+    g = {"disposition": "VISA_REQUIRED", "requirement_detail": None, "application_channel": "online_portal",
+         "source_url": "https://www.mofa.go.jp/"}
+    message = "disposition VISA_REQUIRED carries no requirement_detail"
+    monkeypatch.delenv("ELLIS_REQUIRE_DETAIL", raising=False)
+    assert kimi_primary.require_detail_mode() == "off"
+    assert message not in kimi_primary.serve_time_invariants(g)
+    assert not tstation._detail_capped(g)
+    # Report phase: no contradiction, the grade is capped at Medium.
+    monkeypatch.setenv("ELLIS_REQUIRE_DETAIL", "cap")
+    assert message not in kimi_primary.serve_time_invariants(g)
+    assert tstation._detail_capped(g)
+    assert not tstation._detail_capped(dict(g, requirement_detail="evisa"))
+    # Enforcement: a contradiction, so the row is held.
+    monkeypatch.setenv("ELLIS_REQUIRE_DETAIL", "on")
+    assert message in kimi_primary.serve_time_invariants(g)
+    assert not tstation._detail_capped(g)
+    assert message not in kimi_primary.serve_time_invariants(dict(g, requirement_detail="evisa"))
+    # A CONDITIONAL verdict has no detail family and is never caught.
+    assert not [p for p in kimi_primary.serve_time_invariants({"disposition": "CONDITIONAL"})
+                if "carries no requirement_detail" in p]

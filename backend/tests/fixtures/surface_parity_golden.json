@@ -525,10 +525,12 @@
  {
   "_cache_key": "HKG|HKG|KOR|tourism|default|unknown|v6",
   "_contradictions": [
-   "KOR operates Korea Electronic Travel Authorization (K-ETA) and HKG is on its list, so entry is not unconditional. State the scheme or the exemption condition."
+   "KOR operates Korea Electronic Travel Authorization (K-ETA) and HKG is on its list, so entry is not unconditional. State the scheme or the exemption condition.",
+   "disposition VISA_EXEMPT but the cited page is a travel authorisation scheme, which is not an unconditional exemption"
   ],
   "_disputed": [
-   "KOR operates Korea Electronic Travel Authorization (K-ETA) and HKG is on its list, so entry is not unconditional. State the scheme or the exemption condition."
+   "KOR operates Korea Electronic Travel Authorization (K-ETA) and HKG is on its list, so entry is not unconditional. State the scheme or the exemption condition.",
+   "disposition VISA_EXEMPT but the cited page is a travel authorisation scheme, which is not an unconditional exemption"
   ],
   "_evidence_low": true,
   "_held": true,

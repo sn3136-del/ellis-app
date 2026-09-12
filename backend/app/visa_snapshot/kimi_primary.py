@@ -57,16 +57,13 @@ STATUS_UNAVAILABLE = "KIMI_UNAVAILABLE"
 STATUS_TIMEOUT = "KIMI_TIMEOUT"
 
 # Pages that describe a pre-travel authorisation or a border formality, none
-# of which is a visa. Matched against the URL and the category the answer
-# cites, so a route graded VISA_REQUIRED on one of them is caught.
-_AUTHORIZATION_NOT_VISA = ("etias", "esta", "/eta", "eta_", "k-eta", "keta",
-                           "entry/exit system", "entry-exit-system", "ees_",
-                           "electronic travel authoris", "electronic travel authoriz",
-                           "electronic system for travel author")
-# The same judgement as a compiled word-boundary pattern (guard-20260912
-# T4/T7): "esta" must not fire inside "estancia" and "eta" must not fire
-# inside "etapa", so tokens are matched as whole words in URL path segments
-# and in the category, never as bare substrings.
+# of which is a visa (ETIAS, ESTA, an ETA, K-ETA, the Entry/Exit System).
+# guard-20260912 T7 replaced the bare substring tuple that used to live here
+# (matched with the in operator, so "esta" fired inside "estancia" and "/eta"
+# inside "/etapa") with this compiled word-boundary pattern, applied to URL
+# host and path segments and to the category separately. is_authorization_page
+# is the one judgement the serve-time invariants, validate_answer, the sweep
+# and the scheme registry share.
 _AUTHORIZATION_TOKENS = _re.compile(
     r"(?<![a-z0-9])(?:etias|esta|eta|k-?eta|ees|nzeta|e-?tas?)(?![a-z0-9])|"
     r"entry[/ -]exit[ -]system|electronic[ -]travel[ -]authori(?:s|z|t)|"
@@ -92,6 +89,37 @@ def is_authorization_page(*values) -> bool:
             return True
     return False
 
+def established_scheme_page(*urls) -> bool:
+    """Is any cited URL the page of a scheme whose eligibility list the
+    registry holds as ESTABLISHED (scheme_registry)? The URL must be an
+    authorisation page by is_authorization_page and must sit on the scheme's
+    own list host or carry its portal marker. A scheme whose list nobody
+    could read (the ETIAS, ESTA and UK ETA placeholders) is not a basis for
+    withholding an answer: the fail-safe rule of the registry, "a list
+    nobody could read cannot invent a refusal", applies to the serve-time
+    page rule as well (guard-20260912 T7, measured on the local copy: the
+    bare page rule also withheld four correct Schengen visa-free rows that
+    cite the ETIAS information page)."""
+    from urllib.parse import urlparse
+    from . import scheme_registry
+    for url in urls:
+        text = str(url or "")
+        if not text.startswith("http") or not is_authorization_page(text):
+            continue
+        host = (urlparse(text).hostname or "").lower()
+        for entry in scheme_registry.entries():
+            if entry.get("list_state") != "established":
+                continue
+            marker = str(entry.get("portal_marker") or "").lower()
+            list_host = (urlparse(str(entry.get("source_url") or "")).hostname or "").lower()
+            if marker and marker in text.lower():
+                return True
+            if list_host and host and (host == list_host or host.endswith("." + list_host)
+                                       or list_host.endswith("." + host)):
+                return True
+    return False
+
+
 # VISA_ON_ARRIVAL is a verdict the overrides, the records and the assistant
 # already speak (52 shipped overrides carry it). Leaving it out of the
 # engine's vocabulary made every invariant below skip those routes.
@@ -111,6 +139,19 @@ _EXEMPT_DETAILS = DETAIL_FAMILY["VISA_EXEMPT"]
 _FILING_CHANNELS = ("embassy_or_consulate", "embassy_designated_agency",
                     "visa_center", "authorised_agent", "on_arrival",
                     "embassy")
+
+
+def require_detail_mode() -> str:
+    """ELLIS_REQUIRE_DETAIL, shipped off (guard-20260912 T7). "off": a verdict
+    with no requirement_detail moves nothing and the sweep reports it. "cap":
+    report phase, such a record grades at most Medium and is not held. "on":
+    it is a serve-time contradiction and is held. Any other value is off."""
+    value = str(os.environ.get("ELLIS_REQUIRE_DETAIL") or "").strip().lower()
+    if value in ("1", "on", "true", "yes", "strict"):
+        return "on"
+    if value in ("cap", "report", "medium"):
+        return "cap"
+    return "off"
 
 
 def serve_time_invariants(g: dict | None) -> list[str]:
@@ -223,12 +264,33 @@ def serve_time_invariants(g: dict | None) -> list[str]:
                             f"requirement_detail is {detail}, which is a visa")
         if disp == "VISA_ON_ARRIVAL" and detail in ("evisa", "paper_visa"):
             problems.append(f"disposition VISA_ON_ARRIVAL but requirement_detail is {detail}")
-    if disp == "VISA_REQUIRED":
-        cited = " ".join(str(g.get(k) or "") for k in
-                         ("source_url", "official_portal_url", "visa_category")).lower()
-        if any(t in cited for t in _AUTHORIZATION_NOT_VISA):
-            problems.append("disposition VISA_REQUIRED but the cited page is a travel "
-                            "authorisation or border-formality page, which is not a visa")
+    # The cited-page rule runs for every verdict (guard-20260912 T7). It used
+    # to run for VISA_REQUIRED only, so an unconditional exemption resting on
+    # the K-ETA portal itself (ten live Korea rows, Trip.com finding 1 as a
+    # class) passed every invariant.
+    #   VISA_REQUIRED on a scheme page or category: the existing contradiction
+    #   VISA_EXEMPT, unconditional or with no detail, on the page of a scheme
+    #     whose list the registry holds as established: a new contradiction,
+    #     because a list-based scheme is not an unconditional exemption (the
+    #     category is not read here: "K-ETA exempt" states a condition, it is
+    #     not a citation, and a placeholder scheme withholds nothing)
+    #   conditional_visa_free and transit_visa_free: allowed, the page may be
+    #     where the condition is stated
+    #   ELECTRONIC_AUTHORIZATION_REQUIRED: expected on such a page
+    scheme_page = is_authorization_page(g.get("source_url"), g.get("official_portal_url"))
+    if disp == "VISA_REQUIRED" and (scheme_page or is_authorization_page(g.get("visa_category"))):
+        problems.append("disposition VISA_REQUIRED but the cited page is a travel "
+                        "authorisation or border-formality page, which is not a visa")
+    elif (disp == "VISA_EXEMPT" and detail in ("", "unconditional_visa_free") and scheme_page
+          and established_scheme_page(g.get("source_url"), g.get("official_portal_url"))):
+        problems.append("disposition VISA_EXEMPT but the cited page is a travel authorisation "
+                        "scheme, which is not an unconditional exemption")
+    # A verdict with no subcategory is skipped by every rule above that opens
+    # with a truthiness test on the detail. Behind ELLIS_REQUIRE_DETAIL, which
+    # ships off: "cap" only caps the grade at Medium (tstation), "on" makes it
+    # a contradiction. The sweep reports the population in every state.
+    if disp in DETAIL_FAMILY and not detail and require_detail_mode() == "on":
+        problems.append(f"disposition {disp} carries no requirement_detail")
     workflow = str(g.get("route_workflow_type") or "")
     if disp == "VISA_EXEMPT" and workflow and workflow not in ("visa_exempt_preparation", "conditional"):
         problems.append("disposition VISA_EXEMPT but route_workflow_type requires a visa application")
@@ -917,6 +979,14 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
         clean["visa_products"] = products
     rd = str(clean.get("requirement_detail") or "").strip().lower()
     clean["requirement_detail"] = rd if rd in REQUIREMENT_DETAILS else None
+    if rd and rd not in REQUIREMENT_DETAILS:
+        # An unrecognised subcategory is still dropped (it is never served),
+        # but no longer silently: the raw value is recorded so the sweep's
+        # verdict_detail_missing finding can say what the engine actually
+        # wrote (guard-20260912 T7).
+        clean["_diagnostics"] = list(dict.fromkeys(
+            list(clean.get("_diagnostics") or []) +
+            [f"unrecognised requirement_detail {rd[:80]!r} was dropped"]))
     # application_channel is an ENUM the UI renders through a fixed
     # vocabulary. It was never checked, so a grounded recheck was able to
     # write a prose sentence into it ("diplomatic mission, accredited agency,
@@ -970,9 +1040,8 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     # which is a pre-travel authorisation for the visa-EXEMPT, and graded the
     # route as visa-required. EES is a border biometric and decides nothing.
     if clean.get("disposition") == "VISA_REQUIRED":
-        cited = " ".join(str(clean.get(k) or "") for k in
-                         ("source_url", "official_portal_url", "visa_category")).lower()
-        if any(t in cited for t in _AUTHORIZATION_NOT_VISA):
+        if is_authorization_page(clean.get("source_url"), clean.get("official_portal_url"),
+                                 clean.get("visa_category")):
             contradictions.append(
                 "disposition VISA_REQUIRED but the cited page is a travel "
                 "authorisation or border-formality page (ETIAS/ESTA/eTA/EES), "

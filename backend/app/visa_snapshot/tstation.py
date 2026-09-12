@@ -1725,7 +1725,22 @@ def _regrade(row: dict, g: dict, disputed: list | None,
                  if product_row else True)
     row["confidence_level"] = _confidence(g, prov, grounded, complete=complete and supported,
                                           disputed=conflicted)
+    if row["confidence_level"] == "High" and _detail_capped(g):
+        row["confidence_level"] = "Medium"
     return row
+
+
+def _detail_capped(g: dict) -> bool:
+    """The report phase of ELLIS_REQUIRE_DETAIL (guard-20260912 T7): with the
+    switch at "cap", a verdict that carries no requirement_detail grades at
+    most Medium and is not held. Off (the shipped state) and on (where the
+    serve-time contradiction grades it Low and holds it) never reach here
+    with an effect."""
+    from .kimi_primary import DETAIL_FAMILY, require_detail_mode
+    if require_detail_mode() != "cap" or not isinstance(g, dict):
+        return False
+    disposition = str(g.get("disposition") or "").upper()
+    return disposition in DETAIL_FAMILY and not str(g.get("requirement_detail") or "").strip()
 
 
 def records_for_route(route: dict, guidance: dict,
