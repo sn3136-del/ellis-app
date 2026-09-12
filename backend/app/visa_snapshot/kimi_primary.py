@@ -63,6 +63,34 @@ _AUTHORIZATION_NOT_VISA = ("etias", "esta", "/eta", "eta_", "k-eta", "keta",
                            "entry/exit system", "entry-exit-system", "ees_",
                            "electronic travel authoris", "electronic travel authoriz",
                            "electronic system for travel author")
+# The same judgement as a compiled word-boundary pattern (guard-20260912
+# T4/T7): "esta" must not fire inside "estancia" and "eta" must not fire
+# inside "etapa", so tokens are matched as whole words in URL path segments
+# and in the category, never as bare substrings.
+_AUTHORIZATION_TOKENS = _re.compile(
+    r"(?<![a-z0-9])(?:etias|esta|eta|k-?eta|ees|nzeta|e-?tas?)(?![a-z0-9])|"
+    r"entry[/ -]exit[ -]system|electronic[ -]travel[ -]authori(?:s|z|t)|"
+    r"electronic[ -]system[ -]for[ -]travel[ -]author", _re.I)
+
+
+def is_authorization_page(*values) -> bool:
+    """Does any of the given URLs or category strings name a pre-travel
+    authorisation or border-formality scheme (ETIAS, ESTA, an ETA, K-ETA,
+    EES)? Word-boundary matching on URL path segments and on the text, so a
+    Spanish "estancia" or an "etapa" path never trips it."""
+    for value in values:
+        text = str(value or "")
+        if not text:
+            continue
+        if text.startswith("http"):
+            from urllib.parse import urlparse
+            parsed = urlparse(text)
+            parts = [parsed.hostname or ""] + [seg for seg in parsed.path.split("/") if seg]
+            parts += [parsed.query or ""]
+            text = " ".join(parts).replace("_", " ").replace(".", " ")
+        if _AUTHORIZATION_TOKENS.search(text):
+            return True
+    return False
 
 # VISA_ON_ARRIVAL is a verdict the overrides, the records and the assistant
 # already speak (52 shipped overrides carry it). Leaving it out of the
