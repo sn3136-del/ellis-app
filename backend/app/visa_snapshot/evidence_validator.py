@@ -188,17 +188,16 @@ def source_is_official(url: str) -> bool:
 
 def jurisdiction_matches(url: str, destination: str) -> bool:
     """Require reviewed government ownership, including official missions.
-    Recognition as an official host alone never supplies country ownership."""
-    host = hostname(url)
-    if not is_government_host(host):
+    Recognition as an official host alone never supplies country ownership.
+
+    A thin wrapper over source_authority.is_competent (guard-20260912 T3),
+    so every call site shares the one jurisdiction rule: the destination's
+    own government, or Union visa law naming its instrument for a Schengen
+    destination. The signature is unchanged."""
+    from .source_authority import is_competent
+    if not is_government_host(hostname(url)):
         return False
-    dest = (destination or "").upper()
-    # EU common visa law is competent for the served Schengen destinations;
-    # do not extend this exception to unrelated EU websites or nonmembers.
-    if host == "eur-lex.europa.eu" and dest in {"FRA", "ESP"}:
-        return True
-    owner = government_owner(host)
-    return bool(owner) and owner == dest
+    return is_competent(url, {"destination_country": (destination or "").upper()}, "disposition")
 
 
 def _supporting_match(text: str, disposition: str, nationality: str = ""):

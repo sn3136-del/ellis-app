@@ -40,7 +40,7 @@ def test_sweep_is_read_only(db, operator):
         override_hash = hashlib.sha256(vo.OVERRIDES.read_bytes()).hexdigest()
         changes = db.execute(select(DatabaseChangeLog)).scalars().all()
         issues = db.execute(select(DatabaseIssueReport)).scalars().all()
-        evidence = cs.run(db, now=NOW, trigger="test")
+        evidence = cs.run(db, now=NOW, trigger="test", keys=keys)
         db.expire_all()
         assert _guidance_digest(db, keys) == before
         assert hashlib.sha256(vo.OVERRIDES.read_bytes()).hexdigest() == override_hash

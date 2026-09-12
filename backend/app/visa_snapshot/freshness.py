@@ -521,18 +521,13 @@ def _supports_route(page_text: str, raw: dict, route: dict, guidance: dict,
     # Home-government outbound guidance can settle its citizens' route too.
     # It must explicitly name the traveller group and the DESTINATION in the
     # supporting statement, so an inbound rule for visitors to that government
-    # cannot be recycled as a rule for travelling elsewhere.
-    from .evidence_validator import _NATIONALITY_NAMES
+    # cannot be recycled as a rule for travelling elsewhere. The test lives
+    # in source_authority (guard-20260912 T3) so the grading hand and this
+    # hand cannot disagree.
+    from .source_authority import is_corroborating
     if not jurisdiction_matches(source_url, nationality):
         return False
-    lower = statement.casefold()
-    names = _NATIONALITY_NAMES.get(nationality, ())
-    if not any(re.search(re.escape(n.strip()) + r".{0,25}(?:passport|citizen|national)|(?:passport|citizen|national).{0,25}" + re.escape(n.strip()), lower)
-               for n in names):
-        return False
-    destination_names = _NATIONALITY_NAMES.get(route.get("destination_country", ""), ())
-    return any(re.search(r"(?<![a-z])" + re.escape(n.strip()) + r"(?![a-z])", statement, re.I)
-               for n in destination_names)
+    return is_corroborating(source_url, route, statement=statement)
 
 
 def _source_authority_matches(url: str, route: dict) -> bool:
