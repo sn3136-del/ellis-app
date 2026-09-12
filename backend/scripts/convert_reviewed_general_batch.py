@@ -321,6 +321,71 @@ def _check_proof(proof, sources, route, field, value, *, product=None, general_b
     return proof
 
 
+def _check_audited_absence(proof, sources, route, field, value, *, product=None):
+    """Bind a new absence assertion to the pages actually consulted.
+
+    A page need not literally say "not published": this is a dated review
+    of its omission, not a quoted positive fact. The exact field and subject
+    are explicit, and a captured page already stating a value cannot support
+    a general absence. Complex exceptions need a narrower source review.
+    Legacy manifests retain their original reconstruction contract.
+    """
+    if not isinstance(proof, dict) or proof.get('status') != 'not_published':
+        return
+    from scripts.convert_reviewed_product_patch import _subject
+    from scripts.convert_reviewed_field_fill import _states_value
+    from app.visa_snapshot.evidence_validator import jurisdiction_matches
+    if field not in NOT_PUBLISHED_CELLS:
+        raise PatchRejected(f'{field}: no documented-absence cell contract')
+    _check_proof(proof, sources, route, field, value, product=product)
+    if proof.get('verifier') != 'ai':
+        raise PatchRejected(f'{field}: an absence must name its AI reviewer')
+    review = proof.get('absence_review')
+    if (not isinstance(review, dict) or set(review) != {'field', 'subject'}
+            or review['field'] != field or review['subject'] != _subject(route, product)):
+        raise PatchRejected(f'{field}: an absence review must bind its exact field and subject')
+    try:
+        reviewed = date.fromisoformat(str(proof.get('verified_at') or ''))
+        if reviewed > _today():
+            raise ValueError
+    except ValueError as exc:
+        raise PatchRejected(f'{field}: invalid absence review date') from exc
+    ids = proof.get('source_ids')
+    if (not isinstance(ids, list) or not ids
+            or any(not isinstance(sid, str) or sid not in sources for sid in ids)
+            or len(set(ids)) != len(ids)):
+        raise PatchRejected(f'{field}: an absence must name the captured pages it checked')
+    checked = []
+    for sid in ids:
+        source = sources[sid]
+        if not jurisdiction_matches(source['url'], route['destination_country']):
+            raise PatchRejected(f'{field}: an absence needs destination-government pages')
+        if date.fromisoformat(str(source['checked_at'])[:10]) > reviewed:
+            raise PatchRejected(f'{field}: an absence review predates its source capture')
+        if field == 'processing_time':
+            # The fill converter has no processing-time write contract. Keep
+            # this general field's review available, while rejecting the
+            # ordinary published processing-day statement it would erase.
+            stated = re.search(
+                r'(?:process(?:ing|ed)?|审查|審查|办理|辦理)[^.;。；\n]{0,100}'
+                r'(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*'
+                r'(?:(?:working|business|calendar)\s*)?(?:days?\b|个?工作日|個?工作日|日|天)',
+                source['text'], re.I)
+        else:
+            stated = _states_value(field, source['text'])
+        if stated:
+            raise PatchRejected(f'{field}: the captured page already states a value; review its applicable scope')
+        checked.append({key: deepcopy(source[key]) for key in ('id', 'url', 'sha256', 'checked_at')})
+    # This audit survives in the bound manifest and output proof. Never make
+    # it a "reviewed" positive value or borrow the route's verdict evidence.
+    proof['checked_sources'] = checked
+    note = (str(proof['reason']).strip() + ' Official pages checked on ' + reviewed.isoformat()
+            + ': ' + ', '.join(item['url'] for item in checked))
+    if len('Not published by the destination: ' + note) > 400:
+        raise PatchRejected(f'{field}: the absence rationale and source URLs exceed the stored note limit')
+    proof['absence_note'] = note
+
+
 _CURRENCY_SYMBOLS = {
     'USD': (r'US\$', r'U\.S\.\$', r'\$'), 'EUR': (r'€', r'\beuros?\b'), 'GBP': (r'£',),
     'JPY': (r'¥', r'円', r'\byen\b'), 'CNY': (r'¥', r'元', r'\bRMB\b', r'人民币'), 'KRW': (r'₩', r'원', r'\bwon\b'),
@@ -678,7 +743,7 @@ def _check_value(field, value, passages, route, product, *, strict_validity=True
                 raise PatchRejected('validity: the figure is not in its evidence')
 
 
-def validate_batch(batch, *, strict=True):
+def validate_batch(batch, *, strict=True, _legacy_absences=False):
     """Validate every row. Strict mode raises on the first defect; otherwise
     the defective rows are returned separately with their reason, so one
     unprovable route never blocks the publishable ones. A rejected row is
@@ -692,7 +757,7 @@ def validate_batch(batch, *, strict=True):
     accepted, rejected = [], []
     for row in rows:
         try:
-            _validate_row(row, sources)
+            _validate_row(row, sources, audited_absences=not _legacy_absences)
             accepted.append(row)
         except PatchRejected as exc:
             if strict:
@@ -703,7 +768,7 @@ def validate_batch(batch, *, strict=True):
     return sources, accepted, rejected
 
 
-def _validate_row(row, sources):
+def _validate_row(row, sources, *, audited_absences=True):
     from app.visa_snapshot.kimi_primary import DISPOSITIONS
     from app.visa_snapshot.verified_overrides import _DETAIL_FAMILY
     if True:
@@ -722,6 +787,8 @@ def _validate_row(row, sources):
         dropped = row.setdefault('dropped', [])
         for key, covered in ROUTE_PROOF_COVERS.items():
             if key in proofs:
+                if audited_absences:
+                    _check_audited_absence(proofs[key], sources, route, key, values.get(key))
                 try:
                     _check_proof(proofs[key], sources, route, key, values.get(key), general_batch_semantics=True)
                 except PatchRejected as exc:
@@ -751,6 +818,8 @@ def _validate_row(row, sources):
             pproofs = product.get('proofs') or {}
             for field in PRODUCT_PROOF_FIELDS:
                 value = spec.get(field)
+                if audited_absences:
+                    _check_audited_absence(pproofs.get(field), sources, route, field, value, product=spec)
                 try:
                     if field in pproofs:
                         _check_proof(pproofs[field], sources, route, field, value, product=spec, general_batch_semantics=True)
@@ -767,7 +836,11 @@ def _validate_row(row, sources):
 def build_manifest(batch, layers):
     """Bind the accepted rows to exact captured serving layers; no writes.
     Rejected rows are listed with their reason and bound to nothing."""
-    _, accepted, rejected = validate_batch(batch, strict=False)
+    return _build_manifest(batch, layers, schema_version=2)
+
+
+def _build_manifest(batch, layers, *, schema_version):
+    _, accepted, rejected = validate_batch(batch, strict=False, _legacy_absences=schema_version == 1)
     if not accepted:
         raise PatchRejected('No row in the batch is publishable: ' + '; '.join(r['reason'] for r in rejected)[:400])
     by_key = {r['cache_key']: r for r in accepted}
@@ -798,7 +871,7 @@ def build_manifest(batch, layers):
         entries.append({'cache_key': layer['cache_key'], 'route': deepcopy(layer['route']), 'matches': matches,
                         'baseline': baseline, 'baseline_sha256': {k: digest(v) for k, v in baseline.items()}})
     kept = dict(deepcopy(batch), rows=[r for r in batch['rows'] if r['cache_key'] in by_key])
-    return {'schema_version': 1, 'kind': 'general_reviewed_exact_layers', 'id': batch['id'],
+    return {'schema_version': schema_version, 'kind': 'general_reviewed_exact_layers', 'id': batch['id'],
             'batch': kept, 'routes': entries, 'rejected': rejected,
             'status': 'detached candidate; no registration or activation'}
 
@@ -813,12 +886,18 @@ def _prior(layer, route):
 
 
 def _proof_for(proof, route, field, product=None):
+    absence = proof if proof.get('status') == 'not_published' else None
     if proof.get('status') == 'not_published':
         # The store records an explicit null with its reason; the record
         # cell reads "not published" through unpublished_fields.
         proof = {'status': 'unknown', 'verifier': 'ai',
-                 'reason': 'Not published by the destination: ' + str(proof.get('reason') or '').strip()}
+                 'reason': ('Not published by the destination: ' + str(proof.get('absence_note')
+                            or proof.get('reason') or '').strip())}
     converted = field_provenance(proof, route, field, product)
+    if absence and absence.get('checked_sources'):
+        converted['absence_review'] = dict(deepcopy(absence['absence_review']),
+            verified_at=absence['verified_at'], reason=absence['reason'],
+            checked_sources=deepcopy(absence['checked_sources']))
     for key in ('effective_from', 'effective_to', 'policy_interval_evidence', 'verification_scope'):
         if key in proof:
             converted[key] = deepcopy(proof[key])
@@ -887,11 +966,13 @@ def convert(manifest, current_layers):
     """Return the overlay candidate and a per-route report."""
     from app.visa_snapshot import verified_overrides as vo
     from app.visa_snapshot.kimi_primary import serve_time_invariants
-    if manifest.get('kind') != 'general_reviewed_exact_layers' or manifest.get('schema_version') != 1:
+    version = manifest.get('schema_version')
+    if manifest.get('kind') != 'general_reviewed_exact_layers' or type(version) is not int or version not in (1, 2):
         raise PatchRejected('Malformed general integration manifest')
     batch = manifest['batch']
-    sources = validate_batch(batch)
-    rebuilt = build_manifest(batch, [dict(deepcopy(e['baseline']), cache_key=e['cache_key']) for e in manifest['routes']])
+    sources = validate_batch(batch, _legacy_absences=version == 1)
+    rebuilt = _build_manifest(batch, [dict(deepcopy(e['baseline']), cache_key=e['cache_key']) for e in manifest['routes']],
+                              schema_version=version)
     if rebuilt['rejected']:
         raise PatchRejected('A bound row no longer validates: ' + rebuilt['rejected'][0]['reason'])
     for actual, checked in zip(manifest['routes'], rebuilt['routes'], strict=True):

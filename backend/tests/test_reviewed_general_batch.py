@@ -65,6 +65,18 @@ def batch():
                                                'validity': proof('Vietnam E-visa is valid for maximum of 90 days')}}]}]}
 
 
+def absence(b, field, *, product=None, reason):
+    """Synthetic omission fixture, with the positive field sentence removed."""
+    from scripts.convert_reviewed_product_patch import _subject
+    omitted = {'validity': 'Vietnam E-visa is valid for maximum of 90 days, ',
+               'processing_time': 'Your application will be processed in 3 working days; '}
+    page = b['sources'][0]
+    page['text'] = page['text'].replace(omitted.get(field, '\0'), '')
+    page['sha256'] = hashlib.sha256(page['text'].encode()).hexdigest()
+    return dict(proof(status='not_published', reason=reason), source_ids=['s1'],
+                absence_review={'field': field, 'subject': _subject(b['rows'][0]['route'], product)})
+
+
 def test_a_quote_bound_batch_converts_into_a_supported_product_row():
     b = batch(); manifest = build_manifest(b, [layer()])
     overlay, reports = convert(manifest, [layer()])
@@ -157,7 +169,9 @@ def test_a_visa_free_verdict_keeps_only_a_free_entry_product():
                                    'fee': proof('Entry is free of charge for exempt visitors.'),
                                    'max_stay_days': proof('do not require a visa for stays of up to 30 days'),
                                    'entry': proof(status='unknown', reason='The page does not state an entry count'),
-                                   'validity': proof(status='not_published', reason='No validity is published for an exemption')}}]
+                                   'validity': None}}]
+    row['products'][1]['proofs']['validity'] = absence(b, 'validity', product=row['products'][1]['product'],
+        reason='No validity is published for an exemption')
     manifest = build_manifest(b, [layer()])
     overlay, reports = convert(manifest, [layer()])
     fields = overlay['entries'][0]['fields']
@@ -346,7 +360,8 @@ def test_one_products_unpublished_validity_does_not_complete_an_unknown_sibling(
     b = batch()
     first = b['rows'][0]['products'][0]
     first['product']['validity'] = None
-    first['proofs']['validity'] = proof(status='not_published', reason='No validity published for this product.')
+    first['proofs']['validity'] = absence(b, 'validity', product=first['product'],
+        reason='No validity published for this product.')
     second = deepcopy(first)
     second.update(action='add', current_name=None)
     second['product'].update(type='Multiple-entry tourist e-visa', entry='multiple',
@@ -371,7 +386,8 @@ def test_product_unknown_review_replaces_its_earlier_unpublished_state():
     b = batch()
     first = b['rows'][0]['products'][0]
     first['product']['validity'] = None
-    first['proofs']['validity'] = proof(status='not_published', reason='No validity published for this product.')
+    first['proofs']['validity'] = absence(b, 'validity', product=first['product'],
+        reason='No validity published for this product.')
     initial, _ = convert(build_manifest(b, [layer()]), [layer()])
     baseline = layer(seed_entries=initial['entries'], merged_guidance={
         **layer()['merged_guidance'], **initial['entries'][0]['fields']})
@@ -442,8 +458,8 @@ def test_unknown_product_stay_cannot_borrow_a_route_stay_and_count_as_filled(sta
 def test_new_route_unknown_review_replaces_its_earlier_unpublished_state():
     b = batch()
     b['rows'][0]['route_fields']['processing_time'] = None
-    b['rows'][0]['route_field_proofs']['processing_time'] = proof(
-        status='not_published', reason='No processing time published in the reviewed source.')
+    b['rows'][0]['route_field_proofs']['processing_time'] = absence(b, 'processing_time',
+        reason='No processing time published in the reviewed source.')
     first, _ = convert(build_manifest(b, [layer()]), [layer()])
     assert 'processing_min_days' in first['entries'][0]['fields']['unpublished_fields']
     baseline = layer(seed_entries=first['entries'], merged_guidance={
