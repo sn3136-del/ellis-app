@@ -233,6 +233,39 @@ def _source_table(batch):
     return sources
 
 
+def _route_scope(route):
+    document = str(route.get('travel_document_type') or 'ordinary_passport').replace('_', ' ')
+    return document[:1].upper() + document[1:] + ', ' + str(route.get('travel_purpose') or 'tourism').replace('_', ' ') + '.'
+
+
+def _checked_scope_note(proof, route):
+    """Scope prose cannot attach a second unchecked claim to cited facts.
+
+    Preserve the canonical route descriptor or an entire literal cited
+    passage. Other review commentary remains in the conversion report.
+    """
+    note = str(proof.get('scope_note') or '').strip()
+    scope = _route_scope(route)
+    forms = {_norm(scope).rstrip('.')}
+    forms.update(_norm(alias + ' ' + scope).rstrip('.') for alias in _aliases(route['passport_nationality']))
+    literal = note.strip(' "“”«»「」『』‘’')
+    if (_norm(note).rstrip('.') not in forms
+            and not any(quote_literal(literal, item['quote']) for item in proof['evidence'])):
+        proof['scope_note'] = scope
+        proof['scope_note_dropped'] = list(dict.fromkeys([*proof.get('scope_note_dropped', []), note]))
+
+
+def _note_drops(row):
+    proofs = [('verdict', (row.get('verdict') or {}).get('proof'))]
+    proofs += list((row.get('route_field_proofs') or {}).items())
+    for spec in row.get('products') or []:
+        proofs += [(str((spec.get('product') or {}).get('type')) + ' ' + field, proof)
+                   for field, proof in (spec.get('proofs') or {}).items()]
+    return [label + ' scope note: unquoted commentary omitted: ' + str(note)[:120]
+            for label, proof in proofs if isinstance(proof, dict)
+            for note in proof.get('scope_note_dropped') or []]
+
+
 def _check_proof(proof, sources, route, field, value, *, product=None):
     """Return the validated proof or None for an explicit unknown/not_published."""
     if not isinstance(proof, dict) or proof.get('verifier', 'ai') != 'ai':
@@ -267,6 +300,7 @@ def _check_proof(proof, sources, route, field, value, *, product=None):
         raise PatchRejected(f'{field}: the proof must state its scope')
     if not str(proof.get('verified_at') or '').strip():
         raise PatchRejected(f'{field}: the proof needs a verification date')
+    _checked_scope_note(proof, route)
     passages = '\n'.join(item['quote'] for item in evidence)
     if proof.get('verification_scope') == 'consular_product_eligibility':
         if field != 'disposition' or not _consular_product_eligibility_supported(
@@ -454,6 +488,118 @@ def _consular_product_eligibility_supported(value, evidence, sources, route, pro
     return False
 
 
+_FEE_UNPUBLISHED_RE = re.compile(
+    r"\b(?:no|missing|unavailable|unpublished|unknown|unverified)\s+(?:official\s+)?(?:visa\s+)?fee\s+(?:information|details?|figure|amount|data)\b|"
+    r"\b(?:fee|charge|cost)\b[^.;\n]{0,70}\b(?:not\s+(?:publicly\s+)?(?:published|available|stated|specified|confirmed)|unknown|unverified|unpublished|to be confirmed)\b|"
+    r"\b(?:publishes?|states?|provides?)\s+no\s+(?:(?:visa|issuance|application)\s+)?fee\b", re.I)
+_FEE_TOPIC = r"(?:(?:visa|issuance|application|entry|government|consular)\s+)?(?:fees?|charges?)"
+_FEE_WAIVER_RE = re.compile(
+    rf"\bno\s+{_FEE_TOPIC}\s+(?:(?:is|are)\s+)?(?:charged|payable|levied|due|required|applies?|collected)\b|"
+    rf"\b{_FEE_TOPIC}\s*(?:(?:is|are|has been|have been)\s*)?(?::\s*)?(?:waived|free(?:\s+of\s+charge)?)\b|"
+    rf"\bexempt(?:ed)?\s+from\s+(?:the\s+|any\s+|all\s+)?{_FEE_TOPIC}\b|"
+    r"\b(?:entry|(?:tourist\s+|visitor\s+|electronic\s+|e-)?visa)\s+(?:(?:is|are)\s+)?free\s+of\s+charge\b|"
+    r"(?:签证|簽證|査証|ビザ|비자).{0,10}(?:免费|免費|無料|무료)|miễn phí.{0,15}thị thực|visa.{0,15}percuma|"
+    r"виз.{0,20}бесплатно", re.I)
+_FEE_WAIVER_NEGATED_RE = re.compile(
+    r"\b(?:not|never|no longer)\b[^.;\n]{0,45}\b(?:free|waiv\w*|exempt\w*)\b|"
+    r"\b(?:waiver|exemption)\b[^.;\n]{0,45}\b(?:ended|expired|suspended|withdrawn|terminated|abolished)\b", re.I)
+_ZERO_FEE_NUMBER_RE = re.compile(
+    r"(?:^|\|)\s*(?:0|0[.,]00)\s*(?:\||$)|"
+    r"(?<![\d.,])(?:usd|eur|gbp|aud|cad|sgd|nzd|\$|€|£)\s*0(?:[.,]00)?(?!\d)(?![.,]\d)|"
+    r"(?<![\d.,])0(?:[.,]00)?\s*(?:usd|eur|gbp|aud|cad|sgd|nzd|dollars?|euros?|pounds?)\b|"
+    r"^\s*(?:\d{1,3}[.)]?\s+)?[^\d\n|]{2,60}?(?:[\s|]+\d+(?:[.,]\d+)?)*[\s|]+0+(?:[.,]0+)?(?:[\s|]+\d+(?:[.,]\d+)?)*[\s|]*$", re.I)
+
+
+def _zero_fee_supported(passages):
+    """A missing tariff and a free service do not establish a visa fee.
+
+    Numeric tariff evidence retains its existing validation here. The
+    natural-language path requires a charge relationship, not the isolated
+    words free, exempt, waived or no fee.
+    """
+    if _FEE_UNPUBLISHED_RE.search(passages):
+        return False
+    for sentence in re.split(r'(?<=[.!?])\s+|[;\n]+', passages):
+        if _FEE_WAIVER_NEGATED_RE.search(sentence):
+            continue
+        if _FEE_WAIVER_RE.search(sentence):
+            return True
+        # A numeric zero still needs a fee or currency/table context. A
+        # prose sentence about a free helpline cannot take this branch.
+        if (re.search(r'\d', sentence) and _ZERO_FEE_NUMBER_RE.search(sentence)
+                and (re.search(r'\b(?:fees?|tariff|usd|eur|gbp|aud|cad|sgd|nzd)\b|[$€£]|\|', sentence, re.I)
+                     or (re.search(r'\b(?:fee|tariff)\b', passages, re.I)
+                         and re.fullmatch(r'\s*(?:\d+[.)]?\s+)?[^\d\n|]{2,60}(?:\s+\d+(?:[.,]\d+)?)+\s*', sentence)))):
+            return True
+    return False
+
+
+_DURATION_WORDS = {'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5', 'six': '6',
+                   'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10', 'twelve': '12',
+                   'fifteen': '15', 'thirty': '30', 'sixty': '60', 'ninety': '90'}
+_DURATION_UNITS = {
+    'day': r'days?|hari|дн(?:я|ей)|сут(?:ок|ки)|jours?|días?|ngày|天|日|일',
+    'week': r'weeks?|semaines?|недел\w*|minggu|tuần|周|週',
+    'month': r'months?|bulan|месяц\w*|mois|mes(?:es)?|tháng|个?月|個月|개월',
+    'year': r'years?|tahun|лет|года?|ans?|años?|năm|年|년',
+}
+_DURATION_UNIT_RE = re.compile('|'.join(f'(?P<{key}>{pattern})(?![a-zа-я])' for key, pattern in _DURATION_UNITS.items()), re.I)
+_VALIDITY_CONTEXT_RE = re.compile(
+    r"(?P<valid>\bvalid(?:ity)?\b|\blasts?\b|masa berlaku|на срок|срок(?:а|ом)?\s+действия|durée de validité|duracion de validez|thời hạn hiệu lực|有效期|有効期間)|"
+    r"(?P<other>\b(?:processing|processed|process|stay|stays|staying|passport|passports)\b|срок\w*\s+пребывания)", re.I)
+
+_VALIDITY_SUBJECT_RE = re.compile(
+    r"(?P<other>\b(?:passports?|(?:travel\s+)?insurance(?:\s+polic(?:y|ies))?|residen(?:ce|t)\s+permits?)\b)|"
+    r"(?P<visa>\b(?:(?:e-?)?visas?|eta|esta)\b)", re.I)
+
+
+def _duration_values(text):
+    """Amounts with their own unit, including '2, 5 or 10 years'."""
+    text = _norm(text)
+    for word, number in _DURATION_WORDS.items():
+        text = re.sub(r'\b' + word + r'\b', number, text)
+    text = re.sub(r'\b(\d+)\s*\(\s*\1\s*\)', r'\1', text)
+    for unit in _DURATION_UNIT_RE.finditer(text):
+        before = text[:unit.start()]
+        run = re.search(r'(\d+(?:\s*(?:,|or|and|/|либо|или)\s*\d+)*)\s*[-(]?\s*$', before)
+        if run:
+            for number in re.findall(r'\d+', run.group(1)):
+                yield (int(number), unit.lastgroup), run.start(), unit.end(), text
+
+
+def _validity_supported(value, passages):
+    wanted = list(_duration_values(str(value)))
+    if not wanted:
+        # A free-form translation has no mechanically checked semantics.
+        # Keep it only when its actual words were quoted as visa validity.
+        return bool(re.search(r'\bvalid(?:ity)?\b', _norm(passages)) and quote_literal(str(value), passages))
+    # A table capture can put the field label on the preceding line. Only
+    # the neutral validity label lends context to its immediately adjacent
+    # value, never a processing/stay field or a whole preceding section.
+    passages = re.sub(
+        r'(?im)^\s*((?:visa\s+)?validity(?:\s+period)?\s*:?)\s*\n(?=\s*(?:\d+|one\b|two\b|three\b|five\b|six\b|ten\b))',
+        r'\1 ', passages)
+    supported = set()
+    for sentence in re.split(r'(?<=[.!?])\s+|[;\n]+', passages):
+        for duration, start, end, normalized in _duration_values(sentence):
+            contexts = list(_VALIDITY_CONTEXT_RE.finditer(normalized[:start]))
+            valid_context = bool(contexts and contexts[-1].lastgroup == 'valid')
+            # A duration that starts on grant/issue establishes visa validity
+            # even in a table whose heading is outside the quote.
+            grant_context = bool(re.search(r'^.{0,35}\bfrom\b.{0,35}\b(?:grant|issuance|issuing|issue)\b', normalized[end:]))
+            # Validity belongs to the named subject nearest this duration.
+            # A visa heading cannot lend its validity to travel insurance,
+            # a passport, or a residence permit; "from issue" cannot do so
+            # either. A later explicit visa subject starts its own claim.
+            subjects = list(_VALIDITY_SUBJECT_RE.finditer(normalized[:start]))
+            if subjects and subjects[-1].lastgroup == 'other':
+                valid_context = grant_context = False
+            if valid_context or grant_context:
+                supported.add(duration)
+    return all(duration in supported for duration, _, _, _ in wanted)
+
+
+
 def _check_value(field, value, passages, route, product):
     from app.visa_snapshot.evidence_validator import field_value_supported
     if field == 'disposition':
@@ -470,8 +616,8 @@ def _check_value(field, value, passages, route, product):
             if not field_value_supported(field, value, text):
                 raise PatchRejected(f'{field}: the fee amount is not in its evidence')
         elif isinstance(value, dict) and value.get('amount') == 0:
-            if not re.search(r'free|no fee|no charge|gratis|waived|exempt|0\b|no visa', passages, re.I):
-                raise PatchRejected(f'{field}: a zero fee needs an explicit free, waived or no-visa statement')
+            if not _zero_fee_supported(passages):
+                raise PatchRejected(f'{field}: a zero fee needs an explicit charge waiver or numeric tariff')
     elif field == 'processing_time':
         if value and not field_value_supported(field, value, passages):
             # Working-day and calendar figures must appear in the evidence.
@@ -492,9 +638,8 @@ def _check_value(field, value, passages, route, product):
                                     'multiple': r'multiple|multi|数次|多次'}[value], passages, re.I):
             raise PatchRejected('entry: the entry count is not in its evidence')
     elif field == 'validity':
-        digits = re.findall(r'\d+', str(value or ''))
-        if value and digits and not all(d in passages for d in digits):
-            raise PatchRejected('validity: the validity figure is not in its evidence')
+        if value and not _validity_supported(value, passages):
+            raise PatchRejected('validity: the duration and unit are not stated as visa validity in its evidence')
 
 
 def validate_batch(batch, *, strict=True):
@@ -874,7 +1019,8 @@ def convert(manifest, current_layers):
                         'review_id': batch['id'], 'cache_key': entry['cache_key']})
         reports.append({'cache_key': entry['cache_key'], 'disposition': fields['disposition'],
                         'products': [p['type'] for p in final], 'unsupported_products': unsupported,
-                        'removed_products': removed, 'unpublished': sorted(unpublished)})
+                        'removed_products': removed, 'unpublished': sorted(unpublished),
+                        'dropped': list(dict.fromkeys([*row.get('dropped', []), *_note_drops(row)]))})
     overlay = {'schema_version': 1, 'kind': 'reviewed_overlay_conversion', 'review_id': batch['id'],
                'reviewed_at': today, 'status': 'candidate; registered only after preflight under maintenance',
                'contract': 'Every value carries its own literal official-page quote; verdicts name the nationality; '
