@@ -193,6 +193,45 @@ test('regular Freshness cycle has no continuation note', () => {
   assert.ok(html.includes('Attempts recorded for 2/5 selected routes'))
 })
 
+for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
+  test('Freshness displays aggregate consistency findings separately from verification: ' + lang, () => {
+    const consistency = { state: 'complete', checked_at: '2026-09-12T18:00:00+00:00',
+      routes_checked: 4, records_checked: 6, findings_total: 10,
+      by_type: { surface_divergence: 2, key_fork: 0, stale_projection: 1,
+        verdict_detail_missing: 1, verdict_page_scheme_conflict: 1, proof_missing_quote: 1,
+        proof_nationality_unnamed: 1, proof_off_jurisdiction: 1, absence_undocumented: 2 },
+      findings: [{ cache_key: 'PRIVATE-ROUTE', evidence: 'PRIVATE-QUOTE' }], report_path: '/PRIVATE-PATH' }
+    const run = { ...currentRun, status: 'provider_suspended', consistency }
+    const before = structuredClone(run)
+    const html = renderSweep(run, lang)
+    assert.match(html, /data-testid="ops-fresh-consistency"/)
+    assert.ok(html.includes(t(lang, 'ops.fresh.consistencyCounts')
+      .replace('{at}', consistency.checked_at).replace('{routes}', '4').replace('{records}', '6').replace('{findings}', '10')))
+    assert.ok(html.includes(t(lang, 'ops.fresh.consistencyTypes')
+      .replace('{differences}', '3').replace('{proof}', '5').replace('{absence}', '2')))
+    assert.ok(html.includes(t(lang, 'ops.fresh.consistencyHint')))
+    assert.doesNotMatch(html, /PRIVATE-ROUTE|PRIVATE-QUOTE|PRIVATE-PATH/)
+    assert.deepEqual(run, before)
+  })
+}
+
+test('failed scan shows last complete report time without recycling its findings as current', () => {
+  const html = renderSweep({ ...currentRun, consistency: {
+    state: 'failed', routes_checked: 2, last_success_at: '2026-09-12T12:00:00+00:00', findings_total: 888,
+  } })
+  assert.ok(html.includes('Last complete report: 2026-09-12T12:00:00+00:00.'))
+  assert.doesNotMatch(html, /888 potential findings/)
+})
+
+test('consistency failure remains visible for empty inventory', () => {
+  const html = renderToStaticMarkup(createElement(NextSweepCountdown, {
+    at: null, t: key => t('en', key), summary: { canonical_total: 0,
+      last_run: { consistency: { state: 'failed', routes_checked: 0 } } },
+  }))
+  assert.match(html, /ops-fresh-consistency/)
+  assert.ok(html.includes('Routes examined this run: 0.'))
+})
+
 test('zero prior attempts remain zero, while unavailable counts are not invented', () => {
   const resumed = { ...currentRun, cycle_started_at: '2026-09-09T12:00:00Z',
     resumed_from_started_at: '2026-09-09T14:00:00Z' }

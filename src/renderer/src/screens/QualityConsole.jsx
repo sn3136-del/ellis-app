@@ -132,7 +132,7 @@ function useCountUp(target, ms = 700) {
 const SEQ = { high: '#0b7a44', medium: '#2563eb', low: '#d97706' }
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newQualitySession, qualityRecordRoute } from '../lib/visaSession.js'
-import { createLatestLoader, readQualityTab } from '../lib/qualityLoader.js'
+import { createLatestLoader, readQualityTab, refreshQualityRecord, qualityRefreshOutcome } from '../lib/qualityLoader.js'
 import { indexRecoveredRecords, recoveredForRecord } from '../lib/qualityRecovery.js'
 import { useLocale } from '../lib/locale.jsx'
 import { registerOpenNote } from '../lib/openNote.js'
@@ -1522,18 +1522,13 @@ function RefreshButton({ rec, onRefresh, t }) {
     setState('busy')
     try {
       const r = await onRefresh(rec)
-      const research = r && r.research
-      if (research && (research.changed || []).length > 0)
-        setState({ ok: t('ops.refresh.corrected').replace(
-          '{fields}', research.changed.join(', ')) })
-      else if (research && (research.disputed_fields || []).length > 0)
-        setState({ ok: t('ops.refresh.disputed') })
-      else if (research && research.outcome === 'checked')
-        setState({ ok: t('ops.refresh.ok') })
-      else
-        setState({ ok: t('ops.refresh.noRead') })
+      if (r?.quality_reload === 'superseded') { setState(null); return }
+      const outcome = qualityRefreshOutcome(r?.research)
+      setState({ message: t(`ops.refresh.${outcome.kind}`).replace('{fields}', outcome.changed.join(', ')),
+                 tone: outcome.tone })
     } catch (e) {
-      setState({ err: String(e?.detail || e?.message || e) })
+      setState({ err: e?.code === 'quality_reload_failed' ? t('ops.refresh.reloadFailed')
+        : String(e?.detail || e?.message || e) })
     }
   }
   return (
@@ -1547,9 +1542,9 @@ function RefreshButton({ rec, onRefresh, t }) {
                        marginTop: 10, opacity: state === 'busy' ? 0.6 : 1 }}>
         {state === 'busy' ? t('ops.refresh.busy') : t('ops.refresh.btn')}
       </button>
-      {state && state.ok && (
-        <span style={{ fontSize: 12.5, fontWeight: 600, color: GREEN }}>
-          {state.ok}
+      {state && state.message && (
+        <span role="status" style={{ fontSize: 12.5, fontWeight: 600, color: state.tone === 'success' ? GREEN : AMBER }}>
+          {state.message}
         </span>
       )}
       {state && state.err && (
@@ -1659,6 +1654,13 @@ export function NextSweepCountdown({ at, summary, t }) {
   const continued = validTime(run?.resumed_from_started_at) && validTime(run?.cycle_started_at)
   const priorAttempts = Number.isInteger(run?.prior_attempt_results) && run.prior_attempt_results >= 0
     ? run.prior_attempt_results : '—'
+  const consistency = run?.consistency
+  const consistencyState = ['running', 'complete', 'failed', 'interrupted', 'budget_exhausted'].includes(consistency?.state)
+    ? consistency.state : null
+  const consistencyCount = value => Number.isInteger(value) && value >= 0 ? value : '—'
+  const consistencyTypes = consistency?.by_type || {}
+  const typeTotal = names => names.every(name => Number.isInteger(consistencyTypes[name]) && consistencyTypes[name] >= 0)
+    ? names.reduce((total, name) => total + consistencyTypes[name], 0) : '—'
   return (
     <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14,
                   background: '#fff', padding: '16px 18px',
@@ -1680,6 +1682,23 @@ export function NextSweepCountdown({ at, summary, t }) {
       <div style={{ fontSize: 12.5, color: GRAY, maxWidth: 520,
                     lineHeight: 1.5, display: 'grid', gap: 4 }}>
         <div>{t('ops.fresh.nextHint')}</div>
+        {consistencyState && <div data-testid="ops-fresh-consistency" style={{ color: NAVY }}>
+          <div style={{ fontWeight: 700 }}>{t('ops.fresh.consistencyTitle')}: {t(`ops.fresh.run.${consistencyState}`)}</div>
+          {consistencyState === 'complete' ? <>
+            <div>{t('ops.fresh.consistencyCounts')
+              .replace('{at}', consistency.checked_at || '—')
+              .replace('{routes}', consistencyCount(consistency.routes_checked))
+              .replace('{records}', consistencyCount(consistency.records_checked))
+              .replace('{findings}', consistencyCount(consistency.findings_total))}</div>
+            <div>{t('ops.fresh.consistencyTypes')
+              .replace('{differences}', typeTotal(['surface_divergence', 'key_fork', 'stale_projection']))
+              .replace('{proof}', typeTotal(['verdict_detail_missing', 'verdict_page_scheme_conflict', 'proof_missing_quote', 'proof_nationality_unnamed', 'proof_off_jurisdiction']))
+              .replace('{absence}', consistencyCount(consistencyTypes.absence_undocumented))}</div>
+          </> : <div>{t('ops.fresh.consistencyPending')
+            .replace('{routes}', consistencyCount(consistency.routes_checked))
+            .replace('{at}', consistency.last_success_at || '—')}</div>}
+          <div style={{ color: GRAY }}>{t('ops.fresh.consistencyHint')}</div>
+        </div>}
         {summary && summary.canonical_total > 0 && (
           <>
             <div style={{ color: summary.overdue_attempts ? AMBER : GRAY }}>
@@ -1820,11 +1839,32 @@ function AskCard({ ask, onReview, t }) {
   )
 }
 
-export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t, flagOf, typeNames = {}, tvv = (x) => x }) {
-  const [sort, setSort] = useState({ key: 'route', dir: 1 })
-  const [open, setOpen] = useState(null)
-  const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
+export function isQualityRecordPublished(record) {
+  return typeof record.held === 'boolean'
+    ? !record.held : record.publication_state === 'published'
+}
+
+export function matchesPublicationFilter(record, publication) {
+  return !publication || (publication === 'published'
+    ? isQualityRecordPublished(record) : !isQualityRecordPublished(record))
+}
+
+export function PublicationFilter({ value, onChange, t }) {
+  return <select className="ops-in" value={value}
+    aria-label={t('ops.flt.publication')} data-testid="ops-filter-publication"
+    onChange={event => onChange(event.target.value)}
+    style={{ ...input, color: value ? NAVY : GRAY }}>
+    <option value="">{t('ops.publicationAll')}</option>
+    <option value="published">{t('ops.publicationPublished')}</option>
+    <option value="unpublished">{t('ops.publicationUnpublished')}</option>
+  </select>
+}
+
+export function sortQualityRecords(records, sort) {
   const val = (r, k) => {
+    // Each row is a product. A published sibling never makes a withheld
+    // product published, and confidence alone does not determine access.
+    if (k === 'publication') return Number(!isQualityRecordPublished(r))
     if (k === 'route') return `${r.travel_document_country}${r.destination_country}`
     if (k === 'confidence') return CONF_RANK[r.confidence_level] || 0
     if (k === 'check') return (CONF_RANK[r.confidence_level] || 0) * 10 + (CHECK_RANK[r.source_check] ?? 0)
@@ -1835,10 +1875,17 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
     if (k === 'type') return r.visa_type_name || ''
     return ''
   }
-  const sorted = useMemo(() => [...records].sort((a, b) => {
+  return [...records].sort((a, b) => {
     const x = val(a, sort.key), y = val(b, sort.key)
     return (x < y ? -1 : x > y ? 1 : 0) * sort.dir
-  }), [records, sort])
+  })
+}
+
+export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefresh, t, flagOf, typeNames = {}, tvv = (x) => x }) {
+  const [sort, setSort] = useState({ key: 'route', dir: 1 })
+  const [open, setOpen] = useState(null)
+  const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
+  const sorted = useMemo(() => sortQualityRecords(records, sort), [records, sort])
   const REQ = {
     'Visa-free': [t('ops.req.free'), GREEN],
     'Visa on Arrival': [t('ops.req.voa'), AMBER],
@@ -1862,6 +1909,19 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
           {(total ?? records.length).toLocaleString()} {t('ops.items')}
         </strong>
         <span style={{ color: GRAY, fontSize: 12 }}>{t('ops.rowsHint')}</span>
+        <label style={{ marginLeft: 'auto', color: NAVY, fontSize: 12 }}>
+          {t('ops.sortPublication')}{' '}
+          <select aria-label={t('ops.sortPublication')} data-testid="ops-publication-sort"
+            value={sort.key === 'publication' ? (sort.dir === 1 ? 'published' : 'unpublished') : 'columns'}
+            onChange={event => setSort(event.target.value === 'columns'
+              ? { key: 'route', dir: 1 }
+              : { key: 'publication', dir: event.target.value === 'published' ? 1 : -1 })}
+            style={{ border: `1px solid ${BORDER}`, borderRadius: 6, padding: '5px 8px', background: '#fff', color: NAVY }}>
+            <option value="columns">{t('ops.sortColumns')}</option>
+            <option value="published">{t('ops.sortPublishedFirst')}</option>
+            <option value="unpublished">{t('ops.sortUnpublishedFirst')}</option>
+          </select>
+        </label>
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table className="ops-rt"
@@ -1896,7 +1956,7 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
               const opened = open === id
               const confKey = 'ops.conf.' + String(rec.confidence_level || '').toLowerCase()
               const confLabel = t(confKey) !== confKey ? t(confKey) : (rec.confidence_level || '·')
-              const held = rec.held ?? (rec.confidence_level === 'Low' && !rec.operator_released)
+              const held = !isQualityRecordPublished(rec)
               // A product withheld on its own (an unevidenced optional lane, or a Low
               // sibling beside a published verdict row) is not a route hold: the
               // default route is live and a whole-route release does not apply.
@@ -2470,7 +2530,7 @@ function useValueTranslations(client, lang) {
 
 const EMPTY_FILTERS = { nationality: '', destination: '', purpose: '',
                         requirement: '', confidence: '', visaType: '',
-                        fieldMissing: '', document: '' }
+                        fieldMissing: '', document: '', publication: '' }
 
 export default function QualityConsole() {
   return <QualityWorkspace />
@@ -2488,6 +2548,8 @@ function QualityWorkspace() {
   const { t, lang } = useLocale()
   const tv = useValueTranslations(client, lang)
   const [tab, setTab] = useState('records')
+  const currentTab = useRef(tab)
+  currentTab.current = tab
   const [filters, setFilters] = useState(EMPTY_FILTERS)
   const activeFilters = Object.values(filters).filter(Boolean).length
   const [reg, setReg] = useState(null)
@@ -2724,10 +2786,7 @@ function QualityWorkspace() {
   }
 
   async function refreshRecord(rec) {
-    const r = await client.post('/database/routes/research', {
-      ...qualityRecordRoute(rec) })
-    await load()
-    return r
+    return refreshQualityRecord(client, qualityRecordRoute(rec), loader, () => currentTab.current)
   }
 
   async function acceptProposal(id) {
@@ -2844,6 +2903,7 @@ function QualityWorkspace() {
       if (filters.purpose && r.travel_purpose !== filters.purpose) return false
       if (filters.requirement && r.visa_requirement !== filters.requirement) return false
       if (filters.confidence && r.confidence_level !== filters.confidence) return false
+      if (!matchesPublicationFilter(r, filters.publication)) return false
       if (filters.visaType && !String(r.visa_type_name || '')
             .toLowerCase().includes(filters.visaType.trim().toLowerCase())) return false
       if (filters.document && r.travel_document_type !== filters.document) return false
@@ -3084,6 +3144,10 @@ function QualityWorkspace() {
                   <option key={f} value={f}>{fx(t, f)}</option>
                 ))}
               </select>
+              </F>
+              <F label={t('ops.flt.publication')}>
+              <PublicationFilter value={filters.publication}
+                onChange={set('publication')} t={t} />
               </F>
                 <div className="ops-filters-act">
                   <button className="btn btn--sm ops-export-btn"

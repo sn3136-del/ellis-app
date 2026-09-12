@@ -10,7 +10,7 @@ import { t as translate } from '../../src/renderer/src/lib/i18n.js'
 // The records list is the operator's first screen. It renders a real
 // component, so a helper that is not in scope there crashes every row.
 const compiled = await build({
-  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell } from './src/renderer/src/screens/QualityConsole.jsx'",
+  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell, sortQualityRecords, PublicationFilter, matchesPublicationFilter } from './src/renderer/src/screens/QualityConsole.jsx'",
     resolveDir: resolve('.'), sourcefile: 'quality-records-table-entry.jsx' },
   bundle: true, write: false, platform: 'node', format: 'cjs', jsx: 'automatic',
   external: ['react', 'react/jsx-runtime'], logLevel: 'silent',
@@ -18,7 +18,7 @@ const compiled = await build({
 const module = { exports: {} }
 new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(
   createRequire(import.meta.url), module, module.exports)
-const { RecordsTable, unitNameOf } = module.exports
+const { RecordsTable, unitNameOf, sortQualityRecords, PublicationFilter, matchesPublicationFilter } = module.exports
 
 const t = (key, vars) => translate('en', key, vars)
 
@@ -36,6 +36,36 @@ function render(records) {
     records, total: records.length, onFlag: () => {}, onRelease: () => {}, onEdit: () => {},
     onRefresh: () => {}, t, flagOf: () => null }))
 }
+
+test('publication sorting uses per-product access even when route and confidence differ', () => {
+  const records = [
+    record({ visa_type_name: 'held sibling', held: true, route_held: false, publication_state: 'withheld', confidence_level: 'High' }),
+    record({ visa_type_name: 'published sibling', held: false, route_held: false, publication_state: 'published' }),
+    record({ visa_type_name: 'published Low', held: false, publication_state: 'published', confidence_level: 'Low' }),
+    record({ visa_type_name: 'state-only withheld', held: undefined, publication_state: 'withheld' }),
+  ]
+  const before = structuredClone(records)
+  assert.deepEqual(sortQualityRecords(records, { key: 'publication', dir: 1 }).map(r => r.visa_type_name),
+    ['published sibling', 'published Low', 'held sibling', 'state-only withheld'])
+  assert.deepEqual(sortQualityRecords(records, { key: 'publication', dir: -1 }).map(r => r.visa_type_name),
+    ['held sibling', 'state-only withheld', 'published sibling', 'published Low'])
+  assert.deepEqual(records, before)
+})
+
+test('publication selector is accessible and retains column sorting choice', () => {
+  const html = render([record()])
+  assert.ok(html.includes('aria-label="Publication order"'))
+  assert.ok(html.includes('value="published">Published first</option>'))
+  assert.ok(html.includes('value="unpublished">Unpublished first</option>'))
+  assert.ok(html.includes('value="columns" selected="">Column sorting</option>'))
+})
+
+test('publication option preserves existing fee and route sort behavior', () => {
+  const records = [record({ travel_document_country: 'USA', visa_fee_amount: 10 }),
+    record({ travel_document_country: 'AUS', visa_fee_amount: 20 })]
+  assert.equal(sortQualityRecords(records, { key: 'fee', dir: -1 })[0].visa_fee_amount, 20)
+  assert.equal(sortQualityRecords(records, { key: 'route', dir: 1 })[0].travel_document_country, 'AUS')
+})
 
 test('a numeric stay renders with its own unit name, in every unit', () => {
   for (const [duration, unit, label] of [[30, 'Day', 'days'], [12, 'Hour', 'hours'], [6, 'Month', 'months'], [2, 'Year', 'years']]) {
@@ -155,4 +185,31 @@ test('the stacked card layout undoes the table clamp on both clamped columns', a
   assert.match(block, /\.ops-rt td \{[^}]*max-width: none !important/)
   assert.match(block, /overflow: visible !important/)
   assert.match(block, /\.ops-notetext \{[^}]*white-space: normal !important/)
+})
+
+
+test('publication filter separates mixed route products without changing grades or records', () => {
+  const rows = [
+    record({ visa_type_name: 'published Low', held: false, confidence_level: 'Low' }),
+    record({ visa_type_name: 'held High sibling', held: true, route_held: false, publication_state: 'published' }),
+    record({ visa_type_name: 'state only', held: undefined, publication_state: 'withheld' }),
+  ]
+  const before = structuredClone(rows)
+  assert.deepEqual(rows.filter(r => matchesPublicationFilter(r, 'published')).map(r => r.visa_type_name), ['published Low'])
+  assert.deepEqual(rows.filter(r => matchesPublicationFilter(r, 'unpublished')).map(r => r.visa_type_name), ['held High sibling', 'state only'])
+  assert.equal(rows.filter(r => matchesPublicationFilter(r, '')).length, 3)
+  assert.deepEqual(rows, before)
+})
+
+test('publication filter provides all three choices in each shipped language', () => {
+  for (const lang of ['en', 'zh-CN', 'zh-TW']) {
+    const translateHere = key => translate(lang, key)
+    const html = renderToStaticMarkup(createElement(PublicationFilter, { value: 'unpublished', onChange() {}, t: translateHere }))
+    assert.ok(html.includes('data-testid="ops-filter-publication"'))
+    assert.ok(html.includes('value="unpublished" selected=""'))
+    for (const key of ['ops.flt.publication', 'ops.publicationAll', 'ops.publicationPublished', 'ops.publicationUnpublished']) {
+      assert.notEqual(translateHere(key), key)
+      assert.ok(html.includes(translateHere(key)))
+    }
+  }
 })

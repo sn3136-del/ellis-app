@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createLatestLoader, readQualityTab } from '../../src/renderer/src/lib/qualityLoader.js'
+import { createLatestLoader, readQualityTab, refreshQualityRecord, qualityRefreshOutcome } from '../../src/renderer/src/lib/qualityLoader.js'
 import { createVisaClient } from '../../src/renderer/src/lib/visaBackend.js'
 
 function deferred() { let resolve, reject; const promise = new Promise((a,b) => { resolve=a; reject=b }); return { promise, resolve, reject } }
@@ -21,6 +21,71 @@ test('late pre-correction records cannot replace a newer refreshed answer', asyn
   fresh.resolve({ visa: 'required' }); await b
   old.resolve({ visa: 'free' }); await a
   assert.deepEqual(state, { busy:false, data:{ visa:'required' }, errors:[] })
+})
+
+test('refresh waits for corrected records and rejects a late pre-refresh response', async () => {
+  const old = deferred(), post = deferred(), updated = deferred()
+  let reads = 0, writes = 0
+  const { loader, state } = harness(() => ++reads === 1 ? old.promise : updated.promise)
+  const oldRequest = loader.run('records')
+  const route = { nationality: 'HKG', destination: 'VNM', travel_purpose: 'tourism', travel_document_type: 'ordinary_passport' }
+  const refresh = refreshQualityRecord({ post: async (path, body) => {
+    writes++; assert.equal(path, '/database/routes/research'); assert.deepEqual(body, route); return post.promise
+  } }, route, loader, 'records')
+  old.resolve({ verdict: 'visa-free' }); await oldRequest
+  assert.equal(state.data, null)
+  post.resolve({ research: { outcome: 'checked', renewed: true } })
+  await Promise.resolve(); await Promise.resolve()
+  updated.resolve({ verdict: 'visa-required', fee: 25 })
+  const result = await refresh
+  assert.equal(writes, 1); assert.equal(result.research.renewed, true)
+  assert.deepEqual(state.data, { verdict: 'visa-required', fee: 25 })
+})
+
+test('a failed post-check QC reload cannot display successful refresh or replay the mutation', async () => {
+  let writes = 0
+  const { loader, state } = harness(async () => { throw new Error('HTTP 503') })
+  state.data = { old: true }
+  await assert.rejects(refreshQualityRecord({ post: async () => { writes++; return { research: { outcome: 'checked', renewed: true } } } },
+    {}, loader, 'records'), error => error.code === 'quality_reload_failed')
+  assert.equal(writes, 1); assert.deepEqual(state.data, { old: true })
+  assert.deepEqual(state.errors, ['HTTP 503'])
+})
+
+test('a tab change during source refresh reloads the current view without resurrecting Records', async () => {
+  const post = deferred(); let tab = 'records'; const reads = []
+  const { loader, state } = harness(async which => { reads.push(which); return { view: which } })
+  const pending = refreshQualityRecord({ post: () => post.promise }, {}, loader, () => tab)
+  tab = 'freshness'; await loader.run(tab)
+  post.resolve({ research: { outcome: 'checked', renewed: true } }); await pending
+  assert.deepEqual(reads, ['freshness', 'freshness'])
+  assert.deepEqual(state.data, { view: 'freshness' })
+})
+
+test('a newer tab load supersedes post-refresh reload without a false failure', async () => {
+  const old = deferred(); let tab = 'records'
+  const { loader, state } = harness(which => which === 'records' ? old.promise : Promise.resolve({ view: which }))
+  const pending = refreshQualityRecord({ post: async () => ({ research: { outcome: 'checked' } }) }, {}, loader, () => tab)
+  await Promise.resolve(); await Promise.resolve()
+  tab = 'freshness'; await loader.run(tab)
+  old.resolve({ view: 'records' })
+  assert.equal((await pending).quality_reload, 'superseded')
+  assert.deepEqual(state.data, { view: 'freshness' }); assert.deepEqual(state.errors, [])
+})
+
+test('partial checked/readable/provider failures never become full verification success', () => {
+  for (const research of [
+    { outcome: 'checked', consistent: true, renewed: false, verified_fields: ['government_fee'], unverified_fields: ['disposition'] },
+    { outcome: 'checked', consistent: true },
+    { outcome: 'page_not_relevant', source_reads: 1 },
+    { outcome: 'provider_error', source_reads: 1 },
+    { outcome: 'checked', provider_unavailable: true, renewed: false },
+    { outcome: 'fetch_failed', source_reads: 0 }, null,
+  ]) assert.equal(qualityRefreshOutcome(research).tone, 'warning')
+  assert.equal(qualityRefreshOutcome({ outcome: 'checked', renewed: true }).kind, 'ok')
+  assert.equal(qualityRefreshOutcome({ outcome: 'provider_error' }).kind, 'providerUnavailable')
+  assert.equal(qualityRefreshOutcome({ outcome: 'checked', changed: ['fee'], renewed: false }).kind, 'correctedPartial')
+  assert.equal(qualityRefreshOutcome({ outcome: 'checked', changed: ['fee'], disputed_fields: ['stay'] }).kind, 'correctedDisputed')
 })
 
 test('stale request failure cannot clear the current loading state or show an old error', async () => {

@@ -7,7 +7,7 @@ export function createLatestLoader(read, { onStart, onData, onError, onFinish,
   return {
     invalidate() { generation++; active = false },
     async run(input, { quiet = false } = {}) {
-      if (quiet && active) return
+      if (quiet && active) return { status: 'skipped' }
       const mine = ++generation
       const current = () => mine === generation
       active = true
@@ -16,16 +16,19 @@ export function createLatestLoader(read, { onStart, onData, onError, onFinish,
         for (let attempt = 0; attempt < 2 && current(); attempt++) {
           try {
             const result = await read(input)
-            if (current()) onData(result)
-            return
+            if (current()) {
+              onData(result)
+              return { status: 'loaded' }
+            }
+            return { status: 'superseded' }
           } catch (error) {
-            if (!current()) return
+            if (!current()) return { status: 'superseded' }
             if (attempt === 0 && !quiet && /fetch|network|load failed/i.test(String(error?.message || error))) {
               await wait(800)
               continue
             }
             if (!quiet) onError(error)
-            return
+            return { status: 'failed' }
           }
         }
       } finally {
@@ -36,6 +39,34 @@ export function createLatestLoader(read, { onStart, onData, onError, onFinish,
       }
     },
   }
+}
+
+export async function refreshQualityRecord(client, route, loader, currentTab) {
+  loader.invalidate()
+  const response = await client.post('/database/routes/research', route)
+  // Resolve the visible tab after the mutation: an old Records closure must
+  // not replace a Freshness view the operator selected while it was running.
+  const reloaded = await loader.run(typeof currentTab === 'function' ? currentTab() : currentTab)
+  if (reloaded?.status === 'superseded') return { ...response, quality_reload: 'superseded' }
+  if (reloaded?.status !== 'loaded') {
+    // The source operation may have committed. Do not repeat it automatically
+    // or report a successful display refresh while the old list remains.
+    const error = new Error('The source check returned, but the Quality Control list did not reload.')
+    error.code = 'quality_reload_failed'
+    throw error
+  }
+  return response
+}
+
+export function qualityRefreshOutcome(research) {
+  const changed = Array.isArray(research?.changed) ? research.changed : []
+  const disputed = Array.isArray(research?.disputed_fields) ? research.disputed_fields : []
+  if (disputed.length) return { kind: changed.length ? 'correctedDisputed' : 'disputed', tone: 'warning', changed }
+  if (changed.length) return { kind: research.renewed === true ? 'corrected' : 'correctedPartial', tone: research.renewed === true ? 'success' : 'warning', changed }
+  if (research?.outcome === 'checked' && research.renewed === true) return { kind: 'ok', tone: 'success', changed }
+  if (research?.provider_unavailable || research?.outcome === 'provider_error') return { kind: 'providerUnavailable', tone: 'warning', changed }
+  if (research?.outcome === 'checked' || research?.source_reads > 0) return { kind: 'partial', tone: 'warning', changed }
+  return { kind: 'noRead', tone: 'warning', changed }
 }
 
 export async function readQualityTab(client, tab) {
