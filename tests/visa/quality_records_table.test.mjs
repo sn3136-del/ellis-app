@@ -10,7 +10,7 @@ import { t as translate } from '../../src/renderer/src/lib/i18n.js'
 // The records list is the operator's first screen. It renders a real
 // component, so a helper that is not in scope there crashes every row.
 const compiled = await build({
-  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell, sortQualityRecords, PublicationFilter, matchesPublicationFilter } from './src/renderer/src/screens/QualityConsole.jsx'",
+  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery } from './src/renderer/src/screens/QualityConsole.jsx'",
     resolveDir: resolve('.'), sourcefile: 'quality-records-table-entry.jsx' },
   bundle: true, write: false, platform: 'node', format: 'cjs', jsx: 'automatic',
   external: ['react', 'react/jsx-runtime'], logLevel: 'silent',
@@ -18,7 +18,7 @@ const compiled = await build({
 const module = { exports: {} }
 new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(
   createRequire(import.meta.url), module, module.exports)
-const { RecordsTable, unitNameOf, sortQualityRecords, PublicationFilter, matchesPublicationFilter } = module.exports
+const { RecordsTable, unitNameOf, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery } = module.exports
 
 const t = (key, vars) => translate('en', key, vars)
 
@@ -219,4 +219,10 @@ test('unpublished alternatives never display the published product badge', () =>
   const html = render([record({ held: true, route_held: false, publication_state: 'withheld', publication_reason: 'product_evidence_low' })])
   assert.ok(!html.includes('data-testid="ops-published"'))
   assert.ok(html.includes('Unpublished alternative'))
+})
+
+
+test('Excel receives the same publication, product and missing-field selections as QC', () => {
+  const params = new URLSearchParams(qualityFilterQuery({ nationality: 'IND', destination: 'JPN', visaType: 'Multiple-entry', fieldMissing: 'visa_fee_amount', publication: 'unpublished', confidence: '' }))
+  assert.deepEqual(Object.fromEntries(params), { nationality: 'IND', destination: 'JPN', visa_type: 'Multiple-entry', field_missing: 'visa_fee_amount', publication: 'unpublished' })
 })

@@ -2524,6 +2524,13 @@ function useValueTranslations(client, lang) {
   }, [lang, map, want])
 }
 
+export function qualityFilterQuery(filters) {
+  const names = { visaType: 'visa_type', fieldMissing: 'field_missing' }
+  return new URLSearchParams(Object.fromEntries(Object.entries(filters)
+    .filter(([, value]) => value)
+    .map(([key, value]) => [names[key] || key, value]))).toString()
+}
+
 const EMPTY_FILTERS = { nationality: '', destination: '', purpose: '',
                         requirement: '', confidence: '', visaType: '',
                         fieldMissing: '', document: '', publication: '' }
@@ -2662,9 +2669,7 @@ function QualityWorkspace() {
     return (MAPS[key] || {})[v] ?? (MAPS[key] || {})[v.trim?.()] ?? v
   }, [t, typeNames])
 
-  const qs = useCallback(() => new URLSearchParams(
-    Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
-  ).toString(), [filters])
+  const qs = useCallback(() => qualityFilterQuery(filters), [filters])
 
   const loader = useMemo(() => createLatestLoader(
     (which) => readQualityTab(client, which), {
