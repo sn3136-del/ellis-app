@@ -109,7 +109,8 @@ def test_unconditional_exemption_over_a_published_scheme_is_a_contradiction(regi
     assert pe.issues(free, route("MYS", "RUS")) == []
     assert pe.unstated_lists(free, route("MYS", "RUS")) == ["rus_unified_evisa"]
     annotated = pe.annotate(free, route("MYS", "RUS"))
-    assert annotated["scheme_list_unstated"] == ["rus_unified_evisa"]
+    # Reported, never written into the served guidance.
+    assert annotated == free and "scheme_list_unstated" not in annotated
     assert "_permission_eligibility_issues" not in annotated
     # Establish it with Malaysia on the list: the same answer contradicts.
     quote = "Malaysia\nChina\nIndia\nThailand"
@@ -138,7 +139,10 @@ def test_not_established_list_refuses_nothing_and_releases_nothing(registry):
     assert pe.issues(esta, route("CHN", "USA")) == []
     assert pe.unstated_lists(esta, route("TWN", "USA")) == ["usa_esta_vwp"]
     annotated = pe.annotate(esta, route("CHN", "USA"))
-    assert annotated.get("scheme_list_unstated") == ["usa_esta_vwp"]
+    assert pe.unstated_lists(esta, route("CHN", "USA")) == ["usa_esta_vwp"]
+    assert "scheme_list_unstated" not in annotated
+    # A stale key from an earlier build is removed, never trusted.
+    assert "scheme_list_unstated" not in pe.annotate(dict(esta, scheme_list_unstated=["x"]), route("CHN", "USA"))
     # Not established means no covers() either: nothing is released on its account.
     assert not sr.covers(next(e for e in sr.entries() if e["id"] == "usa_esta_vwp"), "TWN")
     assert kp.serve_time_invariants(annotated) == []

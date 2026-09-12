@@ -28,7 +28,12 @@ time and edit time inherit the guard with no new wiring. The rules:
      depend on a product being present at all)
   4. a not_established or not_publicly_available list refuses NOTHING and
      releases NOTHING: it adds no issue and is reported through
-     scheme_list_unstated instead, the fail-safe direction
+     unstated_lists() instead, the fail-safe direction. The ids are NOT
+     written into the served guidance: an extra key there changed the served
+     payload of every route to a destination with a placeholder entry
+     (India, the United States, Canada, the United Kingdom and others) and
+     broke seven exact-payload tests, so the sweep reads unstated_lists()
+     directly (defect fix after T6)
   5. the reviewed Indonesia to Korea branch STAYS beside the registry. The
      design allowed retiring it once the K-ETA list is established with
      Indonesia absent, behind a test proving an identical message set; that
@@ -287,18 +292,19 @@ def unstated_lists(guidance: dict, route: dict) -> list[str]:
 
 
 def annotate(guidance, route):
-    """Recompute a private hold reason after merging; never trust a stored tag."""
+    """Recompute a private hold reason after merging; never trust a stored tag.
+    Only the hold reason is written; the unstated list ids are reported by
+    unstated_lists() and never ride in the served guidance (a stale key from
+    an earlier build is removed)."""
     if not isinstance(guidance, dict):
         return guidance
-    problems, unstated = _evaluate(guidance, route) if isinstance(route, dict) else ([], [])
+    problems = _evaluate(guidance, route)[0] if isinstance(route, dict) else []
     if (not problems and "_permission_eligibility_issues" not in guidance
-            and not unstated and "scheme_list_unstated" not in guidance):
+            and "scheme_list_unstated" not in guidance):
         return guidance
     out = dict(guidance)
     out.pop("_permission_eligibility_issues", None)
     out.pop("scheme_list_unstated", None)
     if problems:
         out["_permission_eligibility_issues"] = problems
-    if unstated:
-        out["scheme_list_unstated"] = unstated
     return out

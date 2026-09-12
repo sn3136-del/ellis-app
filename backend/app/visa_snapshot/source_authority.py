@@ -65,6 +65,13 @@ EU_INSTRUMENTS = {
     "810/2009": r"810/2009|\b[03]2009R0810\b|\b02009R0810-\d{8}\b",
     "2018/1240": r"2018/1240|\b[03]2018R1240\b|\b02018R1240-\d{8}\b",
     "2017/2226": r"2017/2226|\b[03]2017R2226\b|\b02017R2226-\d{8}\b",
+    # Directive 2004/38/EC, the free movement directive: the Union law that
+    # states a Union citizen's right to enter another Member State. The
+    # pre-T3 carve-out accepted it on eur-lex for FRA and ESP, and the
+    # reviewed ESP to FRA routes cite it; leaving it out narrowed that
+    # carve-out (a defect fix after T6). Scoped to Member State destinations
+    # only, never to a Schengen state outside the Union.
+    "2004/38": r"2004/38|\b[03]2004L0038\b|\b02004L0038-\d{8}\b",
 }
 # What Union law decides. Everything else on a Schengen route is national.
 EU_LAW_FIELDS = frozenset({"disposition", "requirement_detail", "permitted_stay",
@@ -83,6 +90,15 @@ _PROVIDER_STATE: dict = {"mtime": None, "entries": [], "errors": []}
 def schengen_destinations() -> frozenset[str]:
     from ..consular_forms import _SCHENGEN
     return frozenset(_SCHENGEN)
+
+
+def instrument_destinations(instrument: str) -> frozenset[str]:
+    """Where a Union instrument decides entry: the free movement directive in
+    the Member States, every other listed instrument in the Schengen area."""
+    if instrument == "2004/38":
+        from .structured_evidence import EU_MEMBERS
+        return frozenset(EU_MEMBERS)
+    return schengen_destinations()
 
 
 @dataclass(frozen=True)
@@ -230,13 +246,15 @@ def authority_for(url: str, route, *, citation: str = "") -> Authority:
     owner = government_owner(host) or ""
     if dest and owner == dest:
         return Authority(KIND_DESTINATION, owner=owner)
-    if host in EU_LAW_HOSTS and dest in schengen_destinations():
+    if host in EU_LAW_HOSTS:
         instrument = _instrument_named(f"{url} {citation or ''}")
-        if instrument:
+        if instrument and dest in instrument_destinations(instrument):
             return Authority(KIND_EU_VISA_LAW, owner="EU", exemption="eu_visa_law",
                              instrument=instrument, scope=tuple(sorted(EU_LAW_FIELDS)))
-        return Authority(KIND_THIRD_PARTY, owner="EU",
-                         note="Union host but no instrument from the closed list is named")
+        if dest in schengen_destinations():
+            return Authority(KIND_THIRD_PARTY, owner="EU",
+                             note="Union host but no instrument from the closed list is named "
+                                  "for this destination")
     provider = _provider_for(host, dest) if dest else None
     if provider is not None:
         return Authority(KIND_PROVIDER, owner=dest, exemption="authorised_provider",

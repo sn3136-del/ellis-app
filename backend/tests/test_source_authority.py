@@ -156,3 +156,23 @@ def test_non_government_page_is_never_anything():
     assert sa.classify("https://www.ivisa.com/vietnam", route("HKG", "VNM")) == sa.KIND_NON_GOVERNMENT
     assert not sa.is_competent("https://www.ivisa.com/vietnam", route("HKG", "VNM"))
     assert not sa.is_corroborating("https://www.ivisa.com/vietnam", route("HKG", "VNM"), statement="x")
+
+
+
+def test_free_movement_directive_covers_member_states_only():
+    """Defect fix after T6: the pre-T3 carve-out accepted eur-lex for FRA and
+    ESP, and the reviewed ESP to FRA routes cite Directive 2004/38/EC. The
+    directive is competent for the verdict of a Union citizen entering
+    another Member State, never for a Schengen state outside the Union and
+    never for a national field."""
+    url = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02004L0038-20110616"
+    esp_fra = {"passport_nationality": "ESP", "destination_country": "FRA"}
+    authority = sa.authority_for(url, esp_fra)
+    assert authority.kind == sa.KIND_EU_VISA_LAW and authority.instrument == "2004/38"
+    assert sa.is_competent(url, esp_fra, "disposition")
+    assert sa.is_competent(url, dict(esp_fra, destination_country="IRL"), "disposition")
+    assert not sa.is_competent(url, dict(esp_fra, destination_country="CHE"), "disposition")
+    assert not sa.is_competent(url, dict(esp_fra, destination_country="GBR"), "disposition")
+    assert not sa.is_competent(url, esp_fra, "required_documents")
+    from app.visa_snapshot.evidence_validator import jurisdiction_matches
+    assert jurisdiction_matches(url, "FRA") and jurisdiction_matches(url, "ESP")

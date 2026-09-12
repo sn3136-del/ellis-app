@@ -392,7 +392,9 @@ def test_detector_includes_explicit_visa_on_arrival():
 LIVE_PAIRS = [
     ("https://france-visas.gouv.fr/en/web/france-visas/accueil", "FRA", True),
     ("https://www.uscis.gov/working-in-the-united-states/temporary-visitors-for-business/b-1-temporary-business-visitor", "USA", True),
-    ("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02004L0038-20110616", "FRA", False),
+    # The free movement directive stays competent for FRA as it was before
+    # T3 (defect fix after T6: the closed list had narrowed the old carve-out).
+    ("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02004L0038-20110616", "FRA", True),
     ("https://s.nia.gov.cn/mps/bszy/wlgaot/sqgowl/201903/t20190313_1002.html", "MAC", False),
     ("https://eviza.mae.ro/TypeOfVisa", "DEU", False),
     ("https://www.k-eta.go.kr/portal/board/viewboarddetail.do?bbsSn=299707", "KOR", True),
