@@ -569,14 +569,30 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
                    "visa_type_name": "visa_category", "max_stay_duration": "permitted_stay_days",
                    "application_method": "application_channel"}
         # The field column is a 64 character display string, so a finding
-        # naming several fields has its last name cut mid word and could
-        # never be matched by any change-log row. The finding's own
-        # proposal carries the same names untruncated, so read them there
-        # and keep the column as the fallback.
+        # naming several fields can have its last name cut mid word
+        # (passport_validity_requirem) and no change-log row could ever
+        # name it. The column stays the authority on what the finding
+        # reported: the proposal is read only to complete a trailing token
+        # the cut truncated, when exactly one proposal field name extends
+        # it. It never adds a field the column does not account for. The
+        # proposal can name more fields than the finding reported (the cut
+        # dropped whole names after a comma, or a reader flagged one field
+        # and the research proposal named others), and demanding those
+        # would freeze a finding nobody can honestly edit, while replacing
+        # the column with them would close a finding on a field it never
+        # raised. An ambiguous or unmatched cut keeps the token as it is,
+        # so the gate refuses a finding it cannot identify.
+        tokens = [t.strip() for t in str(row.field or "").split(",") if t.strip()]
+        width = DatabaseIssueReport.__table__.c.field.type.length or 64
         proposed = (row.proposal or {}).get("fields")
-        names = (list(proposed) if isinstance(proposed, dict) and proposed
-                 else str(row.field or "").split(","))
-        requested = {aliases.get(str(f).strip(), str(f).strip()) for f in names if str(f).strip()}
+        proposed_names = ([str(f).strip() for f in proposed if str(f).strip()]
+                          if isinstance(proposed, dict) else [])
+        if (tokens and len(str(row.field or "")) >= width
+                and tokens[-1] not in proposed_names):
+            extended = [n for n in proposed_names if n.startswith(tokens[-1])]
+            if len(extended) == 1:
+                tokens[-1] = extended[0]
+        requested = {aliases.get(t, t) for t in tokens}
         changes = db.execute(_sel(DatabaseChangeLog).where(
             DatabaseChangeLog.cache_key == kimi_primary.canonical_key(row.cache_key),
             DatabaseChangeLog.created_at >= row.created_at,

@@ -90,34 +90,3 @@ def test_audit_failure_rolls_back_status_in_the_same_transaction(client,db,monke
         client.post('/database/issues/'+identity,headers=ADMIN,json={'status':'dismissed','resolution':'Reviewed correction'})
     db.expire_all();assert db.get(DatabaseIssueReport,identity).status=='open'
 
-
-def test_a_finding_whose_field_column_was_truncated_can_still_reach_corrected(tmp_path, monkeypatch):
-    """The column is a 64 character display string.
-
-    A finding naming several fields has its last name cut mid word, and the
-    gate then asks for a change-log row naming a token that cannot exist.
-    The finding's own proposal carries the names in full.
-    """
-    from app import main
-    aliases_column = "official_portal_url,passport_validity,passport_validity_requirem"
-    full = {"official_portal_url": {}, "passport_validity": {}, "passport_validity_requirement": {}}
-
-    class Row:
-        field = aliases_column
-        proposal = {"fields": full}
-
-    proposed = (Row.proposal or {}).get("fields")
-    names = (list(proposed) if isinstance(proposed, dict) and proposed
-             else str(Row.field or "").split(","))
-    requested = {str(f).strip() for f in names if str(f).strip()}
-    assert "passport_validity_requirement" in requested
-    assert "passport_validity_requirem" not in requested
-    # With no proposal the column is still read, so nothing regresses.
-    class Bare:
-        field = "processing_time"
-        proposal = None
-    proposed = (Bare.proposal or {}).get("fields")
-    names = (list(proposed) if isinstance(proposed, dict) and proposed
-             else str(Bare.field or "").split(","))
-    assert {str(f).strip() for f in names if str(f).strip()} == {"processing_time"}
-    assert main is not None
