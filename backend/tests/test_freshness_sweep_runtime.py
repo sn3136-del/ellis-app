@@ -117,6 +117,28 @@ def test_concurrent_writer_defers_attempt_without_filing_outage(sweep, monkeypat
     assert status['unreadable'] == status['verified'] == status['renewed'] == 0
 
 
+@pytest.mark.parametrize('outcome', ['checked', 'budget_exhausted', 'provider_error'])
+@pytest.mark.parametrize('provider_state', ['suspended', 'rate_limited', 'available'])
+def test_cycle_provider_stop_survives_partial_and_budget_outcomes(sweep, monkeypatch, outcome, provider_state):
+    row = SimpleNamespace(cache_key='a', route={}, guidance={}, verification={
+        'grounded_check': {'outcome': 'checked', 'evidence_contract': freshness.EVIDENCE_CONTRACT,
+            'verified_fields': [], 'unverified_fields': ['disposition'], 'renewed': False,
+            'source_checks': [{'outcome': 'checked'}, {'outcome': 'provider_error'}]}})
+    setup(monkeypatch, [row])
+    monkeypatch.setattr(freshness, 'recheck_row', lambda *_a, **_k:
+        {'outcome': outcome, 'source_reads': 1, 'model_comparisons': 2})
+    monkeypatch.setattr(kp, 'provider_suspension', lambda:
+        {'reason': 'fixture account suspension'} if provider_state == 'suspended' else None)
+    monkeypatch.setattr(kp, 'rate_gate_saturated', lambda: provider_state == 'rate_limited')
+    delta = sweep._check_route('a', sweep.time.monotonic() + 30, threading.Event())
+    assert delta['provider_suspended'] == int(provider_state == 'suspended')
+    assert delta['provider_rate_limited'] == int(provider_state == 'rate_limited')
+    assert delta['read'] == 1 and delta['model_comparisons'] == 2
+    assert delta['verified'] == delta['renewed'] == 0
+    assert delta['partial'] == int(outcome == 'checked')
+    assert delta['deferred'] == int(outcome == 'budget_exhausted')
+
+
 def test_reused_comparisons_are_separate_from_reads_renewals_and_deferred_work(sweep, monkeypatch):
     rows = [SimpleNamespace(cache_key=str(i), route={}, guidance={'disposition': 'VISA_REQUIRED'},
                             verification={}) for i in range(2)]
@@ -253,7 +275,8 @@ def test_non_transport_failure_cannot_file_source_unreadable_issue(outcome):
     freshness.note_unreadable(UnusableDB(), None, {'outcome':outcome, 'source_reads':1})
 
 
-def test_a_suspended_provider_stops_the_cycle_and_names_the_reason(sweep, monkeypatch):
+@pytest.mark.parametrize('outcome', ['provider_error', 'checked', 'budget_exhausted'])
+def test_a_suspended_provider_stops_the_cycle_and_names_the_reason(sweep, monkeypatch, outcome):
     """One suspension notice ends dispatch: the remaining routes stay due for
     the next cycle instead of each failing in turn, the status names the
     reason for the Freshness tab, the exit is non-zero so systemd records
@@ -266,15 +289,21 @@ def test_a_suspended_provider_stops_the_cycle_and_names_the_reason(sweep, monkey
     def check(_db, row, **_kwargs):
         attempted.append(row.cache_key)
         kp.note_provider_suspension("account suspended due to insufficient balance, please recharge")
-        return {"outcome": "provider_error"}
+        row.verification = {'grounded_check': {'outcome': 'checked',
+            'evidence_contract': freshness.EVIDENCE_CONTRACT, 'consistent': True,
+            'verified_fields': ['disposition'], 'unverified_fields': ['government_fee'], 'renewed': False}}
+        return {"outcome": outcome, 'source_reads': 1}
     monkeypatch.setattr(freshness, "recheck_row", check)
     try:
         assert sweep.main() == 1
         status = freshness.read_sweep_status()
         assert status["state"] == "provider_suspended"
         assert "insufficient balance" in status["provider_notice"]
-        assert status["provider_suspended"] >= 1 and status["provider_failed"] >= 1
-        assert status["verified"] == 0 and not status["running"] and status["finished_at"]
+        assert status["provider_suspended"] >= 1
+        assert status["provider_failed"] == (len(attempted) if outcome == 'provider_error' else 0)
+        assert status['verified'] == status['partial'] == (len(attempted) if outcome == 'checked' else 0)
+        assert status['renewed'] == 0 and status['read'] == status['completed'] == len(attempted)
+        assert not status["running"] and status["finished_at"]
         assert len(attempted) < 6, "dispatch stopped before every route failed the same way"
         assert status["backlog_remaining"] >= 1
         from datetime import datetime, timezone
@@ -284,7 +313,8 @@ def test_a_suspended_provider_stops_the_cycle_and_names_the_reason(sweep, monkey
         kp.clear_provider_suspension()
 
 
-def test_a_rate_gate_stuck_at_its_cap_stops_the_cycle_like_a_suspension(sweep, monkeypatch):
+@pytest.mark.parametrize('outcome', ['provider_error', 'checked', 'budget_exhausted'])
+def test_a_rate_gate_stuck_at_its_cap_stops_the_cycle_like_a_suspension(sweep, monkeypatch, outcome):
     """When every 429 has doubled the gate up to its cap and the account is
     still refusing, the remaining routes would each time out against a
     closed gate. The cycle stops with its own state, exits non-zero and
@@ -299,7 +329,7 @@ def test_a_rate_gate_stuck_at_its_cap_stops_the_cycle_like_a_suspension(sweep, m
         attempted.append(row.cache_key)
         for _ in range(6):
             kp._rate_gate_hit()
-        return {"outcome": "provider_error"}
+        return {"outcome": outcome}
     monkeypatch.setattr(freshness, "recheck_row", check)
     try:
         assert kp.rate_gate_saturated() is False
@@ -307,7 +337,8 @@ def test_a_rate_gate_stuck_at_its_cap_stops_the_cycle_like_a_suspension(sweep, m
         status = freshness.read_sweep_status()
         assert status["state"] == "rate_limited"
         assert "rate limit" in status["provider_notice"]
-        assert status["provider_rate_limited"] >= 1 and status["provider_failed"] >= 1
+        assert status["provider_rate_limited"] >= 1
+        assert status["provider_failed"] == (len(attempted) if outcome == 'provider_error' else 0)
         assert status["provider_suspended"] == 0 and status["verified"] == 0
         assert len(attempted) < 6, "dispatch stopped before every route failed the same way"
         from datetime import datetime, timezone

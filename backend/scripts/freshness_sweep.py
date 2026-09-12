@@ -193,26 +193,21 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
             delta["insufficient_evidence"] = 1
         elif outcome == "provider_error":
             delta["provider_failed"] = 1
-            # An account suspension is not one failed route: every further
-            # route would fail the same way until the account is recharged.
-            # The worker reports it so the coordinator stops the cycle and
-            # the Freshness tab names the reason instead of a wall of
-            # provider failures.
-            suspended = kimi_primary.provider_suspension()
-            if suspended:
-                delta["provider_suspended"] = 1
-                delta["provider_notice"] = suspended.get("reason") or "provider account suspended"
-            elif kimi_primary.rate_gate_saturated():
-                # The rate gate has doubled up to its cap and is still
-                # closed: the account's limit is not clearing within a
-                # route's budget, so the rest of the cycle would only time
-                # out route after route. Stop like a suspension and resume
-                # next run.
-                delta["provider_rate_limited"] = 1
-                delta["provider_notice"] = ("AI provider rate limit persisted at the "
-                                            f"{int(kimi_primary.RATE_GATE_MAX_SECONDS)} second cap")
         elif outcome == "no_official_source":
             delta["no_official_source"] = 1
+        # Provider state belongs to the cycle, independently of this route's
+        # final outcome. One supported page followed by a provider failure
+        # can return checked (partial); a failure using the remaining route
+        # budget can return budget_exhausted. Neither should hide an active
+        # account suspension or keep dispatching source reads after it.
+        suspended = kimi_primary.provider_suspension()
+        if suspended:
+            delta["provider_suspended"] = 1
+            delta["provider_notice"] = suspended.get("reason") or "provider account suspended"
+        elif kimi_primary.rate_gate_saturated():
+            delta["provider_rate_limited"] = 1
+            delta["provider_notice"] = ("AI provider rate limit persisted at the "
+                                        f"{int(kimi_primary.RATE_GATE_MAX_SECONDS)} second cap")
         delta["corrected"] = int(bool(report.get("changed")))
         delta["disputed"] = int(bool(report.get("disputed") or report.get("generic_skipped")))
     except Exception as exc:
