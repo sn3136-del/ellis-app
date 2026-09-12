@@ -1337,6 +1337,7 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
     source_override = dict(override or {}, supporting_sources=[{'id':k,'url':v} for k,v in catalog.items()])
     captures, candidates = {}, []
     workflow_rejections = []
+    comparison_rejections = []
     deadline = time.monotonic() + ROUTE_BUDGET_SECONDS
     requested = {"visa_requirement": "disposition", "visa_fee_amount": "government_fee",
                  "visa_fee_currency": "government_fee", "visa_type": "visa_category",
@@ -1379,11 +1380,13 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
         except Exception as e:  # noqa: BLE001 - an outcome, not a crash
             outcome = "provider_error"
             issue.proposal = {"outcome": outcome, "checked_at": when,
-                              "error": str(e)[:160]}
+                              "provider_diagnostic": _provider_diagnostic(e)}
             db.commit()
             return issue.proposal
-        if not isinstance(raw, dict):
-            outcome = "provider_error"
+        schema_errors = _comparison_schema_errors(raw)
+        if schema_errors:
+            comparison_rejections.append({'source_url': fr.final_url,
+                'validation_errors': schema_errors})
             continue
         quoted, evidence, unquoted = _quoted_proposals(raw, fr.content_text, route)
         empty_workflow = _empty_workflow_proposal_errors(raw)
@@ -1473,6 +1476,15 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
                     "proposed_by": "ellis-ai"}
         if fields or confirmed or requested in awaiting_adjudication:
             break  # a proposal cites this exact source; no mixed-source claims
+    if comparison_rejections:
+        if not proposal or not (proposal.get('fields') or proposal.get('verified_fields')
+                                or proposal.get('awaiting_adjudication')):
+            # An invalid extraction must not overwrite a reader's existing
+            # source evidence or masquerade as a checked/irrelevant page.
+            return {'outcome': 'validation_error', 'checked_at': when, 'consistent': False,
+                    'verified_fields': [], 'fields': {}, 'issue_unchanged': True,
+                    'rejected_comparisons': comparison_rejections}
+        proposal['rejected_comparisons'] = comparison_rejections
     if workflow_rejections:
         if not proposal or not (proposal.get('fields') or proposal.get('verified_fields')
                                 or proposal.get('awaiting_adjudication')):
