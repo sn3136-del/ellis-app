@@ -112,3 +112,83 @@ def test_records_endpoint_preserves_current_product_fee_floor(client, db, shippe
     finally:
         db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).delete()
         db.commit()
+
+
+# ---------------------------------------------------------------------------
+# guard-20260912 T1: the four routes Trip.com reported, pinned before any
+# rule moves. Malaysia to Russia and Hong Kong to Vietnam had no test of
+# their own until here, so either could have reverted with the suite green.
+# ---------------------------------------------------------------------------
+
+def _mys_rus_raw():
+    # The answer as the engine stored it on the live row: an unconditional
+    # exemption with no products, which is Trip.com finding 2.
+    return dict(disposition='VISA_EXEMPT', requirement_detail='unconditional_visa_free',
+                visa_category='Tourist / visa-free entry', source_url=None, official_portal_url=None,
+                government_fee=None, permitted_stay='30 days per visit; maximum 90 days in any 180-day period',
+                permitted_stay_days=30, visa_products=[], application_channel='not_required',
+                processing_time=None)
+
+
+def _hkg_vnm_raw():
+    return dict(disposition='VISA_REQUIRED', requirement_detail='evisa', visa_category='tourist e-Visa',
+                source_url='https://evisa.gov.vn/', official_portal_url='https://evisa.gov.vn/',
+                government_fee={'amount': None, 'currency': None}, permitted_stay='90 days',
+                permitted_stay_days=90, application_channel='online_portal', processing_time='3 working days',
+                visa_products=[
+                    {'type': 'Single-entry tourist e-Visa', 'entry': 'single', 'validity': '90 days',
+                     'max_stay_days': 90, 'fee': {'amount': 25, 'currency': 'USD'}, 'notes': 'Apply online'},
+                    {'type': 'Multiple-entry tourist e-Visa', 'entry': 'multiple', 'validity': '90 days',
+                     'max_stay_days': 90, 'fee': {'amount': 50, 'currency': 'USD'}, 'notes': 'Apply online'},
+                    {'type': 'Visa on arrival after pre-approved letter', 'entry': 'single',
+                     'validity': 'Varies by approval letter', 'max_stay_days': None,
+                     'fee': {'amount': None, 'currency': None}, 'notes': 'Requires pre-approved visa letter'}])
+
+
+def test_malaysian_tourist_to_russia_is_unified_evisa_not_visa_free(shipped):
+    from urllib.parse import urlparse
+    g, provenance = vo.apply(_mys_rus_raw(), route('MYS', 'RUS'))
+    assert g['disposition'] == 'VISA_REQUIRED' and g['requirement_detail'] == 'evisa'
+    products = g['visa_products']
+    assert len(products) == 1
+    assert 'unified electronic visa' in products[0]['type'].lower()
+    assert products[0]['max_stay_days'] == 30 and g['permitted_stay_days'] == 30
+    assert products[0]['validity'].startswith('120 days')
+    assert products[0]['entry'] == 'single'
+    assert urlparse(g['source_url']).hostname == 'evisa.kdmid.ru'
+    assert kp.serve_time_invariants(g) == []
+    records = tstation.records_for_route(route('MYS', 'RUS'), g, provenance=provenance)
+    assert len(records) == 1
+    assert records[0]['visa_requirement'] == 'Visa Required in Advance'
+    assert records[0]['visa_requirement_detail'] == 'eVisa'
+    assert records[0]['max_stay_duration'] == 30 and records[0]['validity_duration'] == 120
+    assert records[0]['entries'] == 'Single'
+
+
+def test_hongkong_to_vietnam_serves_one_evisa_lane(shipped):
+    g, provenance = vo.apply(_hkg_vnm_raw(), route('HKG', 'VNM'))
+    assert g['disposition'] == 'VISA_REQUIRED' and g['requirement_detail'] == 'evisa'
+    exemption_words = ('visa-free', 'visa free', 'no visa', 'exempt', 'waiver', 'without a visa')
+    for p in g['visa_products']:
+        words = f"{p.get('type') or ''} {p.get('notes') or ''}".lower()
+        assert not any(w in words for w in exemption_words), p
+    fees = sorted((p['fee']['amount'], p['fee']['currency']) for p in g['visa_products'])
+    assert fees == [(25, 'USD'), (50, 'USD')]
+    assert kp.serve_time_invariants(g) == []
+    r = route('HKG', 'VNM')
+    assert kp.canonical_key(kp.cache_key(r)) == kp.cache_key(r)
+    records = tstation.records_for_route(r, g, provenance=provenance)
+    assert [x['visa_requirement'] for x in records] == ['Visa Required in Advance'] * 2
+    assert sorted(x['visa_fee_amount'] for x in records) == [25, 50]
+
+
+@pytest.mark.parametrize('nationality,destination', [('IDN', 'KOR'), ('MYS', 'RUS'),
+                                                     ('THA', 'AUS'), ('HKG', 'VNM')])
+def test_reported_routes_serve_from_one_canonical_row(nationality, destination):
+    base = route(nationality, destination)
+    key = kp.cache_key(base)
+    assert kp.is_canonical_key(key) and kp.canonical_key(key) == key
+    assert kp.cache_key(dict(base, arrival_date='2026-12-01')) == key
+    assert kp.cache_key(dict(base, arrival_date='2027-03-15')) == key
+    assert kp.cache_key(dict(base, lawful_country_of_residence='ARE')) == key
+    assert kp.cache_key(dict(base, lawful_country_of_residence='ARE', arrival_date='2026-12-01')) == key
