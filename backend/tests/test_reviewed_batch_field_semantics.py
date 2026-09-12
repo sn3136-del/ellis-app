@@ -70,6 +70,19 @@ def test_explicit_visa_fee_waivers_and_numeric_zero_remain_supported(quote):
     ('90 days', 'Travel insurance is valid for 90 days from issuance.'),
     ('90 days', 'Your passport remains valid for 90 days from the date of issue.'),
     ('90 days', 'The residence permit lasts 90 days from issue.'),
+    ('1.5 months', 'The visa is valid for 5 months.'),
+    ('30 to 90 days', 'The visa is valid for 90 days.'),
+    ('30–90 days', 'The visa is valid for 90 days.'),
+    ('30-90 days', 'The visa is valid for 90 days.'),
+    ('30 through 90 days', 'The visa is valid for 90 days.'),
+    ('30 until 90 days', 'The visa is valid for 90 days.'),
+    ('Thirty until ninety days', 'The visa is valid for 90 days.'),
+    ('5 months', 'The visa is valid for 1.5 months.'),
+    ('5 months', 'The visa is valid for 1,5 months.'),
+    ('90 days', 'The visa is valid for 30–90 days.'),
+    ('90 days or 1.5 months', 'The visa is valid for 90 days or 5 months.'),
+    ('1.5 months', 'The visa is valid for 1.5 months.'),
+    ('30 to 90 days', 'The visa is valid for 30 to 90 days.'),
 ])
 def test_validity_needs_its_own_amount_unit_and_subject(value, quote):
     product, reports = convert_field('validity', value, quote)

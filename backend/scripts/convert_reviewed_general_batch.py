@@ -266,8 +266,13 @@ def _note_drops(row):
             for note in proof.get('scope_note_dropped') or []]
 
 
-def _check_proof(proof, sources, route, field, value, *, product=None):
-    """Return the validated proof or None for an explicit unknown/not_published."""
+def _check_proof(proof, sources, route, field, value, *, product=None, general_batch_semantics=False):
+    """Validate shared capture facts, then the caller's field contract.
+
+    Dedicated field converters bind tables and review notes themselves. The
+    general batch's prose-duration and served-note rules apply only to its
+    own callers, preserving those stronger, distinct field contracts.
+    """
     if not isinstance(proof, dict) or proof.get('verifier', 'ai') != 'ai':
         raise PatchRejected(f'{field}: the source review must be attributed to AI')
     status = proof.get('status')
@@ -300,14 +305,15 @@ def _check_proof(proof, sources, route, field, value, *, product=None):
         raise PatchRejected(f'{field}: the proof must state its scope')
     if not str(proof.get('verified_at') or '').strip():
         raise PatchRejected(f'{field}: the proof needs a verification date')
-    _checked_scope_note(proof, route)
+    if general_batch_semantics:
+        _checked_scope_note(proof, route)
     passages = '\n'.join(item['quote'] for item in evidence)
     if proof.get('verification_scope') == 'consular_product_eligibility':
         if field != 'disposition' or not _consular_product_eligibility_supported(
                 value, evidence, sources, route, product):
             raise PatchRejected('disposition: no scoped consular-product eligibility evidence')
     else:
-        _check_value(field, value, passages, route, product)
+        _check_value(field, value, passages, route, product, strict_validity=general_batch_semantics)
     if any(k in proof for k in ('effective_from', 'effective_to', 'policy_interval_evidence')):
         if field != 'disposition':
             raise PatchRejected('Policy bounds belong to the reviewed visa disposition')
@@ -553,26 +559,47 @@ _VALIDITY_SUBJECT_RE = re.compile(
     r"(?P<visa>\b(?:(?:e-?)?visas?|eta|esta)\b)", re.I)
 
 
-def _duration_values(text):
-    """Amounts with their own unit, including '2, 5 or 10 years'."""
+def _duration_text(text):
     text = _norm(text)
     for word, number in _DURATION_WORDS.items():
         text = re.sub(r'\b' + word + r'\b', number, text)
-    text = re.sub(r'\b(\d+)\s*\(\s*\1\s*\)', r'\1', text)
+    return re.sub(r'\b(\d+)\s*\(\s*\1\s*\)', r'\1', text)
+
+
+def _duration_values(text):
+    """Whole amounts with their unit; None marks an unsupported numeric run."""
+    text = _duration_text(text)
     for unit in _DURATION_UNIT_RE.finditer(text):
         before = text[:unit.start()]
-        run = re.search(r'(\d+(?:\s*(?:,|or|and|/|либо|или)\s*\d+)*)\s*[-(]?\s*$', before)
+        # Consume decimals and ranges as a whole before deciding whether we
+        # understand them. Otherwise 1.5 months becomes 5 months, and 30-90
+        # days becomes 90 days. Neither suffix verifies the original claim.
+        run = re.search(
+            r'(?<![\w.,])(\d+(?:[.,]\d+)*(?:\s*(?:,|or|and|/|либо|или|to|through|[-–—])\s*\d+(?:[.,]\d+)*)*)\s*[-(]?\s*$',
+            before)
         if run:
+            if re.search(r'\d[.,]\d|\b(?:to|through)\b|[-–—]', run.group(1)):
+                yield None, run.start(), unit.end(), text
+                continue
             for number in re.findall(r'\d+', run.group(1)):
                 yield (int(number), unit.lastgroup), run.start(), unit.end(), text
 
 
 def _validity_supported(value, passages):
     wanted = list(_duration_values(str(value)))
+    if any(duration is None for duration, _, _, _ in wanted):
+        return False
+    # Do not silently discard an unparsed number in the proposed claim,
+    # including an unknown range connector such as '30 until 90 days'.
+    if (sorted(int(number) for number in re.findall(r'\d+', _duration_text(str(value))))
+            != sorted(duration[0] for duration, _, _, _ in wanted)):
+        return False
     if not wanted:
         # A free-form translation has no mechanically checked semantics.
         # Keep it only when its actual words were quoted as visa validity.
-        return bool(re.search(r'\bvalid(?:ity)?\b', _norm(passages)) and quote_literal(str(value), passages))
+        return bool(not re.search(r'\d', str(value))
+                    and re.search(r'\bvalid(?:ity)?\b', _norm(passages))
+                    and quote_literal(str(value), passages))
     # A table capture can put the field label on the preceding line. Only
     # the neutral validity label lends context to its immediately adjacent
     # value, never a processing/stay field or a whole preceding section.
@@ -582,6 +609,8 @@ def _validity_supported(value, passages):
     supported = set()
     for sentence in re.split(r'(?<=[.!?])\s+|[;\n]+', passages):
         for duration, start, end, normalized in _duration_values(sentence):
+            if duration is None:
+                continue
             contexts = list(_VALIDITY_CONTEXT_RE.finditer(normalized[:start]))
             valid_context = bool(contexts and contexts[-1].lastgroup == 'valid')
             # A duration that starts on grant/issue establishes visa validity
@@ -600,7 +629,7 @@ def _validity_supported(value, passages):
 
 
 
-def _check_value(field, value, passages, route, product):
+def _check_value(field, value, passages, route, product, *, strict_validity=True):
     from app.visa_snapshot.evidence_validator import field_value_supported
     if field == 'disposition':
         quotes = [q for q in passages.split('\n') if q.strip()]
@@ -638,8 +667,15 @@ def _check_value(field, value, passages, route, product):
                                     'multiple': r'multiple|multi|数次|多次'}[value], passages, re.I):
             raise PatchRejected('entry: the entry count is not in its evidence')
     elif field == 'validity':
-        if value and not _validity_supported(value, passages):
-            raise PatchRejected('validity: the duration and unit are not stated as visa validity in its evidence')
+        if strict_validity:
+            if value and not _validity_supported(value, passages):
+                raise PatchRejected('validity: the duration and unit are not stated as visa validity in its evidence')
+        elif value:
+            # Shared callers perform their own product/table binding after
+            # this original capture-level numeric check.
+            digits = re.findall(r'\d+', str(value))
+            if digits and not all(d in passages for d in digits):
+                raise PatchRejected('validity: the figure is not in its evidence')
 
 
 def validate_batch(batch, *, strict=True):
@@ -679,7 +715,7 @@ def _validate_row(row, sources):
         disp, detail = verdict.get('disposition'), verdict.get('requirement_detail')
         if disp not in DISPOSITIONS or detail not in _DETAIL_FAMILY.get(disp, ()):
             raise PatchRejected('Verdict outside the disposition and subcategory vocabulary')
-        if _check_proof(verdict.get('proof'), sources, route, 'disposition', disp) is None:
+        if _check_proof(verdict.get('proof'), sources, route, 'disposition', disp, general_batch_semantics=True) is None:
             raise PatchRejected('A published verdict cannot be unknown')
         proofs = row.get('route_field_proofs') or {}
         values = row.get('route_fields') or {}
@@ -687,7 +723,7 @@ def _validate_row(row, sources):
         for key, covered in ROUTE_PROOF_COVERS.items():
             if key in proofs:
                 try:
-                    _check_proof(proofs[key], sources, route, key, values.get(key))
+                    _check_proof(proofs[key], sources, route, key, values.get(key), general_batch_semantics=True)
                 except PatchRejected as exc:
                     # An ancillary value that cannot be proved is not asserted;
                     # the verdict is the only field that decides the row.
@@ -717,7 +753,7 @@ def _validate_row(row, sources):
                 value = spec.get(field)
                 try:
                     if field in pproofs:
-                        _check_proof(pproofs[field], sources, route, field, value, product=spec)
+                        _check_proof(pproofs[field], sources, route, field, value, product=spec, general_batch_semantics=True)
                     elif value not in (None, '', {}) and not (isinstance(value, dict) and value.get('amount') is None):
                         raise PatchRejected(f'{spec["type"]}: {field} has a value but no proof')
                 except PatchRejected as exc:
@@ -823,12 +859,12 @@ def _reviewed_optional_products(products, specs, verdict, sources, route):
             for evidence in (decision.get('policy_interval_evidence') or {}).values():
                 if evidence.get('subject') == _subject(route):
                     evidence['subject'] = _subject(route, product)
-        if _check_proof(decision, sources, route, 'disposition', product.get('disposition'), product=product) is None:
+        if _check_proof(decision, sources, route, 'disposition', product.get('disposition'), product=product, general_batch_semantics=True) is None:
             raise PatchRejected('An optional product needs its own reviewed verdict')
         for field in PRODUCT_PROOF_FIELDS[1:]:
             value = product.get(field)
             empty = value in (None, '', {}) or (isinstance(value, dict) and all(v is None for v in value.values()))
-            if not empty and _check_proof(proofs.get(field), sources, route, field, value, product=product) is None:
+            if not empty and _check_proof(proofs.get(field), sources, route, field, value, product=product, general_batch_semantics=True) is None:
                 raise PatchRejected('An optional product value needs its own reviewed proof: ' + field)
 
     free_lanes = [p for p in products
