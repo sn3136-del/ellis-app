@@ -416,6 +416,27 @@ def fallback_reply(out: dict, question: str, lang: str | None = None) -> str | N
     return ("".join(parts) if zh else " ".join(parts)).replace("—", ". ").replace(";", ".")
 
 
+def fact_payload(out: dict) -> dict:
+    """The facts the composer is allowed to speak from, and nothing else: the
+    served guidance's fact fields, the route, a comparison or policy notes
+    when present, and for a held answer only the route and the hold notice.
+    Lifted from compose_reply_ex (guard-20260912 T2) so the consistency
+    sweep can compare the AI surface against the record it came from."""
+    g = out.get("guidance") or {}
+    facts = {k: g.get(k) for k in _FACT_FIELDS if g.get(k) is not None}
+    facts["route"] = out.get("route") or {}
+    if out.get("comparison"):
+        facts["comparison"] = out["comparison"]
+    if out.get("special_policies"):
+        facts["special_policies"] = out["special_policies"]
+    if out.get("held"):
+        facts = {"route": out.get("route") or {},
+                 "held": ("This route's answer is being checked against the "
+                          "official source before it is shown. Say so and "
+                          "invite the reader to check back shortly.")}
+    return facts
+
+
 def compose_reply(question: str, history: list | None, out: dict,
                   lang: str | None = None) -> str | None:
     """A grounded reply from the composer model, or None to let the page
@@ -429,18 +450,7 @@ def compose_reply_ex(question: str, history: list | None, out: dict,
     nothing: "call_failed" (timeout or provider), "empty", "grounding"
     (every sentence carried an unserved number) or "identity"."""
     from . import kimi_primary
-    g = out.get("guidance") or {}
-    facts = {k: g.get(k) for k in _FACT_FIELDS if g.get(k) is not None}
-    facts["route"] = out.get("route") or {}
-    if out.get("comparison"):
-        facts["comparison"] = out["comparison"]
-    if out.get("special_policies"):
-        facts["special_policies"] = out["special_policies"]
-    if out.get("held"):
-        facts = {"route": out.get("route") or {},
-                 "held": ("This route's answer is being checked against the "
-                          "official source before it is shown. Say so and "
-                          "invite the reader to check back shortly.")}
+    facts = fact_payload(out)
     turns = []
     for h in (history or [])[-8:]:
         role = "traveller" if (h.get("role") == "user") else "ellis"

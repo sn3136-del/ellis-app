@@ -1,0 +1,127 @@
+[
+ {
+  "cache_key": "CAN|CAN|USA|tourism|default|unknown|v6",
+  "field": "required_documents",
+  "note": "Automatic source check against https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec212-1.xml: required_documents: page says [\"Valid Canadian passport (air entry; NEXUS card accepted when departing from Canada)\", \"By land or sea: Canadian passpo (quote: A valid unexpired passport is required for Canadian citizens arriving in the United States, except when meeting one of the following requirements: (i) NEXUS Pro)",
+  "proposal": {
+   "checked_at": "2026-09-04T07:13:30.153999+00:00",
+   "fields": {
+    "required_documents": {
+     "page_says": [
+      "Valid Canadian passport (air entry; NEXUS card accepted when departing from Canada)",
+      "By land or sea: Canadian passport, or NEXUS/FAST/SENTRI card"
+     ],
+     "quote": "A valid unexpired passport is required for Canadian citizens arriving in the United States, except when meeting one of the following requirements: (i) NEXUS Program; (ii) FAST Program; (iii) SENTRI Program; (iv) Canadian Indians; (v) Children.",
+     "record_holds": [
+      "Valid Canadian passport (air entry; NEXUS card accepted when departing from Canada)",
+      "By land or sea: Canadian passport, Enhanced Driver's License/Enhanced ID Card, or NEXUS/FAST/SENTRI card"
+     ]
+    }
+   },
+   "source_url": "https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec212-1.xml"
+  },
+  "reported_by": "freshness_monitor",
+  "route": {
+   "arrival_date": null,
+   "consular_jurisdiction": null,
+   "destination_country": "USA",
+   "lawful_country_of_residence": "CAN",
+   "passport_nationality": "CAN",
+   "travel_purpose": "tourism",
+   "visa_category": "tourist_visa"
+  },
+  "status": "open"
+ },
+ {
+  "cache_key": "HKG|HKG|SOM|tourism|default|unknown|v6",
+  "field": "official_portal_url,source_url",
+  "note": "Automatic source check against https://aip.scaa.gov.so/eAIC/HC-eAIC-2025-10-A-en-GB.html: official_portal_url: page says \"https://evisa.gov.so\" (quote: The platform, accessible at https://evisa.gov.so); source_url: page says \"https://evisa.gov.so\" (quote: The platform, accessible at https://evisa.gov.so)",
+  "proposal": {
+   "checked_at": "2026-09-11T19:52:10.149854+00:00",
+   "fields": {
+    "official_portal_url": {
+     "page_says": "https://evisa.gov.so",
+     "quote": "The platform, accessible at https://evisa.gov.so",
+     "record_holds": "https://etas.gov.so/"
+    },
+    "source_url": {
+     "page_says": "https://evisa.gov.so",
+     "quote": "The platform, accessible at https://evisa.gov.so",
+     "record_holds": "https://etas.gov.so/"
+    }
+   },
+   "source_url": "https://aip.scaa.gov.so/eAIC/HC-eAIC-2025-10-A-en-GB.html"
+  },
+  "reported_by": "freshness_monitor",
+  "route": {
+   "arrival_date": null,
+   "consular_jurisdiction": null,
+   "destination_country": "SOM",
+   "lawful_country_of_residence": "HKG",
+   "passport_nationality": "HKG",
+   "transit_countries": null,
+   "travel_document_type": "ordinary_passport",
+   "travel_purpose": "tourism",
+   "visa_category": "tourist_visa"
+  },
+  "status": "open"
+ },
+ {
+  "cache_key": "CHN|CHN|GBR|study|default|unknown|v6",
+  "field": "requirement_detail",
+  "note": "Automatic source check against https://www.gov.uk/student-visa: requirement_detail: page says \"evisa\" (quote: If your application is successful, you'll get an eVisa. This is an online record of your immigration status.)",
+  "proposal": {
+   "checked_at": "2026-09-10T14:20:42.285663+00:00",
+   "fields": {
+    "requirement_detail": {
+     "page_says": "evisa",
+     "quote": "If your application is successful, you'll get an eVisa. This is an online record of your immigration status.",
+     "record_holds": "paper_visa"
+    }
+   },
+   "source_url": "https://www.gov.uk/student-visa"
+  },
+  "reported_by": "freshness_monitor",
+  "route": {
+   "arrival_date": null,
+   "consular_jurisdiction": null,
+   "destination_country": "GBR",
+   "lawful_country_of_residence": "CHN",
+   "passport_nationality": "CHN",
+   "transit_countries": null,
+   "travel_document_type": "ordinary_passport",
+   "travel_purpose": "study",
+   "visa_category": "student_visa"
+  },
+  "status": "open"
+ },
+ {
+  "cache_key": "HKG|HKG|SOM|tourism|default|unknown|v6",
+  "field": "official_portal_url",
+  "note": "Automatic source check against https://aip.scaa.gov.so/eAIC/HC-eAIC-2025-10-A-en-GB.html: official_portal_url: page says \"https://evisa.gov.so\" (quote: The platform, accessible at https://evisa.gov.so is designed to ensure that all travelers obtain an Electronic Travel Authorization (eTA) in advance of their tr)",
+  "proposal": {
+   "checked_at": "2026-09-10T14:05:28.072072+00:00",
+   "fields": {
+    "official_portal_url": {
+     "page_says": "https://evisa.gov.so",
+     "quote": "The platform, accessible at https://evisa.gov.so is designed to ensure that all travelers obtain an Electronic Travel Authorization (eTA) in advance of their travel date.",
+     "record_holds": "https://etas.gov.so/"
+    }
+   },
+   "source_url": "https://aip.scaa.gov.so/eAIC/HC-eAIC-2025-10-A-en-GB.html"
+  },
+  "reported_by": "freshness_monitor",
+  "route": {
+   "arrival_date": null,
+   "consular_jurisdiction": null,
+   "destination_country": "SOM",
+   "lawful_country_of_residence": "HKG",
+   "passport_nationality": "HKG",
+   "transit_countries": null,
+   "travel_document_type": "ordinary_passport",
+   "travel_purpose": "tourism",
+   "visa_category": "tourist_visa"
+  },
+  "status": "open"
+ }
+]

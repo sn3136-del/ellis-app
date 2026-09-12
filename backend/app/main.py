@@ -509,6 +509,79 @@ class DatabaseIssueUpdateIn(BaseModel):
     status: str = ""          # acknowledged | corrected | dismissed
     resolution: str = ""
     expected_issue_sha256: str | None = None
+    # guard-20260912 T9: a dismissal is evidence, not a bulk operation. It
+    # cites a page competent for the destination or a reason from the
+    # closed vocabulary (sweep_issues.DISMISS_REASONS).
+    source_url: str = ""
+    dismiss_reason: str = ""
+    source_excerpt: str = ""  # operator-attested source passage, retained with a false-positive decision
+    # A written correction record ({"fields": [...], "source_url": ...}) for
+    # a finding that names no field, or for a sweep finding whose fix left
+    # no reader-visible change-log row (a quote added to the provenance).
+    correction_evidence: dict | None = None
+
+
+# A source-backed operations decision may identify a checker false positive.
+# Keep its failed recheck in the audit; never pretend a correction occurred.
+def _competent_page(url: str, route: dict) -> bool:
+    from .visa_snapshot.source_authority import is_competent
+    return bool(url) and is_competent(url, dict(route or {}), "disposition")
+
+
+def _dismissal_gate(db, row, body, p, sweep) -> dict:
+    from .visa_snapshot import sweep_issues
+    resolution = (body.resolution or "").strip()
+    if not resolution:
+        raise HTTPException(422, "a dismissal needs a written resolution saying why the finding does not stand")
+    reason = (body.dismiss_reason or "").strip().lower()
+    url = (body.source_url or "").strip()
+    competent = _competent_page(url, row.route)
+    if reason and reason not in sweep_issues.DISMISS_REASONS:
+        raise HTTPException(422, "dismiss_reason must be one of " + ", ".join(sweep_issues.DISMISS_REASONS))
+    if url and not competent:
+        raise HTTPException(422, "the cited source_url is not competent for this destination")
+    if not competent and not reason:
+        raise HTTPException(422, "a dismissal needs a source_url competent for the destination, or a "
+                                 "dismiss_reason from: " + ", ".join(sweep_issues.DISMISS_REASONS))
+    if reason == "not_reproducible" and sweep is None and not competent:
+        raise HTTPException(422, "not_reproducible is verified by rerunning the check; this finding has "
+                                 "no check to rerun, so cite the competent page that shows the record is right")
+    excerpt = (body.source_excerpt or "").strip()
+    if reason == "check_false_positive" and (
+            sweep is None or sweep.get("severity") != "report" or not competent or not excerpt):
+        raise HTTPException(422, "a checker false-positive decision needs a report-level sweep finding, "
+                                 "a competent source_url, and the source excerpt supporting the resolution")
+    rechecked = None
+    if sweep is not None:
+        passes, why = sweep_issues.recheck(db, row)
+        rechecked = {"outcome": "clean" if passes else "reproduces", "reason": why}
+        if not passes and reason != "check_false_positive":
+            raise HTTPException(422, "this sweep finding still reproduces, so it cannot be dismissed "
+                                     "as resolved: " + why)
+    return {"dismiss_reason": reason or None, "source_url": url or None,
+            "source_excerpt": excerpt or None, "rechecked": rechecked}
+
+
+def _valid_correction_evidence(evidence, route) -> set:
+    """The fields a written correction record lists, when it stands."""
+    if not isinstance(evidence, dict):
+        return set()
+    fields = evidence.get("fields")
+    if not isinstance(fields, list) or not all(isinstance(f, str) and f.strip() for f in fields) or not fields:
+        raise HTTPException(422, "correction_evidence needs a non-empty list of field names")
+    if not _competent_page(str(evidence.get("source_url") or "").strip(), route):
+        raise HTTPException(422, "correction_evidence needs a source_url competent for the destination")
+    return {f.strip() for f in fields}
+
+
+def _listed_proposal(proposal):
+    """The queue lists a proposal without its captured page text (it can be
+    200,000 characters); the digest and length stay so the capture is
+    identifiable."""
+    if not isinstance(proposal, dict) or not isinstance(proposal.get("captured_page"), dict):
+        return proposal or {}
+    page = proposal["captured_page"]
+    return dict(proposal, captured_page={k: page.get(k) for k in ("source_url", "sha256", "chars")})
 
 
 # open -> acknowledged -> corrected | dismissed. An issue never silently
@@ -557,6 +630,10 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     if status == "reviewed" and row.resolved_by == p.user_id:
         raise HTTPException(422, "the correction has to be reviewed by someone "
                                  "other than the person who wrote it")
+    from .visa_snapshot import sweep_issues
+    sweep = sweep_issues.sweep_meta(row) if row.reported_by == sweep_issues.REPORTER else None
+    dismissal = _dismissal_gate(db, row, body, p, sweep) if status == "dismissed" else None
+    written_evidence = set()
     if status in ("corrected", "reviewed", "published"):
         # Workflow status is not a policy edit. A correction must already
         # have been applied through a sourced write, preserving the canonical
@@ -596,28 +673,62 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
         tokens = [t.strip() for t in column.split(",") if t.strip()]
         width = DatabaseIssueReport.__table__.c.field.type.length or 64
         proposed = (row.proposal or {}).get("fields")
-        proposed_names = sorted(proposed) if isinstance(proposed, dict) else []
-        monitor_join = ",".join(proposed_names)
-        if (tokens and row.reported_by == "freshness_monitor"
-                and len(monitor_join) > width and column == monitor_join[:width]
-                and len(tokens) <= len(proposed_names)
-                and proposed_names[len(tokens) - 1].startswith(tokens[-1])):
-            tokens[-1] = proposed_names[len(tokens) - 1]
-        requested = {aliases.get(t, t) for t in tokens}
+        if sweep is not None:
+            names = sweep_issues.sweep_fields(row) or [row.field]
+            requested = {aliases.get(str(f).strip(), str(f).strip()) for f in names if str(f).strip()}
+        else:
+            proposed_names = sorted(proposed) if isinstance(proposed, dict) else []
+            monitor_join = ",".join(proposed_names)
+            if (tokens and row.reported_by == "freshness_monitor"
+                    and len(monitor_join) > width and column == monitor_join[:width]
+                    and len(tokens) <= len(proposed_names)
+                    and proposed_names[len(tokens) - 1].startswith(tokens[-1])):
+                tokens[-1] = proposed_names[len(tokens) - 1]
+            requested = {aliases.get(t, t) for t in tokens}
         changes = db.execute(_sel(DatabaseChangeLog).where(
             DatabaseChangeLog.cache_key == kimi_primary.canonical_key(row.cache_key),
             DatabaseChangeLog.created_at >= row.created_at,
             DatabaseChangeLog.origin.in_(("operator-edit", "grounded_recheck")))).scalars()
         corrected_fields = set()
         for change in changes:
-            corrected_fields.update((change.changes or {}).keys())
+            # A field counts as corrected only when its value actually
+            # changed: writing the same wrong value back is not a correction
+            # (guard-20260912 T9).
+            for name, delta in (change.changes or {}).items():
+                if not isinstance(delta, dict) or json.dumps(delta.get("from"), sort_keys=True, default=str) \
+                        != json.dumps(delta.get("to"), sort_keys=True, default=str):
+                    corrected_fields.add(name)
         accepted = (row.proposal or {}).get("correction_evidence") or {}
         corrected_fields.update(accepted.get("fields") or [])
-        covered = (bool(corrected_fields) if requested <= {"", "record", "ai_answer"}
-                   else requested <= corrected_fields)
+        fieldless = sweep is None and requested <= {"", "record", "ai_answer"}
+        if (fieldless or sweep is not None) and body.correction_evidence is not None:
+            written_evidence = _valid_correction_evidence(body.correction_evidence, row.route)
+        if fieldless:
+            # A reader reported the whole answer. Preserve that scope: later
+            # research proposals must not silently narrow it to another field.
+            # The sourced change and separate operations review are still required.
+            covered = bool(corrected_fields or written_evidence or accepted.get("fields"))
+        elif sweep is not None:
+            covered = bool(requested & corrected_fields) or bool(written_evidence) or bool(accepted.get("fields"))
+        else:
+            covered = requested <= corrected_fields
         if not covered:
             raise HTTPException(422, "apply a sourced correction to the reported fields before "
                                      "advancing this issue; changing its status does not change visa facts")
+        if sweep is not None:
+            passes, why = sweep_issues.recheck(db, row)
+            if not passes:
+                raise HTTPException(422, "the correction is recorded but the sweep check still fails: " + why)
+    if dismissal is not None and dismissal.get("dismiss_reason") == "check_false_positive":
+        proposal = dict(row.proposal or {})
+        meta = dict(proposal.get("sweep") or {})
+        meta["false_positive_adjudication"] = dict(
+            dismissal, resolution=body.resolution.strip(), actor=p.user_id,
+            finding_signature=sweep_issues.finding_signature(dict(meta, cache_key=row.cache_key,
+                                                                  field=row.field)),
+            at=datetime.now(timezone.utc).isoformat())
+        proposal["sweep"] = meta
+        row.proposal = proposal
     row.status = status
     if body.resolution:
         row.resolution = body.resolution[:1000]
@@ -638,9 +749,16 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     # Retain the raw row, its provenance and all existing references.
     save_revision(db, row, original_revision)
     # audit.record commits this same transaction, so status and audit persist together.
+    detail = {"issue_id": issue_id}
+    if dismissal is not None:
+        detail.update(cache_key=row.cache_key, fingerprint=row.fingerprint or None,
+                      run_id=(sweep or {}).get("run_id"), **dismissal)
+    if written_evidence:
+        detail["correction_evidence"] = {"fields": sorted(written_evidence),
+                                         "source_url": str((body.correction_evidence or {}).get("source_url") or "")}
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_issue_" + status,
-                 detail={"issue_id": issue_id}, actor=p.user_id)
+                 detail=detail, actor=p.user_id)
     return {"ok": True, "id": row.id, "status": row.status,
             "resolution": row.resolution}
 
@@ -1003,6 +1121,8 @@ def travel_database_issue_accept_proposal(issue_id: str,
     if row.reported_by == "freshness_monitor":
         raise HTTPException(422, "monitor disputes are ruled through the "
                                  "normal stages, not accepted wholesale")
+    if row.status not in ("open", "acknowledged"):
+        raise HTTPException(422, f"a proposal is accepted from open or acknowledged, not {row.status}")
     rt = dict(row.route or {})
     canonical = kimi_primary.cache_key(rt)
     if kimi_primary.canonical_key(row.cache_key) != canonical:
@@ -1011,6 +1131,27 @@ def travel_database_issue_accept_proposal(issue_id: str,
         KimiRouteGuidanceCache.cache_key == canonical)).scalars().first()
     if cached is None:
         raise HTTPException(422, "no canonical cached answer exists to validate this correction")
+    # guard-20260912 T9: every quoted value is re-read against the page text
+    # the proposal was made from before anything is written. A proposal
+    # without an intact capture cannot show its quotes are on the page.
+    import hashlib as _hashlib
+    from .visa_snapshot.evidence_validator import quote_in_text, supports_disposition
+    page = prop.get("captured_page") if isinstance(prop.get("captured_page"), dict) else {}
+    page_text = str(page.get("text") or "")
+    if (not page_text or page.get("source_url") != prop.get("source_url")
+            or _hashlib.sha256(page_text.encode("utf-8")).hexdigest() != page.get("sha256")):
+        raise HTTPException(422, "the proposal carries no intact captured page to re-validate its "
+                                 "quotes against; ask Ellis to read the official page again")
+    for name, value in (prop.get("fields") or {}).items():
+        if not isinstance(value, dict):
+            continue
+        quote = str(value.get("quote") or "")
+        if not quote.strip() or not quote_in_text(quote, page_text):
+            raise HTTPException(422, f"the quote for {name} is not on the captured page")
+        if name == "disposition" and not supports_disposition(
+                quote, str(value.get("page_says") or ""),
+                nationality=str(rt.get("passport_nationality") or "")):
+            raise HTTPException(422, "the quote for disposition does not state that verdict for this nationality")
     quotes = "; ".join(f"{k}: {str(v.get('quote') or '')[:120]}"
                        for k, v in (prop.get("fields") or {}).items()
                        if isinstance(v, dict) and v.get("quote"))
@@ -1031,6 +1172,16 @@ def travel_database_issue_accept_proposal(issue_id: str,
         verified_overrides.append_operator_entry(entry, guidance=cached.guidance)
     except ValueError as e:
         raise HTTPException(422, str(e))
+    # The notify stage is walked, never skipped: open -> acknowledged (who
+    # was told and when) -> corrected (guard-20260912 T9).
+    if row.status == "open":
+        row.status = "acknowledged"
+        row.notified_at = datetime.now(timezone.utc)
+        row.notified_to = f"information provider: Ellis page reading accepted by {p.user_id}"[:200]
+        db.commit()
+        audit.record(db, org_id=p.org_id, application_id="database",
+                     action="database_issue_acknowledged",
+                     detail={"issue_id": issue_id, "via": "accept-proposal"}, actor=p.user_id)
     row.status = "corrected"
     row.resolution = (f"Accepted Ellis's page reading "
                       f"({', '.join(sorted(fields))}) from "
@@ -1449,7 +1600,8 @@ def travel_database_issues(db=Depends(get_session),
                         "reviewed_by": r.reviewed_by,
                         "reviewed_at": _iso(r.reviewed_at),
                         "published_at": _iso(r.published_at),
-                        "proposal": r.proposal or {},
+                        "proposal": _listed_proposal(r.proposal),
+                        "fingerprint": r.fingerprint or None,
                         "created_at": _iso(r.created_at)} for r in rows]}
 
 
@@ -1748,7 +1900,7 @@ def _build_tstation_rows(db):
 
 def _collect_tstation_rows(db, kimi_primary, verified_overrides, tstation, KimiRouteGuidanceCache):
     from sqlalchemy import select as _select
-    from .visa_snapshot import freshness as _fresh
+    from .visa_snapshot.row_projection import records_projection, canonical_route
     # Only canonical policy rows can represent current route products.
     # Legacy dated/residence/transit rows stay in storage for migration and
     # history, but an orphan variant is never promoted to a route decision.
@@ -1756,15 +1908,8 @@ def _collect_tstation_rows(db, kimi_primary, verified_overrides, tstation, KimiR
     for r in db.execute(_select(KimiRouteGuidanceCache)).scalars():
         if not kimi_primary.is_canonical_key(r.cache_key or ""):
             continue
-        route = dict(r.route or {})
-        doc = str(route.get("travel_document_type") or "")
-        if not doc:
-            # Rows cached before the document type was stored carry it only
-            # in the cache key ("doc:diplomatic_passport").
-            doc = next((part[4:] for part in r.cache_key.split("|")
-                        if part.startswith("doc:")), "ordinary_passport")
-        doc = kimi_primary.normalize_document_type(doc)
-        route["travel_document_type"] = doc
+        route = canonical_route(r)
+        doc = route["travel_document_type"]
         gkey = (str(route.get("passport_nationality") or "").upper(),
                 str(route.get("destination_country") or "").upper(),
                 str(route.get("travel_purpose") or "tourism").lower(), doc)
@@ -1784,82 +1929,11 @@ def _collect_tstation_rows(db, kimi_primary, verified_overrides, tstation, KimiR
             candidates[gkey] = (score, r, route)
 
     out = []
+    # One records path: the per-row body lives in row_projection so the
+    # consistency sweep compares the projection the console serves, not a
+    # hand-rebuilt copy of it (guard-20260912 T2).
     for _score, r, route in candidates.values():
-        doc = route["travel_document_type"]
-        reader = kimi_primary.apply_verified_overrides(kimi_primary._result(
-            r.status, kimi_primary.served_guidance(r), cached=True,
-            stale=kimi_primary._is_stale(r), missing=r.missing_fields,
-            contradictions=r.contradictions, model=r.model,
-            released=bool((r.verification or {}).get("operator_released"))), route)
-        g, prov = reader["guidance"], reader.get("source_verified")
-        collected = (r.generated_at.isoformat() if r.generated_at else "")
-        until = (r.fresh_until.isoformat() if r.fresh_until else "")
-        # Whether the official page has actually been read and agreed with:
-        # the difference between a source and a link nobody opened.
-        from .visa_snapshot import freshness as _fresh
-        _gc = _fresh.effective_check(r.verification)
-        _grounded = _grounded_verdict_supported(_gc)
-        _disputed_now = list(_gc.get("disputed_fields") or [])
-        _disputed_now.extend(_fresh.active_disputed_fields(db, r.cache_key))
-        _problems = kimi_primary.serve_time_invariants(g)
-        if _problems:
-            _disputed_now.extend(_problems)
-        _route_state = _apply_records_hold(route, {
-            **reader, "grounded_check": _gc,
-            "detail_pending": bool((r.verification or {}).get("detail_pending")),
-            "operator_released": bool((r.verification or {}).get("operator_released")),
-        }, db)
-        for rec in tstation.records_for_route(route, g, prov, collected, until,
-                                              grounded_ok=_grounded,
-                                              disputed_fields=_disputed_now, grounded_fields=_gc.get("verified_fields")):
-            if not rec.get("source_url") and not rec.get("_separate_permission"):
-                # The destination's browser-verified official portal is the
-                # official reference page for a record whose answer carries
-                # no page of its own (visa-free routes especially).
-                portal = kimi_primary._official_portals().get(
-                    str(route.get("destination_country") or "").upper())
-                if portal:
-                    rec["source_url"] = portal
-                    rec["data_source"] = (rec.get("data_source")
-                                          or "Official portal (reference only)")
-            rec["_cache_key"] = r.cache_key
-            rec["_status"] = kimi_primary.STATUS_UNCERTAIN if _problems else r.status
-            rec["_contradictions"] = _problems
-            # Whether an operator has released this answer despite low
-            # confidence: without it the release half of the confidence gate
-            # cannot be audited from the records surface.
-            rec["_released"] = bool((r.verification or {}).get("operator_released"))
-            rec["_route_held"] = bool(_route_state.get("held"))
-            publication = next((item for item in _route_state.get("product_publication", [])
-                                if item.get("product_index") == rec.get("_product_index")), None)
-            rec["_held"] = bool(publication["held"]) if publication else rec["_route_held"]
-            rec["_review_required"] = rec["_held"] if publication else bool(_route_state.get("review_required"))
-            rec["_publication_state"] = publication["state"] if publication else (
-                "withheld" if rec["_held"] else "published")
-            rec["_publication_reason"] = publication["reason"] if publication else None
-            # How solidly the source BACKS what this record shows:
-            #   human-quote        a person verified these fields against the
-            #                      named page and quoted it
-            #   grounded-consistent the pipeline fetched the official page and
-            #                      found the stored answer consistent with it
-            #   reference          an official page is linked but has not yet
-            #                      been machine-compared to this answer
-            gc = _gc
-            # Fields the page disputed that no human has ruled on yet: the
-            # spec's third checklist state, 未过审 (not approved).
-            rec["_disputed"] = _disputed_now
-            record_prov = rec.get("_product_source_verified") or (None if rec.get("_separate_permission") else prov)
-            if rec.get("_separate_permission"):
-                gc = {}
-            if tstation.verdict_provenance_supported(record_prov):
-                rec["_source_check"] = "human-quote" if record_prov.get("verifier") == "human" else "ai-quote"
-            elif _grounded_verdict_supported(gc):
-                rec["_source_check"] = "grounded-consistent"
-            elif rec.get("source_url"):
-                rec["_source_check"] = "reference"
-            else:
-                rec["_source_check"] = "unchecked"
-            out.append(rec)
+        out.extend(records_projection(db, r, route))
     return out
 
 
@@ -1953,7 +2027,12 @@ def _record_payload(r: dict) -> dict:
             "publication_reason": r.get("_publication_reason"),
             "review_required": r.get("_review_required", False),
             "field_status": statuses,
-            "completeness": round(tstation.completeness(r, statuses=raw), 4)}
+            "completeness": round(tstation.completeness(r, statuses=raw), 4),
+            # guard-20260912 T8: the population each blank belongs to (the
+            # workbook still prints only the two labels) and the completeness
+            # the strict denominator would give.
+            "absence": tstation.absence_populations(r)["populations"],
+            "completeness_strict": round(tstation.completeness(r, strict=True), 4)}
 
 
 def _with_pending(status: dict, disputed) -> dict:

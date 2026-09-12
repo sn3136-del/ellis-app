@@ -58,8 +58,13 @@ def test_endpoint_rejects_conflict_before_any_persistent_mutation(endpoint, file
     # A legacy variant must not let acceptance evade the canonical verdict.
     variant = KimiRouteGuidanceCache(cache_key=key + '|via:SGP', route=ROUTE,
         guidance={'disposition': 'VISA_REQUIRED'})
+    page = 'Fees and channel. Visa applications must be submitted at the embassy.'
+    import hashlib
     proposal = {'source_url': SOURCE, 'fields': {'application_channel': {
-        'page_says': 'embassy', 'quote': 'Visa applications must be submitted at the embassy.'}}}
+        'page_says': 'embassy', 'quote': 'Visa applications must be submitted at the embassy.'}},
+        # guard-20260912 T9: acceptance re-reads every quote on the captured page.
+        'captured_page': {'source_url': SOURCE, 'text': page, 'chars': len(page),
+                          'sha256': hashlib.sha256(page.encode('utf-8')).hexdigest()}}
     issue = DatabaseIssueReport(org_id='authoring-integrity', cache_key=variant.cache_key,
         route=ROUTE, field='application_channel', note='Please check application channel.', reported_by='reader',
         status='open', proposal=proposal)

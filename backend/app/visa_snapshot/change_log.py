@@ -29,6 +29,8 @@ _WATCHED = (
     # added so the remaining delivered fields are traceable too
     "source_url", "validity", "entries", "arrival_card", "passport_validity",
     "consular_jurisdiction", "entry_requirements", "unpublished_fields",
+    # guard-20260912 T8: an absence proof is a correctable field too.
+    "unpublished_evidence",
     "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
     "insurance_required", "biometrics_required", "health_requirements",
     "policy_valid_until",

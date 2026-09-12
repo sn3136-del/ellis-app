@@ -64,7 +64,7 @@ def test_endpoint_atomic_guard_catches_proposal_changed_during_request(client,db
             newer=writer.get(DatabaseIssueReport,identity);newer.proposal={'new_source':'arrived after request read'};writer.commit()
         return original_save(session,record,before)
     monkeypatch.setattr(revision,'save_revision',race)
-    body={'status':'dismissed','resolution':'Old source'}
+    body={'status':'dismissed','resolution':'Old source, superseded by the reviewed canonical correction','dismiss_reason':'superseded_by_published_correction'}
     if send_revision:body['expected_issue_sha256']=current['revision_sha256']
     response=client.post('/database/issues/'+identity,headers=ADMIN,json=body)
     assert response.status_code==409
@@ -74,7 +74,7 @@ def test_endpoint_atomic_guard_catches_proposal_changed_during_request(client,db
 def test_endpoint_current_revision_applies_normal_audited_status_update(client,db):
     row=issue();db.add(row);db.commit();identity=row.id;original=deepcopy(row.proposal)
     current=next(x for x in client.get('/database/issues',headers=ADMIN).json()['issues'] if x['id']==identity)
-    response=client.post('/database/issues/'+identity,headers=ADMIN,json={'status':'dismissed','resolution':'Superseded by reviewed canonical correction','expected_issue_sha256':current['revision_sha256']})
+    response=client.post('/database/issues/'+identity,headers=ADMIN,json={'status':'dismissed','resolution':'Superseded by reviewed canonical correction','dismiss_reason':'superseded_by_published_correction','expected_issue_sha256':current['revision_sha256']})
     assert response.status_code==200,response.text
     db.expire_all();after=db.get(DatabaseIssueReport,identity)
     assert after.status=='dismissed' and after.proposal==original
@@ -87,6 +87,6 @@ def test_audit_failure_rolls_back_status_in_the_same_transaction(client,db,monke
     def fail(*args,**kwargs):raise RuntimeError('Injected audit failure before commit')
     monkeypatch.setattr(audit,'record',fail)
     with pytest.raises(RuntimeError,match='Injected audit failure'):
-        client.post('/database/issues/'+identity,headers=ADMIN,json={'status':'dismissed','resolution':'Reviewed correction'})
+        client.post('/database/issues/'+identity,headers=ADMIN,json={'status':'dismissed','resolution':'Reviewed correction against the canonical source','dismiss_reason':'superseded_by_published_correction'})
     db.expire_all();assert db.get(DatabaseIssueReport,identity).status=='open'
 

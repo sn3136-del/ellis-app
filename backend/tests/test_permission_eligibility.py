@@ -210,7 +210,11 @@ def test_indonesia_korea_guard_keeps_c39_and_conditional_exemptions_distinct():
     for detail in ('conditional_visa_free', 'transit_visa_free'):
         assert not pe.issues({'disposition': 'CONDITIONAL', 'requirement_detail': detail}, rt)
     assert pe.issues(dict(visa, visa_products=[{'type': 'K-ETA'}]), rt)
-    assert not pe.issues({'disposition': 'VISA_EXEMPT'}, route('MYS', 'KOR'))
+    # Eligibility for K-ETA does not establish whether it is mandatory;
+    # temporary exemptions and travel conditions are evaluated separately.
+    assert pe.issues({'disposition': 'VISA_EXEMPT'}, route('MYS', 'KOR')) == []
+    assert not pe.issues({'disposition': 'VISA_EXEMPT', 'requirement_detail': 'conditional_visa_free'},
+                         route('MYS', 'KOR'))
     assert not pe.issues({'disposition': 'VISA_EXEMPT'}, route('IDN', 'KOR', 'diplomatic_passport'))
 
 
@@ -226,3 +230,45 @@ def test_shipped_indonesia_korea_rule_replaces_old_visa_free_answer(monkeypatch)
         assert 'C-3-9' in out['guidance']['visa_category']
         assert 'independent tourists' in ' '.join(out['guidance']['exceptions'])
     vo.reload()
+
+
+
+# ---------------------------------------------------------------------------
+# guard-20260912 T6: the registry path grades Australia exactly as the legacy
+# catalogue did, for all 33 listed and five unlisted nationalities.
+# ---------------------------------------------------------------------------
+
+def test_australia_behaviour_is_unchanged_by_the_migration(tmp_path, monkeypatch):
+    import json
+    from app.visa_snapshot import scheme_registry as sr
+    listed = sorted(pe._LEGACY_AUS_ETA.eligible_nationalities)
+    unlisted = ["THA", "IDN", "VNM", "IND", "PHL"]
+    shapes = [eta(), {"disposition": "VISA_REQUIRED", "visa_category": "Visitor 600",
+                      "visa_products": [{"type": "Visitor (600)"}, {"type": "ETA (601)"}]},
+              {"disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED", "visa_category": "Electronic Travel Authority"}]
+    docs = ["ordinary_passport", "identity_certificate", "diplomatic_passport"]
+    sr.reload()
+    assert pe._entries_for("AUS")[0]["id"] == "aus_eta_601" and not pe._entries_for("AUS")[0].get("legacy")
+    registry_path = {(n, d, i): pe.issues(g, route(n, "AUS", d)) for n in listed + unlisted
+                     for d in docs for i, g in enumerate(shapes)}
+    path = tmp_path / "scheme_lists.json"
+    path.write_text("[]", encoding="utf-8")
+    monkeypatch.setenv("ELLIS_SCHEME_LISTS", str(path))
+    sr.reload()
+    try:
+        assert pe._entries_for("AUS")[0].get("legacy") is True
+        legacy_path = {(n, d, i): pe.issues(g, route(n, "AUS", d)) for n in listed + unlisted
+                       for d in docs for i, g in enumerate(shapes)}
+    finally:
+        sr.reload()
+    strip = lambda msgs: [m.split(" (list checked")[0] for m in msgs]
+    for key in registry_path:
+        assert strip(registry_path[key]) == strip(legacy_path[key]), key
+    # Listed nationalities pass on an ordinary passport, unlisted ones are refused.
+    for n in listed:
+        assert registry_path[(n, "ordinary_passport", 0)] == []
+    for n in unlisted:
+        assert registry_path[(n, "ordinary_passport", 0)]
+    # The document exclusion and the Taiwan official-passport rule survive.
+    assert "non-citizen passports" in registry_path[("JPN", "identity_certificate", 0)][0]
+    assert "Taiwan official and diplomatic passports" in registry_path[("TWN", "diplomatic_passport", 0)][0]

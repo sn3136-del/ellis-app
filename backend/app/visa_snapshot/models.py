@@ -482,6 +482,10 @@ class DatabaseIssueReport(Base, TimestampMixin):
         DateTime(timezone=True), nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True)
+    # guard-20260912 T9: the consistency sweep's stable finding identity, so
+    # a re-run updates the live issue in one indexed read and a closed issue
+    # that reproduces is superseded visibly. Empty for reader flags.
+    fingerprint: Mapped[str] = mapped_column(String(64), index=True, default="", server_default="")
     # What the page actually said, in full, next to what the record holds.
     # The note is a one-line summary clipped at 120 characters per field, so
     # an operator reading the queue could see that a value was contested but

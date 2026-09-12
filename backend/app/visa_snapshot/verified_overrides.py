@@ -99,6 +99,11 @@ OVERRIDABLE = frozenset({
     # Names the fields a destination was checked for and does not publish, so
     # a correct blank reads as "not publicly available" instead of a gap.
     "unpublished_fields",
+    # guard-20260912 T8: the proof behind each such absence, field to
+    # {source_url, quote, checked_at} on a page competent for the
+    # destination. An absence with a proof is a documented absence; one
+    # without is an undocumented gap that only prints the same label.
+    "unpublished_evidence",
     # The page the answer cites. A link that has gone dead, or that was never
     # about this nationality in the first place, could be corrected on the
     # record and not on the page the customer reads, because the customer page
@@ -476,6 +481,10 @@ def _field_errors(fields: dict) -> list[str]:
         elif any(p.get("source_url") and not is_government_host(
                 hostname(str(p["source_url"]))) for p in products):
             errors.append("visa_products source_url must be an official government page")
+        elif any(p.get("program_id") is not None and (
+                not isinstance(p["program_id"], str) or not re.fullmatch(r"[a-z0-9_]{3,64}", p["program_id"]))
+                for p in products):
+            errors.append("visa_products program_id must be a registry id (lower-case letters, digits, underscores)")
     return errors
 
 
@@ -598,6 +607,7 @@ def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
             continue
         clean = _normalise_legacy_shapes({k: v for k, v in fields.items()
                                           if k in OVERRIDABLE or (k in SCOPED_FIELDS and _scoped_review(r, k))})
+        _quarantine_absences(clean, route)
         route_key = _key(route["nationality"], route["destination"],
                          route.get("travel_purpose", "tourism"),
                          route.get("travel_document_type", ""))
@@ -684,6 +694,92 @@ def reload() -> None:
     _CACHE = {"mtime": None, "table": None}
 
 
+def absence_strict() -> bool:
+    """ELLIS_ABSENCE_STRICT, shipped off (guard-20260912 T8). On: an absence
+    in unpublished_fields needs its own unpublished_evidence to count as
+    documented, at write, at load and in the completeness denominator."""
+    return str(os.environ.get("ELLIS_ABSENCE_STRICT") or "").strip().lower() in (
+        "1", "on", "true", "yes", "strict")
+
+
+def _absence_proof_problem(proof, route: dict, field: str) -> str | None:
+    """Why one absence proof does not stand, or None when it does: the page
+    must be competent for the destination (source_authority), the quote must
+    say something, and the check date must be a real past date."""
+    from datetime import date as _date_cls, datetime, timezone
+    from .source_authority import is_competent
+    if not isinstance(proof, dict):
+        return "must be an object with source_url, quote and checked_at"
+    url = str(proof.get("source_url") or "").strip()
+    if not url or not is_competent(url, route, field):
+        return "source_url must be a page competent for the destination"
+    if len(str(proof.get("quote") or "").strip()) < 10:
+        return "quote must state the absence in the page's own words"
+    try:
+        checked = _date_cls.fromisoformat(str(proof.get("checked_at") or "")[:10])
+    except ValueError:
+        return "checked_at must be an ISO date"
+    if checked > datetime.now(timezone.utc).date():
+        return "checked_at is in the future"
+    return None
+
+
+def unpublished_evidence_errors(fields: dict, route: dict) -> list[str]:
+    """Write-time gate for absence proofs. A proof that does not stand is
+    always refused (a bad proof is never better than none). Under
+    ELLIS_ABSENCE_STRICT every listed absence needs a proof."""
+    errors: list[str] = []
+    listed = [str(f) for f in (fields.get("unpublished_fields") or [])] \
+        if isinstance(fields.get("unpublished_fields"), list) else []
+    evidence = fields.get("unpublished_evidence")
+    if evidence is not None and not isinstance(evidence, dict):
+        return ["unpublished_evidence must map a field to its proof"]
+    evidence = evidence or {}
+    for field, proof in evidence.items():
+        if field not in listed:
+            errors.append(f"unpublished_evidence names {field}, which unpublished_fields does not list")
+            continue
+        problem = _absence_proof_problem(proof, route, field)
+        if problem:
+            errors.append(f"unpublished_evidence {field}: {problem}")
+    if absence_strict():
+        unproven = sorted(set(listed) - set(evidence))
+        if unproven:
+            errors.append("unpublished_fields need unpublished_evidence while ELLIS_ABSENCE_STRICT is on: "
+                          + ", ".join(unproven))
+    return errors
+
+
+def _quarantine_absences(clean: dict, route: dict, route_key: str = "") -> None:
+    """Load-time counterpart of unpublished_evidence_errors, in place: a
+    proof that does not stand is dropped together with the absence it was
+    meant to prove (the cell becomes an honest gap), and under
+    ELLIS_ABSENCE_STRICT an absence with no proof is dropped too. With the
+    switch off an absence with no proof still loads, counted by
+    tstation.absence_populations as an undocumented gap."""
+    evidence = clean.get("unpublished_evidence")
+    if evidence is None and not (absence_strict() and clean.get("unpublished_fields")):
+        return
+    evidence = dict(evidence) if isinstance(evidence, dict) else {}
+    listed = [str(f) for f in (clean.get("unpublished_fields") or [])] \
+        if isinstance(clean.get("unpublished_fields"), list) else []
+    good = {f: pr for f, pr in evidence.items() if f in listed and _absence_proof_problem(pr, route, f) is None}
+    bad = set(evidence) - set(good)
+    keep = [f for f in listed if f not in bad and (not absence_strict() or f in good)]
+    if bad or keep != listed:
+        log.warning("Override %s absence quarantined: %s", route_key or route,
+                    ", ".join(sorted((set(listed) - set(keep)) | bad)))
+    if "unpublished_fields" in clean:
+        if keep:
+            clean["unpublished_fields"] = keep
+        else:
+            clean.pop("unpublished_fields", None)
+    if good:
+        clean["unpublished_evidence"] = good
+    else:
+        clean.pop("unpublished_evidence", None)
+
+
 def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
     """Persist one operator-written override, applying the same gates the
     loader applies, but LOUDLY: a rejected entry raises ValueError naming the
@@ -723,6 +819,9 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
                              "customer-facing fact. State the fact plainly")
     if not clean:
         raise ValueError("no editable fields were given")
+    absence_errors = unpublished_evidence_errors(clean, route)
+    if absence_errors:
+        raise ValueError("; ".join(absence_errors))
     route_key = _key(route["nationality"], route["destination"],
                      route.get("travel_purpose", "tourism"),
                      route.get("travel_document_type", ""))
@@ -1035,7 +1134,11 @@ def _verdict_implied_by_detail(fields: dict, guidance: dict) -> str | None:
     verdict is outside that family, else None (nothing to correct)."""
     if "disposition" in fields:
         return None
-    detail = str(fields.get("requirement_detail") or "").strip()
+    # Read case-insensitively (guard-20260912 T7): an operator's "EVISA" is
+    # the same subcategory, and a detail-only override must be able to
+    # correct a row whose verdict carries no detail at all (the 48 rows the
+    # sweep files as verdict_detail_missing).
+    detail = str(fields.get("requirement_detail") or "").strip().lower()
     if not detail:
         return None
     for verdict, family in _DETAIL_FAMILY.items():

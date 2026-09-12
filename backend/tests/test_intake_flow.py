@@ -26,8 +26,10 @@ def _no_shipped_overrides(tmp_path, monkeypatch):
     # Synthetic route evidence isolates journey mechanics from real policy.
     # A mock model's self-rated confidence alone must never release guidance.
     required = {"CHN", "IND", "BRA"}
+    # PER was added by guard-20260912: the sourced-disposition continuation
+    # test moved there from KOR (see that test).
     destinations = {"SGP", "CHN", "GBR", "KOR", "MYS", "THA", "VNM",
-                    "EGY", "IND", "IDN", "KHM", "LAO", "BRA", "NZL", "FJI"}
+                    "EGY", "IND", "IDN", "KHM", "LAO", "BRA", "NZL", "FJI", "PER"}
     entries = []
     for destination in destinations:
         disposition = ("VISA_REQUIRED" if destination in required else
@@ -377,6 +379,24 @@ def test_uncertain_sourced_guidance_with_disposition_continues_with_available(cl
     # A gap that does NOT block safe prep. (processing_time is no longer
     # demanded of a visa-free route — there is nothing to process — so a
     # still-mandatory field stands in for the gap.)
+    partial.pop("required_documents")
+    # guard-20260912: the destination was KOR until T6. The passport is
+    # American, the United States is on the established K-ETA list, so the
+    # module's synthetic visa-free verdict must stay separate from scheme
+    # membership, which the next test pins. PER carries the same synthetic
+    # verified verdict, no scheme list
+    # and no other test in this file resolves it first, so this test keeps
+    # its own subject: a sourced disposition with one gap still continues.
+    iid, g = _resolve_with_guidance(
+        client, partial, dict(ANSWERS_SGP, destination_country="PER"))
+    assert g["status"] == "KIMI_UNCERTAIN"
+    r = client.post(f"/intake/{iid}/continue", headers=H)
+    assert r.status_code == 200
+    assert r.json()["continuation_kind"] == "entry_preparation"
+
+
+def test_keta_list_membership_does_not_invent_an_authorization_obligation(client):
+    partial = dict(EXEMPT_ANSWER)
     partial.pop("required_documents")
     iid, g = _resolve_with_guidance(
         client, partial, dict(ANSWERS_SGP, destination_country="KOR"))

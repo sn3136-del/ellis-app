@@ -34,6 +34,7 @@ happens to remember today.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import contextlib
 import re
@@ -521,18 +522,13 @@ def _supports_route(page_text: str, raw: dict, route: dict, guidance: dict,
     # Home-government outbound guidance can settle its citizens' route too.
     # It must explicitly name the traveller group and the DESTINATION in the
     # supporting statement, so an inbound rule for visitors to that government
-    # cannot be recycled as a rule for travelling elsewhere.
-    from .evidence_validator import _NATIONALITY_NAMES
+    # cannot be recycled as a rule for travelling elsewhere. The test lives
+    # in source_authority (guard-20260912 T3) so the grading hand and this
+    # hand cannot disagree.
+    from .source_authority import is_corroborating
     if not jurisdiction_matches(source_url, nationality):
         return False
-    lower = statement.casefold()
-    names = _NATIONALITY_NAMES.get(nationality, ())
-    if not any(re.search(re.escape(n.strip()) + r".{0,25}(?:passport|citizen|national)|(?:passport|citizen|national).{0,25}" + re.escape(n.strip()), lower)
-               for n in names):
-        return False
-    destination_names = _NATIONALITY_NAMES.get(route.get("destination_country", ""), ())
-    return any(re.search(r"(?<![a-z])" + re.escape(n.strip()) + r"(?![a-z])", statement, re.I)
-               for n in destination_names)
+    return is_corroborating(source_url, route, statement=statement)
 
 
 def _source_authority_matches(url: str, route: dict) -> bool:
@@ -1329,8 +1325,15 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
                      and field_value_supported(requested, guidance.get(requested), evidence[requested])
                      and proof_helpers.field_scope_matches_route(requested,evidence[requested],route)
                      and proof_helpers.field_workflow_matches(requested,evidence[requested],effective_candidate,route,confirmation=True)))
+        captured_text = str(fr.content_text or "")[:200000]
         proposal = {"outcome": "checked", "source_url": fr.final_url,
                     "checked_at": when,
+                    # guard-20260912 T9: the page text the quotes were read
+                    # from, so accepting the proposal re-validates every quote
+                    # against the same capture instead of trusting it.
+                    "captured_page": {"source_url": fr.final_url, "chars": len(captured_text),
+                                      "sha256": hashlib.sha256(captured_text.encode("utf-8")).hexdigest(),
+                                      "text": captured_text},
                     "consistent": confirmed and raw.get("consistent") is True and not fields and not unquoted,
                     "verified_fields": [requested] if confirmed else [],
                     "awaiting_adjudication": awaiting_adjudication,

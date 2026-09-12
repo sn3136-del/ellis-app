@@ -69,6 +69,68 @@ _AUTHORIZATION_NOT_VISA = ("etias", "esta", "/eta", "eta_", "k-eta", "keta",
                            "entry/exit system", "entry-exit-system", "ees_",
                            "electronic travel authoris", "electronic travel authoriz",
                            "electronic system for travel author")
+# of which is a visa (ETIAS, ESTA, an ETA, K-ETA, the Entry/Exit System).
+# guard-20260912 T7 replaced the bare substring tuple that used to live here
+# (matched with the in operator, so "esta" fired inside "estancia" and "/eta"
+# inside "/etapa") with this compiled word-boundary pattern, applied to URL
+# host and path segments and to the category separately. is_authorization_page
+# is the one judgement the serve-time invariants, validate_answer, the sweep
+# and the scheme registry share.
+_AUTHORIZATION_TOKENS = _re.compile(
+    r"(?<![a-z0-9])(?:etias|esta|eta|k-?eta|ees|nzeta|e-?tas?)(?![a-z0-9])|"
+    r"entry[/ -]exit[ -]system|electronic[ -]travel[ -]authori(?:s|z|t)|"
+    r"electronic[ -]system[ -]for[ -]travel[ -]author", _re.I)
+
+
+def is_authorization_page(*values) -> bool:
+    """Does any of the given URLs or category strings name a pre-travel
+    authorisation or border-formality scheme (ETIAS, ESTA, an ETA, K-ETA,
+    EES)? Word-boundary matching on URL path segments and on the text, so a
+    Spanish "estancia" or an "etapa" path never trips it."""
+    for value in values:
+        text = str(value or "")
+        if not text:
+            continue
+        if text.startswith("http"):
+            from urllib.parse import urlparse
+            parsed = urlparse(text)
+            parts = [parsed.hostname or ""] + [seg for seg in parsed.path.split("/") if seg]
+            parts += [parsed.query or ""]
+            text = " ".join(parts).replace("_", " ").replace(".", " ")
+        if _AUTHORIZATION_TOKENS.search(text) or cites_authorization_page(text):
+            return True
+    return False
+
+def established_scheme_page(*urls) -> bool:
+    """Is any cited URL the page of a scheme whose eligibility list the
+    registry holds as ESTABLISHED (scheme_registry)? The URL must be an
+    authorisation page by is_authorization_page and must sit on the scheme's
+    own list host or carry its portal marker. A scheme whose list nobody
+    could read (the ETIAS, ESTA and UK ETA placeholders) is not a basis for
+    withholding an answer: the fail-safe rule of the registry, "a list
+    nobody could read cannot invent a refusal", applies to the serve-time
+    page rule as well (guard-20260912 T7, measured on the local copy: the
+    bare page rule also withheld four correct Schengen visa-free rows that
+    cite the ETIAS information page)."""
+    from urllib.parse import urlparse
+    from . import scheme_registry
+    for url in urls:
+        text = str(url or "")
+        if not text.startswith("http") or not is_authorization_page(text):
+            continue
+        host = (urlparse(text).hostname or "").lower()
+        for entry in scheme_registry.entries():
+            if entry.get("list_state") != "established":
+                continue
+            marker = str(entry.get("portal_marker") or "").lower()
+            list_host = (urlparse(str(entry.get("source_url") or "")).hostname or "").lower()
+            if marker and marker in text.lower():
+                return True
+            if list_host and host and (host == list_host or host.endswith("." + list_host)
+                                       or list_host.endswith("." + host)):
+                return True
+    return False
+
 
 
 def _authorization_name_pattern(name: str) -> str:
@@ -116,6 +178,19 @@ _EXEMPT_DETAILS = DETAIL_FAMILY["VISA_EXEMPT"]
 _FILING_CHANNELS = ("embassy_or_consulate", "embassy_designated_agency",
                     "visa_center", "authorised_agent", "on_arrival",
                     "embassy")
+
+
+def require_detail_mode() -> str:
+    """ELLIS_REQUIRE_DETAIL, shipped off (guard-20260912 T7). "off": a verdict
+    with no requirement_detail moves nothing and the sweep reports it. "cap":
+    report phase, such a record grades at most Medium and is not held. "on":
+    it is a serve-time contradiction and is held. Any other value is off."""
+    value = str(os.environ.get("ELLIS_REQUIRE_DETAIL") or "").strip().lower()
+    if value in ("1", "on", "true", "yes", "strict"):
+        return "on"
+    if value in ("cap", "report", "medium"):
+        return "cap"
+    return "off"
 
 
 def serve_time_invariants(g: dict | None) -> list[str]:
@@ -228,12 +303,24 @@ def serve_time_invariants(g: dict | None) -> list[str]:
                             f"requirement_detail is {detail}, which is a visa")
         if disp == "VISA_ON_ARRIVAL" and detail in ("evisa", "paper_visa"):
             problems.append(f"disposition VISA_ON_ARRIVAL but requirement_detail is {detail}")
-    if disp == "VISA_REQUIRED":
-        cited = " ".join(str(g.get(k) or "") for k in
-                         ("source_url", "official_portal_url", "visa_category")).lower()
-        if cites_authorization_page(cited):
-            problems.append("disposition VISA_REQUIRED but the cited page is a travel "
-                            "authorisation or border-formality page, which is not a visa")
+    # Retain the existing positive mismatch rule (a visa-required answer
+    # naming an authorization instead of a visa). Do not infer a mandatory
+    # authorization from the URL of a page that may explain exemptions.
+    scheme_page = is_authorization_page(g.get("source_url"), g.get("official_portal_url"))
+    if disp == "VISA_REQUIRED" and (scheme_page or is_authorization_page(g.get("visa_category"))):
+        problems.append("disposition VISA_REQUIRED but the cited page is a travel "
+                        "authorisation or border-formality page, which is not a visa")
+    # A scheme's own page can also state who is exempt from that scheme.
+    # Its URL or an established eligibility list does not prove an
+    # authorization is mandatory for this traveler. The read-only proof
+    # sweep still reports such citations for checking; only a supported
+    # policy contradiction may withhold the visa-free answer.
+    # A verdict with no subcategory is skipped by every rule above that opens
+    # with a truthiness test on the detail. Behind ELLIS_REQUIRE_DETAIL, which
+    # ships off: "cap" only caps the grade at Medium (tstation), "on" makes it
+    # a contradiction. The sweep reports the population in every state.
+    if disp in DETAIL_FAMILY and not detail and require_detail_mode() == "on":
+        problems.append(f"disposition {disp} carries no requirement_detail")
     workflow = str(g.get("route_workflow_type") or "")
     if disp == "VISA_EXEMPT" and workflow and workflow not in ("visa_exempt_preparation", "conditional"):
         problems.append("disposition VISA_EXEMPT but route_workflow_type requires a visa application")
@@ -922,6 +1009,14 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
         clean["visa_products"] = products
     rd = str(clean.get("requirement_detail") or "").strip().lower()
     clean["requirement_detail"] = rd if rd in REQUIREMENT_DETAILS else None
+    if rd and rd not in REQUIREMENT_DETAILS:
+        # An unrecognised subcategory is still dropped (it is never served),
+        # but no longer silently: the raw value is recorded so the sweep's
+        # verdict_detail_missing finding can say what the engine actually
+        # wrote (guard-20260912 T7).
+        clean["_diagnostics"] = list(dict.fromkeys(
+            list(clean.get("_diagnostics") or []) +
+            [f"unrecognised requirement_detail {rd[:80]!r} was dropped"]))
     # application_channel is an ENUM the UI renders through a fixed
     # vocabulary. It was never checked, so a grounded recheck was able to
     # write a prose sentence into it ("diplomatic mission, accredited agency,
@@ -975,9 +1070,8 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     # which is a pre-travel authorisation for the visa-EXEMPT, and graded the
     # route as visa-required. EES is a border biometric and decides nothing.
     if clean.get("disposition") == "VISA_REQUIRED":
-        cited = " ".join(str(clean.get(k) or "") for k in
-                         ("source_url", "official_portal_url", "visa_category")).lower()
-        if cites_authorization_page(cited):
+        if is_authorization_page(clean.get("source_url"), clean.get("official_portal_url"),
+                                 clean.get("visa_category")):
             contradictions.append(
                 "disposition VISA_REQUIRED but the cited page is a travel "
                 "authorisation or border-formality page (ETIAS/ESTA/eTA/EES), "
@@ -1680,9 +1774,9 @@ def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
     db.commit()
     if after is not None:
         try:
-            after(route, apply_portal_fallback(apply_verified_overrides(_result(
-                status, clean, cached=True, stale=False, missing=missing,
-                contradictions=contradictions, model=row.model), route), route))
+            after(route, reader_projection(route, status, clean, cached=True, stale=False,
+                                           missing=missing, contradictions=contradictions,
+                                           model=row.model, health=False))
         except Exception:  # noqa: BLE001
             pass
 
@@ -1736,6 +1830,29 @@ def _fill_detail_async(key: str, route: dict, user: str, *, after=None) -> None:
         t.start()
 
 
+def reader_projection(route: dict, status: str, guidance: dict, *, cached: bool,
+                      stale: bool, released: bool = False, missing=None,
+                      contradictions=None, model: str = "", advisories=None,
+                      elapsed_seconds: float | None = None, health: bool = True) -> dict:
+    """THE reader composition, in one place: the raw envelope (_result), the
+    verified overrides, the official-portal fallback, and the health context
+    projection the reader page applies. Every path that hands an answer to a
+    reader (a cached row, a fresh answer, the staged detail fill, the nearest
+    approximation) goes through here, and so does the consistency sweep, so
+    the surface it compares is the surface the reader gets and not a copy
+    (guard-20260912 T2). ``health`` is off only for the records path until
+    T10 moves the health projection onto every surface."""
+    out = apply_portal_fallback(apply_verified_overrides(_result(
+        status, guidance, cached=cached, stale=stale, released=released,
+        missing=missing, contradictions=contradictions, model=model,
+        advisories=advisories, elapsed_seconds=elapsed_seconds), route), route)
+    if health and isinstance(out.get("guidance"), dict):
+        from . import health_context
+        out = dict(out)
+        out["guidance"] = health_context.apply(dict(out["guidance"]), route)
+    return out
+
+
 def nearest_cached_answer(db, route: dict) -> dict | None:
     """The closest real answer we already hold for this nationality and
     destination, when the exact variant cannot be decided right now.
@@ -1773,17 +1890,17 @@ def nearest_cached_answer(db, route: dict) -> dict | None:
         complete = r.status == STATUS_PRIMARY
         return (not complete, not same_purpose)
     best = sorted(rows, key=rank)[0]
-    out = _result(best.status, best.guidance, cached=True, stale=_is_stale(best),
-                  missing=best.missing_fields, contradictions=best.contradictions,
-                  model=best.model,
-                  advisories=deterministic_advisories(route, best.guidance or {}))
+    out = reader_projection(route, best.status, best.guidance, cached=True, stale=_is_stale(best),
+                            missing=best.missing_fields, contradictions=best.contradictions,
+                            model=best.model,
+                            advisories=deterministic_advisories(route, best.guidance or {}))
     out["approximate_for"] = {
         "asked": {"travel_purpose": want_purpose,
                   "travel_document_type": route.get("travel_document_type")},
         "served": best.route or {},
         "served_purpose": (best.cache_key.split("|") + [""] * 4)[3],
     }
-    return apply_portal_fallback(apply_verified_overrides(out, route), route)
+    return out
 
 
 import threading as _threading
@@ -1970,12 +2087,11 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
         # The grounding that counts: a failed later attempt never erases
         # the last successful read of the official page.
         gc = _freshness.effective_check(row.verification)
-        out = apply_portal_fallback(apply_verified_overrides(_result(
-            row.status, served_guidance(row), cached=True, stale=_is_stale(row),
-            released=released,
-            missing=row.missing_fields, contradictions=row.contradictions,
-            model=row.model,
-            advisories=deterministic_advisories(route, row.guidance or {})), route), route)
+        out = reader_projection(route, row.status, served_guidance(row), cached=True,
+                                stale=_is_stale(row), released=released,
+                                missing=row.missing_fields, contradictions=row.contradictions,
+                                model=row.model,
+                                advisories=deterministic_advisories(route, row.guidance or {}))
         out["detail_pending"] = bool((row.verification or {}).get("detail_pending"))
         if isinstance(gc, dict) and gc.get("outcome") == "checked":
             # Machine provenance, deliberately WEAKER than the human badge:
@@ -2102,20 +2218,18 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
                           origin="engine",
                           note="route answered by the engine")
         db.commit()
-    out = apply_portal_fallback(apply_verified_overrides(_result(
-        status, clean, cached=False, stale=False,
-        missing=missing, contradictions=contradictions, model=model,
-        advisories=advisories, elapsed_seconds=elapsed), route), route)
+    out = reader_projection(route, status, clean, cached=False, stale=False,
+                            missing=missing, contradictions=contradictions, model=model,
+                            advisories=advisories, elapsed_seconds=elapsed)
     if staged and has_content:
         if _PROVIDER is not None:
             # Injected provider (tests): stage 2 runs inline, deterministically.
             fill_detail(db, key, route, user, after=after)
             row = _cached(db, key)
-            out = apply_portal_fallback(apply_verified_overrides(_result(
-                row.status, row.guidance, cached=False, stale=False,
-                missing=row.missing_fields, contradictions=row.contradictions,
-                model=row.model, advisories=advisories,
-                elapsed_seconds=elapsed), route), route)
+            out = reader_projection(route, row.status, row.guidance, cached=False, stale=False,
+                                    missing=row.missing_fields, contradictions=row.contradictions,
+                                    model=row.model, advisories=advisories,
+                                    elapsed_seconds=elapsed)
             out["detail_pending"] = False
         else:
             _fill_detail_async(key, route, user, after=after)

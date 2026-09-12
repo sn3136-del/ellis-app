@@ -352,9 +352,14 @@ def test_field_evidence_matches_entire_value_and_its_subject(name, value, text):
 
 
 def test_eu_common_visa_law_competence_is_narrow():
-    assert evv.jurisdiction_matches('https://eur-lex.europa.eu/legal-content/EN/TXT/', 'FRA')
-    assert evv.jurisdiction_matches('https://eur-lex.europa.eu/legal-content/EN/TXT/', 'ESP')
-    assert not evv.jurisdiction_matches('https://eur-lex.europa.eu/legal-content/EN/TXT/', 'GBR')
+    # guard-20260912 T3: Union law is competent only when the citation names
+    # an instrument from the closed list; a bare eur-lex host is not a law.
+    law = 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02018R1806-20251230'
+    assert evv.jurisdiction_matches(law, 'FRA')
+    assert evv.jurisdiction_matches(law, 'ESP')
+    assert evv.jurisdiction_matches(law, 'ITA')
+    assert not evv.jurisdiction_matches(law, 'GBR')
+    assert not evv.jurisdiction_matches('https://eur-lex.europa.eu/legal-content/EN/TXT/', 'FRA')
 
 
 def test_curated_uae_embassy_has_exact_uae_jurisdiction():
@@ -375,3 +380,56 @@ def test_detector_includes_explicit_visa_on_arrival():
     result = evv.detect_disposition_from_pages(route, [{'url': 'https://consular.mfa.go.th/visa',
         'text': 'Indonesian citizens can obtain a visa on arrival for tourism.'}])
     assert result['disposition'] == 'VISA_ON_ARRIVAL' and not result['conflict']
+
+
+# ---------------------------------------------------------------------------
+# guard-20260912 T3: jurisdiction_matches delegates to source_authority and
+# keeps its contract over thirty live host and destination pairs sampled
+# from the 11 September database copy. The one pair whose answer moved is
+# the free-movement Directive 2004/38 cited for France: it is not on the
+# closed visa-law instrument list, so Union competence no longer covers it.
+# ---------------------------------------------------------------------------
+LIVE_PAIRS = [
+    ("https://france-visas.gouv.fr/en/web/france-visas/accueil", "FRA", True),
+    ("https://www.uscis.gov/working-in-the-united-states/temporary-visitors-for-business/b-1-temporary-business-visitor", "USA", True),
+    # The free movement directive stays competent for FRA as it was before
+    # T3 (defect fix after T6: the closed list had narrowed the old carve-out).
+    ("https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02004L0038-20110616", "FRA", True),
+    ("https://s.nia.gov.cn/mps/bszy/wlgaot/sqgowl/201903/t20190313_1002.html", "MAC", False),
+    ("https://eviza.mae.ro/TypeOfVisa", "DEU", False),
+    ("https://www.k-eta.go.kr/portal/board/viewboarddetail.do?bbsSn=299707", "KOR", True),
+    ("https://www.immd.gov.hk/eng/press/press-releases/20231207a.html", "AGO", False),
+    ("https://www.immigration.gov.bs/entry-requirements/before-your-arrival/", "BHS", True),
+    ("https://www.exteriores.gob.es/", "ESP", True),
+    ("https://mfa.gov.af/en/page/38999", "AFG", True),
+    ("https://evisa.gov.ly/", "LBY", True),
+    ("https://www.instagram.com/p/Dab9NF9IILJ/", "VNM", False),
+    ("https://chong.cancilleria.gob.ar/en/entry-argentina-peoples-republic-china-passport-tourism-or-business-without-visa", "ARG", True),
+    ("https://www.france-visas.gouv.fr/en/etudiant", "FRA", True),
+    ("https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=161&PARENT_ID=135", "KOR", True),
+    ("http://tn.china-embassy.gov.cn/lsfw/lsbhyxz/202310/t20231007_11157169.htm", "TUN", False),
+    ("https://www.imi.gov.my/wp-content/uploads/2022/01/21OKT_FAQs-MYS-CHINA_LULUS.pdf", "MYS", True),
+    ("https://taipei.mfa.gov.sg/consular-services/visa-information/", "SGP", True),
+    ("https://my.china-embassy.gov.cn/eng/fwzc/lsyw/qz/202508/t20250801_11681401.htm", "CHN", True),
+    ("https://evisa.gov.vu/", "VUT", True),
+    ("https://www.anzen.mofa.go.jp/info/pcsafetymeasure_052.html", "TUR", False),
+    ("https://consulatedrwest.gob.do/en/listado-de-paises-y-condiciones-de-visado", "DOM", True),
+    ("https://beninembassy.us/visas-requirements/", "BEN", True),
+    ("https://cancilleria.gob.bo/mre/2025/12/01/23577/", "BOL", True),
+    ("https://www.mofa.go.kr/my-en/brd/m_21504/view.do?page=1&seq=46", "KOR", True),
+    ("https://0404.go.kr/bbs/contsPst/MST0000000000113/13/detail", "TUR", False),
+    ("https://www.exteriores.gob.es/Consulados/pekin/en/ServiciosConsulares/Paginas/Consular/Visado-de-transito-aeroportuario.aspx", "ESP", True),
+    ("https://mfa.gov.ua/en/consular-affairs/entry-and-stay-foreigners-ukraine/entry-regime-ukraine-foreign-citizens", "UKR", True),
+    ("https://www.gov.uk/student-visa", "GBR", True),
+    ("https://www.mfa.gov.sg/travelling-overseas/travel-advisories-notices-and-visa-information/indonesia/", "IDN", False),
+]
+
+
+@pytest.mark.parametrize('url,destination,expected', LIVE_PAIRS)
+def test_jurisdiction_matches_delegates_and_keeps_its_contract(url, destination, expected):
+    from app.visa_snapshot import source_authority as sa
+    assert evv.jurisdiction_matches(url, destination) is expected
+    assert evv.jurisdiction_matches(url, destination) == sa.is_competent(
+        url, {'destination_country': destination}, 'disposition')
+    if expected:
+        assert sa.classify(url, {'destination_country': destination}) in (sa.KIND_DESTINATION, sa.KIND_EU_VISA_LAW)
