@@ -218,8 +218,47 @@ def _closed_list_support(proof, source, sources, route, disposition):
     return False
 
 
+_JAPAN_CHINESE_TOURISM_HEADING = '1．什么是中国人赴日旅游签证'
+_JAPAN_CHINESE_TOURISM_CLOSING = '2．签证类型'
+_JAPAN_CHINESE_TOURISM_BODY = (
+    '赴日旅游签证的发放对象是以观光旅游为目的的申请人。因此，除观光旅游外的短期访问目的都不属于此范围（除了部分签证）。'
+    '有关此类签证手续，需通过取得了日本国驻华使领馆（请确认各使领馆的管辖地区）送签资格的指定旅行社进行申请。故申请人无法直接去使领馆办理及领取此类签证。'
+    '此类签证制度是由指定旅行社来为赴日中国人做身元担保。因此，赴日机票、船票以及酒店等住宿设施必须由指定旅行社来预订，不能由申请人自理。但是有部分签证与此不同。详情请咨询各指定旅行社。')
+
+
+def _japan_chinese_tourism_support(proof, source, sources, route, disposition):
+    """An exact reviewed nationality section, not generic visa eligibility.
+
+    The complete first section makes the Chinese tourist application obligatory
+    through a designated agency. It does not establish a fee, individual product
+    stay, electronic/paper issuance, or another travel document's acceptance.
+    Any substantive edit to that bounded section needs a new review.
+    """
+    rule = proof.get('source_country_section') or {}
+    if (route.get('passport_nationality') != 'CHN' or route.get('destination_country') != 'JPN'
+            or route.get('travel_document_type') != 'ordinary_passport' or route.get('travel_purpose') != 'tourism'
+            or disposition != 'VISA_REQUIRED'
+            or not _exact_page(source, 'https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html')
+            or source != _companion(rule, 'source_id', sources, proof)):
+        return False
+    compact = lambda value: re.sub(r'\s+', '', _block_text(value))
+    heading, closing = _JAPAN_CHINESE_TOURISM_HEADING, _JAPAN_CHINESE_TOURISM_CLOSING
+    if (compact(rule.get('heading_quote')) != heading or compact(rule.get('closing_quote')) != closing
+            or compact(proof.get('quote')) != compact(rule.get('section_quote'))):
+        return False
+    page = compact(source['text'])
+    # Repeated section headings make the quotation's ownership ambiguous.
+    if page.count(heading) != 1 or page.count(closing) != 1:
+        return False
+    start, end = page.index(heading), page.index(closing)
+    expected = heading + _JAPAN_CHINESE_TOURISM_BODY
+    return start < end and page[start:end] == expected and compact(rule.get('section_quote')) == expected
+
+
 def _country_section_support(proof, source, sources, route, disposition):
     rule = proof.get('source_country_section')
+    if isinstance(rule, dict) and rule.get('program') == 'japan_chinese_tourist_visa':
+        return _japan_chinese_tourism_support(proof, source, sources, route, disposition)
     if isinstance(rule, dict) and rule.get('program') == 'korea_russian_keta':
         q, age = _norm(proof['quote']), rule.get('age_quote', '')
         return (route['passport_nationality'] == 'RUS' and route['destination_country'] == 'KOR'
@@ -395,6 +434,8 @@ def guidance_conditions_preserved(result, guidance):
                 yield from strings(child)
     text = ' '.join(strings(guidance)).casefold()
     program = result.get('program')
+    if program == 'japan_chinese_tourist_visa' and guidance.get('application_channel') != 'authorised_agent':
+        return {'ok': False, 'reason': 'the Chinese tourist visa section requires a designated agency; preserve that filing channel'}
     if program == 'canada_eta_member':
         air = re.search(r'\bair\b|\bflight|\bflying', text)
         surface = any(re.search(r'\b(?:land|sea|surface|car|bus|train|boat)\b', sentence) and

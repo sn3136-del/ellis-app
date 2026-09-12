@@ -200,6 +200,7 @@ def test_actual_canadian_route_and_fee_both_reuse_only_after_current_reads(h):
     h.texts = {s['url']: s['text'] for s in data['sources']}
     h.override = {'source_url': entry['guidance']['source_url'], 'fields': {}, 'field_provenance': fields}
     h.answer = lambda payload: {'consistent': True, 'page_relevant': True, 'page_is_nationality_specific': False,
+        'corrected_fields': {},
         'evidence': {'government_fee': fee['quote']} if payload['official_page_url'] == fee['source_url'] else {}}
     row = seed(h, entry['guidance'], dict(ROUTE, passport_nationality='GBR', destination_country='CAN'))
     run(h, row); calls = len(h.calls); reads = len(h.fetches)

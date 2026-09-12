@@ -136,7 +136,7 @@ def test_all_fourteen_actual_phl_list_members_are_readable_as_routes(db,monkeypa
     proof=entry['field_provenance']['disposition']; source=next(s for s in data['sources'] if s['id']==proof['source_id'])
     monkeypatch.setattr(vo,'find',lambda r:{'source_url':source['url'],'fields':{},'field_provenance':{'disposition':proof}})
     fetching.set_fetcher(lambda url,**_:capture(url,source['text']))
-    freshness.set_provider(lambda *_:{'consistent':True,'page_relevant':True,'page_is_nationality_specific':False})
+    freshness.set_provider(lambda *_:{'consistent':True,'page_relevant':True,'page_is_nationality_specific':False,'corrected_fields':{},'evidence':{}})
     row=seed(db,{'disposition':'VISA_EXEMPT','source_url':source['url']},route(nationality))
     assert freshness.recheck_row(db,row,today='2026-09-09')['outcome']=='checked'
     assert 'disposition' in row.verification['grounded_check']['verified_fields']
@@ -153,7 +153,7 @@ def test_actual_canadian_country_lists_and_separate_eta_price(db,monkeypatch,nat
                         FetchResult(requested_url=url,ok=False,error='fixture missing'))
     def compare(_,user):
         p=json.loads(user); fee=fields['government_fee']
-        return {'consistent':True,'page_relevant':True,'page_is_nationality_specific':False,
+        return {'consistent':True,'page_relevant':True,'page_is_nationality_specific':False,'corrected_fields':{},
             'evidence':{'government_fee':fee['quote']} if p['official_page_url']==fee['source_url'] else {}}
     freshness.set_provider(compare)
     row=seed(db,entry['guidance'],route(nationality,'CAN'))
@@ -177,7 +177,7 @@ def test_invalid_structured_model_proof_cannot_fall_back_to_true_but_unscoped_te
     text='Canadian citizens need a visa for tourism in Japan.'
     monkeypatch.setattr(vo,'find',lambda r:None)
     fetching.set_fetcher(lambda url,**_:capture(url,text))
-    freshness.set_provider(lambda *_:{'consistent':True,'page_relevant':True,'page_is_nationality_specific':True,
+    freshness.set_provider(lambda *_:{'consistent':True,'page_relevant':True,'page_is_nationality_specific':True,'corrected_fields':{},'evidence':{},
         'route_evidence':{'quote':text,'source_table':{'heading_quote':text,'table_quote':text,'nationality_quote':'China'}}})
     row=seed(db,{'disposition':'VISA_REQUIRED','source_url':url},route('CAN','JPN'))
     assert freshness.recheck_row(db,row,today='2026-09-09')['outcome']=='page_not_relevant'
@@ -189,7 +189,7 @@ def test_old_price_provenance_cannot_verify_an_ineligible_program(db,monkeypatch
     monkeypatch.setattr(vo,'find',lambda r:{'source_url':url,'fields':{},'field_provenance':{
         'government_fee':{'source_id':'price','source_url':url,'quote':fee_quote,'verified_at':'2026-09-09'}}})
     fetching.set_fetcher(lambda url,**_:capture(url,fee_quote))
-    freshness.set_provider(lambda *_:{'consistent':True,'page_relevant':True,'page_is_nationality_specific':False,
+    freshness.set_provider(lambda *_:{'consistent':True,'page_relevant':True,'page_is_nationality_specific':False,'corrected_fields':{},
         'evidence':{'government_fee':fee_quote}})
     row=seed(db,{'disposition':'VISA_REQUIRED','government_fee':{'amount':7,'currency':'CAD'},'source_url':url},route('CHN','CAN'))
     assert freshness.recheck_row(db,row,today='2026-09-09')['outcome']=='page_not_relevant'
@@ -296,7 +296,7 @@ def test_missing_stored_qualification_cannot_fall_back_to_loose_prose(db,monkeyp
     text=source['text']+'\nBritish citizens need an eTA to fly to Canada for tourism.'
     monkeypatch.setattr(vo,'find',lambda r:{'source_url':source['url'],'fields':{},'field_provenance':{'disposition':proof}})
     fetching.set_fetcher(lambda url,**_:capture(url,text))
-    freshness.set_provider(lambda *_:{'consistent':True,'page_relevant':True,'page_is_nationality_specific':True})
+    freshness.set_provider(lambda *_:{'consistent':True,'page_relevant':True,'page_is_nationality_specific':True,'corrected_fields':{},'evidence':{}})
     row=seed(db,{'disposition':'ELECTRONIC_AUTHORIZATION_REQUIRED','requirement_detail':'eta_electronic_authorization','entry_requirements':'Get an eTA.','source_url':source['url']},route('GBR','CAN'))
     assert freshness.recheck_row(db,row,today='2026-09-09')['outcome']=='page_not_relevant'
 

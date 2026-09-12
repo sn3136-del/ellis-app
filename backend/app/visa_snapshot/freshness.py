@@ -164,10 +164,79 @@ An explicit warning that official guidance conflicts is not a settled fact
 contradicted by one page. Preserve that warning; a single source cannot
 adjudicate a disagreement between official sources or verify the warning away.
 When in doubt about whether the page speaks for THIS nationality, say
-page_is_nationality_specific false and correct nothing nationality-specific."""
+page_is_nationality_specific false and correct nothing nationality-specific.
+
+For the Chinese ordinary-passport tourist page at
+https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html only, the complete section
+between "1．什么是中国人赴日旅游签证" and "2．签证类型" may support VISA_REQUIRED.
+If it is present in full, extract route_evidence with source_id "page", quote
+equal to that complete first section (including its heading, excluding the next
+heading), and source_country_section {program: "japan_chinese_tourist_visa",
+source_id: "page", heading_quote: the literal first heading, closing_quote: the
+literal next heading, section_quote: the same complete first section}. Preserve
+its designated-agency requirement. This supports no fee, stay duration,
+electronic/paper issuance, other nationality, other purpose or other document.
+Never assemble the proof from a different section or shorten its conditions."""
 
 _PROVIDER = None
 _MODEL_SLOTS = threading.BoundedSemaphore(4)
+
+
+def _comparison_schema_errors(answer) -> list[str]:
+    """Invalid extraction is not a model judgment that a page is irrelevant."""
+    if not isinstance(answer, dict):
+        return ["comparison response must be an object"]
+    errors = [f"comparison {name} must be a boolean" for name in
+              ("page_relevant", "page_is_nationality_specific", "consistent")
+              if type(answer.get(name)) is not bool]
+    errors += [f"comparison {name} must be an object" for name in
+               ("corrected_fields", "evidence") if not isinstance(answer.get(name), dict)]
+    errors += [f"comparison {name} must be an object" for name in
+               ("route_evidence", "field_scope")
+               if name in answer and not isinstance(answer[name], dict)]
+    return errors
+
+
+def _provider_diagnostic(exc) -> dict:
+    """Keep fixed diagnostic metadata; never a provider body or prompt."""
+    from .. import provider_errors
+    from ..providers.kimi import KimiHttpError
+    from . import kimi_primary
+    out = {"error_type": type(exc).__name__[:80]}
+    if isinstance(exc, kimi_primary.GuidanceProviderError):
+        envelope = exc.envelope
+        category = envelope.get("category", "unknown")
+        out["category"] = category if category in provider_errors.CATALOG else "unknown"
+    elif isinstance(exc, (kimi_primary.GuidanceTimeout, TimeoutError)):
+        out["category"] = "kimi_unavailable"
+        out["technical"] = "comparison_timeout"
+    else:
+        out["category"] = "unknown"
+    cause = exc.__cause__
+    if isinstance(cause, KimiHttpError):
+        out["http_status"] = cause.status
+        if cause.error_type in {"content_filter", "invalid_request_error", "authentication_error",
+                "permission_error", "not_found_error", "rate_limit_error", "rate_limit_reached_error",
+                "exceeded_current_quota_error", "server_error", "api_error", "overloaded_error"}:
+            out["provider_error_type"] = cause.error_type
+    return out
+
+
+def _fetch_diagnostic(result) -> dict:
+    """Safe source failure categories without raw exception strings."""
+    error = str(result.error or "").lower()
+    pdf_errors = {"pdf_download_size_limit", "pdf_empty_document", "pdf_extraction_timeout",
+        "pdf_extraction_capacity", "pdf_extraction_failed", "pdf_encrypted", "pdf_page_limit",
+        "pdf_text_limit", "pdf_page_stream_limit", "pdf_image_only_or_no_extractable_text",
+        "pdf_has_image_only_pages", "pdf_malformed", "pdf_parser_unavailable"}
+    code = ("tls_certificate_error" if "certificate_verify_failed" in error else
+            "source_timeout" if "timeout" in error or "deadline" in error else
+            "source_challenge" if result.challenge else
+            "http_error" if isinstance(result.http_status, int) and result.http_status >= 400 else
+            error if error in pdf_errors else "source_fetch_error")
+    return {"error_code": code, "http_status": result.http_status,
+            "media_type": result.media_type if result.media_type in {"application/pdf", "text/html"} else None,
+            "extraction_method": result.extraction_method if result.extraction_method in {"pypdf_text", "html_text"} else None}
 
 
 def set_provider(fn) -> None:
@@ -723,9 +792,15 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         except Exception as e:
             source_checks.append({'source_url': fr.final_url, 'outcome': 'provider_error', 'at': when,
                 'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
-                'comparison_reused': False, 'error': str(e)[:160]})
+                'comparison_reused': False, 'provider_diagnostic': _provider_diagnostic(e)})
             return
-        if not isinstance(answer, dict): answer = {}
+        schema_errors = _comparison_schema_errors(answer)
+        if schema_errors:
+            source_checks.append({'source_url': fr.final_url, 'outcome': 'validation_error', 'at': when,
+                'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
+                'comparison_reused': reused, 'validation_errors': schema_errors,
+                'relevance_reason': 'invalid_comparison_response'})
+            return
         quoted, evidence, unquoted = _quoted_proposals(answer, fr.content_text, route)
         invalid_enums = _enum_proposal_errors(answer)
         empty_workflow = _empty_workflow_proposal_errors(answer)
@@ -770,7 +845,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                    total_timeout_seconds=min(FETCH_TIMEOUT_SECONDS, remaining))
         if not (fr.ok and fr.content_text and not fr.challenge
                 and is_government_host(fr.final_hostname)):
-            source_checks.append({"source_url": url, "outcome": "fetch_failed", "at": when})
+            source_checks.append({"source_url": url, "outcome": "fetch_failed", "at": when,
+                                  "fetch_diagnostic": _fetch_diagnostic(fr)})
             continue
         if fr.final_url in completed:
             continue
@@ -863,6 +939,10 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             if page is None: page, raw = fr, answer
             readings.append((fr, answer, quoted, evidence, check))
         else:
+            if answer.get('page_relevant') is True:
+                check['relevance_reason'] = 'route_evidence_not_supported'
+            else:
+                check['relevance_reason'] = 'model_marked_page_irrelevant'
             deferred.append((fr, answer, quoted, evidence, check))
     for fr, answer, quoted, evidence, check in deferred:
         allowed = proof_helpers.ancillary_fields(captures[fr.final_url], answer, guidance, route, route_results)

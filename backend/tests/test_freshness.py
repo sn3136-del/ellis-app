@@ -634,7 +634,8 @@ def test_menu_text_cannot_confirm_any_route_even_when_model_claims_it_does(db, c
     fetching.set_fetcher(lambda url, timeout_seconds=0: replace(
         OFFICIAL_PAGE, content_text="Visa services home page. Search contact help login " * 8))
     freshness.set_provider(lambda *_: {"page_relevant": True,
-        "page_is_nationality_specific": claims_specific, "consistent": True})
+        "page_is_nationality_specific": claims_specific, "consistent": True,
+        "corrected_fields": {}, "evidence": {}})
     out = freshness.recheck_row(db, row)
     assert out["outcome"] == "page_not_relevant"
     assert row.fresh_until is None and freshness.effective_check(row.verification) == {}
@@ -673,7 +674,7 @@ def test_uncertain_rows_never_get_primary_ttl(db, missing):
     db.commit()
     fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
     freshness.set_provider(lambda *_: {"page_relevant": True, "page_is_nationality_specific": True,
-                                      "consistent": True, "corrected_fields": {}})
+                                      "consistent": True, "corrected_fields": {}, "evidence": {}})
     freshness.recheck_row(db, row)
     if missing:
         assert row.fresh_until is None
@@ -948,7 +949,7 @@ def test_source_budget_rotates_overflow_instead_of_ignoring_later_citations(db):
         return replace(OFFICIAL_PAGE, final_url=url)
     fetching.set_fetcher(fetch)
     freshness.set_provider(lambda *_: {'page_relevant': True, 'page_is_nationality_specific': True,
-        'consistent': True, 'corrected_fields': {}})
+        'consistent': True, 'corrected_fields': {}, 'evidence': {}})
     freshness.recheck_row(db, row)
     first = set(fetched)
     assert len(first) == freshness.MAX_SOURCES and freshness.effective_check(row.verification)['unchecked_sources']
