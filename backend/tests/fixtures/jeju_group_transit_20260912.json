@@ -1,0 +1,90 @@
+{
+  "route": {
+    "passport_nationality": "CHN",
+    "lawful_country_of_residence": "CHN",
+    "destination_country": "KOR",
+    "visa_category": "transit_visa",
+    "travel_purpose": "transit",
+    "arrival_date": null,
+    "consular_jurisdiction": null,
+    "travel_document_type": "ordinary_passport",
+    "transit_countries": null
+  },
+  "guidance": {
+    "disposition": "CONDITIONAL",
+    "requirement_detail": "transit_visa_free",
+    "source_url": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=161&PARENT_ID=135",
+    "application_channel": "not_required",
+    "visa_products": [
+      {
+        "type": "Airside transit at Incheon without passing immigration",
+        "entry": "single",
+        "validity": null,
+        "max_stay_days": null,
+        "fee": {
+          "amount": 0,
+          "currency": "KRW"
+        },
+        "notes": "Free, no visa needed while you stay in the transit area. If your bags must be collected or you change airports you pass immigration and need a lane below or a visa. No time limit is published on the current Korea Immigration Service page."
+      },
+      {
+        "type": "Third-country transit waiver (B-2), holders of a US, Canada, Australia, New Zealand or European visa",
+        "entry": "single",
+        "validity": null,
+        "max_stay_days": 30,
+        "fee": {
+          "amount": 0,
+          "currency": "KRW"
+        },
+        "notes": "Free, no Korean visa needed. You must hold a valid visa, permanent residency or re-entry permit of the US (including Guam and Saipan), Canada, Australia, New Zealand or one of 32 European countries, be travelling through Korea to that country or from it to China or a third country, and hold an onward ticket within 30 days."
+      },
+      {
+        "type": "Incheon Airport transit tourism programme (B-2)",
+        "entry": "single",
+        "validity": null,
+        "max_stay_days": 3,
+        "fee": {
+          "amount": 0,
+          "currency": "KRW"
+        },
+        "notes": "Free, no visa needed for transfer passengers at Incheon joining the programme, up to 3 days."
+      },
+      {
+        "type": "Jeju direct entry (B-2)",
+        "entry": "single",
+        "validity": null,
+        "max_stay_days": 30,
+        "fee": {
+          "amount": 0,
+          "currency": "KRW"
+        },
+        "notes": "Free, no visa needed on a direct international arrival at a Jeju airport or port. Limited to Jeju."
+      },
+      {
+        "type": "Jeju group transit for Chinese tour groups (B-2)",
+        "entry": "single",
+        "validity": null,
+        "max_stay_days": 15,
+        "fee": {
+          "amount": 0,
+          "currency": "KRW"
+        },
+        "notes": "Free. Chinese tour groups of 3 or more from China, Hong Kong or Macao arriving at Incheon, Gimpo, Gimhae, Cheongju, Muan, Daegu or Yangyang on the way to Jeju may stay up to 5 days in the permitted tourism areas, through a designated agency."
+      },
+      {
+        "type": "Chinese tour groups holding a Japanese group visa (B-2)",
+        "entry": "single",
+        "validity": null,
+        "max_stay_days": 15,
+        "fee": {
+          "amount": 0,
+          "currency": "KRW"
+        },
+        "notes": "Free. Tour groups of 3 or more holding a Japanese group visa, travelling from China through Korea to Japan or from Japan through Korea to China or a third country."
+      }
+    ]
+  },
+  "source": "https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=161&PARENT_ID=135",
+  "checked_at": "2026-09-12",
+  "source_observation": "The Jeju group transit section lists five days for permitted-area stay and transfer to Jeju; its B-2 period is fifteen days. This fixture is only a validator regression, not source verification of every sibling product."
+}

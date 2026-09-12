@@ -976,6 +976,35 @@ def _named_stay_limits(note: str) -> list[int]:
     return limits
 
 
+def _total_stay_note(guidance: dict, product: dict, note: str) -> str:
+    """Separate a reviewed local transit segment from this product's total.
+
+    HiKorea CAT_SEQ=161's Jeju-group section (checked 2026-09-12) gives B-2
+    permission for 15 days, with arrival-area tourism/transfer to Jeju within
+    5 days. That local condition is not a five-day cap on the whole permission.
+    Narrow only this diagnostic's input; never edit the displayed condition,
+    duration, evidence, or route/document eligibility. Different products,
+    source pages, numbers, and any additional total-stay assertions still use
+    the original contradiction check.
+    """
+    import re
+    source = 'https://www.hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=161&PARENT_ID=135'
+    if not (guidance.get('disposition') == 'CONDITIONAL'
+            and guidance.get('requirement_detail') == 'transit_visa_free'
+            and guidance.get('source_url') == source
+            and product.get('source_url', source) == source
+            and product.get('type') == 'Jeju group transit for Chinese tour groups (B-2)'
+            and product.get('max_stay_days') == 15):
+        return note
+    local = re.search(
+        r'\bon the way to Jeju may stay up to 5 days in the permitted tourism areas'
+        r'(?=, through a designated agency(?:[.;]|$))',
+        note, flags=re.I)
+    if not local or re.search(r'\b(?:not|never|without|except|excluding)\s*$', note[:local.start()], re.I):
+        return note
+    return note[:local.start()] + note[local.end():]
+
+
 def _direct_visa_centre_option(detail: str) -> bool:
     """Recognize affirmative personal filing with explicitly optional agents.
 
@@ -1208,7 +1237,7 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
             continue
         # Only a number that describes the STAY counts ("stay of 15 days",
         # "granted 15 days", 停留15天). "Apply 45 days before travel" does not.
-        named = _named_stay_limits(note)
+        named = _named_stay_limits(_total_stay_note(clean, vp, note))
         if named and max(named) < d:
             contradictions.append(
                 f"visa product '{vp.get('type')}' says {d} days but its note "
