@@ -248,15 +248,12 @@ test('malformed continuation timestamps cannot imply a recorded prior cycle', ()
   ]) assert.doesNotMatch(renderSweep({ ...currentRun, ...extra }), /ops-fresh-continuation/)
 })
 
-// Owner requests of 11 September 2026 on the QC access and quality cells,
-// pinned at source level: the green "Published to travelers" label stands in
-// whenever the publish button is absent (including product-only holds, which
-// also name the product under review), and the quality cell shows the tier
-// label alone, never a completeness percentage.
+// Every QC access cell describes its own product publication status or
+// offers the publish action. The quality cell shows the tier label alone.
 test('QC access cell: published label or publish button, never an empty cell', async () => {
   const { readFileSync } = await import('node:fs')
   const src = readFileSync(new URL('../../src/renderer/src/screens/QualityConsole.jsx', import.meta.url), 'utf8')
-  assert.match(src, /\{\(!held \|\| productWithheld\) && \(\s*<span data-testid="ops-published"/)
+  assert.match(src, /\{!held && \(\s*<span data-testid="ops-published"/)
   assert.match(src, /\{held && productWithheld && \(\s*<span data-testid="ops-product-withheld"/)
   assert.match(src, /\{held && !productWithheld && \(\s*<button[^]*?data-testid="ops-release"/)
   assert.ok(!src.includes('pctDone'), 'the quality cell must not print a completeness percentage')
