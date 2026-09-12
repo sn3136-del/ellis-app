@@ -720,6 +720,45 @@ def _reviewed_product_zero_fee(product: dict, fee: dict, route: dict | None) -> 
     return zero and currency_present
 
 
+# A note states that no fee is charged only in a clause of its own that
+# says so and denies nothing: "Visa fee waived for children under six",
+# "No visa fee is payable", "Issued free of charge". A clause that carries
+# the word "free" inside a denial ("0 here is a placeholder, not a claim
+# that it is free") states the opposite, and a bare word such as "nil"
+# inside "until" or "exempt" inside "not exempt" states nothing.
+_FEE_WAIVER_RE = re.compile(
+    r"(?<![^\W_])(?:free[- ]of[- ]charge|issued free|(?:is|are|be|was|were|comes?|available|obtained|granted|issued) free|"
+    r"(?:visa|e-?visa|eta|esta|permit|application|registration|authori[sz]ation|processing)s? (?:is |are )?free"
+    r"(?![- ]?(?:entry|travel|zone|area|transit|movement|trade|access|regime|arrangement|countries|nationals|period|stay))|"
+    r"gratis|gratuit[oa]?s?|kostenlos|gebührenfrei|"
+    r"no (?:visa |application |visa application |processing |consular |government |issuance )?fees?|"
+    r"fees?(?: is| are)?(?: fully)? (?:waived|exempt(?:ed)?)|fee[- ]waivers?|fee[- ]exempt(?:ion)?|"
+    r"waiver of (?:the )?(?:visa |application )?fees?|"
+    r"exempt(?:ed)? from (?:paying |payment of )?(?:the |any |all )?(?:visa |application |visa application |processing |consular )?fees?|"
+    r"nil fee|fees?:? nil|nil|zero[- ]fee|免费|免簽費|免签费|免收|無料|무료)(?![^\W_])", re.I)
+_FEE_DENIAL_RE = re.compile(
+    r"(?<![^\W_])(?:not|never|no longer|isn'?t|aren'?t|doesn'?t|don'?t|cannot|can'?t|won'?t|placeholder|unknown|"
+    r"unpublished|unverified|unless|except|only (?:for|if|when)|if|whether|may be|might be|could be|nor|neither)(?![^\W_])", re.I)
+
+
+# A clause that is nothing but the waiver ("Free", "Fee: free", "Visa fee:
+# Free", "Fee: 0 (free)") states it as plainly as a sentence does.
+_FEE_WAIVER_CLAUSE_RE = re.compile(
+    r"\W*(?:(?:visa|e-?visa|application|consular|processing|government)\s+)?(?:fees?\W*)?(?:0|zero|nil)?\W*"
+    r"(?:free|gratis|gratuit[oa]?s?|kostenlos|gebührenfrei|免费|免簽費|免签费|無料|무료)(?:\s+of\s+charge)?\W*", re.I)
+
+
+def _fee_waiver_stated(text: str) -> bool:
+    """Whether some clause of the text states, on its own and with no
+    denial beside it, that no fee is charged."""
+    for clause in re.split(r"[.;!?\n]+|\s+(?:but|however|although|though)\s+", str(text or "")):
+        if _FEE_DENIAL_RE.search(clause):
+            continue
+        if _FEE_WAIVER_RE.search(clause) or _FEE_WAIVER_CLAUSE_RE.fullmatch(clause):
+            return True
+    return False
+
+
 def _fee(product: dict, guidance: dict, route: dict | None = None) -> tuple[float | None, str | None]:
     fee = product.get("fee") if isinstance(product.get("fee"), dict) else None
     if not fee:
@@ -739,21 +778,25 @@ def _fee(product: dict, guidance: dict, route: dict | None = None) -> tuple[floa
         amount = int(amount)
     if amount == 0:
         # A zero consular fee on a visa that must be applied for is almost
-        # always a hallucinated "free": the acceptance audit found sources
-        # charging 60-90 EUR where 0 was stored. Zero survives only when the
-        # answer itself says the fee is waived; otherwise the fee is honestly
-        # missing (and the completeness campaign researches it).
+        # always a hallucinated "free" or a placeholder: the acceptance
+        # audit found sources charging 60-90 EUR where 0 was stored, and a
+        # Kuwait row carried 0 KWD under a note saying the amount was not
+        # published. Zero survives only on a structured signal: the
+        # product's own reviewed zero tariff, an exemption lane that has no
+        # fee, or a note clause that states no fee is charged and denies
+        # nothing. A word such as "free" inside the clause that denies a
+        # waiver is not that signal. Otherwise the fee is honestly missing
+        # (and the completeness campaign researches it).
         disposition = str(guidance.get("disposition") or "").upper()
         if disposition not in ("VISA_EXEMPT", ""):
-            texts = " ".join(str(x or "") for x in (
-                product.get("notes"), fee.get("note"), fee.get("notes"),
-                guidance.get("requirement_detail"),
-                guidance.get("application_channel_detail"))).lower()
-            if not _reviewed_product_zero_fee(product, fee, route) and not any(k in texts for k in ("free", "gratis", "no fee", "fee waiver",
-                                            "no visa fee", "no visa application fee",
-                                            "waived", "exempt", "nil",
-                                            "zero-fee", "免费", "免簽費",
-                                            "免签费", "免收")):
+            detail = _key_of(guidance.get("requirement_detail"))
+            exemption = (bool(detail) and SUBCATEGORY[detail] in _VISA_FREE_DETAILS) or _product_is_exemption(product)
+            # The product's own name is a clause of its own ("Fee-exempt Type
+            # C visa (applicant under 18)", "Tourist ETA (free of charge)").
+            notes = "\n".join(str(x or "") for x in (
+                product.get("type"), product.get("notes"), fee.get("note"), fee.get("notes"),
+                guidance.get("application_channel_detail")))
+            if not (_reviewed_product_zero_fee(product, fee, route) or exemption or _fee_waiver_stated(notes)):
                 return None, str(currency) if currency else None
         # A genuinely zero fee has no meaningful currency; the exempt branch
         # already writes "0 USD", so a proven-free product does the same

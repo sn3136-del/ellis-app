@@ -10,6 +10,7 @@ one of them must now be refused rather than served.
 from copy import deepcopy
 import hashlib
 import json
+import re
 
 import pytest
 
@@ -462,9 +463,17 @@ def test_a_fee_fill_with_a_currency_symbol_quote_passes_the_monetary_handling():
 
 def test_a_service_charge_is_never_the_government_fee():
     quote = 'The visa centre also charges a service fee of A$62 per application, which is not a consular fee.'
-    route_service = route_fill('government_fee', {'amount': 62, 'currency': 'AUD'}, proof(quote, sid='ru_aus_business', url=BUSINESS))
+    # The sentence stands in the tourist section of its page, so the section
+    # gate binds it and the service-charge gate is the one that refuses.
+    url = 'https://australia.mid.ru/en/consular_services/visas/service/'
+    src = source('ru_service', url, 'Tourist visa.\n' + quote)
+    route_service = route_fill('government_fee', {'amount': 62, 'currency': 'AUD'}, proof(quote, sid='ru_service', url=url))
     with pytest.raises(PatchRejected, match='service, agency, centre'):
-        run(route_service)
+        run(route_service, sources=SOURCES + [src])
+    # On the business page the same sentence never reaches that gate: its
+    # section is the business visa's, which the route does not serve.
+    with pytest.raises(PatchRejected, match='its page section \\(Business visa. .*\\) the sentence is about a business visa class'):
+        run(route_fill('government_fee', {'amount': 62, 'currency': 'AUD'}, proof(quote, sid='ru_aus_business', url=BUSINESS)))
     page = 'A tourist visa application also carries a VFS service fee of A$62.'
     sources = SOURCES + [source('ru_vfs', 'https://australia.mid.ru/en/consular_services/fees/vfs/', page)]
     product_service = product_fill('fee', {'amount': 62, 'currency': 'AUD'}, proof(page, sid='ru_vfs', url='https://australia.mid.ru/en/consular_services/fees/vfs/'))
@@ -778,7 +787,9 @@ def test_a_route_level_fill_never_borrows_another_visa_classs_sentence():
     fill, sources = on_page('required_documents', ['Letter of acceptance from a Russian university', 'Certificate of HIV testing'],
                             'Student visa applicants must submit a letter of acceptance from a Russian university and a certificate of HIV testing.',
                             'b', target='route')
-    with pytest.raises(PatchRejected, match='route required_documents: the sentence is about a student visa class the route does not serve'):
+    with pytest.raises(PatchRejected, match='route required_documents: the sentence that states the document "Letter of acceptance from a '
+                                            'Russian university" does not bind to the served products: .*'
+                                            'the sentence is about a student visa class the route does not serve'):
         run(fill, sources=sources)
     fill, sources = on_page('permitted_stay', 'Up to 90 days', 'A business visa holder may stay in the Russian Federation for up to 90 days.', 'c2', target='route')
     with pytest.raises(PatchRejected, match='about a business visa class the route does not serve'):
@@ -1611,7 +1622,7 @@ def test_a_sentence_with_no_anchor_binds_to_the_section_it_stands_in():
     quote = 'Applicants must present a confirmed onward ticket, a visa for the third country and a hotel reservation.'
     fill = product_fill('required_documents', ['Confirmed onward ticket', 'Visa for the third country', 'Hotel reservation'],
                         proof(quote, sid='r6section', url=url))
-    with pytest.raises(PatchRejected, match='the sentence carries no anchor of the product and its page section '
+    with pytest.raises(PatchRejected, match='the sentence carries no anchor of Tourist visa and its page section '
                                             '\\(Transit visa.\\) the sentence is about a transit visa class the route does not serve'):
         run(fill, sources=SOURCES + [src])
     # The tourist section of the same page still binds, so the gate reads the
@@ -1757,3 +1768,236 @@ def test_an_age_scoped_fee_names_its_band_on_the_applied_record():
     # so the served column stays empty rather than misstating the amount.
     assert report['routes'][0]['changed_record_columns'] == ['visa_fee_amount', 'visa_fee_currency']
     assert report['routes'][0]['records'][0]['visa_fee_qualifier'] is None
+
+
+# Round 7: the four blocking holes and the six majors the sixth review
+# executed against 8c7cd99, each on the reviewer's own heading, header,
+# sentence or cell. The gate is the same one for every fixture: a sentence
+# with no anchor of its own takes its subject from the nearest heading
+# above it, whatever that heading says beside the class word.
+
+TRANSIT_SENTENCE = 'Applicants must present a confirmed onward ticket, a visa for the third country and a hotel reservation.'
+TRANSIT_DOCS = ['Confirmed onward ticket', 'Visa for the third country', 'Hotel reservation']
+TRANSIT_CELL = 'Confirmed onward ticket, Visa for the third country, Hotel reservation'
+TOURIST_SECTION = 'Tourist visa\nA tourist visa is valid for up to 30 days and is issued as a single-entry visa.\n'
+TRANSIT_SECTION = 'Transit visa.\nA transit visa is issued for 10 days and cannot be extended.\n'
+TRANSIT_SECTION_REASON = ('its page section \\(A transit visa is issued for 10 days and cannot be extended.\\) '
+                          'the sentence is about a transit visa class the route does not serve')
+
+
+def transit_fill(sid, text, target='product', quote=TRANSIT_SENTENCE, value=None):
+    """A page with the reviewer's text and a documents fill quoting only the
+    transit requirement sentence on it."""
+    src, url = page(sid, text, path='visas/' + sid)
+    proof_ = proof(quote, sid=sid, url=url)
+    value = value or TRANSIT_DOCS
+    fill = product_fill('required_documents', value, proof_) if target == 'product' else route_fill('required_documents', value, proof_)
+    return fill, SOURCES + [src]
+
+
+@pytest.mark.parametrize('heading', ['Transit', 'Airport transit', 'Transit passengers', 'Documents for transit', 'Transit (Subclass 771)',
+                                     'Crew and transit', 'Transit through the Russian Federation.', 'Student', 'Work',
+                                     'Business travellers', 'Diplomatic and official'])
+def test_a_bare_class_heading_is_that_classs_section(heading):
+    fill, sources = transit_fill('r7bare', TOURIST_SECTION + heading + '\n' + TRANSIT_SENTENCE)
+    with pytest.raises(PatchRejected, match='the sentence carries no anchor of Tourist visa and its page section \\(%s\\) the section '
+                                            'heading names a (?:transit|student|work|business|diplomatic|crew) class the route does not '
+                                            'serve' % re.escape(heading)):
+        run(fill, sources=sources)
+
+
+def test_a_page_whose_only_section_is_another_class_serves_nothing_and_a_served_heading_still_binds():
+    fill, sources = transit_fill('r7only', 'Consular services\nAirport transit requirements\n' + TRANSIT_SENTENCE
+                                 + '\nApplications are lodged at the Embassy in Canberra.')
+    with pytest.raises(PatchRejected, match='the section heading names a transit class the route does not serve'):
+        run(fill, sources=sources)
+    # A documents heading, a numbered heading or a heading naming the served
+    # class under the tourist section keeps the tourist section's subject.
+    for heading in ('Required documents', '8. Required Documents', 'Tourist visa requirements'):
+        fill, sources = transit_fill('r7ok', TOURIST_SECTION + heading + '\n' + TRANSIT_SENTENCE)
+        (overlay, report), manifest, current = run(fill, sources=sources)
+        assert report['routes'][0]['records'][0]['required_documents'] == TRANSIT_CELL, heading
+    # A class word inside a scope phrase names people or a time, not a class.
+    assert c._bare_class_problem('Work', ROUTE, PRODUCT, [PRODUCT], layer()['merged_guidance'])
+    for heading in ('Working days', 'Business hours', 'GCC Residents', 'Press releases', 'Diplomatic Relations'):
+        assert c._bare_class_problem(heading, ROUTE, PRODUCT, [PRODUCT], layer()['merged_guidance']) is None, heading
+    assert c._bare_class_problem('Diplomatic and official', ROUTE, PRODUCT, [PRODUCT], layer()['merged_guidance'])
+    for line in ('Transit', '8. Required Documents', 'Airport transit requirements', 'Documents Required For A Tourist Visa',
+                 'Applicants must hold a return ticket'):
+        assert c._reads_as_heading(line), line
+    assert not c._reads_as_heading('A transit visa is issued for ten days and cannot be extended or converted in country.')
+
+
+def test_a_cross_reference_or_a_stray_product_word_never_reopens_a_foreign_section():
+    for xref in ('Holders of a valid tourist visa are exempt.', 'Tourist visa holders are exempt.', 'Not required with a tourist visa'):
+        fill, sources = transit_fill('r7xref', TRANSIT_SECTION + xref + '\n' + TRANSIT_SENTENCE)
+        with pytest.raises(PatchRejected, match='the sentence carries no anchor of Tourist visa and ' + TRANSIT_SECTION_REASON):
+            run(fill, sources=sources)
+    products = layer()['merged_guidance']['visa_products']
+    stray = 'Applicants must present a confirmed onward ticket, a tourist hotel reservation and a visa for the third country.'
+    assert c._unanchored(stray, products[0], products)
+    assert not c._unanchored('A tourist visa is valid for up to 30 days.', products[0], products)
+    fill, sources = transit_fill('r7stray', TRANSIT_SECTION + stray, quote=stray,
+                                 value=['Confirmed onward ticket', 'Tourist hotel reservation', 'Visa for the third country'])
+    with pytest.raises(PatchRejected, match='the sentence carries no anchor of Tourist visa and ' + TRANSIT_SECTION_REASON):
+        run(fill, sources=sources)
+
+
+def test_a_route_level_fill_runs_the_section_gate():
+    fill, sources = transit_fill('r7route', TRANSIT_SECTION + TRANSIT_SENTENCE + '\nTourist visa.\nA tourist visa is valid for up to 30 days.',
+                                 target='route')
+    with pytest.raises(PatchRejected, match='route required_documents: the sentence that states the document "Confirmed onward ticket" does '
+                                            'not bind to the served products: the sentence carries no anchor of the served products and '
+                                            + TRANSIT_SECTION_REASON):
+        run(fill, sources=sources)
+    fill, sources = transit_fill('r7routebare', TOURIST_SECTION + 'Transit\n' + TRANSIT_SENTENCE, target='route')
+    with pytest.raises(PatchRejected, match='its page section \\(Transit\\) the section heading names a transit class the route does not serve'):
+        run(fill, sources=sources)
+    raw = deepcopy(RAW)
+    raw.pop('permitted_stay'); raw.pop('permitted_stay_days')
+    stay = 'Holders may remain in the country for up to 10 days.'
+    src, url = page('r7routestay', TRANSIT_SECTION + stay + '\nTourist visa.\nA tourist visa is valid for up to 30 days.', path='visas/r7routestay')
+    for fill in (route_fill('permitted_stay', 'Up to 10 days', proof(stay, sid='r7routestay', url=url)),
+                 route_fill('permitted_stay_days', 10, proof(stay, sid='r7routestay', url=url))):
+        with pytest.raises(PatchRejected, match='does not bind to the served products: .*' + TRANSIT_SECTION_REASON):
+            run(fill, current=layer(raw=raw), sources=SOURCES + [src])
+    # The same route fill under the tourist heading binds.
+    fill, sources = transit_fill('r7routeok', 'Transit visa.\nA transit visa is issued for 10 days.\nTourist visa\n' + TRANSIT_SENTENCE, target='route')
+    (overlay, report), manifest, current = run(fill, sources=sources)
+    assert report['routes'][0]['records'][0]['required_documents'] == TRANSIT_CELL
+
+
+def test_a_header_carrying_a_stay_or_a_document_word_never_takes_the_validity_slot():
+    for header in ('Validity of Stay', 'Valid for stay of', 'Validity (Duration of Stay)', 'Stay Validity', 'Validity of Sojourn',
+                   'Residence Permit Validity', 'Work Permit Validity', 'ID Card Validity'):
+        body = 'Visa Classification | Fee | Number of Entries | %s\nB-1/B-2 | None | Multiple | 90 Days' % header
+        assert c._delimited_rows(body) == {'B-1/B-2 | None | Multiple | 90 Days': {
+            'class': 'B-1/B-2', 'fee': 'None', 'entries': 'Multiple'}}, header
+        src, url, current = recip('r7hdr', body, path='r7hdr')
+        with pytest.raises(PatchRejected, match='no quoted sentence bound to the product states this value'):
+            run(product_fill('validity', '90 days', proof(body, sid='r7hdr', url=url), product_type=RECIP_LABEL),
+                current=current, sources=SOURCES + [src])
+    # The round-5 reciprocity table keeps its validity column and serves it.
+    assert c._delimited_rows(RECIPROCITY)['B-1/B-2 | None | Multiple | 120 Months']['validity'] == '120 Months'
+    src, url, current = recip('r7recip', RECIPROCITY, path='r7recip')
+    (overlay, report), manifest, current = run(
+        product_fill('validity', '120 months', proof(RECIPROCITY, sid='r7recip', url=url), product_type=RECIP_LABEL),
+        current=current, sources=SOURCES + [src])
+    assert report['routes'][0]['records'][0]['validity_duration'] == 120
+    # A header-bound cell passes the validity-versus-stay gate a sentence
+    # passes, because the header names the column and not the cell's words.
+    for cell in ('30 Days stay', 'Stay of 30 Days'):
+        body = 'Visa Classification | Fee | Number of Entries | Validity Period\nB-1/B-2 | None | Multiple | %s' % cell
+        src, url, current = recip('r7cell', body, path='r7cell')
+        with pytest.raises(PatchRejected, match="the row's validity cell \\(%s\\) states a stay, not the visa's validity" % cell):
+            run(product_fill('validity', '30 days', proof(body, sid='r7cell', url=url), product_type=RECIP_LABEL),
+                current=current, sources=SOURCES + [src])
+
+
+@pytest.mark.parametrize('sentence, value, cap', [
+    ('The maximum validity of a tourist visa is 10 years.', '10 years', 'maximum'),
+    ('A tourist visa is issued for a maximum validity of 10 years.', '10 years', 'maximum'),
+    ('A tourist visa is valid for 90 days maximum.', '90 days', 'maximum'),
+    ('A tourist visa is valid for a period of 90 days or less.', '90 days', 'or less'),
+    ('A tourist visa is valid for a maximum period of 90 days.', '90 days', 'maximum'),
+    ('A tourist visa is valid for a maximum duration of 15 days.', '15 days', 'maximum'),
+    ('The maximum validity period of a tourist visa shall be 180 days.', '180 days', 'maximum'),
+    ('A tourist visa is valid for maximum 5 years.', '5 years', 'maximum'),
+    ('A tourist visa is valid for a maximum term of 6 months.', '6 months', 'maximum'),
+    ('A tourist visa has a validity period of 5 years or fewer, depending on the position of the holder.', '5 years', 'or fewer'),
+    ('The maximum validity for a tourist visa is 12 months.', '12 months', 'maximum'),
+])
+def test_every_maximum_and_or_less_ceiling_is_refused_as_a_flat_validity(sentence, value, cap):
+    fill, sources = on_page('validity', value, sentence, 'r7cap')
+    with pytest.raises(PatchRejected, match='the figure is governed by a cap \\(%s\\), not stated as the value' % cap):
+        run(fill, sources=sources)
+
+
+def test_the_ceiling_controls_still_serve_a_flat_validity():
+    for sentence, value in (('A tourist visa is valid for 30 days.', '30 days'),
+                            ('A tourist visa is valid for 90 days from the date of issue.', '90 days')):
+        fill, sources = on_page('validity', value, sentence, 'r7flat')
+        (overlay, report), manifest, current = run(fill, sources=sources)
+        assert report['routes'][0]['records'][0]['validity_duration'] == int(value.split()[0])
+    for cell in ('Maximum 60 Months', 'Maximum period of 60 Months', 'Maximum duration of 60 Months', '60 Months maximum', '60 Months or less'):
+        assert c._duration_problem('validity', '', 60, 'Month', None, None, None, None, None,
+                                   cells={'class': 'B-1/B-2', 'validity': cell}, stated='60 months'), cell
+    assert c._duration_problem('validity', '', 60, 'Month', None, None, None, None, None,
+                               cells={'class': 'B-1/B-2', 'validity': '60 Months'}, stated='60 months') is None
+
+
+def test_a_footnote_marker_in_any_rendering_refuses_the_row():
+    for cell in ('60 Months 3', '60 Months3', '60 Months [3]', '60 Months (3)', '60 Months³', '60 Months▲', '60 Months ▲◼'):
+        assert c._row_marker_problem({'class': 'B-1/B-2', 'validity': cell}), cell
+    for cell in ('3 Months', '30 days', '120 Months', '12 Months', '1 Year', '60 Months'):
+        assert c._row_marker_problem({'class': 'B-1/B-2', 'validity': cell}) is None, cell
+    product = {'type': RECIP_LABEL}
+    for cell in ('B-1/B-2 3', 'B-1/B-23', 'B-1/B-2[3]', 'B-1/B-2 (3)', 'B-1/B-2³', 'B-1/B-2 ▲◼'):
+        assert c._row_marker_problem({'class': cell, 'validity': '60 Months'}, product=product), cell
+    for cell in ('B-1/B-2', 'B-2', 'H-1B'):
+        assert c._row_marker_problem({'class': cell, 'validity': '60 Months'}, product=product) is None, cell
+    footnote = '\nCountry Specific Footnotes\n3. Validity is limited to the duration of the approved petition.'
+    for rendering in ('B-1/B-23 | None | Multiple | 60 Months3', 'B-1/B-2[3] | None | Multiple | 60 Months[3]',
+                      'B-1/B-2 (3) | None | Multiple | 60 Months (3)', 'B-1/B-2³ | None | Multiple | 60 Months³',
+                      'B-1/B-2 | None | Multiple | 60 Months ▲◼'):
+        body = 'Visa Classification | Fee | Number of Entries | Validity Period\n' + rendering + footnote
+        src, url, current = recip('r7mark', body, path='r7mark')
+        with pytest.raises(PatchRejected, match='ends in a footnote marker, so the page qualifies the row elsewhere'):
+            run(product_fill('validity', '60 months', proof(body, sid='r7mark', url=url), product_type=RECIP_LABEL),
+                current=current, sources=SOURCES + [src])
+
+
+def test_a_negated_lodgement_never_supports_the_agent_channel():
+    from app.visa_snapshot.evidence_validator import field_value_supported
+    for negated in ('Applications are not accepted at the VFS visa application centre; apply at the Embassy.',
+                    'You cannot apply at the VFS centre.',
+                    'Applications are no longer lodged at the BLS International centre.',
+                    'Applications are lodged at the Embassy and never at the visa application centre.',
+                    'You cannot submit your application at the VFS Global centre, which only returns passports.',
+                    'Do not submit your application at the BLS centre.',
+                    'Applications are not accepted at the BLS International visa application centre.',
+                    'Applications may not be lodged at the BLS centre.',
+                    'The visa application centre in Jakarta and the visa application centre in Surabaya are open from 09:00.',
+                    'Applicants apply online and may collect the passport at the VFS Global office afterwards.'):
+        assert not field_value_supported('application_channel', 'authorised_agent', negated), negated
+    for named in ('Our partner BLS also runs a courier desk for passport collection.',
+                  'The nearest application center is closed on public holidays.',
+                  'VFS Global publishes its processing statistics every quarter.',
+                  'Directions to the visa application centre are available on the map.',
+                  'The BLS International building is next to the shopping mall.'):
+        assert not field_value_supported('application_channel', 'authorised_agent', named), named
+    for lodged in ('Applications are lodged at the BLS International centre in Jakarta.',
+                   'La solicitud de visado se presenta ante Indonesia BLS Visa Spain.',
+                   'You must submit your application at the VFS visa application centre.',
+                   'Applications may be filed through an accredited travel agency.'):
+        assert field_value_supported('application_channel', 'authorised_agent', lodged), lodged
+    raw = deepcopy(RAW)
+    raw.pop('application_channel'); raw.pop('application_channel_detail')
+    fill, sources = on_page('application_channel', 'authorised_agent',
+                            'Tourist visa. Do not submit your application at the BLS centre. Apply at the Embassy of Russia in Canberra.',
+                            'r7agent', target='route')
+    with pytest.raises(PatchRejected):
+        run(fill, current=layer(raw=raw), sources=sources)
+
+
+def test_a_single_code_product_needs_its_rows_to_agree():
+    disagree = ('Visa Classification | Fee | Number of Entries | Validity Period\n'
+                'B-1 | None | Multiple | 120 Months\n'
+                'B-2 | None | One | 3 Months\n'
+                'B-1/B-2 | None | Multiple | 120 Months')
+    label = 'Visitor visa (B-2)'
+    src, url = page('r7single', 'Visa reciprocity schedule.\n' + disagree, path='r7single')
+    for value in ('120 months', '3 months'):
+        with pytest.raises(PatchRejected, match="the table states 2 different validity values for the product's own class codes "
+                                                "\\(120 months for B-1/B-2; 3 months for B-2\\)"):
+            run(product_fill('validity', value, proof(disagree, sid='r7single', url=url), product_type=label),
+                current=labelled_layer(label, entry=None), sources=SOURCES + [src])
+    with pytest.raises(PatchRejected, match="the table states 2 different entries values for the product's own class codes"):
+        run(product_fill('entry', 'multiple', proof(disagree, sid='r7single', url=url), product_type=label),
+            current=labelled_layer(label, entry=None), sources=SOURCES + [src])
+    agree = disagree.replace('B-2 | None | One | 3 Months', 'B-2 | None | Multiple | 120 Months')
+    src2, url2 = page('r7agree', 'Visa reciprocity schedule.\n' + agree, path='r7agree')
+    (overlay, report), manifest, current = run(
+        product_fill('validity', '120 months', proof(agree, sid='r7agree', url=url2), product_type=label),
+        current=labelled_layer(label, entry=None), sources=SOURCES + [src2])
+    assert report['routes'][0]['records'][0]['validity_duration'] == 120

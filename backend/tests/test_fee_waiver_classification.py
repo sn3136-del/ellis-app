@@ -150,3 +150,44 @@ def test_mixed_child_fee_waiver_and_real_entry_exemption_do_not_share_family():
     assert child["visa_requirement_detail"] == "Paper Visa"
     assert child["visa_fee_amount"] == 0
     assert free["visa_requirement_detail"] == "Conditional Visa-free"
+
+
+# Round 7 of the field-fill review: a zero fee survives only on a structured
+# signal, never on the word "free" read out of a note that denies a waiver.
+
+KUWAIT = {"type": "Tourist eVisa / visa on arrival", "entry": "single", "validity": "30 days from date of issuance",
+          "max_stay_days": 90, "fee": {"amount": 0, "currency": "KWD"},
+          "notes": "Amount not published; varies by nationality and shown during the online application. "
+                   "0 here is a placeholder, not a claim that it is free."}
+KUWAIT_ROUTE = {"passport_nationality": "HKG", "lawful_country_of_residence": "HKG", "destination_country": "KWT",
+                "travel_purpose": "tourism", "travel_document_type": "ordinary_passport"}
+KUWAIT_GUIDANCE = {"disposition": "VISA_ON_ARRIVAL", "visa_products": [KUWAIT], "source_url": "https://kuwaitvisa.moi.gov.kw/"}
+
+
+def test_a_placeholder_zero_under_a_note_that_denies_a_waiver_projects_as_missing():
+    assert tstation._fee(KUWAIT, KUWAIT_GUIDANCE, KUWAIT_ROUTE) == (None, "KWD")
+    row, = tstation.records_for_route(KUWAIT_ROUTE, KUWAIT_GUIDANCE)
+    assert row["visa_fee_amount"] is None
+    assert tstation.field_status(row)["visa_fee_amount"] == "missing"
+
+
+@pytest.mark.parametrize("note", ["not free", "The fee is not waived", "0 is a placeholder", "Free if applying online",
+                                  "It is not free of charge", "No fee unless you apply late", "Fee: 0 (unpublished)"])
+def test_a_waiver_word_inside_a_denial_keeps_no_zero(note):
+    assert tstation._fee(dict(KUWAIT, notes=note), KUWAIT_GUIDANCE, KUWAIT_ROUTE) == (None, "KWD")
+
+
+@pytest.mark.parametrize("note", ["Issued free of charge.", "No visa fee is payable.", "Visa fee waived for children under six.",
+                                  "Free", "Visa fee: Free", "Free of charge for Hong Kong SAR passport holders.",
+                                  "Amount not published, but the visa is free-of-charge for this nationality."])
+def test_a_clause_that_states_no_fee_on_its_own_keeps_the_zero(note):
+    assert tstation._fee(dict(KUWAIT, notes=note), KUWAIT_GUIDANCE, KUWAIT_ROUTE) == (0, "KWD")
+
+
+def test_a_product_named_as_the_exempt_lane_keeps_its_zero():
+    named = dict(KUWAIT, type="Fee-exempt Type C visa (applicant under 18)",
+                 notes="Free visas are granted to children who have not reached 18 years of age.")
+    assert tstation._fee(named, dict(KUWAIT_GUIDANCE, disposition="VISA_REQUIRED"), KUWAIT_ROUTE) == (0, "KWD")
+    lane = dict(KUWAIT, type="Tourist ETA (free of charge for 40 eligible nationalities)", notes=None)
+    assert tstation._fee(lane, dict(KUWAIT_GUIDANCE, disposition="ELECTRONIC_AUTHORIZATION_REQUIRED"), KUWAIT_ROUTE) == (0, "KWD")
+    assert tstation._fee(dict(KUWAIT, notes=None), dict(KUWAIT_GUIDANCE, disposition="VISA_REQUIRED"), KUWAIT_ROUTE) == (None, "KWD")

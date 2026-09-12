@@ -539,8 +539,15 @@ _SUSPENSION_RE = re.compile(_words(
 # a value and, on the absence path, is not a stated value. The forms are
 # the ones the captured corpus prints. A bare "up to" is how a fixed
 # validity is commonly worded ("valid for up to 30 days") and is not a cap.
+# The whole maximum family is a ceiling, whatever stands between the word
+# and the figure: "a maximum period of 90 days", "the maximum validity of
+# a tourist visa is 10 years", "issued for a maximum validity of", "valid
+# for maximum 5 years", "90 days maximum", "max. 90 days", and the postfix
+# "90 days or less". A ceiling is not the visa's validity.
 _CAP_RE = re.compile(_words(
-    r'up to a maximum of|a maximum of|maximum of|at (?:the )?most|no more than|not more than|not (?:to )?exceed(?:ing|s)?|'
+    r'up to a maximum of|a maximum of|maximum of|maximum|max\.|max(?=\s*\d)|at (?:the )?most|no more than|not more than|not (?:to )?exceed(?:ing|s)?|'
+    r'or (?:less|fewer|shorter|under|below)|o menos|ou moins|oder weniger|atau kurang|hoặc ít hơn|'
+    r'máxim[oa]s?|maximale?s?|massim[oa]|'
     # "as long as one year", "as much as 10 years" cap a figure. The same
     # words with no figure after them are a condition ("valid for 30 days
     # as long as your passport stays valid") and cap nothing.
@@ -601,8 +608,21 @@ _DOCUMENT_SUBJECT_RE = re.compile(_words(
     r'passports?|travel documents?|passeports?|pasaportes?|paspor|hộ chiếu|certificates?|certificats?|certificados?|sertifikat|'
     r'chứng nhận|giấy chứng nhận|insurance|assurance|seguro|asuransi|bảo hiểm|polic(?:y|ies)|tickets?|billets?|billetes?|tiket|'
     r'photos?|photographs?|bank statements?|statements?|invitations?|letters?|forms?|receipts?|biometrics|tests?|résultats?|'
-    r'результат|справк|сертификат|страхов|полис|билет|паспорт|приглашени|анкет',
-    r'护照|護照|パスポート|旅券|여권|证明|證明|証明|保险|保險|保険|보험|증명서|ประกัน|หนังสือเดินทาง|ใบรับรอง'), re.I)
+    # A residence or work permit, an identity card and a licence carry a
+    # validity of their own that is never the served visa's.
+    r'(?:residence|residency|work|employment|stay) permits?|(?:identity|id|residence|resident|green|credit|debit) cards?|cards?|'
+    r'(?:driving|driver[’\']?s?) licen[cs]es?|licen[cs]es?|permis de séjour|permis de travail|cartes? de séjour|'
+    r'permiso de residencia|permiso de trabajo|tarjeta de residencia|aufenthaltstitel|aufenthaltserlaubnis|arbeitserlaubnis|'
+    r'результат|справк|сертификат|страхов|полис|билет|паспорт|приглашени|анкет|вид на жительство',
+    r'护照|護照|パスポート|旅券|여권|证明|證明|証明|保险|保險|保険|보험|증명서|ประกัน|หนังสือเดินทาง|ใบรับรอง|居留证|居留證|在留カード|'
+    r'외국인등록증|身份证|身份證'), re.I)
+# A header cell that names the visa's validity column must not name a stay
+# or a document: "Validity of Stay", "Stay Validity", "Validity (Duration
+# of Stay)", "Passport Validity", "Residence Permit Validity" and "ID Card
+# Validity" all carry a validity word and none of them is the visa's own.
+_HEADER_NOT_VISA_RE = re.compile(_words(
+    r'permits?|cards?|licen[cs]es?|passes?|residence|residency|work|employment|sojourn|admission|admitted|'
+    r'entry stamp|stamp'), re.I)
 
 # Requirement position. A document a traveller must present stands as the
 # object of a requirement cue (present, submit, need, must carry, a
@@ -702,9 +722,15 @@ _HEADER_KINDS = {
 # as the class column only when no narrower kind claims it first.
 _HEADER_ORDER = ('entries', 'validity', 'fee', 'class')
 # A reciprocity row carries its footnote as a marker after the class code or
-# after the value ("B-1/B-2 3", "60 Months 3"), and the footnote is where
-# the page qualifies the row.
-_ROW_MARKER_RE = re.compile(r'[^\W_]\s+(?:\d{1,2}|[▲◼■●◆†‡*※])\s*$')
+# after the value, and the footnote is where the page qualifies the row.
+# The extractor renders the marker however the page's markup falls: spaced
+# ("60 Months 3"), glued ("60 Months3"), bracketed ("60 Months [3]",
+# "60 Months (3)"), as a superscript glyph ("60 Months³") or as one or
+# more symbols ("60 Months▲", "60 Months ▲◼"). Every rendering is a marker.
+_MARKER_SYMBOLS = r'[▲△◼■□●○◆◇†‡*※§¶⁰¹²³⁴⁵⁶⁷⁸⁹]'
+_ROW_MARKER_RE = re.compile(
+    r'(?:(?P<spaced>[^\W_]\s+\d{1,2})|(?P<glued>[^\W\d_]\d{1,2})|(?P<bracket>\s*[\[(]\s*\d{1,2}\s*[\])])|'
+    r'(?P<symbol>\s*' + _MARKER_SYMBOLS + r'+))\s*$')
 _CELL_ENTRIES = {'multiple': 'multiple', 'multi': 'multiple', 'm': 'multiple', 'single': 'single', 's': 'single',
                  'one': 'single', '1': 'single', 'double': 'double', 'd': 'double', 'two': 'double', '2': 'double'}
 
@@ -1207,106 +1233,238 @@ def _binding_problem(sentence, product, products):
     return None
 
 
+def _subjects(product, products):
+    """The served products a sentence may be about: the fill's own product
+    and its siblings, or every served product for a route-level fill."""
+    typed = [p for p in (products or []) if isinstance(p, dict) and p.get('type')]
+    if product is None:
+        return typed
+    return [product] + _siblings(product, products)
+
+
+def _meaningful_anchors(product):
+    """The anchors of a product that name it on their own. A bare stream
+    word ("tourist" in "a tourist hotel reservation") carries no product
+    meaning by itself and is left out."""
+    return {k: v for k, v in _product_anchors(product).items() if not (k[0] == 'family' and k[1] in _ANCHOR_STREAMS)}
+
+
 def _unanchored(sentence, product, products):
     """Whether nothing in the sentence says which product it is about: it
-    prints no served product's label and carries no anchor of any of them.
-    On a one-product route such a sentence passes _binding_problem, so its
-    subject has to come from the section of the page it stands in."""
-    siblings = [_product_anchors(p) for p in _siblings(product, products)]
-    labels = [product['type']] + [p['type'] for p in _siblings(product, products)]
+    prints no served product's label and carries no anchor of any of them
+    beyond a bare stream word. On a one-product route such a sentence
+    passes _binding_problem, and a route-level sentence binds to nothing
+    at all, so its subject has to come from the section of the page it
+    stands in."""
+    subjects = _subjects(product, products)
+    labels = [p['type'] for p in subjects]
     if any(_free_spans(label, sentence, labels) for label in labels):
         return False
-    every = dict(_product_anchors(product))
-    for anchors in siblings:
-        every.update(anchors)
+    every = {}
+    for p in subjects:
+        every.update(_meaningful_anchors(p))
     return not _anchors_in(sentence, every)
-
-
-def _names_subject(piece, product, products):
-    """Whether this piece of a page says which product or visa class the
-    text under it is about: it names a served product, carries one of
-    their anchors, or names a visa class at all."""
-    every = dict(_product_anchors(product))
-    labels = [product['type']]
-    for p in (products or []):
-        if isinstance(p, dict) and p.get('type'):
-            every.update(_product_anchors(p))
-            labels.append(p['type'])
-    if any(_free_spans(label, piece, labels) for label in labels):
-        return True
-    if _anchors_in(piece, every):
-        return True
-    for pattern in _VISA_CLASSES.values():
-        if any(_COMPOUND_VISA_RE.search(m.group()) for m in pattern.finditer(piece)):
-            return True
-        if _qualifies(piece, pattern, _CLASS_VISA_WORDS, extra=_VISA_CLASS_LINKS, links=5):
-            return True
-    return False
 
 
 # How far above a sentence the captured page is read for the subject of its
 # section. A page that says nothing about its subject in this much text
 # above a sentence has no section for it.
 _SECTION_WINDOW = 6000
+# A line the extractor marks as a heading (markdown or a tag it kept).
+_HEADING_MARK_RE = re.compile(r'^\s*(?:#{1,6}\s+|<h[1-6][^>]*>)', re.I)
+# A numbered line: "4. Fees", "(2) Documents", "II. Transit", "§ 3 Visa".
+_NUMBERED_LINE_RE = re.compile(r'^\s*(?:\(?\d{1,2}(?:\.\d{1,2})*[.):]?|[IVX]{1,4}[.)]|[A-Za-z][.)]|[§#]\s*\d+)\s+\S')
+# The phrases in which a class word names people, a time or a topic rather
+# than a visa class ("GCC Residents", "working days", "business hours",
+# "Treatment of personal data", "Press releases", "Diplomatic relations").
+# A class word inside one of them does not make a heading that class's
+# section.
+_HEADING_SCOPE_RE = re.compile(_words(
+    r'residents?|working (?:days?|hours)|business (?:days?|hours)|treatment of|press (?:releases?|office|room)|'
+    r'media (?:cent(?:re|er)|contacts?|enquiries|inquiries|releases?)|diplomatic (?:relations|missions?|corps|list|notes?)'), re.I)
+# A sentence that mentions the served product to point away from it, so it
+# says nothing about whose section it stands in: "Holders of a valid
+# tourist visa are exempt", "unless you hold a tourist visa".
+_CROSS_REFERENCE_RE = re.compile(_words(
+    r'holders? of|holding|who holds?|if you (?:hold|have|already)|already (?:hold|have)|with a valid|exempt(?:ed|ion)?|'
+    r'not required|no longer|instead of|rather than|unlike|as opposed to|except|unless|other than|see also|refer to|'
+    r'can ?not|cannot|does not|do not|is not|are not|not (?:be )?(?:eligible|permitted|allowed)|'
+    r'titulaires? d|sauf|à moins|dispensés?|exemptés?|titulares? de|salvo|a menos que|exentos?|inhaber|außer|befreit',
+    r'除非|除了|持有|免除|제외|소지자|免除|を除き'), re.I)
 
 
-def _section_above(sentence, item, sources, product, products):
-    """The nearest piece of the captured page above this sentence that says
-    which product or visa class its section is about, or None when the page
-    prints nothing of the kind above it."""
+def _reads_as_heading(line):
+    """Whether a page line reads as a heading: the extractor marks it, it is
+    short, it is numbered, it is title-cased, or it ends without the
+    period a sentence carries. A heading names the subject of the text
+    under it."""
+    text = line.strip()
+    if not text:
+        return False
+    if _HEADING_MARK_RE.match(text):
+        return True
+    words = text.split()
+    if len(words) <= 6:
+        return True
+    if len(words) > 12:
+        return False
+    if not re.search(r'[.;,。；，]\s*$', text):
+        return True
+    if _NUMBERED_LINE_RE.match(text):
+        return True
+    alphabetic = [w for w in words if re.match('[' + _LETTER + ']', w)]
+    capitalised = [w for w in alphabetic if w[0].isupper()]
+    return bool(alphabetic) and len(capitalised) >= 0.8 * len(alphabetic)
+
+
+def _sibling_named(piece, product, products):
+    """Why this piece names a sibling of the product rather than the
+    product, or None: it prints a sibling's label the product's does not
+    cover, or carries a sibling anchor the product lacks."""
+    if product is None:
+        return None
+    siblings = _siblings(product, products)
+    if not siblings:
+        return None
+    labels = [product['type']] + [p['type'] for p in siblings]
+    printed = [p['type'] for p in siblings if _free_spans(p['type'], piece, labels)]
+    target = _product_anchors(product)
+    for sibling in siblings:
+        foreign = _anchors_in(piece, {k: v for k, v in _product_anchors(sibling).items() if k not in target})
+        if foreign and sibling['type'] not in printed:
+            printed.append(sibling['type'])
+    if printed:
+        return 'names the product %s the route serves beside %s' % (', '.join(printed), product['type'])
+    return None
+
+
+def _bare_class_problem(heading, route, product, products, merged):
+    """Why this heading names a visa class the route does not serve by the
+    class word alone: a section headed Transit, Student, Work, Business
+    travellers or Crew and transit is that class's section whether or not
+    the word visa stands beside it."""
+    served = _families_served(_VISA_CLASSES, route, product, products, merged)
+    for family, pattern in _VISA_CLASSES.items():
+        if family in served:
+            continue
+        scoped = [(m.start(), m.end()) for m in _HEADING_SCOPE_RE.finditer(heading)]
+        for m in pattern.finditer(heading):
+            if any(a <= m.start() and m.end() <= b for a, b in scoped):
+                continue
+            return 'the section heading names a %s class the route does not serve' % family
+    return None
+
+
+def _names_served(piece, route, product, products, merged, heading):
+    """Whether this piece says the text under it is about a served
+    subject: it prints a served product's label, carries one of its
+    anchors, or, in a heading, names a served class by the class word. A
+    piece that mentions the product only to point away from it (a
+    cross-reference: "Holders of a valid tourist visa are exempt", however
+    short the line) says nothing about whose section it stands in."""
+    subjects = _subjects(product, products)
+    labels = [p['type'] for p in subjects]
+    every = {}
+    for p in subjects:
+        every.update(_product_anchors(p) if heading else _meaningful_anchors(p))
+    served = _families_served(_VISA_CLASSES, route, product, products, merged) if heading else ()
+    for sentence in ([piece] if heading else _sentences(piece)):
+        if _CROSS_REFERENCE_RE.search(sentence):
+            continue
+        if any(_free_spans(label, sentence, labels) for label in labels) or _anchors_in(sentence, every):
+            return True
+        if any(_VISA_CLASSES[family].search(sentence) for family in served):
+            return True
+    return False
+
+
+def _piece_subject(piece, route, product, products, merged, heading):
+    """What this piece of the page says about the subject of the text
+    under it: ('foreign', reason) when it names a class or a product the
+    fill is not about, ('served', None) when it names the fill's subject,
+    or None when it says nothing either way."""
+    problem = _class_problem(piece, route, product, products, merged) or _sibling_named(piece, product, products)
+    if not problem and heading:
+        problem = _bare_class_problem(piece, route, product, products, merged)
+    if problem:
+        return 'foreign', problem
+    if _names_served(piece, route, product, products, merged, heading):
+        return 'served', None
+    return None
+
+
+def _sentence_start(sentence, item, sources):
+    """The captured page and the offset of this sentence in it, or (text,
+    None) when the page does not print the quote."""
     page = (sources or {}).get(item.get('source_id')) if isinstance(sources, dict) else None
     text = str((page or {}).get('text') or '')
     quote = str(item.get('quote') or '')
     if not text or not quote:
-        return None
+        return text, None
     span = quote if quote in text else _page_span(quote, text)
     start = text.find(span) if span else -1
     if start < 0:
-        return None
+        return text, None
     inner = text.find(sentence.strip(), start, start + len(span) + 2)
-    if inner >= 0:
-        start = inner
-    above = text[max(0, start - _SECTION_WINDOW):start]
-    for piece in reversed([p for p in _sentences(above) if p.strip()]):
-        if _names_subject(piece, product, products):
-            return piece
-    return None
+    return text, (inner if inner >= 0 else start)
 
 
 def _section_problem(sentence, item, sources, route, product, products, merged, cells=None):
     """Why the section of the page a sentence with no anchor stands in is
-    not this product's. The section's subject is the nearest heading or
-    class-naming sentence above it, and it must not name a class or a
-    product the route does not serve. A sentence whose section the page
-    does not state binds only when the page as a whole is about the one
-    served product, which it is when it names no other class at all.
+    not this fill's. The captured page is read upward from the sentence,
+    line by line. The nearest heading that names a subject decides: a
+    heading naming a class or a product the fill is not about refuses the
+    fill, whether the heading carries a visa word ("Transit visa") or the
+    class word alone ("Transit", "Student", "Work"), and a heading naming
+    the fill's subject binds it. Any sentence between the fill's sentence
+    and that heading that names a foreign class refuses the fill, so a
+    cross-reference to the served product standing under a foreign heading
+    never reopens the section. With no subject heading above it, the
+    nearest sentence that names the served subject (and does not merely
+    point away from it) binds the fill. A sentence whose section the page
+    does not state binds only when the page as a whole is about the served
+    subject, which it is when it names no other class at all. The gate
+    runs for a route-level fill exactly as for a product fill, with every
+    served product as its subject.
 
     A row read through its header says which class it is about in its own
     class cell, and _row_binding_problem reads that cell, so a row needs no
     section above it."""
     if cells is not None or not _unanchored(sentence, product, products):
         return None
-    section = _section_above(sentence, item, sources, product, products)
-    if section is not None:
-        problem = (_class_problem(section, route, product, products, merged)
-                   or _binding_problem(section, product, products))
-        if problem:
-            return 'the sentence carries no anchor of the product and its page section (%s) %s' % (
-                section.strip()[:80], problem)
-        return None
-    page = (sources or {}).get(item.get('source_id')) if isinstance(sources, dict) else None
-    text = str((page or {}).get('text') or '')
+    whose = product['type'] if product is not None else 'the served products'
+    text, start = _sentence_start(sentence, item, sources)
+    if start is not None:
+        candidate = None
+        above = text[max(0, start - _SECTION_WINDOW):start]
+        for line in reversed(above.split('\n')):
+            line = line.strip()
+            if not line:
+                continue
+            heading = _reads_as_heading(line)
+            found = _piece_subject(line, route, product, products, merged, heading)
+            if found is None:
+                continue
+            kind, reason = found
+            if kind == 'foreign':
+                return 'the sentence carries no anchor of %s and its page section (%s) %s' % (whose, line[:80], reason)
+            if heading or candidate is None:
+                candidate = line
+            if heading:
+                break
+        if candidate is not None:
+            return None
     title, lead = _page_title_and_lead(text)
-    if _heading_names(title + '\n' + lead, product, products):
+    if any(_heading_names(title + '\n' + lead, p, products) for p in _subjects(product, products)):
         return None
     # Nothing above the sentence says whose section it is, so the whole page
-    # has to be about the one served product. A page that names another visa
+    # has to be about the served subject. A page that names another visa
     # class anywhere may be stating that class's rule here.
     for piece in _sentences(text):
         problem = _class_problem(piece, route, product, products, merged)
         if problem:
-            return ('the sentence carries no anchor of the product, the page states no section subject above it and '
-                    'the page is not about %s alone (%s)' % (product['type'], problem))
+            return ('the sentence carries no anchor of %s, the page states no section subject above it and '
+                    'the page is not about %s alone (%s)' % (whose, whose, problem))
     return None
 
 
@@ -2174,9 +2332,12 @@ def _delimited_rows(passages):
             for kind in _HEADER_ORDER:
                 if not _HEADER_KINDS[kind].search(cell):
                     continue
-                # A document's own validity is never the visa's, so a
-                # "Passport Validity" cell takes no column at all.
-                if kind != 'validity' or not _DOCUMENT_SUBJECT_RE.search(cell):
+                # A document's own validity is never the visa's, and a stay
+                # column is a stay whatever else its name says, so a
+                # "Passport Validity", "Validity of Stay" or "Residence
+                # Permit Validity" cell takes no column at all.
+                if kind != 'validity' or not (_DOCUMENT_SUBJECT_RE.search(cell) or _STAY_WORDS.search(cell)
+                                              or _HEADER_NOT_VISA_RE.search(cell)):
                     found.setdefault(kind, []).append(index)
                 break
         if any(len(indexes) > 1 for indexes in found.values()):
@@ -2201,39 +2362,62 @@ def _row_binding_problem(cells, product):
     return None
 
 
-def _row_marker(cell):
+def _row_marker(cell, codes=None):
     """The footnote marker a bound cell ends in, or None. A trailing number
     that belongs to a money amount ("USD 10") is the amount itself and not
-    a marker, so a priced cell is read as the page writes it."""
-    marker = _ROW_MARKER_RE.search(cell)
-    if marker is None:
-        return None
+    a marker, so a priced cell is read as the page writes it. A digit glued
+    to a letter is a marker after a unit word ("60 Months3"), and in a
+    class cell when the cell without it ends in a code of the product
+    while the cell itself does not ("B-1/B-23"): a code of its own ("B2",
+    "H-1B") is read as the page writes it."""
+    cell = str(cell or '').strip()
     digits = re.search(r'\d+\s*$', cell)
     if digits and any(m.start() <= digits.start() < m.end() for m in _MONEY_RE.finditer(cell)):
         return None
-    return marker.group().strip()
+    marker = _ROW_MARKER_RE.search(cell)
+    if marker is not None and marker.group('glued'):
+        word = re.search(r'[^\W\d_]+$', cell[:marker.start() + 1])
+        marker = marker if word and _ANY_UNIT_RE.fullmatch(word.group()) else None
+    if marker is not None:
+        return marker.group().strip()
+    # A code cell whose trailing digits run past the product's own code
+    # ("B-1/B-23", "B-212") carries a glued marker after the code.
+    if codes and not _ends_in_code(cell, codes):
+        for width in (1, 2):
+            if re.search(r'\d$', cell[:-width] if len(cell) > width else '') and _ends_in_code(cell[:-width], codes) and cell[-width:].isdigit():
+                return cell[-width:]
+    return None
 
 
-def _row_marker_problem(cells):
+def _ends_in_code(text, codes):
+    text = text.rstrip()
+    return any(m.end() == len(text) for _, pattern in codes.values() for m in pattern.finditer(text))
+
+
+def _row_marker_problem(cells, product=None):
     """Why a header-bound row cannot be read flat: one of its cells ends in
     a footnote marker, so the page qualifies the row somewhere else and the
     row alone does not state the value."""
+    codes = {k: v for k, v in _product_anchors(product).items() if k[0] in ('code', 'subclass')} if product is not None else None
     for kind in sorted(cells):
         cell = str(cells.get(kind) or '')
-        if _row_marker(cell):
+        if _row_marker(cell, codes if kind == 'class' else None):
             return ('the row\'s %s cell (%s) ends in a footnote marker, so the page qualifies the row elsewhere and the '
                     'row alone does not state the value' % (kind, cell))
     return None
 
 
 def _row_conflict_problem(rows, cells, product, field):
-    """Why a product that carries several class codes cannot take this row:
-    the table states more than one value for the product's own codes, so
-    which of them the product is served under is the page's choice and not
-    the reviewer's."""
+    """Why a product cannot take this row: the table states more than one
+    value for the rows the product's class codes match, so which of them
+    the product is served under is the page's choice and not the
+    reviewer's. A product with one code matches its own row and any
+    combined row that carries the code ("B-2" and "B-1/B-2"), so the
+    conflict is read from the matched rows, never from the count of the
+    product's codes."""
     kind = {'validity': 'validity', 'entry': 'entries'}.get(field)
     codes = {k: v for k, v in _product_anchors(product).items() if k[0] in ('code', 'subclass')}
-    if not cells or kind is None or kind not in cells or len(codes) < 2:
+    if not cells or kind is None or kind not in cells or not codes:
         return None
     stated = {}
     for row in rows.values():
@@ -2541,10 +2725,17 @@ def _duration_problem(field, sentence, n, unit, own, other, product, products, m
     document-duration gates as a sentence, because the header names the
     column and says nothing about the words printed inside the cell."""
     noun = 'validity' if field == 'validity' else 'stay'
+    own = own or (_VALIDITY_WORDS if field == 'validity' else _STAY_WORDS)
+    other = other or (_STAY_WORDS if field == 'validity' else _VALIDITY_WORDS)
     if cells is not None:
         cell = cells.get('validity') or ''
         if field != 'validity' or not _figure_re(n, unit).search(cell):
             return 'the row\'s validity cell (%s) does not state this figure' % cell
+        # The header names the column and says nothing about the words in
+        # the cell, so a cell that states a stay ("30 Days stay", "Stay of
+        # 30 Days") fails the validity-versus-stay gate a sentence fails.
+        if other.search(cell) or not _bound(noun + ' ' + cell, n, unit, own, other):
+            return 'the row\'s validity cell (%s) states a stay, not the visa\'s validity (a stay is not a validity)' % cell
         if _range_or_choice(cell, n):
             return 'the row\'s validity cell states a range or a choice, not this one value'
         if _owned_by_document(cell, n, unit):
@@ -2579,7 +2770,7 @@ def _sentence_problem(field, value, sentence, route, product, products, merged=N
     if problem:
         return problem
     if cells is not None:
-        problem = _row_marker_problem(cells) or (_row_binding_problem(cells, product) if product is not None else None)
+        problem = _row_marker_problem(cells, product) or (_row_binding_problem(cells, product) if product is not None else None)
         if problem:
             return problem
     if field != 'entry':
@@ -2670,7 +2861,7 @@ def _anaphora_problem(sentence, before, route, product, products, binding):
         return 'the sentence\'s subject refers to the sentence before it, which the quote does not include'
     text = ' '.join(s.strip() for s in before)
     foreign = _foreign_subject(text, route)
-    unbound = [binding.get(s) for s in before] if product is not None else []
+    unbound = [binding.get(s) for s in before]
     problem = ('the sentence before it is about %s, not %s' % ('/'.join(foreign), route['passport_nationality']) if foreign else
                _scope_problem(text, route) or _restrictive_problem(text, product, products)
                # The subject's own sentence must bind to the product too,
@@ -2709,10 +2900,11 @@ def _check_fill_binding(field, value, proof, route, merged, product, label, sour
     for evidence in proof['evidence']:
         for s in _list_sentences(evidence['quote']):
             quoted.setdefault(s, evidence)
-    binding = {s: (_binding_problem(s, product, products)
+    # A route-level sentence has no product to bind to, so it runs the
+    # section gate alone, with every served product as its subject.
+    binding = {s: ((_binding_problem(s, product, products) if product is not None else None)
                    or _section_problem(s, quoted.get(s) or {}, sources, route, product, products, merged,
-                                       rows.get(_row_key(s)))
-                   if product is not None else None) for s in sentences}
+                                       rows.get(_row_key(s)))) for s in sentences}
     bound = [s for s in sentences if binding[s] is None]
     bare_ok = _list_passage(passages)
     for item in items:
@@ -2721,8 +2913,8 @@ def _check_fill_binding(field, value, proof, route, merged, product, label, sour
             what = 'the document "%s"' % item if field == 'required_documents' else 'this value'
             stating = [s for s in sentences if binding[s] is not None and _sentence_supports(field, item, s, rows.get(_row_key(s)))]
             if stating:
-                raise PatchRejected('%s: the sentence that states %s does not bind to the product: %s' % (
-                    label, what, binding[stating[0]]))
+                raise PatchRejected('%s: the sentence that states %s does not bind to %s: %s' % (
+                    label, what, 'the product' if product_type else 'the served products', binding[stating[0]]))
             raise PatchRejected('%s: no quoted sentence %sstates %s' % (
                 label, 'bound to the product ' if product_type else '', what))
         if field == 'required_documents':

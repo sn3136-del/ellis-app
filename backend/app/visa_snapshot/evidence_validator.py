@@ -291,6 +291,55 @@ def route_supporting_excerpt(text: str, disposition: str, route: dict, *, policy
     return ""
 
 
+# The outsourced providers an application is lodged with, the words that
+# say an application is lodged, the words that deny it, and the
+# coordination that hands a lodgement word to another place ("lodged at the
+# Embassy and never at the centre", "apply online and collect at VFS").
+_AGENT_PROVIDER_RE = re.compile(
+    r"\bbls\b|\bvfs\b|tls ?contact|(?:visa )?application cent(?:re|er)s?\b|centro de solicitud de visados?|"
+    r"centre de (?:demande|dépôt|réception) (?:de|des) (?:visas?|demandes)|"
+    r"agencia (?:autorizada|acreditada)|agente (?:autorizado|acreditado)")
+_AGENT_LODGED_RE = re.compile(
+    r"\b(?:submit(?:ted|ting)?|lodge[ds]?|lodging|lodgement|fil(?:e|ed|ing)|apply|applying|applied|applications?|"
+    r"accepts?|accepted|present(?:ed|ing)?|presenta|presentar|presentarse|solicitud(?:es)?|d[ée]pos\w*|demandes?|"
+    r"einreichen|eingereicht|antrag)\b")
+_AGENT_WORDING_RE = re.compile(r"accredited (?:travel )?agen|authori[sz]ed agen")
+_AGENT_NEGATION_RE = re.compile(
+    r"\b(?:not|never|cannot|can't|no longer|don't|doesn't|won't|isn't|aren't|nor|neither|no|ne|pas|nunca|jamais|"
+    r"nicht|kein\w*|tidak|bukan|không|chưa)\b")
+_AGENT_BREAK_RE = re.compile(r"\b(?:and|or|but|nor|y|o|u|et|ou|und|oder|dan|atau|và|hoặc)\b|,\s*(?:which|who|where|that)\b")
+
+
+def _agent_lodgement_supported(low: str) -> bool:
+    """Whether the text states that the application is lodged with an
+    outsourced provider. The provider and a lodgement word must stand in
+    one clause within 70 characters with no coordination between them, and
+    no negation may stand before the later of the two. The word
+    "application" inside "visa application centre" is the provider's name,
+    never a lodgement word, so two centres named in one sentence lodge
+    nothing."""
+    for clause in re.split(r"[.!?;\n]+", low):
+        providers = list(_AGENT_PROVIDER_RE.finditer(clause))
+        for agent in _AGENT_WORDING_RE.finditer(clause):
+            if not _AGENT_NEGATION_RE.search(clause[:agent.start()]):
+                return True
+        if not providers:
+            continue
+        blanked = clause
+        for m in providers:
+            blanked = blanked[:m.start()] + " " * (m.end() - m.start()) + blanked[m.end():]
+        for lodged in _AGENT_LODGED_RE.finditer(blanked):
+            for provider in providers:
+                first, later = (lodged, provider) if lodged.start() < provider.start() else (provider, lodged)
+                between = clause[first.end():later.start()]
+                if len(between) > 70 or _AGENT_BREAK_RE.search(between):
+                    continue
+                if _AGENT_NEGATION_RE.search(clause[:later.start()]):
+                    continue
+                return True
+    return False
+
+
 def field_value_supported(name: str, value, text: str) -> bool:
     """Conservative claim matching, never a shared currency/token shortcut.
     All numbers and substantive value tokens must occur in the cited text;
@@ -382,20 +431,14 @@ def field_value_supported(name: str, value, text: str) -> bool:
         # application is lodged with: "la solicitud de visado se presenta
         # ante Indonesia BLS Visa Spain". A provider named on its own says
         # nothing, because a page may mention a centre it does not lodge
-        # through, so a lodgement word has to stand beside the provider in
-        # the same sentence, the way canonical['visa_center'] asks. The two
+        # through, so a lodgement word has to govern the provider in the
+        # same clause, with no negation before either and no coordination
+        # between them, the way canonical['visa_center'] asks. The two
         # agent wordings carry the lodgement in the word "agent" itself and
-        # keep matching alone, so stored data reads as before.
-        provider = (r"\bbls\b|\bvfs\b|tls ?contact|(?:visa )?application cent(?:re|er)|centro de solicitud de visados?|"
-                    r"centre de (?:demande|dépôt|réception) (?:de|des) (?:visas?|demandes)|"
-                    r"agencia (?:autorizada|acreditada)|agente (?:autorizado|acreditado)")
-        lodged = (r"\b(?:submit|submitted|lodge|lodged|lodgement|apply|applying|applications?|accepts?|accepted|"
-                  r"present|presented|presenta|presentar|presentarse|solicitud(?:es)?|d[ée]pos\w*|demandes?|"
-                  r"einreichen|eingereicht|antrag)\b")
-        pattern = {"authorised_agent": r"accredited (?:travel )?agen|authori[sz]ed agen|" +
-                                       lodged + r"[^.!?;\n]{0,70}(?:" + provider + r")|" +
-                                       r"(?:" + provider + r")[^.!?;\n]{0,70}" + lodged,
-                   "embassy": r"embassy|consulate|mission", "visa_application_centre": r"visa application cent",
+        # match alone, under the same negation test.
+        if value == "authorised_agent":
+            return _agent_lodgement_supported(low)
+        pattern = {"embassy": r"embassy|consulate|mission", "visa_application_centre": r"visa application cent",
                    "evisa": r"e-?visa|electronic visa", "online": r"online|electronic|e-?visa",
                    "none": r"no application|visa[- ]free|without a visa", "on_arrival": r"on arrival|upon arrival"}.get(str(value))
         return bool(pattern and re.search(pattern, low))
