@@ -294,7 +294,7 @@ def _run_workers(keys: list[str], deadline: float, stop: threading.Event, status
 
 def main() -> int:
     from app.db import SessionLocal
-    from app.visa_snapshot import freshness, freshness_priority
+    from app.visa_snapshot import freshness, freshness_priority, consistency_runtime
     path = freshness.sweep_status_path()
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -367,6 +367,20 @@ def main() -> int:
         db = None
         try:
             db = SessionLocal()
+            # Deterministic diagnostics run before any paid source comparison,
+            # inside the same deadline. They never file issues or change facts.
+            def report_progress(summary):
+                status["consistency"] = summary
+                save()
+            status["consistency"] = consistency_runtime.run_report(
+                db, status_path=path, deadline=deadline, should_stop=stop.is_set,
+                previous=(previous or {}).get("consistency"), on_progress=report_progress)
+            if status["consistency"]["state"] == "failed":
+                # A read error must not leave the coordinator transaction
+                # unusable for its existing source/integrity work.
+                db.rollback()
+            if not save():
+                raise OSError("Unable to persist consistency status; dispatch stopped")
             integrity = freshness.audit_integrity(db)
             status["integrity_violations"] = integrity["violated"]
             status["integrity_resolved"] = integrity.get("resolved", 0)

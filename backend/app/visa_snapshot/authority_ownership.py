@@ -11,8 +11,9 @@ from .authority import GOV_SUFFIXES, EXACT_OFFICIAL_HOSTS, is_government_host
 from .registry import iso3
 
 _BY_COUNTRY = {
+    'THA': ('doha.thaiembassy.org', 'yangon.thaiembassy.org', 'www.thaiembassy.fr'),
     'VAT': ('vaticanstate.va', 'vatican.va'),
-    'VNM': ('chinhphu.vn', 'baochinhphu.vn', 'vietnamembassy.org.uk'),
+    'VNM': ('chinhphu.vn', 'baochinhphu.vn', 'vietnamembassy.org.uk', 'vietnamembassydelhi.in'),
     'IRL': ('ireland.ie', 'irishimmigration.ie'),
     'TJK': ('mfa.tj', 'evisa.tj'), 'BHR': ('bahrain.bh',),
     'CUB': ('cubaminrex.cu', 'evisacuba.cu'), 'MUS': ('govmu.org',),

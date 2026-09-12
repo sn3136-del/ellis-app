@@ -24,6 +24,15 @@ from urllib.parse import urlparse
 # nationality selector links directly to visa.visitsaudi.com (read 2026-09-10).
 # Admit these exact hosts only, not the .us/.com suffix or other subdomains.
 EXACT_OFFICIAL_HOSTS = frozenset({
+    # Exact mission websites listed in Thailand MFA's AITC directory:
+    # https://image.mfa.go.th/mfa/0/GH2PYnujXi/AITC/AITC_List_of_Eligible_Countries_as_of_June__2025.pdf
+    # Read 2026-09-12, pages 2, 5 and 6; no parent/sibling host trust.
+    "doha.thaiembassy.org", "yangon.thaiembassy.org", "www.thaiembassy.fr",
+    # Vietnam MFA's 29 April 2021 press briefing, question 13, explicitly
+    # identifies this as the official Embassy in India website. Current
+    # embassy procedures/contact details corroborated on 12 September 2026.
+    # https://vnembassy-abudhabi.mofa.gov.vn/vi/web/guest/tin-chi-tiet/chi-tiet/noi-dung-hop-bao-thuong-ky-lan-thu-7-nam-2021-254.html
+    "vietnamembassydelhi.in",
     # Embassy of Vietnam in London: GOV.UK consular-contact guidance links
     # this exact website; the Vietnam MFA London directory uses its domain.
     # Checked 2026-09-10; no unrelated subdomain receives authority.

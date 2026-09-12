@@ -1085,6 +1085,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                 "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
                 **model_counts}
     return {"outcome": entry['outcome'], "route_key": row.cache_key, "consistent": consistent,
+            "renewed": entry["renewed"], "verified_fields": entry["verified_fields"],
+            "unverified_fields": entry["unverified_fields"], "unchecked_source_count": len(unchecked_sources),
             "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
             **model_counts,
             "changed": sorted(applied), "disputed": sorted(set(disputed) | unresolved_fields),

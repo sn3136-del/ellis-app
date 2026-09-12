@@ -1377,7 +1377,7 @@ def _next_sweep_at() -> str | None:
 
 
 def _last_sweep_status() -> dict | None:
-    from .visa_snapshot import freshness
+    from .visa_snapshot import freshness, consistency_runtime
     from datetime import datetime, timezone
     data = freshness.read_sweep_status()
     if not data:
@@ -1395,6 +1395,9 @@ def _last_sweep_status() -> dict | None:
         "cycle_time_budget_seconds", "resumed_from_started_at", "prior_attempt_results",
         "provider_suspended", "provider_notice", "provider_suspended_at")
     result = {k: data[k] for k in allowed if k in data}
+    consistency = consistency_runtime.public_summary(data.get("consistency"))
+    if consistency:
+        result["consistency"] = consistency
     result.update(status=data.get("state"), checked=data.get("attempted", 0))
     if data.get("running") is True:
         # SIGKILL/power loss cannot execute the worker's finally block. A
@@ -1425,6 +1428,8 @@ def _last_sweep_status() -> dict | None:
             result.update(running=False, state=state, status=state, status_reason=reason)
             # Preserve finished_at=None: an interrupted/unconfirmed worker is
             # not a completed run, and this read must not rewrite its history.
+    if consistency and consistency.get("state") == "running" and result.get("running") is False:
+        consistency["state"] = "interrupted"
     return result
 
 
@@ -2263,6 +2268,7 @@ def travel_database_export(nationality: str = "", destination: str = "",
                            purpose: str = "", document: str = "",
                            requirement: str = "", confidence: str = "",
                            visa_type: str = "", field_missing: str = "",
+                           publication: str = "",
                            db=Depends(get_session),
                            p: Principal = Depends(get_principal)):
     """The dataset as Excel, to Trip.com's export spec: one workbook, a
@@ -2275,9 +2281,20 @@ def travel_database_export(nationality: str = "", destination: str = "",
     from openpyxl.styles import Font
     from .visa_snapshot import tstation
     require_quality_control(p)
+    if publication not in ("", "published", "unpublished"):
+        raise HTTPException(status_code=422, detail="Invalid publication filter")
     rows = _tstation_rows(db, nationality=nationality, destination=destination,
                           purpose=purpose, document=document,
                           requirement=requirement, confidence=confidence)
+    if publication:
+        def is_published(row):
+            # The exporter uses the internal product rows; the QC endpoint
+            # exposes these same fields as held/publication_state. A partial
+            # route can contain both published and held products.
+            held = row.get("_held")
+            return not held if isinstance(held, bool) else row.get("_publication_state") == "published"
+        rows = [row for row in rows
+                if is_published(row) == (publication == "published")]
     # The standard's export filters by visa type too (按站点/目的地/签证类型
     # 筛选), and by field gap for rectification work.
     if visa_type:
@@ -2561,6 +2578,15 @@ def travel_database_route_research(body: DatabaseRouteResearchIn,
             "source_url": g.get("source_url"),
             "research": {"outcome": (report or {}).get("outcome"),
                          "consistent": (report or {}).get("consistent"),
+                         # 'checked' can be partial. Only the evidence engine's
+                         # explicit renewal means the complete record passed.
+                         "renewed": (report or {}).get("renewed") is True,
+                         "verified_fields": (report or {}).get("verified_fields") or [],
+                         "unverified_fields": (report or {}).get("unverified_fields") or [],
+                         "source_reads": (report or {}).get("source_reads", 0),
+                         "source_fetch_failures": (report or {}).get("source_fetch_failures", 0),
+                         "unchecked_source_count": (report or {}).get("unchecked_source_count", 0),
+                         "provider_unavailable": bool(kimi_primary.provider_suspension()),
                          "changed": (report or {}).get("changed") or [],
                          "disputed_fields": (report or {}).get("disputed")
                              or (report or {}).get("disputed_fields") or [],

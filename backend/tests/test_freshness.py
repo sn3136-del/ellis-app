@@ -106,6 +106,7 @@ def test_japan_regression_the_page_corrects_the_stored_answer(db):
     out = freshness.recheck_route(db, ROUTE)
     assert out["outcome"] == "checked"
     assert out["changed"] == ["government_fee", "permitted_stay"]
+    assert out["renewed"] is False and out["unverified_fields"]
     row = db.query(KimiRouteGuidanceCache).one()
     assert row.guidance["permitted_stay"].startswith("15 or 30 days")
     assert row.guidance["government_fee"] == {"amount": 715, "currency": "CNY"}
@@ -908,10 +909,11 @@ def test_freshness_renews_only_when_all_fields_are_supported_across_sources(db):
             'corrected_fields': {}, 'evidence': {'government_fee': 'The visa fee is 7 USD'} if fee
             else {'permitted_stay': 'The permitted stay is 30 days'}}
     fetching.set_fetcher(fetch); freshness.set_provider(answer)
-    freshness.recheck_row(db, row)
+    result = freshness.recheck_row(db, row)
     check = freshness.effective_check(row.verification)
     assert check['verified_fields'] == ['disposition', 'government_fee', 'permitted_stay']
     assert check['unverified_fields'] == [] and check['renewed'] and row.fresh_until is not None
+    assert result['renewed'] is True and result['unverified_fields'] == []
 
 
 def test_generic_fee_page_disagreement_is_not_hidden_by_first_matching_page(db):

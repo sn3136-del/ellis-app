@@ -8,7 +8,7 @@ import threading
 
 import pytest
 
-from app.visa_snapshot import freshness, kimi_primary as kp, verified_overrides as vo
+from app.visa_snapshot import freshness, kimi_primary as kp, verified_overrides as vo, consistency_runtime
 
 
 @pytest.fixture
@@ -21,6 +21,8 @@ def sweep(monkeypatch, tmp_path):
     monkeypatch.setattr(freshness, "active_disputed_fields", lambda *_: [])
     monkeypatch.setattr(freshness, "audit_integrity", lambda _: {"checked": 1, "violated": 0, "created": 0})
     monkeypatch.setattr(vo, "apply", lambda g, _: (g, None))
+    monkeypatch.setattr(consistency_runtime, "run_report", lambda *_a, **_k: {
+        "state": "complete", "routes_checked": 0, "records_checked": 0, "findings_total": 0})
     return module
 
 
@@ -45,6 +47,47 @@ def setup(monkeypatch, rows):
     monkeypatch.setattr(app.db, "SessionLocal", FakeSession)
     monkeypatch.setattr(freshness, "due_rows", lambda *_a, **_k: rows)
     return state
+
+
+def test_deterministic_report_precedes_paid_work_and_survives_provider_suspension(sweep, monkeypatch):
+    row = SimpleNamespace(cache_key='a', route={}, guidance={}, verification={})
+    setup(monkeypatch, [row])
+    events = []
+    def report(db, **kwargs):
+        events.append('report')
+        assert kwargs['deadline'] > sweep.time.monotonic()
+        kwargs['on_progress']({'state': 'running', 'routes_checked': 0})
+        return {'state': 'complete', 'routes_checked': 1, 'findings_total': 2}
+    def check(*args, **kwargs):
+        assert events == ['report']
+        events.append('source')
+        return {'outcome': 'provider_error', 'source_reads': 1, 'model_comparisons': 1}
+    monkeypatch.setattr(consistency_runtime, 'run_report', report)
+    monkeypatch.setattr(freshness, 'recheck_row', check)
+    monkeypatch.setattr(kp, 'provider_suspension', lambda: {'reason': 'fixture account suspension'})
+    monkeypatch.setattr(kp, 'rate_gate_saturated', lambda: False)
+    assert sweep.main() == 1
+    status = freshness.read_sweep_status()
+    assert events == ['report', 'source']
+    assert status['state'] == 'provider_suspended'
+    assert status['consistency'] == {'state': 'complete', 'routes_checked': 1, 'findings_total': 2}
+    assert status['attempted'] == status['read'] == status['model_comparisons'] == 1
+    assert status['verified'] == 0 and status['backlog_remaining'] == 0
+
+
+def test_report_failure_does_not_prevent_source_refresh_or_pollute_its_counters(sweep, monkeypatch):
+    row = SimpleNamespace(cache_key='a', route={}, guidance={}, verification={})
+    state = setup(monkeypatch, [row])
+    monkeypatch.setattr(consistency_runtime, 'run_report', lambda *_a, **_k:
+        {'state': 'failed', 'failure': 'report_write_failed', 'routes_checked': 4})
+    monkeypatch.setattr(freshness, 'recheck_row', lambda *_a, **_k:
+        {'outcome': 'page_not_relevant', 'source_reads': 1})
+    assert sweep.main() == 0
+    status = freshness.read_sweep_status()
+    assert status['state'] == 'complete' and status['consistency']['state'] == 'failed'
+    assert status['attempted'] == status['read'] == status['insufficient_evidence'] == 1
+    assert status['errors'] == status['verified'] == 0
+    assert sum(s.rollbacks for s in state.sessions) == 1
 
 
 def test_metrics_never_count_attempt_or_disputed_read_as_verified(sweep, monkeypatch):

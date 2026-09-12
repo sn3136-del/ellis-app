@@ -442,7 +442,7 @@ def variant_forks(db) -> list[Finding]:
 
 def run(db, now: datetime | None = None, trigger: str = "manual", *, limit: int | None = None,
         keys: list[str] | None = None, proof_checks: bool = True, absence_checks: bool = True,
-        coverage: bool = True) -> dict:
+        coverage: bool = True, checkpoint=None) -> dict:
     """Sweep the inventory and return the evidence dict. Never writes."""
     from . import kimi_primary
     now = now or datetime.now(timezone.utc)
@@ -461,6 +461,8 @@ def run(db, now: datetime | None = None, trigger: str = "manual", *, limit: int 
     grades = {"High": 0, "Medium": 0, "Low": 0}
     proof_rows: list[tuple] = []
     for r in rows:
+        if checkpoint:
+            checkpoint(len(proof_rows))
         row_findings, declared, proj = check_row(db, r, now=now, in_process_cache=in_process)
         findings.extend(row_findings)
         for k, v in declared.items():
@@ -484,6 +486,8 @@ def run(db, now: datetime | None = None, trigger: str = "manual", *, limit: int 
         "declared_differences": declared_totals,
     }
     for name, enabled in (("proof", proof_checks), ("absence", absence_checks), ("coverage", coverage)):
+        if checkpoint:
+            checkpoint(len(proof_rows))
         if enabled:
             extra = _extension(name)
             if extra is not None:
