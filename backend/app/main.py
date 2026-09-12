@@ -572,26 +572,37 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
         # naming several fields can have its last name cut mid word
         # (passport_validity_requirem) and no change-log row could ever
         # name it. The column stays the authority on what the finding
-        # reported: the proposal is read only to complete a trailing token
-        # the cut truncated, when exactly one proposal field name extends
-        # it. It never adds a field the column does not account for. The
-        # proposal can name more fields than the finding reported (the cut
-        # dropped whole names after a comma, or a reader flagged one field
-        # and the research proposal named others), and demanding those
-        # would freeze a finding nobody can honestly edit, while replacing
-        # the column with them would close a finding on a field it never
-        # raised. An ambiguous or unmatched cut keeps the token as it is,
-        # so the gate refuses a finding it cannot identify.
-        tokens = [t.strip() for t in str(row.field or "").split(",") if t.strip()]
+        # reported. The proposal is read only to complete a trailing token
+        # the cut truncated, and only where the column is provably the
+        # cut of the proposal: the freshness monitor files a finding with
+        # field = ",".join(sorted(fields))[:64] over the same fields it
+        # stores as the proposal (freshness._file_dispute), so on a monitor
+        # row whose column equals that join of its own proposal names, the
+        # trailing token is the name at that position in the join and
+        # nothing else. A column ending on a comma or on a complete name
+        # is left as written (the token at that position is already the
+        # whole name), and so is a reader's hand written flag, whose
+        # column is free text and whose proposal is attached later by
+        # research: a prefix test on either would extend a name the
+        # finding reported in full into a longer sibling, refusing the
+        # correction the finding asked for and closing on one it never
+        # raised. The proposal can also name more fields than the column
+        # reported (the cut dropped whole names after a comma, or the
+        # research named what the page contradicted), and demanding those
+        # would freeze a finding nobody can honestly edit. A cut that the
+        # proposal does not reproduce keeps the token as it is, so the
+        # gate refuses a finding it cannot identify.
+        column = str(row.field or "")
+        tokens = [t.strip() for t in column.split(",") if t.strip()]
         width = DatabaseIssueReport.__table__.c.field.type.length or 64
         proposed = (row.proposal or {}).get("fields")
-        proposed_names = ([str(f).strip() for f in proposed if str(f).strip()]
-                          if isinstance(proposed, dict) else [])
-        if (tokens and len(str(row.field or "")) >= width
-                and tokens[-1] not in proposed_names):
-            extended = [n for n in proposed_names if n.startswith(tokens[-1])]
-            if len(extended) == 1:
-                tokens[-1] = extended[0]
+        proposed_names = sorted(proposed) if isinstance(proposed, dict) else []
+        monitor_join = ",".join(proposed_names)
+        if (tokens and row.reported_by == "freshness_monitor"
+                and len(monitor_join) > width and column == monitor_join[:width]
+                and len(tokens) <= len(proposed_names)
+                and proposed_names[len(tokens) - 1].startswith(tokens[-1])):
+            tokens[-1] = proposed_names[len(tokens) - 1]
         requested = {aliases.get(t, t) for t in tokens}
         changes = db.execute(_sel(DatabaseChangeLog).where(
             DatabaseChangeLog.cache_key == kimi_primary.canonical_key(row.cache_key),

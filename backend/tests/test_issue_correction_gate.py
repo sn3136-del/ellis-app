@@ -6,8 +6,14 @@ the names in full, but it can also name more fields than the column reported
 (the cut dropped whole names after a comma, or a reader flagged one field and
 the research proposal named others). The gate therefore keeps the column's
 tokens and reads the proposal only to complete a trailing token the cut
-truncated, when exactly one proposal field name extends it. It never demands
-a field only the proposal names and never closes a finding on one.
+truncated, and only where the column is provably that cut: the freshness
+monitor files a finding with field = ",".join(sorted(fields))[:64] over the
+fields it stores as the proposal, so on a monitor row whose column equals that
+join of its own proposal names the trailing token is the name at that
+position. A column ending on a comma or on a complete name, a reader's hand
+written column and a proposal whose join differs from the column are all read
+as written. The gate never demands a field only the proposal names and never
+closes a finding on one.
 
 Every case runs through the real endpoint with real change-log rows.
 """
@@ -24,6 +30,12 @@ KEY = "HKG|HKG|TUV|tourism|default|unknown|v6"
 ROUTE = {"passport_nationality": "HKG", "destination_country": "TUV",
          "travel_purpose": "tourism", "travel_document_type": "ordinary_passport"}
 WIDTH = DatabaseIssueReport.__table__.c.field.type.length
+
+
+def _monitor_column(names):
+    """The column the freshness monitor files, exactly as
+    freshness._file_dispute builds it (field_key)."""
+    return ",".join(sorted(names))[:WIDTH]
 
 
 def _finding(db, column, proposal_fields, *, status="acknowledged", reported_by="freshness_monitor",
@@ -106,12 +118,12 @@ def test_a_live_finding_whose_cut_fell_on_a_comma_can_still_be_reviewed(client, 
     on the comma before permitted_stay and permitted_stay_days. The page and
     the record agree on permitted_stay_days, so no honest edit can ever log
     it. The gate runs again on the way to reviewed and must not demand it."""
-    column = "accommodation_evidence,financial_evidence,onward_travel_evidence"
+    proposal = ["accommodation_evidence", "financial_evidence", "onward_travel_evidence",
+                "permitted_stay", "permitted_stay_days"]
+    column = _monitor_column(proposal)
+    assert column == "accommodation_evidence,financial_evidence,onward_travel_evidence"
     assert len(column) == WIDTH
-    issue = _finding(db, column, ["accommodation_evidence", "financial_evidence",
-                                  "onward_travel_evidence", "permitted_stay",
-                                  "permitted_stay_days"],
-                     status="corrected", resolved_by="author")
+    issue = _finding(db, column, proposal, status="corrected", resolved_by="author")
     _logged(db, "accommodation_evidence", "financial_evidence", "onward_travel_evidence",
             "permitted_stay")
     r = _advance(client, issue, "reviewed")
@@ -123,13 +135,129 @@ def test_a_trailing_token_cut_mid_word_is_completed_from_the_proposal(client, db
     """The release's target case. The column ends in passport_validity_requirem,
     a name no change-log row can carry. The proposal names it in full and
     that full name is what the gate asks for."""
-    column = "official_portal_url,passport_validity,passport_validity_requirem"
-    assert len(column) == WIDTH
     proposal = ["official_portal_url", "passport_validity", "passport_validity_requirement"]
+    column = _monitor_column(proposal)
+    assert column == "official_portal_url,passport_validity,passport_validity_requirem"
+    assert len(column) == WIDTH
     issue = _finding(db, column, proposal)
     _logged(db, "official_portal_url", "passport_validity")
     assert _advance(client, issue).status_code == 422, "the completed name is still required"
     _logged(db, "passport_validity_requirement", origin="grounded_recheck")
+    r = _advance(client, issue)
+    assert r.status_code == 200, r.text
+
+
+def test_a_real_monitor_truncation_to_a_shorter_field_name_is_still_completed(client, db):
+    """The cut of permitted_stay_days is permitted_stay, itself a field name.
+    A vocabulary guard (never complete a token that is a known field) would
+    freeze this finding forever, because the record and the page agree on
+    permitted_stay and no honest edit can log it. The column equals the
+    monitor's own join of its proposal, so the token at that position is
+    permitted_stay_days and that is the field the gate asks for."""
+    proposal = ["accommodation_evidence", "account_registration_steps", "permitted_stay_days"]
+    column = _monitor_column(proposal)
+    assert column == "accommodation_evidence,account_registration_steps,permitted_stay"
+    assert len(column) == WIDTH
+    issue = _finding(db, column, proposal)
+    _logged(db, "accommodation_evidence", "account_registration_steps", "permitted_stay")
+    assert _advance(client, issue).status_code == 422, "permitted_stay is not what was reported"
+    _logged(db, "permitted_stay_days")
+    r = _advance(client, issue)
+    assert r.status_code == 200, r.text
+
+
+def test_a_two_letter_stub_is_identified_by_its_position_in_the_monitor_join(client, db):
+    """A prefix test could not tell permitted_stay from permitted_stay_days
+    behind the stub pe. The monitor's join can: pe sits at the fourth
+    position, which is permitted_stay_days."""
+    proposal = ["application_channel", "application_channel_detail", "permitted_stay",
+                "permitted_stay_days"]
+    column = _monitor_column(proposal)
+    assert column == "application_channel,application_channel_detail,permitted_stay,pe"
+    assert len(column) == WIDTH
+    issue = _finding(db, column, proposal)
+    _logged(db, "application_channel", "application_channel_detail", "permitted_stay")
+    assert _advance(client, issue).status_code == 422
+    _logged(db, "permitted_stay_days")
+    assert _advance(client, issue).status_code == 200
+
+
+def test_a_monitor_cut_that_fell_right_after_a_comma_completes_nothing(client, db):
+    """The join was cut on the separator: the column ends on a comma and
+    every name it holds is whole. The name the cut dropped after the comma
+    was never reported, so it is not demanded."""
+    proposal = ["accommodation_evidence", "account_registration_steps", "visa_category",
+                "visa_products"]
+    column = _monitor_column(proposal)
+    assert column == "accommodation_evidence,account_registration_steps,visa_category,"
+    assert len(column) == WIDTH
+    issue = _finding(db, column, proposal)
+    _logged(db, "accommodation_evidence", "account_registration_steps", "visa_category")
+    r = _advance(client, issue)
+    assert r.status_code == 200, r.text
+
+
+def test_a_column_ending_on_a_comma_is_read_as_the_names_it_holds(client, db):
+    """Review B, F1. A reader's column is exactly 64 characters and ends on
+    the separator, which proves its last name is complete. The proposal
+    names permitted_stay_days. The finding reported permitted_stay: a
+    correction to permitted_stay_days does not close it, a correction to
+    the four fields it names does."""
+    column = "government_fee,disposition,exceptions,source_url,permitted_stay,"
+    assert len(column) == WIDTH
+    issue = _finding(db, column, ["government_fee", "disposition", "exceptions", "source_url",
+                                  "permitted_stay_days"], reported_by="reader-1")
+    _logged(db, "government_fee", "disposition", "exceptions", "source_url",
+            "permitted_stay_days")
+    assert _advance(client, issue).status_code == 422, "permitted_stay_days was never reported"
+    _logged(db, "permitted_stay")
+    r = _advance(client, issue)
+    assert r.status_code == 200, r.text
+
+
+def test_a_full_width_column_ending_on_a_complete_name_is_not_extended(client, db):
+    """Review B, F2. A reader's column is exactly 64 characters and its last
+    name, permitted_stay, is a complete field. The research proposal named
+    permitted_stay_days. The finding reported permitted_stay, so that is the
+    field whose correction closes it."""
+    column = "passport_validity_requirement,official_portal_url,permitted_stay"
+    assert len(column) == WIDTH
+    issue = _finding(db, column, ["permitted_stay_days"], reported_by="reader-1")
+    _logged(db, "passport_validity_requirement", "official_portal_url", "permitted_stay_days")
+    assert _advance(client, issue).status_code == 422, "permitted_stay_days was never reported"
+    _logged(db, "permitted_stay")
+    r = _advance(client, issue)
+    assert r.status_code == 200, r.text
+
+
+def test_a_full_width_column_ending_on_a_display_alias_is_resolved_not_extended(client, db):
+    """Review B, F3. The column ends on visa_requirement, the display alias
+    of disposition, and the proposal names visa_requirement_detail. The
+    alias resolves to disposition: a sourced disposition correction closes
+    the finding, a requirement_detail correction does not."""
+    column = "arrival_card,visa_products,appointment_required,visa_requirement"
+    assert len(column) == WIDTH
+    issue = _finding(db, column, ["visa_requirement_detail"], reported_by="reader-1")
+    _logged(db, "arrival_card", "visa_products", "appointment_required", "requirement_detail")
+    assert _advance(client, issue).status_code == 422, "requirement_detail was never reported"
+    _logged(db, "disposition")
+    r = _advance(client, issue)
+    assert r.status_code == 200, r.text
+
+
+def test_a_readers_full_width_column_is_never_completed(client, db):
+    """A reader's column is free text and its proposal is attached later by
+    research, so the column is never the cut of that proposal even when it
+    happens to spell it: this column is exactly the 64 character join of the
+    four proposal names, and it still reads as written, permitted_stay."""
+    proposal = ["accommodation_evidence", "disposition", "government_fee", "permitted_stay_days"]
+    column = _monitor_column(proposal)
+    assert column == "accommodation_evidence,disposition,government_fee,permitted_stay"
+    assert len(column) == WIDTH
+    issue = _finding(db, column, proposal, reported_by="reader-1")
+    _logged(db, "accommodation_evidence", "disposition", "government_fee", "permitted_stay_days")
+    assert _advance(client, issue).status_code == 422, "permitted_stay_days was never reported"
+    _logged(db, "permitted_stay")
     r = _advance(client, issue)
     assert r.status_code == 200, r.text
 
@@ -160,25 +288,37 @@ def test_the_gate_never_requires_a_field_only_the_proposal_names(client, db, col
 
 
 @pytest.mark.parametrize("column, proposal", [
-    # The cut left a token that prefixes two proposal names: the finding
-    # cannot say which one it reported.
+    # The proposal carries one more name, so its join puts passport_validity
+    # where the column holds permitted_stay: the column is not this
+    # proposal's cut and the stub pe stays a stub.
     ("application_channel,application_channel_detail,permitted_stay,pe",
-     ["application_channel", "application_channel_detail", "permitted_stay",
-      "permitted_stay_days"]),
-    # The cut left a token no proposal name extends.
+     ["application_channel", "application_channel_detail", "passport_validity",
+      "permitted_stay", "permitted_stay_days"]),
+    # The proposal's join is shorter than the column: nothing was cut.
     ("official_portal_url,passport_validity,passport_validity_requirem",
      ["official_portal_url", "passport_validity", "processing_time"]),
+    # The proposal names the full field but its join differs from the
+    # column, so the column is not its cut.
+    ("official_portal_url,passport_validity,passport_validity_requirem",
+     ["official_portal_url", "passport_validity_requirement", "processing_time"]),
+    # The proposal's names sort into a different order than the column.
+    ("official_portal_url,passport_validity,passport_validity_requirem",
+     ["arrival_card", "official_portal_url", "passport_validity",
+      "passport_validity_requirement"]),
     # No proposal at all: nothing can complete the token.
     ("official_portal_url,passport_validity,passport_validity_requirem", None),
 ])
-def test_an_ambiguous_or_unmatched_cut_keeps_the_column_token_and_refuses(client, db, column, proposal):
+def test_a_cut_the_proposal_does_not_reproduce_keeps_the_column_token_and_refuses(client, db, column, proposal):
     """Even when every field the proposal names has been corrected, a token
-    the proposal cannot identify is kept as it is and the gate refuses."""
+    the proposal's own join does not identify is kept as it is and the gate
+    refuses."""
     assert len(column) == WIDTH
+    if proposal:
+        assert _monitor_column(proposal) != column
     issue = _finding(db, column, proposal)
     _logged(db, "application_channel", "application_channel_detail", "permitted_stay",
             "permitted_stay_days", "official_portal_url", "passport_validity",
-            "passport_validity_requirement", "processing_time")
+            "passport_validity_requirement", "processing_time", "arrival_card")
     r = _advance(client, issue)
     assert r.status_code == 422, r.text
 
