@@ -2048,13 +2048,9 @@ export function RecordsTable({ records, total, onFlag, onRelease, onEdit, onRefr
                       style={{ padding: '10px 12px', verticalAlign: 'top' }}>
                     <div style={{ display: 'flex', flexDirection: 'column',
                                   alignItems: 'flex-start', gap: 6 }}>
-                      {/* Published rows say so in green (owner request, 11
-                          September 2026). A row whose only hold is one
-                          withheld product keeps its published default route,
-                          so it says so too and names the product under
-                          review; every other held row carries the publish
-                          action instead. */}
-                      {(!held || productWithheld) && (
+                      {/* Publication describes this product row; a published
+                          default route does not publish an alternative. */}
+                      {!held && (
                         <span data-testid="ops-published" style={{ fontSize: 12, fontWeight: 700, color: '#1a7f37' }}>
                           {t('ops.publishedToTravelers')}
                         </span>

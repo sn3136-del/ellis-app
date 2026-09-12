@@ -213,3 +213,9 @@ test('publication filter provides all three choices in each shipped language', (
     }
   }
 })
+
+
+test('unpublished alternatives never display the published product badge', () => {
+  const html = render([record({ held: true, route_held: false, publication_state: 'withheld', publication_reason: 'product_evidence_missing' })])
+  assert.ok(!html.includes('data-testid="ops-published"'))
+})
