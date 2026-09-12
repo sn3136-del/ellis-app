@@ -135,6 +135,7 @@ import { newQualitySession, qualityRecordRoute } from '../lib/visaSession.js'
 import { createLatestLoader, readQualityTab } from '../lib/qualityLoader.js'
 import { indexRecoveredRecords, recoveredForRecord } from '../lib/qualityRecovery.js'
 import { useLocale } from '../lib/locale.jsx'
+import { registerOpenNote } from '../lib/openNote.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { useLocalizedCountries } from '../lib/countryNames.js'
 import { matchCountry, matchCountryStrict } from '../lib/countryMatch.js'
@@ -552,9 +553,9 @@ function fx(t, f) {
 // opens it in a small panel behind an information button.
 // Only one note is read at a time. Without this a second panel opens on top
 // of the first, because the button stops its own click before the open
-// panel's document listener can hear it.
-let closeOpenNote = null
-
+// panel's document listener can hear it. The open cell registers with the
+// shared registry (lib/openNote.js) and unregisters as it closes, whichever
+// way it closes.
 export function NoteCell({ text, t = (k) => k, title }) {
   const [open, setOpen] = useState(false)
   const [spot, setSpot] = useState(null)
@@ -599,19 +600,32 @@ export function NoteCell({ text, t = (k) => k, title }) {
   }, [open])
   useLayoutEffect(() => { if (open) place(); else setSpot(null) }, [open, place])
   useLayoutEffect(() => {
+    // Registering closes whichever note was open before. The cleanup runs on
+    // every path that closes this one, so the registry never keeps a closer
+    // for a panel that is already gone. It is a layout effect so the old
+    // panel is gone before the new one is painted.
+    if (!open) return undefined
+    return registerOpenNote(() => setOpen(false))
+  }, [open])
+  useLayoutEffect(() => {
     // Whether the value fits is a question about pixels, not characters, so
-    // the button appears exactly when the text is actually cut off.
-    const measure = () => {
-      const el = lead.current
-      setClipped(!!el && el.scrollWidth > el.clientWidth + 1)
-    }
+    // the button appears exactly when the text is actually cut off. The
+    // column narrows when the window does, but also when the card grows a
+    // scrollbar, so the cell itself is watched where the browser allows.
+    const el = lead.current
+    const measure = () => setClipped(!!el && el.scrollWidth > el.clientWidth + 1)
     measure()
-    if (typeof window === 'undefined') return undefined
+    if (!el || typeof window === 'undefined') return undefined
+    if (typeof ResizeObserver !== 'undefined') {
+      const watcher = new ResizeObserver(measure)
+      watcher.observe(el)
+      return () => watcher.disconnect()
+    }
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
   }, [text])
   const value = typeof text === 'string' ? text.trim() : ''
-  const long = clipped || value.length > 30
+  const long = clipped
   const stop = (e) => { e.stopPropagation() }
   return (
     <span style={{ display: 'flex', alignItems: 'baseline', gap: 6, minWidth: 0 }}>
@@ -621,15 +635,7 @@ export function NoteCell({ text, t = (k) => k, title }) {
       </span>
       {long && (
         <button ref={button} type="button" onMouseDown={stop}
-                onClick={(e) => {
-                  stop(e)
-                  setOpen((v) => {
-                    if (v) { closeOpenNote = null; return false }
-                    if (closeOpenNote) closeOpenNote()
-                    closeOpenNote = () => setOpen(false)
-                    return true
-                  })
-                }}
+                onClick={(e) => { stop(e); setOpen((v) => !v) }}
                 aria-expanded={open} aria-haspopup="dialog" aria-label={t('ops.noteOpen')}
                 style={{ flex: '0 0 auto', width: 17, height: 17, borderRadius: 9, cursor: 'pointer',
                          border: `1px solid ${open ? BLUE : BORDER}`, background: open ? BLUE : '#fff',

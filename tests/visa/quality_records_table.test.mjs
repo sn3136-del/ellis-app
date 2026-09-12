@@ -84,8 +84,10 @@ test('a long stay note is clamped by the cell and never rewritten', () => {
   // and the whole of it is one hover away. No figure is lifted out of it.
   assert.ok(html.includes('Actual permitted stay is determined'))
   assert.ok(html.includes('text-overflow:ellipsis'))
-  assert.ok(html.includes('aria-label="' + t('ops.noteOpen') + '"'))
   assert.ok(html.includes('title="' + long + '"'))
+  // The information button is a measured property (the text is cut off in
+  // pixels), so static markup never carries one, whatever the length.
+  assert.ok(!html.includes('aria-label="' + t('ops.noteOpen') + '"'))
   assert.ok(!html.includes('up to 30 days<'))
 })
 
