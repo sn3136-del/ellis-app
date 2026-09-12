@@ -1341,6 +1341,10 @@ def _product_fields(row: dict, product: dict) -> None:
     if "exceptions" in product:
         v = product["exceptions"]
         row["special_conditions"] = ". ".join(str(x) for x in v if x) if isinstance(v, list) else v
+    # The programme a list-based product belongs to (scheme_registry), so an
+    # eligibility list is keyed off the product and not guessed from its name.
+    if str(product.get("program_id") or "").strip():
+        row["_program_id"] = str(product["program_id"]).strip()
 
 
 _PRODUCT_FIELD_CELLS = {

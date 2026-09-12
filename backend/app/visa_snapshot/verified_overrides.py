@@ -476,6 +476,10 @@ def _field_errors(fields: dict) -> list[str]:
         elif any(p.get("source_url") and not is_government_host(
                 hostname(str(p["source_url"]))) for p in products):
             errors.append("visa_products source_url must be an official government page")
+        elif any(p.get("program_id") is not None and (
+                not isinstance(p["program_id"], str) or not re.fullmatch(r"[a-z0-9_]{3,64}", p["program_id"]))
+                for p in products):
+            errors.append("visa_products program_id must be a registry id (lower-case letters, digits, underscores)")
     return errors
 
 
