@@ -509,6 +509,136 @@ class DatabaseIssueUpdateIn(BaseModel):
     status: str = ""          # acknowledged | corrected | dismissed
     resolution: str = ""
     expected_issue_sha256: str | None = None
+    # guard-20260912 T9: a dismissal is evidence, not a bulk operation. It
+    # cites a page competent for the destination or a reason from the
+    # closed vocabulary (sweep_issues.DISMISS_REASONS).
+    source_url: str = ""
+    dismiss_reason: str = ""
+    # A written correction record ({"fields": [...], "source_url": ...}) for
+    # a finding that names no field, or for a sweep finding whose fix left
+    # no reader-visible change-log row (a quote added to the provenance).
+    correction_evidence: dict | None = None
+
+
+# guard-20260912 T9: the dismissal gate.
+DISMISSAL_MIN_CHARS = 40
+DISMISSALS_PER_HOUR = 10
+
+
+def _aware(value):
+    from datetime import timezone
+    if value is None:
+        return None
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+
+
+def _issue_last_actor(db, row) -> str:
+    """Who last acted on an issue: the actor of its latest stage event in the
+    audit log, else whoever filed it."""
+    from sqlalchemy import select as _sel
+    from .models import AuditEvent
+    events = db.execute(_sel(AuditEvent).where(AuditEvent.action.like("database_issue_%"))
+                        .order_by(AuditEvent.seq.desc())).scalars()
+    for event in events:
+        detail = event.detail or {}
+        if detail.get("issue_id") == row.id or detail.get("issue") == row.id:
+            return str(event.actor or "")
+    return str(row.reported_by or "")
+
+
+def _competent_page(url: str, route: dict) -> bool:
+    from .visa_snapshot.source_authority import is_competent
+    return bool(url) and is_competent(url, dict(route or {}), "disposition")
+
+
+def _dismissal_gate(db, row, body, p, sweep) -> dict:
+    """A dismissal is worked one issue at a time, on evidence: a written
+    resolution of at least forty characters; a competent page or a reason
+    from the closed vocabulary; for a sweep finding, its check rerun and
+    passing; someone other than the last actor; at most ten per operator per
+    hour and one per route per sweep run."""
+    from datetime import datetime, timedelta, timezone
+    from sqlalchemy import select as _sel
+    from .models import AuditEvent
+    from .visa_snapshot import sweep_issues
+    resolution = (body.resolution or "").strip()
+    if len(resolution) < DISMISSAL_MIN_CHARS:
+        raise HTTPException(422, f"a dismissal needs a written resolution of at least "
+                                 f"{DISMISSAL_MIN_CHARS} characters saying why the finding does not stand")
+    reason = (body.dismiss_reason or "").strip().lower()
+    url = (body.source_url or "").strip()
+    competent = _competent_page(url, row.route)
+    if reason and reason not in sweep_issues.DISMISS_REASONS:
+        raise HTTPException(422, "dismiss_reason must be one of " + ", ".join(sweep_issues.DISMISS_REASONS))
+    if url and not competent:
+        raise HTTPException(422, "the cited source_url is not competent for this destination")
+    if not competent and not reason:
+        raise HTTPException(422, "a dismissal needs a source_url competent for the destination, or a "
+                                 "dismiss_reason from: " + ", ".join(sweep_issues.DISMISS_REASONS))
+    if reason == "not_reproducible" and sweep is None and not competent:
+        raise HTTPException(422, "not_reproducible is verified by rerunning the check; this finding has "
+                                 "no check to rerun, so cite the competent page that shows the record is right")
+    rechecked = None
+    if sweep is not None:
+        passes, why = sweep_issues.recheck(db, row)
+        if not passes:
+            raise HTTPException(422, "this sweep finding still reproduces, so it cannot be dismissed: " + why)
+        rechecked = why
+    if _issue_last_actor(db, row) == p.user_id:
+        raise HTTPException(422, "a dismissal has to be written by someone other than the last "
+                                 "person who acted on this issue")
+    since = datetime.now(timezone.utc) - timedelta(hours=1)
+    mine = [e for e in db.execute(_sel(AuditEvent).where(
+        AuditEvent.action == "database_issue_dismissed", AuditEvent.actor == p.user_id)).scalars()
+        if (_aware(e.at) or since) >= since]
+    if len(mine) >= DISMISSALS_PER_HOUR:
+        raise HTTPException(429, "dismissals are worked one at a time: at most "
+                                 f"{DISMISSALS_PER_HOUR} per operator per hour")
+    if sweep is not None and sweep.get("run_id"):
+        same_run = [e for e in db.execute(_sel(AuditEvent).where(
+            AuditEvent.action == "database_issue_dismissed")).scalars()
+            if (e.detail or {}).get("cache_key") == row.cache_key
+            and (e.detail or {}).get("run_id") == sweep.get("run_id")]
+        if same_run:
+            raise HTTPException(429, "dismissals are worked one at a time: this route already had a "
+                                     "finding from this sweep run dismissed")
+    return {"dismiss_reason": reason or None, "source_url": url or None, "rechecked": rechecked}
+
+
+def _fields_named(row) -> set:
+    """The correctable fields an issue names in its proposal or its note."""
+    from .visa_snapshot import verified_overrides
+    named = set()
+    proposed = (row.proposal or {}).get("fields") if isinstance(row.proposal, dict) else None
+    if isinstance(proposed, dict):
+        named.update(str(k) for k in proposed)
+    note = str(row.note or "")
+    for field in verified_overrides.OVERRIDABLE:
+        if re.search(r"(?<![a-z_])" + re.escape(field) + r"(?![a-z_])", note):
+            named.add(field)
+    return named
+
+
+def _valid_correction_evidence(evidence, route) -> set:
+    """The fields a written correction record lists, when it stands."""
+    if not isinstance(evidence, dict):
+        return set()
+    fields = evidence.get("fields")
+    if not isinstance(fields, list) or not all(isinstance(f, str) and f.strip() for f in fields) or not fields:
+        raise HTTPException(422, "correction_evidence needs a non-empty list of field names")
+    if not _competent_page(str(evidence.get("source_url") or "").strip(), route):
+        raise HTTPException(422, "correction_evidence needs a source_url competent for the destination")
+    return {f.strip() for f in fields}
+
+
+def _listed_proposal(proposal):
+    """The queue lists a proposal without its captured page text (it can be
+    200,000 characters); the digest and length stay so the capture is
+    identifiable."""
+    if not isinstance(proposal, dict) or not isinstance(proposal.get("captured_page"), dict):
+        return proposal or {}
+    page = proposal["captured_page"]
+    return dict(proposal, captured_page={k: page.get(k) for k in ("source_url", "sha256", "chars")})
 
 
 # open -> acknowledged -> corrected | dismissed. An issue never silently
@@ -557,6 +687,10 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     if status == "reviewed" and row.resolved_by == p.user_id:
         raise HTTPException(422, "the correction has to be reviewed by someone "
                                  "other than the person who wrote it")
+    from .visa_snapshot import sweep_issues
+    sweep = sweep_issues.sweep_meta(row) if row.reported_by == sweep_issues.REPORTER else None
+    dismissal = _dismissal_gate(db, row, body, p, sweep) if status == "dismissed" else None
+    written_evidence = set()
     if status in ("corrected", "reviewed", "published"):
         # Workflow status is not a policy edit. A correction must already
         # have been applied through a sourced write, preserving the canonical
@@ -574,8 +708,13 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
         # proposal carries the same names untruncated, so read them there
         # and keep the column as the fallback.
         proposed = (row.proposal or {}).get("fields")
-        names = (list(proposed) if isinstance(proposed, dict) and proposed
-                 else str(row.field or "").split(","))
+        if sweep is not None:
+            # A sweep finding names its fields in its own record, never the
+            # fieldless branch below (guard-20260912 T9).
+            names = sweep_issues.sweep_fields(row) or [row.field]
+        else:
+            names = (list(proposed) if isinstance(proposed, dict) and proposed
+                     else str(row.field or "").split(","))
         requested = {aliases.get(str(f).strip(), str(f).strip()) for f in names if str(f).strip()}
         changes = db.execute(_sel(DatabaseChangeLog).where(
             DatabaseChangeLog.cache_key == kimi_primary.canonical_key(row.cache_key),
@@ -583,14 +722,35 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
             DatabaseChangeLog.origin.in_(("operator-edit", "grounded_recheck")))).scalars()
         corrected_fields = set()
         for change in changes:
-            corrected_fields.update((change.changes or {}).keys())
+            # A field counts as corrected only when its value actually
+            # changed: writing the same wrong value back is not a correction
+            # (guard-20260912 T9).
+            for name, delta in (change.changes or {}).items():
+                if not isinstance(delta, dict) or json.dumps(delta.get("from"), sort_keys=True, default=str) \
+                        != json.dumps(delta.get("to"), sort_keys=True, default=str):
+                    corrected_fields.add(name)
         accepted = (row.proposal or {}).get("correction_evidence") or {}
         corrected_fields.update(accepted.get("fields") or [])
-        covered = (bool(corrected_fields) if requested <= {"", "record", "ai_answer"}
-                   else requested <= corrected_fields)
+        fieldless = sweep is None and requested <= {"", "record", "ai_answer"}
+        if (fieldless or sweep is not None) and body.correction_evidence is not None:
+            written_evidence = _valid_correction_evidence(body.correction_evidence, row.route)
+        if fieldless:
+            # A flag naming no field is closed only by a change to a field it
+            # names in its proposal or note, or by a written correction record
+            # listing the fields; any unrelated edit used to close it.
+            named = {aliases.get(f, f) for f in _fields_named(row)}
+            covered = bool(written_evidence) or bool(accepted.get("fields")) or bool(named & corrected_fields)
+        elif sweep is not None:
+            covered = bool(requested & corrected_fields) or bool(written_evidence) or bool(accepted.get("fields"))
+        else:
+            covered = requested <= corrected_fields
         if not covered:
             raise HTTPException(422, "apply a sourced correction to the reported fields before "
                                      "advancing this issue; changing its status does not change visa facts")
+        if sweep is not None:
+            passes, why = sweep_issues.recheck(db, row)
+            if not passes:
+                raise HTTPException(422, "the correction is recorded but the sweep check still fails: " + why)
     row.status = status
     if body.resolution:
         row.resolution = body.resolution[:1000]
@@ -611,9 +771,16 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     # Retain the raw row, its provenance and all existing references.
     save_revision(db, row, original_revision)
     # audit.record commits this same transaction, so status and audit persist together.
+    detail = {"issue_id": issue_id}
+    if dismissal is not None:
+        detail.update(cache_key=row.cache_key, fingerprint=row.fingerprint or None,
+                      run_id=(sweep or {}).get("run_id"), **dismissal)
+    if written_evidence:
+        detail["correction_evidence"] = {"fields": sorted(written_evidence),
+                                         "source_url": str((body.correction_evidence or {}).get("source_url") or "")}
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_issue_" + status,
-                 detail={"issue_id": issue_id}, actor=p.user_id)
+                 detail=detail, actor=p.user_id)
     return {"ok": True, "id": row.id, "status": row.status,
             "resolution": row.resolution}
 
@@ -976,6 +1143,8 @@ def travel_database_issue_accept_proposal(issue_id: str,
     if row.reported_by == "freshness_monitor":
         raise HTTPException(422, "monitor disputes are ruled through the "
                                  "normal stages, not accepted wholesale")
+    if row.status not in ("open", "acknowledged"):
+        raise HTTPException(422, f"a proposal is accepted from open or acknowledged, not {row.status}")
     rt = dict(row.route or {})
     canonical = kimi_primary.cache_key(rt)
     if kimi_primary.canonical_key(row.cache_key) != canonical:
@@ -984,6 +1153,27 @@ def travel_database_issue_accept_proposal(issue_id: str,
         KimiRouteGuidanceCache.cache_key == canonical)).scalars().first()
     if cached is None:
         raise HTTPException(422, "no canonical cached answer exists to validate this correction")
+    # guard-20260912 T9: every quoted value is re-read against the page text
+    # the proposal was made from before anything is written. A proposal
+    # without an intact capture cannot show its quotes are on the page.
+    import hashlib as _hashlib
+    from .visa_snapshot.evidence_validator import quote_in_text, supports_disposition
+    page = prop.get("captured_page") if isinstance(prop.get("captured_page"), dict) else {}
+    page_text = str(page.get("text") or "")
+    if (not page_text or page.get("source_url") != prop.get("source_url")
+            or _hashlib.sha256(page_text.encode("utf-8")).hexdigest() != page.get("sha256")):
+        raise HTTPException(422, "the proposal carries no intact captured page to re-validate its "
+                                 "quotes against; ask Ellis to read the official page again")
+    for name, value in (prop.get("fields") or {}).items():
+        if not isinstance(value, dict):
+            continue
+        quote = str(value.get("quote") or "")
+        if not quote.strip() or not quote_in_text(quote, page_text):
+            raise HTTPException(422, f"the quote for {name} is not on the captured page")
+        if name == "disposition" and not supports_disposition(
+                quote, str(value.get("page_says") or ""),
+                nationality=str(rt.get("passport_nationality") or "")):
+            raise HTTPException(422, "the quote for disposition does not state that verdict for this nationality")
     quotes = "; ".join(f"{k}: {str(v.get('quote') or '')[:120]}"
                        for k, v in (prop.get("fields") or {}).items()
                        if isinstance(v, dict) and v.get("quote"))
@@ -1004,6 +1194,16 @@ def travel_database_issue_accept_proposal(issue_id: str,
         verified_overrides.append_operator_entry(entry, guidance=cached.guidance)
     except ValueError as e:
         raise HTTPException(422, str(e))
+    # The notify stage is walked, never skipped: open -> acknowledged (who
+    # was told and when) -> corrected (guard-20260912 T9).
+    if row.status == "open":
+        row.status = "acknowledged"
+        row.notified_at = datetime.now(timezone.utc)
+        row.notified_to = f"information provider: Ellis page reading accepted by {p.user_id}"[:200]
+        db.commit()
+        audit.record(db, org_id=p.org_id, application_id="database",
+                     action="database_issue_acknowledged",
+                     detail={"issue_id": issue_id, "via": "accept-proposal"}, actor=p.user_id)
     row.status = "corrected"
     row.resolution = (f"Accepted Ellis's page reading "
                       f"({', '.join(sorted(fields))}) from "
@@ -1422,7 +1622,8 @@ def travel_database_issues(db=Depends(get_session),
                         "reviewed_by": r.reviewed_by,
                         "reviewed_at": _iso(r.reviewed_at),
                         "published_at": _iso(r.published_at),
-                        "proposal": r.proposal or {},
+                        "proposal": _listed_proposal(r.proposal),
+                        "fingerprint": r.fingerprint or None,
                         "created_at": _iso(r.created_at)} for r in rows]}
 
 

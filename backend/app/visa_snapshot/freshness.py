@@ -34,6 +34,7 @@ happens to remember today.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import contextlib
 import re
@@ -1324,8 +1325,15 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
                      and field_value_supported(requested, guidance.get(requested), evidence[requested])
                      and proof_helpers.field_scope_matches_route(requested,evidence[requested],route)
                      and proof_helpers.field_workflow_matches(requested,evidence[requested],effective_candidate,route,confirmation=True)))
+        captured_text = str(fr.content_text or "")[:200000]
         proposal = {"outcome": "checked", "source_url": fr.final_url,
                     "checked_at": when,
+                    # guard-20260912 T9: the page text the quotes were read
+                    # from, so accepting the proposal re-validates every quote
+                    # against the same capture instead of trusting it.
+                    "captured_page": {"source_url": fr.final_url, "chars": len(captured_text),
+                                      "sha256": hashlib.sha256(captured_text.encode("utf-8")).hexdigest(),
+                                      "text": captured_text},
                     "consistent": confirmed and raw.get("consistent") is True and not fields and not unquoted,
                     "verified_fields": [requested] if confirmed else [],
                     "awaiting_adjudication": awaiting_adjudication,

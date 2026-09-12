@@ -1079,3 +1079,248 @@ def test_only_the_lookup_and_ask_posts_skip_invalidation():
     assert m._records_read_post("/database/lookup") and m._records_read_post("/database/ask")
     assert not m._records_read_post("/database/asks/12/review"), "an ask review is an operator write"
     assert not m._records_read_post("/database/records/edit")
+
+
+# ---------------------------------------------------------------------------
+# guard-20260912 T9: the correction loop's four holes are closed.
+# ---------------------------------------------------------------------------
+import hashlib as _hashlib
+from datetime import datetime as _dt, timezone as _tz
+
+LOOP_ROUTE = {"passport_nationality": "KHM", "destination_country": "JPN", "travel_purpose": "tourism",
+              "travel_document_type": "ordinary_passport"}
+MOFA = "https://www.mofa.go.jp/j_info/visit/visa/index.html"
+
+
+def _admin(user):
+    return {"Authorization": "Bearer admin-token", "X-Org-Id": "loop-ops", "X-User-Id": user}
+
+
+def _issue(db, **kw):
+    from app.visa_snapshot.models import DatabaseIssueReport
+    values = dict(org_id="platform", cache_key=kimi_primary.cache_key(LOOP_ROUTE), route=dict(LOOP_ROUTE),
+                  field="government_fee", note="the fee looks wrong", reported_by="reader-1", status="open")
+    values.update(kw)
+    row = DatabaseIssueReport(**values)
+    db.add(row)
+    db.commit()
+    return row.id
+
+
+def _change(db, fields, route=LOOP_ROUTE):
+    from app.visa_snapshot.models import DatabaseChangeLog
+    db.add(DatabaseChangeLog(cache_key=kimi_primary.cache_key(route), route=dict(route), action="modify",
+                             origin="operator-edit", changes=fields, note="test"))
+    db.commit()
+
+
+LONG = "The official page was reread and the record matches it exactly as served today."
+
+
+def test_sweep_issue_cannot_be_dismissed_while_it_still_reproduces(client, db, monkeypatch, tmp_path):
+    from app.visa_snapshot import consistency_sweep as cs, sweep_issues, verified_overrides as vo
+    from app.visa_snapshot.models import DatabaseIssueReport
+    from tests import _guard_fixtures as gf
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES", str(tmp_path / "operator.json"))
+    vo.reload()
+    with gf.seeded(db) as keys:
+        korea = next(k for k in keys if k.startswith("HKG|HKG|KOR|tourism"))
+        evidence = cs.run(db, now=_dt(2026, 9, 12, tzinfo=_tz.utc), trigger="test", keys=[korea],
+                          absence_checks=False, coverage=False)
+        conflict = next(f for f in evidence["findings"] if f["code"] == "verdict_page_scheme_conflict")
+        sweep_issues.file_findings(db, [conflict], run_id=evidence["run_id"])
+        issue = db.query(DatabaseIssueReport).filter_by(fingerprint=conflict["fingerprint"]).one()
+        try:
+            refused = client.post(f"/database/issues/{issue.id}", headers=_admin("op-sweep"),
+                                  json={"status": "dismissed", "resolution": LONG,
+                                        "dismiss_reason": "not_reproducible"})
+            assert refused.status_code == 422
+            assert "still reproduces" in refused.json()["detail"]
+            assert "verdict_page_scheme_conflict" in refused.json()["detail"]
+            monkeypatch.setattr(sweep_issues, "recheck", lambda db_, issue_: (True, "rechecked clean"))
+            ok = client.post(f"/database/issues/{issue.id}", headers=_admin("op-sweep"),
+                             json={"status": "dismissed", "resolution": LONG, "dismiss_reason": "not_reproducible"})
+            assert ok.status_code == 200, ok.text
+        finally:
+            db.query(DatabaseIssueReport).filter_by(fingerprint=conflict["fingerprint"]).delete()
+            db.commit()
+    vo.reload()
+
+
+def test_dismissal_requires_a_competent_source_or_a_listed_reason(client, db):
+    iid = _issue(db)
+    post = lambda body: client.post(f"/database/issues/{iid}", headers=_admin("op-competent"),
+                                    json=dict({"status": "dismissed", "resolution": LONG}, **body))
+    short = client.post(f"/database/issues/{iid}", headers=_admin("op-competent"),
+                        json={"status": "dismissed", "resolution": "wrong", "dismiss_reason": "reporter_error"})
+    assert short.status_code == 422 and "40 characters" in short.json()["detail"]
+    assert post({}).status_code == 422
+    assert post({"dismiss_reason": "looks fine"}).status_code == 422
+    # Another government's page is never competent for Japan.
+    home = post({"source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html"})
+    assert home.status_code == 422 and "not competent" in home.json()["detail"]
+    assert post({"source_url": MOFA}).status_code == 200
+    iid2 = _issue(db)
+    ok = client.post(f"/database/issues/{iid2}", headers=_admin("op-competent"),
+                     json={"status": "dismissed", "resolution": LONG, "dismiss_reason": "duplicate_of_open_issue"})
+    assert ok.status_code == 200
+
+
+def test_dismissal_cannot_be_written_by_the_last_actor(client, db):
+    iid = _issue(db)
+    assert client.post(f"/database/issues/{iid}", headers=_admin("op-last"),
+                       json={"status": "acknowledged", "resolution": "told the provider"}).status_code == 200
+    mine = client.post(f"/database/issues/{iid}", headers=_admin("op-last"),
+                       json={"status": "dismissed", "resolution": LONG, "dismiss_reason": "reporter_error"})
+    assert mine.status_code == 422 and "last person" in mine.json()["detail"]
+    other = client.post(f"/database/issues/{iid}", headers=_admin("op-other"),
+                        json={"status": "dismissed", "resolution": LONG, "dismiss_reason": "reporter_error"})
+    assert other.status_code == 200
+    # The reporter cannot dismiss their own flag either.
+    own = _issue(db, reported_by="op-reporter")
+    assert client.post(f"/database/issues/{own}", headers=_admin("op-reporter"),
+                       json={"status": "dismissed", "resolution": LONG,
+                             "dismiss_reason": "reporter_error"}).status_code == 422
+
+
+def test_eleventh_dismissal_in_an_hour_is_refused(client, db):
+    ids = [_issue(db) for _ in range(11)]
+    body = {"status": "dismissed", "resolution": LONG, "dismiss_reason": "duplicate_of_open_issue"}
+    for iid in ids[:10]:
+        assert client.post(f"/database/issues/{iid}", headers=_admin("op-eleven"), json=body).status_code == 200
+    eleventh = client.post(f"/database/issues/{ids[10]}", headers=_admin("op-eleven"), json=body)
+    assert eleventh.status_code == 429
+    assert "dismissals are worked one at a time" in eleventh.json()["detail"]
+    # Another operator is not limited by this one's count.
+    assert client.post(f"/database/issues/{ids[10]}", headers=_admin("op-twelve"), json=body).status_code == 200
+
+
+def test_fieldless_issue_is_not_closed_by_an_unrelated_edit(client, db):
+    iid = _issue(db, field="record", note="something on this record is wrong")
+    hdr = _admin("op-fieldless")
+    assert client.post(f"/database/issues/{iid}", headers=hdr,
+                       json={"status": "acknowledged", "resolution": "told the provider"}).status_code == 200
+    _change(db, {"processing_time": {"from": "5 days", "to": "7 days"}})
+    unrelated = client.post(f"/database/issues/{iid}", headers=hdr,
+                            json={"status": "corrected", "resolution": "an unrelated edit"})
+    assert unrelated.status_code == 422
+    # A written correction record listing the fields, on a competent page, closes it.
+    written = client.post(f"/database/issues/{iid}", headers=hdr,
+                          json={"status": "corrected", "resolution": "corrected the stay",
+                                "correction_evidence": {"fields": ["permitted_stay"], "source_url": MOFA}})
+    assert written.status_code == 200, written.text
+    # A note that names a field is closed by a change to that field.
+    named = _issue(db, field="record", note="permitted_stay reads 90 days but the page says 30")
+    client.post(f"/database/issues/{named}", headers=hdr, json={"status": "acknowledged", "resolution": "told"})
+    _change(db, {"permitted_stay": {"from": "90 days", "to": "30 days"}})
+    assert client.post(f"/database/issues/{named}", headers=hdr,
+                       json={"status": "corrected", "resolution": "stay corrected"}).status_code == 200
+
+
+def test_writing_the_same_wrong_value_back_does_not_count_as_corrected(client, db):
+    iid = _issue(db, field="government_fee")
+    hdr = _admin("op-same")
+    client.post(f"/database/issues/{iid}", headers=hdr, json={"status": "acknowledged", "resolution": "told"})
+    same = {"amount": 100, "currency": "USD"}
+    _change(db, {"government_fee": {"from": same, "to": dict(same)}})
+    assert client.post(f"/database/issues/{iid}", headers=hdr,
+                       json={"status": "corrected", "resolution": "rewrote the fee"}).status_code == 422
+    _change(db, {"government_fee": {"from": same, "to": {"amount": 3000, "currency": "JPY"}}})
+    assert client.post(f"/database/issues/{iid}", headers=hdr,
+                       json={"status": "corrected", "resolution": "fee corrected"}).status_code == 200
+
+
+def _proposal_issue(db, page_text):
+    from app.visa_snapshot.models import KimiRouteGuidanceCache
+    key = kimi_primary.cache_key(LOOP_ROUTE)
+    if db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).first() is None:
+        db.add(KimiRouteGuidanceCache(cache_key=key, route=dict(LOOP_ROUTE), status="KIMI_PRIMARY", model="t",
+                                      guidance={"disposition": "VISA_REQUIRED", "requirement_detail": "paper_visa",
+                                                "visa_category": "Temporary visitor visa",
+                                                "application_channel": "embassy_or_consulate",
+                                                "government_fee": {"amount": 3000, "currency": "JPY"},
+                                                "source_url": MOFA, "confidence": "high"}))
+        db.commit()
+    proposal = {"source_url": MOFA, "checked_at": "2026-09-12T00:00:00+00:00",
+                "captured_page": {"source_url": MOFA, "text": page_text, "chars": len(page_text),
+                                  "sha256": _hashlib.sha256(page_text.encode("utf-8")).hexdigest()},
+                "fields": {"disposition": {"page_says": "VISA_REQUIRED", "record_holds": "VISA_REQUIRED",
+                                           "quote": "Cambodian nationals must obtain a visa before visiting Japan."},
+                           "government_fee": {"page_says": {"amount": 3000, "currency": "JPY"},
+                                              "record_holds": {"amount": 3000, "currency": "JPY"},
+                                              "quote": "The single entry visa fee is 3,000 yen."}}}
+    return _issue(db, field="government_fee", proposal=proposal)
+
+
+PAGE = ("Visa information. Cambodian nationals must obtain a visa before visiting Japan. "
+        "The single entry visa fee is 3,000 yen. Apply at the Embassy of Japan.")
+
+
+def test_accept_proposal_walks_the_notify_stage_and_records_notification(client, db, monkeypatch, tmp_path):
+    from app.models import AuditEvent
+    from app.visa_snapshot import verified_overrides as vo
+    from app.visa_snapshot.models import DatabaseIssueReport
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES", str(tmp_path / "operator.json"))
+    vo.reload()
+    try:
+        iid = _proposal_issue(db, PAGE)
+        response = client.post(f"/database/issues/{iid}/accept-proposal", headers=_admin("op-accept"))
+        assert response.status_code == 200, response.text
+        db.expire_all()
+        row = db.get(DatabaseIssueReport, iid)
+        assert row.status == "corrected" and row.notified_at is not None
+        assert "information provider" in row.notified_to and "op-accept" in row.notified_to
+        actions = [e.action for e in db.query(AuditEvent).order_by(AuditEvent.seq)
+                   if (e.detail or {}).get("issue_id") == iid or (e.detail or {}).get("issue") == iid]
+        assert actions[-2:] == ["database_issue_acknowledged", "database_issue_proposal_accepted"]
+        # A corrected issue cannot be accepted again.
+        again = client.post(f"/database/issues/{iid}/accept-proposal", headers=_admin("op-accept"))
+        assert again.status_code == 422
+    finally:
+        vo.reload()
+
+
+def test_accept_proposal_refuses_a_quote_that_is_not_on_the_page(client, db, monkeypatch, tmp_path):
+    from app.visa_snapshot import verified_overrides as vo
+    from app.visa_snapshot.models import DatabaseIssueReport
+    operator = tmp_path / "operator.json"
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES", str(operator))
+    vo.reload()
+    try:
+        iid = _proposal_issue(db, "Visa information. Cambodian nationals must obtain a visa before visiting Japan.")
+        refused = client.post(f"/database/issues/{iid}/accept-proposal", headers=_admin("op-accept"))
+        assert refused.status_code == 422 and "government_fee is not on the captured page" in refused.json()["detail"]
+        # A tampered capture is refused as well.
+        row = db.get(DatabaseIssueReport, iid)
+        tampered = dict(row.proposal)
+        tampered["captured_page"] = dict(tampered["captured_page"], text=PAGE)
+        row.proposal = tampered
+        db.commit()
+        assert client.post(f"/database/issues/{iid}/accept-proposal", headers=_admin("op-accept")).status_code == 422
+        db.expire_all()
+        assert db.get(DatabaseIssueReport, iid).status == "open"
+        assert not operator.exists() or json.loads(operator.read_text() or "[]") == []
+    finally:
+        vo.reload()
+
+
+def test_existing_stage_order_and_self_review_rules_are_unchanged(client, db):
+    iid = _issue(db, field="government_fee")
+    hdr, other = _admin("op-stage"), _admin("op-stage-review")
+    assert client.post(f"/database/issues/{iid}", headers=hdr,
+                       json={"status": "corrected", "resolution": "skip"}).status_code == 422
+    assert client.post(f"/database/issues/{iid}", headers=hdr,
+                       json={"status": "acknowledged", "resolution": "told"}).status_code == 200
+    assert client.post(f"/database/issues/{iid}", headers=hdr,
+                       json={"status": "published", "resolution": "skip"}).status_code == 422
+    assert client.post(f"/database/issues/{iid}", headers=hdr,
+                       json={"status": "open", "resolution": "back"}).status_code == 422
+    _change(db, {"government_fee": {"from": {"amount": 1}, "to": {"amount": 2}}})
+    assert client.post(f"/database/issues/{iid}", headers=hdr,
+                       json={"status": "corrected", "resolution": "fee fixed"}).status_code == 200
+    assert client.post(f"/database/issues/{iid}", headers=hdr,
+                       json={"status": "reviewed", "resolution": "self"}).status_code == 422
+    assert client.post(f"/database/issues/{iid}", headers=other,
+                       json={"status": "reviewed", "resolution": "checked"}).status_code == 200
+    assert client.post(f"/database/issues/{iid}", headers=other,
+                       json={"status": "published", "resolution": "live"}).status_code == 200
