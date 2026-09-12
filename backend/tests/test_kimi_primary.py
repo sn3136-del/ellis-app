@@ -401,6 +401,11 @@ def test_a_stay_page_in_spanish_is_not_read_as_the_us_travel_authorisation(db):
     "electronic travel authorisation (eta)", "k-eta (korea electronic travel authorization)",
     "electronic system for travel authorization", "entry/exit system", "entry-exit-system",
     "https://travel-europe.europa.eu/ees_en", "https://x.gov/etias-en", "esta-application",
+    # The three portals whose host fuses the name with a country, a plural
+    # or a prefix, in the exact forms the live database cites.
+    "https://etakenya.go.ke/", "https://www.etakenya.go.ke",
+    "https://borders.etakenya.go.ke/media/AIC_14.25.pdf",
+    "https://etas.gov.so/", "https://www.uk-eta.homeoffice.gov.uk",
 ])
 def test_every_real_authorisation_form_is_still_matched(cited):
     assert kimi_primary.cites_authorization_page(cited)
@@ -412,6 +417,8 @@ def test_every_real_authorisation_form_is_still_matched(cited):
     "https://vistoperitalia.esteri.it/", "https://embassy.gov/visa_fees_en", "beta_test",
     "https://embassy.gov/theta_en", "marketa", "https://embassy.gov/etage", "https://embassy.gov/detail",
     "questa", "etiast", "https://embassy.gov/", "",
+    "https://www.exteriores.gob.es/consulados/visados/estancia", "https://etage.fr/",
+    "https://embassy.gov/fees_en", "https://embassy.gov/beta", "estas tarifas",
 ])
 def test_an_authorisation_name_inside_another_word_is_not_a_match(cited):
     assert not kimi_primary.cites_authorization_page(cited)

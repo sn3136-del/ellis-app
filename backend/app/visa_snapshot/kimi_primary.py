@@ -58,8 +58,14 @@ STATUS_TIMEOUT = "KIMI_TIMEOUT"
 
 # Pages that describe a pre-travel authorisation or a border formality, none
 # of which is a visa. Matched against the URL and the category the answer
-# cites, so a route graded VISA_REQUIRED on one of them is caught.
+# cites, so a route graded VISA_REQUIRED on one of them is caught. The
+# portals whose host fuses the authorisation name with a country, a plural
+# or a prefix (etakenya.go.ke, etas.gov.so, uk-eta.homeoffice.gov.uk, all
+# cited by the live database) are named in full: "eta" as a host label has
+# no boundary that separates them from an unrelated word such as etage, so
+# the word rule below can only keep them by name.
 _AUTHORIZATION_NOT_VISA = ("etias", "esta", "/eta", "eta_", "k-eta", "keta",
+                           "uk-eta", "etas", "etakenya",
                            "entry/exit system", "entry-exit-system", "ees_",
                            "electronic travel authoris", "electronic travel authoriz",
                            "electronic system for travel author")
