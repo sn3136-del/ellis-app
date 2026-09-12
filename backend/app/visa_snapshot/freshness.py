@@ -182,6 +182,25 @@ _PROVIDER = None
 _MODEL_SLOTS = threading.BoundedSemaphore(4)
 
 
+def _comparison_facts(guidance: dict) -> dict:
+    """Send policy values, not their nested review archives, to extraction.
+
+    Product proof can dwarf the source page and exhaust the comparison budget.
+    Only the field_provenance metadata is omitted from this prompt copy; all
+    policy values, conditions and notes are retained. Full original guidance
+    and provenance still bind comparison reuse and every deterministic check.
+    The selected route proof remains a separate reviewed_evidence input.
+    """
+    def without_archives(value):
+        if isinstance(value, dict):
+            return {key: without_archives(child) for key, child in value.items()
+                    if key != 'field_provenance'}
+        if isinstance(value, list):
+            return [without_archives(child) for child in value]
+        return value
+    return {key: without_archives(guidance[key]) for key in OVERRIDABLE if key in guidance}
+
+
 def _comparison_schema_errors(answer) -> list[str]:
     """Invalid extraction is not a model judgment that a page is irrelevant."""
     if not isinstance(answer, dict):
@@ -872,7 +891,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                               ("passport_nationality", "destination_country",
                                "travel_purpose", "travel_document_type")},
                    "policy_date": when[:10],
-                   "stored_answer": {k: guidance[k] for k in OVERRIDABLE if k in guidance},
+                   "stored_answer": _comparison_facts(guidance),
                    "allowed_enum_values": {'disposition': kimi_primary.DISPOSITIONS,
                        'requirement_detail': kimi_primary.REQUIREMENT_DETAILS,
                        'application_channel': kimi_primary.APPLICATION_CHANNELS},
@@ -1348,8 +1367,7 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
                       ("passport_nationality", "destination_country",
                        "travel_purpose", "travel_document_type")},
             "flag_from_reader": {"field": issue.field, "note": issue.note},
-            "stored_answer": {k: guidance.get(k) for k in OVERRIDABLE
-                              if k in guidance},
+            "stored_answer": _comparison_facts(guidance),
             "official_page_url": fr.final_url,
             "official_page_text": fr.content_text[:MAX_PAGE_CHARS],
         }
