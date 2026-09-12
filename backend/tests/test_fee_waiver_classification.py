@@ -115,12 +115,45 @@ def test_missing_fee_cannot_turn_a_visa_fee_waiver_into_entry_exemption():
 
 
 @pytest.mark.parametrize("wording", ["Visa fee waived", "Visa fee waiver", "No visa fee is payable",
-                                     "No visa application fee", "Issued free of charge"])
+                                     "No visa application fee is charged", "Issued free of charge"])
 def test_explicit_fee_waiver_retains_zero_without_a_visa_exemption(wording):
     row, = rows({**CHILD, "type": "EU-family-member entry visa", "notes": wording})
     assert (row["visa_fee_amount"], row["visa_fee_currency"]) == (0, "EUR")
     assert row["visa_requirement"] == "Visa Required in Advance"
     assert row["visa_requirement_detail"] == "Paper Visa"
+
+
+@pytest.mark.parametrize("label,note,expected", [
+    ("Schengen C visa, children under 6", "No fee for applicants aged 0 to 6", 0),
+    ("Schengen C visa, children under 6", "No fee for applicants aged 0 to 6 per official embassy notice. Entries not specified by the official page, so the entries fact remains unset.", 0),
+    ("Schengen C visa, children under six", "No visa fee for applicants aged 0–6 years old", 0),
+    ("Schengen C visa, children under 5", "No fee for children aged 0 to 6 years", 0),
+    ("Schengen C visa", "No fee for applicants aged 0 to 6", None),
+    ("Schengen C visa for adults", "No fee for applicants aged 0 to 6", None),
+    ("Schengen C visa, children under 12", "No fee for applicants aged 0 to 6", None),
+    ("Schengen C visa, children under 6", "No fee for applicants aged 6 to 12", None),
+    ("Schengen C visa, children under 6", "No fee for applicants aged 0 to 5", None),
+    ("Schengen C visa, children aged 6 to 12", "No fee for applicants aged 0 to 6", None),
+    ("Schengen C visa, adults and children under 6", "No fee for applicants aged 0 to 6", None),
+    ("Schengen C visa, children under 6 or adults", "No fee for applicants aged 0 to 6", None),
+    ("Schengen C visa, applicants not under 6", "No fee for applicants aged 0 to 6", None),
+    ("Schengen C visa, children under 6 or under 12", "No fee for applicants aged 0 to 6", None),
+    ("Tourist visa for parents with children under 6", "No fee for applicants aged 0 to 6", None),
+    ("Visitor visa, guardians accompanying children under 6", "No fee for applicants aged 0 to 6", None),
+    ("Schengen C visa, children under 6", "No fee information published for applicants aged 0 to 6", None),
+    ("Schengen C visa, children under 6", "No fee for applicants aged 0 to 6 if applying online", None),
+    ("Schengen C visa, children under 6", "No fee for applicants aged 0 to 6. Fee is unknown.", None),
+])
+def test_explicit_applicant_age_fee_waiver_stays_inside_product_population(label, note, expected):
+    row, = rows(dict(CHILD, type=label, notes=note))
+    assert row["visa_fee_amount"] == expected
+    assert row["visa_requirement"] == "Visa Required in Advance"
+
+
+def test_explicit_applicant_age_waiver_cannot_override_own_unpublished_fee():
+    row, = rows(dict(CHILD, type="Schengen C visa, children under 6",
+                     notes="No fee for applicants aged 0 to 6", unpublished_fields=["fee"]))
+    assert row["visa_fee_amount"] is None
 
 
 def test_explicit_visa_product_detail_cannot_be_overridden_by_waiver_words():
@@ -177,7 +210,7 @@ def test_a_waiver_word_inside_a_denial_keeps_no_zero(note):
     assert tstation._fee(dict(KUWAIT, notes=note), KUWAIT_GUIDANCE, KUWAIT_ROUTE) == (None, "KWD")
 
 
-@pytest.mark.parametrize("note", ["Issued free of charge.", "No visa fee is payable.", "Visa fee waived for children under six.",
+@pytest.mark.parametrize("note", ["Issued free of charge.", "No visa fee is payable.",
                                   "Free", "Visa fee: Free", "Free of charge for Hong Kong SAR passport holders.",
                                   "Amount not published, but the visa is free-of-charge for this nationality."])
 def test_a_clause_that_states_no_fee_on_its_own_keeps_the_zero(note):
@@ -191,3 +224,75 @@ def test_a_product_named_as_the_exempt_lane_keeps_its_zero():
     lane = dict(KUWAIT, type="Tourist ETA (free of charge for 40 eligible nationalities)", notes=None)
     assert tstation._fee(lane, dict(KUWAIT_GUIDANCE, disposition="ELECTRONIC_AUTHORIZATION_REQUIRED"), KUWAIT_ROUTE) == (0, "KWD")
     assert tstation._fee(dict(KUWAIT, notes=None), dict(KUWAIT_GUIDANCE, disposition="VISA_REQUIRED"), KUWAIT_ROUTE) == (None, "KWD")
+
+
+@pytest.mark.parametrize('note', [
+    'The official BCBP page publishes no issuance fee for the on-arrival tourist visa, so the initial-fee fact remains unset.',
+    'No fee information published.', 'No fee data available.', 'No fees listed.',
+    'No fee waiver applies to this visa.', 'There is no fee waiver for tourist visas.',
+    'The fee waiver ended on 31 December 2024.', 'Fee waivers were abolished in 2023.',
+    'Fee waivers have been discontinued.', 'The visa used to be free.',
+    'Das Visum ist nicht kostenlos.', 'El visado no es gratuito.', "Le visa n'est pas gratuit.",
+    'The visa is free for children under 12', 'Free of charge for holders of diplomatic passports.',
+    'Fee: nil (to be confirmed)', 'No fee shown. The 0 is a placeholder.',
+    'Visa fee waived. This 0 is a placeholder.', 'No visa application fee',
+    'The IMUGA declaration is free of charge.', 'Registration is free.',
+    'Free help is available for completing this application.',
+])
+def test_unknown_expired_negated_and_other_applicant_waivers_cannot_price_a_general_product(note):
+    row, = rows(dict(CHILD, type='Tourist visa', notes=note))
+    assert row['visa_fee_amount'] is None
+
+
+@pytest.mark.parametrize('scope', ['route', 'product'])
+@pytest.mark.parametrize('field', ['visa_fee_amount', 'visa_fee_currency', 'fee', 'government_fee'])
+def test_unpublished_fee_vetoes_even_an_explicit_waiver(scope, field):
+    product = dict(CHILD, type='Tourist visa', notes='No visa fee is payable.')
+    guidance = dict(GUIDANCE, government_fee={'amount': 0, 'currency': 'USD'}, visa_products=[product])
+    (product if scope == 'product' else guidance)['unpublished_fields'] = [field]
+    row, = tstation.records_for_route(ROUTE, guidance)
+    assert row['visa_fee_amount'] is None
+
+
+def test_palau_unpublished_arrival_fee_stays_unpublished_in_product_projection():
+    route = dict(ROUTE, passport_nationality='CHN', destination_country='PLW')
+    product = dict(CHILD, type='Visa on arrival', requirement_detail='visa_on_arrival',
+                   fee={'amount': 0, 'currency': 'USD'},
+                   notes='The official BCBP page publishes no issuance fee for the on-arrival tourist visa, so the initial-fee fact remains unset.',
+                   unpublished_fields=['visa_fee_amount', 'visa_fee_currency'])
+    guidance = dict(GUIDANCE, disposition='VISA_ON_ARRIVAL', requirement_detail='visa_on_arrival',
+                    source_url='https://bcbp.pw/?page_id=165', visa_products=[product])
+    row, = tstation.records_for_route(route, guidance)
+    assert (row['visa_fee_amount'], row['visa_fee_currency']) == (None, None)
+    assert tstation.field_status(row)['visa_fee_amount'] == 'not-published'
+
+
+def test_explicit_transit_waiver_preserves_its_zero_without_borrowing_route_detail():
+    product = dict(CHILD, type='Third-country transit waiver (B-2)',
+                   notes='Free, no Korean visa needed. Conditions apply to the transit itinerary.',
+                   requirement_detail='paper_visa', fee={'amount': 0, 'currency': 'KRW'})
+    row, = rows(product, disposition='CONDITIONAL', requirement_detail='transit_visa_free')
+    assert (row['visa_fee_amount'], row['visa_fee_currency']) == (0, 'KRW')
+
+
+def test_a_named_free_product_cannot_override_a_note_denying_its_fee_waiver():
+    row, = rows(dict(CHILD, type='Tourist visa (free of charge)', notes='The fee waiver has been discontinued.'))
+    assert row['visa_fee_amount'] is None
+
+
+def test_child_waiver_cannot_be_extended_to_an_older_child_lane():
+    row, = rows(dict(CHILD, type='Tourist visa (child under 12)', notes='Visa fee waived for children under six.'))
+    assert row['visa_fee_amount'] is None
+
+
+def test_unknown_other_field_does_not_erase_a_stated_fee_waiver():
+    row, = rows(dict(CHILD, type='Tourist visa', notes='No visa fee is charged. The entries fact remains unset.'))
+    assert row['visa_fee_amount'] == 0
+
+
+@pytest.mark.parametrize('sentence', ['La solicitud ante BLS no es posible.',
+                                      'Les demandes au centre TLScontact ne sont plus acceptées.',
+                                      'Please refrain from submitting applications at the VFS centre.'])
+def test_multilingual_negative_agent_wordings_are_not_application_instructions(sentence):
+    from app.visa_snapshot.evidence_validator import field_value_supported
+    assert not field_value_supported('application_channel', 'authorised_agent', sentence)

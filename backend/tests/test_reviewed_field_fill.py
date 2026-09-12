@@ -1609,8 +1609,7 @@ def test_a_stay_or_a_passport_column_never_takes_the_validity_slot():
     # sentence, because the header names the column and not the cell's words.
     assert c._duration_problem('validity', '', 60, 'Month', None, None, None, None, None,
                                cells={'class': 'B-1/B-2', 'validity': 'Up to 60 Months'}, stated='60 months') == (
-        'the figure is a ceiling the page states with "Up to" and the stored value drops the wording, so it would be '
-        'served as a flat validity')
+        "the row's validity cell (Up to 60 Months) does not fully match a duration from issue")
 
 
 def test_a_sentence_with_no_anchor_binds_to_the_section_it_stands_in():
@@ -1822,9 +1821,9 @@ def test_a_page_whose_only_section_is_another_class_serves_nothing_and_a_served_
     for heading in ('Working days', 'Business hours', 'GCC Residents', 'Press releases', 'Diplomatic Relations'):
         assert c._bare_class_problem(heading, ROUTE, PRODUCT, [PRODUCT], layer()['merged_guidance']) is None, heading
     assert c._bare_class_problem('Diplomatic and official', ROUTE, PRODUCT, [PRODUCT], layer()['merged_guidance'])
-    for line in ('Transit', '8. Required Documents', 'Airport transit requirements', 'Documents Required For A Tourist Visa',
-                 'Applicants must hold a return ticket'):
+    for line in ('Transit', '8. Required Documents', 'Airport transit requirements', 'Documents Required For A Tourist Visa'):
         assert c._reads_as_heading(line), line
+    assert not c._reads_as_heading('Applicants must hold a return ticket')
     assert not c._reads_as_heading('A transit visa is issued for ten days and cannot be extended or converted in country.')
 
 
@@ -1862,7 +1861,7 @@ def test_a_route_level_fill_runs_the_section_gate():
         with pytest.raises(PatchRejected, match='does not bind to the served products: .*' + TRANSIT_SECTION_REASON):
             run(fill, current=layer(raw=raw), sources=SOURCES + [src])
     # The same route fill under the tourist heading binds.
-    fill, sources = transit_fill('r7routeok', 'Transit visa.\nA transit visa is issued for 10 days.\nTourist visa\n' + TRANSIT_SENTENCE, target='route')
+    fill, sources = transit_fill('r7routeok', 'Transit visa.\nA transit visa is issued for 10 days.\n## Tourist visa\n' + TRANSIT_SENTENCE, target='route')
     (overlay, report), manifest, current = run(fill, sources=sources)
     assert report['routes'][0]['records'][0]['required_documents'] == TRANSIT_CELL
 
@@ -1889,7 +1888,7 @@ def test_a_header_carrying_a_stay_or_a_document_word_never_takes_the_validity_sl
     for cell in ('30 Days stay', 'Stay of 30 Days'):
         body = 'Visa Classification | Fee | Number of Entries | Validity Period\nB-1/B-2 | None | Multiple | %s' % cell
         src, url, current = recip('r7cell', body, path='r7cell')
-        with pytest.raises(PatchRejected, match="the row's validity cell \\(%s\\) states a stay, not the visa's validity" % cell):
+        with pytest.raises(PatchRejected, match="the row's validity cell \\(%s\\) does not fully match its column grammar" % cell):
             run(product_fill('validity', '30 days', proof(body, sid='r7cell', url=url), product_type=RECIP_LABEL),
                 current=current, sources=SOURCES + [src])
 
@@ -1960,6 +1959,128 @@ def test_a_negated_lodgement_never_supports_the_agent_channel():
                     'The visa application centre in Jakarta and the visa application centre in Surabaya are open from 09:00.',
                     'Applicants apply online and may collect the passport at the VFS Global office afterwards.'):
         assert not field_value_supported('application_channel', 'authorised_agent', negated), negated
+
+
+@pytest.mark.parametrize('target', ['product', 'route'])
+@pytest.mark.parametrize('heading', [
+    'Transiting passengers', 'Transiting through Russia', 'Flughafentransit', 'Transitreisende', 'Durchreise',
+    'Passagers en correspondance', 'Escala en Rusia', 'Stopover passengers', 'Layover', 'Connecting flights',
+    'Education', 'Universities', 'Scholarships', 'Empleo', 'Emploi', 'Jobs', 'Highly qualified specialists',
+    'Foreign correspondents', 'Airline personnel', 'Government officials', 'Residents', 'Permanent residents', 'Private visit',
+    'Passengers in transit to a third country must meet the following requirements.',
+    'Students admitted to a Russian university must also meet these requirements.',
+])
+def test_unrecognised_sections_do_not_borrow_the_tourist_subject(target, heading):
+    fill, sources = transit_fill('r8foreign', TOURIST_SECTION + heading + '\n' + TRANSIT_SENTENCE, target=target)
+    with pytest.raises(PatchRejected):
+        run(fill, sources=sources)
+
+
+@pytest.mark.parametrize('target', ['product', 'route'])
+@pytest.mark.parametrize('mention', [
+    'Tourist visas', 'Tourist visa fees', 'Apply for a tourist visa', 'A tourist visa costs A$135.',
+    'Tourist visas are issued in Canberra.', 'Tourist visa holders: see above', 'Already a tourist visa holder?',
+    'Back to tourist visa', 'Compare with the tourist visa', 'Туристическая виза не требуется',
+    '持旅游签证者免办', 'Con visado de turista no se necesita', 'Leaving the airport to visit the city',
+    'Holiday makers on a stopover', 'Tourist information desk',
+])
+def test_plain_product_mentions_never_reopen_a_foreign_section(target, mention):
+    fill, sources = transit_fill('r8mention', TRANSIT_SECTION + mention + '\n' + TRANSIT_SENTENCE, target=target)
+    with pytest.raises(PatchRejected):
+        run(fill, sources=sources)
+
+
+@pytest.mark.parametrize('header', [
+    'Validity (Days in Country)', 'Validity of Presence', 'Validity (Time Allowed in Country)',
+    'Validity of Leave to Enter', 'Validity (Length of Each Trip)', 'Validity (Maximum Days per Year)',
+    'Validity of Authorised Period', 'Validity (Duration in Country)', 'Validity (Period Granted on Arrival)',
+    'Validity of Visa-free Period', 'Validity of Travel Authorization', 'Validity of eTA', 'ESTA Validity',
+    'Validity of Registration', 'Validity of Vaccination',
+])
+def test_only_visa_validity_headers_bind_the_validity_column(header):
+    body = 'Visa Classification | Fee | Number of Entries | ' + header + '\nB-1/B-2 | None | Multiple | 90 Days'
+    src, url, current = recip('r8header', body, path='r8header')
+    with pytest.raises(PatchRejected):
+        run(product_fill('validity', '90 days', proof(body, sid='r8header', url=url), product_type=RECIP_LABEL),
+            current=current, sources=SOURCES + [src])
+
+
+@pytest.mark.parametrize('cell', [
+    '30 Days in Country', '30 Days per Trip', '30 Days from Arrival', '30 Days of Presence',
+    '30 Days on Arrival', '30 Days in Russia', '30 Days (Admission)', '30 Days per Year',
+    '30 Days (a)', '30 Days [a]', '30 Daysᵃ', '30 Days⁽³⁾', '30 Days 3)', '30 Days3)',
+    '30 Days [3,4]', '30 Days 3,4', '30 Days ✝', '30 Days #', '30 Days ^3', '30 Days (note 3)',
+    '30 Days (see note)', '30 Days ♦', '30 Days ◊', '30 Days ✱',
+])
+def test_validity_cells_must_be_a_whole_unqualified_duration(cell):
+    body = 'Visa Classification | Fee | Number of Entries | Validity Period\nB-1/B-2 | None | Multiple | ' + cell
+    src, url, current = recip('r8cell', body, path='r8cell')
+    with pytest.raises(PatchRejected):
+        run(product_fill('validity', '30 days', proof(body, sid='r8cell', url=url), product_type=RECIP_LABEL),
+            current=current, sources=SOURCES + [src])
+
+
+@pytest.mark.parametrize('row', [
+    'B-1/B-2 | None3 | Multiple | 60 Months', 'B-1/B-2 | None | Multiple3 | 60 Months',
+    'B-1/B-2 (a) | None | Multiple | 60 Months', 'B-1/B-2ᵃ | None | Multiple | 60 Months',
+    'B-1/B-2 a | None | Multiple | 60 Months', 'B-1/B-2 ³⁾ | None | Multiple | 60 Months',
+    '(3) B-1/B-2 | None | Multiple | 60 Months',
+])
+def test_every_bound_column_refuses_unparsed_tokens(row):
+    body = 'Visa Classification | Fee | Number of Entries | Validity Period\n' + row
+    src, url, current = recip('r8allcells', body, path='r8allcells')
+    with pytest.raises(PatchRejected):
+        run(product_fill('validity', '60 months', proof(body, sid='r8allcells', url=url), product_type=RECIP_LABEL),
+            current=current, sources=SOURCES + [src])
+
+
+@pytest.mark.parametrize('sentence', [
+    'The validity of a tourist visa cannot exceed 90 days.', 'The validity of a tourist visa shall in no case exceed 90 days.',
+    'The validity of a tourist visa must never exceed 90 days.', 'The validity of a tourist visa is not greater than 90 days.',
+    'A tourist visa is valid for less than 90 days.', 'The validity of a tourist visa is limited to 90 days.',
+    'The validity of a tourist visa is capped at 90 days.', 'A tourist visa is valid for 90 days at the longest.',
+    'The validity of a tourist visa will not go beyond 90 days.', 'The validity of a tourist visa may not be longer than 90 days.',
+    'The validity of a tourist visa cannot be more than 90 days.', 'The upper limit of tourist visa validity is 90 days.',
+    'A tourist visa is valid for 90 days as the upper limit.',
+])
+def test_comparison_wordings_cannot_be_stored_as_flat_validity(sentence):
+    fill, sources = on_page('validity', '90 days', sentence, 'r8ceiling')
+    with pytest.raises(PatchRejected):
+        run(fill, sources=sources)
+
+
+@pytest.mark.parametrize('suffix', ['are not accepted', 'will not be processed', 'is not possible', 'will be rejected',
+                                   'no longer possible', 'has been suspended', 'have been discontinued', 'are refused', 'is not an option'])
+def test_agent_refusal_after_both_words_does_not_become_agency_service(suffix):
+    from app.visa_snapshot.evidence_validator import field_value_supported
+    text = 'Applications at the VFS centre ' + suffix + '. Apply at the Embassy of Russia in Canberra.'
+    assert not field_value_supported('application_channel', 'authorised_agent', text)
+    current = layer()
+    current['raw_guidance'].pop('application_channel', None)
+    current['raw_guidance'].pop('application_channel_detail', None)
+    current['merged_guidance'].pop('application_channel', None)
+    current['merged_guidance'].pop('application_channel_detail', None)
+    src, url = page('r8agent', 'Tourist visa. ' + text)
+    fill = route_fill('application_channel', 'authorised_agent', proof(text, sid='r8agent', url=url))
+    with pytest.raises(PatchRejected):
+        run(fill, current=current, sources=SOURCES + [src])
+
+
+@pytest.mark.parametrize('other_class', ['B-1/B-2', 'B-1/2'])
+@pytest.mark.parametrize('field,value', [('validity', '120 months'), ('entry', 'multiple')])
+def test_rows_below_the_quote_are_checked_for_class_conflicts(other_class, field, value):
+    first = 'B-2 | None | Multiple | 120 Months'
+    body = 'Visa Classification | Fee | Number of Entries | Validity Period\n' + first + '\n' + other_class + ' | None | One | 3 Months'
+    label = 'Visitor visa (B-2)'
+    src, url = page('r8below', body, path='r8below')
+    current = labelled_layer(label, entry=None)
+    with pytest.raises(PatchRejected, match='the table states 2 different'):
+        run(product_fill(field, value, proof(first, sid='r8below', url=url), product_type=label),
+            current=current, sources=SOURCES + [src])
+
+
+def test_agent_lodgement_positive_and_nonlodgement_controls():
+    from app.visa_snapshot.evidence_validator import field_value_supported
     for named in ('Our partner BLS also runs a courier desk for passport collection.',
                   'The nearest application center is closed on public holidays.',
                   'VFS Global publishes its processing statistics every quarter.',

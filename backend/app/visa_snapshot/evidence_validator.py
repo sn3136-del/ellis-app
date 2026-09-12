@@ -306,7 +306,8 @@ _AGENT_LODGED_RE = re.compile(
 _AGENT_WORDING_RE = re.compile(r"accredited (?:travel )?agen|authori[sz]ed agen")
 _AGENT_NEGATION_RE = re.compile(
     r"\b(?:not|never|cannot|can't|no longer|don't|doesn't|won't|isn't|aren't|nor|neither|no|ne|pas|nunca|jamais|"
-    r"nicht|kein\w*|tidak|bukan|không|chưa)\b")
+    r"nicht|kein\w*|tidak|bukan|không|chưa|rejected|refused|prohibited|suspended|discontinued|refrain|"
+    r"rejet\w*|refus\w*|suspend\w*|rechaz\w*|prohib\w*|ablehn\w*|ausgesetzt)\b")
 _AGENT_BREAK_RE = re.compile(r"\b(?:and|or|but|nor|y|o|u|et|ou|und|oder|dan|atau|và|hoặc)\b|,\s*(?:which|who|where|that)\b")
 
 
@@ -314,11 +315,13 @@ def _agent_lodgement_supported(low: str) -> bool:
     """Whether the text states that the application is lodged with an
     outsourced provider. The provider and a lodgement word must stand in
     one clause within 70 characters with no coordination between them, and
-    no negation may stand before the later of the two. The word
+    no negation or refusal may stand anywhere in that clause. The word
     "application" inside "visa application centre" is the provider's name,
     never a lodgement word, so two centres named in one sentence lodge
     nothing."""
     for clause in re.split(r"[.!?;\n]+", low):
+        if _AGENT_NEGATION_RE.search(clause):
+            continue
         providers = list(_AGENT_PROVIDER_RE.finditer(clause))
         for agent in _AGENT_WORDING_RE.finditer(clause):
             if not _AGENT_NEGATION_RE.search(clause[:agent.start()]):

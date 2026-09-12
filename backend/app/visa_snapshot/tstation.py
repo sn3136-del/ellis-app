@@ -731,14 +731,37 @@ _FEE_WAIVER_RE = re.compile(
     r"(?:visa|e-?visa|eta|esta|permit|application|registration|authori[sz]ation|processing)s? (?:is |are )?free"
     r"(?![- ]?(?:entry|travel|zone|area|transit|movement|trade|access|regime|arrangement|countries|nationals|period|stay))|"
     r"gratis|gratuit[oa]?s?|kostenlos|gebührenfrei|"
-    r"no (?:visa |application |visa application |processing |consular |government |issuance )?fees?|"
+    r"no (?:visa |application |visa application |processing |consular |government |issuance )?fees? "
+    r"(?:(?:is|are|will be) )?(?:charged|payable|levied|applies?|due|required)|"
     r"fees?(?: is| are)?(?: fully)? (?:waived|exempt(?:ed)?)|fee[- ]waivers?|fee[- ]exempt(?:ion)?|"
     r"waiver of (?:the )?(?:visa |application )?fees?|"
     r"exempt(?:ed)? from (?:paying |payment of )?(?:the |any |all )?(?:visa |application |visa application |processing |consular )?fees?|"
-    r"nil fee|fees?:? nil|nil|zero[- ]fee|免费|免簽費|免签费|免收|無料|무료)(?![^\W_])", re.I)
+    r"nil fee|fees?(?: is| of|:)? nil|(?:pay|pays|paying|charged) no (?:Schengen |visa |application )?fees?|"
+    r"zero[- ]fee|免费|免簽費|免签费|免收|無料|무료)(?![^\W_])", re.I)
 _FEE_DENIAL_RE = re.compile(
     r"(?<![^\W_])(?:not|never|no longer|isn'?t|aren'?t|doesn'?t|don'?t|cannot|can'?t|won'?t|placeholder|unknown|"
-    r"unpublished|unverified|unless|except|only (?:for|if|when)|if|whether|may be|might be|could be|nor|neither)(?![^\W_])", re.I)
+    r"unpublished|unverified|unless|except|only (?:for|if|when)|if|whether|may be|might be|could be|nor|neither|"
+    r"ended|expired|abolished|discontinued|withdrawn|suspended|used to be|nicht|kein\w*|pas|tidak|không|"
+    r"no (?:visa )?fee waiver|no es|n['’]est)(?![^\W_])", re.I)
+_FEE_UNKNOWN_RE = re.compile(r"\b(?:placeholder|unknown|unverified|to be confirmed|remains? unset)\b", re.I)
+_FEE_TOPIC_RE = re.compile(r"\b(?:fee\w*|charge\w*|amount|cost|price|tariff|waiver|free|zero|0)\b", re.I)
+_OTHER_FIELD_TOPIC_RE = re.compile(r"\b(?:validity|entries|passport|processing|stay|documents?)\b", re.I)
+_FEE_CONTRADICTION_RE = re.compile(
+    r"\b(?:not|never|no longer|nicht|pas|tidak|không|no es|n['’]est)\s+(?:\w+\s+){0,2}(?:free|waived|exempt|gratis|gratuit[oa]?|kostenlos)\b|"
+    r"\bno (?:visa )?fee waiver\b|\bfee waivers?\s+(?:(?:was|were|has been|have been)\s+)?(?:ended|expired|abolished|discontinued|withdrawn|suspended)\b|"
+    r"\bused to be free\b", re.I)
+_FEE_PUBLICATION_RE = re.compile(r"\b(?:publish\w*|list\w*|stat(?:e[ds]?|ing)|specif\w*|show\w*|information|data|available|found|unset)\b", re.I)
+_FEE_OTHER_SUBJECT_RE = re.compile(r"\b(?:declaration|IMUGA|renewal|extension|courier|help|assistance|registration)\b", re.I)
+_FEE_AGE_RE = re.compile(r"\bunder (?:the age of )?(\d+|six|twelve|eighteen)\b", re.I)
+_FEE_APPLICANT_AGE_WAIVER_RE = re.compile(
+    r"\s*no (?:visa |application |visa application )?fee for (?:applicants|children) aged "
+    r"(\d+)\s*(?:to|[-–])\s*(\d+)(?: years(?: old)?)?"
+    r"(?: per (?:the )?official (?:embassy|consulate) notice)?\s*", re.I)
+_FEE_CHILD_PRODUCT_RE = re.compile(
+    r"(?:(?:short[- ]stay|uniform)\s+)?(?:Schengen\s+)?(?:C\s+)?(?:(?:tourist|visitor)\s+)?visa"
+    r"\s*(?:,\s*|\(\s*|for\s+)(?:children|child|applicants?) under (?:the age of )?(\d+|six|twelve|eighteen)"
+    r"(?: years(?: old)?)?\s*\)?\s*", re.I)
+_FEE_CONCESSION_RE = re.compile(r"\b(?:children?|minors?|under (?:the age of )?(?:\d+|six|twelve|eighteen)|diplomatic|official passport|family members?)\b", re.I)
 
 
 # A clause that is nothing but the waiver ("Free", "Fee: free", "Visa fee:
@@ -748,12 +771,53 @@ _FEE_WAIVER_CLAUSE_RE = re.compile(
     r"(?:free|gratis|gratuit[oa]?s?|kostenlos|gebührenfrei|免费|免簽費|免签费|無料|무료)(?:\s+of\s+charge)?\W*", re.I)
 
 
-def _fee_waiver_stated(text: str) -> bool:
+def _fee_waiver_stated(text: str, product: dict | None = None) -> bool:
     """Whether some clause of the text states, on its own and with no
     denial beside it, that no fee is charged."""
-    for clause in re.split(r"[.;!?\n]+|\s+(?:but|however|although|though)\s+", str(text or "")):
+    text = str(text or "")
+    clauses = re.split(r"[.;!?\n]+|\s+(?:but|however|although|though)\s+", text)
+    unknown_fee = any(_FEE_UNKNOWN_RE.search(c) and (_FEE_TOPIC_RE.search(c) or not _OTHER_FIELD_TOPIC_RE.search(c)) for c in clauses)
+    if unknown_fee or _FEE_CONTRADICTION_RE.search(text):
+        return False
+    label = str((product or {}).get("type") or "")
+    for clause in clauses:
         if _FEE_DENIAL_RE.search(clause):
             continue
+        if _FEE_PUBLICATION_RE.search(clause) and re.search(r"\bfee\w*\b", clause, re.I):
+            continue
+        if any(not re.search(r'\b' + re.escape(m[0]) + r'\b', label, re.I)
+               for m in _FEE_OTHER_SUBJECT_RE.finditer(clause)):
+            continue
+        # "No fee for applicants aged 0 to 6" states a charge waiver,
+        # unlike "no fee information published". Its age restriction must
+        # cover the product's whole named population; it cannot price an
+        # adult/general lane or a wider/different child band.
+        applicant_waiver = _FEE_APPLICANT_AGE_WAIVER_RE.fullmatch(clause)
+        if applicant_waiver:
+            child_product = _FEE_CHILD_PRODUCT_RE.fullmatch(label)
+            if not child_product:
+                continue
+            age = (int(child_product[1]) if child_product[1].isdigit() else
+                   {"six": 6, "twelve": 12, "eighteen": 18}[child_product[1].lower()])
+            if int(applicant_waiver[1]) == 0 and 0 < age <= int(applicant_waiver[2]):
+                return True
+            continue
+        # A concession for another applicant cannot price the general lane.
+        # The product must itself name the same restricted population.
+        if _FEE_CONCESSION_RE.search(clause) and clause.strip() != label.strip():
+            population = re.search(r"\b(?:child\w*|minors?|diplomatic|official passport|family members?)\b", clause, re.I)
+            clause_age, label_age = _FEE_AGE_RE.search(clause), _FEE_AGE_RE.search(label)
+            if clause_age:
+                as_number = lambda x: int(x) if x.isdigit() else {"six": 6, "twelve": 12, "eighteen": 18}[x.lower()]
+                if not label_age or as_number(label_age[1]) > as_number(clause_age[1]):
+                    continue
+            elif not population or not re.search(r"\b" + (r"child\w*|minor" if re.match(r"child|minor", population[0], re.I)
+                                                           else re.escape(population[0])) + r"\b", label, re.I):
+                continue
+        # A short leading waiver segment is explicit, but only when the
+        # following segment says no visa is needed, not a different fee.
+        if re.match(r"^\s*Free,\s*no (?:[A-Z][a-z]+ )?visa (?:is )?(?:needed|required)\b", clause):
+            return True
         if _FEE_WAIVER_RE.search(clause) or _FEE_WAIVER_CLAUSE_RE.fullmatch(clause):
             return True
     return False
@@ -777,6 +841,9 @@ def _fee(product: dict, guidance: dict, route: dict | None = None) -> tuple[floa
     if amount == int(amount):
         amount = int(amount)
     if amount == 0:
+        unpublished = set(product.get("unpublished_fields") or []) | _product_unpublished_fields(product, guidance.get("unpublished_fields") or [])
+        if unpublished & {"fee", "government_fee", "visa_fee_amount", "visa_fee_currency"}:
+            return None, None if "visa_fee_currency" in unpublished else (str(currency) if currency else None)
         # A zero consular fee on a visa that must be applied for is almost
         # always a hallucinated "free" or a placeholder: the acceptance
         # audit found sources charging 60-90 EUR where 0 was stored, and a
@@ -796,7 +863,7 @@ def _fee(product: dict, guidance: dict, route: dict | None = None) -> tuple[floa
             notes = "\n".join(str(x or "") for x in (
                 product.get("type"), product.get("notes"), fee.get("note"), fee.get("notes"),
                 guidance.get("application_channel_detail")))
-            if not (_reviewed_product_zero_fee(product, fee, route) or exemption or _fee_waiver_stated(notes)):
+            if not (_reviewed_product_zero_fee(product, fee, route) or exemption or _fee_waiver_stated(notes, product)):
                 return None, str(currency) if currency else None
         # A genuinely zero fee has no meaningful currency; the exempt branch
         # already writes "0 USD", so a proven-free product does the same

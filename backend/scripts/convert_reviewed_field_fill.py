@@ -388,7 +388,8 @@ _VISA_CLASSES = {
         r'work|working|employment|employees?|workers?|labou?r|trabajo|travail|arbeit(?:svis(?:um|a|en)|s)?|beschäftigung|'
         r'lavoro|trabalho|'
         r'lao động|làm việc|kerja|bekerja|ทำงาน|рабоч|работ|трудов', r'工作|就労|就業|취업|근로|노동'), re.I),
-    'transit': re.compile(_words(r'transit(?:vis(?:um|a|en))?|tránsito|trânsito|transito|quá cảnh|ผ่านแดน|транзит',
+    'transit': re.compile(_words(r'transit(?:ing|reisende[nr]?|vis(?:um|a|en))?|flughafentransit|durchreise|stopover|layover|connecting flights|'
+                                 r'passagers en correspondance|escala|tránsito|trânsito|transito|quá cảnh|ผ่านแดน|транзит',
                                  r'过境|過境|通過|トランジット|통과|환승'), re.I),
     'crew': re.compile(_words(
         r'crews?|seafarers?|seam[ae]n|aircrew|tripulantes?|tripulación|équipage|besatzung|thuyền viên|phi hành đoàn|awak|'
@@ -552,7 +553,9 @@ _CAP_RE = re.compile(_words(
     # words with no figure after them are a condition ("valid for 30 days
     # as long as your passport stays valid") and cap nothing.
     r'as (?:much|long|many) as(?=\s+(?:\d|(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|a|an)(?![^\W_])))|'
-    r'(?:shall|must|may|can|will|does|do|should|cannot|can ?not) not exceed|no longer than|not longer than|'
+    r'(?:shall|must|may|can|will|does|do|should) (?:not|never|in no case) exceed|cannot exceed|can not exceed|'
+    r'exceed|surpass|go beyond|greater than|more than|longer than|less than|limited to|capped at|upper limit|at the longest|'
+    r'no longer than|not longer than|'
     r'whichever (?:comes|is|occurs|happens) (?:first|earlier|sooner|shorter|the (?:earlier|sooner|shorter))|'
     r'au maximum|un maximum de|jusqu[’\']à un maximum|ne (?:peut|pourra|doit|devra) (?:pas )?(?:excéder|dépasser)|n[’\']excédant pas|'
     r'hasta un máximo de|un máximo de|como máximo|máximo de|no (?:será|sera|podrá|podra|puede|deberá|debera) (?:ser )?superior a|'
@@ -1134,7 +1137,11 @@ def _product_anchors(product):
 
 def _anchors_in(text, anchors):
     """The keys of the anchors that stand in this text."""
-    return {key for key, (_, pattern) in anchors.items() if pattern.search(text)}
+    # US tables abbreviate a shared class prefix, e.g. B-1/2. Read both
+    # codes for conflict detection without treating the slash as prose.
+    expanded = re.sub(r'\b([A-Z]{1,3})-?([1-9])((?:/[1-9])+)(?![A-Za-z0-9])',
+                      lambda m: m[1] + '-' + m[2] + ''.join('/' + m[1] + '-' + n for n in m[3].split('/')[1:]), text)
+    return {key for key, (_, pattern) in anchors.items() if pattern.search(expanded if key[0] == 'code' else text)}
 
 
 def _anchor_spans(text, anchors):
@@ -1280,7 +1287,7 @@ _NUMBERED_LINE_RE = re.compile(r'^\s*(?:\(?\d{1,2}(?:\.\d{1,2})*[.):]?|[IVX]{1,4
 # A class word inside one of them does not make a heading that class's
 # section.
 _HEADING_SCOPE_RE = re.compile(_words(
-    r'residents?|working (?:days?|hours)|business (?:days?|hours)|treatment of|press (?:releases?|office|room)|'
+    r'(?:GCC|EU|EEA|Schengen) residents?|working (?:days?|hours)|business (?:days?|hours)|treatment of|press (?:releases?|office|room)|'
     r'media (?:cent(?:re|er)|contacts?|enquiries|inquiries|releases?)|diplomatic (?:relations|missions?|corps|list|notes?)'), re.I)
 # A sentence that mentions the served product to point away from it, so it
 # says nothing about whose section it stands in: "Holders of a valid
@@ -1289,32 +1296,32 @@ _CROSS_REFERENCE_RE = re.compile(_words(
     r'holders? of|holding|who holds?|if you (?:hold|have|already)|already (?:hold|have)|with a valid|exempt(?:ed|ion)?|'
     r'not required|no longer|instead of|rather than|unlike|as opposed to|except|unless|other than|see also|refer to|'
     r'can ?not|cannot|does not|do not|is not|are not|not (?:be )?(?:eligible|permitted|allowed)|'
-    r'titulaires? d|sauf|à moins|dispensés?|exemptés?|titulares? de|salvo|a menos que|exentos?|inhaber|außer|befreit',
-    r'除非|除了|持有|免除|제외|소지자|免除|を除き'), re.I)
+    r'titulaires? d|sauf|à moins|dispensés?|exemptés?|titulares? de|salvo|a menos que|exentos?|inhaber|außer|befreit|'
+    r'holders?|see above|back to|compare with|apply for|information desk|не требуется|no se necesita',
+    r'除非|除了|持有|持旅游|免办|免除|제외|소지자|免除|を除き'), re.I)
+_HEADING_PREDICATE_RE = re.compile(r'\b(?:must|shall|should|need|needs|are|is|have|has|will|can|may|costs?|issued|admitted|leaving|hold)\b', re.I)
+_NEUTRAL_HEADING_RE = re.compile(r'(?:(?:required|supporting|application|visa) )?(?:documents?|requirements?|fees?|processing(?: time)?|how to apply|application procedure)', re.I)
+
+
+def _heading_text(line):
+    text = _HEADING_MARK_RE.sub('', line.strip())
+    text = re.sub(r'</?h[1-6][^>]*>', '', text, flags=re.I)
+    prefix = _NUMBERED_LINE_RE.match(text)
+    if prefix:
+        text = text[prefix.end() - 1:]
+    return text.strip().rstrip(':：').strip()
 
 
 def _reads_as_heading(line):
-    """Whether a page line reads as a heading: the extractor marks it, it is
-    short, it is numbered, it is title-cased, or it ends without the
-    period a sentence carries. A heading names the subject of the text
-    under it."""
+    """A heading has structural markup or a short noun phrase, never a
+    short sentence merely because it contains six words or fewer."""
     text = line.strip()
     if not text:
         return False
-    if _HEADING_MARK_RE.match(text):
-        return True
-    words = text.split()
-    if len(words) <= 6:
-        return True
-    if len(words) > 12:
+    plain = _heading_text(text)
+    if re.search(r'[.;,!?。；，！？]', plain) or _HEADING_PREDICATE_RE.search(plain):
         return False
-    if not re.search(r'[.;,。；，]\s*$', text):
-        return True
-    if _NUMBERED_LINE_RE.match(text):
-        return True
-    alphabetic = [w for w in words if re.match('[' + _LETTER + ']', w)]
-    capitalised = [w for w in alphabetic if w[0].isupper()]
-    return bool(alphabetic) and len(capitalised) >= 0.8 * len(alphabetic)
+    return bool(plain and (len(plain.split()) <= 12 or _HEADING_MARK_RE.match(text)))
 
 
 def _sibling_named(piece, product, products):
@@ -1371,6 +1378,13 @@ def _names_served(piece, route, product, products, merged, heading):
     for sentence in ([piece] if heading else _sentences(piece)):
         if _CROSS_REFERENCE_RE.search(sentence):
             continue
+        if heading:
+            title = _heading_text(sentence)
+            if any(re.fullmatch(re.escape(label) + r'(?:\s+(?:requirements|documents|fees|processing))?', title, re.I) for label in labels):
+                return True
+            # A family word alone does not make "Private visit" or
+            # "Tourist information desk" the tourist visa's section.
+            continue
         if any(_free_spans(label, sentence, labels) for label in labels) or _anchors_in(sentence, every):
             return True
         if any(_VISA_CLASSES[family].search(sentence) for family in served):
@@ -1384,7 +1398,7 @@ def _piece_subject(piece, route, product, products, merged, heading):
     fill is not about, ('served', None) when it names the fill's subject,
     or None when it says nothing either way."""
     problem = _class_problem(piece, route, product, products, merged) or _sibling_named(piece, product, products)
-    if not problem and heading:
+    if not problem and (heading or re.match(r'^(?:the )?(?:transit|passengers?|travell?ers?|students?|workers?|residents?|tourists?|journalists?)\b', piece, re.I)):
         problem = _bare_class_problem(piece, route, product, products, merged)
     if problem:
         return 'foreign', problem
@@ -1444,13 +1458,17 @@ def _section_problem(sentence, item, sources, route, product, products, merged, 
             heading = _reads_as_heading(line)
             found = _piece_subject(line, route, product, products, merged, heading)
             if found is None:
+                if candidate is None and heading and not _NEUTRAL_HEADING_RE.fullmatch(_heading_text(line)) and not _CROSS_REFERENCE_RE.search(line):
+                    return 'the sentence carries no anchor of %s and its page section (%s) is not an allowed neutral heading' % (whose, line[:80])
                 continue
             kind, reason = found
             if kind == 'foreign':
                 return 'the sentence carries no anchor of %s and its page section (%s) %s' % (whose, line[:80], reason)
             if heading or candidate is None:
                 candidate = line
-            if heading:
+            # A plain text mention cannot reopen an earlier foreign section.
+            # Explicit extractor/numbered headings preserve genuine siblings.
+            if heading and (_HEADING_MARK_RE.match(line) or _NUMBERED_LINE_RE.match(line)):
                 break
         if candidate is not None:
             return None
@@ -2287,6 +2305,17 @@ def _row_context(proof, sources):
         start = text.find(span)
         head = max(0, start - 1200)
         stop = text.find('\n', start + len(span))
+        if stop >= 0:
+            # Include every following row of this same contiguous table.
+            # A reviewer quoting its first row cannot hide conflicting rows
+            # later in the table, while a separate section remains separate.
+            while stop < len(text):
+                end = text.find('\n', stop + 1)
+                end = len(text) if end < 0 else end
+                following = text[stop + 1:end]
+                if following.count('|') < 2:
+                    break
+                stop = end
         window = text[head:len(text) if stop < 0 else stop]
         out.append(window[window.find('\n') + 1:] if head and '\n' in window else window)
     return '\n'.join(out)
@@ -2336,8 +2365,8 @@ def _delimited_rows(passages):
                 # column is a stay whatever else its name says, so a
                 # "Passport Validity", "Validity of Stay" or "Residence
                 # Permit Validity" cell takes no column at all.
-                if kind != 'validity' or not (_DOCUMENT_SUBJECT_RE.search(cell) or _STAY_WORDS.search(cell)
-                                              or _HEADER_NOT_VISA_RE.search(cell)):
+                tokens = re.findall(r'\w+', cell.lower())
+                if kind != 'validity' or ('validity' in tokens and set(tokens) <= {'visa', 'validity', 'of', 'the', 'duration', 'period'}):
                     found.setdefault(kind, []).append(index)
                 break
         if any(len(indexes) > 1 for indexes in found.values()):
@@ -2404,7 +2433,30 @@ def _row_marker_problem(cells, product=None):
         if _row_marker(cell, codes if kind == 'class' else None):
             return ('the row\'s %s cell (%s) ends in a footnote marker, so the page qualifies the row elsewhere and the '
                     'row alone does not state the value' % (kind, cell))
+        if not _table_cell_supported(kind, cell):
+            return ("the row's %s cell (%s) does not fully match its column grammar, so an extra qualifier or footnote "
+                    "cannot be discarded" % (kind, cell))
     return None
+
+
+_TABLE_CODE_RE = r'[A-Z]{1,3}-?[1-9][A-Z]?'
+_TABLE_CLASS_RE = re.compile(_TABLE_CODE_RE + r'(?:(?:\s*[/,&]\s*|\s+and\s+)(?:' + _TABLE_CODE_RE + r'|[1-9]))*')
+_TABLE_DURATION_RE = re.compile(_FIGURE_FORMS + r'\s*(?:' + _ANY_UNIT_RE.pattern + r')'
+                                + r'(?:\s+from\s+(?:the\s+)?(?:date\s+of\s+)?issu(?:e|ance))?', re.I)
+
+
+def _table_cell_supported(kind, cell):
+    """Accept the entire known column grammar, never strip unknown suffixes
+    that may be footnotes, stay restrictions or another permission's terms."""
+    if kind == 'class':
+        return bool(_TABLE_CLASS_RE.fullmatch(cell))
+    if kind == 'validity':
+        return bool(_TABLE_DURATION_RE.fullmatch(cell))
+    if kind == 'entries':
+        return _cell_entry(cell) is not None
+    if kind == 'fee':
+        return bool(re.fullmatch(r'None|Free|\d+(?:\.\d+)?', cell, re.I) or _MONEY_RE.fullmatch(cell))
+    return False
 
 
 def _row_conflict_problem(rows, cells, product, field):
@@ -2736,6 +2788,8 @@ def _duration_problem(field, sentence, n, unit, own, other, product, products, m
         # 30 Days") fails the validity-versus-stay gate a sentence fails.
         if other.search(cell) or not _bound(noun + ' ' + cell, n, unit, own, other):
             return 'the row\'s validity cell (%s) states a stay, not the visa\'s validity (a stay is not a validity)' % cell
+        if not _table_cell_supported('validity', cell):
+            return 'the row\'s validity cell (%s) does not fully match a duration from issue' % cell
         if _range_or_choice(cell, n):
             return 'the row\'s validity cell states a range or a choice, not this one value'
         if _owned_by_document(cell, n, unit):

@@ -62,13 +62,18 @@ def test_every_other_canonical_fact_and_proof_exactly_preserved(result):
 def test_exact_158_documented_cells_no_invented_processing_or_policy_date(result):
  rs=[z for route in result[1]['routes'] for z in route['records']];counts=Counter(t.field_status(x)[k] for x in rs for k in t.CONTRACT_FIELDS)
  # Field 24 on a checked answer is a documented absence (75 rows), no longer a gap.
- assert counts=={'filled':1618,'not-published':223,'missing':18,'optional-empty':16}
+ # The two six-month products inherit an explicitly unpublished fee.
+ # Its currency cannot survive as a filled USD value while the fee is unknown.
+ assert counts=={'filled':1616,'not-published':225,'missing':18,'optional-empty':16}
  assert t.acceptance_summary(rs)['documented_completed_cells']==1841
  assert all(x['info_validity'] is None and x['confidence_level'] in ('High','Medium') for x in rs)
  assert sum(t.field_status(x)['processing_min_days']=='not-published' for x in rs)==72
  assert all(x['processing_min_days'] is None and x['processing_unit'] is None for x in rs)
  assert all(t.field_status(x)['processing_min_days']!='not-published' for x in rs if x['visa_type_name'] in ['Visa on arrival','Regular tourist visa'])
  assert sum(x['visa_fee_amount']==0 for x in rs)==12
+ unpublished_six_month=[x for x in rs if x['travel_document_country'] in ('MYS','RUS') and x['visa_type_name']=='6-month e-Tourist Visa (e-T2 V)']
+ assert len(unpublished_six_month)==2
+ assert all(x['visa_fee_currency'] is None and t.field_status(x)['visa_fee_currency']=='not-published' for x in unpublished_six_month)
  for x in rs:
   if x['travel_document_country']=='TWN' and x['visa_type_name']=='1-year e-Tourist Visa':assert (x['validity_duration'],x['validity_unit'])==(365,'Day')
   if x['travel_document_country']=='USA' and x['visa_type_name']=='5-year e-Tourist Visa':assert (x['visa_fee_amount'],x['visa_fee_currency'])==(160,'USD')
