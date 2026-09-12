@@ -1647,9 +1647,9 @@ def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
     db.commit()
     if after is not None:
         try:
-            after(route, apply_portal_fallback(apply_verified_overrides(_result(
-                status, clean, cached=True, stale=False, missing=missing,
-                contradictions=contradictions, model=row.model), route), route))
+            after(route, reader_projection(route, status, clean, cached=True, stale=False,
+                                           missing=missing, contradictions=contradictions,
+                                           model=row.model, health=False))
         except Exception:  # noqa: BLE001
             pass
 
@@ -1703,6 +1703,29 @@ def _fill_detail_async(key: str, route: dict, user: str, *, after=None) -> None:
         t.start()
 
 
+def reader_projection(route: dict, status: str, guidance: dict, *, cached: bool,
+                      stale: bool, released: bool = False, missing=None,
+                      contradictions=None, model: str = "", advisories=None,
+                      elapsed_seconds: float | None = None, health: bool = True) -> dict:
+    """THE reader composition, in one place: the raw envelope (_result), the
+    verified overrides, the official-portal fallback, and the health context
+    projection the reader page applies. Every path that hands an answer to a
+    reader (a cached row, a fresh answer, the staged detail fill, the nearest
+    approximation) goes through here, and so does the consistency sweep, so
+    the surface it compares is the surface the reader gets and not a copy
+    (guard-20260912 T2). ``health`` is off only for the records path until
+    T10 moves the health projection onto every surface."""
+    out = apply_portal_fallback(apply_verified_overrides(_result(
+        status, guidance, cached=cached, stale=stale, released=released,
+        missing=missing, contradictions=contradictions, model=model,
+        advisories=advisories, elapsed_seconds=elapsed_seconds), route), route)
+    if health and isinstance(out.get("guidance"), dict):
+        from . import health_context
+        out = dict(out)
+        out["guidance"] = health_context.apply(dict(out["guidance"]), route)
+    return out
+
+
 def nearest_cached_answer(db, route: dict) -> dict | None:
     """The closest real answer we already hold for this nationality and
     destination, when the exact variant cannot be decided right now.
@@ -1740,17 +1763,17 @@ def nearest_cached_answer(db, route: dict) -> dict | None:
         complete = r.status == STATUS_PRIMARY
         return (not complete, not same_purpose)
     best = sorted(rows, key=rank)[0]
-    out = _result(best.status, best.guidance, cached=True, stale=_is_stale(best),
-                  missing=best.missing_fields, contradictions=best.contradictions,
-                  model=best.model,
-                  advisories=deterministic_advisories(route, best.guidance or {}))
+    out = reader_projection(route, best.status, best.guidance, cached=True, stale=_is_stale(best),
+                            missing=best.missing_fields, contradictions=best.contradictions,
+                            model=best.model,
+                            advisories=deterministic_advisories(route, best.guidance or {}))
     out["approximate_for"] = {
         "asked": {"travel_purpose": want_purpose,
                   "travel_document_type": route.get("travel_document_type")},
         "served": best.route or {},
         "served_purpose": (best.cache_key.split("|") + [""] * 4)[3],
     }
-    return apply_portal_fallback(apply_verified_overrides(out, route), route)
+    return out
 
 
 import threading as _threading
@@ -1937,12 +1960,11 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
         # The grounding that counts: a failed later attempt never erases
         # the last successful read of the official page.
         gc = _freshness.effective_check(row.verification)
-        out = apply_portal_fallback(apply_verified_overrides(_result(
-            row.status, served_guidance(row), cached=True, stale=_is_stale(row),
-            released=released,
-            missing=row.missing_fields, contradictions=row.contradictions,
-            model=row.model,
-            advisories=deterministic_advisories(route, row.guidance or {})), route), route)
+        out = reader_projection(route, row.status, served_guidance(row), cached=True,
+                                stale=_is_stale(row), released=released,
+                                missing=row.missing_fields, contradictions=row.contradictions,
+                                model=row.model,
+                                advisories=deterministic_advisories(route, row.guidance or {}))
         out["detail_pending"] = bool((row.verification or {}).get("detail_pending"))
         if isinstance(gc, dict) and gc.get("outcome") == "checked":
             # Machine provenance, deliberately WEAKER than the human badge:
@@ -2069,20 +2091,18 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
                           origin="engine",
                           note="route answered by the engine")
         db.commit()
-    out = apply_portal_fallback(apply_verified_overrides(_result(
-        status, clean, cached=False, stale=False,
-        missing=missing, contradictions=contradictions, model=model,
-        advisories=advisories, elapsed_seconds=elapsed), route), route)
+    out = reader_projection(route, status, clean, cached=False, stale=False,
+                            missing=missing, contradictions=contradictions, model=model,
+                            advisories=advisories, elapsed_seconds=elapsed)
     if staged and has_content:
         if _PROVIDER is not None:
             # Injected provider (tests): stage 2 runs inline, deterministically.
             fill_detail(db, key, route, user, after=after)
             row = _cached(db, key)
-            out = apply_portal_fallback(apply_verified_overrides(_result(
-                row.status, row.guidance, cached=False, stale=False,
-                missing=row.missing_fields, contradictions=row.contradictions,
-                model=row.model, advisories=advisories,
-                elapsed_seconds=elapsed), route), route)
+            out = reader_projection(route, row.status, row.guidance, cached=False, stale=False,
+                                    missing=row.missing_fields, contradictions=row.contradictions,
+                                    model=row.model, advisories=advisories,
+                                    elapsed_seconds=elapsed)
             out["detail_pending"] = False
         else:
             _fill_detail_async(key, route, user, after=after)
