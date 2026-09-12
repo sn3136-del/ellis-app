@@ -367,6 +367,56 @@ def test_travel_authorization_page_cannot_prove_a_visa_requirement(db):
     assert any("travel authorisation" in c for c in g["contradictions"])
 
 
+def test_a_stay_page_in_spanish_is_not_read_as_the_us_travel_authorisation(db):
+    """A substring test read "esta" inside "estancia" (Spanish for stay), so
+    a visa-required answer citing a Spanish consulate's stay page was flagged
+    as citing ESTA and held as uncertain. A name matches only as a word."""
+    _clear_cache(db)
+    ok = dict(GOOD_ANSWER, disposition="VISA_REQUIRED",
+              source_url="https://www.exteriores.gob.es/consulados/visados/estancia",
+              official_portal_url="https://www.exteriores.gob.es/estancia/visa_fees_en",
+              visa_category="Visado de estancia (short stay, up to 90 days)",
+              visa_products=[{"type": "Schengen C", "entry": "single",
+                              "validity": "90 days", "max_stay_days": 90,
+                              "fee": {"amount": 90, "currency": "EUR"},
+                              "notes": None}])
+    kimi_primary.set_provider(single_pass(ok))
+    g = kimi_primary.get_route_guidance(db, ROUTE)
+    assert not any("travel authorisation" in c
+                   for c in (g.get("contradictions") or []))
+    assert not any("travel authorisation" in c
+                   for c in kimi_primary.serve_time_invariants(g))
+
+
+@pytest.mark.parametrize("cited", [
+    # Every form the live database cites, from a survey of 950 answers.
+    "https://esta.cbp.dhs.gov", "https://www.cbp.gov/travel/international-visitors/esta",
+    "visa waiver program (esta) for tourism", "vwp/esta for business",
+    "https://travel-europe.europa.eu/etias_en", "https://travel-europe.europa.eu/etias/what-etias_en",
+    "https://etias.ec.europa.eu/", "short-stay (visa-exempt, etias)",
+    "https://www.k-eta.go.kr", "https://www.k-eta.go.kr/portal", "visitor via k-eta", "keta",
+    "https://www.gov.uk/eta", "https://eta.gov.lk/slvi", "https://onlineservices-servicesenligne.cic.gc.ca/eta/application",
+    "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html",
+    "https://www.canada.ca/en/services/visit-canada/eta/apply.html", "https://www.gov.uk/eta_en",
+    "electronic travel authorisation (eta)", "k-eta (korea electronic travel authorization)",
+    "electronic system for travel authorization", "entry/exit system", "entry-exit-system",
+    "https://travel-europe.europa.eu/ees_en", "https://x.gov/etias-en", "esta-application",
+])
+def test_every_real_authorisation_form_is_still_matched(cited):
+    assert kimi_primary.cites_authorization_page(cited)
+    assert kimi_primary.cites_authorization_page(cited.upper())
+
+
+@pytest.mark.parametrize("cited", [
+    "https://www.exteriores.gob.es/estancia", "visado de estancia", "estas", "estate agents",
+    "https://vistoperitalia.esteri.it/", "https://embassy.gov/visa_fees_en", "beta_test",
+    "https://embassy.gov/theta_en", "marketa", "https://embassy.gov/etage", "https://embassy.gov/detail",
+    "questa", "etiast", "https://embassy.gov/", "",
+])
+def test_an_authorisation_name_inside_another_word_is_not_a_match(cited):
+    assert not kimi_primary.cites_authorization_page(cited)
+
+
 def test_visa_required_on_an_ordinary_official_page_is_not_flagged(db):
     """The guard must not fire on a genuine visa page: a real visa-required
     route citing a consulate page stays clean."""

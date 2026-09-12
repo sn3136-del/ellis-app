@@ -64,6 +64,33 @@ _AUTHORIZATION_NOT_VISA = ("etias", "esta", "/eta", "eta_", "k-eta", "keta",
                            "electronic travel authoris", "electronic travel authoriz",
                            "electronic system for travel author")
 
+
+def _authorization_name_pattern(name: str) -> str:
+    """A name matches only where a word starts, and a single word only
+    where that word ends. A plain substring test read "esta" inside
+    "estancia" (Spanish for stay) and "ees_" inside "fees_", flagging a
+    Spanish consulate's stay page as the US travel authorisation. A name
+    that begins or ends with a separator ("/eta", "eta_", "ees_") keeps it
+    as its boundary on that side. A phrase keeps its open end, because the
+    listed phrases are deliberate prefixes ("authoris" for authorisation
+    and authorised, "author" for authorization)."""
+    pattern = _re.escape(name)
+    if name[0].isalnum():
+        pattern = r"(?<![a-z0-9])" + pattern
+    if name[-1].isalnum() and " " not in name:
+        pattern = pattern + r"(?![a-z0-9])"
+    return pattern
+
+
+_AUTHORIZATION_NOT_VISA_RE = _re.compile(
+    "|".join(_authorization_name_pattern(n) for n in _AUTHORIZATION_NOT_VISA))
+
+
+def cites_authorization_page(cited: str) -> bool:
+    """True when the URL and category text an answer cites name a pre-travel
+    authorisation or a border formality rather than a visa."""
+    return bool(_AUTHORIZATION_NOT_VISA_RE.search(str(cited or "").lower()))
+
 # VISA_ON_ARRIVAL is a verdict the overrides, the records and the assistant
 # already speak (52 shipped overrides carry it). Leaving it out of the
 # engine's vocabulary made every invariant below skip those routes.
@@ -198,7 +225,7 @@ def serve_time_invariants(g: dict | None) -> list[str]:
     if disp == "VISA_REQUIRED":
         cited = " ".join(str(g.get(k) or "") for k in
                          ("source_url", "official_portal_url", "visa_category")).lower()
-        if any(t in cited for t in _AUTHORIZATION_NOT_VISA):
+        if cites_authorization_page(cited):
             problems.append("disposition VISA_REQUIRED but the cited page is a travel "
                             "authorisation or border-formality page, which is not a visa")
     workflow = str(g.get("route_workflow_type") or "")
@@ -944,7 +971,7 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     if clean.get("disposition") == "VISA_REQUIRED":
         cited = " ".join(str(clean.get(k) or "") for k in
                          ("source_url", "official_portal_url", "visa_category")).lower()
-        if any(t in cited for t in _AUTHORIZATION_NOT_VISA):
+        if cites_authorization_page(cited):
             contradictions.append(
                 "disposition VISA_REQUIRED but the cited page is a travel "
                 "authorisation or border-formality page (ETIAS/ESTA/eTA/EES), "
