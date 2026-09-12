@@ -40,7 +40,13 @@ def test_reader_projection_is_the_only_reader_composition():
 def test_records_projection_is_byte_identical_for_twelve_seeded_routes(db, monkeypatch, tmp_path):
     """The records builder output for twelve real routes, captured at HEAD
     7010800 before the body was lifted into row_projection, is reproduced
-    exactly through app.main._build_tstation_rows after the extraction."""
+    exactly through app.main._build_tstation_rows after the extraction.
+
+    Golden history (every later task that deliberately moves a fixture row
+    regenerates the file and records the delta here):
+      T2  captured at 7010800, byte identical after the extraction
+      T6  HKG to KOR (No visa needed): held, Low, withheld, one contradiction
+          naming the K-ETA list (rule 3 of permission_eligibility)"""
     from app.visa_snapshot import verified_overrides as vo
     monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES", str(tmp_path / "operator.json"))
     vo.reload()

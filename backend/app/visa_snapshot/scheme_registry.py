@@ -283,7 +283,10 @@ def select(item: dict, destination: str, *, headline: bool = False) -> dict | No
     explicit = str(item.get("program_id") or "").strip()
     if explicit:
         return next((e for e in candidates if e["id"] == explicit), None)
-    portal = str(item.get("official_portal_url") or item.get("source_url") or "").lower()
+    # The application portal names the programme; a source_url citing the
+    # scheme's page does not (a citation explaining an exclusion is not a
+    # recommendation to apply).
+    portal = str(item.get("official_portal_url") or "").lower()
     for e in candidates:
         marker = str(e.get("portal_marker") or "").lower()
         if marker and marker in portal:

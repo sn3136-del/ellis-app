@@ -524,25 +524,29 @@
  },
  {
   "_cache_key": "HKG|HKG|KOR|tourism|default|unknown|v6",
-  "_contradictions": [],
-  "_disputed": [],
-  "_evidence_low": false,
-  "_held": false,
-  "_product_index": null,
+  "_contradictions": [
+   "KOR operates Korea Electronic Travel Authorization (K-ETA) and HKG is on its list, so entry is not unconditional. State the scheme or the exemption condition."
+  ],
+  "_disputed": [
+   "KOR operates Korea Electronic Travel Authorization (K-ETA) and HKG is on its list, so entry is not unconditional. State the scheme or the exemption condition."
+  ],
+  "_evidence_low": true,
+  "_held": true,
+  "_product_index": 0,
   "_publication_reason": null,
-  "_publication_state": "published",
+  "_publication_state": "withheld",
   "_released": false,
-  "_review_required": false,
-  "_route_held": false,
+  "_review_required": true,
+  "_route_held": true,
   "_separate_permission": null,
   "_source_check": "ai-quote",
-  "_status": "KIMI_PRIMARY",
+  "_status": "KIMI_UNCERTAIN",
   "_unpublished": [
    "info_validity"
   ],
   "application_method": null,
   "collected_at": "2026-08-29",
-  "confidence_level": "High",
+  "confidence_level": "Low",
   "consulate_district": null,
   "corroborating_sources": [
    {
@@ -563,7 +567,7 @@
   ],
   "data_source": "Ellis source audit",
   "destination_country": "KOR",
-  "entries": null,
+  "entries": "Multiple",
   "entry_requirements": "No visa. You must still file the Arrival/Departure Card, Completed on arrival before immigration inspection. Passport: Valid at least 6 months after intended entry. Onward travel: Return/onward ticket may be requested at immigration, not uploaded during K-ETA application. Accommodation: Korea address is requested in the application, booking proof may be checked on arrival. Funds: Proof of sufficient funds for the stay may be requested at immigration",
   "freshness_valid_until": "2027-09-09T00:00:00",
   "info_validity": null,
@@ -572,21 +576,21 @@
   "max_stay_unit": "Day",
   "processing_min_days": null,
   "processing_unit": null,
-  "required_documents": "Valid HKSAR passport, recent passport-style photo, return/onward ticket, accommodation details, proof of funds",
+  "required_documents": "Valid HKSAR passport, recent passport-style photo, email address, payment card, return/onward ticket, accommodation details, proof of funds",
   "source_url": "https://www.k-eta.go.kr/portal/board/viewboarddetail.do?bbsSn=299707",
-  "special_conditions": "The temporary K-ETA exemption applies through 31 December 2026 (KST), requirements for later travel must be checked.. A voluntary K-ETA application is charged and exempts its holder from submitting an arrival card",
+  "special_conditions": "The temporary K-ETA exemption applies through 31 December 2026 (KST), requirements for later travel must be checked.. A voluntary K-ETA application is charged and exempts its holder from submitting an arrival card.. No visa is required. K-ETA is temporarily waived for Hong Kong through 31 December 2026 (KST), travellers may still apply for one voluntarily",
   "travel_document_country": "HKG",
   "travel_document_type": "ordinary_passport",
   "travel_purpose": "tourism",
   "validity_duration": null,
-  "validity_text": null,
+  "validity_text": "on arrival",
   "validity_unit": null,
   "visa_fee_amount": 0,
   "visa_fee_currency": null,
   "visa_fee_qualifier": null,
   "visa_requirement": "Visa-free",
   "visa_requirement_detail": "Unconditional Visa-free",
-  "visa_type_name": "No visa needed"
+  "visa_type_name": "Visa-free entry"
  },
  {
   "_cache_key": "HKG|HKG|SOM|tourism|default|unknown|v6",
