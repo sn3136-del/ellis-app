@@ -659,6 +659,29 @@ export default function TravelDatabase({ onBack }) {
   // heading of one route above the answer of another. Only the most recent
   // request is allowed to write the page.
   const askSeq = useRef(0)
+  const pollRef = useRef(0)
+  function beginRequest(kind) {
+    const seq = ++askSeq.current
+    ++pollRef.current
+    // The newest action owns every loading state, including a request it
+    // supersedes through the other input path.
+    setBusy(kind === 'lookup'); setAskBusy(kind === 'ask')
+    setAskSlow(false); setSwitching(false)
+    return seq
+  }
+  function routeKey(r) {
+    return [r.nat, r.dest, r.purpose, r.doc, r.transit.join(','), r.arrival].join('|')
+  }
+  function writeAnswerHash(route) {
+    writeHash(route)
+    const currentRoute = routeFromHash()
+    openedRoute.current = currentRoute ? routeKey(currentRoute) : ''
+  }
+  function newSearch() {
+    beginRequest(null)
+    openedRoute.current = ''
+    setResult(null); clearHash()
+  }
   // The handler is registered once but must call the CURRENT lookUp, not the
   // one that existed at mount, which closes over the first render's arrival
   // date, departure city and stopovers.
@@ -668,12 +691,13 @@ export default function TravelDatabase({ onBack }) {
     if (!r) {
       if (booted.current && openedRoute.current) {
         openedRoute.current = ''
+        beginRequest(null)
         setResult(null); setError('')
       }
       booted.current = true
       return
     }
-    const key = [r.nat, r.dest, r.purpose, r.doc, r.transit.join(','), r.arrival].join('|')
+    const key = routeKey(r)
     if (booted.current && key === openedRoute.current) return
     booted.current = true
     openedRoute.current = key
@@ -686,7 +710,13 @@ export default function TravelDatabase({ onBack }) {
     openHash.current()
     const on = () => openHash.current()
     window.addEventListener('hashchange', on)
-    return () => window.removeEventListener('hashchange', on)
+    return () => {
+      window.removeEventListener('hashchange', on)
+      ++askSeq.current; ++pollRef.current
+      // StrictMode replays this effect after cleanup; its replacement must
+      // restart a deep-linked request that cleanup just invalidated.
+      booted.current = false; openedRoute.current = ''
+    }
   }, [])
 
   useEffect(() => {
@@ -850,12 +880,14 @@ export default function TravelDatabase({ onBack }) {
     const sendText = (preset && preset.send) || question.trim()
     const showText = (preset && preset.show) || sendText
     if (!sendText) return
-    setAskBusy(true); setError(''); setResult(null); setAskSlow(false)
+    const seq = beginRequest('ask')
+    const current = () => seq === askSeq.current
+    setError(''); setResult(null)
     if (!preset) setQuestion('')
     pushChat({ role: 'user', text: showText })
     // Warm routes answer in milliseconds. If nothing is back after two
     // seconds, this is a first-time route: say so instead of looking stuck.
-    const slowTimer = setTimeout(() => setAskSlow(true), 2000)
+    const slowTimer = setTimeout(() => { if (current()) setAskSlow(true) }, 2000)
     try {
       // The route on screen travels with a follow-up, so "what about
       // business?" modifies it instead of being refused. When only a
@@ -875,13 +907,14 @@ export default function TravelDatabase({ onBack }) {
             travel_document_type: shown.doc || 'ordinary_passport',
             field: '', note: sendText.slice(0, 400),
             cache_key: result.cache_key || '' })
+          if (!current()) return
           pushChat({ role: 'ellis', kind: 'info',
                      text: t('db.chat.reported') })
         } catch (e2) {
+          if (!current()) return
           pushChat({ role: 'ellis', kind: 'error',
                      text: String(e2?.message || e2) })
         }
-        clearTimeout(slowTimer); setAskSlow(false); setAskBusy(false)
         return
       }
       const hist = chat.slice(-10).map((m) => (
@@ -890,16 +923,15 @@ export default function TravelDatabase({ onBack }) {
         nationality: nat, destination: dest, travel_purpose: shown.purpose,
         travel_document_type: shown.doc,
       } : askCtx, hist, lang)
+      if (!current()) return
       if (out.identity || out.off_topic || out.greeting) {
         // Ellis answered for itself: no route changes, no card repaint.
         pushChat({ role: 'ellis', kind: 'info', text: out.reply })
-        clearTimeout(slowTimer); setAskSlow(false); setAskBusy(false)
         return
       }
       if (out.comparison) {
         pushChat({ role: 'ellis', kind: 'comparison', text: out.reply,
                    routes: out.routes || [] })
-        clearTimeout(slowTimer); setAskSlow(false); setAskBusy(false)
         return
       }
       if (out.understood === false) {
@@ -927,7 +959,7 @@ export default function TravelDatabase({ onBack }) {
           setShown({ purpose: out.route.travel_purpose || 'tourism', doc: askedDoc })
           setTransit(out.route.transit_countries || [])
           setFocus(out.focus || null)
-          writeHash({ nat: out.route.nationality, dest: out.route.destination,
+          writeAnswerHash({ nat: out.route.nationality, dest: out.route.destination,
                       purpose: out.route.travel_purpose, doc: askedDoc, transit: out.route.transit_countries || [] })
         }
         const noAnswer = !out.guidance && !out.held
@@ -940,11 +972,12 @@ export default function TravelDatabase({ onBack }) {
                      || (noAnswer ? t('db.chat.retry') : summ.text) })
       }
     } catch (e) {
-      pushChat({ role: 'ellis', kind: 'error',
-                 text: e?.detail?.reason || e?.message || t('db.error') })
+      if (current()) pushChat({ role: 'ellis', kind: 'error',
+                               text: e?.detail?.reason || e?.message || t('db.error') })
+    } finally {
+      clearTimeout(slowTimer)
+      if (current()) { setAskSlow(false); setAskBusy(false) }
     }
-    clearTimeout(slowTimer); setAskSlow(false)
-    setAskBusy(false)
   }
 
   useEffect(() => {
@@ -954,10 +987,8 @@ export default function TravelDatabase({ onBack }) {
   // Two-stage answers: a route nobody asked before paints its verdict first
   // and fills the detail sections in the background. Poll until they land
   // (the cached lookup is instant), then swap the fuller answer in.
-  const pollRef = useRef(0)
-  function pollDetail(body) {
+  function pollDetail(body, request) {
     const mine = ++pollRef.current
-    const request = askSeq.current
     let tries = 0
     const tick = async () => {
       if (pollRef.current !== mine || askSeq.current !== request || tries++ > 12) return
@@ -966,7 +997,7 @@ export default function TravelDatabase({ onBack }) {
         if (pollRef.current !== mine || askSeq.current !== request) return
         if (!out.detail_pending) { setResult(out); return }
       } catch { /* keep what we have */ }
-      setTimeout(tick, 2500)
+      if (pollRef.current === mine && askSeq.current === request) setTimeout(tick, 2500)
     }
     setTimeout(tick, 2500)
   }
@@ -1005,9 +1036,10 @@ export default function TravelDatabase({ onBack }) {
     const useTransit = override.transit ?? transit
     const useArrival = override.arrival ?? arrival
     if (!useNat || !useDest) return
-    const seq = ++askSeq.current
+    const seq = beginRequest('lookup')
     const current = () => seq === askSeq.current
-    setBusy(true); setError(''); setIssueOpen(false); setIssueDone(false)
+    setSwitching(Boolean(override.switching))
+    setError(''); setIssueOpen(false); setIssueDone(false)
     if (!override.keepResult) setResult(null)
     try {
       const out = await client.databaseLookup({
@@ -1016,43 +1048,41 @@ export default function TravelDatabase({ onBack }) {
         departure_city: departureCity || '',
         transit_countries: useTransit,
       })
-      if (!current()) return true   // a newer question is already on screen
+      if (!current()) return  // superseded: the caller must not roll back controls
       setResult(out)
       setShown({ purpose: usePurpose, doc: useDoc, transit: useTransit })
       if (!override.keepFocus) setFocus(null)
-      writeHash({ nat: useNat, dest: useDest, purpose: usePurpose, doc: useDoc, transit: useTransit, arrival: useArrival })
-      setBusy(false)
+      writeAnswerHash({ nat: useNat, dest: useDest, purpose: usePurpose, doc: useDoc, transit: useTransit, arrival: useArrival })
       if (out.detail_pending) pollDetail({
         nationality: useNat, destination: useDest, travel_document_type: useDoc,
         travel_purpose: usePurpose, arrival_date: useArrival || '',
         departure_city: departureCity || '', transit_countries: useTransit,
-      })
+      }, seq)
       return true
     } catch (e) {
-      if (!current()) return false  // a newer question is already on screen
+      if (!current()) return  // superseded failures cannot change the current page
       setError(e?.detail?.reason || e?.detail?.detail || e?.message || t('db.error'))
       // A failed switch leaves the answer the reader was already looking at
       // on screen. Clearing it would throw away a good answer because a
       // DIFFERENT question could not be answered.
-      setBusy(false)
       return false
+    } finally {
+      if (current()) { setBusy(false); setSwitching(false) }
     }
   }
 
   // A switcher on the answer page: set the control, then re-ask for it.
   async function switchDoc(v) {
     const was = doc
-    setDoc(v); setSwitching(true)
-    const ok = await lookUp({ doc: v, keepResult: true })
-    setSwitching(false)
-    if (!ok) setDoc(was)          // the page must never label an old answer anew
+    setDoc(v)
+    const ok = await lookUp({ doc: v, keepResult: true, switching: true })
+    if (ok === false) setDoc(was)          // the page must never label an old answer anew
   }
   async function switchPurpose(v) {
     const was = purpose
-    setPurpose(v); setSwitching(true)
-    const ok = await lookUp({ purpose: v, keepResult: true })
-    setSwitching(false)
-    if (!ok) setPurpose(was)
+    setPurpose(v)
+    const ok = await lookUp({ purpose: v, keepResult: true, switching: true })
+    if (ok === false) setPurpose(was)
   }
 
   async function reportIssue() {
@@ -1878,7 +1908,7 @@ export default function TravelDatabase({ onBack }) {
             {/* This deliverable is an information base: no application
                 buttons. Trip.com's review read the old "Process my visa"
                 button as scope drift into visa processing. */}
-            <button className="btn btn--ghost" onClick={() => { setResult(null); clearHash() }}
+            <button className="btn btn--ghost" onClick={newSearch}
                     data-testid="database-again"
                     style={{ fontSize: 14, borderRadius: 999 }}>
               {t('db.newSearch')}
@@ -2045,7 +2075,7 @@ export default function TravelDatabase({ onBack }) {
           {/* A held combination is a reason to switch, not to start again. */}
           <div style={{ marginTop: 16 }}>{switchers}</div>
           <div style={{ marginTop: 14 }}>
-            <button className="btn btn--ghost" onClick={() => { setResult(null); clearHash() }}
+            <button className="btn btn--ghost" onClick={newSearch}
                     data-testid="database-held-again"
                     style={{ fontSize: 14, borderRadius: 999 }}>
               {t('db.newSearch')}
@@ -2063,7 +2093,7 @@ export default function TravelDatabase({ onBack }) {
             {t('db.noDecision')}
           </div>
           <button className="btn btn--ghost" style={{ marginTop: 12 }}
-                  onClick={() => { setResult(null); clearHash() }}>{t('db.newSearch')}</button>
+                  onClick={newSearch}>{t('db.newSearch')}</button>
         </div>
       )}
     </div>
