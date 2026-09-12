@@ -570,11 +570,13 @@ export function NoteCell({ text, t = (k) => k, title }) {
     if (!button.current || typeof window === 'undefined') return
     const r = button.current.getBoundingClientRect()
     const width = Math.min(340, window.innerWidth - 24)
-    const room = window.innerHeight - r.bottom
+    const below = Math.max(0, window.innerHeight - r.bottom - 20)
+    const above = Math.max(0, r.top - 20)
+    const openBelow = below >= Math.min(190, above)
     setSpot({ left: Math.max(12, Math.min(r.right - width, window.innerWidth - width - 12)),
-              top: room > 190 ? Math.max(12, r.bottom + 8) : null,
-              bottom: room > 190 ? null : Math.max(12, window.innerHeight - r.top + 8),
-              width, room: Math.max(120, window.innerHeight - 24) })
+              top: openBelow ? Math.max(12, r.bottom + 8) : null,
+              bottom: openBelow ? null : Math.max(12, window.innerHeight - r.top + 8),
+              width, room: openBelow ? below : above })
   }, [])
   useEffect(() => {
     if (!open) return undefined
@@ -585,8 +587,12 @@ export function NoteCell({ text, t = (k) => k, title }) {
     }
     const key = (e) => { if (e.key === 'Escape') { setOpen(false); if (button.current) button.current.focus() } }
     // A note read while the list moves would end up over another route, so
-    // scrolling or resizing closes it rather than leaving it behind.
-    const moved = () => setOpen(false)
+    // Moving the list or viewport closes it. Scrolling the note itself
+    // must keep it open so every line remains accessible.
+    const moved = (e) => {
+      if (e.type === 'scroll' && e.target?.nodeType && panel.current?.contains(e.target)) return
+      setOpen(false)
+    }
     document.addEventListener('mousedown', away)
     document.addEventListener('keydown', key)
     window.addEventListener('scroll', moved, true)
@@ -613,7 +619,15 @@ export function NoteCell({ text, t = (k) => k, title }) {
     // column narrows when the window does, but also when the card grows a
     // scrollbar, so the cell itself is watched where the browser allows.
     const el = lead.current
-    const measure = () => setClipped(!!el && el.scrollWidth > el.clientWidth + 1)
+    const measure = () => {
+      if (!el) { setClipped(false); return }
+      // scrollWidth and clientWidth round to whole pixels. Measure the
+      // text as well so a fractional clipped edge still gets a button.
+      const range = el.ownerDocument.createRange()
+      range.selectNodeContents(el)
+      setClipped(el.scrollWidth > el.clientWidth ||
+        range.getBoundingClientRect().width > el.getBoundingClientRect().width)
+    }
     measure()
     if (!el || typeof window === 'undefined') return undefined
     if (typeof ResizeObserver !== 'undefined') {
