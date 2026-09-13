@@ -1761,13 +1761,16 @@ def travel_database_issues(db=Depends(get_session),
 # each read: 1,442 records took 48 seconds on 11 September 2026 against the
 # console's 30 second read deadline, so testers saw "the Quality Control
 # read timed out" before any record. The full unfiltered set is built once,
-# kept for a short while, invalidated by every operator write in this
-# process, and refreshed in the background while the stale copy is served
-# (the sweep writes from another process, so the time bound covers it).
+# kept for a short while, and invalidated by in-process writes and checked
+# source versions from external writers. Only ordinary TTL expiry serves
+# the previous copy while refreshing in the background; source changes
+# make the reader wait for the corresponding generation.
 # Filters then run over the cached set in memory, which is milliseconds.
 _RECORDS_CACHE: dict = {"rows": None, "built_at": 0.0, "building": False,
-                        "dirty": False, "generation": 0, "built_generation": -1}
+                        "dirty": False, "generation": 0, "built_generation": -1,
+                        "external_version": None}
 _RECORDS_CACHE_LOCK = threading.Lock()
+_RECORDS_SOURCE_VERSION_LOCK = threading.Lock()
 # Readers waiting for an in-flight rebuild sleep on this instead of each
 # starting a build of their own.
 _RECORDS_CACHE_READY = threading.Condition(_RECORDS_CACHE_LOCK)
@@ -1776,6 +1779,56 @@ RECORDS_CACHE_SECONDS = _env_float("ELLIS_RECORDS_CACHE_SECONDS", 120.0)
 # under the console's own 120 s read deadline, so the fallback can still
 # answer the request that waited.
 RECORDS_CACHE_WAIT_SECONDS = _env_float("ELLIS_RECORDS_CACHE_WAIT_SECONDS", 100.0)
+
+
+def _records_external_version(db):
+    """Cheap cross-process versions, without reading policy blobs or audit traffic."""
+    import hashlib
+    from .visa_snapshot import verified_overrides as vo
+    paths = set(vo.OVERRIDES.parent.glob('*.json'))
+    paths.update((vo.OVERRIDES, vo.operator_overrides_path(),
+                  vo.OVERRIDES.parent / vo.REVIEWED_OVERLAY_LIST))
+    paths.update(vo._reviewed_overlay_paths())
+    stores = []
+    for path in sorted(paths):
+        try:
+            stat = path.stat()
+            stamp = (stat.st_mtime_ns, stat.st_ctime_ns, stat.st_size, stat.st_ino)
+        except OSError:
+            stamp = None
+        stores.append((str(path), stamp))
+    database = None
+    # Real request/background sessions share the same version contract. Test
+    # doubles used for cache scheduling need no database connection.
+    from sqlalchemy.orm import Session
+    if isinstance(db, Session):
+        from sqlalchemy import select, literal, cast, String, union_all
+        statements = [select(literal(model.__tablename__).label('source'),
+                             model.id.label('identity'), cast(model.updated_at, String).label('version'))
+                      for model in _records_source_models()]
+        versions = union_all(*statements).order_by('source', 'identity')
+        database = hashlib.sha256(json.dumps([tuple(row) for row in db.execute(versions)],
+            ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
+    return (hashlib.sha256(json.dumps(stores, separators=(',', ':')).encode()).hexdigest(), database)
+
+
+def _observe_records_sources(db):
+    """An external write is a new generation just like an in-process commit."""
+    from .visa_snapshot import verified_overrides as vo
+    # Serialize observations so a slow old snapshot cannot replace a later
+    # observation. Do not hold the list-cache lock during the database read.
+    with _RECORDS_SOURCE_VERSION_LOCK:
+        version = _records_external_version(db)
+        with _RECORDS_CACHE_LOCK:
+            previous = _RECORDS_CACHE.get('external_version')
+            _RECORDS_CACHE['external_version'] = version
+            if previous is not None and previous != version:
+                _RECORDS_CACHE['dirty'] = True
+                _RECORDS_CACHE['generation'] += 1
+        if previous is not None and previous[0] != version[0]:
+            # Atomic replacements may preserve size/mtime. The parsed table's
+            # own shorter stat key must not retain the old operator values.
+            vo.reload()
 
 
 def invalidate_records_cache() -> None:
@@ -1809,10 +1862,12 @@ def _build_records_cache(db) -> list[dict]:
     who arrived before that write may still take it (it reflects every
     write before the reader's own request), a reader who arrives after it
     waits for the next build, which starts at once in the background."""
-    with _RECORDS_CACHE_LOCK:
-        generation = _RECORDS_CACHE["generation"]
     try:
+        _observe_records_sources(db)
+        with _RECORDS_CACHE_LOCK:
+            generation = _RECORDS_CACHE["generation"]
         rows = _build_tstation_rows(db)
+        _observe_records_sources(db)
     except BaseException:
         _release_records_build()
         raise
@@ -1878,10 +1933,9 @@ def _records_copy_for(entered: int):
 def _all_tstation_rows(db) -> list[dict]:
     """The complete record set (before dedupe), cached.
 
-    A copy that is merely old (past the time bound, nothing written in this
-    process) is served at once and rebuilt behind the reader: the sweep
-    writes from another process and the bound covers it. A copy made stale
-    by a write in this process is never served: the reader waits for the
+    Source versions are checked before serving a warm copy, including writes
+    by the sweep and external source installers. A copy made stale by a
+    source write is never served: the reader waits for the
     one rebuild in flight, or builds it, so the read after an edit shows
     the edit. Under pytest the cache is off unless a test opts in, and an
     opted-in test rebuilds inline rather than leaking a thread."""
@@ -1891,6 +1945,7 @@ def _all_tstation_rows(db) -> list[dict]:
         # runtime mode they emulate; they read the truth each time unless a
         # test opts into the cache explicitly.
         return _build_tstation_rows(db)
+    _observe_records_sources(db)
     rows, dirty, age, entered = _records_cache_state()
     if rows is not None and not dirty:
         if age > RECORDS_CACHE_SECONDS:
