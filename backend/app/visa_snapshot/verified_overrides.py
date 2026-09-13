@@ -70,6 +70,43 @@ def operator_overrides_path() -> pathlib.Path:
         return var / "operator_overrides.json"
     return OVERRIDES.parent / "operator_overrides.json"
 
+
+@contextlib.contextmanager
+def operator_write_lock(*, timeout_seconds=5.0):
+    """Serialize API-process edits and source completion across processes.
+
+    File lock precedes any DB write. Waiting is bounded so an unavailable
+    writer never consumes an entire source lease or blocks a request forever.
+    The persistent lock file must not be deleted/replaced while workers run.
+    """
+    import fcntl
+    import time
+    timeout = max(0.0, min(5.0, float(timeout_seconds)))
+    deadline = time.monotonic() + timeout
+    if not _OP_LOCK.acquire(timeout=timeout):
+        raise ValueError("another source edit is in progress; retry shortly")
+    try:
+        path = operator_overrides_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        lock_path = path.with_name(path.name + ".lock")
+        fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
+        with os.fdopen(fd, "a+") as handle:
+            while True:
+                try:
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise ValueError("another source edit is in progress; retry shortly") from None
+                    time.sleep(min(0.01, remaining))
+            try:
+                yield
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    finally:
+        _OP_LOCK.release()
+
 # Fields an override is allowed to correct. Anything else in the file is
 # ignored rather than trusted, so a malformed entry cannot reshape an answer.
 OVERRIDABLE = frozenset({
@@ -305,6 +342,21 @@ def pinned_table():
         yield _PINNED.table
     finally:
         _PINNED.table = None
+
+
+@contextlib.contextmanager
+def current_store_table():
+    """A final write check reads real stores even inside a reader snapshot.
+
+    Call under operator_write_lock when the checked values authorize a write.
+    Restore the caller's pinned table afterward; do not change its snapshot.
+    """
+    previous = getattr(_PINNED, "table", None)
+    _PINNED.table = _load_table()
+    try:
+        yield _PINNED.table
+    finally:
+        _PINNED.table = previous
 
 
 def _read_rows(path: pathlib.Path) -> list:
@@ -827,7 +879,7 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
                      route.get("travel_document_type", ""))
     entry = dict(entry, fields=clean, verifier=entry.get("verifier", "ai"))
     path = operator_overrides_path()
-    with _OP_LOCK:
+    with operator_write_lock():
         # Re-read under the write lock. A concurrent edit may have changed
         # the verdict since the request began, invalidating a fee-only edit.
         current_table = _load_table()

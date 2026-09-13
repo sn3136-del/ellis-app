@@ -9,9 +9,9 @@ steps, exceptions, uncertainty). That Kimi result drives the Ellis workflow
 directly — there is no second model pass; every check on top of it is the
 deterministic validation in this module.
 
-NO official-source fetching, Browserbase research, or evidence validation runs
-on this path, and none is started asynchronously — the research pipeline
-remains a separate developer/administrator tool only.
+New route generation does not perform official-source fetching on its model
+call. A cached orphaned detail job may start a bounded official-source retry;
+its durable pending flag remains until that same generation completes safely.
 
 TIME LIMIT: the whole analysis runs under ONE hard wall-clock deadline
 (default 60 seconds, ELLIS_GUIDANCE_DEADLINE_SECONDS). Every Kimi call gets a
@@ -1841,13 +1841,20 @@ def _detail_consistent(core: dict, detail: dict) -> dict:
     return out
 
 
-def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
-    """Stage 2: the DETAIL for a row that was served core-first. Told the
-    verdict it must respect; merged deterministically; the row's pending flag
-    cleared whatever happens so readers stop polling; `after` (recheck +
-    pre-translation) runs once the full answer exists."""
+def fill_detail(db, key: str, route: dict, user: str, *, after=None,
+                expected_generation=None, expected_token=None) -> None:
+    """Complete only the staged generation this worker owns.
+
+    A provider failure or obsolete worker leaves pending intact. Restarted
+    jobs are recovered separately against official sources, not regenerated.
+    """
+    from . import detail_jobs
     row = _cached(db, key)
     if row is None:
+        return
+    lease = detail_jobs.claim(db, row, expected_generation=expected_generation,
+                              expected_token=expected_token)
+    if lease is None:
         return
     core = dict(row.guidance or {})
     verdict = {k: core.get(k) for k in ("disposition", "requirement_detail",
@@ -1856,8 +1863,13 @@ def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
     try:
         detail = _call(_stage_system(DETAIL_FIELDS, "DETAIL", verdict), user,
                        timeout=60.0, max_tokens=PASS1_MAX_TOKENS)
-    except Exception:  # noqa: BLE001 — the core answer stands on its own
-        detail = None
+    except Exception as exc:  # noqa: BLE001 — retain the answer and pending hold
+        db.rollback()
+        detail_jobs.finish(db, row, lease, success=False, reason=type(exc).__name__)
+        return
+    if not isinstance(detail, dict) or not any(k in DETAIL_FIELDS and v is not None for k, v in detail.items()):
+        detail_jobs.finish(db, row, lease, success=False, reason="empty_detail_response")
+        return
     # Merge onto the row AS IT IS NOW, not the snapshot taken before a call
     # that can run a minute: a grounded re-check or an operator edit may
     # have written in the meantime, and the detail stage must never undo it.
@@ -1865,6 +1877,8 @@ def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
         db.refresh(row)
     except Exception:  # noqa: BLE001 - never overwrite from an obsolete snapshot
         db.rollback()
+        return
+    if not detail_jobs.owns(lease, row):
         return
     current = dict(row.guidance or {})
     changed_since = {k for k in set(current) | set(core)
@@ -1880,16 +1894,14 @@ def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
         else STATUS_UNCERTAIN
     ttl = int(os.getenv("ELLIS_KIMI_GUIDANCE_TTL_DAYS", TTL_DAYS) or TTL_DAYS) \
         if status == STATUS_PRIMARY else UNCERTAIN_TTL_DAYS
-    ver = dict(row.verification or {})
-    ver.pop("detail_pending", None)
-    from . import change_log
-    change_log.record(db, key, route, current, clean,
-                      origin="engine", note="detail stage completed")
-    row.guidance, row.status = clean, status
-    row.missing_fields, row.contradictions = missing, contradictions
-    row.verification = ver
-    row.fresh_until = (row.generated_at or _now()) + timedelta(days=ttl)
-    db.commit()
+    if missing or contradictions:
+        detail_jobs.finish(db, row, lease, success=False, reason="invalid_or_incomplete_detail")
+        return
+    if not detail_jobs.finish(db, row, lease, success=True, reason="detail_completed", values={
+            "guidance": clean, "status": status, "missing_fields": missing,
+            "contradictions": contradictions,
+            "fresh_until": (row.generated_at or _now()) + timedelta(days=ttl)}):
+        return
     if after is not None:
         try:
             after(route, reader_projection(route, status, clean, cached=True, stale=False,
@@ -1922,30 +1934,51 @@ def join_detail_stage(timeout: float = 5.0, *, key: str | None = None) -> bool:
     return not any(t.is_alive() for t in targets)
 
 
-def _fill_detail_async(key: str, route: dict, user: str, *, after=None) -> None:
-    import threading
+def _start_detail_thread(key, work, *, name, generation=None):
+    t = threading.Thread(target=work, name=name, daemon=True)
+    t.ellis_route_key = key
+    t.ellis_generation = generation
+    with _DETAIL_GUARD:
+        _DETAIL_THREADS[:] = [t for t in _DETAIL_THREADS if t.is_alive()]
+        if any(getattr(t, "ellis_route_key", None) == key and
+               getattr(t, "ellis_generation", None) == generation for t in _DETAIL_THREADS):
+            return
+        _DETAIL_THREADS.append(t)
+        t.start()
+
+
+def _fill_detail_async(key: str, route: dict, user: str, *, after=None,
+                       expected_generation=None, expected_token=None) -> None:
     from ..db import SessionLocal
 
     def _work():
         s = SessionLocal()
         try:
-            fill_detail(s, key, route, user, after=after)
+            fill_detail(s, key, route, user, after=after, expected_generation=expected_generation,
+                        expected_token=expected_token)
         except Exception:  # noqa: BLE001
-            try:
-                row = _cached(s, key)
-                if row is not None:
-                    ver = dict(row.verification or {}); ver.pop("detail_pending", None)
-                    row.verification = ver; s.commit()
-            except Exception:  # noqa: BLE001
-                pass
+            # Durable lease expiry permits a later source-backed retry.
+            # Never clear a flag after an unverified or failed exception path.
+            s.rollback()
         finally:
             s.close()
-    t = threading.Thread(target=_work, name="ellis-detail-stage", daemon=True)
-    t.ellis_route_key = key
-    with _DETAIL_GUARD:
-        _DETAIL_THREADS[:] = [t for t in _DETAIL_THREADS if t.is_alive()]
-        _DETAIL_THREADS.append(t)
-        t.start()
+    _start_detail_thread(key, _work, name="ellis-detail-stage", generation=expected_generation)
+
+
+def _recover_detail_async(key: str, *, generation=None) -> None:
+    from ..db import SessionLocal
+    from . import freshness
+    def work():
+        s = SessionLocal()
+        try:
+            row = _cached(s, key)
+            if row is not None:
+                freshness.recheck_row(s, row)
+        except Exception:  # noqa: BLE001 — pending persists through failed retries
+            s.rollback()
+        finally:
+            s.close()
+    _start_detail_thread(key, work, name="ellis-source-detail-recovery", generation=generation)
 
 
 def reader_projection(route: dict, status: str, guidance: dict, *, cached: bool,
@@ -2189,6 +2222,10 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
             force_refresh = False
     if row is not None and not force_refresh:
         if stage == "full" and (row.verification or {}).get("detail_pending"):
+            from . import detail_jobs
+            if detail_jobs.retry_eligible(row) and is_available():
+                job = (row.verification or {}).get(detail_jobs.JOB) or {}
+                _recover_detail_async(key, generation=(detail_jobs.generation(row.generated_at), job.get("token")))
             join_detail_stage(timeout=min(60.0, _deadline_seconds()), key=key)
             db.expire_all()
             row = _cached(db, key)
@@ -2325,9 +2362,12 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
         # (an operator's release, the last good page check, a drill shadow).
         ver = dict(row.verification or {})
         ver.pop("detail_pending", None)
+        ver.pop("detail_job", None)
         ver.update({"passes": 1, "label": VERIFIED_LABEL})
         if staged:
+            from . import detail_jobs
             ver["detail_pending"] = True
+            ver[detail_jobs.JOB] = detail_jobs.reserve(now)
         row.verification = ver
         row.generated_at = now
         row.fresh_until = now + timedelta(days=ttl)
@@ -2342,15 +2382,19 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
     if staged and has_content:
         if _PROVIDER is not None:
             # Injected provider (tests): stage 2 runs inline, deterministically.
-            fill_detail(db, key, route, user, after=after)
+            fill_detail(db, key, route, user, after=after,
+                        expected_generation=ver["detail_job"]["generation"],
+                        expected_token=ver["detail_job"]["token"])
             row = _cached(db, key)
             out = reader_projection(route, row.status, row.guidance, cached=False, stale=False,
                                     missing=row.missing_fields, contradictions=row.contradictions,
                                     model=row.model, advisories=advisories,
                                     elapsed_seconds=elapsed)
-            out["detail_pending"] = False
+            out["detail_pending"] = bool((row.verification or {}).get("detail_pending"))
         else:
-            _fill_detail_async(key, route, user, after=after)
+            _fill_detail_async(key, route, user, after=after,
+                               expected_generation=ver["detail_job"]["generation"],
+                               expected_token=ver["detail_job"]["token"])
             out["detail_pending"] = True
     elif after is not None and not out.get("cached"):
         try:

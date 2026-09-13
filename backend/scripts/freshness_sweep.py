@@ -184,8 +184,9 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
             if (grounded_verdict_supported(check) and not kimi_primary.serve_time_invariants(guidance)
                     and not freshness.active_disputed_fields(db, key)):
                 delta["verified"] = 1
-            delta["renewed"] = int(check.get("renewed") is True)
-            delta["partial"] = int(bool(check.get("unverified_fields") or check.get("unchecked_sources")))
+            pending = bool((row.verification or {}).get("detail_pending"))
+            delta["renewed"] = int(check.get("renewed") is True and not pending)
+            delta["partial"] = int(bool(pending or check.get("unverified_fields") or check.get("unchecked_sources")))
         elif outcome == "fetch_failed" and not delta["read"]:
             delta["unreadable"] = 1
             freshness.note_unreadable(db, row, report)

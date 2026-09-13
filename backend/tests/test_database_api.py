@@ -412,14 +412,19 @@ def test_operator_edit_writes_a_gated_override_that_readers_see(client,
                        str(tmp_path / "operator_overrides.json"))
     from app.visa_snapshot import verified_overrides
     verified_overrides.reload()
-    _provide(dict(ANSWER, visa_products=[]))
+    # This test owns editing, not failed detail recovery: provide one complete
+    # product so the initial staged job can legitimately finish.
+    _provide(ANSWER)
     look = client.post("/database/lookup", headers=READER,
                        json={"nationality": "ISL", "destination": "KIR"}).json()
     assert look["held"] and look["guidance"] is None, \
         "the unread initial answer must stay held until the operator verifies it"
     edit = {"nationality": "ISL", "destination": "KIR",
             "travel_purpose": "tourism",
-            "fields": {"disposition": "VISA_REQUIRED", "government_fee": {"amount": 120, "currency": "USD"}},
+            "fields": {"disposition": "VISA_REQUIRED", "requirement_detail": "paper_visa",
+                       "government_fee": {"amount": 120, "currency": "USD"},
+                       "visa_products": [dict(p, fee={"amount": 120, "currency": "USD"})
+                                         for p in ANSWER["visa_products"]]},
             "source_url": "https://www.mofa.go.jp/fee-page",
             "note": "fee updated per the official schedule"}
     # A reader cannot edit; a commercial source is refused; unknown fields
@@ -461,7 +466,8 @@ def test_operator_edit_layers_onto_seed_overrides_not_over_them(client,
                        str(tmp_path / "operator_overrides.json"))
     from app.visa_snapshot import verified_overrides
     verified_overrides.reload()
-    _provide(dict(ANSWER, visa_products=[],
+    _provide(dict(ANSWER,
+                  visa_products=[dict(p, fee={"amount": 40, "currency": "USD"}) for p in ANSWER["visa_products"]],
                   government_fee={"amount": 40, "currency": "USD"}))
     # CHN->KOR carries a seed override with the verified 280 CNY fee.
     edit = {"nationality": "CHN", "destination": "KOR",
@@ -533,7 +539,7 @@ def test_the_assistant_is_ellis_refuses_off_topic_and_grounds_replies(client, db
             return {"nationality": "ISL", "destination": "JPN",
                     "travel_purpose": "tourism",
                     "travel_document_type": "ordinary_passport"}
-        return dict(ANSWER, visa_products=[])
+        return dict(ANSWER)
     kimi_primary.set_provider(model)
     r = client.post("/database/ask", headers=READER,
                     json={"question": "from Iceland to Japan for tourism",
@@ -547,7 +553,7 @@ def test_the_assistant_is_ellis_refuses_off_topic_and_grounds_replies(client, db
     def broken(system, user):
         if "Compose one short reply" in str(system):
             raise RuntimeError("model down")
-        return dict(ANSWER, visa_products=[])
+        return dict(ANSWER)
     kimi_primary.set_provider(broken)
     r2 = client.post("/database/ask", headers=READER,
                      json={"question": "from Iceland to Nauru for tourism"}).json()

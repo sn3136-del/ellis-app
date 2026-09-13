@@ -991,7 +991,7 @@ def test_core_first_serves_the_verdict_then_fills_detail_consistently(db):
     assert row.guidance.get("exceptions") == ["None"]
 
 
-def test_detail_stage_failure_leaves_the_core_answer_served_and_unpending(db):
+def test_detail_stage_failure_preserves_core_and_pending_for_source_retry(db):
     _clear_cache(db)
     core = {k: v for k, v in GOOD_ANSWER.items() if k in kimi_primary.CORE_FIELDS}
 
@@ -1003,7 +1003,9 @@ def test_detail_stage_failure_leaves_the_core_answer_served_and_unpending(db):
     g = kimi_primary.get_route_guidance(db, ROUTE, stage="core")
     assert g["guidance"]["disposition"] == GOOD_ANSWER["disposition"]
     row = db.query(KimiRouteGuidanceCache).one()
-    assert "detail_pending" not in (row.verification or {})   # readers stop polling
+    assert row.verification["detail_pending"] is True
+    assert row.verification["detail_job"]["state"] == "retry_wait"
+    assert g["detail_pending"] is True
     assert row.guidance["disposition"] == GOOD_ANSWER["disposition"]
 
 

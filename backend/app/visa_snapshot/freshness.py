@@ -415,7 +415,7 @@ def json_unchanged(db, column, value):
 
 
 def _commit_recheck(db, row, entry: dict, *, expected_guidance: dict,
-                    expected_route: dict, fresh_until=None, comparison_cache=None) -> bool:
+                    expected_route: dict, fresh_until=None, comparison_cache=None, completion_projection=None) -> bool:
     """Merge metadata freshly and commit only if that exact row still exists.
 
     API and sweep processes have separate memory/locks. A final refresh alone
@@ -435,15 +435,21 @@ def _commit_recheck(db, row, entry: dict, *, expected_guidance: dict,
     # the pending raw correction before its compare-and-swap guard.
     with db.no_autoflush:
         latest = db.execute(select(model.verification, model.guidance, model.route,
-            model.fresh_until).where(model.id == row_id)).first()
+            model.fresh_until, model.generated_at).where(model.id == row_id)).first()
+    from . import detail_jobs
+    lease = detail_jobs.active_lease()
+    lease_ok = latest is not None and detail_jobs.owns(lease, SimpleNamespace(
+        id=row_id, cache_key=key, generated_at=latest.generated_at, verification=latest.verification))
     if (latest is None or latest.guidance != expected_guidance or latest.route != expected_route
-            or isinstance(latest.verification, dict) and latest.verification.get("detail_pending")):
+            or lease is not None and not lease_ok
+            or isinstance(latest.verification, dict) and latest.verification.get("detail_pending") and not lease_ok):
         db.rollback()
         if latest is not None:
             db.refresh(row)
         return False
     stamped = SimpleNamespace(verification=latest.verification)
-    _stamp(stamped, entry)
+    provisional = dict(entry, renewed=False, detail_completion_pending=True) if lease is not None else entry
+    _stamp(stamped, provisional)
     if comparison_cache is not None:
         stamped.verification['comparison_cache'] = comparison_cache
 
@@ -451,12 +457,15 @@ def _commit_recheck(db, row, entry: dict, *, expected_guidance: dict,
     changed = desired_guidance != expected_guidance
     if changed:
         values["guidance"] = desired_guidance
-    if fresh_until is not None:
+    if fresh_until is not None and lease is None:
         values["fresh_until"] = fresh_until
     stmt = update(model).where(model.id == row_id,
+        model.generated_at == latest.generated_at,
         json_unchanged(db, model.verification, latest.verification),
         json_unchanged(db, model.guidance, expected_guidance), json_unchanged(db, model.route, expected_route),
         model.fresh_until == latest.fresh_until).values(**values).execution_options(synchronize_session=False)
+    if lease is not None:
+        stmt = stmt.where(detail_jobs.live_lease_clause(db))
     with db.no_autoflush:
         result = db.execute(stmt)
     if result.rowcount != 1:
@@ -471,6 +480,14 @@ def _commit_recheck(db, row, entry: dict, *, expected_guidance: dict,
         from . import change_log
         change_log.record(db, key, expected_route, expected_guidance, desired_guidance,
             origin="grounded_recheck", note=f"corrected against {entry.get('source_url') or ''}")
+    # Save the exact state the source check committed, before any refresh
+    # can rebase the old proof onto a concurrently edited answer.
+    if lease is not None and completion_projection is not None:
+        from copy import deepcopy
+        lease["_checked_snapshot"] = deepcopy({"guidance": desired_guidance,
+            "route": expected_route, "verification": stamped.verification,
+            "fresh_until": latest.fresh_until, "renew_until": fresh_until,
+            "projection": completion_projection})
     db.commit()
     return True
 
@@ -760,7 +777,13 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     if not kimi_primary.is_canonical_key(row.cache_key):
         return {"outcome": "noncanonical", "route_key": row.cache_key}
     if (row.verification or {}).get("detail_pending"):
-        return {"outcome": "detail_pending", "route_key": row.cache_key}
+        from . import detail_jobs
+        lease = detail_jobs.active_lease()
+        if lease is None:
+            return detail_jobs.recover_row(db, row, today=today, budget_seconds=budget_seconds,
+                                          should_stop=should_stop)
+        if not detail_jobs.owns(lease, row):
+            return {"outcome": "concurrent_change", "route_key": row.cache_key, "detail_pending": True}
     route, original = dict(row.route or {}), dict(row.guidance or {})
     override = verified_overrides.find(route)
     guidance, provenance = verified_overrides.apply(dict(original), route)
@@ -1050,16 +1073,19 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     # The source read can take a minute. Refresh both the row and the override,
     # and refuse to overwrite any field changed during that time.
     db.refresh(row)
-    if (row.verification or {}).get("detail_pending"):
+    from . import detail_jobs
+    lease = detail_jobs.active_lease()
+    if ((lease is not None and not detail_jobs.owns(lease, row))
+            or (row.verification or {}).get("detail_pending") and lease is None):
         db.rollback()
-        return {"outcome": "detail_pending", "route_key": row.cache_key,
+        return {"outcome": "concurrent_change" if lease is not None else "detail_pending", "route_key": row.cache_key,
                 "source_reads": len(tried),
                 "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
                 **model_counts}
     override = verified_overrides.find(route)
     protected = set((override or {}).get("fields") or {})
     current = dict(row.guidance or {})
-    seen, _ = verified_overrides.apply(dict(current), route)
+    seen, final_provenance = verified_overrides.apply(dict(current), route)
     unresolved_fields = _source_conflict_fields(seen)
     disputed, applied = {}, {}
     for k, v in proposed.items():
@@ -1079,7 +1105,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             applied[k] = v
     if applied:
         candidate = {**current, **applied}
-        merged, _ = verified_overrides.apply(dict(candidate), route)
+        merged, candidate_provenance = verified_overrides.apply(dict(candidate), route)
         clean, missing, contradictions = kimi_primary.validate_answer(merged)
         contradictions = list(contradictions) + kimi_primary.serve_time_invariants(merged)
         # Validation may discard malformed fields. Never write the rejected
@@ -1091,6 +1117,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         else:
             row.guidance = candidate  # only page corrections, never override copies
             seen = merged
+            final_provenance = candidate_provenance
     conflicting_evidence = sorted((item for item in observations if item["field"] in conflicts),
                                  key=lambda item: (item["field"], item["source_url"]))
     for fr, _, quoted, quotes, _ in readings:
@@ -1163,7 +1190,15 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     unverified_fields = sorted(substantive - verified_fields)
     unchecked_sources = [u for u in all_sources if u not in visited]
     failed_sources = any(c["outcome"] in {"fetch_failed", "provider_error", "validation_error"} for c in source_checks)
-    renewed = (not (disputed or unresolved_fields or unquoted or fallback or remaining_contradictions or row.missing_fields
+    missing_for_renewal = row.missing_fields
+    from . import detail_jobs
+    if detail_jobs.active_lease() is not None:
+        # Historical stage-one missing markers may outlive already repaired
+        # fields. Recompute them from the exact source-checked projection;
+        # metadata is cleared only by successful owning-job completion.
+        _, actual_missing, actual_contradictions = kimi_primary.validate_answer(dict(row.guidance or {}, **seen), detail_known=True)
+        missing_for_renewal = actual_missing or actual_contradictions
+    renewed = (not (disputed or unresolved_fields or unquoted or fallback or remaining_contradictions or missing_for_renewal
                     or unverified_fields or unchecked_sources or failed_sources
                     or active_disputed_fields(db, row.cache_key)) and (consistent or bool(applied)))
     validation_errors = sorted({error for c in source_checks for error in c.get('validation_errors', [])})
@@ -1208,7 +1243,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             if snapshot: snapshots.append(snapshot)
     updated_comparisons = comparison_reuse.merge(old_comparisons, snapshots)
     if not _commit_recheck(db, row, entry, expected_guidance=current, expected_route=route,
-            fresh_until=fresh_until, comparison_cache=updated_comparisons):
+            fresh_until=fresh_until, comparison_cache=updated_comparisons,
+            completion_projection={"guidance": seen, "provenance": final_provenance}):
         return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], "disputed": [],
                 "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
                 **model_counts}
@@ -1287,7 +1323,12 @@ def due_rows(db, *, older_than_hours: int = 48, limit: int = 400) -> list:
     for row in db.execute(select(KimiRouteGuidanceCache)).scalars():
         key = row.cache_key or ""
         verification = row.verification if isinstance(row.verification, dict) else {}
-        if not kimi_primary.is_canonical_key(key) or verification.get("detail_pending"):
+        if not kimi_primary.is_canonical_key(key):
+            continue
+        if verification.get("detail_pending"):
+            from . import detail_jobs
+            if detail_jobs.retry_eligible(row):
+                out.append((None, row))
             continue
         gc = verification.get("grounded_check") if isinstance(verification.get("grounded_check"), dict) else {}
         try:
