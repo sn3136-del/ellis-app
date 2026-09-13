@@ -474,7 +474,7 @@ test('missing or malformed numeric stays remain unknown without a parent or sibl
 
 
 import fs from 'node:fs'
-import { checkRequirements } from '../../src/renderer/src/lib/checkRequirements.js'
+import { checkRequirements, shouldShowChecksCard } from '../../src/renderer/src/lib/checkRequirements.js'
 const checkRoute = { passport_nationality: 'HKG', destination_country: 'JPN',
   travel_purpose: 'tourism', travel_document_type: 'ordinary_passport' }
 
@@ -532,6 +532,46 @@ test('original flags, actual border instructions and application workflow are re
   assert.deepEqual(g, before)
 })
 
+test('the checks card is hidden for unknown requirements or applicability across all three flags', () => {
+  for (const field of ['biometrics_required', 'interview_required', 'appointment_required']) {
+    for (const value of [true, false]) {
+      const guidance = { [field]: value }; const before = structuredClone(guidance)
+      assert.equal(shouldShowChecksCard(checkRequirements(guidance)), false)
+      assert.deepEqual(guidance, before)
+    }
+  }
+  for (const checks of [undefined, null, [], [null], [{}],
+    [{ valueKey: 'db.required', scopeConfirmed: false }],
+    [{ valueKey: 'db.required', scopeConfirmed: true, stageKey: 'db.checkStageUnknown' }],
+    [{ valueKey: 'db.checkRequirementUnknown', scopeConfirmed: true, stageKey: 'visa_application' }]]) {
+    assert.equal(shouldShowChecksCard(checks), false)
+  }
+})
+
+test('the whole checks card is hidden when one row is unconfirmed, without hiding confirmed source instructions', () => {
+  const known = { field: 'appointment_required', valueKey: 'db.notRequired' }
+  const unknown = checkRequirements({ biometrics_required: true })[0]
+  assert.equal(shouldShowChecksCard([known]), true)
+  assert.equal(shouldShowChecksCard([known, unknown]), false)
+  const guidance = { biometrics_required: true, entry_requirements: 'Provide biometrics at the border if requested.' }
+  const before = structuredClone(guidance)
+  assert.equal(shouldShowChecksCard(checkRequirements(guidance)), false)
+  assert.deepEqual(guidance, before)
+})
+
+test('confirmed checks retain conditional stage wording and not-required needs no stage', () => {
+  const checks = [
+    { field: 'biometrics_required', valueKey: 'db.required', scopeConfirmed: true,
+      stageKey: 'visa_application_if_requested', condition: 'Only when the visa office requests it.' },
+    { field: 'appointment_required', valueKey: 'db.notRequired', scopeConfirmed: false },
+    { field: 'interview_required', valueKey: 'db.notRequired', scopeConfirmed: true,
+      stageKey: 'db.checkStageUnknown' },
+  ]
+  const before = structuredClone(checks)
+  assert.equal(shouldShowChecksCard(checks), true)
+  assert.deepEqual(checks, before)
+})
+
 test('all locale labels describe unconfirmed scope and never a border exemption', () => {
   const keys = ['db.checksAndAppointments', 'db.checkStageUnknown',
     'db.checkRequirementUnknown', 'db.checkScopeExplanation']
@@ -549,6 +589,8 @@ test('renderer isolates legacy checks from entry facts and preserves existing st
   assert.match(source, /insuranceRequirement\(g, result\?\.requirement_evidence\)/)
   assert.match(source, /checkRequirements\(g\)/)
   assert.match(source, /Section title=\{t\('db.checksAndAppointments'\)\}/)
+  assert.match(source, /if \(shouldShowChecksCard\(processChecks\)\)/)
+  assert.match(source, /description=\{check.scopeConfirmed && check.stageKey\s+&& check.stageKey !== 'db.checkStageUnknown' \? t\(check.stageKey\) : undefined\}/)
   assert.match(source, /publishedStayText/)
   assert.match(source, /itemsOf\(g\.required_documents\)/)
   assert.match(source, /applicationInstructions\(result, g\)\.steps/)

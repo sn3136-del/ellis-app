@@ -18,7 +18,7 @@ import { newSession } from '../lib/visaSession.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { publishedStayText } from '../lib/publishedStay.js'
 import { passportValidityText } from '../lib/passportValidity.js'
-import { checkRequirements } from '../lib/checkRequirements.js'
+import { checkRequirements, shouldShowChecksCard } from '../lib/checkRequirements.js'
 import { insuranceRequirement } from '../lib/insuranceRequirement.js'
 import { entryInstructionTexts, publishedEntryInstructions } from '../lib/entryInstructions.js'
 import { arrivalCardLines } from '../lib/arrivalCard.js'
@@ -1760,19 +1760,16 @@ export default function TravelDatabase({ onBack }) {
                   </Section>
                 ) })
               }
-              if (processChecks.length > 0) {
+              if (shouldShowChecksCard(processChecks)) {
                 cards.push({ key: 'process-checks', weight: processChecks.length + 2, node: (
                   <Section title={t('db.checksAndAppointments')} accent={BLUE} key="process-checks">
                     {processChecks.map((check) => (
                       <Fact key={check.field}
-                            label={t(check.labelKey)} description={t(check.stageKey)}
+                            label={t(check.labelKey)}
+                            description={check.scopeConfirmed && check.stageKey
+                              && check.stageKey !== 'db.checkStageUnknown' ? t(check.stageKey) : undefined}
                             value={t(check.valueKey)} pill={check.tone} />
                     ))}
-                    {processChecks.some((check) => !check.scopeConfirmed) && (
-                      <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8, lineHeight: 1.5 }}>
-                        {t('db.checkScopeExplanation')}
-                      </div>
-                    )}
                   </Section>
                 ) })
               }

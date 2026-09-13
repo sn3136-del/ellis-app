@@ -17,3 +17,13 @@ export function checkRequirements(guidance) {
       valueKey: 'db.checkRequirementUnknown', tone: null, scopeConfirmed: false }]
   })
 }
+
+export function shouldShowChecksCard(checks) {
+  return Array.isArray(checks) && checks.length > 0 && checks.every((check) => (
+    check && typeof check.valueKey === 'string' && check.valueKey.trim()
+    && check.valueKey !== 'db.checkRequirementUnknown'
+    && (check.valueKey === 'db.notRequired'
+      || (check.scopeConfirmed === true && typeof check.stageKey === 'string'
+        && check.stageKey.trim() && check.stageKey !== 'db.checkStageUnknown'))
+  ))
+}
