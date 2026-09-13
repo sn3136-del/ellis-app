@@ -1,0 +1,657 @@
+{
+  "at": "2026-09-13T22:21:57.217Z",
+  "key": "HKG|HKG|VNM|tourism|default|unknown|v6",
+  "errors": [],
+  "evidenceRequests": [
+    {
+      "at": "2026-09-13T22:22:00.119Z",
+      "method": "GET",
+      "query": {
+        "cache_key": "HKG|HKG|VNM|tourism|default|unknown|v6",
+        "product_index": "0",
+        "revision": "c3a252244e1f365d1b7ce67a23d77bf0574df0c3c0da0d0609878ab86afb6b20"
+      }
+    },
+    {
+      "at": "2026-09-13T22:22:00.390Z",
+      "method": "GET",
+      "query": {
+        "cache_key": "HKG|HKG|VNM|tourism|default|unknown|v6",
+        "product_index": "1",
+        "revision": "139461ed2121b2341104eb799670d7417ee26362f5d33932b0b0399d2981b09c"
+      }
+    }
+  ],
+  "blockedTranslations": [
+    {
+      "entryCount": 120
+    },
+    {
+      "entryCount": 9
+    },
+    {
+      "entryCount": 120
+    },
+    {
+      "entryCount": 9
+    }
+  ],
+  "blockedMutations": [],
+  "products": [
+    {
+      "productIndex": 0,
+      "name": "Single-entry tourist e-visa",
+      "amount": 25,
+      "milliseconds": 281,
+      "response": {
+        "cache_key": "HKG|HKG|VNM|tourism|default|unknown|v6",
+        "product_index": 0,
+        "revision": "c3a252244e1f365d1b7ce67a23d77bf0574df0c3c0da0d0609878ab86afb6b20",
+        "visa_type_name": "Single-entry tourist e-visa",
+        "field_evidence": {
+          "travel_document_type": [],
+          "travel_document_country": [],
+          "destination_country": [],
+          "travel_purpose": [],
+          "visa_requirement": [
+            {
+              "quote": "Foreigners who enter and exit Vietnam must have their passport or passport substitutes (hereinafter referred to as passports) and visas issued by competent authorities of Viet Nam, except in case of visa exemption.",
+              "source_url": "https://visa.mofa.gov.vn/NewsDetail.aspx?id=29",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Hiệp định này không áp dụng đối với Hong Kong và Ma Cao.",
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "visa_requirement_detail": [
+            {
+              "quote": "Accordingly, the Government granted issueing electronic visas to citizens of all countries and territories.",
+              "source_url": "https://vnconsulate-vancouver.mofa.gov.vn/en-us/News/EmbassyNews/Pages/Viet-Nam%E2%80%99s-electronic-visa-(or-e-visa,-labeled-as-EV)-shall-be-applied-for-citizens-of-all-countries-and-territories.aspx",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Hiệp định này không áp dụng đối với Hong Kong và Ma Cao.",
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "visa_type_name": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Accordingly, the Government granted issueing electronic visas to citizens of all countries and territories.",
+              "source_url": "https://vnconsulate-vancouver.mofa.gov.vn/en-us/News/EmbassyNews/Pages/Viet-Nam%E2%80%99s-electronic-visa-(or-e-visa,-labeled-as-EV)-shall-be-applied-for-citizens-of-all-countries-and-territories.aspx",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "validity_duration": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "validity_unit": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "max_stay_duration": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Arrival date must not be earlier than the effective date of the e-Visa.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "max_stay_unit": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Arrival date must not be earlier than the effective date of the e-Visa.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "entries": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "processing_min_days": [
+            {
+              "quote": "Within 03 working days from the date of receiving application for electronic visa and visa fee",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "The e-Visa is normally processed within 03 working days (*) after the e-Visa fee has been paid with sufficient and valid information. In case of the application to be further verified by The Ministry of Public Security, you will receive the result from 03 to 15 working days.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "processing_unit": [
+            {
+              "quote": "Within 03 working days from the date of receiving application for electronic visa and visa fee",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "The e-Visa is normally processed within 03 working days (*) after the e-Visa fee has been paid with sufficient and valid information. In case of the application to be further verified by The Ministry of Public Security, you will receive the result from 03 to 15 working days.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "visa_fee_amount": [
+            {
+              "quote": "E-visa fee: 25 USD for a single-entry visa / 50 USD for a multiple-entry visa.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "visa_fee_currency": [
+            {
+              "quote": "E-visa fee: 25 USD for a single-entry visa / 50 USD for a multiple-entry visa.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "application_method": [
+            {
+              "quote": "Foreigners access the Public Service Portal of the Ministry of Public Security (domain name in Vietnamese: https://dichvucong.bocongan.gov.vn, in English https://e-services.mps.gov.vn) to fill in information on electronic visa application, upload portrait photo and passport bio-data page. After this step, foreigners will be provided with an electronic dossier code by the system.",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "required_documents": [
+            {
+              "quote": "+ Information about applying for an electronic visa (NA1a) is posted on the electronic visa web portal.\n+ Portrait photo 4cm x 6cm; photo of passport biodata page is uploaded to the electronic visa web portal in accordance with regulations.",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "+ Foreigners have passports and do not fall into the cases of not allowed to enter the country as prescribed in Article 21 of the Law on Foreigners entry into, exit from, transit through and residence in Vietnam.",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Registration code will be sent via your registered email, therefore, please kindly provide the correct email, and take full responsibility for the provided information.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "consulate_district": [
+            {
+              "quote": "Fully online service",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Foreigners access the Public Service Portal of the Ministry of Public Security (domain name in Vietnamese: https://dichvucong.bocongan.gov.vn, in English https://e-services.mps.gov.vn) to fill in information on electronic visa application, upload portrait photo and passport bio-data page. After this step, foreigners will be provided with an electronic dossier code by the system.",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "entry_requirements": [
+            {
+              "quote": "Travel documents must be valid for at least 6 months upon arrival.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Download, print out your e-Visa and bring it along with your entry.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Foreigners using e-visas must enter and exit Viet Nam through international border gates designated by the Government (list of border gates).",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Arrival date must not be earlier than the effective date of the e-Visa.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "To present passports or international travel documents, as well as documents related to residence in Viet Nam, to accommodation establishments to make temporary residence declarations as prescribed.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "special_conditions": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Arrival date must not be earlier than the effective date of the e-Visa.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Hiệp định này không áp dụng đối với Hong Kong và Ma Cao.",
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Foreigners who enter and exit Vietnam must have their passport or passport substitutes (hereinafter referred to as passports) and visas issued by competent authorities of Viet Nam, except in case of visa exemption.",
+              "source_url": "https://visa.mofa.gov.vn/NewsDetail.aspx?id=29",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Việt Nam miễn thị thực cho người nước ngoài nhập cảnh từ nước ngoài vào Phú Quốc với thời hạn cư trú 30 ngày; áp dụng với cả trường hợp lưu tại khư vực quá cảnh ở một cửa khẩu quốc tế của Việt Nam (kể cả đường hàng không và đường biển), rồi đi tiếp đến đảo Phú Quốc.",
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Foreigners using e-visas must enter and exit Viet Nam through international border gates designated by the Government (list of border gates).",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Within 03 working days from the date of receiving application for electronic visa and visa fee",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "The e-Visa is normally processed within 03 working days (*) after the e-Visa fee has been paid with sufficient and valid information. In case of the application to be further verified by The Ministry of Public Security, you will receive the result from 03 to 15 working days.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "data_source": [],
+          "source_url": [],
+          "collected_at": [],
+          "info_validity": [],
+          "confidence_level": []
+        }
+      },
+      "feeQuotes": [
+        "E-visa fee: 25 USD for a single-entry visa / 50 USD for a multiple-entry visa."
+      ],
+      "feeLinks": [
+        "https://evisa.gov.vn/?option=MO"
+      ]
+    },
+    {
+      "productIndex": 1,
+      "name": "Multiple-entry tourist e-visa",
+      "amount": 50,
+      "milliseconds": 255,
+      "response": {
+        "cache_key": "HKG|HKG|VNM|tourism|default|unknown|v6",
+        "product_index": 1,
+        "revision": "139461ed2121b2341104eb799670d7417ee26362f5d33932b0b0399d2981b09c",
+        "visa_type_name": "Multiple-entry tourist e-visa",
+        "field_evidence": {
+          "travel_document_type": [],
+          "travel_document_country": [],
+          "destination_country": [],
+          "travel_purpose": [],
+          "visa_requirement": [
+            {
+              "quote": "Foreigners who enter and exit Vietnam must have their passport or passport substitutes (hereinafter referred to as passports) and visas issued by competent authorities of Viet Nam, except in case of visa exemption.",
+              "source_url": "https://visa.mofa.gov.vn/NewsDetail.aspx?id=29",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Hiệp định này không áp dụng đối với Hong Kong và Ma Cao.",
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "visa_requirement_detail": [
+            {
+              "quote": "Accordingly, the Government granted issueing electronic visas to citizens of all countries and territories.",
+              "source_url": "https://vnconsulate-vancouver.mofa.gov.vn/en-us/News/EmbassyNews/Pages/Viet-Nam%E2%80%99s-electronic-visa-(or-e-visa,-labeled-as-EV)-shall-be-applied-for-citizens-of-all-countries-and-territories.aspx",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Hiệp định này không áp dụng đối với Hong Kong và Ma Cao.",
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "visa_type_name": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Accordingly, the Government granted issueing electronic visas to citizens of all countries and territories.",
+              "source_url": "https://vnconsulate-vancouver.mofa.gov.vn/en-us/News/EmbassyNews/Pages/Viet-Nam%E2%80%99s-electronic-visa-(or-e-visa,-labeled-as-EV)-shall-be-applied-for-citizens-of-all-countries-and-territories.aspx",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "validity_duration": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "validity_unit": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "max_stay_duration": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Arrival date must not be earlier than the effective date of the e-Visa.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "max_stay_unit": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Arrival date must not be earlier than the effective date of the e-Visa.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "entries": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "processing_min_days": [
+            {
+              "quote": "Within 03 working days from the date of receiving application for electronic visa and visa fee",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "The e-Visa is normally processed within 03 working days (*) after the e-Visa fee has been paid with sufficient and valid information. In case of the application to be further verified by The Ministry of Public Security, you will receive the result from 03 to 15 working days.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "processing_unit": [
+            {
+              "quote": "Within 03 working days from the date of receiving application for electronic visa and visa fee",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "The e-Visa is normally processed within 03 working days (*) after the e-Visa fee has been paid with sufficient and valid information. In case of the application to be further verified by The Ministry of Public Security, you will receive the result from 03 to 15 working days.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "visa_fee_amount": [
+            {
+              "quote": "E-visa fee: 25 USD for a single-entry visa / 50 USD for a multiple-entry visa.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "visa_fee_currency": [
+            {
+              "quote": "E-visa fee: 25 USD for a single-entry visa / 50 USD for a multiple-entry visa.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "application_method": [
+            {
+              "quote": "Foreigners access the Public Service Portal of the Ministry of Public Security (domain name in Vietnamese: https://dichvucong.bocongan.gov.vn, in English https://e-services.mps.gov.vn) to fill in information on electronic visa application, upload portrait photo and passport bio-data page. After this step, foreigners will be provided with an electronic dossier code by the system.",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "required_documents": [
+            {
+              "quote": "+ Information about applying for an electronic visa (NA1a) is posted on the electronic visa web portal.\n+ Portrait photo 4cm x 6cm; photo of passport biodata page is uploaded to the electronic visa web portal in accordance with regulations.",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "+ Foreigners have passports and do not fall into the cases of not allowed to enter the country as prescribed in Article 21 of the Law on Foreigners entry into, exit from, transit through and residence in Vietnam.",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Registration code will be sent via your registered email, therefore, please kindly provide the correct email, and take full responsibility for the provided information.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "consulate_district": [
+            {
+              "quote": "Fully online service",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Foreigners access the Public Service Portal of the Ministry of Public Security (domain name in Vietnamese: https://dichvucong.bocongan.gov.vn, in English https://e-services.mps.gov.vn) to fill in information on electronic visa application, upload portrait photo and passport bio-data page. After this step, foreigners will be provided with an electronic dossier code by the system.",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "entry_requirements": [
+            {
+              "quote": "Travel documents must be valid for at least 6 months upon arrival.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Download, print out your e-Visa and bring it along with your entry.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Foreigners using e-visas must enter and exit Viet Nam through international border gates designated by the Government (list of border gates).",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Arrival date must not be earlier than the effective date of the e-Visa.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "To present passports or international travel documents, as well as documents related to residence in Viet Nam, to accommodation establishments to make temporary residence declarations as prescribed.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "special_conditions": [
+            {
+              "quote": "Viet Nam e-Visa is valid for a maximum of 90 days, fo﻿﻿﻿﻿﻿﻿﻿﻿﻿r single or multiple entries.",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Arrival date must not be earlier than the effective date of the e-Visa.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Hiệp định này không áp dụng đối với Hong Kong và Ma Cao.",
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Foreigners who enter and exit Vietnam must have their passport or passport substitutes (hereinafter referred to as passports) and visas issued by competent authorities of Viet Nam, except in case of visa exemption.",
+              "source_url": "https://visa.mofa.gov.vn/NewsDetail.aspx?id=29",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Việt Nam miễn thị thực cho người nước ngoài nhập cảnh từ nước ngoài vào Phú Quốc với thời hạn cư trú 30 ngày; áp dụng với cả trường hợp lưu tại khư vực quá cảnh ở một cửa khẩu quốc tế của Việt Nam (kể cả đường hàng không và đường biển), rồi đi tiếp đến đảo Phú Quốc.",
+              "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Foreigners using e-visas must enter and exit Viet Nam through international border gates designated by the Government (list of border gates).",
+              "source_url": "https://evisa.gov.vn/?option=MO",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "Within 03 working days from the date of receiving application for electronic visa and visa fee",
+              "source_url": "https://e-services.mps.gov.vn/bocongan/bothutuc/tthc?matt=26277",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            },
+            {
+              "quote": "The e-Visa is normally processed within 03 working days (*) after the e-Visa fee has been paid with sufficient and valid information. In case of the application to be further verified by The Ministry of Public Security, you will receive the result from 03 to 15 working days.",
+              "source_url": "https://hef.gov.vn/applying-e-visa-instruction.html",
+              "kind": "source_review",
+              "verified_at": "2026-09-13"
+            }
+          ],
+          "data_source": [],
+          "source_url": [],
+          "collected_at": [],
+          "info_validity": [],
+          "confidence_level": []
+        }
+      },
+      "feeQuotes": [
+        "E-visa fee: 25 USD for a single-entry visa / 50 USD for a multiple-entry visa."
+      ],
+      "feeLinks": [
+        "https://evisa.gov.vn/?option=MO"
+      ]
+    }
+  ],
+  "locales": [
+    {
+      "lang": "zh-CN",
+      "milliseconds": 315,
+      "exactQuotesRetained": true
+    },
+    {
+      "lang": "zh-Hant",
+      "milliseconds": 75,
+      "exactQuotesRetained": true
+    }
+  ],
+  "list": {
+    "milliseconds": 1536,
+    "records": 1452,
+    "evidenceRequests": 0
+  },
+  "filtersRetained": true,
+  "narrow": {
+    "left": 43,
+    "right": 347,
+    "viewport": 390,
+    "clientWidth": 302,
+    "scrollWidth": 302
+  },
+  "freshness": {
+    "fontSize": "36px",
+    "center": 195,
+    "panelCenter": 195,
+    "viewport": 390,
+    "ticking": true
+  },
+  "passed": true
+}

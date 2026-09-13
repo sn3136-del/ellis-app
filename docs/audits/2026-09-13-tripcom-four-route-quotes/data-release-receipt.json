@@ -1,0 +1,19 @@
+{
+  "state": "committed",
+  "started_at": "2026-09-13T22:10:24.308550+00:00",
+  "manifest_sha256": "bc9592508d28cc5011482bd1cae61aa94ad877d1bdeef398d0523875d150b656",
+  "packet_sha256": "8b46477a2b384c0b401d4f47553e67b23c0052c44ae838b8402f02e05267a9aa",
+  "service_signals_sent": 0,
+  "issue_changes": 0,
+  "verification_changes": 0,
+  "operator_backup": "/root/ellis-trip-four-quotes-20260913/manifest-receipt-operator-before.json",
+  "finished_at": "2026-09-13T22:10:27.103105+00:00",
+  "change_log_ids": [
+    "199209986f3a44e7b5b52b9fff40bc70",
+    "ebaf09828d4b4d1dbc164799eaf79f54",
+    "1a5541ac46ce48c2b7d1950e7ddf2465",
+    "5ab807b3801941a89d4c06551a193f93"
+  ],
+  "operator_after_sha256": "7f86ae34e08e25dfb80925c99ef083234a33b314a8c4fb14fe5e6dea570a1ad0",
+  "sweep_status_unchanged": true
+}

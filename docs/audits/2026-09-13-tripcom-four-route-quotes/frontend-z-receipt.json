@@ -1,0 +1,18 @@
+{
+  "release_id": "publication20260913z",
+  "source_commit": "bfa982d6d930b1b30496d633c045278a331754b4",
+  "frontend_tests_passed": 448,
+  "frontend_tests_failed": 0,
+  "logs_sha256": {
+    "country-filter-frontend-test.log": "5dba72183bf4537a8a81a84b3ca245fed0babc1594e8d2cf2fc3193e63797ea7",
+    "country-filter-frontend-build.log": "5b18a8d9333e54f0e3ec6d98e0e6f1dd52135e5edb316b39b4be272afa0b067a",
+    "country-filter-frontend-scan.log": "c212d9ffbfe7b4baf7a3c707a0a626ebda7ba3768cad3f3a8ad042a74467c0e3"
+  },
+  "scope": "Keep QC filter field wrapper identity stable across parent renders, preserving typed country text and its auto-commit timer while country catalogs and records load. No style, backend, data or scheduler changes.",
+  "expected_index_sha256": "ef0b159f42d12309d4277791fba177dfc54bcb1a1a31b22fc2ed3c055c2cdc2f",
+  "state": "deployed",
+  "started_at": "2026-09-13T22:21:47.656627+00:00",
+  "backup": "/root/ellis-backup-frontend-publication20260913z",
+  "deployed_at": "2026-09-13T22:21:47.691480+00:00",
+  "files": 16
+}

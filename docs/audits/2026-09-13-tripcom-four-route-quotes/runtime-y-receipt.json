@@ -1,0 +1,74 @@
+{
+  "after_monitors": {
+    "completed_process_id": 995867,
+    "cron_sha256": "afe10995bda08431f521192bb2a3a55f0e271d8c98e153e3e6abab24fa380a07",
+    "mode": "completed_idle",
+    "pid": 0,
+    "service": {
+      "ActiveState": "inactive",
+      "ExecMainExitTimestamp": "Sun 2026-09-13 20:25:51 UTC",
+      "ExecMainStatus": "0",
+      "LoadState": "loaded",
+      "MainPID": "0",
+      "Result": "success",
+      "SubState": "dead"
+    },
+    "start_ticks": null,
+    "status_sha256": "629948298df030f4b47ce4756b80290a5671ce2618a79e6703f7bacda36abe25",
+    "timer": {
+      "AccuracyUSec": "1min",
+      "ActiveState": "active",
+      "LoadState": "loaded",
+      "NextElapseUSecRealtime": "Mon 2026-09-14 00:26:27 UTC",
+      "RandomizedDelayUSec": "10min",
+      "UnitFileState": "enabled",
+      "calendar": [
+        "*-*-* 00/6:20:00"
+      ]
+    }
+  },
+  "api_restarts": 1,
+  "base_commit": "712e98739e610d5f3223c5362daff87faa8c1014",
+  "before_monitors": {
+    "completed_process_id": 995867,
+    "cron_sha256": "afe10995bda08431f521192bb2a3a55f0e271d8c98e153e3e6abab24fa380a07",
+    "mode": "completed_idle",
+    "pid": 0,
+    "service": {
+      "ActiveState": "inactive",
+      "ExecMainExitTimestamp": "Sun 2026-09-13 20:25:51 UTC",
+      "ExecMainStatus": "0",
+      "LoadState": "loaded",
+      "MainPID": "0",
+      "Result": "success",
+      "SubState": "dead"
+    },
+    "start_ticks": null,
+    "status_sha256": "629948298df030f4b47ce4756b80290a5671ce2618a79e6703f7bacda36abe25",
+    "timer": {
+      "AccuracyUSec": "1min",
+      "ActiveState": "active",
+      "LoadState": "loaded",
+      "NextElapseUSecRealtime": "Mon 2026-09-14 00:26:27 UTC",
+      "RandomizedDelayUSec": "10min",
+      "UnitFileState": "enabled",
+      "calendar": [
+        "*-*-* 00/6:20:00"
+      ]
+    }
+  },
+  "code_backup": "/root/ellis-backup-api-only-runtime20260913y",
+  "completed_run_preserved": true,
+  "cron_modified": false,
+  "database_modified_by_installer": false,
+  "finished_at": "2026-09-13T22:09:03.957268+00:00",
+  "heartbeat_advanced": false,
+  "installed_files": [
+    "backend/app/visa_snapshot/verified_overrides.py"
+  ],
+  "release_id": "runtime20260913y",
+  "scheduler_signals_sent": 0,
+  "source_commit": "779a881a3de06a77b0ae7fabda54c2b9b0bfbe50",
+  "started_at": "2026-09-13T22:08:59.555357+00:00",
+  "state": "installed_api_healthy_monitors_unchanged"
+}

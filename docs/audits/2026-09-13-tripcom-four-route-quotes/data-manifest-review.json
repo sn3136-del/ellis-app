@@ -1,0 +1,9 @@
+{
+  "state": "reviewed_ready_to_apply",
+  "manifest_sha256": "fbc9878cdad7c5d06f72afba98f48c4e77aef058c0dd640fc44f0a2100c76f49",
+  "preview_equals_tested_private_preview": true,
+  "baseline_equals_reviewed_baseline": true,
+  "routes": 4,
+  "product_rows": 5,
+  "quote_bearing_cells": 76
+}

@@ -1,0 +1,15 @@
+{
+  "base_commit": "712e98739e610d5f3223c5362daff87faa8c1014",
+  "captured_at": "2026-09-13T22:03:17.107644+00:00",
+  "changed_routes": 0,
+  "database_sha256": "3c2c24821b1551c116888f6432b7ebf86e880b7c24d86a85aed58288eb9f74be",
+  "database_unchanged": true,
+  "grade_changes": {},
+  "impact_signature": {},
+  "operators_sha256": "d949ed3b40aa0a7967be419c5e0084266898502ad1fa6747387553086c8c5ee9",
+  "operators_unchanged": true,
+  "paid_calls": 0,
+  "read_only_production": true,
+  "routes_compared": 948,
+  "source_commit": "779a881a3de06a77b0ae7fabda54c2b9b0bfbe50"
+}
