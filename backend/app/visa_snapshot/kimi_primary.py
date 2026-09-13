@@ -726,7 +726,17 @@ def _restored(value, key: str = ""):
     return value
 
 
-def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> dict:
+def comparison_provider_contract() -> dict:
+    """The bounded comparison transport contract also identifies memoized work."""
+    s = settings()
+    model = os.getenv("KIMI_GUIDANCE_MODEL", "").strip() or s.kimi_model
+    return {"model": model, "base_url": s.kimi_base_url,
+            "reasoning_effort": "low" if model == "kimi-k3" else None,
+            "final_json_only": True}
+
+
+def _live_call(system: str, user: str, *, timeout: float, max_tokens: int,
+               source_comparison: bool = False) -> dict:
     s = settings()
     if not (s.moonshot_api_key and s.kimi_enabled):
         raise GuidanceUnavailable("Kimi K3 not configured — guidance unavailable")
@@ -736,6 +746,11 @@ def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> di
     # KIMI_MODEL). Lets a deployment pick a faster Kimi tier for the bounded
     # route decision without touching the rest of the system.
     model = os.getenv("KIMI_GUIDANCE_MODEL", "").strip() or None
+    comparison_options = {}
+    if source_comparison:
+        comparison_options["final_json_only"] = True
+        if (model or s.kimi_model) == "kimi-k3":
+            comparison_options["reasoning_effort"] = "low"
     deadline = time.monotonic() + max(0.0, timeout)
     neutralised = False
     suspended = provider_suspension()
@@ -766,7 +781,7 @@ def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> di
                 raise GuidanceTimeout()
             try:
                 out = provider._chat(system, user, json_mode=True, timeout=left,
-                                     max_tokens=max_tokens, model=model)
+                                     max_tokens=max_tokens, model=model, **comparison_options)
                 _rate_gate_clear()
                 return _restored(out) if neutralised else out
             except KimiTimeout as e:

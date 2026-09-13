@@ -219,10 +219,13 @@ def _comparison_schema_errors(answer) -> list[str]:
 def _provider_diagnostic(exc) -> dict:
     """Keep fixed diagnostic metadata; never a provider body or prompt."""
     from .. import provider_errors
-    from ..providers.kimi import KimiHttpError
+    from ..providers.kimi import KimiHttpError, KimiInvalidResponse
     from . import kimi_primary
     out = {"error_type": type(exc).__name__[:80]}
-    if isinstance(exc, kimi_primary.GuidanceProviderError):
+    if isinstance(exc, KimiInvalidResponse):
+        out["category"] = "kimi_unavailable"
+        out["technical"] = exc.reason
+    elif isinstance(exc, kimi_primary.GuidanceProviderError):
         envelope = exc.envelope
         category = envelope.get("category", "unknown")
         out["category"] = category if category in provider_errors.CATALOG else "unknown"
@@ -272,7 +275,7 @@ def _call(system: str, user: str, *, timeout_seconds: float = CALL_TIMEOUT_SECON
     provider = _PROVIDER
     return call(lambda: provider(system, user) if provider is not None else
         kimi_primary._live_call(system, user, timeout=max(0.001, deadline - time.monotonic()),
-                                max_tokens=6000), budget, _MODEL_SLOTS)
+                                max_tokens=6000, source_comparison=True), budget, _MODEL_SLOTS)
 
 
 def _now():
@@ -926,8 +929,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             guidance=guidance, provenance=provenance, reviewed_fields=reviewed_fields,
             catalog=catalog, sources=all_sources, full_text=fr.content_text,
             requested_url=url, evidence_contract=EVIDENCE_CONTRACT,
-            provider={'model': os.getenv('KIMI_GUIDANCE_MODEL') or os.getenv('KIMI_MODEL', 'kimi-k3'),
-                      'base_url': os.getenv('KIMI_BASE_URL', 'https://api.moonshot.ai/v1'),
+            provider={**kimi_primary.comparison_provider_contract(),
                       'test_provider': id(_PROVIDER) if _PROVIDER is not None else None})
         previous = comparison_reuse.lookup(old_comparisons, signature=signature,
             source_url=fr.final_url, policy_date=when[:10])

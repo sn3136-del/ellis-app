@@ -87,7 +87,7 @@ def test_identical_fresh_reads_reuse_one_comparison_and_preserve_partial_coverag
 
 @pytest.mark.parametrize('change', ['text', 'guidance', 'nationality', 'destination', 'document',
     'purpose', 'prompt', 'reviewed_proof', 'catalog', 'provenance', 'day', 'version', 'contract',
-    'provider_model', 'redirect', 'validation_code'])
+    'provider_model', 'comparison_transport', 'redirect', 'validation_code'])
 def test_each_comparison_dependency_invalidates_reuse(h, monkeypatch, change):
     row = seed(h); run(h, row)
     assert len(h.calls) == 1
@@ -108,6 +108,10 @@ def test_each_comparison_dependency_invalidates_reuse(h, monkeypatch, change):
     elif change == 'version': monkeypatch.setattr(reuse, 'VERSION', reuse.VERSION + 1)
     elif change == 'contract': monkeypatch.setattr(freshness, 'EVIDENCE_CONTRACT', 3)
     elif change == 'provider_model': monkeypatch.setenv('KIMI_GUIDANCE_MODEL', 'different-model')
+    elif change == 'comparison_transport':
+        contract = kimi_primary.comparison_provider_contract()
+        monkeypatch.setattr(kimi_primary, 'comparison_provider_contract',
+            lambda: dict(contract, final_json_only=False, reasoning_effort=None))
     elif change == 'redirect': h.redirect = 'https://www.mofa.go.jp/new-visa'
     elif change == 'validation_code': monkeypatch.setattr(reuse, 'validator_fingerprint', lambda: 'new-validator-code')
     h.db.commit()

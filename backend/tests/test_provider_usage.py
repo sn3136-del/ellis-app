@@ -103,7 +103,8 @@ def test_freshness_thread_and_actual_retry_attempts_remain_attributable(ledger, 
     monkeypatch.setattr(kimi_primary, "settings", kimi.settings)
     monkeypatch.setattr(freshness, "_PROVIDER", None)
     monkeypatch.setenv("KIMI_GUIDANCE_MODEL", "code-highspeed")
-    replies = iter([response(429), response(usage={"total_tokens": 10})])
+    replies = iter([response(429), response(usage={"total_tokens": 10},
+        choices=[{"finish_reason": "stop", "message": {"content": '{"answer":"ok"}'}}])])
     monkeypatch.setattr(httpx, "post", lambda *a, **k: next(replies))
     assert freshness._call(PROMPT, SECRET, timeout_seconds=3) == {"answer": "ok"}
     first, second = events(ledger)

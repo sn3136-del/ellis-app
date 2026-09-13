@@ -249,6 +249,54 @@ class KimiTimeout(Exception):
     """The Kimi call exceeded its bounded wall-clock budget."""
 
 
+class KimiInvalidResponse(Exception):
+    """A fixed, non-sensitive reason why final structured output is unusable."""
+
+    def __init__(self, reason: str):
+        self.reason = reason if reason in {
+            "output_truncated", "incomplete_final_response", "invalid_final_json"
+        } else "invalid_final_json"
+        super().__init__(self.reason)
+
+
+def _complete_final_json(payload) -> dict:
+    """Source comparisons require the completed final object, never reasoning
+    or a parseable fragment rescued from an unfinished response."""
+    choices = payload.get("choices") if isinstance(payload, dict) else None
+    if not isinstance(choices, list) or len(choices) != 1 or not isinstance(choices[0], dict):
+        raise KimiInvalidResponse("incomplete_final_response")
+    choice = choices[0]
+    if choice.get("finish_reason") == "length":
+        raise KimiInvalidResponse("output_truncated")
+    if choice.get("finish_reason") != "stop":
+        raise KimiInvalidResponse("incomplete_final_response")
+    msg = choice.get("message")
+    if (not isinstance(msg, dict) or msg.get("refusal") or msg.get("tool_calls")
+            or msg.get("function_call") or not isinstance(msg.get("content"), str)
+            or not msg["content"].strip()):
+        raise KimiInvalidResponse("incomplete_final_response")
+
+    def object_pairs(pairs):
+        out = {}
+        for key, value in pairs:
+            if key in out:
+                raise ValueError("duplicate JSON key")
+            out[key] = value
+        return out
+
+    def invalid_constant(_value):
+        raise ValueError("non-JSON numeric constant")
+
+    try:
+        out = json.loads(msg["content"], object_pairs_hook=object_pairs,
+                         parse_constant=invalid_constant)
+    except (ValueError, TypeError, RecursionError):
+        raise KimiInvalidResponse("invalid_final_json") from None
+    if not isinstance(out, dict):
+        raise KimiInvalidResponse("invalid_final_json")
+    return out
+
+
 class LiveKimiProvider:  # pragma: no cover - needs a real key/network
     name = "kimi-k3"
 
@@ -264,7 +312,8 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
     def _chat(self, system: str, user: str, json_mode: bool = True, *,
               timeout: float | None = None, max_tokens: int | None = None,
               temperature: float | None = None, model: str | None = None,
-              reasoning_effort: str | None = None) -> dict:
+              reasoning_effort: str | None = None,
+              final_json_only: bool = False) -> dict:
         # Always prefix the Ellis identity so the model can never present itself
         # as Kimi/Moonshot/the underlying model, or as an official/lawyer/embassy.
         from ..i18n import ELLIS_SYSTEM_IDENTITY
@@ -290,6 +339,12 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
             raise KimiTimeout(f"kimi call exceeded its {timeout or self._timeout}s budget") from e
         if r.status_code >= 400:
             raise _http_error(r)
+        if final_json_only:
+            try:
+                payload = r.json()
+            except (ValueError, TypeError, RecursionError):
+                raise KimiInvalidResponse("invalid_final_json") from None
+            return _complete_final_json(payload)
         msg = r.json()["choices"][0]["message"]
         # K3 is a reasoning model: under json_mode it occasionally leaves
         # "content" empty and puts the answer in "reasoning_content"
