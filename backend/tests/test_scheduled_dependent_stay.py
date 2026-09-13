@@ -139,7 +139,7 @@ def test_repeated_schedule_application_preserves_the_same_conflict_and_inputs():
 
 
 @pytest.mark.parametrize("spelling", ["Macao", "Macau"])
-def test_reviewed_macao_identity_can_join_the_existing_seventeen_schedules_without_weakening_scope(spelling):
+def test_reviewed_macao_identity_can_join_the_existing_schedules_without_weakening_scope(spelling):
     existing = [r for r in json.loads(sp.POLICIES.read_text()) if r["route"]["nationality"] != "MAC"]
     maca = deepcopy(next(row for row in existing if row["route"]["nationality"] == "HKG"))
     maca["id"] = "THA-2026-09-15-MAC-ordinary-tourism"
@@ -147,7 +147,7 @@ def test_reviewed_macao_identity_can_join_the_existing_seventeen_schedules_witho
     maca["evidence"]["text"] = maca["evidence"]["text"].replace("Hong Kong", spelling)
     maca["evidence"]["quotes"]["nationality"] = spelling
     parsed = sp._parse_rows(existing + [maca])
-    assert len(parsed) == 18
+    assert len(parsed) == len(existing) + 1
     assert {r["route"]["nationality"] for r in parsed} == {r["route"]["nationality"] for r in existing} | {"MAC"}
     maca["route"]["nationality"] = "HKG"
     with pytest.raises(ValueError, match="nationality quote"):

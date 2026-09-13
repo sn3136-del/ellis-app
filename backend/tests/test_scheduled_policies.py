@@ -43,15 +43,15 @@ def test_effective_day_switches_answer_without_forking_canonical_key(arrival, st
         assert g["scheduled_policy"]["date_used"] == arrival
 
 
-def test_all_and_only_eighteen_manifest_nationalities_are_scheduled():
+def test_all_and_only_nineteen_manifest_nationalities_are_scheduled():
     loaded = sp._parse_rows(rows())
-    assert len(loaded) == 18
-    assert {r["route"]["nationality"] for r in loaded} == {"KOR", "HKG", "RUS", "VNM", "TWN", "JPN", "USA", "SGP", "MYS", "GBR", "AUS", "IDN", "PHL", "FRA", "ESP", "IND", "CAN", "MAC"}
+    assert len(loaded) == 19
+    assert {r["route"]["nationality"] for r in loaded} == {"KOR", "HKG", "RUS", "VNM", "TWN", "JPN", "USA", "SGP", "MYS", "GBR", "AUS", "IDN", "PHL", "FRA", "ESP", "IND", "CAN", "MAC", "CHN"}
     for row in loaded:
         nat = row["route"]["nationality"]
         g, _ = sp.apply(BASE, None, {**ROUTE, "passport_nationality": nat, "arrival_date": "2026-09-15"})
         assert g["permitted_stay_days"] == (90 if nat == "KOR" else 30)
-    assert sp.apply(BASE, None, {**ROUTE, "passport_nationality": "CHN", "arrival_date": "2026-09-15"}) == (BASE, None)
+    assert sp.apply(BASE, None, {**ROUTE, "passport_nationality": "NZL", "arrival_date": "2026-09-15"}) == (BASE, None)
 
 
 @pytest.mark.parametrize("change", [{"travel_document_type": "diplomatic_passport"}, {"travel_purpose": "business"},
@@ -130,7 +130,7 @@ def test_invalid_store_cannot_keep_applying_previously_loaded_policy(tmp_path, m
     path = tmp_path / "scheduled.json"
     path.write_text(json.dumps(rows()))
     monkeypatch.setattr(sp, "POLICIES", path)
-    assert len(sp._load()) == 18
+    assert len(sp._load()) == 19
     path.write_text("not json")
     with pytest.raises(sp.PolicyStoreUnavailable):
         sp._load()
