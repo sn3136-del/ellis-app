@@ -829,6 +829,68 @@ def _has_asserted_value(value) -> bool:
     return True
 
 
+def _discovery_targets(row, guidance: dict) -> list[str]:
+    """Search hints only: missing extraction must never become an absence fact.
+
+    Restrict implicit gaps to fields already present in the stored schema.
+    Zero/False remain populated facts; optional workflow fields on an exempt
+    no-application visit do not justify an application-page search.
+    """
+    metadata = {"confidence", "source_url", "official_portal_url", "corroborating_sources",
+                "unpublished_fields", "unpublished_evidence"}
+    fields = OVERRIDABLE - metadata
+    previous = (row.verification or {}).get("grounded_check") or {}
+    targets = {k for group in (row.missing_fields, previous.get("unverified_fields"),
+                               previous.get("unquoted_fields"), guidance.get("unpublished_fields"))
+               if isinstance(group, list) for k in group if isinstance(k, str) and k in fields}
+    targets.update(k for k in fields & guidance.keys() if not _has_asserted_value(guidance[k]))
+    fee = guidance.get("government_fee")
+    if isinstance(fee, dict) and (fee.get("amount") is None or not fee.get("currency")):
+        targets.add("government_fee")
+    if guidance.get("disposition") == "VISA_EXEMPT" and guidance.get("application_channel") in {"none", "not_required"}:
+        targets -= {"government_fee", "processing_time", "visa_products", "visa_category",
+                    "requirement_detail", "application_channel_detail", "account_registration_steps",
+                    "payment_process", "submission_process", "photo_requirements", "consular_jurisdiction"}
+    return sorted(targets)
+
+
+def _discover_supplemental_sources(row, route, guidance, existing, deadline, should_stop):
+    """Supplement failed/incomplete citations without expanding any quota.
+
+    Scheduled checks may use deterministic registry hints, but only an explicit
+    Add/Refresh permits a single bounded model proposal. Original sources stay
+    in the comparison set, including conflicting or currently unreadable ones.
+    """
+    from . import source_discovery
+    targets = _discovery_targets(row, guidance)
+    previous = (row.verification or {}).get("grounded_check") or {}
+    failed = previous.get("outcome") in {"fetch_failed", "page_not_relevant", "no_official_source"}
+    failed = failed or bool(previous.get("source_fetch_failures") or previous.get("irrelevant_sources"))
+    if (existing and not targets and not failed) or time.monotonic() >= deadline or (should_stop and should_stop()):
+        return existing, None
+    hints = candidate_sources({"corroborating_sources": [{"url": u} for u in
+        source_discovery.official_source_seeds(route.get("destination_country", ""))]}, None, limit=None)
+    # An explicit retry must not get stuck on the same unsuccessful seed
+    # selection. Periodic checks can still retry those hints after outages.
+    previous_hints = (previous.get("source_discovery") or {}).get("candidate_urls", [])
+    tried_hints = set(previous_hints) if _DISCOVER_SOURCES.get() and isinstance(previous_hints, list) else set()
+    hints = [u for u in hints if u not in existing and u not in tried_hints][:source_discovery.DISCOVERY_MAX_SOURCES]
+    if hints:
+        discovery = {"urls": hints, "outcome": "seed_candidates", "model_discovery_calls": 0}
+    elif _DISCOVER_SOURCES.get():
+        discovery = source_discovery.bounded_route_candidates(route,
+            timeout_seconds=max(0.0, deadline - time.monotonic()),
+            target_fields=targets, existing_urls=existing)
+    else:
+        return existing, None
+    proposed_urls = discovery.pop("urls")
+    accepted = candidate_sources({"corroborating_sources": [{"url": u} for u in proposed_urls]}, None, limit=None)
+    additional = [u for u in accepted if u not in existing][:source_discovery.DISCOVERY_MAX_SOURCES]
+    discovery.update(candidate_urls=additional, target_fields=targets,
+                     rejected_candidate_count=len(proposed_urls) - len(accepted))
+    return existing + additional, discovery
+
+
 def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | None = None,
                 should_stop=None) -> dict:
     """Read a canonical answer's actual source. Only route-supported, fully
@@ -856,20 +918,9 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     route_budget = ROUTE_BUDGET_SECONDS if budget_seconds is None else max(0.0, min(ROUTE_BUDGET_SECONDS, budget_seconds))
     deadline = time.monotonic() + route_budget
     model_counts = {'model_comparisons': 0, 'model_comparisons_reused': 0}
-    discovery = None
-    if not all_sources and _DISCOVER_SOURCES.get() and not (should_stop and should_stop()):
-        from . import source_discovery
-        hints = source_discovery.official_source_seeds(route.get("destination_country", ""))
-        discovery = ({"urls": hints[:source_discovery.DISCOVERY_MAX_SOURCES],
-                      "outcome": "seed_candidates", "model_discovery_calls": 0} if hints else
-                     source_discovery.bounded_route_candidates(route,
-                         timeout_seconds=max(0.0, deadline - time.monotonic())))
-        proposed_urls = discovery.pop("urls")
-        # Hints become candidates only. They cannot populate a source field
-        # or provide confidence without the existing fetch and proof checks.
-        all_sources = candidate_sources({"corroborating_sources": [{"url": u} for u in proposed_urls]}, None)
-        discovery["candidate_urls"] = all_sources
-        discovery["rejected_candidate_count"] = len(proposed_urls) - len(all_sources)
+    all_sources, discovery = _discover_supplemental_sources(
+        row, route, guidance, all_sources, deadline, should_stop)
+    if discovery is not None:
         model_counts.update(model_discovery_calls=discovery["model_discovery_calls"],
                             source_discovery=discovery)
     previous = (row.verification or {}).get("grounded_check") or {}

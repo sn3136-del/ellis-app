@@ -283,3 +283,142 @@ def test_proposal_uses_bounded_existing_k3_transport_and_safe_error(state, monke
     monkeypatch.setattr(kimi_primary, "_live_call", lambda *_a, **_k: (_ for _ in ()).throw(RuntimeError("secret-key")))
     result = source_discovery.bounded_route_candidates(ROUTE, timeout_seconds=1)
     assert result["outcome"] == "provider_error" and "secret-key" not in json.dumps(result)
+
+
+def test_failed_existing_root_does_not_starve_missing_fee_and_processing(state):
+    from tests.test_freshness import ROUTE as JAPAN_ROUTE, STALE_JPN
+    row, db = state
+    old = "https://www.mofa.go.jp/"
+    extra = "https://www.mofa.go.jp/j_info/visit/visa/fees.html"
+    row.route, row.cache_key = deepcopy(JAPAN_ROUTE), kimi_primary.cache_key(JAPAN_ROUTE)
+    row.guidance = dict(deepcopy(STALE_JPN), source_url=old,
+        government_fee={"amount": None, "currency": None}, processing_time=None)
+    row.verification = {"grounded_check": {"outcome": "fetch_failed", "source_fetch_failures": 1}}
+    db.commit()
+    queries, fetched = [], []
+    source_discovery.set_proposer(lambda q: queries.append(q) or [old, extra])
+    text = ("Chinese nationals must obtain a visa for tourism in Japan. "
+            "The single-entry visa fee is 715 CNY. Processing time is 5 working days.")
+    def fetch(url, **_):
+        fetched.append(url)
+        return FetchResult(requested_url=url, final_url=url, final_hostname="www.mofa.go.jp",
+            ok=url == extra, http_status=200 if url == extra else 503,
+            content_text=text if url == extra else None, error=None if url == extra else "timeout")
+    fetching.set_fetcher(fetch)
+    freshness.set_provider(lambda *_: {"page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": False, "corrected_fields": {"government_fee": {"amount": 715, "currency": "CNY"},
+            "processing_time": "5 working days"}, "evidence": {
+                "government_fee": "The single-entry visa fee is 715 CNY.",
+                "processing_time": "Processing time is 5 working days."}})
+    result = freshness.recheck_route(db, JAPAN_ROUTE, discover_sources=True)
+    assert len(queries) == 1 and "government_fee, processing_time" in queries[0]
+    assert old in queries[0] and fetched == [old, extra]
+    assert result["changed"] == ["government_fee", "processing_time"]
+    assert row.guidance["government_fee"] == {"amount": 715, "currency": "CNY"}
+    assert row.guidance["processing_time"] == "5 working days"
+    assert row.guidance["source_url"] == old  # Original citation/failure is not erased.
+    assert not result["renewed"] and result["source_fetch_failures"] == 1
+    assert row.verification["grounded_check"]["field_sources"]["government_fee"]["source_url"] == extra
+
+
+def test_failed_cited_route_with_no_field_gaps_gets_one_explicit_alternative(state):
+    row, db = state
+    root = "https://www.irishimmigration.ie/"
+    row.guidance = dict(row.guidance, source_url=root)
+    row.verification = {"grounded_check": {"outcome": "fetch_failed"}}
+    db.commit()
+    calls = []
+    source_discovery.set_proposer(lambda q: calls.append(q) or [URL])
+    fetched = readings()
+    result = freshness.recheck_route(db, ROUTE, discover_sources=True)
+    assert len(calls) == 1 and fetched == [root, URL]
+    assert result["source_discovery"]["candidate_urls"] == [URL]
+
+
+def test_periodic_gaps_use_only_new_registry_hints_and_keep_original(state, monkeypatch):
+    row, db = state
+    root = "https://www.irishimmigration.ie/"
+    row.guidance = dict(row.guidance, source_url=root, passport_validity=None)
+    db.commit()
+    monkeypatch.setattr(source_discovery, "official_source_seeds", lambda _: [root, URL, URL])
+    source_discovery.set_proposer(lambda _: pytest.fail("periodic discovery must not spend"))
+    fetched = readings()
+    result = freshness.recheck_route(db, ROUTE)
+    assert fetched == [root, URL] and result["model_discovery_calls"] == 0
+    assert result["source_discovery"]["target_fields"] == ["passport_validity"]
+    assert row.guidance["passport_validity"] is None  # No proof means no new value.
+
+
+def test_repeated_existing_seed_does_not_prevent_explicit_new_page_proposal(state, monkeypatch):
+    row, db = state
+    root = "https://www.irishimmigration.ie/"
+    row.guidance = dict(row.guidance, source_url=root, financial_evidence=None)
+    db.commit()
+    monkeypatch.setattr(source_discovery, "official_source_seeds", lambda _: [root])
+    calls = []
+    source_discovery.set_proposer(lambda q: calls.append(q) or [URL])
+    readings()
+    result = freshness.recheck_route(db, ROUTE, discover_sources=True)
+    assert len(calls) == 1 and result["source_discovery"]["candidate_urls"] == [URL]
+    assert "financial_evidence" in calls[0]
+
+
+@pytest.mark.parametrize("field,value,target", [
+    ("insurance_required", False, False), ("arrival_card", {"required": False}, False),
+    ("government_fee", {"amount": 0, "currency": "EUR"}, False),
+    ("government_fee", {"amount": None, "currency": "EUR"}, True),
+    ("required_documents", [], True), ("processing_time", None, True),
+    ("payment_process", [], True), ("passport_validity", None, True)])
+def test_discovery_targets_missing_fields_without_reinterpreting_zero_or_false(state, field, value, target):
+    row, _ = state
+    g = dict(GUIDANCE, disposition="VISA_REQUIRED", application_channel="online", **{field: value})
+    assert (field in freshness._discovery_targets(row, g)) is target
+
+
+def test_missing_and_unverified_markers_are_targets_not_policy_claims(state):
+    row, _ = state
+    row.missing_fields = ["permitted_stay", "invented_field"]
+    row.verification = {"grounded_check": {"unverified_fields": ["required_documents"],
+                                         "unquoted_fields": ["passport_validity"]}}
+    assert freshness._discovery_targets(row, GUIDANCE) == ["passport_validity", "permitted_stay", "required_documents"]
+
+
+def test_supplemental_unscoped_or_unquoted_page_never_fills_a_missing_field(state):
+    row, db = state
+    row.guidance = dict(row.guidance, source_url=URL, financial_evidence=None)
+    db.commit()
+    extra = "https://www.irishimmigration.ie/fees/"
+    source_discovery.set_proposer(lambda _: [extra])
+    readings(response={"page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": False, "corrected_fields": {"financial_evidence": "EUR 1000"},
+        "evidence": {"disposition": QUOTE, "financial_evidence": "EUR 1000"}})
+    result = freshness.recheck_route(db, ROUTE, discover_sources=True)
+    assert result["changed"] == [] and row.guidance["financial_evidence"] is None
+    assert not result["renewed"] and "financial_evidence" in result["unquoted_fields"]
+
+
+def test_explicit_retry_does_not_keep_choosing_a_failed_registry_hint(state, monkeypatch):
+    row, db = state
+    row.guidance = dict(row.guidance, source_url=URL, passport_validity=None)
+    failed = "https://www.irishimmigration.ie/old-passport-page/"
+    extra = "https://www.irishimmigration.ie/passport-page/"
+    row.verification = {"grounded_check": {"outcome": "fetch_failed", "source_discovery": {
+        "candidate_urls": [failed], "model_discovery_calls": 0}}}
+    db.commit()
+    monkeypatch.setattr(source_discovery, "official_source_seeds", lambda _: [failed])
+    calls = []
+    source_discovery.set_proposer(lambda q: calls.append(q) or [extra])
+    fetched = readings()
+    result = freshness.recheck_route(db, ROUTE, discover_sources=True)
+    assert len(calls) == 1 and fetched == [URL, extra]
+    assert result["model_discovery_calls"] == 1
+
+
+def test_periodic_missing_fields_without_registry_never_call_discovery_model(state):
+    row, db = state
+    row.guidance = dict(row.guidance, source_url=URL, passport_validity=None)
+    db.commit()
+    source_discovery.set_proposer(lambda _: pytest.fail("implicit proposal call"))
+    readings()
+    result = freshness.recheck_route(db, ROUTE)
+    assert "model_discovery_calls" not in result and row.guidance["passport_validity"] is None

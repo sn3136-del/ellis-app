@@ -158,7 +158,9 @@ DISCOVERY_TIMEOUT_SECONDS = 20.0
 DISCOVERY_MAX_SOURCES = 4
 
 
-def bounded_route_candidates(route: dict, *, timeout_seconds: float) -> dict:
+def bounded_route_candidates(route: dict, *, timeout_seconds: float,
+                             target_fields: list[str] | None = None,
+                             existing_urls: list[str] | None = None) -> dict:
     """One explicit-request proposal operation; returned URLs are not evidence.
 
     No proposal memo is used here: a failed earlier suggestion must not block
@@ -179,6 +181,12 @@ def bounded_route_candidates(route: dict, *, timeout_seconds: float) -> dict:
     query = (_route_query(route) + f" Return at most {DISCOVERY_MAX_SOURCES} useful pages, "
              "prioritising the exact entry/exemption rule. Omit filing, fee and appointment pages "
              "when no visa application applies. These are untrusted search hints, not a policy answer.")
+    if target_fields:
+        query += (" The stored answer has unresolved fields: " + ", ".join(sorted(set(target_fields))) +
+                  ". Locate the competent official pages that actually publish these details for this "
+                  "route and product; search absence on one page is not proof of non-publication.")
+    if existing_urls:
+        query += " Find additional pages, not these already cited URLs: " + ", ".join(existing_urls[:8]) + "."
 
     def propose():
         remaining = deadline - time.monotonic()
