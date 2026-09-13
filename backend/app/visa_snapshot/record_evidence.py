@@ -191,12 +191,47 @@ def for_record(row: dict, route: dict, guidance: dict, provenance: dict | None,
     sources = check.get('field_sources') or {}
     sources = sources if isinstance(sources, dict) else {}
 
+    def checked_after_empty_parent(proof, field):
+        # A source link or reviewer narrative is not an asserting quotation.
+        # A later independently checked field may supply its own exact quote;
+        # no product-scoped, partial, disputed or different-value proof is
+        # replaced through this path.
+        if not isinstance(proof, dict) or proof.get('status') not in (None, 'reviewed', 'verified'):
+            return []
+        if _quotes(proof, 'source_review', field) or any(k in proof for k in (
+                'reviewed_value', 'verified_elements', 'retained_unverified_elements',
+                'effective_from', 'effective_to')):
+            return []
+        subject = proof.get('subject')
+        if subject is not None and (not isinstance(subject, dict)
+                or any(route.get(k) != v for k, v in subject.items())):
+            return []
+        source = sources.get(field)
+        if field not in checked or check.get('outcome') != 'checked' or not isinstance(source, dict):
+            return []
+        if field in (row.get('_disputed') or []) or field in (row.get('_disputed_fields') or []) or row.get('_contradictions'):
+            return []
+        def when(value):
+            dt = datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+            return dt.replace(tzinfo=dt.tzinfo or timezone.utc)
+        try:
+            current = when(check.get('at'))
+            if current > datetime.now(timezone.utc) or when(source.get('checked_at')) != current:
+                return []
+            older = proof.get('verified_at') or proof.get('checked_at')
+            if older and when(older) > current:
+                return []
+        except (TypeError, ValueError):
+            return []
+        return _owned(source, route, None, field, guidance.get(field), checked=True)
+
     def parent(field):
         value = guidance.get(field)
         if value in _EMPTY:
             return []
         if field in parents:
-            return _owned(parents[field], route, None, field, value)
+            return (_owned(parents[field], route, None, field, value)
+                    or checked_after_empty_parent(parents[field], field))
         if field in (prov.get('fields') or []):
             quotes = _owned(prov, route, None, field, value)
             if quotes:
