@@ -965,9 +965,8 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
     return {"ok": True, **publication, "released_by": p.user_id}
 
 
-# One in-flight page check per route at a time; re-ground when the last check
-# is older than this many days (or never happened).
-_GROUNDING_IN_FLIGHT: set = set()
+# Access grounding and stale renewal share the engine's per-route scheduler.
+# Re-ground when the last check is older than this many days (or never happened).
 GROUND_ON_ACCESS_DAYS = 3
 
 
@@ -1003,29 +1002,11 @@ def _ground_on_access(route: dict, out: dict) -> None:
     if _settings().runtime_mode == "test" or \
             os.getenv("ELLIS_BACKGROUND_RENEWAL", "1").strip() != "1":
         return
-    if not should_reground(out):
+    if not out.get("stale") and not should_reground(out):
         return
     from .visa_snapshot import kimi_primary as _kp
-    key = _kp.cache_key(route)
-    if key in _GROUNDING_IN_FLIGHT:
-        return
-    _GROUNDING_IN_FLIGHT.add(key)
-
-    def _work():
-        try:
-            from .db import SessionLocal as _SL
-            from .visa_snapshot import freshness
-            s = _SL()
-            try:
-                freshness.recheck_route(s, route)
-            finally:
-                s.close()
-        except Exception:  # noqa: BLE001 — best effort, never surfaces
-            pass
-        finally:
-            _GROUNDING_IN_FLIGHT.discard(key)
-    threading.Thread(target=_work, name="ellis-ground-on-access",
-                     daemon=True).start()
+    from .db import SessionLocal as _SL
+    _kp.refresh_stale_async(_SL, route)
 
 
 def _after_cold_answer(route: dict, out: dict) -> None:
@@ -3328,14 +3309,8 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     # any lookup carrying a travel date or a transit point).
     out["cache_key"] = kimi_primary.canonical_key(kimi_primary.cache_key(route))
     out["record_present"] = kimi_primary._cached(db, out["cache_key"]) is not None
-    # A stale cache entry was already served above — freshen it for the next
-    # reader without making this one wait.
-    if out.get("stale"):
-        try:
-            from .db import SessionLocal as _SL
-            kimi_primary.refresh_stale_async(_SL, route)
-        except Exception:  # noqa: BLE001 — refresh is best-effort
-            pass
+    # Cached access above already schedules any stale renewal. A second
+    # dispatch here could repeat a fast completed check for the same request.
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_lookup",
                  detail={"nationality": nat, "destination": dest,

@@ -222,7 +222,10 @@ def test_once_grounded_memory_regen_never_reverts_the_answer(db, monkeypatch):
     kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
         AssertionError("memory regeneration must not run for a grounded row")))
     from app.db import SessionLocal
-    kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
+    worker = kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
+    assert worker is not None
+    worker.join(timeout=10)
+    assert not worker.is_alive()
     db.expire_all()
     assert db.query(KimiRouteGuidanceCache).one() \
              .guidance["government_fee"] == {"amount": 715, "currency": "CNY"}

@@ -2423,45 +2423,61 @@ _REFRESH_IN_FLIGHT: set = set()
 _REFRESH_GUARD = _threading.Lock()
 
 
-def refresh_stale_async(db_factory, route: dict) -> None:
+def refresh_stale_async(db_factory, route: dict) -> threading.Thread | None:
     """Background renewal for a stale cache entry (never blocks the reader).
 
     Renewal is GROUNDED first: the stored answer is re-checked against its own
     official government page (freshness.recheck_route), which is the only way
-    a policy change actually reaches the answer — re-asking the model's memory
-    just renews the same staleness with a new timestamp. Memory regeneration
-    remains only as the fallback for a row that has never been grounded and
-    names no official page; once a row has been checked against its page, a
-    failed recheck keeps the existing answer (still honestly marked stale)
-    rather than reverting to whatever the model remembers today."""
+    a policy change actually reaches the answer. A failed check or missing
+    official source keeps the existing answer honestly stale; neither permits
+    regeneration from model memory. Returns the started worker for callers
+    that explicitly need to await completion, or None when already scheduled."""
+    from copy import deepcopy
+    route = deepcopy(route)
     row_key = cache_key(route)
     with _REFRESH_GUARD:
         if row_key in _REFRESH_IN_FLIGHT:
             return
         _REFRESH_IN_FLIGHT.add(row_key)
-    db = db_factory()
-    try:
-        from . import freshness
-        row = db.execute(select(KimiRouteGuidanceCache).where(
-            KimiRouteGuidanceCache.cache_key == row_key)).scalars().first()
-        outcome = None
+    def _work():
+        db = None
         try:
-            outcome = freshness.recheck_route(db, route)
-        except Exception:  # noqa: BLE001 - grounded renewal is best-effort
+            # Both session construction and every source/model operation
+            # belong to the worker, never to the cached HTTP response.
+            db = db_factory()
+            from . import freshness
+            row = db.execute(select(KimiRouteGuidanceCache).where(
+                KimiRouteGuidanceCache.cache_key == row_key)).scalars().first()
             outcome = None
-        ok = bool(outcome) and outcome.get("outcome") == "checked"
-        if not ok and row is not None:
-            # The page could not be read, so nothing is renewed: the answer
-            # stays, honestly marked stale, and one open issue tells a person
-            # which page failed. Re-asking the model's memory was how a
-            # stale row became a fresh guess with a new timestamp.
-            freshness.note_unreadable(db, row, outcome)
-    except Exception:  # noqa: BLE001 - background refresh is best-effort
-        pass
-    finally:
-        db.close()
+            try:
+                outcome = freshness.recheck_route(db, route)
+            except Exception:  # noqa: BLE001 - grounded renewal is best-effort
+                outcome = None
+            ok = bool(outcome) and outcome.get("outcome") == "checked"
+            if not ok and row is not None:
+                # A failed read never regenerates or renews the old answer.
+                freshness.note_unreadable(db, row, outcome)
+        except Exception:  # noqa: BLE001 - background refresh is best-effort
+            pass
+        finally:
+            try:
+                if db is not None:
+                    try:
+                        db.close()
+                    except Exception:  # noqa: BLE001 - cleanup still releases the route
+                        pass
+            finally:
+                with _REFRESH_GUARD:
+                    _REFRESH_IN_FLIGHT.discard(row_key)
+
+    try:
+        worker = threading.Thread(target=_work, name="ellis-grounded-renewal", daemon=True)
+        worker.start()
+        return worker
+    except Exception:  # noqa: BLE001 - failed scheduling must remain retryable
         with _REFRESH_GUARD:
             _REFRESH_IN_FLIGHT.discard(row_key)
+        return None
 
 
 def maybe_start_adapter_build(db, *, org_id: str, user_id: str, case_id: str,

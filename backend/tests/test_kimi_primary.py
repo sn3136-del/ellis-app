@@ -2176,7 +2176,10 @@ def test_a_stale_row_is_never_regenerated_from_memory(db, tmp_path, monkeypatch,
             # Per-row unreadable tickets are opt-in since 2026-09-09 (they flooded the queue).
             monkeypatch.setenv('ELLIS_FILE_UNREADABLE_ISSUES', '1')
             for attempt in range(2):
-                kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
+                worker = kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
+                assert worker is not None
+                worker.join(timeout=10)
+                assert not worker.is_alive()
                 db.expire_all()
                 again = db.query(KimiRouteGuidanceCache).filter_by(cache_key=key).one()
                 assert again.guidance == original_guidance
