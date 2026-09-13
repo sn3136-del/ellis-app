@@ -25,6 +25,8 @@ Honesty / safety:
 from __future__ import annotations
 
 import re
+import threading
+import time
 from functools import lru_cache
 
 from ..config import REAL_ONLY_MODES, settings
@@ -37,17 +39,19 @@ _TRIM = ".,);]}'\">"
 _MAX_CANDIDATES = 16
 
 _DISCOVERY_SYSTEM = (
-    "You locate the OFFICIAL government pages an applicant must use for a "
-    "tourist visa. Given a search query, return the most useful OFFICIAL URLs. "
+    "You locate OFFICIAL government entry and visa policy pages for the exact "
+    "nationality, residence, travel document and purpose in the query. Return the most useful OFFICIAL URLs. "
     "Prioritise SPECIFIC pages that state the actual requirements, not just site "
     "roots:\n"
-    "- the exact tourist/visitor visa REQUIREMENTS page for the applicant's "
+    "- the exact entry/visa REQUIREMENTS page for the applicant's "
     "nationality (whether a visa is needed, exemptions, allowed stay),\n"
     "- the visa FEE page and the APPLICATION / how-to-apply page,\n"
     "- the official e-visa / ETA portal if one exists,\n"
-    "- the responsible embassy/consulate's tourist-visa page for the applicant's "
+    "- the responsible embassy/consulate's applicable visa page for the applicant's "
     "residence, and the immigration authority's visa section.\n"
     "Rules:\n"
+    "- A visa-exempt route still needs an official POLICY reference. Do not "
+    "substitute a visa application portal for the exemption rule.\n"
     "- Return ONLY real, official URLs you are confident exist. Prefer government "
     "domains (.gov, .gob, .go.*, .gouv.*, .europa.eu, national immigration/MFA "
     "sites). Deep links to the specific visa page are BETTER than a bare homepage "
@@ -131,16 +135,82 @@ def discover_candidates_for_route(route: dict) -> list[str] | None:
     injected per-query `search()` seam (tests) or stored sources only."""
     if not is_available():
         return None
+    return list(_propose_cached(_route_query(route)))
+
+
+def _route_query(route: dict) -> str:
     dest = route.get("destination_country", "")
     nat = route.get("passport_nationality", "")
     res = route.get("lawful_country_of_residence", "")
     cat = route.get("visa_category", "tourist_visa")
+    doc = route.get("travel_document_type", "ordinary_passport")
+    purpose = route.get("travel_purpose", "tourism")
     query = (f"destination={dest} passport_nationality={nat} residence={res} "
-             f"visa_category={cat}. Find the official immigration authority, the "
+             f"travel_document_type={doc} travel_purpose={purpose} visa_category={cat}. Find the official immigration authority, the "
              f"responsible embassy/consulate for a {res} resident, the official "
              f"e-visa/ETA portal, any officially appointed visa application "
              f"center, and the official fee and appointment pages.")
-    return list(_propose_cached(query.strip()))
+    return query.strip()
+
+
+_BOUNDED_DISCOVERY_SLOTS = threading.BoundedSemaphore(2)
+DISCOVERY_TIMEOUT_SECONDS = 20.0
+DISCOVERY_MAX_SOURCES = 4
+
+
+def bounded_route_candidates(route: dict, *, timeout_seconds: float) -> dict:
+    """One explicit-request proposal operation; returned URLs are not evidence.
+
+    No proposal memo is used here: a failed earlier suggestion must not block
+    a later explicit retry. Existing provider rate/suspension controls apply;
+    transport retries, if any, share this one operation's hard deadline.
+    """
+    from . import kimi_primary
+    from .bounded_io import call
+    from urllib.parse import urlsplit
+    budget = max(0.0, min(DISCOVERY_TIMEOUT_SECONDS, timeout_seconds))
+    report = {"urls": [], "outcome": "unavailable", "model_discovery_calls": 0}
+    if budget <= 0:
+        return dict(report, outcome="budget_exhausted")
+    if not is_available() or kimi_primary.provider_suspension():
+        return report
+    deadline = time.monotonic() + budget
+    proposer = _PROPOSER
+    query = (_route_query(route) + f" Return at most {DISCOVERY_MAX_SOURCES} useful pages, "
+             "prioritising the exact entry/exemption rule. Omit filing, fee and appointment pages "
+             "when no visa application applies. These are untrusted search hints, not a policy answer.")
+
+    def propose():
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("source discovery budget exhausted")
+        report["model_discovery_calls"] = 1
+        if proposer is not None:
+            return proposer(query)
+        return kimi_primary._live_call(_DISCOVERY_SYSTEM, query,
+            timeout=remaining, max_tokens=1400,
+            source_comparison=True)
+    try:
+        raw = call(propose, budget, _BOUNDED_DISCOVERY_SLOTS)
+    except TimeoutError:
+        return dict(report, outcome="timeout")
+    except Exception:
+        return dict(report, outcome="provider_error")
+    values = raw.get("urls") if isinstance(raw, dict) else raw if proposer is not None else None
+    if not isinstance(values, list) or any(not isinstance(v, str) for v in values):
+        return dict(report, outcome="invalid_response")
+    urls = []
+    for url in _sanitize_urls(values):
+        try:
+            parsed = urlsplit(url)
+            if not parsed.hostname or parsed.username or parsed.password:
+                continue
+        except ValueError:
+            continue
+        urls.append(url)
+        if len(urls) >= DISCOVERY_MAX_SOURCES:
+            break
+    return dict(report, urls=urls, outcome="candidates" if urls else "no_candidates")
 
 
 def reset_cache() -> None:

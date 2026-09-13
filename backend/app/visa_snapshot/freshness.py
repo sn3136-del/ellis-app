@@ -41,6 +41,7 @@ import re
 import os
 import time
 import threading
+from contextvars import ContextVar
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
@@ -76,6 +77,7 @@ MAX_PAGE_CHARS = 28_000  # model prompt only; deterministic proof uses the bound
 MAX_SOURCES = 8
 ROUTE_BUDGET_SECONDS = 120.0
 EVIDENCE_CONTRACT = 2
+_DISCOVER_SOURCES = ContextVar("ellis_explicit_source_discovery", default=False)
 
 _SYSTEM = """You are checking a stored visa-requirements answer against the
 OFFICIAL PAGE TEXT provided. Judge ONLY from the page text — never from your
@@ -810,6 +812,23 @@ def _future_scheduled_source(url: str, route: dict, policy_date: str) -> bool:
     return bool(matches) and all(scheduled._date(p["effective_from"]) > on for p in matches)
 
 
+def _has_asserted_value(value) -> bool:
+    """Null-shaped details are missing data, not claims to re-verify.
+
+    False and zero remain asserted policy values. Nonempty nested facts must
+    still pass their normal field evidence gates before whole-row renewal.
+    """
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, dict):
+        return any(_has_asserted_value(v) for v in value.values())
+    if isinstance(value, (list, tuple)):
+        return any(_has_asserted_value(v) for v in value)
+    return True
+
+
 def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | None = None,
                 should_stop=None) -> dict:
     """Read a canonical answer's actual source. Only route-supported, fully
@@ -834,27 +853,43 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     reviewed_fields, catalog = proof_helpers.reviewed_evidence(override, row.verification)
     source_override = dict(override or {}, supporting_sources=[{'id':k,'url':v} for k,v in catalog.items()])
     all_sources = candidate_sources(guidance, source_override, limit=None)
+    route_budget = ROUTE_BUDGET_SECONDS if budget_seconds is None else max(0.0, min(ROUTE_BUDGET_SECONDS, budget_seconds))
+    deadline = time.monotonic() + route_budget
+    model_counts = {'model_comparisons': 0, 'model_comparisons_reused': 0}
+    discovery = None
+    if not all_sources and _DISCOVER_SOURCES.get() and not (should_stop and should_stop()):
+        from . import source_discovery
+        hints = source_discovery.official_source_seeds(route.get("destination_country", ""))
+        discovery = ({"urls": hints[:source_discovery.DISCOVERY_MAX_SOURCES],
+                      "outcome": "seed_candidates", "model_discovery_calls": 0} if hints else
+                     source_discovery.bounded_route_candidates(route,
+                         timeout_seconds=max(0.0, deadline - time.monotonic())))
+        proposed_urls = discovery.pop("urls")
+        # Hints become candidates only. They cannot populate a source field
+        # or provide confidence without the existing fetch and proof checks.
+        all_sources = candidate_sources({"corroborating_sources": [{"url": u} for u in proposed_urls]}, None)
+        discovery["candidate_urls"] = all_sources
+        discovery["rejected_candidate_count"] = len(proposed_urls) - len(all_sources)
+        model_counts.update(model_discovery_calls=discovery["model_discovery_calls"],
+                            source_discovery=discovery)
     previous = (row.verification or {}).get("grounded_check") or {}
     cursor = previous.get("source_cursor", 0)
     cursor = cursor if isinstance(cursor, int) and cursor >= 0 else 0
     offset = cursor % len(all_sources) if all_sources else 0
     ordered = all_sources[offset:] + all_sources[:offset]
     sources = ordered[:MAX_SOURCES]
-    route_budget = ROUTE_BUDGET_SECONDS if budget_seconds is None else max(0.0, min(ROUTE_BUDGET_SECONDS, budget_seconds))
-    deadline = time.monotonic() + route_budget
     when = today or _now().isoformat()
     if not sources:
         if not _commit_recheck(db, row, {"at": when, "outcome": "no_official_source",
                 "disputed_fields": sorted(unresolved_fields),
-                "note": "the answer names no government page to check"},
+                "note": "the answer names no government page to check", **model_counts},
                 expected_guidance=original, expected_route=route):
-            return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": []}
-        return {"outcome": "no_official_source", "route_key": row.cache_key}
+            return {"outcome": "concurrent_change", "route_key": row.cache_key, "changed": [], **model_counts}
+        return {"outcome": "no_official_source", "route_key": row.cache_key, **model_counts}
 
     tried, irrelevant, unquoted_all = [], [], set()
     readings, source_checks, candidates, captures = [], [], [], {}
     full_captures, deferred_comparisons, comparison_context = {}, [], {}
-    model_counts = {'model_comparisons': 0, 'model_comparisons_reused': 0}
     visited, completed = set(), set()
     page = raw = None
     fallback = None
@@ -1185,7 +1220,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     # for every substantive populated field; existing old provenance does not
     # make an unmentioned detail newly checked today.
     metadata_fields = {"confidence", "source_url", "official_portal_url", "corroborating_sources", "unpublished_fields"}
-    substantive = {k for k in OVERRIDABLE - metadata_fields if seen.get(k) not in (None, "", [], {})}
+    substantive = {k for k in OVERRIDABLE - metadata_fields if _has_asserted_value(seen.get(k))}
     verified_fields, verified_field_sources = set(), {}
     for fr, answer, quoted, quotes, check in readings:
         source = captures[fr.final_url]
@@ -1260,6 +1295,14 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     renewed = (not (disputed or unresolved_fields or unquoted or fallback or remaining_contradictions or missing_for_renewal
                     or unverified_fields or unchecked_sources or failed_sources
                     or active_disputed_fields(db, row.cache_key)) and (consistent or bool(applied)))
+    if discovery and not seen.get("source_url") and 'disposition' in verified_fields:
+        # A fetched page which actually passed the route/verdict proof may
+        # become the missing policy citation. Merely proposing/fetching a URL
+        # never reaches this branch, and renewal still requires every field.
+        source = verified_field_sources['disposition']['source_url']
+        row.guidance = dict(row.guidance or {}, source_url=source)
+        seen = dict(seen, source_url=source)
+        applied['source_url'] = source
     validation_errors = sorted({error for c in source_checks for error in c.get('validation_errors', [])})
     entry = {"at": when, "outcome": "validation_error" if validation_errors else "checked", "evidence_contract": EVIDENCE_CONTRACT,
                  "source_reads": len(tried),
@@ -1357,15 +1400,21 @@ def note_unreadable(db, row, outcome: dict | None) -> None:
     db.commit()
 
 
-def recheck_route(db, route: dict) -> dict | None:
-    """Recheck by route (the stale-serving path). None when nothing is cached."""
+def recheck_route(db, route: dict, *, discover_sources: bool = False) -> dict | None:
+    """Recheck a cached route; only explicit requests may discover missing sources."""
     from . import kimi_primary
     key = kimi_primary.canonical_key(kimi_primary.cache_key(route))
     row = db.execute(select(KimiRouteGuidanceCache).where(
         KimiRouteGuidanceCache.cache_key == key)).scalars().first()
     if row is None:
         return None
-    return recheck_row(db, row)
+    # Permission follows a synchronous pending-detail recovery too, but never
+    # escapes to later sweeps, background reader jobs or another request.
+    token = _DISCOVER_SOURCES.set(bool(discover_sources))
+    try:
+        return recheck_row(db, row)
+    finally:
+        _DISCOVER_SOURCES.reset(token)
 
 
 def has_been_grounded(row) -> bool:
