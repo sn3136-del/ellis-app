@@ -461,6 +461,7 @@ def _load_table() -> dict:
         field_provenance = dict(base.get("field_provenance") or {})
         for field, incoming in (op.get("field_provenance") or {}).items():
             field_provenance[field] = inherit_bounds(field_provenance.get(field), incoming)
+        applicability = _merge_field_applicability(base, op)
         table[k] = {"fields": merged_fields,
                     "source_url": op["source_url"],
                     "verified_at": op["verified_at"],
@@ -468,6 +469,8 @@ def _load_table() -> dict:
                     "verifier": op["verifier"],
                     "field_provenance": field_provenance,
                     "note": (base.get("note") or "").strip()}
+        if applicability:
+            table[k]["field_applicability"] = applicability
         if op.get("note"):
             table[k]["note"] = (table[k]["note"] + " | " + op["note"]).strip(" |")[:400]
     return _VerificationTable(table, errors)
@@ -623,7 +626,7 @@ def _applicable(hit: dict | None, route: dict) -> dict | None:
         return hit
     residence = str((route or {}).get("lawful_country_of_residence") or "").upper()
     dropped = {f for f, c in scoped.items()
-               if residence and c.get("lawful_country_of_residence") != residence}
+               if c.get("lawful_country_of_residence") != residence}
     if not dropped:
         return hit
     fields = {k: v for k, v in hit["fields"].items() if k not in dropped}
@@ -634,6 +637,19 @@ def _applicable(hit: dict | None, route: dict) -> dict | None:
     out["field_provenance"] = {k: v for k, v in (hit.get("field_provenance") or {}).items() if k not in dropped}
     out["inapplicable_fields"] = sorted(dropped)
     return out
+
+
+def _merge_field_applicability(base: dict, incoming: dict) -> dict:
+    """A field keeps the scope of the entry that supplies its current value.
+
+    Unchanged fields retain their old constraints. An explicitly replaced
+    global field must not inherit an older residence restriction.
+    """
+    scopes = {field: deepcopy(scope) for field, scope in
+              (base.get("field_applicability") or {}).items()
+              if field not in incoming.get("fields", {})}
+    scopes.update(deepcopy(incoming.get("field_applicability") or {}))
+    return scopes
 
 
 def _parse_rows(rows, table: dict, *, inherited: dict | None = None) -> dict:
@@ -860,6 +876,8 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
     if unknown:
         raise ValueError(f"these fields cannot be edited: {sorted(unknown)}")
     clean = _normalise_legacy_shapes({k: v for k, v in fields.items() if k in OVERRIDABLE})
+    if _field_applicability(entry, clean) is None:
+        raise ValueError("malformed applicability declaration")
     for k in _URL_FIELDS:
         v = str(clean.get(k) or "").strip()
         if v and not is_government_host(hostname(v)):
@@ -930,6 +948,18 @@ def append_operator_entry(entry: dict, *, guidance: dict | None = None) -> dict:
             per_field = dict(parsed.get("field_provenance") or {})
             per_field.update(incoming_proofs)
             entry = dict(entry, fields=retained, field_provenance=per_field)
+            applicability = _merge_field_applicability(parsed, incoming)
+            if applicability:
+                residences = {scope["lawful_country_of_residence"]
+                              for scope in applicability.values()}
+                if len(residences) != 1:
+                    raise ValueError("an operator entry cannot consolidate different residence scopes")
+                entry["applicability"] = {
+                    "lawful_country_of_residence": residences.pop(),
+                    "fields": sorted(applicability),
+                }
+            else:
+                entry.pop("applicability", None)
         rows = [r for r in rows if _rk(r) != _rk(entry)]
         rows.append(entry)
         path.parent.mkdir(parents=True, exist_ok=True)

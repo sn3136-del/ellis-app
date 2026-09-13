@@ -75,7 +75,8 @@ def test_residence_applicability_is_parsed_and_enforced_by_find(monkeypatch):
     same = vo.find(dict(ROUTE, lawful_country_of_residence='GBR'))
     assert set(same['fields']) == {'processing_time', 'application_channel_detail', 'permitted_stay_days'}
     unknown = vo.find({k: v for k, v in ROUTE.items() if k != 'lawful_country_of_residence'})
-    assert set(unknown['fields']) == set(same['fields'])
+    assert set(unknown['fields']) == {'permitted_stay_days'}
+    assert 'processing_time' not in unknown['field_provenance']
     other = vo.find(dict(ROUTE, lawful_country_of_residence='CAN'))
     assert set(other['fields']) == {'permitted_stay_days'} and other['inapplicable_fields'] == ['application_channel_detail', 'processing_time']
     assert 'processing_time' not in other['field_provenance']
