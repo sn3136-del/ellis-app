@@ -1,5 +1,6 @@
 """Stored evidence shapes and strict current-product ownership; no network."""
 from copy import deepcopy
+from unittest.mock import patch
 
 from app.visa_snapshot import record_evidence as evidence, tstation
 from tests.test_record_field_evidence import case, proof, ROUTE, URL
@@ -117,3 +118,52 @@ def test_legacy_product_source_quote_requires_current_value_match():
 def test_revision_can_bind_source_metadata_without_changing_display_values():
     row,_,_=case()
     assert evidence.revision(dict(row,_evidence_version='old-source')) != evidence.revision(dict(row,_evidence_version='new-source'))
+
+
+def loaded_review_case():
+    from app.visa_snapshot import verified_overrides as vo
+    _, g, _ = case()
+    products = [{'type':'Single-entry tourist eVisa', 'disposition':'VISA_REQUIRED',
+                 'requirement_detail':'evisa', 'fee':{'amount':25,'currency':'USD'},
+                 'max_stay_days':90, 'validity':'90 days', 'entry':'single',
+                 'processing_time':'3 working days'}]
+    fields = dict(g, visa_products=products)
+    quotes = {'processing_time':'Within 03 working days from the date of receiving application for electronic visa and visa fee',
+              'government_fee':'US$ 25/single-entry electronic visa',
+              'visa_products':'Single entry US$25; multiple entry US$50.'}
+    entry = {'route':{'nationality':'CAN','destination':'VNM','travel_purpose':'tourism'},
+             'source_url':URL,'verified_at':'2026-08-01','verifier':'ai','fields':fields,
+             'field_provenance':{k:proof(v,reviewed_value=deepcopy(fields[k]),subject=ROUTE) for k,v in quotes.items()}}
+    with patch.object(vo, '_read_verification_store', lambda path,kind,**kw: [entry] if kind=='operator_overrides' else []), \
+            patch.object(vo, '_reviewed_overlay_paths', lambda:[]):
+        table=vo._load_table()
+    with patch.object(vo, '_table', lambda:table):
+        guidance, provenance=vo.apply(deepcopy(g),ROUTE)
+        active=deepcopy(vo.find(ROUTE))
+    row=tstation.records_for_route(ROUTE,guidance,provenance)[0]
+    return row,guidance,provenance,active
+
+
+def test_actual_loader_field_binding_recovers_recorded_route_and_table_quotes():
+    row,g,p,active=loaded_review_case()
+    assert 'reviewed_value' not in p['field_provenance']['processing_time']
+    before=deepcopy((row,g,p,active))
+    result=evidence.for_record(row,ROUTE,g,p,{},active_override=active)
+    assert result['processing_min_days'][0]['quote'].startswith('Within 03 working days')
+    assert result['visa_fee_amount'][0]['quote']=='US$ 25/single-entry electronic visa'
+    assert result['validity_duration'][0]['quote']=='Single entry US$25; multiple entry US$50.'
+    assert (row,g,p,active)==before
+
+
+def test_actual_loader_binding_rejects_current_value_or_proof_drift():
+    row,g,p,active=loaded_review_case()
+    p['field_provenance'].pop('visa_products')
+    active['fields']['processing_time']='5 working days'
+    assert not evidence.for_record(row,ROUTE,g,p,{},active_override=active)['processing_min_days']
+    row,g,p,active=loaded_review_case()
+    p['field_provenance'].pop('visa_products')
+    active['field_provenance']['processing_time']['quote']='Different later source text.'
+    assert not evidence.for_record(row,ROUTE,g,p,{},active_override=active)['processing_min_days']
+    row,g,p,active=loaded_review_case()
+    active['fields']['visa_products'][0]['validity']='180 days'
+    assert not evidence.for_record(row,ROUTE,g,p,{},active_override=active)['validity_duration']

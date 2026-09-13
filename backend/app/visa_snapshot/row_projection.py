@@ -108,7 +108,9 @@ def records_projection(db, r, route: dict, *, include_evidence=False) -> list[di
             rec["_source_check"] = "unchecked"
         if include_evidence:
             from .record_evidence import for_record
-            rec['_field_evidence'] = for_record(rec, route, g, prov, _gc)
+            from .verified_overrides import find as find_override
+            rec['_field_evidence'] = for_record(rec, route, g, prov, _gc,
+                                               active_override=find_override(route))
         out.append(rec)
     return out
 

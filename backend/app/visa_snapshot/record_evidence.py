@@ -154,7 +154,7 @@ def _owned(proof, route, product, field, value, *, checked=False):
 
 
 def for_record(row: dict, route: dict, guidance: dict, provenance: dict | None,
-               check: dict | None) -> dict:
+               check: dict | None, *, active_override: dict | None = None) -> dict:
     """All contract fields are present; unrecorded provenance remains empty."""
     out = {field: [] for field in tstation.FIELD_ORDER}
     prov = provenance if isinstance(provenance, dict) else {}
@@ -172,6 +172,20 @@ def for_record(row: dict, route: dict, guidance: dict, provenance: dict | None,
     own = own if isinstance(own, dict) else {}
     parents = prov.get('field_provenance') or {}
     parents = parents if isinstance(parents, dict) else {}
+    # The official override loader intentionally narrows provenance, dropping
+    # reviewed_value. Recover ownership only in this viewer, from the exact
+    # applicable loaded field and the same projected proof. A later override,
+    # scheduled rule or raw-field edit cannot borrow an earlier review.
+    active = active_override if isinstance(active_override, dict) else {}
+    active_fields = active.get('fields') if isinstance(active.get('fields'), dict) else {}
+    active_proofs = active.get('field_provenance') if isinstance(active.get('field_provenance'), dict) else {}
+    parents = dict(parents)
+    for field, proof in parents.items():
+        if (isinstance(proof, dict) and 'reviewed_value' not in proof
+                and proof.get('status') in ('reviewed', 'verified')
+                and field in active_fields and active_proofs.get(field) == proof
+                and _same_value(active_fields[field], guidance.get(field))):
+            parents[field] = dict(proof, reviewed_value=active_fields[field])
     checked = set(check.get('verified_fields') or []) - set(check.get('disputed_fields') or [])
     sources = check.get('field_sources') or {}
     sources = sources if isinstance(sources, dict) else {}
