@@ -43,6 +43,13 @@ def _value_supported(field, value, proof):
     passages = _quoted_passages(proof)
     if not passages:
         return False
+    if (field == 'insurance_required' and isinstance(value, bool)
+            or field == 'arrival_card' and isinstance(value, dict) and isinstance(value.get('required'), bool)):
+        # Legacy clipped quotes have no source boundaries. Do not upgrade
+        # their read-side grade using the newly supported Boolean grammar.
+        context = proof.get('source_text')
+        return isinstance(context, str) and bool(context.strip()) and any(
+            field_value_supported(field, value, quote, source_text=context) for quote in passages)
     if field == 'required_documents':
         values = value if isinstance(value, list) else [value]
         def supported_document(document):

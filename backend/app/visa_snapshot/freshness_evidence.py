@@ -112,7 +112,7 @@ def reviewed_field_quote(name, value, fields, source, sources, route):
         quotes.append(item['quote'])
         scope.append({'source_url':extra['url'], 'quote':item['quote']})
     combined = '\n'.join(quotes)
-    return (combined, scope) if field_scope_matches_route(name,combined,route) and field_value_supported(name, value, combined) else None
+    return (combined, scope) if field_scope_matches_route(name,combined,route) and field_value_supported(name, value, combined, source_text=source['text']) else None
 
 
 def has_structured_contract(answer, known, source_url):

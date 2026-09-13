@@ -373,7 +373,47 @@ def _explicit_entry_requirement(topic: str, text: str, required: bool) -> bool:
     return any(re.fullmatch(pattern + r"[.!]?", text) for pattern in patterns)
 
 
-def field_value_supported(name: str, value, text: str) -> bool:
+def _entry_requirement_source_clause(topic: str, required: bool, quote: str, source_text: str) -> bool:
+    """A clipped literal quote cannot discard its source's qualification.
+
+    Require each occurrence to be a whole unqualified source sentence. A
+    preceding unterminated heading or scope sentence also remains attached;
+    this conservative gate does not infer which subgroup a heading means.
+    """
+    source = unicodedata.normalize('NFKC', str(source_text or '')).casefold()
+    needle = ' '.join(unicodedata.normalize('NFKC', str(quote or '')).casefold().split()).rstrip('.!')
+    if not needle:
+        return False
+    matches = list(re.finditer(r'(?<!\w)' + r'\s+'.join(re.escape(x) for x in needle.split()) + r'(?!\w)', source))
+    if not matches:
+        return False
+    for match in matches:
+        left = max(source.rfind(mark, 0, match.start()) for mark in '.!?\n') + 1
+        ends = [pos for mark in '.!?\n' if (pos := source.find(mark, match.end())) >= 0]
+        right = min(ends) if ends else len(source)
+        clause = ' '.join(source[left:right].split())
+        if not _explicit_entry_requirement(topic, clause, required):
+            return False
+        # A line break cannot sever "For children:" (or another heading)
+        # from its rule. Punctuation-terminated ordinary sentences are safe.
+        prefix = source[:left].rstrip('\n \t')
+        if prefix and prefix[-1] not in '.!?':
+            return False
+        # Adjacent explicit scope/qualification prose must not be clipped
+        # merely because it ends with a full stop rather than a colon.
+        previous = re.split(r'[.!?\n]', prefix.rstrip('.!?'))[-1].strip()
+        tail = source[right + 1:] if right < len(source) else ''
+        following = re.split(r'[.!?\n]', tail.lstrip())[0].strip()
+        scoped = r'^(?:for\b|if\b|when\b|unless\b|except\b|only\b|provided\b|subject to\b|this (?:rule|requirement|exemption) (?:applies|is)\b)'
+        if re.search(scoped, previous) or re.search(scoped, following):
+            return False
+    # Two opposite unqualified statements on the same fetched page are not
+    # permission to choose one of them as the global Boolean.
+    return not any(_explicit_entry_requirement(topic, ' '.join(part.split()), not required)
+                   for part in re.split(r'[.!?\n]', source))
+
+
+def field_value_supported(name: str, value, text: str, *, source_text: str | None = None) -> bool:
     """Conservative claim matching, never a shared currency/token shortcut.
     All numbers and substantive value tokens must occur in the cited text;
     booleans require an explicit statement about that specific requirement."""
@@ -381,11 +421,13 @@ def field_value_supported(name: str, value, text: str) -> bool:
         return False
     low = " ".join(unicodedata.normalize("NFKC", str(text or "")).casefold().split())
     if name == "insurance_required" and isinstance(value, bool):
-        return _explicit_entry_requirement("insurance", low, value)
+        return (_explicit_entry_requirement("insurance", low, value)
+                and (source_text is None or _entry_requirement_source_clause('insurance', value, text, source_text)))
     if name == "arrival_card" and isinstance(value, dict) and isinstance(value.get("required"), bool):
         if set(value) - {"required", "name", "submission_window"}:
             return False
         return (_explicit_entry_requirement("arrival_card", low, value["required"])
+                and (source_text is None or _entry_requirement_source_clause('arrival_card', value['required'], text, source_text))
                 and all(field_value_supported(k, v, text) for k, v in value.items()
                         if k != "required" and v not in (None, "", [], {})))
     if isinstance(value, bool):

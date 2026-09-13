@@ -609,7 +609,7 @@ def _quoted_proposals(raw: dict, text: str, route: dict | None = None) -> tuple[
                 v = normalized
         if (not isinstance(evidence.get(k), str) or not quote_in_text(evidence[k], text)
                 or route is not None and not proof_helpers.field_scope_matches_route(k,evidence[k],route)
-                or (v not in (None, "", [], {}) and not field_value_supported(k, v, evidence[k]))):
+                or (v not in (None, "", [], {}) and not field_value_supported(k, v, evidence[k], source_text=text))):
             unquoted.append(k)
         else:
             quoted[k] = v
@@ -1138,14 +1138,26 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             value, quote = guidance.get(key), quotes.get(key)
             if (value not in (None, "", [], {}) and isinstance(quote, str)
                     and quote_in_text(quote, captures[fr.final_url]["text"])
-                    and field_value_supported(key, value, quote)
                     and proof_helpers.field_scope_matches_route(key, quote, route)
                     and proof_helpers.field_program_matches(key, quote, guidance)
                     and proof_helpers.field_workflow_matches(key, quote, guidance, route, confirmation=True)):
-                observations.append({"field": key, "source_url": fr.final_url,
-                                     "value": value, "quote": quote})
-                if proposed[key] != value:
-                    conflicts.add(key)
+                if field_value_supported(key, value, quote, source_text=captures[fr.final_url]["text"]):
+                    observations.append({"field": key, "source_url": fr.final_url,
+                                         "value": value, "quote": quote})
+                    if proposed[key] != value:
+                        conflicts.add(key)
+                elif (key == 'arrival_card' and isinstance(value, dict)
+                      and isinstance(value.get('required'), bool)
+                      and isinstance(proposed[key], dict)
+                      and isinstance(proposed[key].get('required'), bool)
+                      and field_value_supported(key, {'required': value['required']}, quote, source_text=captures[fr.final_url]['text'])):
+                    # A page may prove the requirement without naming the
+                    # form or its submission window. Observe only that Boolean
+                    # for conflict detection; never verify the whole object.
+                    observations.append({'field': key, 'source_url': fr.final_url,
+                        'value': {'required': value['required']}, 'component': 'required', 'quote': quote})
+                    if proposed[key]['required'] != value['required']:
+                        conflicts.add(key)
     # The source read can take a minute. Refresh both the row and the override,
     # and refuse to overwrite any field changed during that time.
     db.refresh(row)
@@ -1239,7 +1251,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             allowed -= {'government_fee','processing_time'} - program_fields
         supported_fields = {k for k in substantive & allowed if isinstance(quotes.get(k), str)
                             and quote_in_text(quotes[k], source['text'])
-                            and field_value_supported(k, seen[k], quotes[k])
+                            and field_value_supported(k, seen[k], quotes[k], source_text=source['text'])
                             and proof_helpers.field_scope_matches_route(k,quotes[k],route)
                             and proof_helpers.field_program_matches(k,quotes[k],seen)
                             and proof_helpers.field_workflow_matches(k,quotes[k],seen,route,confirmation=True)}
@@ -1609,7 +1621,7 @@ def propose_for_issue(db, issue_id: str) -> dict | None:
         confirmed = (requested not in unresolved_fields and (allowed is None or requested in allowed) and (requested == "disposition" or
                      isinstance(evidence.get(requested), str)
                      and quote_in_text(evidence[requested], fr.content_text)
-                     and field_value_supported(requested, guidance.get(requested), evidence[requested])
+                     and field_value_supported(requested, guidance.get(requested), evidence[requested], source_text=fr.content_text)
                      and proof_helpers.field_scope_matches_route(requested,evidence[requested],route)
                      and proof_helpers.field_workflow_matches(requested,evidence[requested],effective_candidate,route,confirmation=True)))
         captured_text = str(fr.content_text or "")[:200000]
