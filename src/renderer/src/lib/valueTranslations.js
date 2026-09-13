@@ -7,7 +7,10 @@ export function translationSegments(text, limit = 900) {
     const window = rest.slice(0, limit + 1)
     let cut = Math.max(window.lastIndexOf('. '), window.lastIndexOf('; '))
     if (cut < limit / 2) cut = window.lastIndexOf(' ')
-    if (cut < 1) cut = limit
+    // An oversized URL/identifier is immutable source text. Keep it whole;
+    // load/get pass it through locally instead of exposing a partial token.
+    if (cut < 1) cut = rest.search(/\s/)
+    if (cut < 1) cut = rest.length
     else if (window[cut] !== ' ') cut += 1
     pieces.push(rest.slice(0, cut).trim())
     rest = rest.slice(cut).trimStart()
@@ -19,6 +22,24 @@ export function translationSegments(text, limit = 900) {
 export function createValueTranslations({ storage = () => globalThis.localStorage } = {}) {
   const languages = new Map()
   const pending = new Map()
+  const queued = []
+  let active = 0
+  function dispatch() {
+    while (active < 2 && queued.length) {
+      const { task, resolve, reject } = queued.shift()
+      active += 1
+      Promise.resolve().then(task).then(resolve, reject).finally(() => {
+        active -= 1
+        dispatch()
+      })
+    }
+  }
+  function schedule(task) {
+    return new Promise((resolve, reject) => {
+      queued.push({ task, resolve, reject })
+      dispatch()
+    })
+  }
   function cache(lang) {
     if (!languages.has(lang)) {
       let entries = []
@@ -41,7 +62,7 @@ export function createValueTranslations({ storage = () => globalThis.localStorag
   }
   function get(lang, text) {
     if (lang === 'en') return text
-    const translated = translationSegments(text).map((part) => cache(lang).get(part))
+    const translated = translationSegments(text).map((part) => part.length > 900 ? part : cache(lang).get(part))
     return translated.length && translated.every((part) => typeof part === 'string')
       ? translated.join(' ') : undefined
   }
@@ -54,14 +75,14 @@ export function createValueTranslations({ storage = () => globalThis.localStorag
     const values = cache(lang)
     if (!pending.has(lang)) pending.set(lang, new Map())
     const flights = pending.get(lang)
-    const missing = [...new Set(texts.flatMap((text) => translationSegments(text)))].filter((text) => !values.has(text))
+    const missing = [...new Set(texts.flatMap((text) => translationSegments(text)))].filter((text) => text.length <= 900 && !values.has(text))
     const owned = missing.filter((text) => !flights.has(text))
     // Register synchronously before dispatch, so simultaneous components and
     // StrictMode share the same work even when their entry keys differ.
     for (let offset = 0; offset < owned.length; offset += 120) {
       const batch = owned.slice(offset, offset + 120)
       const entries = Object.fromEntries(batch.map((text, i) => [`v${i}`, text]))
-      const work = Promise.resolve().then(() => request(lang, entries)).then((out) => {
+      const work = schedule(() => request(lang, entries)).then((out) => {
         if (!['ok', 'partial', 'passthrough'].includes(out?.status)) return
         batch.forEach((text, i) => {
           const value = out.entries?.[`v${i}`]

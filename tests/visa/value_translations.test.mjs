@@ -103,3 +103,51 @@ test('blocked storage still supports instant same-session reuse', async () => {
   await cache.load('zh-CN',['Travel'],async (_lang,entries)=>translated(entries))
   assert.equal(cache.get('zh-CN','Travel'),'译Travel')
 })
+
+test('oversized source URLs and identifiers remain intact and are never submitted in pieces', async () => {
+  const url = 'https://www.mofa.go.jp/visa/' + 'official-12345'.repeat(100) + '?fee=6000&stay=90'
+  const token = '1234567890'.repeat(100)
+  const text = `Official source ${url} Identifier ${token} Fee JPY 6000.`
+  const cache = createValueTranslations({ storage: () => memory() }), sent = []
+  assert.ok(translationSegments(text).includes(url))
+  assert.ok(translationSegments(text).includes(token))
+  await cache.load('zh-CN', [text, url], async (_lang, entries) => {
+    sent.push(...Object.values(entries)); return translated(entries)
+  })
+  assert.ok(sent.every(value => value.length <= 900 && !value.includes('https:') && !value.includes('12345')))
+  assert.equal(cache.get('zh-CN', url), url)
+  assert.ok(cache.get('zh-CN', text).includes(url))
+  assert.ok(cache.get('zh-CN', text).includes(token))
+  assert.ok(cache.get('zh-CN', text).endsWith('Fee JPY 6000.'))
+})
+
+test('at most two batches run across simultaneous callers and languages; queued strings share flights', async () => {
+  const cache = createValueTranslations({ storage: () => memory() }), calls = []
+  const texts = Array.from({length: 500}, (_, i) => `Rule ${i}`)
+  let active = 0, peak = 0
+  const request = (lang, entries) => {
+    const d = deferred()
+    active += 1; peak = Math.max(peak, active)
+    calls.push({lang, entries, finish() { active -= 1; d.resolve(translated(entries)) }})
+    return d.promise
+  }
+  const first = cache.load('zh-CN', texts, request)
+  const second = cache.load('zh-CN', [texts.at(-1)], request)
+  const third = cache.load('zh-Hant', ['Passport'], request)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(calls.length, 2)
+  calls[0].finish()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(cache.get('zh-CN', texts[0]), '译' + texts[0])
+  assert.equal(calls.length, 3)
+  calls[1].finish()
+  for (let i = 2; i < 6; i += 1) {
+    await new Promise(resolve => setImmediate(resolve))
+    calls[i].finish()
+  }
+  await Promise.all([first, second, third])
+  assert.equal(peak, 2)
+  assert.equal(calls.length, 6)
+  assert.equal(Object.keys(cache.snapshot('zh-CN', texts)).length, 500)
+  assert.equal(cache.get('zh-Hant', 'Passport'), '译Passport')
+})
