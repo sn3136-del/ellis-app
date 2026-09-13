@@ -36,7 +36,9 @@ FIELDS = {
                            ('entry_requirements', 'passport_validity', 'passport_validity_requirement',
                             'arrival_card', 'onward_travel_evidence', 'accommodation_evidence',
                             'financial_evidence', 'insurance_required', 'health_requirements')),
-    'special_conditions': (('notes',), ('exceptions',)),
+    # The visible tile combines these product conditions and may append
+    # qualified processing wording. Retain each component's own proof.
+    'special_conditions': (('notes', 'exceptions', 'processing_time'), ('exceptions', 'processing_time')),
     'info_validity': (('policy_valid_until',), ('policy_valid_until',)),
 }
 _EMPTY = (None, '', [], {})
@@ -247,6 +249,15 @@ def for_record(row: dict, route: dict, guidance: dict, provenance: dict | None,
         return _owned(proof, route, None, 'visa_products', guidance.get('visa_products'))
 
     for cell, (own_fields, parent_fields) in FIELDS.items():
+        if cell == 'special_conditions':
+            visible = ' '.join(str(row.get(cell) or '').split())
+            def rendered_timing(value):
+                text = ' '.join(value.split()) if isinstance(value, str) else ''
+                return bool(text and text in visible)
+            if not rendered_timing((product or {}).get('processing_time')):
+                own_fields = tuple(f for f in own_fields if f != 'processing_time')
+            if not rendered_timing(guidance.get('processing_time')):
+                parent_fields = tuple(f for f in parent_fields if f != 'processing_time')
         wording = ('processing_text' if cell in ('processing_min_days', 'processing_unit') else
                    'max_stay_text' if cell in ('max_stay_duration', 'max_stay_unit') else
                    'validity_text' if cell in ('validity_duration', 'validity_unit') else None)
