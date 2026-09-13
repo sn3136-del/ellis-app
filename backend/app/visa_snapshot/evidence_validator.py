@@ -342,6 +342,28 @@ def _agent_lodgement_supported(low: str) -> bool:
     return False
 
 
+def _explicit_no_entry_requirement(topic: str, text: str) -> bool:
+    """An unqualified present-tense negative, never silence or a sub-step.
+
+    Scope-bearing prefixes/tails (children, visa applications, online filing,
+    arrival from a named place, future dates, etc.) cannot prove a global
+    Boolean. Keep this complete-statement grammar narrow: a second contrary
+    clause also makes the quote ineligible rather than choosing one side.
+    """
+    subject = r"(?:(?:(?:travel|medical|health|travel medical) )?insurance)" if topic == "insurance" else r"(?:(?:an? |the )?arrival cards?)"
+    patterns = [
+        subject + r" (?:is|are) not (?:required|mandatory|compulsory|necessary)",
+        r"no " + (r"(?:(?:travel|medical|health|travel medical) )?insurance" if topic == "insurance" else r"arrival cards?") + r" (?:(?:is|are) )?(?:required|necessary)",
+    ]
+    if topic == "insurance":
+        patterns.append(r"you do not need (?:travel|medical|health|travel medical) insurance")
+    else:
+        patterns.extend([r"you do not need (?:an? )?arrival card",
+                         r"you do not need to (?:complete|submit|fill (?:in|out)) (?:an? |the )?arrival card",
+                         r"there is no arrival card requirement"])
+    return any(re.fullmatch(pattern + r"[.!]?", text) for pattern in patterns)
+
+
 def field_value_supported(name: str, value, text: str) -> bool:
     """Conservative claim matching, never a shared currency/token shortcut.
     All numbers and substantive value tokens must occur in the cited text;
@@ -349,6 +371,14 @@ def field_value_supported(name: str, value, text: str) -> bool:
     if value is None or value == "" or value == [] or value == {}:
         return False
     low = " ".join(unicodedata.normalize("NFKC", str(text or "")).casefold().split())
+    if name == "insurance_required" and value is False:
+        return _explicit_no_entry_requirement("insurance", low)
+    if name == "arrival_card" and isinstance(value, dict) and value.get("required") is False:
+        if set(value) - {"required", "name", "submission_window"}:
+            return False
+        return (_explicit_no_entry_requirement("arrival_card", low)
+                and all(field_value_supported(k, v, text) for k, v in value.items()
+                        if k != "required" and v not in (None, "", [], {})))
     if isinstance(value, bool):
         topic = {"biometrics_required": r"biometric|fingerprint", "appointment_required": r"appointment",
                  "interview_required": r"interview"}.get(name)
