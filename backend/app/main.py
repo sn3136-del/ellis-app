@@ -2162,6 +2162,7 @@ def _wording_field(r: dict, cell: str, key: str, statuses: dict):
 def _record_payload(r: dict) -> dict:
     """One record of the QC browser payload, its checklist computed once."""
     from .visa_snapshot import tstation
+    from .visa_snapshot.record_evidence import revision
     statuses, raw = _served_and_raw_status(r)
     return {**{k: r.get(k) for k in tstation.FIELD_ORDER},
             # The per-source binding of the acceptance standard. Deliberately
@@ -2170,6 +2171,8 @@ def _record_payload(r: dict) -> dict:
             # checked against, not just the one that fits field 22.
             "corroborating_sources": r.get("corroborating_sources") or [],
             "cache_key": r["_cache_key"],
+            "product_index": r.get("_product_index"),
+            "evidence_revision": revision(r),
             "status": r.get("_status"),
             "contradictions": r.get("_contradictions") or [],
             "source_check": r.get("_source_check", "unchecked"),
@@ -2212,6 +2215,39 @@ def _with_pending(status: dict, disputed) -> dict:
 # A correction forces a new row list before a later reader reaches here.
 _RECORDS_JSON_CACHE = {"rows": None, "body": None}
 _RECORDS_JSON_LOCK = threading.Lock()
+
+
+@app.get("/database/record-evidence")
+def travel_database_record_evidence(cache_key: str, product_index: int | None = None,
+                                    revision: str = "", db=Depends(get_session),
+                                    p: Principal = Depends(get_principal)):
+    """Lazy field quotes from the exact current QC product, without model calls."""
+    require_quality_control(p)
+    from .visa_snapshot import kimi_primary, record_evidence
+    from .visa_snapshot.models import KimiRouteGuidanceCache
+    from .visa_snapshot.row_projection import canonical_route, records_projection
+    from sqlalchemy import select
+    if len(cache_key) > 250 or (product_index is not None and product_index < 0):
+        raise HTTPException(422, "Invalid record identity")
+    key = kimi_primary.canonical_key(cache_key)
+    if key != cache_key:
+        raise HTTPException(422, "Use the canonical record key")
+    row = db.execute(select(KimiRouteGuidanceCache).where(
+        KimiRouteGuidanceCache.cache_key == key)).scalars().first()
+    if row is None:
+        raise HTTPException(404, "Record not found")
+    records = records_projection(db, row, canonical_route(row), include_evidence=True)
+    rec = next((r for r in records if r.get('_product_index') == product_index), None)
+    if rec is None:
+        raise HTTPException(404, "Product not found; reload the records")
+    current_revision = record_evidence.revision(rec)
+    if revision and revision != current_revision:
+        raise HTTPException(409, "This record changed; reload the records before opening its quotes")
+    from fastapi.responses import JSONResponse
+    return JSONResponse({"cache_key": key, "product_index": product_index,
+                         "revision": current_revision, "visa_type_name": rec.get('visa_type_name'),
+                         "field_evidence": rec['_field_evidence']},
+                        headers={"Cache-Control": "no-store"})
 
 
 @app.get("/database/records")

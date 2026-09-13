@@ -13,7 +13,7 @@ session of its own.
 from __future__ import annotations
 
 
-def records_projection(db, r, route: dict) -> list[dict]:
+def records_projection(db, r, route: dict, *, include_evidence=False) -> list[dict]:
     """The T-Station records of one cached answer, exactly as /database/records
     builds them: the merged guidance through the override layer, the grounded
     check and the open monitor findings, the publication hold, and the
@@ -36,6 +36,13 @@ def records_projection(db, r, route: dict) -> list[dict]:
     # Whether the official page has actually been read and agreed with:
     # the difference between a source and a link nobody opened.
     _gc = _fresh.effective_check(r.verification)
+    # Only this compact generation token joins the bulk list. A recheck that
+    # changes the supporting quotes without changing a value must invalidate
+    # the lazy evidence drawer too.
+    import hashlib
+    import json
+    evidence_version = hashlib.sha256(json.dumps([g, prov, _gc], sort_keys=True,
+        ensure_ascii=False, allow_nan=False, default=str).encode()).hexdigest()
     _grounded = _grounded_verdict_supported(_gc)
     _disputed_now = list(_gc.get("disputed_fields") or [])
     _disputed_now.extend(_fresh.active_disputed_fields(db, r.cache_key))
@@ -62,6 +69,7 @@ def records_projection(db, r, route: dict) -> list[dict]:
                 rec["data_source"] = (rec.get("data_source")
                                       or "Official portal (reference only)")
         rec["_cache_key"] = r.cache_key
+        rec['_evidence_version'] = evidence_version
         rec["_status"] = kimi_primary.STATUS_UNCERTAIN if _problems else r.status
         rec["_contradictions"] = _problems
         # Whether an operator has released this answer despite low
@@ -98,6 +106,9 @@ def records_projection(db, r, route: dict) -> list[dict]:
             rec["_source_check"] = "reference"
         else:
             rec["_source_check"] = "unchecked"
+        if include_evidence:
+            from .record_evidence import for_record
+            rec['_field_evidence'] = for_record(rec, route, g, prov, _gc)
         out.append(rec)
     return out
 
