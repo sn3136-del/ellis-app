@@ -1,4 +1,5 @@
 """QC refresh reports exactly the engine outcome, including partial checks."""
+from types import SimpleNamespace
 import pytest
 from app import main
 from app.visa_snapshot import kimi_primary as kp, freshness
@@ -16,6 +17,7 @@ ADMIN = {'authorization': 'Bearer admin-token', 'x-org-id': 'integrity', 'x-user
 ])
 def test_refresh_api_preserves_actual_evidence_and_rereads_the_same_canonical_route(client, monkeypatch, report, suspended):
     stages = []
+    monkeypatch.setattr(kp, '_cached', lambda *a: SimpleNamespace(verification={}))
     def guidance(db, route, **kwargs):
         stages.append((kwargs['stage'], kp.cache_key(route)))
         return {'guidance': {'disposition': 'VISA_REQUIRED'}, 'held': True}

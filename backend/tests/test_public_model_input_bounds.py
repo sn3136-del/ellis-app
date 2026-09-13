@@ -1,4 +1,5 @@
 """Malformed public inputs cannot start provider work or create arbitrary routes."""
+from types import SimpleNamespace
 import json
 from pathlib import Path
 import shutil
@@ -33,6 +34,7 @@ def test_invalid_research_scope_is_rejected_before_any_model_call(client, monkey
 ])
 def test_research_and_lookup_use_identical_finite_scope(client, monkeypatch, public_qc, purpose, document, expected):
     routes = []
+    monkeypatch.setattr(kp, "_cached", lambda *a: SimpleNamespace(verification={}))
     def guidance(db, route, **kwargs):
         routes.append(route)
         return {"guidance": {}, "held": True, "status": "KIMI_UNCERTAIN", "cached": False, "stale": False}

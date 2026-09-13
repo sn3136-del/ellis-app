@@ -132,6 +132,7 @@ function useCountUp(target, ms = 700) {
 const SEQ = { high: '#0b7a44', medium: '#2563eb', low: '#d97706' }
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newQualitySession, qualityRecordRoute } from '../lib/visaSession.js'
+import { createQualityRouteAdder, qualityAddOutcome, manualRouteFields } from '../lib/qualityAddRoute.js'
 import { createLatestLoader, readQualityTab, refreshQualityRecord, publishQualityRecord, qualityRefreshOutcome } from '../lib/qualityLoader.js'
 import { indexRecoveredRecords, recoveredForRecord } from '../lib/qualityRecovery.js'
 import { useLocale } from '../lib/locale.jsx'
@@ -933,7 +934,7 @@ const FieldLabel = ({ label, children }) => (
   </label>
 )
 
-function AddRouteCard({ countries, t, onAdd, onManualAdd, adding, addMsg }) {
+export function AddRouteCard({ countries, t, onAdd, onManualAdd, adding, addMsg }) {
   // Trip.com adds a route themselves: pick the pair, press one button, and
   // the engine answers it on the spot. The result lands in the record list
   // with the filters already set to show it.
@@ -947,47 +948,20 @@ function AddRouteCard({ countries, t, onAdd, onManualAdd, adding, addMsg }) {
   const [note, setNote] = useState('')
   const [mState, setMState] = useState(null)
   const setM = (k) => (e) => setMv((v) => ({ ...v, [k]: e.target.value }))
-  const ready = nat && dest && !adding
+  const ready = nat && dest && !adding && mState !== 'saving'
   const manualDirty = Object.values(mv).some((v) => String(v || '').trim())
   const manualReady = ready && manualDirty && srcUrl.trim() && note.trim()
     && mState !== 'saving'
   const sel = { ...input, width: '100%', boxSizing: 'border-box' }
   async function saveManual() {
-    const g = (k) => String(mv[k] || '').trim()
-    const fields = {}
-    if (g('requirement')) fields.disposition = g('requirement')
-    if (g('visa_type')) fields.visa_category = g('visa_type')
-    if (g('fee_amount') || g('fee_currency')) fields.government_fee = {
-      amount: g('fee_amount') ? Number(g('fee_amount')) : null,
-      currency: g('fee_currency') ? g('fee_currency').toUpperCase() : null }
-    if (g('permitted_stay')) fields.permitted_stay = g('permitted_stay')
-    if (g('stay_days')) fields.permitted_stay_days = Number(g('stay_days'))
-    if (g('processing_time')) fields.processing_time = g('processing_time')
-    if (g('official_portal_url')) fields.official_portal_url =
-      g('official_portal_url')
-    if (g('channel_detail')) fields.application_channel_detail =
-      g('channel_detail')
-    if (g('required_documents')) fields.required_documents =
-      g('required_documents').split(',').map((x) => x.trim()).filter(Boolean)
-    if (g('exceptions')) fields.exceptions =
-      g('exceptions').split('\n').map((x) => x.trim()).filter(Boolean)
-    if (g('visa_type') && (g('validity') || g('entries_sel'))) {
-      fields.visa_products = [{
-        type: g('visa_type'),
-        entry: g('entries_sel') || 'single',
-        validity: g('validity') || 'As issued',
-        max_stay_days: g('stay_days') ? Number(g('stay_days')) : null,
-        fee: fields.government_fee
-          || { amount: null, currency: null },
-        notes: null }]
-    }
     setMState('saving')
     try {
+      const fields = manualRouteFields(mv)
       await onManualAdd(nat, dest, purpose, doc, fields,
                         srcUrl.trim(), note.trim())
       setMState('saved'); setMv({}); setSrcUrl(''); setNote('')
     } catch (e) {
-      setMState({ err: String(e?.detail || e?.message || e) })
+      setMState({ err: e?.code?.startsWith('add_') ? t('ops.add.' + e.code.slice(4)) : String(e?.message || e) })
     }
   }
   return (
@@ -1000,6 +974,7 @@ function AddRouteCard({ countries, t, onAdd, onManualAdd, adding, addMsg }) {
       <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 12 }}>
         {t('ops.add.hint')}
       </div>
+      <fieldset disabled={adding || mState === 'saving'} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
       <div style={{ display: 'grid', gap: 10,
                     gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
         <FieldLabel label={t('ops.flt.passport')}>
@@ -1026,7 +1001,9 @@ function AddRouteCard({ countries, t, onAdd, onManualAdd, adding, addMsg }) {
                   className="ops-in" style={sel}>
             {['ordinary_passport', 'diplomatic_passport', 'service_passport',
               'official_ordinary_passport', 'child_passport',
-              'temporary_passport', 'emergency_passport'].map((v) => (
+              'temporary_passport', 'emergency_passport', 'prc_travel_document',
+              'refugee_travel_document', 'stateless_travel_document', 'alien_passport',
+              'laissez_passer', 'identity_certificate'].map((v) => (
               <option key={v} value={v}>{t('db.doc.' + v)}</option>
             ))}
           </select>
@@ -1138,7 +1115,7 @@ function AddRouteCard({ countries, t, onAdd, onManualAdd, adding, addMsg }) {
             </button>
             {mState === 'saved' && (
               <span style={{ fontSize: 12.5, fontWeight: 600, color: GREEN }}>
-                {t('ops.add.savedManual')}
+                {t('ops.add.manual_saved')}
               </span>
             )}
             {mState && mState.err && (
@@ -1175,23 +1152,20 @@ function AddRouteCard({ countries, t, onAdd, onManualAdd, adding, addMsg }) {
             {t('ops.add.wait')}
           </span>
         )}
-        {addMsg && addMsg.ok && (
-          <span style={{ fontSize: 12.5, fontWeight: 600, color: GREEN }}>
-            {addMsg.researched
-              ? (addMsg.researched.consistent
-                  ? t('ops.add.researchOk')
-                  : addMsg.researched.outcome === 'checked'
-                    ? t('ops.add.researchDispute')
-                    : t('ops.add.researchNoRead'))
-              : addMsg.held ? t('ops.add.held') : t('ops.add.done')}
+        {addMsg && addMsg.ok && (() => {
+          const outcome = qualityAddOutcome(addMsg.response)
+          return <span role="status" style={{ fontSize: 12.5, fontWeight: 600,
+            color: outcome.tone === 'success' ? GREEN : '#9b6800' }}>
+            {t(outcome.key, { fields: (outcome.changed || []).join(', ') })}
           </span>
-        )}
+        })()}
         {addMsg && !addMsg.ok && (
           <span style={{ fontSize: 12.5, fontWeight: 600, color: RED }}>
             {addMsg.err}
           </span>
         )}
       </div>
+      </fieldset>
     </div>
   )
 }
@@ -2754,47 +2728,48 @@ function QualityWorkspace() {
 
   const [adding, setAdding] = useState(false)
   const [addMsg, setAddMsg] = useState(null)
-  async function addRoute(nat, dest, purpose, docType, research = false) {
+  const addingNow = useRef(false)
+  const addMounted = useRef(true)
+  useEffect(() => { addMounted.current = true; return () => { addMounted.current = false } }, [])
+  const filtersNow = useRef(filters)
+  filtersNow.current = filters
+  const addFilterSnapshot = useRef(null)
+  const routeAdder = useMemo(() => createQualityRouteAdder({ client,
+    loader: () => currentLoader.current, currentTab: () => currentTab.current,
+    isActive: () => addMounted.current,
+    onStored: (response, route, which) => {
+      if (which !== 'records' || filtersNow.current !== addFilterSnapshot.current) return
+      const identity = response.route || route
+      setFilters({ ...EMPTY_FILTERS, nationality: identity.nationality,
+        destination: identity.destination, purpose: identity.travel_purpose,
+        document: identity.travel_document_type || 'ordinary_passport' })
+    },
+  }), [client])
+  async function addRoute(nat, dest, purpose, docType) {
+    if (addingNow.current) return
+    addingNow.current = true
+    addFilterSnapshot.current = filtersNow.current
     setAdding(true); setAddMsg(null)
     try {
-      let held = false
-      let researched = null
-      if (research) {
-        const out = await client.post('/database/routes/research', {
-          nationality: nat, destination: dest, travel_purpose: purpose,
-          travel_document_type: docType || 'ordinary_passport' })
-        held = !!out.held
-        researched = out.research || null
-      } else {
-        const out = await client.databaseLookup({
-          nationality: nat, destination: dest, travel_purpose: purpose,
-          travel_document_type: docType || 'ordinary_passport' })
-        held = !!out.held
-      }
-      setAddMsg({ ok: true, held, researched })
-      setFilters({ ...EMPTY_FILTERS, nationality: nat, destination: dest })
-      await load()
+      const response = await routeAdder({ nationality: nat, destination: dest,
+        travel_purpose: purpose, travel_document_type: docType || 'ordinary_passport' })
+      setAddMsg({ ok: true, response })
     } catch (e) {
-      setAddMsg({ ok: false, err: String(e?.detail?.reason || e?.message || e) })
-    }
-    setAdding(false)
+      setAddMsg({ ok: false, err: e?.code?.startsWith('add_')
+        ? t('ops.add.' + e.code.slice(4)) : String(e?.detail?.reason || e?.message || e) })
+    } finally { addingNow.current = false; setAdding(false) }
   }
 
-  async function manualAddRoute(nat, dest, purpose, docType, fields,
-                                sourceUrl, note) {
-    // The operator's facts are written first as a sourced override, then
-    // the route is answered so a record exists. The override governs every
-    // field the operator entered from the very first serve.
-    await client.post('/database/records/edit', {
-      nationality: nat, destination: dest, travel_purpose: purpose,
-      travel_document_type:
-        docType === 'ordinary_passport' ? '' : (docType || ''),
-      fields, source_url: sourceUrl, note })
-    await client.databaseLookup({ nationality: nat, destination: dest,
-      travel_purpose: purpose,
-      travel_document_type: docType || 'ordinary_passport' })
-    setFilters({ ...EMPTY_FILTERS, nationality: nat, destination: dest })
-    await load()
+  async function manualAddRoute(nat, dest, purpose, docType, fields, sourceUrl, note) {
+    if (addingNow.current) throw new Error(t('ops.add.busy'))
+    addingNow.current = true
+    addFilterSnapshot.current = filtersNow.current
+    setAdding(true); setAddMsg(null)
+    try {
+      return await routeAdder({ nationality: nat, destination: dest,
+        travel_purpose: purpose, travel_document_type: docType || 'ordinary_passport' },
+        { fields, source_url: sourceUrl, note })
+    } finally { addingNow.current = false; setAdding(false) }
   }
 
   async function editRecord(rec, fields, sourceUrl, note, productPatch) {

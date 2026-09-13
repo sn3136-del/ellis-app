@@ -2539,10 +2539,13 @@ def travel_database_record_edit(body: DatabaseRecordEditIn,
     if not nat or not dest:
         raise HTTPException(422, "nationality and destination must be real "
                                  "countries (name or ISO code)")
-    purpose = (body.travel_purpose or "tourism").strip().lower()
+    from .visa_snapshot.registry import normalize_route_scope, RegistryError
+    try:
+        purpose, doc = normalize_route_scope(body.travel_purpose, body.travel_document_type)
+    except RegistryError as exc:
+        raise HTTPException(422, str(exc)) from exc
     route = {"nationality": nat, "destination": dest,
              "travel_purpose": purpose}
-    doc = (body.travel_document_type or "").strip()
     if doc and doc != "ordinary_passport":
         route["travel_document_type"] = doc
     entry = {"route": route,
@@ -2665,30 +2668,43 @@ def travel_database_route_research(body: DatabaseRouteResearchIn,
     except (kimi_primary.GuidanceTimeout, kimi_primary.GuidanceUnavailable,
             kimi_primary.GuidanceProviderError) as e:
         out = _answer_anyway(db, route, e)
+    key = kimi_primary.canonical_key(kimi_primary.cache_key(route))
     report = None
-    try:
-        report = freshness.recheck_route(db, route)
-    except Exception:  # noqa: BLE001 — a research failure is a report, not a 500
-        report = None
-    # Serve the post-research answer without repeating the detail wait.
-    try:
-        out = kimi_primary.get_route_guidance(db, route, stage="core",
-                                              after=None)
-    except Exception:  # noqa: BLE001
-        pass
+    # An empty/malformed model response can return without creating a row.
+    # Do not start a second generation or claim that such a route was added.
+    cached = kimi_primary._cached(db, key)
+    if cached is not None:
+        try:
+            report = freshness.recheck_route(db, route)
+        except Exception:  # noqa: BLE001 — keep the stored answer and report failure
+            report = {"outcome": "research_error", "renewed": False}
+        db.expire_all()
+        cached = kimi_primary._cached(db, key)
+        # Serve the post-research answer without repeating the detail wait.
+        if cached is not None:
+            try:
+                out = kimi_primary.get_route_guidance(db, route, stage="core",
+                                                      after=None)
+            except Exception as exc:  # noqa: BLE001 — never return pre-check policy after a committed correction
+                raise HTTPException(503, "The route is stored, but its current answer could not be read. Reload the list before retrying.") from exc
+    present = cached is not None
     out = _apply_records_hold(route, out, db)
-    g = {} if out.get("held") else (out.get("guidance") or {})
+    pending = bool(present and (cached.verification or {}).get("detail_pending"))
+    held = not present or pending or bool(out.get("held"))
+    g = {} if held else (out.get("guidance") or {})
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_route_research",
                  detail={"nationality": nat, "destination": dest,
                          "purpose": purpose,
                          "outcome": (report or {}).get("outcome")},
                  actor=p.user_id)
-    return {"ok": True,
+    return {"ok": present, "record_present": present, "cache_key": key,
+            "status": "not_added" if not present else "pending" if pending else "stored",
+            "detail_pending": pending,
             "route": {"nationality": nat, "destination": dest,
-                      "travel_purpose": purpose},
+                      "travel_purpose": purpose, "travel_document_type": doc},
             "disposition": g.get("disposition"),
-            "held": bool(out.get("held")),
+            "held": held,
             "source_url": g.get("source_url"),
             "research": {"outcome": (report or {}).get("outcome"),
                          "consistent": (report or {}).get("consistent"),
@@ -3281,6 +3297,7 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     # of re-deriving a key from a subset of the inputs (which silently missed
     # any lookup carrying a travel date or a transit point).
     out["cache_key"] = kimi_primary.canonical_key(kimi_primary.cache_key(route))
+    out["record_present"] = kimi_primary._cached(db, out["cache_key"]) is not None
     # A stale cache entry was already served above — freshen it for the next
     # reader without making this one wait.
     if out.get("stale"):
