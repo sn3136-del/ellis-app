@@ -3,6 +3,17 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { applicationInstructions } from '../../src/renderer/src/lib/applicationInstructions.js'
 const guidance={disposition:'VISA_REQUIRED',application_channel:'online_portal',account_registration_steps:['Create UKVI account'],payment_process:['Pay an agent'],submission_process:['Attend VAC','Submit online']}
+test('published application guidance remains readable without inventing an ordered procedure',()=>{
+ const summary='Chinese ordinary passport holders must apply through a designated agency. Use the online issuance notice on a mobile device; a screenshot is not accepted.'
+ const r=applicationInstructions({guidance:{...guidance,application_channel_detail:summary},application_steps_status:'unknown',apply_steps:[]})
+ assert.equal(r.summary,summary);assert.equal(r.status,'unknown');assert.deepEqual(r.steps,[])
+ for(const detail of ['',null,'Not publicly available.','not applicable','Unknown'])assert.equal(applicationInstructions({guidance:{...guidance,application_channel_detail:detail}}).summary,undefined)
+ assert.equal(applicationInstructions({held:true,guidance:{...guidance,application_channel_detail:summary}}).summary,undefined)
+ for(const disposition of ['VISA_REQUIRED','ELECTRONIC_AUTHORIZATION_REQUIRED','CONDITIONAL']){
+  const result=applicationInstructions({application_steps_status:'not_applicable',guidance:{...guidance,disposition,application_channel_detail:summary}})
+  assert.equal(result.status,'unknown');assert.equal(result.summary,summary)
+ }
+})
 test('old cached lists and unmarked apply_steps stay unknown',()=>{
  for(const r of [{},{apply_steps:['Pay fee','Submit']}])assert.deepEqual(applicationInstructions({...r,guidance}),{status:'unknown',steps:[],sourceUrl:null})
 })

@@ -24,6 +24,7 @@ import { arrivalCardLines } from '../lib/arrivalCard.js'
 import { parseDatabaseRouteHash, databaseRouteHash } from '../lib/databaseRoute.js'
 import { applicationLane, applicationStepLinkIndex } from '../lib/applicationLane.js'
 import { applicationInstructions } from '../lib/applicationInstructions.js'
+import { healthRequirementLines } from '../lib/healthRequirements.js'
 import { formatPolicyText as humanize } from '../lib/policyText.js'
 
 const NAVY = 'var(--trip-navy, #0f294d)'
@@ -533,27 +534,36 @@ function Pill({ tone, children }) {
   return (
     <span style={{ fontSize: 12.5, fontWeight: 700, padding: '4px 12px',
                    borderRadius: 999, background: styles.bg, color: styles.fg,
-                   whiteSpace: 'nowrap' }}>{children}</span>
+                   maxWidth: '100%', overflowWrap: 'anywhere',
+                   whiteSpace: 'normal' }}>{children}</span>
   )
 }
 
-function Fact({ label, value, pill }) {
+function Fact({ label, value, pill, description }) {
   const v = sentence(asText(value))
   if (!v) return null
   // A short answer sits opposite its label; a sentence gets its own line so
   // it reads left to right instead of wrapping against the right edge.
   const stacked = !pill && v.length > 42
   return (
-    <div style={{ display: stacked ? 'block' : 'flex',
-                  justifyContent: 'space-between', alignItems: 'center', gap: 20,
-                  padding: '12px 0', fontSize: 13.5, lineHeight: 1.6,
+    <div style={{ minWidth: 0, padding: '12px 0', fontSize: 13.5, lineHeight: 1.6,
                   borderBottom: '1px solid #f3f5f9' }}>
-      <div style={{ color: GRAY, flex: 'none',
-                    marginBottom: stacked ? 4 : 0 }}>{label}</div>
-      {pill
-        ? <Pill tone={pill}>{v}</Pill>
-        : <div style={{ color: NAVY, fontWeight: 600,
-                        textAlign: stacked ? 'left' : 'right' }}>{v}</div>}
+      <div style={{ display: stacked ? 'block' : 'flex', flexWrap: 'wrap',
+                    justifyContent: 'space-between', alignItems: 'baseline',
+                    gap: '4px 16px', minWidth: 0 }}>
+        <div style={{ color: GRAY, flex: '1 1 auto', minWidth: 0,
+                      overflowWrap: 'anywhere',
+                      marginBottom: stacked ? 4 : 0 }}>{label}</div>
+        {pill
+          ? <Pill tone={pill}>{v}</Pill>
+          : <div style={{ color: NAVY, fontWeight: 600, minWidth: 0,
+                          maxWidth: '100%', overflowWrap: 'anywhere',
+                          textAlign: stacked ? 'left' : 'right' }}>{v}</div>}
+      </div>
+      {description && <div style={{ color: GRAY, fontSize: 12.5,
+                                    lineHeight: 1.5, marginTop: 4 }}>
+        {description}
+      </div>}
     </div>
   )
 }
@@ -808,8 +818,9 @@ export default function TravelDatabase({ onBack }) {
                                    asText(vp.notes), asText(vp.entry),
                                    ...entryInstructionTexts(vp.entry_requirements)]),
       ...applicationInstructions(result, g).steps,
+      applicationInstructions(result, g).summary,
       ...itemsOf(g.required_documents), ...itemsOf(g.forms),
-      ...itemsOf(g.health_requirements),
+      ...healthRequirementLines(g.health_requirements),
       ...itemsOf(g.exceptions), ...itemsOf(g.uncertainty),
       ...itemsOf(result?.advisories),
     ].filter(Boolean))]
@@ -1123,9 +1134,7 @@ export default function TravelDatabase({ onBack }) {
   ].filter(([, v]) => v) : []
 
   const documents = g ? itemsOf(g.required_documents).map(T) : []
-  const health = g ? itemsOf((g.health_requirements || []).filter((h) =>
-    !h || typeof h !== 'object' ||
-    String(h.applicability || '') !== 'not_applicable')).map(T) : []
+  const health = g ? healthRequirementLines(g.health_requirements).map(T) : []
 
   const label = (k) => (
     <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{t(k)}</span>
@@ -1756,11 +1765,11 @@ export default function TravelDatabase({ onBack }) {
                   <Section title={t('db.checksAndAppointments')} accent={BLUE} key="process-checks">
                     {processChecks.map((check) => (
                       <Fact key={check.field}
-                            label={`${t(check.labelKey)} · ${t(check.stageKey)}`}
+                            label={t(check.labelKey)} description={t(check.stageKey)}
                             value={t(check.valueKey)} pill={check.tone} />
                     ))}
                     {processChecks.some((check) => !check.scopeConfirmed) && (
-                      <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8 }}>
+                      <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8, lineHeight: 1.5 }}>
                         {t('db.checkScopeExplanation')}
                       </div>
                     )}
@@ -1846,9 +1855,10 @@ export default function TravelDatabase({ onBack }) {
               )
             })()}
 
-            {(applySteps.length > 0 || instructions.status === 'unknown') && (
+            {(applySteps.length > 0 || instructions.status === 'unknown' || instructions.status === 'not_applicable') && (
               <Section title={t('db.steps')} accent={NAVY}>
-                    {instructions.status === 'unknown' && <p style={{ margin: '0 0 10px', color: GRAY }}>{t('db.stepsUnknown')}</p>}
+                    {instructions.status === 'not_applicable' && <p style={{ margin: 0, color: NAVY, lineHeight: 1.6 }}>{t('db.stepsNotApplicable')}</p>}
+                    {instructions.status === 'unknown' && <p style={{ margin: '0 0 10px', color: instructions.summary ? NAVY : GRAY, lineHeight: 1.6, overflowWrap: 'anywhere' }}>{instructions.summary ? T(instructions.summary) : t('db.stepsUnknown')}</p>}
                     {instructions.status === 'unknown' && instructions.sourceUrl && (
                       <a href={instructions.sourceUrl} target="_blank" rel="noreferrer" style={{ color: BLUE }}>{t('db.stepsOfficial')} ↗</a>
                     )}

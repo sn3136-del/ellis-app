@@ -9,10 +9,59 @@ import {
 } from '../../src/renderer/src/lib/visaSession.js'
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
 import { arrivalCardLines } from '../../src/renderer/src/lib/arrivalCard.js'
+import { healthRequirementLines } from '../../src/renderer/src/lib/healthRequirements.js'
 import { publishedStayText } from '../../src/renderer/src/lib/publishedStay.js'
 import { formatPolicyText } from '../../src/renderer/src/lib/policyText.js'
 import { applicationLane, applicationStepLinkIndex } from '../../src/renderer/src/lib/applicationLane.js'
 import { t as translate, SUPPORTED } from '../../src/renderer/src/lib/i18n.js'
+
+test('health rendering retains the published recent-travel condition and question', () => {
+  const item = {name: 'Yellow fever vaccination certificate', applicability: 'conditional',
+    trigger_countries: [],
+    trigger: 'Arrival from or transit through a country/area with risk of yellow fever transmission within 9 days before entry',
+    question: 'Have you been in a yellow-fever risk country or area within the past 9 days?'}
+  const before = structuredClone(item)
+  const lines = healthRequirementLines([item])
+  assert.equal(lines.length, 1)
+  for (const text of [item.name, '(conditional)', item.trigger, item.question]) assert.ok(lines[0].includes(text))
+  assert.deepEqual(item, before)
+})
+
+test('health rendering retains residence, duration and specified-country scope', () => {
+  const item = {name: 'Tuberculosis (TB) test certificate', applicability: 'always_required',
+    trigger_countries: ['CHN'],
+    trigger: 'Resident in China and applying for a UK visa valid for more than 6 months', question: null}
+  const [line] = healthRequirementLines([item])
+  assert.ok(line.includes(item.trigger))
+  assert.match(line, /Countries specified for this condition: CHN/)
+  assert.doesNotMatch(line, /Chinese passport|nationality/i)
+})
+
+test('health notes preserve every qualification without rendering provenance or raw objects', () => {
+  const note = 'If an officer requests a test, follow the specific instructions; a short visit alone does not require it.'
+  const [line] = healthRequirementLines([{name: 'Medical examination', applicability: 'conditional',
+    trigger: 'Only if the published residence and duration criteria are both met.',
+    notes: [note, 'An exemption may apply under the stated conditions.'], note,
+    instructions: 'Use an approved panel physician only if an examination is required.',
+    source_url: 'https://example.invalid/private-capture', field_provenance: {private: 'do not render'},
+    _internal: 'do not render'}])
+  assert.ok(line.includes(note))
+  assert.equal(line.split(note).length - 1, 1)
+  assert.match(line, /both met/)
+  assert.match(line, /An exemption may apply under the stated conditions/)
+  assert.match(line, /only if an examination is required/)
+  assert.doesNotMatch(line, /private-capture|do not render|\[object Object\]/)
+})
+
+test('health rendering handles legacy text and absent or malformed values without an all-clear claim', () => {
+  assert.deepEqual(healthRequirementLines('Follow the published health conditions.'), ['Follow the published health conditions.'])
+  assert.deepEqual(healthRequirementLines(null), [])
+  assert.deepEqual(healthRequirementLines([null, false, 0, {}, {name: {bad: true}}, []]), [])
+  assert.deepEqual(healthRequirementLines([{name: 'Not applicable item', applicability: ' NOT_APPLICABLE ',
+    trigger: 'No requirement.'}]), [])
+  assert.deepEqual(healthRequirementLines({name: 'Health screening', trigger: 'If directed on arrival.'}),
+    ['Health screening — If directed on arrival.'])
+})
 
 const ETA_APP = {
   disposition: 'ELECTRONIC_AUTHORIZATION_REQUIRED',
