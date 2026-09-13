@@ -10,7 +10,7 @@ import { t as translate } from '../../src/renderer/src/lib/i18n.js'
 // The records list is the operator's first screen. It renders a real
 // component, so a helper that is not in scope there crashes every row.
 const compiled = await build({
-  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery } from './src/renderer/src/screens/QualityConsole.jsx'",
+  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown } from './src/renderer/src/screens/QualityConsole.jsx'",
     resolveDir: resolve('.'), sourcefile: 'quality-records-table-entry.jsx' },
   bundle: true, write: false, platform: 'node', format: 'cjs', jsx: 'automatic',
   external: ['react', 'react/jsx-runtime'], logLevel: 'silent',
@@ -18,7 +18,7 @@ const compiled = await build({
 const module = { exports: {} }
 new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(
   createRequire(import.meta.url), module, module.exports)
-const { RecordsTable, unitNameOf, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery } = module.exports
+const { RecordsTable, unitNameOf, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown } = module.exports
 
 const t = (key, vars) => translate('en', key, vars)
 
@@ -58,6 +58,25 @@ test('records header hides publication order while retaining normal table column
   assert.ok(!html.includes('Publication order'))
   assert.ok(html.includes(t('ops.col.route')))
   assert.ok(html.includes(t('ops.col.fee')))
+})
+
+test('freshness retains the next scheduled countdown while the current refresh is running', () => {
+  const realNow = Date.now
+  Date.now = () => Date.parse('2026-09-13T19:15:00Z')
+  try {
+    for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
+      const localized = key => translate(lang, key)
+      const html = renderToStaticMarkup(createElement(NextSweepCountdown, {
+        at: '2026-09-14T00:20:00Z',
+        summary: { scheduler: { status: 'active' }, last_run: { running: true } },
+        t: localized,
+      }))
+      assert.ok(html.includes('05:05:00'))
+      assert.ok(html.includes(localized('ops.fresh.nextTitle')))
+      assert.ok(!html.includes(localized('ops.fresh.awaitingRun')))
+      assert.ok(!html.includes(localized('ops.fresh.schedulerUnavailable')))
+    }
+  } finally { Date.now = realNow }
 })
 
 test('publication option preserves existing fee and route sort behavior', () => {

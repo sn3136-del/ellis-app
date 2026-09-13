@@ -1453,24 +1453,68 @@ def _recheck_coverage(rows: list, now) -> dict:
 
 
 def _sweep_timer_status() -> dict:
-    """Report the real timer state; a missing/stopped timer has no countdown."""
+    """Report systemd's armed time, or its next calendar slot during a run."""
+    import re
     import subprocess
     from datetime import datetime, timezone
+
+    def utc_time(raw):
+        match = re.fullmatch(r"[A-Za-z]{3} (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}(?:\.\d+)?) UTC", raw.strip())
+        if not match:
+            return None
+        try:
+            return datetime.fromisoformat(" ".join(match.groups())).replace(tzinfo=timezone.utc)
+        except ValueError:
+            return None
+
+    def duration_seconds(raw):
+        if raw in ('0', '0s', '0us'):
+            return 0
+        pattern = r"(\d+(?:\.\d+)?)\s*(us|ms|s|min|h|d)"
+        if not re.fullmatch(r"(?:" + pattern + r"\s*)+", raw):
+            return None
+        units = {'us': .000001, 'ms': .001, 's': 1, 'min': 60, 'h': 3600, 'd': 86400}
+        return sum(float(number) * units[unit] for number, unit in re.findall(pattern, raw))
+
+    # systemd interprets unzoned calendars in the host timezone, not an
+    # application's private TZ override. Keep explicit zones in the calendar.
+    env = {key: value for key, value in os.environ.items() if key != 'TZ'}
+    env['LC_ALL'] = 'C'
     try:
-        proc = subprocess.run(["systemctl", "show", "ellis-freshness.timer",
-            "--property=LoadState,ActiveState,NextElapseUSecRealtime"],
-            capture_output=True, text=True, timeout=2)
+        proc = subprocess.run(["systemctl", "show", "ellis-freshness.timer", "--timestamp=utc",
+            "--property=LoadState,ActiveState,NextElapseUSecRealtime,TimersCalendar,RandomizedDelayUSec,AccuracyUSec"],
+            capture_output=True, text=True, timeout=2, env=env)
         fields = dict(line.split("=", 1) for line in (proc.stdout or "").splitlines() if "=" in line)
         active = proc.returncode == 0 and fields.get("LoadState") == "loaded" and fields.get("ActiveState") == "active"
-        at = None
-        raw = fields.get("NextElapseUSecRealtime", "")
-        if active and raw not in ("", "n/a", "0"):
-            parts = raw.split()
-            if len(parts) >= 3 and parts[-1] == "UTC":
-                dt = datetime.strptime(parts[1] + " " + parts[2], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-                if dt > datetime.now(timezone.utc):
-                    at = dt.isoformat()
-        return {"status": "active" if active else "inactive", "next_sweep_at": at}
+        result = {"status": "active" if active else "inactive", "next_sweep_at": None}
+        if not active:
+            return result
+        now = datetime.now(timezone.utc)
+        at = utc_time(fields.get("NextElapseUSecRealtime", ""))
+        if at and at > now:
+            return dict(result, next_sweep_at=at.isoformat(), schedule_basis='timer')
+        # An active oneshot leaves NextElapse blank. Re-evaluate only the
+        # installed OnCalendar expressions; never invent a six-hour offset.
+        calendars = re.findall(r"\{\s*OnCalendar=(.*?)\s*;\s*next_elapse=[^}]*\}",
+                               fields.get('TimersCalendar', ''))
+        if not calendars or len(calendars) > 8 or any(not c or len(c) > 500 for c in calendars):
+            return result
+        try:
+            parsed = subprocess.run(['systemd-analyze', 'calendar', '--iterations=1',
+                '--base-time=' + now.isoformat(), '--', *calendars],
+                capture_output=True, text=True, timeout=2, env=env)
+        except (OSError, subprocess.SubprocessError):
+            return result
+        if parsed.returncode != 0:
+            return result
+        times = [utc_time(line.split(':', 1)[1]) for line in (parsed.stdout or '').splitlines()
+                 if re.match(r"\s*(?:Next elapse|\(in UTC\)):", line)]
+        times = [at for at in times if at and at > now]
+        if not times:
+            return result
+        return dict(result, next_sweep_at=min(times).isoformat(), schedule_basis='calendar',
+            randomized_delay_seconds=duration_seconds(fields.get('RandomizedDelayUSec', '')),
+            accuracy_seconds=duration_seconds(fields.get('AccuracyUSec', '')))
     except Exception:
         return {"status": "unavailable", "next_sweep_at": None}
 
