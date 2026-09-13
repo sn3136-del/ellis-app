@@ -40,6 +40,7 @@ import re
 import threading
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
+from urllib.parse import unquote, urlsplit
 
 from .authority import hostname, is_government_host
 from .authority_ownership import government_owner
@@ -85,6 +86,33 @@ _PROVIDERS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "dat
                                "database_seed", "authorised_providers.json")
 _PROVIDER_LOCK = threading.Lock()
 _PROVIDER_STATE: dict = {"mtime": None, "entries": [], "errors": []}
+
+
+# The Korean Embassy in Jakarta operates these exact pages on Google Sites.
+# Ownership is explicitly announced by the embassy (2024-08-14), verified
+# 2026-09-13: https://overseas.mofa.go.kr/id-id/brd/m_2710/view.do?page=1&seq=748814
+# This is an embassy publication, not a visa-service provider appointment.
+# Never infer ownership for google.com, other Sites, or unreviewed child pages.
+_JAKARTA_OFFICIAL_PAGES = frozenset({
+    "/view/koreanembassy2",
+    "/view/koreanembassy2/informasi-umum",
+    "/view/koreanembassy2/visa-jangka-pendek/kunjungan-wisata-umumc-3-9",
+    "/view/koreanembassy2/참고사항/공통서류-안내",
+})
+_JAKARTA_OWNERSHIP_NOTICE = (
+    "https://overseas.mofa.go.kr/id-id/brd/m_2710/view.do?page=1&seq=748814"
+)
+
+
+def _embassy_published_page(url: str, destination: str) -> bool:
+    try:
+        parsed = urlsplit(url)
+        return (destination == "KOR" and parsed.scheme == "https"
+                and parsed.netloc == "sites.google.com"
+                and not parsed.query
+                and unquote(parsed.path) in _JAKARTA_OFFICIAL_PAGES)
+    except (TypeError, ValueError):
+        return False
 
 
 def schengen_destinations() -> frozenset[str]:
@@ -236,6 +264,10 @@ def authority_for(url: str, route, *, citation: str = "") -> Authority:
     the page is (a quote, a note); the URL itself always counts."""
     dest, nat = _route_parts(route)
     host = hostname(str(url or ""))
+    if _embassy_published_page(str(url or ""), dest):
+        return Authority(KIND_DESTINATION, owner="KOR",
+                         appointed_by=_JAKARTA_OWNERSHIP_NOTICE,
+                         note="Exact page published by the Korean Embassy in Jakarta")
     if not host or not is_government_host(host):
         provider = _provider_for(host, dest) if host and dest else None
         if provider is not None:
