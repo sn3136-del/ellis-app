@@ -1,0 +1,18 @@
+{
+  "release_id": "publication20260913aa",
+  "source_commit": "8df05c51db7902e82c0998fe1fc97abaf882b564",
+  "frontend_tests_passed": 459,
+  "frontend_tests_failed": 0,
+  "logs_sha256": {
+    "combined-ui-frontend-test.log": "741dfaa24dc1aee0ed9e90890f6bfc2f1cb6e2aaf919a23e21c91ab74cde5714",
+    "combined-ui-frontend-build.log": "126b042882af5c5e169b4a40b356ee16143cf9605ede341ef51718d4ea53977e",
+    "combined-ui-frontend-scan.log": "c212d9ffbfe7b4baf7a3c707a0a626ebda7ba3768cad3f3a8ad042a74467c0e3"
+  },
+  "scope": "Hide the traveler checks-and-appointments card when its information is unconfirmed; display readable QC change-log updates with accurate AI or human authorship labels. No backend, data, publication-grade or scheduler changes.",
+  "expected_index_sha256": "c0abfc0ce03c6478bf71e7a9f0b5ff3d6e9c79b46096ec057997672ffa626310",
+  "state": "deployed",
+  "started_at": "2026-09-13T22:36:00.524544+00:00",
+  "backup": "/root/ellis-backup-frontend-publication20260913aa",
+  "deployed_at": "2026-09-13T22:36:00.557711+00:00",
+  "files": 16
+}
