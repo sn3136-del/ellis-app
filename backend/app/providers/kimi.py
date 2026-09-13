@@ -263,13 +263,18 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
 
     def _chat(self, system: str, user: str, json_mode: bool = True, *,
               timeout: float | None = None, max_tokens: int | None = None,
-              temperature: float | None = None, model: str | None = None) -> dict:
+              temperature: float | None = None, model: str | None = None,
+              reasoning_effort: str | None = None) -> dict:
         # Always prefix the Ellis identity so the model can never present itself
         # as Kimi/Moonshot/the underlying model, or as an official/lawyer/embassy.
         from ..i18n import ELLIS_SYSTEM_IDENTITY
         system = ELLIS_SYSTEM_IDENTITY + "\n\n" + system
         body = {"model": model or self._model, "messages": [
             {"role": "system", "content": system}, {"role": "user", "content": user}]}
+        if reasoning_effort is not None:
+            if body["model"] != "kimi-k3" or reasoning_effort not in {"low", "high", "max"}:
+                raise ValueError("reasoning_effort requires a supported Kimi K3 setting")
+            body["reasoning_effort"] = reasoning_effort
         if json_mode:
             body["response_format"] = {"type": "json_object"}
         if max_tokens is not None:
@@ -306,12 +311,9 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
     def translate(self, text: str, target: str, source: str) -> str:  # pragma: no cover - needs key
         """Translate a document's extracted text.
 
-        K3 is a reasoning model, and this call used to set neither temperature
-        nor max_tokens — so a translation could spend most of its wall clock
-        deliberating about text that needs no deliberation, and applicants
-        waited. Translation is not a reasoning task: temperature 0 is correct
-        for it anyway, and the answer's length is bounded by the input's, so
-        both are stated instead of left open.
+        K3 supports low reasoning effort for this bounded transformation.
+        Its sampling temperature is fixed, so passing the old temperature=0
+        caused an invalid-request error instead of a translation.
         """
         from ..i18n import LANGUAGE_NAMES
         tgt = LANGUAGE_NAMES.get(target, target)
@@ -325,7 +327,9 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
             f"translate, reorder, or remove them. Translate directly: do not "
             f"explain, do not deliberate, do not comment. Reply JSON "
             f"{{\"translated\":\"...\"}}.",
-            text, max_tokens=budget, temperature=0.0)
+            text, max_tokens=budget,
+            temperature=None if self._model in {"kimi-k3", "kimi-k2.6", "kimi-k2.7-code", "kimi-k2.7-code-highspeed"} else 0.0,
+            reasoning_effort="low" if self._model == "kimi-k3" else None)
         return out.get("translated", text)
 
     def translate_batch(self, items: dict, target: str, source: str,
@@ -342,7 +346,8 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
             f"Keys must stay EXACTLY as given. Preserve every ⟦T…⟧ sentinel "
             f"EXACTLY as written. Reply as a JSON object with the SAME keys.",
             json.dumps(items, ensure_ascii=False),
-            max_tokens=8000, timeout=120, model=model)
+            max_tokens=8000, timeout=120, model=model,
+            reasoning_effort="low" if (model or self._model) == "kimi-k3" else None)
         return {str(k): str(v) for k, v in (out or {}).items()}
 
     def run(self, goal: str, context: dict) -> AgentResult:

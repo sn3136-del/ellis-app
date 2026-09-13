@@ -16,6 +16,7 @@
 // server resolves whatever is typed. The chrome translates with the app's
 // language picker; record VALUES stay as stored — they are the dataset.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { valueTranslations } from '../lib/valueTranslations.js'
 
 // Console-wide motion and polish. Bars grow, numbers count, cards lift —
 // all suppressed for readers who ask for reduced motion.
@@ -2378,31 +2379,27 @@ function MicroStack({ segs, height = 10, legend = true }) {
 const PAGE = 50
 
 function useTypeNames(client, data, lang) {
-  const [map, setMap] = useState({})
+  const [map, setMap] = useState({ lang, values: {} })
   useEffect(() => {
     const records = data?.records || []
     if (lang === 'en' || !records.length) {
-      setMap((m) => (Object.keys(m).length ? {} : m))
+      setMap({ lang, values: {} })
       return
     }
     const names = [...new Set(records.map((r) => r.visa_type_name)
       .filter((v) => v && /[A-Za-z]{3}/.test(v)))].slice(0, 120)
     if (!names.length) {
-      setMap((m) => (Object.keys(m).length ? {} : m))
+      setMap({ lang, values: {} })
       return
     }
-    const entries = {}
-    names.forEach((n, i) => { entries['n' + i] = n })
+    setMap({ lang, values: valueTranslations.snapshot(lang, names) })
     let live = true
-    client.i18nCatalog(lang, entries).then((out) => {
-      if (!live || !out?.entries) return
-      const m = {}
-      names.forEach((n, i) => { const v = out.entries['n' + i]; if (v) m[n] = v })
-      setMap(m)
-    }).catch(() => { /* English stays */ })
+    valueTranslations.load(lang, names, (target, entries) => client.i18nCatalog(target, entries)).then((m) => {
+      if (live) setMap({ lang, values: m })
+    })
     return () => { live = false }
   }, [client, data, lang])
-  return map
+  return map.lang === lang ? map.values : {}
 }
 
 /** Dynamic DATA values (record content, the monitor's page readings, reader
@@ -2413,98 +2410,35 @@ function useTypeNames(client, data, lang) {
  *  round-trip unchanged). Verbatim source quotes are exempt: they are
  *  evidence and stay in the page's own words. */
 function useValueTranslations(client, lang) {
-  const LSK = `ellis.opsvals.v2.${lang}`
-  const [map, setMap] = useState(() => {
-    if (lang === 'en') return {}
-    try { return JSON.parse(localStorage.getItem(LSK) || '{}') } catch { return {} }
-  })
-  const queue = useRef(new Set())
-  const flushRef = useRef(() => {})
-  const inflight = useRef(new Set())
-  const timer = useRef(null)
+  const [, redraw] = useState(0)
+  const scope = useMemo(() => ({ lang, client, active: true, queue: new Set(), attempted: new Set(), timer: null }), [lang, client])
   useEffect(() => {
-    if (lang === 'en') { setMap({}); return }
-    try { setMap(JSON.parse(localStorage.getItem(LSK) || '{}')) } catch { setMap({}) }
-  }, [lang])  // eslint-disable-line react-hooks/exhaustive-deps
-  const flush = useCallback(() => {
-    const batch = [...queue.current].slice(0, 120)
-    if (!batch.length) return
-    batch.forEach((v) => { queue.current.delete(v); inflight.current.add(v) })
-    const entries = {}
-    batch.forEach((v, i) => { entries['v' + i] = v })
-    client.i18nCatalog(lang, entries).then((out) => {
-      if (!out?.entries) return
-      setMap((m) => {
-        const next = { ...m }
-        batch.forEach((v, i) => {
-          const tr = out.entries['v' + i]
-          if (tr && tr !== v) next[v.slice(0, 400)] = tr
-        })
-        try {
-          const keys = Object.keys(next)
-          localStorage.setItem(LSK, JSON.stringify(
-            keys.length > 1500 ? {} : next))
-        } catch { /* quota: cache resets next load */ }
-        return next
-      })
-    }).catch(() => { /* English stays visible */ })
-      .finally(() => {
-        batch.forEach((v) => inflight.current.delete(v))
-        // A page can queue more than one batch; without this the tail after
-        // the first 120 strings stayed English until something re-rendered.
-        if (queue.current.size) {
-          if (timer.current) clearTimeout(timer.current)
-          timer.current = setTimeout(flushRef.current, 200)
-        }
-      })
-  }, [client, lang])  // eslint-disable-line react-hooks/exhaustive-deps
-  flushRef.current = flush
-  // A document checklist or a conditions paragraph can run past the
-  // catalog's per-string cap; those are exactly the fields an operator must
-  // read. Long values translate SEGMENT BY SEGMENT (sentence and list
-  // boundaries) and are rejoined, so length never means untranslated.
-  const CAP = 360
-  const segment = (v) => {
-    const out = []
-    let rest = v
-    while (rest.length > CAP) {
-      const win = rest.slice(0, CAP)
-      let cut = Math.max(win.lastIndexOf('. '), win.lastIndexOf('; '),
-                         win.lastIndexOf(', '))
-      if (cut < 60) cut = win.lastIndexOf(' ')
-      if (cut < 60) cut = CAP
-      out.push(rest.slice(0, cut + 1).trim())
-      rest = rest.slice(cut + 1)
-    }
-    if (rest.trim()) out.push(rest.trim())
-    return out
-  }
-  const want = useCallback((piece) => {
-    if (!queue.current.has(piece) && !inflight.current.has(piece)) {
-      queue.current.add(piece)
-      if (timer.current) clearTimeout(timer.current)
-      timer.current = setTimeout(flush, 350)
-    }
-  }, [flush])
+    scope.active = true
+    if (scope.queue.size && scope.flush) scope.timer = setTimeout(scope.flush, 0)
+    return () => { scope.active = false; clearTimeout(scope.timer); scope.timer = null }
+  }, [scope])
   return useCallback((sIn) => {
     if (lang === 'en') return sIn
-    const v = String(sIn ?? '')
-    if (!v || v.length < 3) return sIn
-    if (/^https?:\/\//.test(v)) return sIn
-    if (/^[\d\s.,:;%/()+·-]*$/.test(v)) return sIn
-    if (!/[A-Za-z]{2}/.test(v)) return sIn
-    if (v.length <= CAP) {
-      const hit = map[v]
-      if (hit) return hit
-      want(v)
-      return sIn
+    const text = String(sIn ?? '')
+    if (!text || /^https?:\/\//.test(text) || !/[A-Za-z]{2}/.test(text)) return sIn
+    const hit = valueTranslations.get(lang, text)
+    if (hit !== undefined) return hit
+    if (!scope.attempted.has(text)) {
+      scope.queue.add(text)
+      scope.flush = () => {
+        scope.timer = null
+        if (!scope.active) return
+        const batch = [...scope.queue]
+        scope.queue.clear()
+        batch.forEach((value) => scope.attempted.add(value))
+        valueTranslations.load(lang, batch, (target, entries) => client.i18nCatalog(target, entries)).then(() => {
+          if (scope.active) redraw((n) => n + 1)
+        })
+      }
+      if (!scope.timer) scope.timer = setTimeout(scope.flush, 40)
     }
-    const pieces = segment(v)
-    const done = pieces.map((x) => map[x])
-    pieces.forEach((x, i) => { if (!done[i]) want(x) })
-    if (done.every(Boolean)) return done.join(' ')
     return sIn
-  }, [lang, map, want])
+  }, [lang, client, scope])
 }
 
 export function qualityFilterQuery(filters) {

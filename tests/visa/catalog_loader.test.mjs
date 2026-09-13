@@ -173,3 +173,27 @@ test('clearing a stale RTL overlay does not mark untranslated English fallback r
   setDynamicCatalog('ar', {})
   assert.equal(hasDynamicCatalog('ar'), false)
 })
+
+test('all current bundled Chinese UI keys are immediate and make zero translation requests', async () => {
+  for (const lang of ['zh-CN', 'zh-Hant']) {
+    const calls = [], installed = [], store = memory()
+    store.setItem('ellis.cat.v2.' + lang, JSON.stringify({version:2,source:catalogSignature(STRINGS.en),entries:{'ops.stat.srcLine':'STALE OVERLAY'}}))
+    const loader=createCatalogLoader({entries:STRINGS.en,bundled:STRINGS,storage:()=>store,
+      install:(code, entries)=>installed.push({code,entries}),request:async(...args)=>{calls.push(args)}})
+    assert.equal(loader.needsLoad(lang),false)
+    await loader.load(lang)
+    assert.equal(calls.length,0)
+    assert.equal(Object.keys(installed[0].entries).length,Object.keys(STRINGS.en).length)
+    assert.equal(installed[0].entries['ops.stat.srcLine'],STRINGS[lang]['ops.stat.srcLine'])
+  }
+})
+
+test('a missing bundled UI key alone requests dynamic translation and retains current maintained wording', async () => {
+  const calls=[],installed=[]
+  const loader=createCatalogLoader({entries:{known:'Known',new:'New'},bundled:{'zh-CN':{known:'已知'}},storage:()=>memory(),
+    install:(_lang,v)=>installed.push(v),request:async(_lang,entries)=>{calls.push(entries);return {status:'ok',entries:{new:'新增',known:'wrong override'}}}})
+  assert.equal(loader.needsLoad('zh-CN'),true)
+  await loader.load('zh-CN')
+  assert.deepEqual(calls,[{new:'New'}])
+  assert.deepEqual(installed.at(-1),{known:'已知',new:'新增'})
+})

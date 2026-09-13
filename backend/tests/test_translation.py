@@ -244,19 +244,23 @@ def test_no_document_text_in_audit_or_checklist_payload(client):
     assert "Extracto bancario" not in _json.dumps(j)
 
 
-def test_translation_is_bounded_and_deterministic():
-    """K3 is a reasoning model, and this call set neither temperature nor
-    max_tokens — so a translation could spend most of its wall clock
-    deliberating about text that needs no deliberation, and the applicant
-    waited. Translation is not a reasoning task."""
-    import inspect
+def test_translation_is_bounded_with_supported_k3_effort(monkeypatch):
+    """K3 fixes temperature at1; use its supported effort knob and keep the
+    real input-scaled token bounds instead of pinning an invalid parameter."""
     from app.providers import kimi
-    src = inspect.getsource(kimi.LiveKimiProvider.translate)
-    assert "temperature=0.0" in src, "translation must be deterministic"
-    assert "max_tokens=budget" in src, "translation must be bounded"
-    assert "do not deliberate" in src
-    # The budget scales with the input, with a floor and a ceiling.
-    assert "max(1200" in src and "min(16000" in src
+    provider = object.__new__(kimi.LiveKimiProvider)
+    provider._model = "kimi-k3"
+    calls = []
+    def chat(system, text, **kwargs):
+        calls.append((system, kwargs))
+        return {"translated": "译文"}
+    monkeypatch.setattr(provider, "_chat", chat)
+    for text in ("Short text", "Word " * 50000):
+        assert provider.translate(text, "zh-CN", "en") == "译文"
+    assert [kwargs["max_tokens"] for _, kwargs in calls] == [1200, 16000]
+    assert all(kwargs["reasoning_effort"] == "low" and kwargs["temperature"] is None
+               for _, kwargs in calls)
+    assert all("do not deliberate" in system for system, _ in calls)
 
 
 def test_the_translate_button_needs_one_press():

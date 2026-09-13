@@ -11,7 +11,7 @@ import { act, create } from 'react-test-renderer'
 const stubs = {
   'visaBackend.js': 'export const createVisaClient = () => globalThis.__requestTestClient',
   'visaSession.js': 'export const newSession = () => "request-order-test"',
-  'locale.jsx': 'export const useLocale = () => ({lang:"en",t:(key)=>key})',
+  'locale.jsx': 'export const useLocale = () => ({lang:globalThis.__requestTestLang || "en",t:(key)=>key})',
   'countryNames.js': 'export const useLocalizedCountries = () => []',
   'App.jsx': 'export const EllisMark = () => null',
   'ui.jsx': 'export const Loading = () => null',
@@ -44,7 +44,7 @@ function answer(label, nationality = 'HKG', destination = 'VNM', extra = {}) {
       government_fee: { amount: 25, currency: 'USD' }, permitted_stay: '90 days', visa_products: [] }, ...extra }
 }
 async function screen(t, hash = '#database') {
-  const saved = Object.fromEntries(['window', 'document', 'setTimeout', 'clearTimeout', '__requestTestClient'].map(k => [k, globalThis[k]]))
+  const saved = Object.fromEntries(['window', 'document', 'setTimeout', 'clearTimeout', '__requestTestClient', '__requestTestLang'].map(k => [k, globalThis[k]]))
   const handlers = new Map(), timers = new Map()
   let timerId = 0
   globalThis.setTimeout = (fn, delay) => { timers.set(++timerId, { fn, delay }); return timerId }
@@ -52,11 +52,12 @@ async function screen(t, hash = '#database') {
   globalThis.window = { location: { hash }, history: { replaceState: (_state, _title, next) => { window.location.hash = next } },
     addEventListener: (name, fn) => handlers.set(name, fn), removeEventListener: name => handlers.delete(name) }
   globalThis.document = { addEventListener() {}, removeEventListener() {} }
-  const asks = [], lookups = [], reports = []
+  const asks = [], lookups = [], reports = [], translations = []
   globalThis.__requestTestClient = {
     snapshotRegistries: async () => ({ countries: [], nationalities: [], travel_document_types: [] }),
     databaseAsk: (...args) => { const d = deferred(); asks.push({ ...d, args }); return d.promise },
     databaseLookup: body => { const d = deferred(); lookups.push({ ...d, body }); return d.promise },
+    i18nCatalog: (lang, entries) => { const d = deferred(); translations.push({ ...d, lang, entries }); return d.promise },
     databaseReportIssue: body => { const d = deferred(); reports.push({ ...d, body }); return d.promise },
   }
   let renderer
@@ -71,7 +72,10 @@ async function screen(t, hash = '#database') {
   const find = id => renderer.root.findByProps({ 'data-testid': id })
   const has = id => renderer.root.findAllByProps({ 'data-testid': id }).length > 0
   const text = () => JSON.stringify(renderer.toJSON())
-  return { renderer, asks, lookups, reports, find, has, text,
+  return { renderer, asks, lookups, reports, translations, find, has, text,
+    async language(lang) {
+      await act(async () => { globalThis.__requestTestLang = lang; renderer.update(createElement(TravelDatabase)); await Promise.resolve() })
+    },
     async ask(question) {
       act(() => find('database-question').props.onChange({ target: { value: question } }))
       act(() => find('database-question').props.onKeyDown({ key: 'Enter' }))
@@ -230,4 +234,26 @@ test('reopening a route after new search starts a fresh lookup', async t => {
   assert.equal(s.lookups.length, count + 1)
   await s.finish(reopened, answer('REOPENED ANSWER'))
   assert.ok(s.text().includes('REOPENED ANSWER'))
+})
+
+
+test('actual reader rejects stale locale translations and reuses the exact warm language without another request', async t => {
+  const s = await screen(t, '#database/HKG/VNM/tourism/ordinary_passport')
+  await s.finish(s.lookups[0], answer('UNIQUE READER TRANSLATION PRODUCT'))
+  await s.language('zh-CN')
+  const simplified = s.translations.at(-1)
+  await s.language('zh-Hant')
+  const traditional = s.translations.at(-1)
+  const result = (request, marker) => ({status:'ok',entries:Object.fromEntries(
+    Object.entries(request.entries).map(([k,v])=>[k,marker+v]))})
+  await s.finish(simplified, result(simplified,'简'))
+  assert.ok(!s.text().includes('简UNIQUE READER TRANSLATION PRODUCT'))
+  await s.finish(traditional, result(traditional,'繁'))
+  assert.ok(s.text().includes('繁UNIQUE READER TRANSLATION PRODUCT'))
+  const count = s.translations.length
+  await s.language('zh-CN')
+  assert.ok(s.text().includes('简UNIQUE READER TRANSLATION PRODUCT'))
+  assert.equal(s.translations.length,count)
+  await s.language('en')
+  assert.ok(!s.text().includes('简UNIQUE READER TRANSLATION PRODUCT'))
 })

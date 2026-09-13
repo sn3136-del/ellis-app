@@ -8,7 +8,7 @@ const PREFIX = 'ellis.cat.v2.'
 const LEGACY_PREFIX = 'ellis.cat.v1.'
 
 export function createCatalogLoader({ entries, defaultLanguage = 'en', request,
-  install, storage = () => globalThis.localStorage }) {
+  install, bundled = {}, storage = () => globalThis.localStorage }) {
   const source = Object.freeze({ ...entries })
   const signature = catalogSignature(source)
   const ready = new Set()
@@ -19,6 +19,14 @@ export function createCatalogLoader({ entries, defaultLanguage = 'en', request,
     const result = Object.fromEntries(Object.entries(value).filter(([key, text]) =>
       Object.hasOwn(source, key) && typeof text === 'string' && text.trim()))
     return Object.keys(result).length ? result : null
+  }
+
+  function localEntries(lang) {
+    return validEntries(bundled[lang]) || {}
+  }
+  function missingEntries(lang) {
+    const local = localEntries(lang)
+    return Object.fromEntries(Object.entries(source).filter(([key]) => !Object.hasOwn(local, key)))
   }
 
   function cached(lang) {
@@ -34,29 +42,40 @@ export function createCatalogLoader({ entries, defaultLanguage = 'en', request,
   }
 
   function needsLoad(lang) {
-    return lang !== defaultLanguage && !ready.has(lang) && !cached(lang)
+    return lang !== defaultLanguage && !ready.has(lang) && Object.keys(missingEntries(lang)).length > 0 && !cached(lang)
   }
 
   function load(lang) {
     if (lang === defaultLanguage || ready.has(lang)) return Promise.resolve(true)
     if (inFlight.has(lang)) return inFlight.get(lang)
+    const local = localEntries(lang)
+    const missing = missingEntries(lang)
+    // Maintained Chinese strings ship with this exact application build.
+    // Do not replace them with an older browser overlay or pay to translate
+    // all labels again before the language switch can complete.
+    if (!Object.keys(missing).length) {
+      install(lang, local)
+      ready.add(lang)
+      return Promise.resolve(true)
+    }
     const saved = cached(lang)
     if (saved) {
-      install(lang, saved)
+      install(lang, { ...saved, ...local })
       ready.add(lang)
       return Promise.resolve(true)
     }
     // No unversioned in-memory overlay may outlive its source catalog either.
-    install(lang, {})
+    install(lang, local)
     const pending = Promise.resolve().then(async () => {
-      const response = await request(lang, source)
+      const response = await request(lang, missing)
       if (!response || !['ok', 'partial', 'passthrough'].includes(response.status)) return false
       const translated = validEntries(response.entries)
       if (!translated) return false
-      install(lang, translated)
+      const complete = { ...translated, ...local }
+      install(lang, complete)
       ready.add(lang)
       try {
-        storage()?.setItem(PREFIX + lang, JSON.stringify({ version: 2, source: signature, entries: translated }))
+        storage()?.setItem(PREFIX + lang, JSON.stringify({ version: 2, source: signature, entries: complete }))
       } catch { /* memory catalog and shipped fallback still work without storage */ }
       return true
     }).catch(() => false).finally(() => {

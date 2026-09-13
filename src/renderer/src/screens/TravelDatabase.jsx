@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loading } from '../components/ui.jsx'
 import { EllisMark } from '../App.jsx'
 import { useLocale } from '../lib/locale.jsx'
+import { valueTranslations } from '../lib/valueTranslations.js'
 import { useLocalizedCountries } from '../lib/countryNames.js'
 import { DEPARTURE_CITIES } from '../lib/departureCities.js'
 import { createVisaClient } from '../lib/visaBackend.js'
@@ -783,7 +784,7 @@ export default function TravelDatabase({ onBack }) {
   // Every user-facing string the decision carries, translated in ONE masked,
   // cached Kimi catalog call whenever the UI language is not English.
   useEffect(() => {
-    if (!g || lang === 'en') { setTx({}); return }
+    if (!g || lang === 'en') { setTx({}); setTxPending(false); return }
     const products = (g.visa_products || []).filter((x) => x && typeof x === 'object')
     const texts = [...new Set([
       asText(g.visa_category), asText(g.permitted_stay),
@@ -812,24 +813,19 @@ export default function TravelDatabase({ onBack }) {
       ...itemsOf(g.exceptions), ...itemsOf(g.uncertainty),
       ...itemsOf(result?.advisories),
     ].filter(Boolean))]
-    if (!texts.length) { setTx({}); return }
-    setTxPending(true)
-    const entries = {}
-    texts.forEach((s, i) => { entries['g' + i] = s })
+    const cached = valueTranslations.snapshot(lang, texts)
+    setTx({ lang, values: cached })
+    setTxPending(texts.some((text) => !Object.hasOwn(cached, text)))
     let live = true
-    client.i18nCatalog(lang, entries).then((out) => {
+    valueTranslations.load(lang, texts, (target, entries) => client.i18nCatalog(target, entries)).then((m) => {
       if (!live) return
-      const m = {}
-      texts.forEach((s, i) => {
-        const v = (out?.entries || {})['g' + i]
-        if (v) m[s] = v
-      })
-      setTx(m)
+      setTx({ lang, values: m })
       setTxPending(false)
-    }).catch(() => { if (live) setTxPending(false) /* honest English fallback */ })
+    })
     return () => { live = false }
-  }, [g, lang])
-  const T = (s) => (s && tx[s]) || s
+  }, [g, lang, client])
+  const T = (s) => (s && (valueTranslations.get(lang, s) || (tx.lang === lang && tx.values?.[s]))) || s
+
   const arrivalLines = arrivalCardLines(g?.arrival_card, T, t('db.arrivalCard'))
 
   // AI Q&A as a conversation: every exchange is a turn in a thread, the

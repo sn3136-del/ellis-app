@@ -25,6 +25,8 @@ import json
 import os
 import pathlib
 import re
+import threading
+import tempfile
 
 # Supported UI languages. en / zh-CN / zh-Hant ship as maintained static
 # catalogs in the renderer; every other language here is served DYNAMICALLY —
@@ -139,6 +141,7 @@ def restore_tokens(text: str, mapping: dict) -> str:
 
 # --- translation ------------------------------------------------------------
 _CACHE: dict[str, str] = {}
+_CACHE_LOCK = threading.RLock()
 
 # The cache survives restarts: an in-memory dict alone made every language
 # switch re-pay the full Kimi pass after each relaunch — and a fresh clone
@@ -171,12 +174,26 @@ def _persist_cache() -> None:
 
 
 def flush_cache() -> None:
-    try:
-        path = _cache_path()
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(_CACHE, ensure_ascii=False))
-    except Exception:  # noqa: BLE001
-        pass
+    # One atomic snapshot: catalog translation can add many strings at once,
+    # and concurrent callers must never expose a partially-written JSON file.
+    with _CACHE_LOCK:
+        temporary = None
+        try:
+            path = _cache_path()
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                             prefix=".i18n-", suffix=".json", delete=False) as stream:
+                temporary = pathlib.Path(stream.name)
+                json.dump(_CACHE, stream, ensure_ascii=False)
+            os.replace(temporary, path)
+        except Exception:  # noqa: BLE001 — a cache miss remains safe
+            pass
+        finally:
+            if temporary is not None:
+                try:
+                    temporary.unlink(missing_ok=True)
+                except OSError:
+                    pass
 
 
 _load_disk_cache()
@@ -251,7 +268,8 @@ def translate(text: str, target_lang: str, source_lang: str = "auto", *, transla
                 "target_lang": target_lang, "status": "unavailable", "cached": False}
     translated = restore_tokens(masked_translation, mapping)
     translated = _no_em_dashes(translated)
-    _CACHE[key] = translated
+    with _CACHE_LOCK:
+        _CACHE[key] = translated
     _persist_cache()
     return {"original": text, "translated": translated, "source_lang": source_lang,
             "target_lang": target_lang, "status": "ok", "cached": False}
@@ -341,9 +359,7 @@ def translate_catalog(entries: dict, target_lang: str, *,
                 except Exception:  # noqa: BLE001 — one bad chunk stays English
                     results[idx] = None
 
-    if unavailable and not out:
-        return {"status": "unavailable", "entries": entries}
-
+    added = 0
     for (chunk_keys, _masked, mappings), translated in zip(prepared, results):
         for k in chunk_keys:
             got = str((translated or {}).get(k) or "").strip()
@@ -353,10 +369,14 @@ def translate_catalog(entries: dict, target_lang: str, *,
                 missed += 1
                 continue
             restored = _no_em_dashes(restore_tokens(got, mappings[k]))
-            _CACHE[_cache_key(source_lang, target_lang, todo[k])] = restored
-            _persist_cache()
+            with _CACHE_LOCK:
+                _CACHE[_cache_key(source_lang, target_lang, todo[k])] = restored
+            added += 1
             out[k] = restored
-    return {"status": "partial" if missed else "ok", "entries": out}
+    if added:
+        flush_cache()
+    status = "unavailable" if unavailable and missed == len(entries) else "partial" if missed else "ok"
+    return {"status": status, "entries": out}
 
 
 def clear_cache():

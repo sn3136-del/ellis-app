@@ -1,8 +1,8 @@
 // Locale context: holds the current UI language, persists the choice, and
 // exposes a t() bound to it. English / Simplified / Traditional Chinese ship
-// as static maintained catalogs; EVERY non-English language is dynamic — the
-// English catalog is translated on the backend by Kimi K3 (masked, cached,
-// honest English fallback) and overlaid at runtime. RTL languages flip the
+// as maintained catalogs and switch immediately. Other UI languages and
+// missing catalog keys use masked, cached Kimi translations with an honest
+// English fallback. Dynamic route content uses Kimi separately. RTL languages flip the
 // document direction.
 import { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react'
 import {
@@ -31,10 +31,11 @@ function applyDirection(lang) {
 
 const catalogLoader = createCatalogLoader({
   entries: STRINGS[DEFAULT_LANG], defaultLanguage: DEFAULT_LANG,
+  bundled: STRINGS,
   install: setDynamicCatalog,
   request: async (lang, entries) => {
-    // Every non-English language, including both Chinese locales, keeps its
-    // dynamic overlay. The backend reuses unchanged per-string translations.
+    // Only UI keys missing from the maintained bundled language need AI.
+    // Route and record content use their separate exact-value cache.
     const [{ createVisaClient }, { newSession }] = await Promise.all([
       import('./visaBackend.js'), import('./visaSession.js'),
     ])
