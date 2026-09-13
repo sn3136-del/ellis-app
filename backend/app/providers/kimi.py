@@ -287,9 +287,16 @@ def _complete_final_json(payload) -> dict:
     def invalid_constant(_value):
         raise ValueError("non-JSON numeric constant")
 
+    def finite_float(value):
+        from math import isfinite
+        number = float(value)
+        if not isfinite(number):
+            raise ValueError("non-finite JSON number")
+        return number
+
     try:
         out = json.loads(msg["content"], object_pairs_hook=object_pairs,
-                         parse_constant=invalid_constant)
+                         parse_constant=invalid_constant, parse_float=finite_float)
     except (ValueError, TypeError, RecursionError):
         raise KimiInvalidResponse("invalid_final_json") from None
     if not isinstance(out, dict):

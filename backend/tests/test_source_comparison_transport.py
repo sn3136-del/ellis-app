@@ -103,6 +103,8 @@ BAD_FINALS = [
     (envelope('{"consistent":true,"consistent":false}'), 'invalid_final_json'),
     (envelope('{"fee":NaN}'), 'invalid_final_json'),
     (envelope('{"fee":Infinity}'), 'invalid_final_json'),
+    (envelope('{"corrected_fields":{"government_fee":{"amount":1e999}}}'), 'invalid_final_json'),
+    (envelope('{"corrected_fields":{"government_fee":{"amount":-1e999}}}'), 'invalid_final_json'),
     ({'choices': []}, 'incomplete_final_response'),
     ({'choices': envelope()['choices'] * 2}, 'incomplete_final_response'),
     ({'choices': [{'finish_reason': 'stop', 'message': {'reasoning_content': json.dumps(ANSWER)}}]}, 'incomplete_final_response'),
