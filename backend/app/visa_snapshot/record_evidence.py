@@ -134,7 +134,8 @@ def _owned(proof, route, product, field, value, *, checked=False):
     expected = dict(route, travel_document_type=route.get('travel_document_type') or 'ordinary_passport')
     if product is not None:
         expected.update(product_type=product.get('type'), disposition=product.get('disposition'),
-                        requirement_detail=product.get('requirement_detail'))
+                        requirement_detail=product.get('requirement_detail'),
+                        entry=product.get('entry'), application_channel=product.get('application_channel'))
     if subject is not None and (not isinstance(subject, dict) or any(expected.get(k) != v for k, v in subject.items())):
         return []
     quotes = _quotes(proof, 'official_page_check' if checked else 'source_review', field)

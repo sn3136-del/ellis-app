@@ -1,0 +1,212 @@
+[
+  {
+    "route": {
+      "passport_nationality": "CAN",
+      "lawful_country_of_residence": "CAN",
+      "destination_country": "IDN",
+      "visa_category": "tourist_visa",
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "field": "required_documents",
+    "product": {
+      "type": "Visa on Arrival / e-Visa on Arrival, tourism (index B1)",
+      "entry": "single",
+      "application_channel": "online",
+      "disposition": "VISA_ON_ARRIVAL",
+      "requirement_detail": "evisa_on_arrival",
+      "required_documents": [
+        "For an online e-VOA application: Full biodata page of passport with at least six months validity from arrival (JPG/JPEG/PNG)",
+        "For an online e-VOA application: Passport-size photograph (JPG/JPEG/PNG)",
+        "For an online e-VOA application: Email address",
+        "For an online e-VOA application: Valid Mastercard, Visa or JCB credit card"
+      ]
+    },
+    "proof": {
+      "source_url": "https://evisa.imigrasi.go.id/front/info/evoa",
+      "verified_at": "2026-09-12",
+      "verified_by": "Codex official-source review",
+      "verifier": "ai",
+      "quote": "The documents to request an Visitor Visa are as follows: Full biodata page of passport with at least 6 months validity from the date of your arrival to Indonesia (format JPG/JPEG/PNG); Passport size photograph (format JPG/JPEG/PNG); Email address; and A valid Mastercard, Visa, or JCB credit card.",
+      "reviewed_value": [
+        "For an online e-VOA application: Full biodata page of passport with at least six months validity from arrival (JPG/JPEG/PNG)",
+        "For an online e-VOA application: Passport-size photograph (JPG/JPEG/PNG)",
+        "For an online e-VOA application: Email address",
+        "For an online e-VOA application: Valid Mastercard, Visa or JCB credit card"
+      ],
+      "note": "This four-item checklist belongs only to the online e-VOA application. It does not assert credit-card, email or upload requirements for the airport VOA counter or the separate C1 visa. Canada is on the same official visitor-visa eligibility list.",
+      "subject": {
+        "passport_nationality": "CAN",
+        "destination_country": "IDN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport",
+        "product_type": "Visa on Arrival / e-Visa on Arrival, tourism (index B1)",
+        "application_channel": "online"
+      },
+      "status": "reviewed"
+    }
+  },
+  {
+    "route": {
+      "passport_nationality": "CHN",
+      "lawful_country_of_residence": "CHN",
+      "destination_country": "JPN",
+      "visa_category": null,
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "field": "validity",
+    "product": {
+      "type": "Group tourist visa (团队旅游签证)",
+      "entry": "single",
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": null,
+      "validity": "3 months"
+    },
+    "proof": {
+      "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_qa.html",
+      "quote": "A：不做规定，但由于单次签证的有效期是自发放日开始三个月，所以请注意不要太早申请，否则有可能在您出发前签证就已失效。\n#### 〖观光〗",
+      "verified_at": "2026-09-12",
+      "verified_by": "Codex official-source review",
+      "verifier": "ai",
+      "status": "reviewed",
+      "reviewed_value": "3 months",
+      "capture_file": "/Users/sammynawaly/Documents/Codex/2026-09-09/files-mentioned-by-the-user-handoff20260909/work/resume20260912/selected-prc-jpn-fee/sources/qa.json",
+      "note": "Existing product validity is preserved and independently checked: general single-entry visa validity applies to the two single-entry products; the 3-year and 5-year products retain their own periods.",
+      "subject": {
+        "passport_nationality": "CHN",
+        "destination_country": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport",
+        "product_type": "Group tourist visa (团队旅游签证)",
+        "entry": "single"
+      }
+    }
+  },
+  {
+    "route": {
+      "passport_nationality": "CHN",
+      "lawful_country_of_residence": "CHN",
+      "destination_country": "JPN",
+      "visa_category": null,
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "field": "validity",
+    "product": {
+      "type": "Individual single-entry tourist visa (个人单次旅游签证)",
+      "entry": "single",
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": null,
+      "validity": "3 months"
+    },
+    "proof": {
+      "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_qa.html",
+      "quote": "A：不做规定，但由于单次签证的有效期是自发放日开始三个月，所以请注意不要太早申请，否则有可能在您出发前签证就已失效。\n#### 〖观光〗",
+      "verified_at": "2026-09-12",
+      "verified_by": "Codex official-source review",
+      "verifier": "ai",
+      "status": "reviewed",
+      "reviewed_value": "3 months",
+      "capture_file": "/Users/sammynawaly/Documents/Codex/2026-09-09/files-mentioned-by-the-user-handoff20260909/work/resume20260912/selected-prc-jpn-fee/sources/qa.json",
+      "note": "Existing product validity is preserved and independently checked: general single-entry visa validity applies to the two single-entry products; the 3-year and 5-year products retain their own periods.",
+      "subject": {
+        "passport_nationality": "CHN",
+        "destination_country": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport",
+        "product_type": "Individual single-entry tourist visa (个人单次旅游签证)",
+        "entry": "single"
+      }
+    }
+  },
+  {
+    "route": {
+      "passport_nationality": "CHN",
+      "lawful_country_of_residence": "CHN",
+      "destination_country": "JPN",
+      "visa_category": null,
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "field": "validity",
+    "product": {
+      "type": "3-year multiple-entry tourist visa (三年多次旅游签证)",
+      "entry": "multiple",
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": null,
+      "validity": "3 years"
+    },
+    "proof": {
+      "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
+      "quote": "#### （4）具有足够经济能力人士的多次旅游签证\n\n###### 该签证同（3）「冲绳县及东北六县多次旅游签证」一样，3年有效期间之内可以多次使用，停留期限为「30天」。并且从第二次以后赴日，除了观光旅游以外的短期访问也可以使用。\n发放对象是“具有足够经济能力的人士及家属”。并且与上述（3）不同的是赴日目的地不受限制。",
+      "verified_at": "2026-09-12",
+      "verified_by": "Codex official-source review",
+      "verifier": "ai",
+      "status": "reviewed",
+      "reviewed_value": "3 years",
+      "capture_file": "/Users/sammynawaly/Documents/Codex/2026-09-09/files-mentioned-by-the-user-handoff20260909/work/resume20260912/selected-prc-jpn-fee/sources/tourism.json",
+      "note": "Existing product validity is preserved and independently checked: general single-entry visa validity applies to the two single-entry products; the 3-year and 5-year products retain their own periods.",
+      "subject": {
+        "passport_nationality": "CHN",
+        "destination_country": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport",
+        "product_type": "3-year multiple-entry tourist visa (三年多次旅游签证)",
+        "entry": "multiple"
+      }
+    }
+  },
+  {
+    "route": {
+      "passport_nationality": "CHN",
+      "lawful_country_of_residence": "CHN",
+      "destination_country": "JPN",
+      "visa_category": null,
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "field": "validity",
+    "product": {
+      "type": "5-year multiple-entry tourist visa (五年多次旅游签证)",
+      "entry": "multiple",
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": null,
+      "validity": "5 years"
+    },
+    "proof": {
+      "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
+      "quote": "#### （5）相当高收入人士的多次签证\n###### 该签证可以在5年有效期之内多次使用，停留期限为「90天」。而且，只有这种签证从初次赴日开始，观光旅游以外的短期访问也可以使用。且赴日机票，船票和住宿设施等预订以及旅行全程，都可以申请人本人自行决定和改变。\n发放对象是“具有相当高收入的人士及家属”。与上述（3）不同的是赴日目的地不受限制。",
+      "verified_at": "2026-09-12",
+      "verified_by": "Codex official-source review",
+      "verifier": "ai",
+      "status": "reviewed",
+      "reviewed_value": "5 years",
+      "capture_file": "/Users/sammynawaly/Documents/Codex/2026-09-09/files-mentioned-by-the-user-handoff20260909/work/resume20260912/selected-prc-jpn-fee/sources/tourism.json",
+      "note": "Existing product validity is preserved and independently checked: general single-entry visa validity applies to the two single-entry products; the 3-year and 5-year products retain their own periods.",
+      "subject": {
+        "passport_nationality": "CHN",
+        "destination_country": "JPN",
+        "travel_purpose": "tourism",
+        "travel_document_type": "ordinary_passport",
+        "product_type": "5-year multiple-entry tourist visa (五年多次旅游签证)",
+        "entry": "multiple"
+      }
+    }
+  }
+]
