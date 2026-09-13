@@ -342,8 +342,8 @@ def _agent_lodgement_supported(low: str) -> bool:
     return False
 
 
-def _explicit_no_entry_requirement(topic: str, text: str) -> bool:
-    """An unqualified present-tense negative, never silence or a sub-step.
+def _explicit_entry_requirement(topic: str, text: str, required: bool) -> bool:
+    """An unqualified present-tense rule, never silence or a sub-step.
 
     Scope-bearing prefixes/tails (children, visa applications, online filing,
     arrival from a named place, future dates, etc.) cannot prove a global
@@ -351,6 +351,15 @@ def _explicit_no_entry_requirement(topic: str, text: str) -> bool:
     clause also makes the quote ineligible rather than choosing one side.
     """
     subject = r"(?:(?:(?:travel|medical|health|travel medical) )?insurance)" if topic == "insurance" else r"(?:(?:an? |the )?arrival cards?)"
+    if required:
+        patterns = [subject + r" (?:is|are) (?:required|mandatory|compulsory|necessary)"]
+        if topic == "insurance":
+            patterns.append(r"you need (?:(?:travel|medical|health|travel medical) )?insurance")
+        else:
+            patterns.extend([r"you need (?:an? )?arrival card",
+                             r"you (?:must|need to) (?:complete|submit|fill (?:in|out)) (?:an? |the )?arrival card",
+                             r"there is an? arrival card requirement"])
+        return any(re.fullmatch(pattern + r"[.!]?", text) for pattern in patterns)
     patterns = [
         subject + r" (?:is|are) not (?:required|mandatory|compulsory|necessary)",
         r"no " + (r"(?:(?:travel|medical|health|travel medical) )?insurance" if topic == "insurance" else r"arrival cards?") + r" (?:(?:is|are) )?(?:required|necessary)",
@@ -371,12 +380,12 @@ def field_value_supported(name: str, value, text: str) -> bool:
     if value is None or value == "" or value == [] or value == {}:
         return False
     low = " ".join(unicodedata.normalize("NFKC", str(text or "")).casefold().split())
-    if name == "insurance_required" and value is False:
-        return _explicit_no_entry_requirement("insurance", low)
-    if name == "arrival_card" and isinstance(value, dict) and value.get("required") is False:
+    if name == "insurance_required" and isinstance(value, bool):
+        return _explicit_entry_requirement("insurance", low, value)
+    if name == "arrival_card" and isinstance(value, dict) and isinstance(value.get("required"), bool):
         if set(value) - {"required", "name", "submission_window"}:
             return False
-        return (_explicit_no_entry_requirement("arrival_card", low)
+        return (_explicit_entry_requirement("arrival_card", low, value["required"])
                 and all(field_value_supported(k, v, text) for k, v in value.items()
                         if k != "required" and v not in (None, "", [], {})))
     if isinstance(value, bool):
