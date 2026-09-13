@@ -1956,7 +1956,7 @@ _sa_event.listen(_SASession, "do_orm_execute", _records_orm_execute)
 
 def _tstation_rows(db, *, nationality: str = "", destination: str = "",
                    purpose: str = "", document: str = "",
-                   requirement: str = "", confidence: str = ""):
+                   requirement: str = "", confidence: str = "", _rows=None):
     """Every served answer as Trip.com 25-field records, filters combined —
     their "multi-dimensional spot check": slice by station (the nationality a
     T-site serves), passport type, destination, visa requirement, field."""
@@ -1976,7 +1976,7 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
     nationality = _resolve(nationality) if nationality else ""
     destination = _resolve(destination) if destination else ""
     out = []
-    for rec in _all_tstation_rows(db):
+    for rec in (_all_tstation_rows(db) if _rows is None else _rows):
         if nationality and str(rec.get("travel_document_country") or "").upper() != nationality.upper():
             continue
         if destination and str(rec.get("destination_country") or "").upper() != destination.upper():
@@ -2051,8 +2051,15 @@ def _collect_tstation_rows(db, kimi_primary, verified_overrides, tstation, KimiR
     # One records path: the per-row body lives in row_projection so the
     # consistency sweep compares the projection the console serves, not a
     # hand-rebuilt copy of it (guard-20260912 T2).
+    from .visa_snapshot import record_projection_cache as projection_cache
+    reuse = not os.environ.get("PYTEST_CURRENT_TEST") or _RECORDS_CACHE.get("test_enabled")
+    version = projection_cache.context_version(verified_overrides) if reuse else None
     for _score, r, route in candidates.values():
-        out.extend(records_projection(db, r, route))
+        if reuse:
+            out.extend(projection_cache.project(db, r, route, version,
+                records_projection, ttl=RECORDS_CACHE_SECONDS))
+        else:
+            out.extend(records_projection(db, r, route))
     return out
 
 
@@ -2164,6 +2171,13 @@ def _with_pending(status: dict, disputed) -> dict:
     return status
 
 
+# JSON preparation is part of the record snapshot. Reuse only the exact
+# immutable row-list object returned by the generation-aware cache above.
+# A correction forces a new row list before a later reader reaches here.
+_RECORDS_JSON_CACHE = {"rows": None, "body": None}
+_RECORDS_JSON_LOCK = threading.Lock()
+
+
 @app.get("/database/records")
 def travel_database_records(nationality: str = "", destination: str = "",
                             purpose: str = "", document: str = "",
@@ -2176,9 +2190,18 @@ def travel_database_records(nationality: str = "", destination: str = "",
     source and confidence — the operator's spot-check surface."""
     from .visa_snapshot import tstation
     require_quality_control(p)
+    from fastapi.responses import Response
+    snapshot_rows = _all_tstation_rows(db)
+    unfiltered = not any((nationality, destination, purpose, document,
+                          requirement, confidence, visa_type, field_missing))
+    if unfiltered:
+        with _RECORDS_JSON_LOCK:
+            if _RECORDS_JSON_CACHE["rows"] is snapshot_rows:
+                return Response(_RECORDS_JSON_CACHE["body"], media_type="application/json")
     rows = _tstation_rows(db, nationality=nationality, destination=destination,
                           purpose=purpose, document=document,
-                          requirement=requirement, confidence=confidence)
+                          requirement=requirement, confidence=confidence,
+                          _rows=snapshot_rows)
     # The acceptance standard's multi-dimensional spot check (4.1.2) slices
     # by visa TYPE and by FIELD as well as by route dimensions.
     if visa_type:
@@ -2190,7 +2213,7 @@ def travel_database_records(nationality: str = "", destination: str = "",
             rows = [r for r in rows
                     if tstation.field_status(r).get(f) == "missing"]
     complete = sum(1 for r in rows if tstation.completeness(r) == 1.0)
-    return {"fields": list(tstation.FIELD_ORDER),
+    payload = {"fields": list(tstation.FIELD_ORDER),
             "required_fields": sorted(tstation.REQUIRED_FIELDS),
             "acceptance_summary": tstation.acceptance_summary(rows),
             "records": [_record_payload(r) for r in rows],
@@ -2201,6 +2224,13 @@ def travel_database_records(nationality: str = "", destination: str = "",
                         "source_coverage": round(sum(1 for r in rows if r.get("_source_check") in ("human-quote", "ai-quote", "grounded-consistent")) / len(rows), 4) if rows else None,
                         "source_link_coverage": round(sum(1 for r in rows if r.get("source_url")) / len(rows), 4) if rows else None,
                         "substantiated": sum(1 for r in rows if r.get("_source_check") in ("human-quote", "ai-quote", "grounded-consistent"))}}
+
+    body = json.dumps(payload, ensure_ascii=False, allow_nan=False,
+                      separators=(",", ":")).encode("utf-8")
+    if unfiltered:
+        with _RECORDS_JSON_LOCK:
+            _RECORDS_JSON_CACHE.update(rows=snapshot_rows, body=body)
+    return Response(body, media_type="application/json")
 
 
 def _change_source(db, row) -> dict:

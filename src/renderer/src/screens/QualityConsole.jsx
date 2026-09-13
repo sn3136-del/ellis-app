@@ -1617,25 +1617,6 @@ export function NextSweepCountdown({ at, summary, t }) {
   const ss = String(left % 60).padStart(2, '0')
   const local = new Date(at).toLocaleString(undefined,
     { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
-  const run = summary.last_run
-  const runStates = ['running', 'complete', 'complete_with_errors', 'budget_exhausted',
-    'interrupted', 'failed', 'provider_suspended', 'status_stale', 'status_unconfirmed']
-  const providerNotice = summary.provider?.suspended
-    ? (summary.provider.reason || t('ops.fresh.run.provider_suspended'))
-    : (run?.provider_notice && run?.status === 'provider_suspended' ? run.provider_notice : null)
-  const runState = runStates.includes(run?.status) ? run.status : 'status_unconfirmed'
-  const runCount = name => Number.isFinite(run?.[name]) ? run[name] : '—'
-  const validTime = value => typeof value === 'string' && Number.isFinite(Date.parse(value))
-  const continued = validTime(run?.resumed_from_started_at) && validTime(run?.cycle_started_at)
-  const priorAttempts = Number.isInteger(run?.prior_attempt_results) && run.prior_attempt_results >= 0
-    ? run.prior_attempt_results : '—'
-  const consistency = run?.consistency
-  const consistencyState = ['running', 'complete', 'failed', 'interrupted', 'budget_exhausted'].includes(consistency?.state)
-    ? consistency.state : null
-  const consistencyCount = value => Number.isInteger(value) && value >= 0 ? value : '—'
-  const consistencyTypes = consistency?.by_type || {}
-  const typeTotal = names => names.every(name => Number.isInteger(consistencyTypes[name]) && consistencyTypes[name] >= 0)
-    ? names.reduce((total, name) => total + consistencyTypes[name], 0) : '—'
   return (
     <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14,
                   background: '#fff', padding: '16px 18px',
@@ -1654,61 +1635,7 @@ export function NextSweepCountdown({ at, summary, t }) {
           {target && t('ops.fresh.nextAt').replace('{time}', local)}
         </div>
       </div>
-      <div style={{ fontSize: 12.5, color: GRAY, maxWidth: 520,
-                    lineHeight: 1.5, display: 'grid', gap: 4 }}>
-        <div>{t('ops.fresh.nextHint')}</div>
-        {consistencyState && <div data-testid="ops-fresh-consistency" style={{ color: NAVY }}>
-          <div style={{ fontWeight: 700 }}>{t('ops.fresh.consistencyTitle')}: {t(`ops.fresh.run.${consistencyState}`)}</div>
-          {consistencyState === 'complete' ? <>
-            <div>{t('ops.fresh.consistencyCounts')
-              .replace('{at}', consistency.checked_at || '—')
-              .replace('{routes}', consistencyCount(consistency.routes_checked))
-              .replace('{records}', consistencyCount(consistency.records_checked))
-              .replace('{findings}', consistencyCount(consistency.findings_total))}</div>
-            <div>{t('ops.fresh.consistencyTypes')
-              .replace('{differences}', typeTotal(['surface_divergence', 'key_fork', 'stale_projection']))
-              .replace('{proof}', typeTotal(['verdict_detail_missing', 'verdict_page_scheme_conflict', 'proof_missing_quote', 'proof_nationality_unnamed', 'proof_off_jurisdiction']))
-              .replace('{absence}', consistencyCount(consistencyTypes.absence_undocumented))}</div>
-          </> : <div>{t('ops.fresh.consistencyPending')
-            .replace('{routes}', consistencyCount(consistency.routes_checked))
-            .replace('{at}', consistency.last_success_at || '—')}</div>}
-          <div style={{ color: GRAY }}>{t('ops.fresh.consistencyHint')}</div>
-        </div>}
-        {summary && summary.canonical_total > 0 && (
-          <>
-            <div style={{ color: summary.overdue_attempts ? AMBER : GRAY }}>
-              {t('ops.fresh.attemptsMeasured').replace('{n}', summary.attempted_target).replace('{total}', summary.canonical_total).replace('{overdue}', summary.overdue_attempts)}
-            </div>
-            <div style={{ color: summary.verified_target === summary.canonical_total ? GREEN : AMBER, fontWeight: 700 }}>
-              {t('ops.fresh.verifiedMeasured').replace('{n}', summary.verified_target).replace('{total}', summary.canonical_total)}
-            </div>
-            <div>{t('ops.fresh.runResult')}: {run
-              ? `${t(`ops.fresh.run.${runState}`)} · ${run.finished_at || run.started_at || '·'}${providerNotice ? ` · ${t('ops.fresh.providerNotice')}: ${providerNotice}` : ''}`
-              : t('ops.fresh.runUnknown')}</div>
-            {run && <>
-              {continued && <div data-testid="ops-fresh-continuation" style={{ color: NAVY }}>
-                {t('ops.fresh.runContinuation')
-                  .replace('{start}', run.cycle_started_at).replace('{prior}', priorAttempts)}
-              </div>}
-              <div>{t('ops.fresh.runCoverage')
-                .replace('{attempted}', runCount('attempted')).replace('{selected}', runCount('selected'))
-                .replace('{unfinished}', runCount('cycle_unattempted'))}</div>
-              <div>{t('ops.fresh.runEvidence')
-                .replace('{verified}', runCount('verified')).replace('{partial}', runCount('partial'))
-                .replace('{unreadable}', runCount('unreadable')).replace('{errors}', runCount('errors'))}</div>
-              <div>{t('ops.fresh.runReads')
-                .replace('{read}', runCount('read')).replace('{sources}', runCount('source_reads'))
-                .replace('{insufficient}', runCount('insufficient_evidence'))}</div>
-              <div>{t('ops.fresh.runComparisons')
-                .replace('{new}', runCount('model_comparisons'))
-                .replace('{reused}', runCount('model_comparisons_reused'))}</div>
-              <div>{t('ops.fresh.runFailures')
-                .replace('{fetch}', runCount('source_fetch_failures')).replace('{provider}', runCount('provider_failed'))
-                .replace('{missing}', runCount('no_official_source'))}</div>
-            </>}
-          </>
-        )}
-      </div>
+
     </div>
   )
 }
