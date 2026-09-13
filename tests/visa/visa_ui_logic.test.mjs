@@ -11,9 +11,35 @@ import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src
 import { arrivalCardLines } from '../../src/renderer/src/lib/arrivalCard.js'
 import { healthRequirementLines } from '../../src/renderer/src/lib/healthRequirements.js'
 import { publishedStayText } from '../../src/renderer/src/lib/publishedStay.js'
+import { passportValidityText } from '../../src/renderer/src/lib/passportValidity.js'
 import { formatPolicyText } from '../../src/renderer/src/lib/policyText.js'
 import { applicationLane, applicationStepLinkIndex } from '../../src/renderer/src/lib/applicationLane.js'
 import { t as translate, SUPPORTED } from '../../src/renderer/src/lib/i18n.js'
+
+test('passport validity rendering retains arrival or departure and validity-only rules', () => {
+  const render = rule => passportValidityText(rule, (key, vars) => translate('en', key, vars))
+  assert.equal(render({ kind: 'valid_on_arrival', months: null }), 'Valid on arrival')
+  assert.equal(render({ kind: 'valid_through_departure', months: 0 }), 'Valid through departure')
+  assert.equal(render({ kind: 'months_after_arrival', months: 6 }), 'Valid for at least 6 months after arrival')
+  assert.equal(render({ kind: 'months_after_departure', months: 3 }), 'Valid for at least 3 months after departure')
+  for (const rule of [null, {}, { kind: 'unknown', months: 6 }, { kind: 'valid_on_arrival', months: 6 },
+    ...[null, 0, -1, 1.5, true, '6'].map(months => ({ kind: 'months_after_arrival', months }))]) {
+    assert.equal(render(rule), null)
+  }
+})
+
+test('passport validity schema labels are available immediately in all shipped languages', () => {
+  for (const lang of SUPPORTED) {
+    const atArrival = passportValidityText({ kind: 'months_after_arrival', months: 6 },
+      (key, vars) => translate(lang, key, vars))
+    const atDeparture = passportValidityText({ kind: 'months_after_departure', months: 6 },
+      (key, vars) => translate(lang, key, vars))
+    assert.ok(atArrival.includes('6') && atDeparture.includes('6'))
+    assert.notEqual(atArrival, atDeparture)
+    assert.ok(!atArrival.includes('db.passportRule'))
+    assert.ok(!atDeparture.includes('db.passportRule'))
+  }
+})
 
 test('health rendering retains the published recent-travel condition and question', () => {
   const item = {name: 'Yellow fever vaccination certificate', applicability: 'conditional',

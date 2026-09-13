@@ -177,6 +177,19 @@ test('current detail poll still fills the answer it belongs to', async t => {
   assert.ok(!s.text().includes('CURRENT PARTIAL'))
 })
 
+for (const [kind, months, key] of [
+  ['valid_on_arrival', null, 'arrival'], ['valid_through_departure', 0, 'departure'],
+  ['months_after_arrival', 6, 'monthsAfterArrival'], ['months_after_departure', 3, 'monthsAfterDeparture'],
+]) test('reader displays the structured passport rule without duplicate prose: ' + kind, async t => {
+  const s = await screen(t, '#database/HKG/VNM/tourism/ordinary_passport')
+  const response = answer('PASSPORT RULE')
+  response.guidance.passport_validity_requirement = { kind, months }
+  await s.finish(s.lookups[0], response)
+  assert.ok(s.text().includes('db.passportPhoto'))
+  assert.ok(s.text().includes('Db.passportRule.' + key))
+  assert.ok(!s.text().includes('db.validityMonths'))
+})
+
 test('pending detail poll displays a manually published answer without waiting for detail generation', async t => {
   const s = await screen(t, '#database/HKG/VNM/tourism/ordinary_passport')
   await s.finish(s.lookups[0], answer('SAVED ANSWER', 'HKG', 'VNM', {

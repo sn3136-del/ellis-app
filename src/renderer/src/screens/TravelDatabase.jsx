@@ -17,6 +17,7 @@ import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { publishedStayText } from '../lib/publishedStay.js'
+import { passportValidityText } from '../lib/passportValidity.js'
 import { checkRequirements } from '../lib/checkRequirements.js'
 import { insuranceRequirement } from '../lib/insuranceRequirement.js'
 import { entryInstructionTexts, publishedEntryInstructions } from '../lib/entryInstructions.js'
@@ -790,6 +791,7 @@ export default function TravelDatabase({ onBack }) {
 
   const held = result?.held === true   // server decides; off by default
   const g = (result && !held) ? (result.guidance || null) : null
+  const passportRule = passportValidityText(g?.passport_validity_requirement, t)
 
   // Every user-facing string the decision carries, translated in ONE masked,
   // cached Kimi catalog call whenever the UI language is not English.
@@ -1746,15 +1748,13 @@ export default function TravelDatabase({ onBack }) {
               // shorter column (weighted by its row count), so short and
               // tall cards sit flush with no stranded white space.
               const cards = []
-              if (asText(g.passport_validity) || asText(g.photo_requirements) ||
-                  g.passport_validity_requirement?.months) {
+              if (asText(g.passport_validity) || asText(g.photo_requirements) || passportRule) {
                 cards.push({ key: 'passport', weight: 3, node: (
                   <Section title={t('db.passportPhoto')} accent={BLUE} key="passport">
                     <Fact label={t('db.validity')} value={T(asText(g.passport_validity))} />
-                    {g.passport_validity_requirement?.months ? (
+                    {passportRule ? (
                       <Fact label={t('db.validityRule')}
-                            value={t('db.validityMonths',
-                                     { n: g.passport_validity_requirement.months })} />
+                            value={passportRule} />
                     ) : null}
                     <Fact label={t('db.photo')} value={T(asText(g.photo_requirements))} />
                   </Section>
