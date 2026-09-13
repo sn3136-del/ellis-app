@@ -74,8 +74,8 @@ def test_pending_details_are_stored_but_never_reported_as_published(client, db, 
     db.add(KimiRouteGuidanceCache(cache_key=kp.cache_key(route), route=route, guidance=deepcopy(ANSWER),
         status=kp.STATUS_UNCERTAIN, generated_at=datetime.now(timezone.utc), verification={'detail_pending': True}))
     db.commit()
-    monkeypatch.setattr(kp, 'get_route_guidance', lambda *a, **k: {'guidance': deepcopy(ANSWER), 'held': False})
-    monkeypatch.setattr(main, '_apply_records_hold', lambda r, o, db: o)
+    monkeypatch.setattr(kp, 'get_route_guidance', lambda *a, **k: {
+        'guidance': deepcopy(ANSWER), 'held': False, 'detail_pending': True})
     out = client.post('/database/routes/research', headers=ADMIN, json=BODY).json()
     assert out['record_present'] and out['detail_pending'] and out['status'] == 'pending'
     assert out['held'] and out['disposition'] is None
@@ -131,3 +131,32 @@ def test_failed_post_check_projection_never_returns_old_policy(client, db, monke
     assert 'Reload the list' in response.json()['detail']
     assert 'private projection failure' not in response.text
     assert 'disposition' not in response.json()
+
+
+def test_explicitly_published_pending_route_remains_published_after_incomplete_research(client, db, monkeypatch):
+    route = {'passport_nationality': 'ISL', 'destination_country': 'JPN', 'travel_purpose': 'tourism',
+             'travel_document_type': 'ordinary_passport'}
+    row = KimiRouteGuidanceCache(cache_key=kp.cache_key(route), route=route, guidance=deepcopy(ANSWER),
+        status=kp.STATUS_UNCERTAIN, generated_at=datetime.now(timezone.utc), verification={'detail_pending': True})
+    db.add(row)
+    db.commit()
+    response = client.post('/database/approve', headers=ADMIN, json=BODY)
+    assert response.status_code == 200 and response.json()['published'] is True
+    calls = []
+    def report(*args, **kwargs):
+        calls.append(kwargs)
+        return {'outcome': 'detail_pending', 'renewed': False, 'source_reads': 0}
+    monkeypatch.setattr(freshness, 'recheck_route', report)
+    monkeypatch.setattr(kp, 'join_detail_stage', lambda **kw: pytest.fail('manual publication must not join detail work'))
+    monkeypatch.setattr(kp, '_recover_detail_async', lambda *a, **k: pytest.fail('manual lookup must not recover detail work'))
+    monkeypatch.setattr(kp, '_call', lambda *a, **k: pytest.fail('must read the saved answer'))
+    response = client.post('/database/routes/research', headers=ADMIN, json=BODY)
+    assert response.status_code == 200
+    out = response.json()
+    assert out['record_present'] and out['status'] == 'stored'
+    assert not out['detail_pending'] and not out['held'] and out['disposition'] == ANSWER['disposition']
+    assert out['research']['outcome'] == 'detail_pending' and not out['research']['renewed']
+    assert calls == [{'discover_sources': True}]
+    db.refresh(row)
+    assert row.verification['detail_pending'] is True and row.guidance == ANSWER
+    assert row.verification['operator_released']['mode'] == 'manual_publication'

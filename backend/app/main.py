@@ -774,7 +774,7 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
 
 
 class DatabaseApproveIn(BaseModel):
-    """An operator releasing a held (low-confidence) answer for display."""
+    """An operator publishing the saved answer for customers to read."""
     nationality: str = ""
     destination: str = ""
     travel_purpose: str = "tourism"
@@ -789,12 +789,13 @@ class DatabaseApproveIn(BaseModel):
 def _database_publication_result(db, row, verification=None) -> tuple[dict, list]:
     """Inspect the actual QC/product publication path, without changing it.
 
-    A release is permission to serve soft Low evidence, not permission to
-    suppress a dispute, unfinished extraction, or a contradictory product.
+    A manual publication is permission to display the saved answer; it does
+    not certify its evidence or erase a dispute or unfinished extraction.
     The same projection is checked on a proposed copy and on the written row.
     """
     from types import SimpleNamespace
     from .visa_snapshot import kimi_primary, row_projection, tstation
+    from .visa_snapshot.records_guard import manually_published
     snapshot = SimpleNamespace(**{c.key: getattr(row, c.key) for c in row.__table__.columns})
     if verification is not None:
         snapshot.verification = verification
@@ -825,7 +826,7 @@ def _database_publication_result(db, row, verification=None) -> tuple[dict, list
                 reasons.append("Complete the source evidence for the withheld visa product before publishing it.")
             elif reason:
                 reasons.append(str(reason))
-        if (snapshot.verification or {}).get("detail_pending"):
+        if (snapshot.verification or {}).get("detail_pending") and not manually_published(snapshot.verification):
             reasons.append("The detail check is still pending; finish it before publishing.")
         if not has_answer:
             reasons.append("There is no visa-requirement answer to publish; refresh or correct this route first.")
@@ -839,11 +840,17 @@ def _database_publication_result(db, row, verification=None) -> tuple[dict, list
     }, records
 
 
-def _publication_values(records: list) -> list:
-    """Pin projected facts even when an override changes outside the cache."""
-    return [{key: value for key, value in record.items()
-             if not key.startswith("_") and key != "confidence_level"}
-            for record in records]
+def _publication_values(row) -> dict:
+    """Pin saved and overlaid facts, independently of changing review status.
+
+    A new finding changes the QC display of some visa-only cells as well as
+    the grade. That must not reject an explicit publication of unchanged
+    facts. Compare the actual merged guidance before quality presentation.
+    """
+    from .visa_snapshot import kimi_primary, row_projection
+    route = row_projection.canonical_route(row)
+    return kimi_primary.apply_verified_overrides(
+        {"guidance": kimi_primary.served_guidance(row)}, route).get("guidance") or {}
 
 
 def _publication_changed(key: str) -> None:
@@ -862,11 +869,11 @@ def _require_database_publication(result: dict) -> None:
 @app.post("/database/approve")
 def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
                             p: Principal = Depends(get_principal)):
-    """Publish an operator-reviewed answer only when the shared reader agrees.
+    """Publish the operator-selected saved answer through the shared reader.
 
-    Manual release can clear a soft Low hold; conflicts, unresolved disputes,
-    and pending checks continue to apply. The response confirms the current
-    product publication state, not merely that release metadata was saved.
+    The explicit manual decision overrides automatic publication holds.
+    Evidence and pending checks remain recorded independently. The response
+    confirms actual customer visibility, not just that metadata was saved.
     """
     from datetime import datetime, timezone
     from sqlalchemy import select as _select
@@ -900,7 +907,7 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
         raise HTTPException(404, "no cached answer for that route")
     release = {
         "by": p.user_id, "at": datetime.now(timezone.utc).isoformat(),
-        "note": (body.note or "")[:500]}
+        "note": (body.note or "")[:500], "mode": "manual_publication"}
     # The API and freshness sweep are separate processes. Pin both facts and
     # metadata to the inspected generation, then check the actual projection
     # again before committing. A new issue is not necessarily a cache write.
@@ -927,7 +934,7 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
         with db.no_autoflush:
             proposed, records = _database_publication_result(db, current, merged)
             _require_database_publication(proposed)
-            values = _publication_values(records)
+            values = _publication_values(current)
             if reviewed_values is not None and reviewed_values != values:
                 _publication_changed(key)
             reviewed_values = deepcopy(values)
@@ -942,13 +949,13 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
             written = db.execute(statement)
         if written.rowcount == 1:
             # Keep this write uncommitted until both the saved release and
-            # every live dispute have passed the same checks readers use.
+            # the actual customer projection agree about publication.
             try:
                 with db.no_autoflush:
                     db.refresh(current)
                     publication, records = _database_publication_result(db, current)
                     _require_database_publication(publication)
-                    if _publication_values(records) != reviewed_values:
+                    if _publication_values(current) != reviewed_values:
                         _publication_changed(key)
             except Exception:
                 db.rollback()
@@ -960,7 +967,8 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_answer_released",
                  detail={"nationality": nat, "destination": dest,
-                         "cache_key": key, "publication_state": publication["publication_state"]},
+                         "cache_key": key, "publication_state": publication["publication_state"],
+                         "publication_mode": release["mode"]},
                  actor=p.user_id)
     return {"ok": True, **publication, "released_by": p.user_id}
 
@@ -2703,7 +2711,9 @@ def travel_database_route_research(body: DatabaseRouteResearchIn,
                 raise HTTPException(503, "The route is stored, but its current answer could not be read. Reload the list before retrying.") from exc
     present = cached is not None
     out = _apply_records_hold(route, out, db)
-    pending = bool(present and (cached.verification or {}).get("detail_pending"))
+    # Report the same effective publication state as lookup and QC. An
+    # unfinished research job does not withdraw an explicit manual publish.
+    pending = bool(present and out.get("detail_pending"))
     held = not present or pending or bool(out.get("held"))
     g = {} if held else (out.get("guidance") or {})
     audit.record(db, org_id=p.org_id, application_id="database",

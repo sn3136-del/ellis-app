@@ -104,15 +104,17 @@ def test_release_accepts_legacy_json_null_metadata(client, release_session):
     assert row.verification["operator_released"]["by"] == "operator"
 
 
-def test_new_material_dispute_during_release_is_preserved_and_blocks_retry(
+def test_new_material_dispute_during_manual_release_is_preserved_and_published(
         client, release_session, monkeypatch):
     session, row_id = release_session
     writes = interleave_worker(monkeypatch, session, row_id, times=1, disputed=True)
     response = client.post("/database/approve", headers=HEADERS, json=BODY)
-    assert response.status_code == 409, response.text
-    assert response.json()["detail"]["code"] == "publication_blocked"
-    assert response.json()["detail"]["blocked_fields"] == ["government_fee"]
+    assert response.status_code == 200, response.text
+    assert response.json()["published"] is True and response.json()["held"] is False
     with SessionLocal() as reader:
         actual = reader.get(KimiRouteGuidanceCache, row_id).verification
+    release = actual.pop("operator_released")
+    assert release["mode"] == "manual_publication" and release["by"] == "operator"
     assert actual == writes[-1]
-    assert "operator_released" not in actual
+    assert actual["grounded_check"]["disputed_fields"] == ["government_fee"]
+    assert actual["grounded_check"]["consistent"] is False

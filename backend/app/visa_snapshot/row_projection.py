@@ -22,7 +22,8 @@ def records_projection(db, r, route: dict) -> list[dict]:
     from . import kimi_primary, tstation
     from . import freshness as _fresh
     from .records_guard import (apply_records_hold as _apply_records_hold,
-                                grounded_verdict_supported as _grounded_verdict_supported)
+                                grounded_verdict_supported as _grounded_verdict_supported,
+                                manually_published)
     out = []
     reader = kimi_primary.apply_verified_overrides(kimi_primary._result(
         r.status, kimi_primary.served_guidance(r), cached=True,
@@ -45,6 +46,7 @@ def records_projection(db, r, route: dict) -> list[dict]:
         **reader, "grounded_check": _gc,
         "detail_pending": bool((r.verification or {}).get("detail_pending")),
         "operator_released": bool((r.verification or {}).get("operator_released")),
+        "manual_publication": manually_published(r.verification),
     }, db)
     for rec in tstation.records_for_route(route, g, prov, collected, until,
                                           grounded_ok=_grounded,

@@ -1811,19 +1811,6 @@ export function RecordsTable({ records, total, onFlag, onRelease, releaseStates 
           {(total ?? records.length).toLocaleString()} {t('ops.items')}
         </strong>
         <span style={{ color: GRAY, fontSize: 12 }}>{t('ops.rowsHint')}</span>
-        <label style={{ marginLeft: 'auto', color: NAVY, fontSize: 12 }}>
-          {t('ops.sortPublication')}{' '}
-          <select aria-label={t('ops.sortPublication')} data-testid="ops-publication-sort"
-            value={sort.key === 'publication' ? (sort.dir === 1 ? 'published' : 'unpublished') : 'columns'}
-            onChange={event => setSort(event.target.value === 'columns'
-              ? { key: 'route', dir: 1 }
-              : { key: 'publication', dir: event.target.value === 'published' ? 1 : -1 })}
-            style={{ border: `1px solid ${BORDER}`, borderRadius: 6, padding: '5px 8px', background: '#fff', color: NAVY }}>
-            <option value="columns">{t('ops.sortColumns')}</option>
-            <option value="published">{t('ops.sortPublishedFirst')}</option>
-            <option value="unpublished">{t('ops.sortUnpublishedFirst')}</option>
-          </select>
-        </label>
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table className="ops-rt"

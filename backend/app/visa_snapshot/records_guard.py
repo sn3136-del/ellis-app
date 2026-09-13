@@ -1,4 +1,14 @@
 """Shared evidence and contradiction gate for all route readers."""
+def manually_published(verification: dict | None) -> bool:
+    """Only an explicit QC publication uses the owner's manual decision.
+
+    Legacy soft-Low releases keep their original meaning. Publication is not
+    source verification: pending jobs, disputes and evidence stay recorded.
+    """
+    release = (verification or {}).get("operator_released")
+    return isinstance(release, dict) and release.get("mode") == "manual_publication"
+
+
 def grounded_verdict_supported(check: dict | None) -> bool:
     """An old consistency flag or an ancillary check cannot verify a verdict."""
     from . import freshness
@@ -16,6 +26,15 @@ def apply_records_hold(route: dict, out: dict, db=None) -> dict:
     if not out.get("guidance"):
         return out
     out = dict(out)
+    if out.get("manual_publication"):
+        # QC's Publish button is an explicit decision to display this saved
+        # answer. Automatic research can continue without blocking readers.
+        # Do not alter the stored pending flag, confidence or source findings.
+        out.update(held=False, review_required=False, detail_pending=False)
+        out.pop("product_publication", None)
+        out.pop("withheld_product_count", None)
+        out["publication_state"] = "published"
+        return project_insurance(route, out)
     gc = out.get("grounded_check")
     gc = gc if isinstance(gc, dict) else {}
     problems = kimi_primary.serve_time_invariants(out["guidance"])

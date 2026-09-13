@@ -52,12 +52,12 @@ test('publication sorting uses per-product access even when route and confidence
   assert.deepEqual(records, before)
 })
 
-test('publication selector is accessible and retains column sorting choice', () => {
+test('records header hides publication order while retaining normal table columns', () => {
   const html = render([record()])
-  assert.ok(html.includes('aria-label="Publication order"'))
-  assert.ok(html.includes('value="published">Published first</option>'))
-  assert.ok(html.includes('value="unpublished">Unpublished first</option>'))
-  assert.ok(html.includes('value="columns" selected="">Column sorting</option>'))
+  assert.ok(!html.includes('ops-publication-sort'))
+  assert.ok(!html.includes('Publication order'))
+  assert.ok(html.includes(t('ops.col.route')))
+  assert.ok(html.includes(t('ops.col.fee')))
 })
 
 test('publication option preserves existing fee and route sort behavior', () => {

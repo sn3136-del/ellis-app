@@ -177,6 +177,25 @@ test('current detail poll still fills the answer it belongs to', async t => {
   assert.ok(!s.text().includes('CURRENT PARTIAL'))
 })
 
+test('pending detail poll displays a manually published answer without waiting for detail generation', async t => {
+  const s = await screen(t, '#database/HKG/VNM/tourism/ordinary_passport')
+  await s.finish(s.lookups[0], answer('SAVED ANSWER', 'HKG', 'VNM', {
+    held: true, detail_pending: true, publication_state: 'held', guidance: null,
+  }))
+  assert.ok(s.has('database-held'))
+  await s.timers(2500)
+  await s.finish(s.lookups.at(-1), answer('MANUALLY PUBLISHED ANSWER', 'HKG', 'VNM', {
+    held: false, detail_pending: false, publication_state: 'published',
+  }))
+  assert.ok(!s.has('database-held'))
+  assert.ok(s.has('database-result'))
+  assert.ok(s.text().includes('MANUALLY PUBLISHED ANSWER'))
+  assert.ok(!s.has('database-detail-pending'))
+  const count = s.lookups.length
+  await s.timers(2500)
+  assert.equal(s.lookups.length, count)
+})
+
 test('failed superseded switch cannot roll back the purpose selected by the new answer', async t => {
   const s = await screen(t, '#database/HKG/VNM/tourism/ordinary_passport')
   await s.finish(s.lookups[0], answer('FIRST ROUTE'))

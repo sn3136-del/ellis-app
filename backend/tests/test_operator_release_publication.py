@@ -1,4 +1,4 @@
-"""Publishing reports the reader's actual state and never records a false release."""
+"""Explicit manual publication serves saved facts without rewriting their evidence."""
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 
@@ -62,28 +62,52 @@ def assert_blocked_without_release(response, session, row_id, before, audit_coun
     return detail
 
 
+def assert_manual_publication(response, session, row_id, before, audit_count):
+    assert response.status_code == 200, response.text
+    assert response.json()["published"] is True and response.json()["held"] is False
+    assert response.json()["publication_state"] == "published"
+    actual = current_metadata(row_id)
+    release = actual.pop("operator_released")
+    assert release["mode"] == "manual_publication" and release["by"] == "operator"
+    assert actual == {k: v for k, v in before.items() if k != "operator_released"}
+    assert releases(session) == audit_count + 1
+
+
+def assert_reader_and_records_published(client):
+    lookup = client.post("/database/lookup", headers=HEADERS, json=LOOKUP_BODY).json()
+    assert lookup.get("held") is False and lookup["guidance"], lookup
+    records = client.get("/database/records", headers=HEADERS,
+        params={"nationality": "ISL", "destination": "NRU"}).json()["records"]
+    assert records and all(r["publication_state"] == "published" and not r["held"] for r in records)
+    return lookup, records
+
+
 @pytest.mark.parametrize("already_released", [False, True])
 @pytest.mark.parametrize("status", ["open", "acknowledged"])
-def test_open_material_dispute_cannot_be_published_or_falsely_audited(
+def test_manual_publication_preserves_open_findings_and_publishes_saved_answer(
         client, publication_session, already_released, status):
     session, row_id = publication_session
     row = session.get(KimiRouteGuidanceCache, row_id)
     if already_released:
         row.verification = dict(row.verification, operator_released={"by": "earlier-reviewer", "at": "earlier"})
         session.commit()
-    add_dispute(session, row.cache_key, status=status)
+    issue_id = add_dispute(session, row.cache_key, status=status)
     before, count = current_metadata(row_id), releases(session)
+    saved = deepcopy(row.guidance)
+    prior_records = row_projection.records_projection(session, row, ROUTE)
     response = client.post("/database/approve", headers=HEADERS, json=BODY)
-    detail = assert_blocked_without_release(response, session, row_id, before, count)
-    assert detail["publication_state"] == "withheld"
-    assert detail["blocked_fields"] == ["government_fee"]
-    assert "government_fee" in detail["message"]
-    lookup = client.post("/database/lookup", headers=HEADERS, json=LOOKUP_BODY).json()
-    assert lookup.get("held") is True and lookup["guidance"] is None, lookup
+    assert_manual_publication(response, session, row_id, before, count)
+    lookup, records = assert_reader_and_records_published(client)
+    assert lookup["guidance"]["disposition"] == saved["disposition"]
+    session.refresh(row)
+    assert row.guidance == saved and session.get(DatabaseIssueReport, issue_id).status == status
+    after_records = row_projection.records_projection(session, row, ROUTE)
+    assert [(r["confidence_level"], r["_disputed"], r["_source_check"]) for r in after_records] == [
+        (r["confidence_level"], r["_disputed"], r["_source_check"]) for r in prior_records]
 
 
-@pytest.mark.parametrize("blocker", ["pending", "grounded_dispute", "contradiction", "missing_answer"])
-def test_release_respects_live_shared_publication_checks(
+@pytest.mark.parametrize("blocker", ["pending", "grounded_dispute", "contradiction"])
+def test_explicit_manual_publication_preserves_quality_state_without_blocking_saved_answer(
         client, publication_session, blocker):
     session, row_id = publication_session
     row = session.get(KimiRouteGuidanceCache, row_id)
@@ -93,20 +117,41 @@ def test_release_respects_live_shared_publication_checks(
         row.verification = dict(row.verification, grounded_check={
             "outcome": "checked", "evidence_contract": freshness.EVIDENCE_CONTRACT,
             "consistent": False, "disputed_fields": ["government_fee"]})
-    elif blocker == "contradiction":
+    else:
         row.guidance = {"disposition": "VISA_EXEMPT", "requirement_detail": "evisa",
             "government_fee": {"amount": 25, "currency": "USD"},
             "visa_products": [{"type": "Tourist e-visa", "fee": {"amount": 25, "currency": "USD"}}]}
+    session.commit()
+    saved = deepcopy(row.guidance)
+    before, count = current_metadata(row_id), releases(session)
+    prior_records = row_projection.records_projection(session, row, ROUTE)
+    response = client.post("/database/approve", headers=HEADERS, json=BODY)
+    assert_manual_publication(response, session, row_id, before, count)
+    lookup, _ = assert_reader_and_records_published(client)
+    assert lookup["guidance"]["disposition"] == saved["disposition"]
+    session.refresh(row)
+    assert row.guidance == saved
+    after_records = row_projection.records_projection(session, row, ROUTE)
+    assert [(r["confidence_level"], r["_disputed"], r["_contradictions"], r["_source_check"]) for r in after_records] == [
+        (r["confidence_level"], r["_disputed"], r["_contradictions"], r["_source_check"]) for r in prior_records]
+    if blocker == "pending":
+        assert lookup.get("detail_pending") is False and current_metadata(row_id)["detail_pending"] is True
+    elif blocker == "grounded_dispute":
+        assert lookup["grounded_check"]["disputed_fields"] == ["government_fee"]
+        assert lookup["grounded_check"]["consistent"] is False
     else:
-        row.guidance = {}
+        assert lookup["contradictions"] and any(r["_contradictions"] for r in after_records)
+
+
+def test_missing_answer_still_cannot_be_published(client, publication_session):
+    session, row_id = publication_session
+    row = session.get(KimiRouteGuidanceCache, row_id)
+    row.guidance = {}
     session.commit()
     before, count = current_metadata(row_id), releases(session)
     response = client.post("/database/approve", headers=HEADERS, json=BODY)
     detail = assert_blocked_without_release(response, session, row_id, before, count)
-    if blocker == "pending":
-        assert "pending" in detail["message"]
-    if blocker == "missing_answer":
-        assert "no visa-requirement answer" in detail["message"]
+    assert "no visa-requirement answer" in detail["message"]
 
 
 def test_soft_low_release_is_confirmed_by_lookup_and_quality_records(
@@ -129,7 +174,7 @@ def test_soft_low_release_is_confirmed_by_lookup_and_quality_records(
     assert releases(session) == count + 1
 
 
-def test_new_issue_between_preflight_and_write_rolls_back_release_metadata_and_audit(
+def test_new_issue_between_preflight_and_write_is_preserved_while_manual_publication_succeeds(
         client, publication_session, monkeypatch):
     session, row_id = publication_session
     before, count = current_metadata(row_id), releases(session)
@@ -143,9 +188,9 @@ def test_new_issue_between_preflight_and_write_rolls_back_release_metadata_and_a
 
     monkeypatch.setattr(session, "execute", interleave)
     response = client.post("/database/approve", headers=HEADERS, json=BODY)
-    detail = assert_blocked_without_release(response, session, row_id, before, count)
-    assert detail["blocked_fields"] == ["government_fee"] and len(inserted) == 1
-    assert session.get(DatabaseIssueReport, inserted[0]).status == "open"
+    assert_manual_publication(response, session, row_id, before, count)
+    assert len(inserted) == 1 and session.get(DatabaseIssueReport, inserted[0]).status == "open"
+    assert_reader_and_records_published(client)
 
 
 @pytest.mark.parametrize("new_guidance", [
@@ -240,3 +285,61 @@ def test_manual_release_of_soft_low_siblings_really_publishes_every_product(
     session.refresh(row)
     assert row.guidance == raw["guidance"]
     assert [r["_held"] for r in row_projection.records_projection(session, row, route)] == [False] * 4
+
+
+def test_manual_pending_full_lookup_is_immediate_without_model_source_or_detail_work(
+        client, publication_session, monkeypatch):
+    from app.visa_snapshot import fetching, detail_jobs, records_guard
+    session, row_id = publication_session
+    row = session.get(KimiRouteGuidanceCache, row_id)
+    row.verification = dict(row.verification, detail_pending=True,
+        grounded_check={"outcome": "provider_error", "renewed": False, "note": "source check not completed"})
+    row.missing_fields = ["required_documents"]
+    row.fresh_until = datetime.now(timezone.utc) - timedelta(days=1)
+    session.commit()
+    before, count = current_metadata(row_id), releases(session)
+    calls = []
+    def forbidden(*args, **kwargs):
+        calls.append(True)
+        raise AssertionError("Manual publication must serve saved content without provider/source/detail work")
+    for module, name in [
+        (kp, "_call"), (kp, "_live_call"), (kp, "join_detail_stage"),
+        (kp, "_recover_detail_async"), (kp, "refresh_stale_async"),
+        (detail_jobs, "recover_row"), (freshness, "recheck_row"),
+        (freshness, "recheck_route"), (fetching, "fetch"),
+    ]:
+        monkeypatch.setattr(module, name, forbidden)
+    response = client.post("/database/approve", headers=HEADERS, json=BODY)
+    assert_manual_publication(response, session, row_id, before, count)
+    direct = kp.get_route_guidance(session, ROUTE, stage="full")
+    assert direct["guidance"]["disposition"] == "VISA_EXEMPT"
+    direct = records_guard.apply_records_hold(ROUTE, direct, session)
+    assert direct.get("detail_pending") is False and direct.get("held") is False
+    lookup, _ = assert_reader_and_records_published(client)
+    assert lookup["detail_pending"] is False and lookup["missing_fields"] == ["required_documents"]
+    assert current_metadata(row_id)["detail_pending"] is True
+    assert current_metadata(row_id)["grounded_check"] == before["grounded_check"]
+    assert calls == []
+
+
+@pytest.mark.parametrize("legacy_release", [
+    {"by": "old-reviewer", "at": "earlier"},
+    {"by": "old-reviewer", "at": "earlier", "mode": "different_mode"},
+])
+def test_legacy_or_nonmanual_release_does_not_bypass_pending_guard(
+        client, publication_session, monkeypatch, legacy_release):
+    from app.visa_snapshot import detail_jobs, records_guard
+    session, row_id = publication_session
+    row = session.get(KimiRouteGuidanceCache, row_id)
+    row.verification = dict(row.verification, detail_pending=True, operator_released=legacy_release)
+    session.commit()
+    monkeypatch.setattr(detail_jobs, "retry_eligible", lambda _: False)
+    joins = []
+    monkeypatch.setattr(kp, "join_detail_stage", lambda **kwargs: joins.append(kwargs))
+    direct = kp.get_route_guidance(session, ROUTE, stage="full")
+    guarded = records_guard.apply_records_hold(ROUTE, direct, session)
+    assert guarded["detail_pending"] is True and guarded["held"] is True
+    assert len(joins) == 1
+    lookup = client.post("/database/lookup", headers=HEADERS, json=LOOKUP_BODY).json()
+    assert lookup["held"] is True and lookup["guidance"] is None
+    assert current_metadata(row_id)["operator_released"] == legacy_release

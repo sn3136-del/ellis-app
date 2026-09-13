@@ -131,7 +131,7 @@ def _reader_projection(db, r, route: dict, gc: dict, *, arrival_date: str | None
     it: the shared reader composition, the grounded check stamp, the records
     hold, and the held envelope when the answer is withheld."""
     from . import kimi_primary
-    from .records_guard import apply_records_hold, held_envelope
+    from .records_guard import apply_records_hold, held_envelope, manually_published
     rt = dict(route)
     if arrival_date:
         rt["arrival_date"] = arrival_date
@@ -145,6 +145,7 @@ def _reader_projection(db, r, route: dict, gc: dict, *, arrival_date: str | None
         advisories=kimi_primary.deterministic_advisories(rt, r.guidance or {}))
     out["detail_pending"] = bool((r.verification or {}).get("detail_pending"))
     out["operator_released"] = released
+    out["manual_publication"] = manually_published(r.verification)
     if isinstance(gc, dict) and gc.get("outcome") == "checked":
         out["grounded_check"] = {k: gc.get(k) for k in
                                  ("at", "outcome", "source_url", "consistent", "changed_fields",

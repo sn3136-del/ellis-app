@@ -2236,7 +2236,8 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
         if ver.get("operator_released") or ver.get("drill_shadow") or _freshness.effective_check(ver):
             force_refresh = False
     if row is not None and not force_refresh:
-        if stage == "full" and (row.verification or {}).get("detail_pending"):
+        from .records_guard import manually_published
+        if stage == "full" and (row.verification or {}).get("detail_pending") and not manually_published(row.verification):
             from . import detail_jobs
             if detail_jobs.retry_eligible(row) and is_available():
                 job = (row.verification or {}).get(detail_jobs.JOB) or {}
@@ -2263,6 +2264,7 @@ def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
                                 model=row.model,
                                 advisories=deterministic_advisories(route, row.guidance or {}))
         out["detail_pending"] = bool((row.verification or {}).get("detail_pending"))
+        out["manual_publication"] = manually_published(row.verification)
         if isinstance(gc, dict) and gc.get("outcome") == "checked":
             # Machine provenance, deliberately WEAKER than the human badge:
             # "the official page was read on this date and matched", never
