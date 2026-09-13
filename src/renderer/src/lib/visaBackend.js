@@ -250,6 +250,12 @@ export function createVisaClient(session) {
     // same Kimi-primary decision the applicant journey trusts, served from
     // its cache instantly on repeat lookups.
     databaseLookup: (body) => call('POST', '/database/lookup', session, body),
+    databaseRecordEvidence: (cacheKey, productIndex = null, revision = null) => {
+      const query = new URLSearchParams({ cache_key: cacheKey })
+      if (productIndex != null) query.set('product_index', String(productIndex))
+      if (revision) query.set('revision', revision)
+      return call('GET', `/database/record-evidence?${query}`, session)
+    },
     // AI Q&A: a plain-language question, answered by the same decision engine.
     databaseAsk: (question, context = null, history = null, lang = null) =>
       call('POST', '/database/ask', session,

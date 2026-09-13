@@ -540,6 +540,85 @@ function fx(t, f) {
   return t(k) !== k ? t(k) : f.replace(/_/g, ' ')
 }
 
+function fieldQuoteLink(value) {
+  if (typeof value !== 'string' || !value.trim()) return null
+  try {
+    const url = new URL(value)
+    return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password
+      ? value : null
+  } catch { return null }
+}
+
+export function FieldQuoteList({ rec, evidence, t }) {
+  // The API binds each quote to this product's current field value. A route
+  // source link or its confidence badge is never a substitute for that proof.
+  const fields = Object.keys(rec?.field_status || evidence)
+  return <dl style={{ margin: '12px 0 0', display: 'grid', gap: 14 }}>
+      {fields.map(field => {
+        const seen = new Set()
+        const quotes = (Array.isArray(evidence[field]) ? evidence[field] : []).filter(entry => {
+          if (typeof entry?.quote !== 'string' || !entry.quote.trim() || !fieldQuoteLink(entry.source_url)) return false
+          const key = JSON.stringify([entry.quote, entry.source_url])
+          if (seen.has(key)) return false
+          seen.add(key)
+          return true
+        })
+        return <div key={field} data-quote-field={field} style={{ minWidth: 0 }}>
+          <dt style={{ color: GRAY, fontSize: 11, fontWeight: 700 }}>{fx(t, field)}</dt>
+          <dd style={{ margin: '5px 0 0', color: NAVY, fontSize: 12.5, lineHeight: 1.5,
+            overflowWrap: 'anywhere' }}>
+            {quotes.length ? quotes.map((entry, index) => <div key={index} style={{ marginTop: index ? 10 : 0 }}>
+              {/* Source wording stays exact, even when UI labels are translated. */}
+              <blockquote style={{ margin: '0 0 4px', whiteSpace: 'pre-wrap' }}>{entry.quote}</blockquote>
+              <a href={fieldQuoteLink(entry.source_url)} target="_blank" rel="noopener noreferrer"
+                onClick={event => event.stopPropagation()}
+                style={{ color: BLUE, textDecoration: 'underline' }}>{entry.source_url} ↗</a>
+            </div>) : <span style={{ color: GRAY }}>{t('ops.quotes.none')}</span>}
+          </dd>
+        </div>
+      })}
+  </dl>
+}
+
+export function FieldQuotes({ rec, t, onEvidence }) {
+  const [opened, setOpened] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+  const [state, setState] = useState({ pending: false, evidence: null, error: false })
+  useEffect(() => {
+    let current = true
+    setState({ pending: opened, evidence: null, error: false })
+    if (opened) {
+      Promise.resolve().then(() => onEvidence(rec)).then(response => {
+        if (!current) return
+        if (response?.cache_key !== rec.cache_key ||
+            (response?.product_index ?? null) !== (rec.product_index ?? null) ||
+            (rec.evidence_revision && response?.revision !== rec.evidence_revision) ||
+            !response.field_evidence || typeof response.field_evidence !== 'object' ||
+            Array.isArray(response.field_evidence)) throw new Error('Evidence identity not confirmed')
+        setState({ pending: false, evidence: response.field_evidence, record: rec, error: false })
+      }).catch(() => {
+        if (current) setState({ pending: false, evidence: null, error: true })
+      })
+    }
+    return () => { current = false }
+  }, [opened, attempt, rec, onEvidence])
+  return <details data-testid="ops-field-quotes" onToggle={event => setOpened(event.currentTarget.open)}
+    style={{ gridColumn: '1 / -1', border: `1px solid ${BORDER}`, borderRadius: 10,
+      padding: '10px 12px', background: '#fff', minWidth: 0 }}>
+    <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 700, color: NAVY }}>
+      {t('ops.quotes.title')}
+    </summary>
+    {state.pending && <p role="status" style={{ fontSize: 12.5, color: GRAY }}>{t('ops.quotes.loading')}</p>}
+    {state.error && <div role="alert" style={{ marginTop: 10, color: RED, fontSize: 12.5 }}>
+      {t('ops.quotes.failed')}{' '}
+      <button type="button" onClick={() => setAttempt(value => value + 1)}
+        style={{ color: BLUE, background: '#fff', border: `1px solid ${BORDER}`, borderRadius: 6,
+          padding: '4px 8px', cursor: 'pointer' }}>{t('ops.quotes.retry')}</button>
+    </div>}
+    {state.evidence && state.record === rec && <FieldQuoteList rec={rec} evidence={state.evidence} t={t} />}
+  </details>
+}
+
 // Wording (a stay or a validity the source states in words) is shown only
 // when the backend checklist calls the cell filled by it, or pending review:
 // a visa-free record keeps its Not applicable label and a documented absence
@@ -698,7 +777,7 @@ export function wordingFor(rec, cell, key) {
     && rec[cell] == null && typeof rec[key] === 'string' && rec[key].trim()) ? rec[key] : null
 }
 
-export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
+export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x, onEvidence }) {
   const UNIT = { Day: t('ops.u.day'), Hour: t('ops.u.hour'),
                  Month: t('ops.u.month'), Year: t('ops.u.year'),
                  'Calendar Day': t('ops.u.calDay'),
@@ -845,6 +924,7 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
           </div>
         </div>
       ))}
+      <FieldQuotes rec={rec} t={t} onEvidence={onEvidence} />
       <RecoveredRecord rec={rec} t={t} />
       {/* §4.2.1's cross-validation, one URL per source. Field 22 holds a
           single source_url by their dictionary, so a route checked against
@@ -1783,7 +1863,7 @@ export function sortQualityRecords(records, sort) {
   })
 }
 
-export function RecordsTable({ records, total, onFlag, onRelease, releaseStates = {}, onEdit, onRefresh, t, flagOf, typeNames = {}, tvv = (x) => x }) {
+export function RecordsTable({ records, total, onFlag, onRelease, releaseStates = {}, onEdit, onRefresh, onEvidence, t, flagOf, typeNames = {}, tvv = (x) => x }) {
   const [sort, setSort] = useState({ key: 'route', dir: 1 })
   const [open, setOpen] = useState(null)
   const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
@@ -1981,7 +2061,7 @@ export function RecordsTable({ records, total, onFlag, onRelease, releaseStates 
                           scroll width and a phone only ever sees a third. */}
                       <div className="ops-rowdetail">
                         <FieldGrid rec={rec} t={t} typeNames={typeNames}
-                                   tvv={tvv} />
+                                   tvv={tvv} onEvidence={onEvidence} />
                         {missing.length > 0 && (
                           <MissingLine missing={missing} t={t} />
                         )}
@@ -2374,6 +2454,8 @@ function QualityWorkspace() {
   const [session] = useState(() => newQualitySession())
   const { token, orgId, userId } = session
   const client = useMemo(() => createVisaClient(session), [session])
+  const readEvidence = useCallback(rec => client.databaseRecordEvidence(
+    rec.cache_key, rec.product_index ?? null, rec.evidence_revision), [client])
 
   async function runDrill(nat, dest) {
     return client.post('/database/freshness/drill', {
@@ -3019,7 +3101,7 @@ function QualityWorkspace() {
             <AddRouteCard countries={countries} t={t} onAdd={addRoute}
                           onManualAdd={manualAddRoute}
                           adding={adding} addMsg={addMsg} />
-            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} releaseStates={releaseStates} onEdit={editRecord} onRefresh={refreshRecord} t={t} flagOf={flagOf} typeNames={typeNames} tvv={tv} />
+            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} releaseStates={releaseStates} onEdit={editRecord} onRefresh={refreshRecord} onEvidence={readEvidence} t={t} flagOf={flagOf} typeNames={typeNames} tvv={tv} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}

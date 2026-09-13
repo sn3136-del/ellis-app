@@ -5,11 +5,13 @@ import { resolve } from 'node:path'
 import { build } from 'esbuild'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { act, create } from 'react-test-renderer'
 import { t } from '../../src/renderer/src/lib/i18n.js'
+import { createVisaClient } from '../../src/renderer/src/lib/visaBackend.js'
 
 // Compile the actual component in memory, without a production bundle or DOM.
 const compiled = await build({
-  stdin: { contents: "export { FieldGrid } from './src/renderer/src/screens/QualityConsole.jsx'",
+  stdin: { contents: "export { FieldGrid, FieldQuotes, FieldQuoteList } from './src/renderer/src/screens/QualityConsole.jsx'",
     resolveDir: resolve('.'), sourcefile: 'quality-field-grid-entry.jsx' },
   bundle: true, write: false, platform: 'node', format: 'cjs', jsx: 'automatic',
   external: ['react', 'react/jsx-runtime'], logLevel: 'silent',
@@ -17,7 +19,7 @@ const compiled = await build({
 const module = { exports: {} }
 new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(
   createRequire(import.meta.url), module, module.exports)
-const { FieldGrid } = module.exports
+const { FieldGrid, FieldQuotes, FieldQuoteList } = module.exports
 
 function record(text, extra = {}) {
   // The backend marks a stay stated in words as filled with the unit Not
@@ -29,6 +31,161 @@ function record(text, extra = {}) {
 function render(rec, lang = 'en', tvv = value => value) {
   return renderToStaticMarkup(createElement(FieldGrid, { rec, t: key => t(lang, key), tvv }))
 }
+function renderQuotes(rec, lang = 'en') {
+  return renderToStaticMarkup(createElement(FieldQuoteList, { rec, evidence: rec.field_evidence || {},
+    t: key => t(lang, key) }))
+}
+
+test('each field has a collapsed Quotes entry including paired units and missing evidence', () => {
+  const rec = { field_status: { visa_fee_amount: 'filled', visa_fee_currency: 'filled',
+    required_documents: 'missing', source_url: 'filled' }, visa_fee_amount: 25, visa_fee_currency: 'USD',
+    source_url: 'https://immigration.example.gov/general',
+    field_evidence: { visa_fee_amount: [{ quote: 'Single entry: USD 25.\nAgency fee is not included.',
+      source_url: 'https://immigration.example.gov/fees' }] } }
+  const before = structuredClone(rec)
+  const closed = render(rec)
+  assert.match(closed, /<details data-testid="ops-field-quotes"[^>]*>/)
+  assert.doesNotMatch(closed, /<details[^>]*\bopen=/)
+  assert.ok(!closed.includes('<blockquote'))
+  const html = renderQuotes(rec)
+  for (const field of Object.keys(rec.field_status)) assert.ok(html.includes(`data-quote-field="${field}"`))
+  assert.ok(html.includes('Single entry: USD 25.\nAgency fee is not included.'))
+  assert.ok(html.includes('href="https://immigration.example.gov/fees"'))
+  assert.equal((html.match(/No supporting quote recorded/g) || []).length, 3)
+  assert.deepEqual(rec, before)
+})
+
+test('Quotes never borrow a route source link or a sibling product quote as field proof', () => {
+  const rec = { field_status: { visa_fee_amount: 'missing', required_documents: 'filled' },
+    source_url: 'https://immigration.example.gov/general', field_evidence: {
+      required_documents: [{ quote: 'Passport required.', source_url: 'https://immigration.example.gov/documents' }],
+      visa_fee_amount: [{ quote: 'A fee without its supporting URL.' }],
+    } }
+  const html = renderQuotes(rec)
+  const feeSection = html.split('data-quote-field="visa_fee_amount"')[1].split('data-quote-field="required_documents"')[0]
+  assert.ok(feeSection.includes('No supporting quote recorded'))
+  assert.ok(!feeSection.includes('<blockquote'))
+  assert.ok(!feeSection.includes('https://immigration.example.gov/general'))
+  assert.ok(!feeSection.includes('Passport required.'))
+})
+
+test('Quotes preserve distinct supporting pages, remove duplicates and reject unsafe links', () => {
+  const source = { quote: 'Published fee: USD 25.', source_url: 'https://immigration.example.gov/fees' }
+  const rec = { field_status: { visa_fee_amount: 'filled' }, visa_fee_amount: 25, field_evidence: {
+    visa_fee_amount: [source, { ...source },
+      { quote: 'Consular confirmation.', source_url: 'https://embassy.example.gov/fees' },
+      ...['javascript:alert(1)', 'data:text/html,unsafe', '//example.gov/fees', 'https://user:password@example.gov/'].map(source_url => ({ quote: 'Unsafe link.', source_url })),
+      { quote: '', source_url: 'https://example.gov/' }, { quote: {}, source_url: 'https://example.gov/' }, null],
+  } }
+  const html = renderQuotes(rec)
+  assert.equal((html.match(/<blockquote/g) || []).length, 2)
+  assert.equal((html.match(/Published fee: USD 25\./g) || []).length, 1)
+  assert.ok(html.includes('rel="noopener noreferrer"'))
+  assert.ok(!html.includes('Unsafe link.'))
+  assert.ok(!html.includes('javascript:'))
+})
+
+for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
+  test('Quotes localize controls while preserving exact source wording: ' + lang, () => {
+    const html = renderQuotes({ field_status: { required_documents: 'filled', visa_fee_amount: 'missing' },
+      field_evidence: { required_documents: [{ quote: 'Passport & itinerary\nKeep the exact wording.',
+        source_url: 'https://immigration.example.gov/documents' }] } }, lang)
+    assert.ok(render(record(null), lang).includes(t(lang, 'ops.quotes.title')))
+    assert.ok(html.includes(t(lang, 'ops.quotes.none')))
+    assert.ok(html.includes('Passport &amp; itinerary\nKeep the exact wording.'))
+    assert.ok(!html.includes('translated value'))
+  })
+}
+
+function quoteRecord(extra = {}) {
+  return { cache_key: 'CAN|CAN|VNM|tourism|default|unknown|v6', product_index: 0,
+    evidence_revision: 'record-v1', field_status: { visa_fee_amount: 'filled' }, ...extra }
+}
+function quoteResponse(rec, quote = 'Single entry: USD 25.') {
+  return { cache_key: rec.cache_key, product_index: rec.product_index, revision: rec.evidence_revision,
+    field_evidence: { visa_fee_amount: [{ quote, source_url: 'https://immigration.example.gov/fees' }] } }
+}
+function deferred() {
+  let resolve, reject
+  const promise = new Promise((yes, no) => { resolve = yes; reject = no })
+  return { promise, resolve, reject }
+}
+async function quoteScreen(test, rec = quoteRecord()) {
+  const reads = []
+  const onEvidence = record => { const request = deferred(); reads.push({ ...request, record }); return request.promise }
+  const props = record => ({ rec: record, t: key => t('en', key), onEvidence })
+  let renderer
+  await act(async () => { renderer = create(createElement(FieldQuotes, props(rec))) })
+  test.after(() => act(() => renderer.unmount()))
+  return { reads, renderer, text: () => JSON.stringify(renderer.toJSON()),
+    async toggle(open) {
+      await act(async () => { renderer.root.findByProps({ 'data-testid': 'ops-field-quotes' })
+        .props.onToggle({ currentTarget: { open } }); await Promise.resolve() })
+    },
+    async update(next) { await act(async () => { renderer.update(createElement(FieldQuotes, props(next))) }) },
+    async resolve(index, response) { await act(async () => { reads[index].resolve(response) }) },
+  }
+}
+
+test('Quotes fetch only when expanded and reread current evidence after reopening', async test => {
+  const rec = quoteRecord(), s = await quoteScreen(test, rec)
+  assert.equal(s.reads.length, 0)
+  await s.toggle(true)
+  assert.equal(s.reads.length, 1)
+  assert.ok(s.text().includes(t('en', 'ops.quotes.loading')))
+  await s.resolve(0, quoteResponse(rec))
+  assert.ok(s.text().includes('Single entry: USD 25.'))
+  await s.toggle(false)
+  assert.equal(s.reads.length, 1)
+  await s.toggle(true)
+  assert.equal(s.reads.length, 2)
+  await s.resolve(1, quoteResponse(rec, 'Updated source wording.'))
+  assert.ok(s.text().includes('Updated source wording.'))
+})
+
+test('late Quotes response cannot replace evidence for a refreshed product', async test => {
+  const prior = quoteRecord(), current = quoteRecord({ product_index: 1, evidence_revision: 'record-v2' })
+  const s = await quoteScreen(test, prior)
+  await s.toggle(true)
+  await s.update(current)
+  assert.equal(s.reads.length, 2)
+  await s.resolve(1, quoteResponse(current, 'Current product quote.'))
+  await s.resolve(0, quoteResponse(prior, 'Stale product quote.'))
+  assert.ok(s.text().includes('Current product quote.'))
+  assert.ok(!s.text().includes('Stale product quote.'))
+})
+
+test('Quotes reject mismatched identity and allow explicit retry without automatic requests', async test => {
+  const rec = quoteRecord(), s = await quoteScreen(test, rec)
+  await s.toggle(true)
+  await s.resolve(0, { ...quoteResponse(rec), revision: 'stale-revision' })
+  assert.ok(s.text().includes(t('en', 'ops.quotes.failed')))
+  assert.ok(!s.text().includes('Single entry: USD 25.'))
+  assert.equal(s.reads.length, 1)
+  await act(async () => { s.renderer.root.findByType('button').props.onClick(); await Promise.resolve() })
+  assert.equal(s.reads.length, 2)
+  await s.resolve(1, quoteResponse(rec))
+  assert.ok(s.text().includes('Single entry: USD 25.'))
+})
+
+test('evidence API sends product and revision with the existing public QC session and no browser cache', async () => {
+  const original = globalThis.fetch, requests = []
+  globalThis.fetch = async (url, options) => { requests.push({ url, options }); return { ok: true, text: async () => '{}' } }
+  try {
+    const client = createVisaClient({ token: 'public-quality-control', orgId: 'platform', userId: 'tester' })
+    await client.databaseRecordEvidence('CAN|CAN|VNM|tourism|default|unknown|v6', 0, 'record-v1')
+    await client.databaseRecordEvidence('CAN|CAN|VNM|tourism|default|unknown|v6', null)
+    const url = new URL(requests[0].url)
+    assert.equal(url.pathname, '/database/record-evidence')
+    assert.equal(url.searchParams.get('product_index'), '0')
+    assert.equal(url.searchParams.get('revision'), 'record-v1')
+    assert.equal(url.searchParams.get('cache_key'), 'CAN|CAN|VNM|tourism|default|unknown|v6')
+    assert.equal(requests[0].options.method, 'GET')
+    assert.equal(requests[0].options.cache, 'no-store')
+    assert.equal(requests[0].options.headers.authorization, 'Bearer public-quality-control')
+    assert.equal(new URL(requests[1].url).searchParams.has('product_index'), false)
+  } finally { globalThis.fetch = original }
+})
 
 for (const text of [
   'Usually six calendar months, decided on arrival',
