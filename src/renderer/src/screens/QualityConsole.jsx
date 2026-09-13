@@ -1708,27 +1708,21 @@ export function NextSweepCountdown({ at, summary, t }) {
   const hh = String(Math.floor(left / 3600)).padStart(2, '0')
   const mm = String(Math.floor((left % 3600) / 60)).padStart(2, '0')
   const ss = String(left % 60).padStart(2, '0')
-  const local = new Date(at).toLocaleString(undefined,
-    { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
   return (
     <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14,
-                  background: '#fff', padding: '16px 18px',
-                  display: 'flex', gap: 18, alignItems: 'center',
-                  flexWrap: 'wrap' }}>
+                  background: '#fff', padding: '52px 20px', minHeight: 260,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  textAlign: 'center' }}>
       <div>
-        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1,
                       color: GRAY, textTransform: 'uppercase' }}>
           {t('ops.fresh.nextTitle')}
         </div>
-        <div style={{ fontSize: 30, fontWeight: 800, color: NAVY,
-                      fontVariantNumeric: 'tabular-nums', marginTop: 2 }}>
+        <div style={{ fontSize: 'clamp(36px, 8vw, 80px)', fontWeight: 800, color: NAVY,
+                      fontVariantNumeric: 'tabular-nums', marginTop: 12, lineHeight: 1.2 }}>
           {target && target > now ? `${hh}:${mm}:${ss}` : t(summary.scheduler?.status === 'active' ? 'ops.fresh.awaitingRun' : 'ops.fresh.schedulerUnavailable')}
         </div>
-        <div style={{ fontSize: 12, color: GRAY }}>
-          {target && t('ops.fresh.nextAt').replace('{time}', local)}
-        </div>
       </div>
-
     </div>
   )
 }
@@ -3810,124 +3804,11 @@ function QualityWorkspace() {
           )
         })()}
 
-        {tab === 'freshness' && freshness && (() => {
-          const f = freshness.summary
-          const covered = f.human_verified + f.grounded
-          const rest = Math.max(0, f.total - covered)
-          const segs = [
-            [f.human_verified, SEQ.high, t('ops.fresh.human')],
-            [f.grounded, SEQ.medium, t('ops.fresh.grounded')],
-            [rest, SEQ.low, t('ops.fresh.notYet')],
-          ]
-          return (
-            <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
-              <NextSweepCountdown at={f.next_sweep_at} summary={f} t={t} />
-              {/* The 48-hour drill card is hidden from the tab on the owner's
-                  request (2026-09-03). The component, the endpoint and its
-                  test stay in place; restore by mounting it here again. */}
-              {false && <DrillCard countries={countries} onDrill={runDrill} t={t} />}
-              <div className="ops-tiles">
-                {[
-                  // Every tile states its own unit. An answer is one cached
-                  // route decision; a record is one visa product within it,
-                  // which is why this page counts fewer things than Records
-                  // does - a difference that reads as a bug when unstated.
-                  { label: t('ops.fresh.answers'), value: f.total,
-                    sub: t('ops.fresh.answersSub'), accent: NAVY },
-                  { label: t('ops.fresh.human'), value: f.human_verified,
-                    accent: GREEN,
-                    pct: f.total ? (f.human_verified / f.total) * 100 : null,
-                    sub: t('ops.fresh.humanSub') },
-                  { label: t('ops.fresh.grounded'), value: f.grounded,
-                    accent: BLUE,
-                    pct: f.total ? (f.grounded / f.total) * 100 : null,
-                    sub: t('ops.fresh.groundedSub2') },
-                  { label: t('ops.fresh.stale'), value: f.stale,
-                    accent: f.stale ? AMBER : GREEN,
-                    pct: f.total ? (f.stale / f.total) * 100 : null,
-                    sub: t('ops.fresh.staleSub') },
-                  // The caption used to carry the queue's open-report count,
-                  // so the tile showed two different numbers at once and read
-                  // as broken. It now describes only what it counts.
-                  { label: t('ops.fresh.disputed'), value: f.disputed,
-                    accent: f.disputed ? RED : GREEN,
-                    pct: f.total ? (f.disputed / f.total) * 100 : null,
-                    onClick: () => setTab('issues'),
-                    sub: t('ops.fresh.disputedSub') },
-                  ...(() => {
-                    const m = uptime?.months?.[uptime.months.length - 1]
-                    if (!m) return []
-                    return [{ label: t('ops.fresh.avail'),
-                              value: `${m.availability_pct}%`,
-                              accent: m.availability_pct >= 99.99 ? GREEN : AMBER,
-                              sub: t('ops.fresh.availSub')
-                                     .replace('{ms}', m.median_latency_ms ?? '·') }]
-                  })(),
-                ].map((p, i) => (
-                  <div key={i} className="ops-lift"
-                       onClick={p.onClick}
-                       style={{ ...card, padding: 0,
-                                cursor: p.onClick ? 'pointer' : 'default' }}>
-                    <StatCell {...p} delay={i * 70} />
-                  </div>
-                ))}
-              </div>
-              <div style={{ ...card, padding: '16px 20px', fontSize: 12.5,
-                            color: GRAY, lineHeight: 1.65, display: 'flex',
-                            gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ width: 22, height: 22, borderRadius: 99,
-                               background: `${BLUE}18`, color: BLUE,
-                               fontWeight: 800, fontSize: 12, flexShrink: 0,
-                               display: 'inline-flex', alignItems: 'center',
-                               justifyContent: 'center' }}>i</span>
-                <span>{t('ops.fresh.note')}</span>
-              </div>
-              <div style={{ ...card, padding: '24px 28px' }}>
-                <div style={{ display: 'grid', gap: 16, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline',
-                                gap: 12, flexWrap: 'wrap' }}>
-                    <div style={{ fontSize: 10.5, fontWeight: 800,
-                                  letterSpacing: 1, color: GRAY,
-                                  textTransform: 'uppercase', flex: 1 }}>
-                      {t('ops.fresh.coverage')}
-                    </div>
-                    <div style={{ fontSize: 26, fontWeight: 700, color: NAVY,
-                                  lineHeight: 1,
-                                  fontVariantNumeric: 'tabular-nums' }}>
-                      {f.total ? Math.round((covered / f.total) * 100) : 0}%
-                    </div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: GRAY,
-                                  textTransform: 'uppercase',
-                                  letterSpacing: 0.6 }}>
-                      {t('ops.fresh.coveredShort')}
-                    </div>
-                  </div>
-                  <MicroStack segs={segs} height={22} legend={false} />
-                  <div style={{ display: 'grid', gap: 8 }}>
-                    {segs.map(([n, color, name], i) => (
-                      <div key={i} style={{ display: 'flex',
-                                    alignItems: 'center', gap: 10,
-                                    fontSize: 13 }}>
-                        <span style={{ width: 10, height: 10, borderRadius: 3,
-                                       background: color, flexShrink: 0 }} />
-                        <span style={{ color: GRAY, flex: 1 }}>{name}</span>
-                        <strong style={{ color: NAVY,
-                                         fontVariantNumeric: 'tabular-nums' }}>
-                          {n.toLocaleString()}
-                        </strong>
-                        <span style={{ color: GRAY, fontSize: 12, width: 44,
-                                       textAlign: 'right',
-                                       fontVariantNumeric: 'tabular-nums' }}>
-                          {f.total ? Math.round((n / f.total) * 100) : 0}%
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        })()}
+        {tab === 'freshness' && freshness && (
+          <div className="ops-fade" data-testid="ops-freshness">
+            <NextSweepCountdown at={freshness.summary.next_sweep_at} summary={freshness.summary} t={t} />
+          </div>
+        )}
       </div>
     </div>
   )
