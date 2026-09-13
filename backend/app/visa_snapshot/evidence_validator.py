@@ -404,8 +404,21 @@ def _entry_requirement_source_clause(topic: str, required: bool, quote: str, sou
         previous = re.split(r'[.!?\n]', prefix.rstrip('.!?'))[-1].strip()
         tail = source[right + 1:] if right < len(source) else ''
         following = re.split(r'[.!?\n]', tail.lstrip())[0].strip()
-        scoped = r'^(?:for\b|if\b|when\b|unless\b|except\b|only\b|provided\b|subject to\b|this (?:rule|requirement|exemption) (?:applies|is)\b)'
+        scoped = r'^(?:for\b|if\b|when\b|unless\b|except\b|only\b|provided\b|subject to\b|this (?:rule|requirement|exemption) (?:applies|is)\b|from\b|effective\b|as of\b|since\b|until\b|before\b|after\b)'
         if re.search(scoped, previous) or re.search(scoped, following):
+            return False
+        # Full stops are also used after short section headings. Keep noun
+        # phrases naming an age, nationality, document or applicant status
+        # attached without mistaking ordinary policy sentences for headings.
+        heading = (
+            r'^(?:(?:children|minors|infants|adults|students|workers|residents)'
+            r'(?:\s+(?:under|over|aged|age|between|with|without|only)\b[^.!?]*)?'
+            r'|(?:[a-z]+[ -]){0,6}(?:citizens|nationals|passport holders|residents)'
+            r'(?:\s+(?:only|aged|under|over|with|without)\b[^.!?]*)?'
+            r'|(?:(?:diplomatic|service|official|ordinary|refugee|emergency|temporary|special|prc|travel|electronic)[ -]+)+'
+            r'(?:passports?|documents?)(?: only)?'
+            r'|(?:visa application|application|online submission|border inspection) stage)$')
+        if re.fullmatch(heading, previous) or re.fullmatch(heading, following):
             return False
     # Two opposite unqualified statements on the same fetched page are not
     # permission to choose one of them as the global Boolean.

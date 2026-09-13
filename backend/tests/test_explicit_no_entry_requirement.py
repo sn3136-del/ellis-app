@@ -329,3 +329,21 @@ def test_partial_card_observation_does_not_clip_a_subgroup_into_global_conflict(
             next(fixture)
         except StopIteration:
             pass
+
+
+@pytest.mark.parametrize('heading', [
+    'Children under 16.', 'Canadian citizens.', 'Diplomatic passports.',
+    'From 2027.', 'Effective 1 January 2027.', 'Residents with a valid permit.',
+    'Refugee travel documents.', 'Visa application stage.',
+])
+@pytest.mark.parametrize('before', [True, False])
+@pytest.mark.parametrize('required', [True, False])
+@pytest.mark.parametrize('field', ['insurance_required', 'arrival_card'])
+def test_punctuated_adjacent_scope_headings_do_not_become_global_rule(heading, before, required, field):
+    topic = 'Travel insurance' if field == 'insurance_required' else 'An arrival card'
+    quote = topic + (' is required.' if required else ' is not required.')
+    value = required if field == 'insurance_required' else {**CARD, 'required': required}
+    source = heading + '\n' + quote if before else quote + '\n' + heading
+    assert not field_value_supported(field, value, quote, source_text=source)
+    proposed, _, unquoted = _quoted_proposals({'corrected_fields': {field: value}, 'evidence': {field: quote}}, source, ROUTE)
+    assert proposed == {} and unquoted == [field]
