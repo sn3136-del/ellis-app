@@ -402,7 +402,7 @@ def test_explicit_retry_does_not_keep_choosing_a_failed_registry_hint(state, mon
     row.guidance = dict(row.guidance, source_url=URL, passport_validity=None)
     failed = "https://www.irishimmigration.ie/old-passport-page/"
     extra = "https://www.irishimmigration.ie/passport-page/"
-    row.verification = {"grounded_check": {"outcome": "fetch_failed", "source_discovery": {
+    row.verification = {"grounded_check": {"outcome": "fetch_failed", "unchecked_sources": [], "source_discovery": {
         "candidate_urls": [failed], "model_discovery_calls": 0}}}
     db.commit()
     monkeypatch.setattr(source_discovery, "official_source_seeds", lambda _: [failed])
@@ -422,3 +422,39 @@ def test_periodic_missing_fields_without_registry_never_call_discovery_model(sta
     readings()
     result = freshness.recheck_route(db, ROUTE)
     assert "model_discovery_calls" not in result and row.guidance["passport_validity"] is None
+
+
+@pytest.mark.parametrize("field,value", [("fee", {"amount": None, "currency": "USD"}),
+    ("processing_time", None), ("validity", None), ("required_documents", [])])
+def test_nested_product_gap_triggers_supplement_even_with_complete_route_fields(state, field, value):
+    row, db = state
+    product = {"type": "Tourist eVisa", "disposition": "VISA_REQUIRED", field: value}
+    row.guidance = dict(GUIDANCE, source_url=URL, visa_products=[product])
+    db.commit()
+    queries = []
+    source_discovery.set_proposer(lambda q: queries.append(q) or [])
+    readings()
+    result = freshness.recheck_route(db, ROUTE, discover_sources=True)
+    assert len(queries) == 1 and "visa_products" in result["source_discovery"]["target_fields"]
+    assert row.guidance["visa_products"] == [product]
+
+
+def test_exempt_product_nonapplicable_filing_and_zero_fee_do_not_create_gap(state):
+    row, _ = state
+    product = {"type": "Visa exemption", "disposition": "VISA_EXEMPT", "validity": None,
+               "processing_time": None, "fee": {"amount": 0, "currency": None}}
+    assert freshness._discovery_targets(row, dict(GUIDANCE, visa_products=[product])) == []
+
+
+def test_registry_candidate_not_yet_attempted_remains_available(state, monkeypatch):
+    row, db = state
+    row.guidance = dict(GUIDANCE, source_url=URL, passport_validity=None)
+    extra = "https://www.irishimmigration.ie/passport-page/"
+    row.verification = {"grounded_check": {"outcome": "budget_exhausted", "unchecked_sources": [extra],
+        "source_discovery": {"candidate_urls": [extra]}}}
+    db.commit()
+    monkeypatch.setattr(source_discovery, "official_source_seeds", lambda _: [extra])
+    source_discovery.set_proposer(lambda _: pytest.fail("unattempted hint still available"))
+    fetched = readings()
+    result = freshness.recheck_route(db, ROUTE, discover_sources=True)
+    assert fetched == [URL, extra] and result["model_discovery_calls"] == 0

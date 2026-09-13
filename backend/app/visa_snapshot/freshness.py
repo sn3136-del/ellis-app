@@ -851,6 +851,23 @@ def _discovery_targets(row, guidance: dict) -> list[str]:
         targets -= {"government_fee", "processing_time", "visa_products", "visa_category",
                     "requirement_detail", "application_channel_detail", "account_registration_steps",
                     "payment_process", "submission_process", "photo_requirements", "consular_jurisdiction"}
+    products = guidance.get("visa_products")
+    for product in products if isinstance(products, list) else []:
+        if not isinstance(product, dict):
+            continue
+        product_fields = fields | {"fee", "validity", "entry", "max_stay_days"}
+        if (product.get("disposition") == "VISA_EXEMPT" or product.get("requirement_detail") in
+                {"unconditional_visa_free", "conditional_visa_free", "transit_visa_free"}):
+            product_fields -= {"fee", "government_fee", "validity", "entry", "processing_time",
+                               "application_channel_detail", "photo_requirements", "payment_process",
+                               "submission_process", "account_registration_steps", "consular_jurisdiction"}
+        product_gap = any(not _has_asserted_value(product[k]) for k in product_fields & product.keys())
+        fee = product.get("fee")
+        product_gap = product_gap or ("fee" in product_fields and isinstance(fee, dict) and
+                                     (fee.get("amount") is None or not fee.get("currency")))
+        if product_gap:
+            targets.add("visa_products")
+            break
     return sorted(targets)
 
 
@@ -873,7 +890,9 @@ def _discover_supplemental_sources(row, route, guidance, existing, deadline, sho
     # An explicit retry must not get stuck on the same unsuccessful seed
     # selection. Periodic checks can still retry those hints after outages.
     previous_hints = (previous.get("source_discovery") or {}).get("candidate_urls", [])
-    tried_hints = set(previous_hints) if _DISCOVER_SOURCES.get() and isinstance(previous_hints, list) else set()
+    unchecked = previous.get("unchecked_sources")
+    tried_hints = ({u for u in previous_hints if isinstance(u, str) and u not in unchecked}
+                   if _DISCOVER_SOURCES.get() and isinstance(previous_hints, list) and isinstance(unchecked, list) else set())
     hints = [u for u in hints if u not in existing and u not in tried_hints][:source_discovery.DISCOVERY_MAX_SOURCES]
     if hints:
         discovery = {"urls": hints, "outcome": "seed_candidates", "model_discovery_calls": 0}
