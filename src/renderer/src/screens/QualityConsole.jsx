@@ -324,7 +324,18 @@ function SuggestInput({ value, placeholder, options, onCommit, testid }) {
   )
 }
 
-function CountryFilter({ value, placeholder, onCommit, countries }) {
+export function QualityFilterField({ label, children }) {
+  return (
+    <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+      <span style={{ fontSize: 10.5, fontWeight: 700,
+                     letterSpacing: 0.4, color: GRAY,
+                     textTransform: 'uppercase', paddingLeft: 2 }}>{label}</span>
+      {children}
+    </label>
+  )
+}
+
+export function CountryFilter({ value, placeholder, onCommit, countries }) {
   // The interaction model is the customer combo\'s, which is proven: the box
   // EMPTIES on focus so typing always starts fresh (the committed country
   // stays visible as the placeholder), suggestions appear once something is
@@ -2985,28 +2996,17 @@ function QualityWorkspace() {
                   each field filters before touching it (the last one slices
                   by records MISSING a field, which a bare select hid). */}
               <div className="ops-filters">
-              {(() => {
-                const F = ({ label, children }) => (
-                  <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
-                    <span style={{ fontSize: 10.5, fontWeight: 700,
-                                   letterSpacing: 0.4, color: GRAY,
-                                   textTransform: 'uppercase',
-                                   paddingLeft: 2 }}>{label}</span>
-                    {children}
-                  </label>
-                )
-                return (<>
-              <F label={t('ops.flt.passport')}>
+              <QualityFilterField label={t('ops.flt.passport')}>
               <CountryFilter value={filters.nationality} countries={countries}
                              placeholder={t('ops.passport')}
                              onCommit={set('nationality')} />
-              </F>
-              <F label={t('ops.flt.destination')}>
+              </QualityFilterField>
+              <QualityFilterField label={t('ops.flt.destination')}>
               <CountryFilter value={filters.destination} countries={countries}
                              placeholder={t('ops.destination')}
                              onCommit={set('destination')} />
-              </F>
-              <F label={t('ops.flt.purpose')}>
+              </QualityFilterField>
+              <QualityFilterField label={t('ops.flt.purpose')}>
               <select value={filters.purpose} onChange={(e) => set('purpose')(e.target.value)}
                       className="ops-in"
                       style={{ ...input, color: filters.purpose ? NAVY : GRAY }}>
@@ -3015,8 +3015,8 @@ function QualityWorkspace() {
                   <option key={p} value={p}>{t(PURPOSE_KEY[p])}</option>
                 ))}
               </select>
-              </F>
-              <F label={t('ops.flt.requirement')}>
+              </QualityFilterField>
+              <QualityFilterField label={t('ops.flt.requirement')}>
               <select value={filters.requirement}
                       onChange={(e) => set('requirement')(e.target.value)}
                       className="ops-in"
@@ -3027,8 +3027,8 @@ function QualityWorkspace() {
                 <option value="Visa Required in Advance">{t('ops.req.advance')}</option>
                 <option value="Conditional">{t('ops.req.conditional')}</option>
               </select>
-              </F>
-              <F label={t('ops.flt.confidence')}>
+              </QualityFilterField>
+              <QualityFilterField label={t('ops.flt.confidence')}>
               <select value={filters.confidence}
                       onChange={(e) => set('confidence')(e.target.value)}
                       className="ops-in"
@@ -3038,17 +3038,17 @@ function QualityWorkspace() {
                 <option value="Medium">{t('ops.conf.medium')}</option>
                 <option value="Low">{t('ops.conf.low')}</option>
               </select>
-              </F>
+              </QualityFilterField>
               {/* The acceptance standard's extra slice dimensions (4.1.2):
                   by visa type, and by a specific field's gaps. */}
-              <F label={t('ops.flt.visaType')}>
+              <QualityFilterField label={t('ops.flt.visaType')}>
               <SuggestInput value={filters.visaType}
                             placeholder={t('ops.typeFilter')}
                             testid="ops-filter-visatype"
                             options={visaTypeOptions}
                             onCommit={(v) => setFilters((f) => ({ ...f, visaType: v }))} />
-              </F>
-              <F label={t('ops.flt.document')}>
+              </QualityFilterField>
+              <QualityFilterField label={t('ops.flt.document')}>
               <select className="ops-in" value={filters.document}
                       data-testid="ops-filter-document"
                       style={{ ...input, width: '100%', boxSizing: 'border-box',
@@ -3063,8 +3063,8 @@ function QualityWorkspace() {
                   </option>
                 ))}
               </select>
-              </F>
-              <F label={t('ops.flt.gap')}>
+              </QualityFilterField>
+              <QualityFilterField label={t('ops.flt.gap')}>
               <select className="ops-in" value={filters.fieldMissing}
                       data-testid="ops-filter-fieldmissing"
                       style={{ ...input, width: '100%',
@@ -3076,11 +3076,11 @@ function QualityWorkspace() {
                   <option key={f} value={f}>{fx(t, f)}</option>
                 ))}
               </select>
-              </F>
-              <F label={t('ops.flt.publication')}>
+              </QualityFilterField>
+              <QualityFilterField label={t('ops.flt.publication')}>
               <PublicationFilter value={filters.publication}
                 onChange={set('publication')} t={t} />
-              </F>
+              </QualityFilterField>
                 <div className="ops-filters-act">
                   <button className="btn btn--sm ops-export-btn"
                           onClick={exportXlsx}
@@ -3099,8 +3099,6 @@ function QualityWorkspace() {
                     {t('ops.export')}
                   </button>
                 </div>
-                </>)
-              })()}
               </div>
             </div>
 

@@ -5,12 +5,13 @@ import { resolve } from 'node:path'
 import { build } from 'esbuild'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { act, create } from 'react-test-renderer'
 import { t as translate } from '../../src/renderer/src/lib/i18n.js'
 
 // The records list is the operator's first screen. It renders a real
 // component, so a helper that is not in scope there crashes every row.
 const compiled = await build({
-  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown } from './src/renderer/src/screens/QualityConsole.jsx'",
+  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown, QualityFilterField, CountryFilter } from './src/renderer/src/screens/QualityConsole.jsx'",
     resolveDir: resolve('.'), sourcefile: 'quality-records-table-entry.jsx' },
   bundle: true, write: false, platform: 'node', format: 'cjs', jsx: 'automatic',
   external: ['react', 'react/jsx-runtime'], logLevel: 'silent',
@@ -18,9 +19,47 @@ const compiled = await build({
 const module = { exports: {} }
 new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(
   createRequire(import.meta.url), module, module.exports)
-const { RecordsTable, unitNameOf, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown } = module.exports
+const { RecordsTable, unitNameOf, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown, QualityFilterField, CountryFilter } = module.exports
 
 const t = (key, vars) => translate('en', key, vars)
+
+const hongKong = { value: 'HKG', label: 'Hong Kong', search: 'hkg hk hong kong' }
+function countryField(countries, onCommit, label = 'Passport') {
+  return createElement(QualityFilterField, { label }, createElement(CountryFilter, {
+    value: '', placeholder: 'China or CHN', countries, onCommit,
+  }))
+}
+
+test('country text survives the parent render when the country catalog arrives', () => {
+  const committed = []; const commit = value => committed.push(value)
+  let renderer
+  try {
+    act(() => { renderer = create(countryField([], commit)) })
+    const input = renderer.root.findByType('input')
+    act(() => { input.props.onFocus(); input.props.onChange({ target: { value: 'Hong Ko' } }) })
+    act(() => { renderer.update(countryField([hongKong], commit)) })
+    const updated = renderer.root.findByType('input')
+    assert.ok(updated === input, 'The same input must remain mounted')
+    assert.equal(updated.props.value, 'Hong Ko')
+    assert.deepEqual(committed, [])
+    act(() => { updated.props.onKeyDown({ key: 'Enter', preventDefault() {} }) })
+    assert.deepEqual(committed, ['HKG'], 'Newly loaded suggestions resolve the retained text')
+  } finally { if (renderer) act(() => renderer.unmount()) }
+})
+
+test('an unrelated parent render does not cancel the country auto-commit timer', async () => {
+  const committed = []; const commit = value => committed.push(value)
+  let renderer
+  try {
+    act(() => { renderer = create(countryField([hongKong], commit)) })
+    const input = renderer.root.findByType('input')
+    act(() => { input.props.onFocus(); input.props.onChange({ target: { value: 'HKG' } }) })
+    act(() => { renderer.update(countryField([hongKong], commit, 'Passport country')) })
+    assert.equal(renderer.root.findByType('input').props.value, 'HKG')
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 280)) })
+    assert.deepEqual(committed, ['HKG'])
+  } finally { if (renderer) act(() => renderer.unmount()) }
+})
 
 function record(extra = {}) {
   return { travel_document_country: 'AUS', destination_country: 'RUS', travel_purpose: 'tourism',
