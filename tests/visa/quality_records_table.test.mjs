@@ -7,6 +7,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { act, create } from 'react-test-renderer'
 import { t as translate } from '../../src/renderer/src/lib/i18n.js'
+import { formatChangeValue, changeDisplayEntries, changeOriginKind } from '../../src/renderer/src/lib/changeLogDisplay.js'
 
 // The records list is the operator's first screen. It renders a real
 // component, so a helper that is not in scope there crashes every row.
@@ -302,4 +303,61 @@ test('publish rejection is visible beside its route instead of a silent unchange
   assert.ok(html.includes('Resolve the conflicting visa requirement'))
   assert.ok(!html.includes('data-testid="ops-published"'))
   assert.ok(!html.includes('disabled=""'))
+})
+
+
+test('change log renders source metadata as words and retains equal-count evidence updates', () => {
+  const from = { disposition: { source_url: 'https://example.gov/old', verifier: 'human', quote: 'Earlier policy' } }
+  const to = { disposition: { source_url: 'https://example.gov/new', status: 'reviewed', verifier: 'ai', quote: 'Current policy' } }
+  const rows = changeDisplayEntries({ field_provenance: { from, to } }, 'modify', { t })
+  assert.equal(rows.length, 1)
+  assert.equal(rows[0][2], 'Updated: Field source records: 1 · Source pages: 1')
+  assert.equal(rows[0][3], true)
+  assert.doesNotMatch(rows[0][2], /[{}]|source_url|verifier/)
+  assert.equal(changeDisplayEntries({ field_provenance: { from: to, to } }, 'modify', { t }).length, 0)
+})
+
+test('change log keeps changed same-length lists, zero fees and qualified fees', () => {
+  const rows = changeDisplayEntries({ required_documents: { from: ['Passport', 'Ticket'], to: ['Passport', 'Photo'] } }, 'modify', { t })
+  assert.equal(rows[0][1], 'Passport · Ticket')
+  assert.equal(rows[0][2], 'Passport · Photo')
+  assert.equal(formatChangeValue('government_fee', { amount: 0, currency: 'USD' }, { t }), '0 USD')
+  assert.equal(formatChangeValue('government_fee', { amount: 250, currency: 'AUD', qualifier: 'from', note: 'Agency charges excluded' }, { t }), 'From 250 AUD · Agency charges excluded')
+})
+
+test('structured conditions and encoded object values stay readable without losing false', () => {
+  const text = formatChangeValue('arrival_card', { required: false, condition: 'Only when requested', submission_method: 'online_portal' }, { t })
+  assert.equal(text, 'Required: No · Condition: Only when requested · Submission Method: Online Portal')
+  assert.doesNotMatch(text, /[{}]|required.*false|online_portal/)
+  assert.equal(formatChangeValue('fee', '{"amount":25,"currency":"USD"}', { t }), '25 USD')
+  assert.equal(formatChangeValue('notes', 'Bring {original} passport', { t }), 'Bring {original} passport')
+})
+
+test('change attribution uses only this change new evidence and never infers a person from origin or source_kind', () => {
+  const change = { origin: 'operator-edit', source_kind: 'human-verified 2026-09-13', changes: { field_provenance: {
+    from: { fee: { verifier: 'human' } }, to: { fee: { verifier: 'ai' } },
+  } } }
+  assert.equal(changeOriginKind(change), 'aiReview')
+  assert.equal(changeOriginKind({ origin: 'operator-edit', source_kind: 'human-verified 2026-09-13' }), 'qc')
+  change.changes.field_provenance.to.docs = { verifier: 'human' }
+  assert.equal(changeOriginKind(change), 'qc')
+  assert.equal(changeOriginKind({ origin: 'grounded_recheck' }), 'recheck')
+  assert.equal(changeOriginKind({ origin: 'engine' }), 'engine')
+})
+
+for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
+  test(`change log summaries and attribution have static ${lang} labels`, () => {
+    const tr = (key, vars) => translate(lang, key, vars)
+    const summary = formatChangeValue('field_provenance', { fee: { source_url: 'https://example.gov/fee' } }, { t: tr })
+    assert.doesNotMatch(summary, /ops\.chg|source_url|\{fields\}|\{sources\}/)
+    for (const key of ['ops.chg.evidenceLabel', 'ops.origin.aiReview', 'ops.origin.qc', 'ops.originAiReviewTip', 'ops.originQcTip']) assert.notEqual(tr(key), key)
+  })
+}
+
+
+test('an unpublished fee amount does not conceal a changed published currency', () => {
+  const rows = changeDisplayEntries({ government_fee: { from: { amount: null, currency: 'USD' }, to: { amount: null, currency: 'EUR' } } }, 'modify', { t })
+  assert.equal(rows.length, 1)
+  assert.equal(rows[0][1], 'Currency: USD')
+  assert.equal(rows[0][2], 'Currency: EUR')
 })

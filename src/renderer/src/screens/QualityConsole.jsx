@@ -141,6 +141,7 @@ import { registerOpenNote } from '../lib/openNote.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { useLocalizedCountries } from '../lib/countryNames.js'
 import { matchCountry, matchCountryStrict } from '../lib/countryMatch.js'
+import { changeDisplayEntries, changeOriginKind } from '../lib/changeLogDisplay.js'
 
 const NAVY = '#0f294d'
 const BLUE = '#287dfa'
@@ -2537,6 +2538,7 @@ function QualityWorkspace() {
   // Used by the correction queue and the change log alike.
   const fieldLabel = useCallback((f) => {
     const M = {
+      field_provenance: t('ops.chg.evidenceLabel'),
       disposition: t('ops.col.requirement'),
       visa_category: t('ops.col.type'),
       permitted_stay: t('ops.col.stay'),
@@ -3535,20 +3537,6 @@ function QualityWorkspace() {
             try { return new URL(u).hostname.replace(/^www\./, '') }
             catch { return u }
           }
-          const fmt = (v) => {
-            if (v == null) return null
-            if (typeof v === 'object') {
-              if (Array.isArray(v)) return `${v.length} ${t('ops.items')}`
-              if ('amount' in v) {
-                return v.amount == null ? null
-                  : `${v.amount} ${v.currency || ''}`.trim()
-              }
-              const j = JSON.stringify(v)
-              return j === '{}' ? null : j.slice(0, 40)
-            }
-            const sv = String(v).replace(/^"|"$/g, '')
-            return sv.length > 220 ? sv.slice(0, 220) + '…' : sv
-          }
           const all = changes?.changes || []
           const counts = { '': all.length }
           for (const c of all) counts[c.action] = (counts[c.action] || 0) + 1
@@ -3653,7 +3641,7 @@ function QualityWorkspace() {
                     </span>
                   </div>
                   {g.items.map((c) => (
-                    <div key={c.id} className="ops-lift"
+                    <div key={c.id} data-testid="ops-change-card" className="ops-lift"
                          style={{ ...card, padding: '12px 16px',
                                   borderLeft: `3px solid ${AC[c.action] || GRAY}` }}>
                       <div style={{ display: 'flex', gap: 10,
@@ -3685,22 +3673,20 @@ function QualityWorkspace() {
                             ? c.action : t(`ops.act.${c.action}`)}
                         </Chip>
                         {/* WHO changed it, in plain words, not a token. */}
-                        <span title={c.origin === 'grounded_recheck'
-                                ? t('ops.originRecheckTip')
-                                : c.origin === 'engine' ? t('ops.originEngineTip')
-                                  : t('ops.originHumanTip')}
-                              style={{ cursor: 'help' }}>
-                        <Chip filled={false}
-                              color={c.origin === 'grounded_recheck' ? BLUE
-                                : c.origin === 'engine' ? GRAY : GREEN}>
-                          {c.origin === 'grounded_recheck' ? t('ops.origin.recheck')
-                            : c.origin === 'engine' ? t('ops.origin.engine')
-                              : t('ops.origin.human')}
-                        </Chip>
-                        </span>
+                        {(() => {
+                          const origin = changeOriginKind(c)
+                          const tip = origin === 'recheck' ? 'ops.originRecheckTip'
+                            : origin === 'engine' ? 'ops.originEngineTip'
+                              : origin === 'aiReview' ? 'ops.originAiReviewTip' : 'ops.originQcTip'
+                          return <span title={t(tip)} style={{ cursor: 'help' }}>
+                            <Chip filled={false} color={origin === 'qc' || origin === 'engine' ? GRAY : BLUE}>
+                              {t(`ops.origin.${origin}`)}
+                            </Chip>
+                          </span>
+                        })()}
                         {sourceOf(c) ? (
                           <a href={sourceOf(c)} target="_blank" rel="noreferrer"
-                             title={`${c.source_kind || t('ops.chg.srcTitle')}\n${sourceOf(c)}`}
+                             title={`${t('ops.chg.srcTitle')}\n${sourceOf(c)}`}
                              style={{ display: 'inline-flex', alignItems: 'center',
                                       gap: 5, fontSize: 11.5, fontWeight: 700,
                                       color: BLUE, textDecoration: 'none',
@@ -3736,11 +3722,7 @@ function QualityWorkspace() {
                         {(() => {
                           const HEAD = ['disposition', 'visa_category',
                                         'permitted_stay', 'government_fee']
-                          const fv = (f, v) =>
-                            fmt(typeof v === 'string' ? valueLabel(f, v) : v)
-                          let entries = Object.entries(c.changes || {})
-                            .map(([f, d]) => [f, fv(f, d.from), fv(f, d.to)])
-                            .filter(([, a, b]) => a != null || b != null)
+                          let entries = changeDisplayEntries(c.changes, c.action, { t, valueLabel, fieldLabel })
                           if (c.action === 'add') {
                             // A brand-new record: lead with the headline facts
                             // instead of listing every stored field.
@@ -3749,13 +3731,8 @@ function QualityWorkspace() {
                               return (ix < 0 ? 9 : ix) - (iy < 0 ? 9 : iy)
                             })
                           }
-                          // A row whose two sides render identically claims a
-                          // change while showing none: drop it.
-                          if (c.action === 'modify') {
-                            entries = entries.filter(([, a, b]) => a !== b)
-                          }
                           const cap = c.action === 'add' ? 4 : 5
-                          const Row = ([f, a, b]) => (
+                          const Row = ([f, a, b, summaryOnly]) => (
                               <div key={f} style={{ display: 'grid',
                                     gridTemplateColumns: '175px 1fr', gap: 10,
                                     alignItems: 'center', fontSize: 12 }}>
@@ -3766,7 +3743,7 @@ function QualityWorkspace() {
                                 <span style={{ minWidth: 0, display: 'flex',
                                                gap: 6, alignItems: 'center',
                                                flexWrap: 'wrap' }}>
-                                  {c.action === 'modify' && [
+                                  {c.action === 'modify' && !summaryOnly && [
                                     <ValueChip key="o" v={a ?? t('ops.emptyVal')}
                                                kind={a == null ? 'empty' : 'old'} />,
                                     <span key="s" style={{ color: '#b6c2d4' }}>→</span>,
