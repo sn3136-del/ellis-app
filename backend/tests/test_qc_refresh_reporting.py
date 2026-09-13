@@ -14,6 +14,9 @@ ADMIN = {'authorization': 'Bearer admin-token', 'x-org-id': 'integrity', 'x-user
       'verified_fields': ['government_fee'], 'unverified_fields': ['disposition'], 'source_reads': 1}, False),
     ({'outcome': 'provider_error', 'source_reads': 1}, True),
     ({'outcome': 'fetch_failed', 'source_reads': 0}, False),
+    ({'outcome': 'no_official_source', 'source_reads': 0, 'model_discovery_calls': 1,
+      'source_discovery': {'outcome': 'timeout', 'model_discovery_calls': 1,
+                           'candidate_urls': [], 'rejected_candidate_count': 0}}, False),
 ])
 def test_refresh_api_preserves_actual_evidence_and_rereads_the_same_canonical_route(client, monkeypatch, report, suspended):
     stages = []
@@ -39,6 +42,8 @@ def test_refresh_api_preserves_actual_evidence_and_rereads_the_same_canonical_ro
     assert result['verified_fields'] == report.get('verified_fields', [])
     assert result['unverified_fields'] == report.get('unverified_fields', [])
     assert result['source_reads'] == report['source_reads']
+    assert result['model_discovery_calls'] == report.get('model_discovery_calls', 0)
+    assert result['source_discovery'] == report.get('source_discovery')
     assert result['provider_unavailable'] is suspended
     assert [s[0] for s in stages] == ['full', 'core']
     assert stages[0][1] == stages[1][1] == 'HKG|HKG|VNM|tourism|default|unknown|v6'
