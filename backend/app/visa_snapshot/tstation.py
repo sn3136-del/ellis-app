@@ -1220,6 +1220,18 @@ def _processing_note(guidance: dict, *, ambiguous: bool = False):
     return {"label": label, "text": text.strip()}
 
 
+def _processing_text(guidance: dict) -> str | None:
+    """Preserve actual timing wording without pretending an upper bound is a minimum."""
+    text = guidance.get("processing_time")
+    if not isinstance(text, str):
+        return None
+    # The shared duration wording check excludes working days when evaluating
+    # stays/validity. Here they really are processing units; normalize only
+    # that check and return the original qualified statement unchanged.
+    check = re.sub(r"\b(?:working|business)\s+", "", text, flags=re.I)
+    return text.strip() if _wording_status(check) == "filled" else None
+
+
 def _ambiguous_inherited_processing(guidance: dict, products: list[dict]) -> bool:
     if len(products) < 2:
         return False
@@ -1482,6 +1494,7 @@ def _product_fields(row: dict, product: dict) -> None:
     if "processing_time" in product:
         row["processing_min_days"], row["processing_unit"] = _processing(product)
         row["_processing_note"] = _processing_note(product)
+        row["processing_text"] = _processing_text(product)
     if "consular_jurisdiction" in product:
         row["consulate_district"] = _consulate_district(product, {})
     if "exceptions" in product:
@@ -1657,7 +1670,7 @@ def _strip_visa_only_fields(row: dict) -> dict:
         row["validity_text"] = None
         return row
     for f in ("validity_duration", "validity_unit", "validity_text", "entries",
-              "processing_min_days", "processing_unit"):
+              "processing_min_days", "processing_unit", "processing_text"):
         row[f] = None
     # Their enum has no "not applicable", so an empty cell carries it and the
     # checklist says why. "Other" implied a channel that does not exist.
@@ -1847,6 +1860,9 @@ def _regrade(row: dict, g: dict, disputed: list | None,
         and (verdict_provenance_supported(prov) or grounded)
         and "disposition" in checked)
     timing = row.pop("_processing_note", None)
+    if (_no_visa_issued(row) or set(unpublished or ()) &
+            {"processing_time", "processing_min_days", "processing_unit"}):
+        row["processing_text"] = None
     if (timing and row.get("visa_requirement") != "Visa-free"
             and row.get("visa_requirement_detail") not in _VISA_FREE_DETAILS):
         current = str(row.get("special_conditions") or "")
@@ -1987,6 +2003,7 @@ def records_for_route(route: dict, guidance: dict,
         "entries": None,
         "processing_min_days": proc_n, "processing_unit": proc_unit,
         "_processing_note": _processing_note(g),
+        "processing_text": _processing_text(g),
         "visa_fee_amount": None, "visa_fee_currency": None,
         "visa_fee_qualifier": _fee_qualifier({}, g),
         "application_method": method,
@@ -2076,7 +2093,7 @@ def records_for_route(route: dict, guidance: dict,
         row["visa_fee_qualifier"] = _fee_qualifier({}, g)
         row["application_method"] = _method_for_detail(
             row.get("visa_requirement_detail"), method, row, method_from_channel)
-        return [_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
+        return [_regrade({k: v if k == "processing_text" else _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
     rows = []
     ambiguous_timing = _ambiguous_inherited_processing(g, products)
     for product_index, p in enumerate(products):
@@ -2085,6 +2102,7 @@ def records_for_route(route: dict, guidance: dict,
         if ambiguous_timing:
             row["processing_min_days"], row["processing_unit"] = None, None
             row["_processing_note"] = _processing_note(g, ambiguous=True)
+            row["processing_text"] = None
         row["visa_type_name"] = str(p.get("type"))
         row["visa_requirement_detail"] = _subcategory_for(
             p, base.get("visa_requirement_detail"), requirement, method)
@@ -2112,7 +2130,7 @@ def records_for_route(route: dict, guidance: dict,
             row["visa_requirement"] = _DISPOSITION_TO_REQUIREMENT[own_disposition]
             row["visa_requirement_detail"] = own_detail
             for key in ("required_documents", "entry_requirements", "special_conditions",
-                        "processing_min_days", "processing_unit", "_processing_note", "application_method",
+                        "processing_min_days", "processing_unit", "_processing_note", "processing_text", "application_method",
                         "consulate_district", "source_url", "collected_at", "info_validity"):
                 row[key] = None
             product_g = dict(p, disposition=own_disposition, requirement_detail=_key_of(own_detail))
@@ -2306,7 +2324,7 @@ def records_for_route(route: dict, guidance: dict,
             # source or filing terms. Only the unsupported physical-issuance
             # display claim is removed; the visa-required verdict remains.
             row["visa_requirement_detail"] = None
-        rows.append(_regrade({k: _clean_text(v) for k, v in row.items()}, product_g,
+        rows.append(_regrade({k: v if k == "processing_text" else _clean_text(v) for k, v in row.items()}, product_g,
                              disputed_fields, product_unpublished))
     return rows
 

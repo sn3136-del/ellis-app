@@ -2178,6 +2178,9 @@ def _record_payload(r: dict) -> dict:
             # number is empty, or the stored wording beside a number.
             "max_stay_text": _wording_field(r, "max_stay_duration", "max_stay_text", statuses),
             "validity_text": _wording_field(r, "validity_duration", "validity_text", statuses),
+            # Bounds such as "within 24 hours" are actual processing facts,
+            # even though they cannot fill a numeric minimum in days.
+            "processing_text": r.get("processing_text"),
             "freshness_valid_until": r.get("freshness_valid_until"),
             "operator_released": r.get("_released", False),
             "held": r.get("_held", False),
