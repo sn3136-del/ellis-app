@@ -3082,6 +3082,37 @@ def _extract_arrival(question: str) -> str | None:
     from datetime import date
     q = str(question or "").lower()
     today = date.today()
+    # Preserve an explicitly named day before the broad month-only fallback.
+    # Otherwise "September 15" becomes September 1, selecting the wrong side
+    # of an effective-date policy boundary while reusing the same route key.
+    month_name = (r"jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|"
+                  r"jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|"
+                  r"oct(?:ober)?|nov(?:ember)?|dec(?:ember)?")
+    day_number = r"\d{1,2}(?:st|nd|rd|th)?(?![a-z0-9])"
+    explicit = _re.search(
+        rf"\b(?P<month>{month_name})\.?\s+(?:the\s+)?(?P<day>{day_number})"
+        r"(?:\s*,?\s*(?P<year>20\d\d)\b)?", q)
+    if not explicit:
+        explicit = _re.search(
+            rf"\b(?P<day>{day_number})\s+(?:of\s+)?(?P<month>{month_name})\.?(?![a-z])"
+            r"(?:\s*,?\s*(?P<year>20\d\d)\b)?", q)
+    if explicit:
+        month = _MONTHS[explicit.group("month")[:3]]
+        day = int(_re.match(r"\d+", explicit.group("day")).group())
+        if explicit.group("year"):
+            year = int(explicit.group("year"))
+        elif "next year" in q:
+            year = today.year + 1
+        elif "this year" in q:
+            year = today.year
+        else:
+            year = today.year + ((month, day) < (today.month, today.day))
+        try:
+            return date(year, month, day).isoformat()
+        except ValueError:
+            # A malformed explicit date is not evidence for the first day
+            # of that month. Leave it unresolved instead of inventing a day.
+            return None
     m = _re.search(r"\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|"
                    r"jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|"
                    r"nov(?:ember)?|dec(?:ember)?)\.?\s*(?:of\s*)?(20\d\d)?\b", q)
