@@ -2686,7 +2686,10 @@ def travel_database_route_research(body: DatabaseRouteResearchIn,
     cached = kimi_primary._cached(db, key)
     if cached is not None:
         try:
-            report = freshness.recheck_route(db, route)
+            # Explicit Add/Refresh may discover missing policy citations within
+            # the source-check budget. Reader and scheduled refresh paths keep
+            # their existing budget and do not opt into extra discovery calls.
+            report = freshness.recheck_route(db, route, discover_sources=True)
         except Exception:  # noqa: BLE001 — keep the stored answer and report failure
             report = {"outcome": "research_error", "renewed": False}
         db.expire_all()

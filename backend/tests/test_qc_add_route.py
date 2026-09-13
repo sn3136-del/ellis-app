@@ -27,7 +27,7 @@ def isolate(db, monkeypatch):
     monkeypatch.setattr(vo, '_table', lambda: {})
     monkeypatch.setattr(main, '_ground_on_access', lambda *a: None)
     monkeypatch.setattr(main, '_after_cold_answer', lambda *a: None)
-    monkeypatch.setattr(freshness, 'recheck_route', lambda *a: {'outcome': 'checked', 'consistent': True,
+    monkeypatch.setattr(freshness, 'recheck_route', lambda *a, **kw: {'outcome': 'checked', 'consistent': True,
         'renewed': False, 'verified_fields': ['government_fee'], 'unverified_fields': ['disposition']})
     yield
     kp.set_provider(None)
@@ -37,7 +37,7 @@ def test_empty_completed_answer_is_not_added_and_does_not_start_a_second_generat
     calls = []
     monkeypatch.setattr(kp, 'get_route_guidance', lambda _db, route, **kw:
         calls.append(kw['stage']) or {'status': kp.STATUS_UNCERTAIN, 'guidance': {}, 'held': True})
-    monkeypatch.setattr(freshness, 'recheck_route', lambda *a: pytest.fail('no row to research'))
+    monkeypatch.setattr(freshness, 'recheck_route', lambda *a, **kw: pytest.fail('no row to research'))
     out = client.post('/database/routes/research', headers=ADMIN, json=BODY)
     assert out.status_code == 200
     assert calls == ['full']
@@ -83,7 +83,7 @@ def test_pending_details_are_stored_but_never_reported_as_published(client, db, 
 
 def test_source_exception_keeps_real_row_but_does_not_hide_failed_check(client, monkeypatch):
     kp.set_provider(lambda *a: deepcopy(ANSWER))
-    def fail(*a): raise RuntimeError('private provider secret')
+    def fail(*a, **kw): raise RuntimeError('private provider secret')
     monkeypatch.setattr(freshness, 'recheck_route', fail)
     response = client.post('/database/routes/research', headers=ADMIN, json=BODY)
     out = response.json()

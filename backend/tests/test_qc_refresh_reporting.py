@@ -22,7 +22,13 @@ def test_refresh_api_preserves_actual_evidence_and_rereads_the_same_canonical_ro
         stages.append((kwargs['stage'], kp.cache_key(route)))
         return {'guidance': {'disposition': 'VISA_REQUIRED'}, 'held': True}
     monkeypatch.setattr(kp, 'get_route_guidance', guidance)
-    monkeypatch.setattr(freshness, 'recheck_route', lambda *_a, **_k: report)
+    def recheck(db, route, *, discover_sources=False):
+        assert discover_sources is True
+        assert route['passport_nationality'] == 'HKG'
+        assert route['travel_document_type'] == 'ordinary_passport'
+        assert route['travel_purpose'] == 'tourism'
+        return report
+    monkeypatch.setattr(freshness, 'recheck_route', recheck)
     monkeypatch.setattr(kp, 'provider_suspension', lambda: {'reason': 'private provider message'} if suspended else None)
     response = client.post('/database/routes/research', headers=ADMIN,
         json={'nationality': 'HKG', 'destination': 'VNM', 'travel_purpose': 'tourism'})
