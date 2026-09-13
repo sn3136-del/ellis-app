@@ -36,7 +36,7 @@ function renderQuotes(rec, lang = 'en') {
     t: key => t(lang, key) }))
 }
 
-test('each field has a collapsed Quotes entry including paired units and missing evidence', () => {
+test('Quotes wait for evidence and display only fields with supporting quotations', () => {
   const rec = { field_status: { visa_fee_amount: 'filled', visa_fee_currency: 'filled',
     required_documents: 'missing', source_url: 'filled' }, visa_fee_amount: 25, visa_fee_currency: 'USD',
     source_url: 'https://immigration.example.gov/general',
@@ -44,14 +44,16 @@ test('each field has a collapsed Quotes entry including paired units and missing
       source_url: 'https://immigration.example.gov/fees' }] } }
   const before = structuredClone(rec)
   const closed = render(rec)
-  assert.match(closed, /<details data-testid="ops-field-quotes"[^>]*>/)
-  assert.doesNotMatch(closed, /<details[^>]*\bopen=/)
+  assert.ok(!closed.includes('data-testid="ops-field-quotes"'))
   assert.ok(!closed.includes('<blockquote'))
   const html = renderQuotes(rec)
-  for (const field of Object.keys(rec.field_status)) assert.ok(html.includes(`data-quote-field="${field}"`))
+  assert.ok(html.includes('data-quote-field="visa_fee_amount"'))
+  for (const field of ['visa_fee_currency', 'required_documents', 'source_url']) {
+    assert.ok(!html.includes(`data-quote-field="${field}"`))
+  }
   assert.ok(html.includes('Single entry: USD 25.\nAgency fee is not included.'))
   assert.ok(html.includes('href="https://immigration.example.gov/fees"'))
-  assert.equal((html.match(/No supporting quote recorded/g) || []).length, 3)
+  assert.ok(!html.includes('No supporting quote recorded'))
   assert.deepEqual(rec, before)
 })
 
@@ -62,11 +64,17 @@ test('Quotes never borrow a route source link or a sibling product quote as fiel
       visa_fee_amount: [{ quote: 'A fee without its supporting URL.' }],
     } }
   const html = renderQuotes(rec)
-  const feeSection = html.split('data-quote-field="visa_fee_amount"')[1].split('data-quote-field="required_documents"')[0]
-  assert.ok(feeSection.includes('No supporting quote recorded'))
-  assert.ok(!feeSection.includes('<blockquote'))
-  assert.ok(!feeSection.includes('https://immigration.example.gov/general'))
-  assert.ok(!feeSection.includes('Passport required.'))
+  assert.ok(!html.includes('data-quote-field="visa_fee_amount"'))
+  assert.ok(!html.includes('No supporting quote recorded'))
+  assert.ok(!html.includes('https://immigration.example.gov/general'))
+  assert.ok(html.includes('data-quote-field="required_documents"'))
+  assert.ok(html.includes('Passport required.'))
+})
+
+test('an empty Quotes response shows no field labels or replacement message', () => {
+  const html = renderQuotes({ field_status: { visa_fee_amount: 'filled', required_documents: 'missing' } })
+  assert.doesNotMatch(html, /data-quote-field|<dt|<dd|<blockquote|No supporting quote/)
+  assert.equal(html.replace(/<[^>]*>/g, '').trim(), '')
 })
 
 test('Quotes preserve distinct supporting pages, remove duplicates and reject unsafe links', () => {
@@ -90,8 +98,9 @@ for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
     const html = renderQuotes({ field_status: { required_documents: 'filled', visa_fee_amount: 'missing' },
       field_evidence: { required_documents: [{ quote: 'Passport & itinerary\nKeep the exact wording.',
         source_url: 'https://immigration.example.gov/documents' }] } }, lang)
-    assert.ok(render(record(null), lang).includes(t(lang, 'ops.quotes.title')))
-    assert.ok(html.includes(t(lang, 'ops.quotes.none')))
+    assert.ok(html.includes(t(lang, 'ops.fx.required_documents')))
+    assert.ok(!html.includes('data-quote-field="visa_fee_amount"'))
+    assert.ok(!html.includes('No supporting quote recorded'))
     assert.ok(html.includes('Passport &amp; itinerary\nKeep the exact wording.'))
     assert.ok(!html.includes('translated value'))
   })
@@ -118,36 +127,40 @@ async function quoteScreen(test, rec = quoteRecord()) {
   await act(async () => { renderer = create(createElement(FieldQuotes, props(rec))) })
   test.after(() => act(() => renderer.unmount()))
   return { reads, renderer, text: () => JSON.stringify(renderer.toJSON()),
-    async toggle(open) {
-      await act(async () => { renderer.root.findByProps({ 'data-testid': 'ops-field-quotes' })
-        .props.onToggle({ currentTarget: { open } }); await Promise.resolve() })
-    },
     async update(next) { await act(async () => { renderer.update(createElement(FieldQuotes, props(next))) }) },
     async resolve(index, response) { await act(async () => { reads[index].resolve(response) }) },
   }
 }
 
-test('Quotes fetch only when expanded and reread current evidence after reopening', async test => {
+test('expanding a record checks evidence once and shows a collapsed Quotes dropdown only after proof arrives', async test => {
   const rec = quoteRecord(), s = await quoteScreen(test, rec)
-  assert.equal(s.reads.length, 0)
-  await s.toggle(true)
   assert.equal(s.reads.length, 1)
-  assert.ok(s.text().includes(t('en', 'ops.quotes.loading')))
+  assert.equal(s.renderer.toJSON(), null)
   await s.resolve(0, quoteResponse(rec))
   assert.ok(s.text().includes('Single entry: USD 25.'))
-  await s.toggle(false)
+  const dropdown = s.renderer.root.findByProps({ 'data-testid': 'ops-field-quotes' })
+  assert.equal(dropdown.type, 'details')
+  assert.notEqual(dropdown.props.open, true)
+  assert.ok(s.text().includes(t('en', 'ops.quotes.title')))
   assert.equal(s.reads.length, 1)
-  await s.toggle(true)
-  assert.equal(s.reads.length, 2)
-  await s.resolve(1, quoteResponse(rec, 'Updated source wording.'))
-  assert.ok(s.text().includes('Updated source wording.'))
 })
+
+for (const field_evidence of [{}, { visa_fee_amount: [] }, {
+  visa_fee_amount: [{ quote: 'Quote with no safe source.', source_url: 'javascript:alert(1)' }],
+}, { unrecognized_field: [{ quote: 'Not a displayed field.', source_url: 'https://example.gov/' }] }]) {
+  test('a route without usable field quotations has no Quotes dropdown: ' + JSON.stringify(field_evidence), async test => {
+    const rec = quoteRecord(), s = await quoteScreen(test, rec)
+    await s.resolve(0, { ...quoteResponse(rec), field_evidence })
+    assert.equal(s.renderer.toJSON(), null)
+    assert.equal(s.reads.length, 1)
+  })
+}
 
 test('late Quotes response cannot replace evidence for a refreshed product', async test => {
   const prior = quoteRecord(), current = quoteRecord({ product_index: 1, evidence_revision: 'record-v2' })
   const s = await quoteScreen(test, prior)
-  await s.toggle(true)
   await s.update(current)
+  assert.equal(s.renderer.toJSON(), null)
   assert.equal(s.reads.length, 2)
   await s.resolve(1, quoteResponse(current, 'Current product quote.'))
   await s.resolve(0, quoteResponse(prior, 'Stale product quote.'))
@@ -157,7 +170,6 @@ test('late Quotes response cannot replace evidence for a refreshed product', asy
 
 test('Quotes reject mismatched identity and allow explicit retry without automatic requests', async test => {
   const rec = quoteRecord(), s = await quoteScreen(test, rec)
-  await s.toggle(true)
   await s.resolve(0, { ...quoteResponse(rec), revision: 'stale-revision' })
   assert.ok(s.text().includes(t('en', 'ops.quotes.failed')))
   assert.ok(!s.text().includes('Single entry: USD 25.'))
