@@ -812,6 +812,12 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x, onEvidence }
   // double entry visa, up to 6 months for a multiple entry visa") is shown
   // as stored for the same reason: the wording is the value the record holds.
   const validityText = wordingFor(rec, 'validity_duration', 'validity_text')
+  // A deadline or conditional range can be known without a numeric minimum.
+  // This dedicated field is scoped by the backend; never recover it from a
+  // general conditions paragraph or turn its upper bound into a minimum.
+  const processingText = typeof rec.processing_text === 'string' && rec.processing_text.trim()
+    && !['not-applicable', 'not-published', 'optional-empty'].includes(rec.field_status?.processing_min_days)
+      ? rec.processing_text : null
   const show = (f) => {
     const v = rec[f]
     if (v == null || v === '') return '·'
@@ -903,6 +909,8 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x, onEvidence }
                     {st === 'not-published' ? t('ops.wordingAbsence') : t('ops.validityTextOnly')}
                   </div>
                 </>
+              : f === 'processing_min_days' && processingText
+              ? <span>{processingText}</span>
               : (rec[f] == null || rec[f] === '')
               /* Owner rule (11 September 2026): a cell reads as a value or
                  as one of two labels, never "Missing information". The

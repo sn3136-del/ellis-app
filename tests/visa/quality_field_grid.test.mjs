@@ -213,6 +213,45 @@ test('calendar wording does not promote an unverified or held record', () => {
   assert.equal(rec.held, true)
 })
 
+test('published processing wording fills its own tile without inventing a numeric minimum', () => {
+  const rec = { processing_min_days: null, processing_unit: null,
+    processing_text: 'Within 24 hours after receiving a complete application.',
+    field_status: { processing_min_days: 'missing', processing_unit: 'missing' },
+    held: true, confidence_level: 'Low', completeness: 0.8 }
+  const before = structuredClone(rec)
+  const html = render(rec)
+  assert.ok(html.includes(rec.processing_text))
+  assert.ok(!html.includes(t('en', 'ops.notPublished')))
+  assert.ok(html.includes('✗'))
+  assert.deepEqual(rec, before)
+})
+
+test('processing ranges and qualifications remain visible beside an extracted minimum', () => {
+  const text = '5–10 working days; public holidays and additional checks may extend processing.'
+  const rec = { processing_min_days: 5, processing_unit: 'Working Day', processing_text: text,
+    field_status: { processing_min_days: 'filled', processing_unit: 'filled' } }
+  for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
+    const html = render(rec, lang, () => 'shortened translation')
+    assert.ok(html.includes(text))
+    assert.ok(!html.includes('shortened translation'))
+  }
+})
+
+test('processing wording never resurrects inapplicable or unpublished values', () => {
+  for (const status of ['not-applicable', 'not-published', 'optional-empty']) {
+    const html = render({ processing_min_days: null, processing_unit: null,
+      processing_text: 'Stale processing words', field_status: { processing_min_days: status, processing_unit: status } })
+    assert.ok(!html.includes('Stale processing words'))
+    assert.ok(html.includes(t('en', status === 'not-applicable' ? 'ops.notApplicable' : 'ops.notPublished')))
+  }
+})
+
+test('processing still uses its numeric value when no qualified wording is supplied', () => {
+  const html = render({ processing_min_days: 5, processing_unit: 'Working Day', processing_text: null,
+    field_status: { processing_min_days: 'filled', processing_unit: 'filled' } })
+  assert.ok(html.includes('5 working days'))
+})
+
 test('a genuinely missing stay keeps the gap mark even when stale wording rides along', () => {
   const rec = record('As above', { field_status: { max_stay_duration: 'missing', max_stay_unit: 'missing' } })
   const html = render(rec)
