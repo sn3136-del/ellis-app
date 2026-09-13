@@ -719,6 +719,35 @@ def _proposal_identity(proposal):
         return None
 
 
+def _sourced_dismissal(db, issue, route):
+    """Only an actual sourced API ruling can exempt an unchanged hold.
+
+    The historical queue also suppresses bare legacy dismissals. Those are
+    not evidence for publication: require the existing transactional audit
+    entry, the actual resolving actor, and a competent source plus excerpt.
+    The quote itself remains in the original proposal; no HTML-content hash
+    is inferred for old proposals which never stored one.
+    """
+    from app.models import AuditEvent
+    from .source_authority import is_competent
+    if not issue.resolved_by or not issue.resolved_at or not str(issue.resolution or "").strip():
+        return None
+    events = db.execute(select(AuditEvent).where(
+        AuditEvent.action == "database_issue_dismissed",
+        AuditEvent.application_id == "database",
+        AuditEvent.actor == issue.resolved_by,
+        AuditEvent.at >= issue.resolved_at,
+        AuditEvent.detail["issue_id"].as_string() == issue.id)).scalars()
+    for event in events:
+        detail = event.detail if isinstance(event.detail, dict) else {}
+        url, excerpt = detail.get("source_url"), detail.get("source_excerpt")
+        if (isinstance(url, str) and isinstance(excerpt, str) and excerpt.strip()
+                and is_competent(url, route, "disposition")):
+            return {"issue_id": issue.id, "audit_id": event.id,
+                    "source_url": url, "actor": event.actor}
+    return None
+
+
 def _file_dispute(db, row, route, guidance, fields, evidence, source_url, when,
                   *, conflicting_evidence=None):
     if not fields:
@@ -739,9 +768,19 @@ def _file_dispute(db, row, route, guidance, fields, evidence, source_url, when,
         DatabaseIssueReport.field == field_key,
         DatabaseIssueReport.status.in_(("open", "acknowledged", "dismissed")))).scalars().all()
     identity = _proposal_identity(proposal)
-    if identity is not None and any(issue.status == "dismissed" and
-            _proposal_identity(issue.proposal) == identity for issue in candidates):
-        return
+    matches = [issue for issue in candidates if issue.status == "dismissed"
+               and identity is not None and _proposal_identity(issue.proposal) == identity]
+    if matches:
+        for issue in matches:
+            ruling = _sourced_dismissal(db, issue, route)
+            if ruling:
+                return {"outcome": "matched_sourced_dismissal", "fields": sorted(fields),
+                        "comparison_source_url": source_url,
+                        "proposal_identity_sha256": hashlib.sha256(identity.encode()).hexdigest(),
+                        **ruling}
+        # Preserve historical queue dedupe without granting a hold exemption
+        # to a legacy or unsourced dismissal.
+        return None
     # A second official page must not replace the evidence from the first.
     # Match the full field set too: the display key is truncated to 64 chars.
     existing = next((issue for issue in candidates if issue.status != "dismissed"
@@ -1122,10 +1161,22 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             final_provenance = candidate_provenance
     conflicting_evidence = sorted((item for item in observations if item["field"] in conflicts),
                                  key=lambda item: (item["field"], item["source_url"]))
+    dismissal_coverage = {key: [] for key in disputed}
+    adjudicated_findings = []
     for fr, _, quoted, quotes, _ in readings:
         own_disputes = {k: v for k, v in quoted.items() if k in disputed}
-        _file_dispute(db, row, route, seen, own_disputes, quotes, fr.final_url, when,
-                      conflicting_evidence=conflicting_evidence)
+        ruling = _file_dispute(db, row, route, seen, own_disputes, quotes, fr.final_url, when,
+                              conflicting_evidence=conflicting_evidence)
+        matched = bool(ruling and ruling.get("outcome") == "matched_sourced_dismissal")
+        for key in own_disputes:
+            dismissal_coverage[key].append(matched)
+        if matched:
+            adjudicated_findings.append(ruling)
+    # Every current comparison of a field must match an unchanged sourced
+    # ruling. Preserve the raw disputes for renewal and audit; only their
+    # publication hold projection can inherit that precise prior decision.
+    adjudicated = {key for key, matches in dismissal_coverage.items() if matches and all(matches)}
+    publication_disputed = (set(disputed) - adjudicated) | unresolved_fields
     remaining_contradictions = kimi_primary.serve_time_invariants(seen)
     consistent = (all(answer.get("consistent") is True for _, answer, _, _, _ in readings) and not proposed and not unquoted
                   and not disputed and not unresolved_fields and fallback is None and not remaining_contradictions)
@@ -1189,6 +1240,12 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         for key in supported_fields:
             if key not in verified_field_sources:
                 verified_field_sources[key] = {'source_url':fr.final_url, 'checked_at':when, 'quote':quotes[key]}
+    # Dismissal rejects a comparison; it does not newly verify the old fact.
+    verified_fields.difference_update(adjudicated)
+    for key in adjudicated:
+        verified_field_sources.pop(key, None)
+    for check in source_checks:
+        check["verified_fields"] = [key for key in check.get("verified_fields", []) if key not in adjudicated]
     unverified_fields = sorted(substantive - verified_fields)
     unchecked_sources = [u for u in all_sources if u not in visited]
     failed_sources = any(c["outcome"] in {"fetch_failed", "provider_error", "validation_error"} for c in source_checks)
@@ -1209,7 +1266,9 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                  "source_fetch_failures": sum(s["outcome"] == "fetch_failed" for s in source_checks),
                  "source_url": page.final_url,
                  "content_hash": page.content_hash, "consistent": consistent,
-                 "changed_fields": sorted(applied), "disputed_fields": sorted(set(disputed) | unresolved_fields),
+                 "changed_fields": sorted(applied), "disputed_fields": sorted(publication_disputed),
+                 "raw_disputed_fields": sorted(set(disputed) | unresolved_fields),
+                 "adjudicated_fields": sorted(adjudicated), "adjudicated_findings": adjudicated_findings,
                  "awaiting_adjudication_fields": sorted(unresolved_fields),
                  "unquoted_fields": unquoted, "irrelevant_sources": irrelevant,
                  "validation_errors": validation_errors,
@@ -1255,7 +1314,9 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
             "unverified_fields": entry["unverified_fields"], "unchecked_source_count": len(unchecked_sources),
             "source_reads": entry["source_reads"], "source_fetch_failures": entry["source_fetch_failures"],
             **model_counts,
-            "changed": sorted(applied), "disputed": sorted(set(disputed) | unresolved_fields),
+            "changed": sorted(applied), "disputed": sorted(publication_disputed),
+            "raw_disputed": sorted(set(disputed) | unresolved_fields),
+            "adjudicated_fields": sorted(adjudicated),
             "generic_skipped": sorted(fallback[1]) if fallback else [],
             "unquoted_fields": unquoted, "validation_errors": validation_errors, "source_url": page.final_url}
 
