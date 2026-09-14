@@ -1,10 +1,10 @@
 // Display names only. Stored reviewer IDs, official quotations and links stay
 // unchanged so an audit can still identify the original author and evidence.
-const provider = /\b(?:codex|chatgpt|openai|claude)(?:ai)?(?:[-_][a-z0-9]+)*\b/i
-const providers = /\b(?:codex|chatgpt|openai|claude)(?:ai)?(?:[-_][a-z0-9]+)*\b/gi
+const provider = /(?<![a-z0-9])(?:codex|chatgpt|openai|claude)(?:ai)?(?:[-_][a-z0-9]+)*(?![a-z0-9])/i
+const providers = /(?<![a-z0-9])(?:codex|chatgpt|openai|claude)(?:ai)?(?:[-_][a-z0-9]+)*(?![a-z0-9])/gi
 
 export function reviewAttributionLabel(value, aiLabel = 'AI review') {
-  return typeof value === 'string' && !/^https?:\/\//i.test(value) && provider.test(value)
+  return typeof value === 'string' && !/^\s*(?:[a-z][a-z0-9+.-]*:\/\/|www\.)/i.test(value) && provider.test(value)
     ? aiLabel : value
 }
 

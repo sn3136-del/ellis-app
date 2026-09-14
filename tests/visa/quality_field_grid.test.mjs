@@ -420,7 +420,7 @@ test('a disputed wording cell still shows the stored wording under the pending m
 
 test('reviewer brands are replaced in record fields in all UI languages without rewriting evidence', () => {
   for (const name of ['Codex root official-source review', 'codex-guard_review-20260913',
-    'OpenAI official source review', 'ChatGPT', 'ClaudeAI', 'claude-source-review-20260913']) {
+    'OpenAI official source review', 'ChatGPT', 'ClaudeAI', 'claude-source-review-20260913', 'agent_codex_review']) {
     const rec = record(null, { data_source: name, source_url: 'https://example.gov/codex-fees',
       field_status: { data_source: 'filled', source_url: 'filled' } })
     for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
@@ -441,4 +441,6 @@ test('Ellis display messages normalize provider names and preserve embedded sour
     'AI checked https://example.gov/OpenAI/fees?by=codex')
   assert.equal(reviewAttributionLabel('Ministry of Foreign Affairs'), 'Ministry of Foreign Affairs')
   assert.equal(reviewDisplayText(null), null)
+  assert.equal(reviewAttributionLabel(' www.example.gov/claude'), ' www.example.gov/claude')
+  assert.equal(reviewAttributionLabel('medicalcodex'), 'medicalcodex')
 })
