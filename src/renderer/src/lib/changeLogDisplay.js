@@ -1,3 +1,5 @@
+import { reviewAttributionLabel, reviewDisplayText } from './reviewDisplay.js'
+
 // Presentation only: retain the full structured values in the audit/export.
 const humanize = value => String(value).replace(/_/g, ' ').replace(/\b([a-z])/g, c => c.toUpperCase())
 const decode = value => {
@@ -28,7 +30,10 @@ export function formatChangeValue(field, raw, { t, valueLabel = (_, value) => va
   if (value == null || value === '') return null
   if (typeof value === 'boolean') return t(value ? 'ops.chg.yes' : 'ops.chg.no')
   if (typeof value !== 'object') {
-    const labeled = valueLabel(field, value)
+    const isEvidence = /(?:^|_)(?:quote|url)(?:$|_)/.test(field)
+    const displayed = isEvidence ? value : field === 'data_source' || /^(?:actor|reviewer|verified_by|reviewed_by)$/.test(field)
+      ? reviewAttributionLabel(value, t('ops.origin.aiReview')) : reviewDisplayText(value)
+    const labeled = valueLabel(field, displayed)
     const text = String(labeled === value && /^[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+$/.test(value)
       ? humanize(value) : labeled)
     return text.length > 220 ? text.slice(0, 220) + '…' : text
@@ -52,7 +57,7 @@ export function formatChangeValue(field, raw, { t, valueLabel = (_, value) => va
     }
     const amount = `${value.amount} ${value.currency || ''}`.trim()
     const qualified = value.qualifier === 'from' ? t('ops.chg.feeFrom', { amount }) : amount
-    return value.note ? `${qualified} · ${value.note}` : qualified
+    return value.note ? `${qualified} · ${reviewDisplayText(value.note)}` : qualified
   }
   if (depth >= 2) return t('ops.chg.detailCount', { n: keys.length })
   if (Array.isArray(value)) {

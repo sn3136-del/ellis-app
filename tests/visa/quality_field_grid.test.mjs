@@ -417,3 +417,28 @@ test('a disputed wording cell still shows the stored wording under the pending m
   const html = render(rec)
   assert.ok(html.includes('Up to 3 months for a single or double entry visa'))
 })
+
+test('reviewer brands are replaced in record fields in all UI languages without rewriting evidence', () => {
+  for (const name of ['Codex root official-source review', 'codex-guard_review-20260913',
+    'OpenAI official source review', 'ChatGPT', 'ClaudeAI', 'claude-source-review-20260913']) {
+    const rec = record(null, { data_source: name, source_url: 'https://example.gov/codex-fees',
+      field_status: { data_source: 'filled', source_url: 'filled' } })
+    for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
+      const html = render(rec, lang)
+      assert.ok(html.includes(t(lang, 'ops.origin.aiReview')))
+      assert.ok(!html.includes(name))
+      assert.ok(html.includes('https://example.gov/codex-fees'))
+      assert.equal(rec.data_source, name, 'Presentation must not mutate the audit identity')
+    }
+  }
+})
+
+test('Ellis display messages normalize provider names and preserve embedded source URLs', async () => {
+  const { reviewDisplayText, reviewAttributionLabel } = await import('../../src/renderer/src/lib/reviewDisplay.js')
+  assert.equal(reviewDisplayText('CodexAI, ChatGPT, OPENAI, Claude and claude-source-review completed checks.'),
+    'AI, AI, AI, AI and AI completed checks.')
+  assert.equal(reviewDisplayText('Claude checked https://example.gov/OpenAI/fees?by=codex'),
+    'AI checked https://example.gov/OpenAI/fees?by=codex')
+  assert.equal(reviewAttributionLabel('Ministry of Foreign Affairs'), 'Ministry of Foreign Affairs')
+  assert.equal(reviewDisplayText(null), null)
+})

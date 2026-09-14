@@ -1,3 +1,5 @@
+import { reviewDisplayText } from './reviewDisplay.js'
+
 // Typed client for the Ellis visa backend (FastAPI). The Electron renderer uses
 // this to drive the production multi-user backend over authenticated HTTP.
 //
@@ -42,11 +44,11 @@ function authHeaders(session) {
 // ({reason, message, detail, ...}) carry their own honest explanation — the
 // applicant must never be shown a bare "HTTP 409" when one exists.
 export function errorMessageFrom(detail, status) {
-  if (typeof detail === 'string' && detail) return detail
+  if (typeof detail === 'string' && detail) return reviewDisplayText(detail)
   if (detail && typeof detail === 'object') {
     for (const key of ['message', 'detail', 'reason']) {
       const v = detail[key]
-      if (typeof v === 'string' && v.trim()) return v
+      if (typeof v === 'string' && v.trim()) return reviewDisplayText(v)
     }
   }
   return `HTTP ${status}`

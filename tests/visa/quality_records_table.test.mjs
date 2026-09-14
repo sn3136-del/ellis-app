@@ -361,3 +361,15 @@ test('an unpublished fee amount does not conceal a changed published currency', 
   assert.equal(rows[0][1], 'Currency: USD')
   assert.equal(rows[0][2], 'Currency: EUR')
 })
+
+test('change log reviewer identities are neutral while source quote and URL values stay exact', () => {
+  for (const value of ['CodexAI', 'OpenAI', 'CHATGPT', 'claude-fill_review-20260913']) {
+    assert.equal(formatChangeValue('data_source', value, { t }), 'AI source review')
+    assert.equal(formatChangeValue('verified_by', value, { t }), 'AI source review')
+  }
+  assert.equal(formatChangeValue('note', 'Reviewed by Claude; checked with Codex.', { t }),
+    'Reviewed by AI; checked with AI.')
+  assert.equal(formatChangeValue('source_url', 'https://example.gov/openai', { t }), 'https://example.gov/openai')
+  assert.equal(formatChangeValue('quote', 'Codex is literal wording in this test quote.', { t }),
+    'Codex is literal wording in this test quote.')
+})

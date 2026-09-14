@@ -2,6 +2,7 @@
 // Drives each adapter through discovered → … → production_active with human-only
 // activation. Talks to the backend admin API (admin token grants the role); no
 // provider credentials ever touch this renderer.
+import { reviewAttributionLabel } from '../lib/reviewDisplay.js'
 import { useEffect, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, Empty, KVList } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
@@ -1125,7 +1126,7 @@ function AdapterDetail({ client, id, isAdmin, onBack, onChanged }) {
               {(a.audit || []).map((e) => (
                 <div key={e.seq} className="row">
                   <div className="row__main"><div className="row__title" style={{ textTransform: 'capitalize' }}>{e.action.replace(/_/g, ' ')}</div>
-                    <div className="row__sub">{e.actor}{e.detail?.to ? ` → ${e.detail.to}` : ''}</div></div>
+                    <div className="row__sub">{reviewAttributionLabel(e.actor, 'AI')}{e.detail?.to ? ` → ${e.detail.to}` : ''}</div></div>
                   <span className="chip" style={{ fontSize: 10 }}>#{e.seq}</span>
                 </div>
               ))}

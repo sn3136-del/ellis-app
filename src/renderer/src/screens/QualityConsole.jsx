@@ -17,6 +17,7 @@
 // language picker; record VALUES stay as stored — they are the dataset.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { valueTranslations } from '../lib/valueTranslations.js'
+import { reviewAttributionLabel, reviewDisplayText } from '../lib/reviewDisplay.js'
 
 // Console-wide motion and polish. Bars grow, numbers count, cards lift —
 // all suppressed for readers who ask for reduced motion.
@@ -839,7 +840,10 @@ export function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x, onEvidence }
     const v = rec[f]
     if (v == null || v === '') return '·'
     if (f === 'data_source') {
-      if (v === 'Ellis source audit') return t('ops.src.audit')
+      const attribution = reviewAttributionLabel(v, t('ops.origin.aiReview'))
+      if (attribution !== v) return attribution
+      if (v === 'AI review') return t('ops.origin.aiReview')
+      if (v === 'Ellis review' || v === 'Ellis source audit') return t('ops.src.audit')
       if (v === 'Ellis verified route engine') return t('ops.src.engine')
       return String(v)
     }
@@ -2430,12 +2434,13 @@ function useValueTranslations(client, lang) {
     if (scope.queue.size && scope.flush) scope.timer = setTimeout(scope.flush, 0)
     return () => { scope.active = false; clearTimeout(scope.timer); scope.timer = null }
   }, [scope])
-  return useCallback((sIn) => {
+  return useCallback((raw) => {
+    const sIn = reviewDisplayText(raw)
     if (lang === 'en') return sIn
     const text = String(sIn ?? '')
     if (!text || /^https?:\/\//.test(text) || !/[A-Za-z]{2}/.test(text)) return sIn
     const hit = valueTranslations.get(lang, text)
-    if (hit !== undefined) return hit
+    if (hit !== undefined) return reviewDisplayText(hit)
     if (!scope.attempted.has(text)) {
       scope.queue.add(text)
       scope.flush = () => {
