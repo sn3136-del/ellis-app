@@ -13,7 +13,8 @@ function instructionTexts(value) {
 
 function noApplication(guidance) {
   return guidance?.disposition === 'VISA_EXEMPT'
-    && ['', 'none', 'not_required'].includes(String(guidance?.application_channel || '').toLowerCase())
+    && ['', 'none', 'not_required', 'no_application_required', 'none_or_port_of_entry']
+      .includes(String(guidance?.application_channel || '').trim().toLowerCase())
 }
 
 function savedInstructions(guidance) {

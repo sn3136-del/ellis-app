@@ -82,3 +82,14 @@ test('source links are reference metadata only and require HTTPS',()=>{
  const r=applicationInstructions({guidance,application_steps_source_url:'https://www.mofa.go.jp/'})
  assert.equal(r.status,'unknown');assert.deepEqual(r.steps,[]);assert.equal(r.sourceUrl,'https://www.mofa.go.jp/')
 })
+
+for (const application_channel of ['none', 'not_required', 'no_application_required', 'none_or_port_of_entry', ' NONE_OR_PORT_OF_ENTRY ']) {
+ test('no-filing channel does not revive stale route steps: '+application_channel,()=>{
+  const g={disposition:'VISA_EXEMPT',application_channel,submission_process:['Pay and submit'],application_channel_detail:'Submit a visa application.'}
+  assert.deepEqual(applicationInstructions({guidance:g,application_steps_status:'source_ordered',apply_steps:['Pay and submit']}),{status:'not_applicable',steps:[],sourceUrl:null})
+  const withOptional=applicationInstructions({guidance:{...g,visa_products:[{type:'Optional visa',disposition:'VISA_REQUIRED',submission_process:['Apply only for the optional visa.']}]}})
+  assert.deepEqual(withOptional.steps,[])
+  assert.equal(withOptional.summary,undefined)
+  assert.deepEqual(withOptional.products[0].steps,['Apply only for the optional visa.'])
+ })
+}
