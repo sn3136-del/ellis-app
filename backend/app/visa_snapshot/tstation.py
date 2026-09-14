@@ -16,6 +16,7 @@ import math
 import re
 from functools import lru_cache
 from datetime import datetime, timezone
+from .reviewer_display import reviewer_label
 
 # Their field order, exactly as numbered 1-25 in the requirements document.
 FIELD_ORDER = (
@@ -2012,7 +2013,8 @@ def records_for_route(route: dict, guidance: dict,
         "entry_requirements": (entry_req if isinstance(entry_req, str)
                                else _entry_requirements(g)),
         "special_conditions": exceptions if isinstance(exceptions, str) else None,
-        "data_source": ((provenance or {}).get("verified_by")
+        "data_source": (reviewer_label((provenance or {}).get("verified_by"),
+                                       (provenance or {}).get("verifier"))
                        or ("Ellis official-page check" if grounded_ok else
                            "Ellis route engine (reference only)" if g else None)),
         "source_url": _headline_source(g, provenance),
@@ -2156,7 +2158,7 @@ def records_for_route(route: dict, guidance: dict,
                                         verified_at=p.get("verified_at") or product_prov.get("verified_at"),
                                         fields=["disposition", "visa_products"])
                     row["_product_source_verified"] = row["_prov"]
-                    row["data_source"] = product_prov.get("verified_by") or "Ellis product source check"
+                    row["data_source"] = reviewer_label(product_prov.get("verified_by"), product_prov.get("verifier")) or "Ellis product source check"
             if row["_prov"] is None and product_prov and verdict_provenance_supported(product_prov):
                 # The source review that verified the route's product table
                 # verified this permission with it: a verified table replaces
@@ -2176,7 +2178,7 @@ def records_for_route(route: dict, guidance: dict,
                 row["_product_source_verified"] = row["_prov"]
                 row["_grade_checked_fields"] = sorted(set((provenance or {}).get("fields") or ()))
                 row["_table_reviewed"] = True
-                row["data_source"] = product_prov.get("verified_by") or "Ellis product source check"
+                row["data_source"] = reviewer_label(product_prov.get("verified_by"), product_prov.get("verifier")) or "Ellis product source check"
         # A product may have a different policy interval from the route's
         # default permission. An explicitly unknown product date also must
         # not inherit the route date. Separate permission families already
@@ -2212,7 +2214,7 @@ def records_for_route(route: dict, guidance: dict,
             row["_product_source_verified"] = row["_prov"] = own_review
             row["_grounded"] = False
             row["collected_at"] = own_review.get("verified_at") if own_review else None
-            row["data_source"] = (own_review.get("verified_by") or "Ellis product visa requirement source review") if own_review else "Ellis product information (reference only)"
+            row["data_source"] = (reviewer_label(own_review.get("verified_by"), own_review.get("verifier")) or "Ellis product visa requirement source review") if own_review else "Ellis product information (reference only)"
             if own_review:
                 row["source_url"] = own_review["source_url"]
             if "policy_valid_until" not in p:
@@ -2694,6 +2696,10 @@ def export_values(row: dict, unpublished: set | None = None) -> list:
     statuses = field_status(row, unpublished)
     cells = [row.get(f) if statuses.get(f) == "filled" else _EXPORT_LABELS.get(statuses.get(f))
              for f in FIELD_ORDER]
+    # Workbook callers can also provide an already-built legacy row. Only the
+    # attribution cell is presentation-normalized; facts and proof stay exact.
+    source_index = FIELD_ORDER.index("data_source")
+    cells[source_index] = reviewer_label(cells[source_index], (row.get("_prov") or {}).get("verifier"))
     # A stay the source states in words rather than as a number and a unit
     # (an e-Pass decided on arrival) is a real value the record holds: the
     # workbook carries the wording in the stay cell, and the unit cell reads
