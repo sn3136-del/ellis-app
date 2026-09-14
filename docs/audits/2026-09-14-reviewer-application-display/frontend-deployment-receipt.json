@@ -1,0 +1,18 @@
+{
+  "release_id": "publication20260913ab",
+  "source_commit": "a7c50c251a1e8fa5cceb38acd58bae243b45ffae",
+  "frontend_tests_passed": 472,
+  "frontend_tests_failed": 0,
+  "logs_sha256": {
+    "branding-how-to-final-frontend-test.log": "7c3016380aa3139003cab7d2bd8dc390af24d982cdde84c358282529460c6b4d",
+    "branding-how-to-final-frontend-build.log": "ea6168cf0d847285ae5a8b7a1768109699b8b65faee082862672960148e90852",
+    "branding-how-to-final-frontend-scan.log": "c212d9ffbfe7b4baf7a3c707a0a626ebda7ba3768cad3f3a8ad042a74467c0e3"
+  },
+  "scope": "Use Ellis display branding for reviewer labels while preserving literal quotations and URLs; show only supported How to apply content and recognize known no-filing exemption aliases. No stored data, publication-grade or scheduler changes.",
+  "expected_index_sha256": "fdc6f27e9ccd5a1812da55e09e913ca98a20f450f07351c0845fda11c2730707",
+  "state": "deployed",
+  "started_at": "2026-09-14T04:05:14.799235+00:00",
+  "backup": "/root/ellis-backup-frontend-publication20260913ab",
+  "deployed_at": "2026-09-14T04:05:14.831576+00:00",
+  "files": 16
+}

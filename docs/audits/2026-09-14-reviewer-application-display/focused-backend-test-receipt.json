@@ -1,0 +1,18 @@
+{
+  "commit": "ed9302b603df274d72c1fe6ee1a61b37185591ab",
+  "files": {
+    "backend/app/visa_snapshot/tstation.py": "7eb5ce2d53f6acce24610731323318909f4f78d2092313b4ac346b95255c51a1",
+    "backend/app/visa_snapshot/reviewer_display.py": "44273830face9bcaf6405df9e4b8f172500031c01a2e7917bef7621133620d2b",
+    "backend/tests/test_reviewer_display.py": "87eb595b6e29a99e30da69cd99bbfeadc193e8b90f10eaf173207b8fb1447c61"
+  },
+  "tests": {
+    "command": "PYTHONPATH=backend /Users/sammynawaly/Documents/ellis-app/backend/.venv/bin/python3.14 -B -m pytest -q -p no:cacheprovider backend/tests/test_reviewer_display.py backend/tests/test_tstation_backend.py backend/tests/test_record_field_evidence.py backend/tests/test_grade_publication.py backend/tests/test_export_publication_filter.py backend/tests/test_export_labels.py",
+    "passed": 90,
+    "failed": 0,
+    "skipped": 0,
+    "warnings": 3,
+    "duration_seconds": 0.97,
+    "evidence": "Completed unified exec session 51396; no separate raw logfile was written."
+  },
+  "scope": "Display attribution only. Source labels normalized, exact quotes/URLs and stored actor/provenance IDs preserved. No live calls or deployment."
+}

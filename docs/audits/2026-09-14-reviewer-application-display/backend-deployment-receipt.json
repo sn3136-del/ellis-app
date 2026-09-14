@@ -1,0 +1,75 @@
+{
+  "after_monitors": {
+    "cron_sha256": "afe10995bda08431f521192bb2a3a55f0e271d8c98e153e3e6abab24fa380a07",
+    "mode": "idle_failed",
+    "observed_monotonic_usec": 1472164534359,
+    "pid": 0,
+    "service": {
+      "ActiveState": "failed",
+      "ExecMainExitTimestampMonotonic": "1460020946965",
+      "ExecMainPID": "1022325",
+      "ExecMainStartTimestampMonotonic": "1458804630971",
+      "ExecMainStatus": "1",
+      "LoadState": "loaded",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "SubState": "failed"
+    },
+    "start_ticks": null,
+    "timer": {
+      "AccuracyUSec": "1min",
+      "ActiveState": "active",
+      "LoadState": "loaded",
+      "RandomizedDelayUSec": "10min",
+      "UnitFileState": "enabled",
+      "calendar": [
+        "*-*-* 00/6:20:00"
+      ]
+    }
+  },
+  "api_restarts": 1,
+  "base_commit": "928bee2af96f70a554079cc93b4630452a914d03",
+  "before_monitors": {
+    "cron_sha256": "afe10995bda08431f521192bb2a3a55f0e271d8c98e153e3e6abab24fa380a07",
+    "mode": "idle_failed",
+    "observed_monotonic_usec": 1472158746858,
+    "pid": 0,
+    "service": {
+      "ActiveState": "failed",
+      "ExecMainExitTimestampMonotonic": "1460020946965",
+      "ExecMainPID": "1022325",
+      "ExecMainStartTimestampMonotonic": "1458804630971",
+      "ExecMainStatus": "1",
+      "LoadState": "loaded",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "SubState": "failed"
+    },
+    "start_ticks": null,
+    "timer": {
+      "AccuracyUSec": "1min",
+      "ActiveState": "active",
+      "LoadState": "loaded",
+      "RandomizedDelayUSec": "10min",
+      "UnitFileState": "enabled",
+      "calendar": [
+        "*-*-* 00/6:20:00"
+      ]
+    }
+  },
+  "code_backup": "/root/ellis-backup-api-only-runtime20260914a",
+  "cron_modified": false,
+  "database_modified_by_installer": false,
+  "finished_at": "2026-09-14T04:09:11.143637+00:00",
+  "freshness_health": "preexisting_failure",
+  "freshness_transition": "preexisting_idle_failure_preserved",
+  "installed_files": [
+    "backend/app/visa_snapshot/reviewer_display.py",
+    "backend/app/visa_snapshot/tstation.py"
+  ],
+  "release_id": "runtime20260914a",
+  "scheduler_signals_sent": 0,
+  "source_commit": "ed9302b603df274d72c1fe6ee1a61b37185591ab",
+  "started_at": "2026-09-14T04:09:05.358197+00:00",
+  "state": "installed_api_healthy_freshness_preserved"
+}

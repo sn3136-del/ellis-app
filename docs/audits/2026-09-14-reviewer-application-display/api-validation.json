@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "frontend_release": "publication20260913ab",
+  "backend_release": "runtime20260914a",
+  "public_index_sha256": "3a4f8d9a49c5887d4bbb50bf42aa0aafc43183e7cd353fb7d9fc36c1f6fc0f4a",
+  "records_compared": 1453,
+  "changed_records": 93,
+  "changed_fields": {
+    "evidence_revision": 93,
+    "data_source": 93
+  },
+  "branded_data_source_labels_after": 0,
+  "workbook_data_source_labels": [
+    "AI review",
+    "AI review"
+  ],
+  "public_health": {
+    "ok": true
+  },
+  "frontend_tests_passed": 472,
+  "focused_backend_tests_passed": 90,
+  "installer_tests_passed": 37,
+  "browser_smoke": "Not completed: sandbox Chrome launch failed and CUA reported User unavailable. Actual React component tests and live asset hash checks passed.",
+  "freshness": "Preexisting rate-limited failure preserved; timer active/enabled.",
+  "paid_lookups_or_refreshes": 0
+}
