@@ -289,3 +289,37 @@ test('actual reader rejects stale locale translations and reuses the exact warm 
   await s.language('en')
   assert.ok(!s.text().includes('简UNIQUE READER TRANSLATION PRODUCT'))
 })
+
+test('How to apply hides placeholder and link-only responses, then shows real saved instructions', async t => {
+  const s = await screen(t, '#database/HKG/VNM/tourism/ordinary_passport')
+  const response = answer('APPLICATION GUIDANCE', 'HKG', 'VNM', {
+    application_steps_status: 'unknown', apply_steps: [], application_steps_source_url: 'https://evisa.gov.vn/',
+  })
+  response.guidance.application_channel_detail = 'Application steps are not yet confirmed.'
+  response.guidance.submission_process = ['Not publicly available.']
+  await s.finish(s.lookups[0], response)
+  assert.ok(!s.text().includes('db.steps'))
+  assert.ok(!s.has('database-application-instructions'))
+  const next = await s.navigate('#database/IDN/KOR/tourism/ordinary_passport')
+  const available = answer('SAVED INSTRUCTIONS', 'IDN', 'KOR')
+  available.guidance.submission_process = 'Submit through KVAC Jakarta; personal attendance is required unless an allowed exception applies.'
+  available.guidance.payment_process = ['Pay USD 40 plus any separate service charge.']
+  await s.finish(next, available)
+  assert.equal(s.find('database-application-instructions').type, 'ul')
+  assert.ok(s.text().includes(available.guidance.submission_process))
+  assert.ok(s.text().includes('Pay USD 40 plus any separate service charge.'))
+  assert.ok(!s.text().includes('db.stepsUnknown'))
+})
+
+test('How to apply keeps reviewed step numbers and named product procedures distinct', async t => {
+  const s = await screen(t, '#database/HKG/VNM/tourism/ordinary_passport')
+  const response = answer('ORDERED INSTRUCTIONS', 'HKG', 'VNM', {
+    application_steps_status: 'source_ordered', apply_steps: ['Submit the eVisa application.', 'Pay after submission if instructed.'],
+  })
+  response.guidance.visa_products = [{type:'Embassy visa',submission_process:['Attend the responsible embassy only for this product.']}]
+  await s.finish(s.lookups[0], response)
+  assert.equal(s.find('database-application-instructions').type, 'ol')
+  const product = s.find('database-product-application-instructions')
+  assert.match(JSON.stringify(product.toJSON ? product.toJSON() : product.children.map(x=>typeof x==='string'?x:x.props.children)),/Embassy visa/)
+  assert.ok(s.text().includes('Attend the responsible embassy only for this product.'))
+})

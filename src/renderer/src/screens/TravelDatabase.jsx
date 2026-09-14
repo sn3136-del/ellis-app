@@ -821,6 +821,7 @@ export default function TravelDatabase({ onBack }) {
                                    ...entryInstructionTexts(vp.entry_requirements)]),
       ...applicationInstructions(result, g).steps,
       applicationInstructions(result, g).summary,
+      ...(applicationInstructions(result, g).products || []).flatMap((product) => [product.name, product.summary, ...product.steps]),
       ...itemsOf(g.required_documents), ...itemsOf(g.forms),
       ...healthRequirementLines(g.health_requirements),
       ...itemsOf(g.exceptions), ...itemsOf(g.uncertainty),
@@ -1120,6 +1121,8 @@ export default function TravelDatabase({ onBack }) {
     : NO_APPLICATION_CHANNELS.has(String(g.application_channel || '').toLowerCase())
   const instructions = applicationInstructions(result, g)
   const applySteps = instructions.steps
+  const orderedSteps = instructions.status === 'source_ordered'
+  const InstructionList = orderedSteps ? 'ol' : 'ul'
   // Every application surface shares the same source-backed lane. An ETA
   // guide opens app instructions; it never implies initial ImmiAccount filing.
   const application = applicationLane(g)
@@ -1852,20 +1855,19 @@ export default function TravelDatabase({ onBack }) {
               )
             })()}
 
-            {(applySteps.length > 0 || instructions.status === 'unknown' || instructions.status === 'not_applicable') && (
+            {(applySteps.length > 0 || instructions.summary || instructions.products?.length > 0) && (
               <Section title={t('db.steps')} accent={NAVY}>
-                    {instructions.status === 'not_applicable' && <p style={{ margin: 0, color: NAVY, lineHeight: 1.6 }}>{t('db.stepsNotApplicable')}</p>}
-                    {instructions.status === 'unknown' && <p style={{ margin: '0 0 10px', color: instructions.summary ? NAVY : GRAY, lineHeight: 1.6, overflowWrap: 'anywhere' }}>{instructions.summary ? T(instructions.summary) : t('db.stepsUnknown')}</p>}
-                    {instructions.status === 'unknown' && instructions.sourceUrl && (
-                      <a href={instructions.sourceUrl} target="_blank" rel="noreferrer" style={{ color: BLUE }}>{t('db.stepsOfficial')} ↗</a>
-                    )}
-                <ol style={{ margin: 0, paddingLeft: 0, listStyle: 'none',
-                             position: 'relative' }}>
+                {instructions.summary && <p style={{ margin: '0 0 10px', color: NAVY, lineHeight: 1.6, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{T(instructions.summary)}</p>}
+                {instructions.summary && instructions.sourceUrl && (
+                  <a href={instructions.sourceUrl} target="_blank" rel="noreferrer" style={{ color: BLUE }}>{t('db.stepsOfficial')} ↗</a>
+                )}
+                <InstructionList data-testid="database-application-instructions"
+                    style={{ margin: 0, paddingLeft: 0, listStyle: 'none', position: 'relative' }}>
                   {applySteps.map((x, i) => (
                     <li key={i} style={{ display: 'flex', gap: 14,
                                          alignItems: 'flex-start',
                                          padding: '8px 0', position: 'relative' }}>
-                      {i < applySteps.length - 1 && (
+                      {orderedSteps && i < applySteps.length - 1 && (
                         <span style={{ position: 'absolute', left: 12, top: 34,
                                        bottom: -6, width: 2,
                                        background: 'var(--line, #e8edf3)' }} />
@@ -1874,7 +1876,7 @@ export default function TravelDatabase({ onBack }) {
                                      borderRadius: 999, background: BLUE,
                                      color: '#fff', fontSize: 13, fontWeight: 800,
                                      display: 'flex', alignItems: 'center',
-                                     justifyContent: 'center', zIndex: 1 }}>{i + 1}</span>
+                                     justifyContent: 'center', zIndex: 1 }}>{orderedSteps ? i + 1 : '•'}</span>
                       <span style={{ fontSize: 13.5, color: NAVY,
                                      lineHeight: '26px' }}>
                         {T(x)}
@@ -1892,7 +1894,14 @@ export default function TravelDatabase({ onBack }) {
                       </span>
                     </li>
                   ))}
-                </ol>
+                </InstructionList>
+                {(instructions.products || []).map((product) => (
+                  <div key={product.index} data-testid="database-product-application-instructions" style={{ marginTop: 12 }}>
+                    <div style={{ fontWeight: 700, color: NAVY, marginBottom: 6 }}>{T(product.name)}</div>
+                    {product.summary && <p style={{ margin: '0 0 8px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{T(product.summary)}</p>}
+                    <Bullets items={product.steps.map(T)} />
+                  </div>
+                ))}
                 {applySteps.length > 0 && g.official_portal_url && portalStepIndex === -1 && (
                   <a href={g.official_portal_url} target="_blank" rel="noreferrer"
                      style={{ display: 'inline-block', marginTop: 6, color: BLUE,
