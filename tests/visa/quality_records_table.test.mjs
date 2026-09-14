@@ -7,7 +7,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { act, create } from 'react-test-renderer'
 import { t as translate } from '../../src/renderer/src/lib/i18n.js'
-import { formatChangeValue, changeDisplayEntries, changeOriginKind } from '../../src/renderer/src/lib/changeLogDisplay.js'
+import { formatChangeValue, changeDisplayEntries, changeOriginKind, translateChangeValue } from '../../src/renderer/src/lib/changeLogDisplay.js'
 
 // The records list is the operator's first screen. It renders a real
 // component, so a helper that is not in scope there crashes every row.
@@ -372,4 +372,12 @@ test('change log reviewer identities are neutral while source quote and URL valu
   assert.equal(formatChangeValue('source_url', 'https://example.gov/openai', { t }), 'https://example.gov/openai')
   assert.equal(formatChangeValue('quote', 'Codex is literal wording in this test quote.', { t }),
     'Codex is literal wording in this test quote.')
+})
+
+
+test('the final change chip translation path leaves literal evidence wording unchanged', () => {
+  const transform = value => value.replace(/Codex/g, 'AI')
+  assert.equal(translateChangeValue('quote', 'Codex in literal evidence', transform), 'Codex in literal evidence')
+  assert.equal(translateChangeValue('source_url', 'https://example.gov/Codex', transform), 'https://example.gov/Codex')
+  assert.equal(translateChangeValue('note', 'Checked by Codex', transform), 'Checked by AI')
 })

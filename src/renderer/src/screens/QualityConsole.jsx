@@ -142,7 +142,7 @@ import { registerOpenNote } from '../lib/openNote.js'
 import { publishedFeeText } from '../lib/publishedFee.js'
 import { useLocalizedCountries } from '../lib/countryNames.js'
 import { matchCountry, matchCountryStrict } from '../lib/countryMatch.js'
-import { changeDisplayEntries, changeOriginKind } from '../lib/changeLogDisplay.js'
+import { changeDisplayEntries, changeOriginKind, translateChangeValue } from '../lib/changeLogDisplay.js'
 
 const NAVY = '#0f294d'
 const BLUE = '#287dfa'
@@ -3554,7 +3554,7 @@ function QualityWorkspace() {
             if (g && g.day === day) g.items.push(c)
             else byDay.push({ day, items: [c] })
           }
-          const ValueChip = ({ v, kind }) => (
+          const ValueChip = ({ v, kind, field }) => (
             <span title={typeof v === 'string' ? v : undefined}
                   style={{ display: 'inline-block', padding: '2px 8px',
                            borderRadius: 7, fontSize: 12,
@@ -3571,7 +3571,7 @@ function QualityWorkspace() {
                                ? { background: '#fdf1f4', color: RED, fontWeight: 700 }
                                : { background: '#eefaf3', color: '#0b7a44',
                                    fontWeight: 700 }) }}>
-              {typeof v === 'string' ? tv(v) : v}
+              {typeof v === 'string' ? translateChangeValue(field, v, tv) : v}
             </span>
           )
           return (
@@ -3749,11 +3749,11 @@ function QualityWorkspace() {
                                                gap: 6, alignItems: 'center',
                                                flexWrap: 'wrap' }}>
                                   {c.action === 'modify' && !summaryOnly && [
-                                    <ValueChip key="o" v={a ?? t('ops.emptyVal')}
+                                    <ValueChip key="o" field={f} v={a ?? t('ops.emptyVal')}
                                                kind={a == null ? 'empty' : 'old'} />,
                                     <span key="s" style={{ color: '#b6c2d4' }}>→</span>,
                                   ]}
-                                  <ValueChip v={b ?? t('ops.emptyVal')}
+                                  <ValueChip field={f} v={b ?? t('ops.emptyVal')}
                                              kind={c.action === 'delete' ? 'del'
                                                : b == null ? 'empty' : 'new'} />
                                 </span>

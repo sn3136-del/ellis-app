@@ -1,6 +1,9 @@
 import { reviewAttributionLabel, reviewDisplayText } from './reviewDisplay.js'
 
 // Presentation only: retain the full structured values in the audit/export.
+const literalEvidenceField = field => /(?:^|_)(?:quote|url)(?:$|_)/.test(field)
+export const translateChangeValue = (field, value, translate) => literalEvidenceField(field) ? value : translate(value)
+
 const humanize = value => String(value).replace(/_/g, ' ').replace(/\b([a-z])/g, c => c.toUpperCase())
 const decode = value => {
   if (typeof value !== 'string' || !/^[\[{]/.test(value.trim())) return value
@@ -30,7 +33,7 @@ export function formatChangeValue(field, raw, { t, valueLabel = (_, value) => va
   if (value == null || value === '') return null
   if (typeof value === 'boolean') return t(value ? 'ops.chg.yes' : 'ops.chg.no')
   if (typeof value !== 'object') {
-    const isEvidence = /(?:^|_)(?:quote|url)(?:$|_)/.test(field)
+    const isEvidence = literalEvidenceField(field)
     const displayed = isEvidence ? value : field === 'data_source' || /^(?:actor|reviewer|verified_by|reviewed_by)$/.test(field)
       ? reviewAttributionLabel(value, t('ops.origin.aiReview')) : reviewDisplayText(value)
     const labeled = valueLabel(field, displayed)
