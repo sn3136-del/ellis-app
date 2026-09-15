@@ -281,8 +281,13 @@ def authority_for(url: str, route, *, citation: str = "") -> Authority:
     if host in EU_LAW_HOSTS:
         instrument = _instrument_named(f"{url} {citation or ''}")
         if instrument and dest in instrument_destinations(instrument):
+            scope = EU_LAW_FIELDS
+            if instrument == "810/2009":
+                # Visa Code Article 12 governs the travel document presented
+                # for a Schengen visa application, including passport validity.
+                scope = scope | {"passport_validity", "passport_validity_requirement"}
             return Authority(KIND_EU_VISA_LAW, owner="EU", exemption="eu_visa_law",
-                             instrument=instrument, scope=tuple(sorted(EU_LAW_FIELDS)))
+                             instrument=instrument, scope=tuple(sorted(scope)))
         if dest in schengen_destinations():
             return Authority(KIND_THIRD_PARTY, owner="EU",
                              note="Union host but no instrument from the closed list is named "
