@@ -13,6 +13,17 @@ def test_missing_or_inactive_timer_cannot_fabricate_next_run(monkeypatch):
     assert main._next_sweep_at() is None
 
 
+def test_only_confirmed_disabled_inactive_timer_is_reported_as_paused(monkeypatch):
+    import subprocess
+    state = {'returncode': 0, 'stdout': 'LoadState=loaded\nActiveState=inactive\nUnitFileState=disabled\nNextElapseUSecRealtime=Wed 2099-09-09 06:20:00 UTC'}
+    monkeypatch.setattr(subprocess, 'run', lambda *a, **k: SimpleNamespace(**state))
+    assert main._sweep_timer_status() == {'status': 'paused', 'next_sweep_at': None}
+    state['returncode'] = 1
+    assert main._sweep_timer_status() == {'status': 'unavailable', 'next_sweep_at': None}
+    state.update(returncode=0, stdout=state['stdout'].replace('UnitFileState=disabled', 'UnitFileState=enabled'))
+    assert main._sweep_timer_status()['status'] == 'inactive'
+
+
 def test_reporting_distinguishes_attempt_from_read_and_verified():
     now = datetime(2026, 9, 9, tzinfo=timezone.utc)
     def row(destination, **data):

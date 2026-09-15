@@ -1719,7 +1719,8 @@ export function NextSweepCountdown({ at, summary, t }) {
     const id = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(id)
   }, [])
-  const target = at ? new Date(at).getTime() : null
+  const paused = summary.scheduler?.status === 'paused'
+  const target = !paused && at ? new Date(at).getTime() : null
   const left = target ? Math.max(0, Math.floor((target - now) / 1000)) : 0
   const hh = String(Math.floor(left / 3600)).padStart(2, '0')
   const mm = String(Math.floor((left % 3600) / 60)).padStart(2, '0')
@@ -1736,7 +1737,7 @@ export function NextSweepCountdown({ at, summary, t }) {
         </div>
         <div style={{ fontSize: 'clamp(36px, 8vw, 80px)', fontWeight: 800, color: NAVY,
                       fontVariantNumeric: 'tabular-nums', marginTop: 12, lineHeight: 1.2 }}>
-          {target && target > now ? `${hh}:${mm}:${ss}` : t(summary.scheduler?.status === 'active' ? 'ops.fresh.awaitingRun' : 'ops.fresh.schedulerUnavailable')}
+          {paused ? t('ops.fresh.paused') : target && target > now ? `${hh}:${mm}:${ss}` : t(summary.scheduler?.status === 'active' ? 'ops.fresh.awaitingRun' : 'ops.fresh.schedulerUnavailable')}
         </div>
       </div>
     </div>

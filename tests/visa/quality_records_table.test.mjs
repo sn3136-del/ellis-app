@@ -119,6 +119,19 @@ test('freshness retains the next scheduled countdown while the current refresh i
   } finally { Date.now = realNow }
 })
 
+test('explicitly paused refresh shows a localized pause and ignores an old countdown', () => {
+  for (const lang of ['en', 'zh-CN', 'zh-Hant']) {
+    const localized = key => translate(lang, key)
+    const html = renderToStaticMarkup(createElement(NextSweepCountdown, {
+      at: '2099-09-14T00:20:00Z', summary: { scheduler: { status: 'paused' } }, t: localized,
+    }))
+    assert.ok(html.includes(localized('ops.fresh.paused')))
+    assert.ok(!html.includes(localized('ops.fresh.awaitingRun')))
+    assert.ok(!html.includes(localized('ops.fresh.schedulerUnavailable')))
+    assert.doesNotMatch(html, /\d{2}:\d{2}:\d{2}/)
+  }
+})
+
 test('publication option preserves existing fee and route sort behavior', () => {
   const records = [record({ travel_document_country: 'USA', visa_fee_amount: 10 }),
     record({ travel_document_country: 'AUS', visa_fee_amount: 20 })]

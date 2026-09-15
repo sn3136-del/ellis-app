@@ -1489,9 +1489,14 @@ def _sweep_timer_status() -> dict:
     env['LC_ALL'] = 'C'
     try:
         proc = subprocess.run(["systemctl", "show", "ellis-freshness.timer", "--timestamp=utc",
-            "--property=LoadState,ActiveState,NextElapseUSecRealtime,TimersCalendar,RandomizedDelayUSec,AccuracyUSec"],
+            "--property=LoadState,ActiveState,UnitFileState,NextElapseUSecRealtime,TimersCalendar,RandomizedDelayUSec,AccuracyUSec"],
             capture_output=True, text=True, timeout=2, env=env)
         fields = dict(line.split("=", 1) for line in (proc.stdout or "").splitlines() if "=" in line)
+        if proc.returncode != 0:
+            return {"status": "unavailable", "next_sweep_at": None}
+        if (fields.get("LoadState") == "loaded" and fields.get("ActiveState") == "inactive"
+                and fields.get("UnitFileState") == "disabled"):
+            return {"status": "paused", "next_sweep_at": None}
         active = proc.returncode == 0 and fields.get("LoadState") == "loaded" and fields.get("ActiveState") == "active"
         result = {"status": "active" if active else "inactive", "next_sweep_at": None}
         if not active:
