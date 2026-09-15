@@ -1,0 +1,70 @@
+{
+  "at": "2026-09-15T20:18:12.727907+00:00",
+  "issue_id": "4a5455ff0e9647e7bc59a90b31d8c988",
+  "before": {
+    "id": "4a5455ff0e9647e7bc59a90b31d8c988",
+    "route": {
+      "passport_nationality": "FRA",
+      "lawful_country_of_residence": "FRA",
+      "destination_country": "RUS",
+      "visa_category": "tourist_visa",
+      "travel_purpose": "tourism",
+      "arrival_date": null,
+      "consular_jurisdiction": null,
+      "travel_document_type": "ordinary_passport",
+      "transit_countries": null
+    },
+    "field": "health_requirements",
+    "revision_sha256": "aea139c377695022ecce8681b3857e13a40a1b66454ae7b6e722052597fc2da0",
+    "note": "Automatic source check against https://electronic-visa.kdmid.ru/faq_en.html: health_requirements: page says [] (quote: Lack of data about it is not a reason for refusal of entry into the Russian Federation, nor for refusal to issue an e-visa)",
+    "status": "open",
+    "resolution": "",
+    "reported_by": "freshness_monitor",
+    "cache_key": "FRA|FRA|RUS|tourism|default|unknown|v6",
+    "notified_to": "",
+    "notified_at": null,
+    "resolved_by": "",
+    "resolved_at": null,
+    "reviewed_by": "",
+    "reviewed_at": null,
+    "published_at": null,
+    "proposal": {
+      "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
+      "checked_at": "2026-09-15T01:08:03.414944+00:00",
+      "fields": {
+        "health_requirements": {
+          "page_says": [],
+          "record_holds": [
+            {
+              "name": "Travel medical insurance",
+              "applicability": "always_required",
+              "trigger_countries": [],
+              "trigger": "Coverage required for the entire stay in Russia, including medical evacuation and repatriation",
+              "question": null
+            }
+          ],
+          "quote": "Lack of data about it is not a reason for refusal of entry into the Russian Federation, nor for refusal to issue an e-visa"
+        }
+      }
+    },
+    "fingerprint": null,
+    "created_at": "2026-09-15T01:09:18.430395"
+  },
+  "payload": {
+    "status": "dismissed",
+    "expected_issue_sha256": "aea139c377695022ecce8681b3857e13a40a1b66454ae7b6e722052597fc2da0",
+    "source_url": "https://electronic-visa.kdmid.ru/faq_en.html",
+    "source_excerpt": "The question about insurance in the application is not that important.",
+    "resolution": "The proposed deletion confuses insurance details entered in the application with the requirement to hold insurance. The current Russian MFA FAQ discusses missing insurance data in the form; point 19 at https://evisa.kdmid.ru/ still requires medical insurance for the full stay, subject to reciprocity exceptions. Keep the existing insurance requirement and its exception. This ruling rejects the proposed empty health-requirements list; it does not certify evacuation/repatriation details or every field on the route. The two official pages were read by two independent AI reviewers on 2026-09-15."
+  },
+  "response": {
+    "ok": true,
+    "id": "4a5455ff0e9647e7bc59a90b31d8c988",
+    "status": "dismissed",
+    "resolution": "The proposed deletion confuses insurance details entered in the application with the requirement to hold insurance. The current Russian MFA FAQ discusses missing insurance data in the form; point 19 at https://evisa.kdmid.ru/ still requires medical insurance for the full stay, subject to reciprocity exceptions. Keep the existing insurance requirement and its exception. This ruling rejects the proposed empty health-requirements list; it does not certify evacuation/repatriation details or every field on the route. The two official pages were read by two independent AI reviewers on 2026-09-15."
+  },
+  "source_urls": [
+    "https://electronic-visa.kdmid.ru/faq_en.html",
+    "https://evisa.kdmid.ru/"
+  ]
+}

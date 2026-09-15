@@ -1,0 +1,58 @@
+{
+  "started_at": "2026-09-15T20:35:45.244780+00:00",
+  "completed_at": "2026-09-15T20:36:05.405119+00:00",
+  "elapsed_seconds": 20.16,
+  "all_canonical_routes": 949,
+  "either_endpoint_18": {
+    "route_keys": 814,
+    "product_rows": 1220,
+    "populated_factual_cells": 13967,
+    "factual_quote_cells": 1600,
+    "factual_quote_gaps": 12367,
+    "quote_entries_in_factual_cells": 2827,
+    "distinct_quote_url_pairs_in_factual_cells": 551,
+    "routes_with_factual_quotes": 235,
+    "product_rows_with_factual_quotes": 403,
+    "products": {
+      "low": 187,
+      "held": 117,
+      "either": 198,
+      "both": 106
+    },
+    "routes": {
+      "low": 121,
+      "held": 90,
+      "either": 132,
+      "both": 79
+    }
+  },
+  "both_endpoints_18": {
+    "route_keys": 331,
+    "product_rows": 547,
+    "populated_factual_cells": 6461,
+    "factual_quote_cells": 1307,
+    "factual_quote_gaps": 5154,
+    "quote_entries_in_factual_cells": 2227,
+    "distinct_quote_url_pairs_in_factual_cells": 397,
+    "routes_with_factual_quotes": 191,
+    "product_rows_with_factual_quotes": 322,
+    "products": {
+      "low": 8,
+      "held": 9,
+      "either": 9,
+      "both": 8
+    },
+    "routes": {
+      "low": 8,
+      "held": 9,
+      "either": 9,
+      "both": 8
+    }
+  },
+  "operators_sha256": "2c5a62187a9d7d95ffb55916fdf16514a528b66ebe1c9697e814c4866faa10aa",
+  "record_evidence_sha256": "197452671b27f8ee411957e62c252fda94f05f74069122b27b5ce4b3cc1e2ae7",
+  "network_calls": 0,
+  "model_calls": 0,
+  "api_mutations": 0,
+  "interpretation": "Cells with at least one owned official quotation, not independent facts or full composite verification. N/A, input, metadata and NPA excluded. Low=confidence_level Low; held=_held true; each route counted once per category if any product matches."
+}

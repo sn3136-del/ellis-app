@@ -1,0 +1,68 @@
+{
+  "after_monitors": {
+    "cron_sha256": "afe10995bda08431f521192bb2a3a55f0e271d8c98e153e3e6abab24fa380a07",
+    "mode": "paused",
+    "pid": 0,
+    "service": {
+      "ActiveState": "failed",
+      "ExecMainExitTimestampMonotonic": "1610019677786",
+      "ExecMainPID": "1121224",
+      "ExecMainStartTimestampMonotonic": "1609944628887",
+      "ExecMainStatus": "1",
+      "LoadState": "loaded",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "SubState": "failed"
+    },
+    "start_ticks": null,
+    "timer": {
+      "AccuracyUSec": "1min",
+      "ActiveState": "inactive",
+      "LoadState": "loaded",
+      "RandomizedDelayUSec": "10min",
+      "TimersCalendar": "{ OnCalendar=*-*-* 00/6:20:00 ; next_elapse=(null) }",
+      "UnitFileState": "disabled"
+    }
+  },
+  "api_restarts": 1,
+  "base_commit": "e2286d9691b88f5c414f9e7d9522f4ddb3eaa3b5",
+  "before_monitors": {
+    "cron_sha256": "afe10995bda08431f521192bb2a3a55f0e271d8c98e153e3e6abab24fa380a07",
+    "mode": "paused",
+    "pid": 0,
+    "service": {
+      "ActiveState": "failed",
+      "ExecMainExitTimestampMonotonic": "1610019677786",
+      "ExecMainPID": "1121224",
+      "ExecMainStartTimestampMonotonic": "1609944628887",
+      "ExecMainStatus": "1",
+      "LoadState": "loaded",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "SubState": "failed"
+    },
+    "start_ticks": null,
+    "timer": {
+      "AccuracyUSec": "1min",
+      "ActiveState": "inactive",
+      "LoadState": "loaded",
+      "RandomizedDelayUSec": "10min",
+      "TimersCalendar": "{ OnCalendar=*-*-* 00/6:20:00 ; next_elapse=(null) }",
+      "UnitFileState": "disabled"
+    }
+  },
+  "code_backup": "/root/ellis-backup-api-only-runtime20260915b",
+  "cron_modified": false,
+  "database_modified_by_installer": false,
+  "finished_at": "2026-09-15T20:22:16.671475+00:00",
+  "freshness_health": "explicitly_paused_by_user",
+  "freshness_transition": "explicit_pause_preserved",
+  "installed_files": [
+    "backend/app/visa_snapshot/source_authority.py"
+  ],
+  "release_id": "runtime20260915b",
+  "scheduler_signals_sent": 0,
+  "source_commit": "651375c2eac746a7d49a368cd2d7ac80c99327de",
+  "started_at": "2026-09-15T20:22:11.038626+00:00",
+  "state": "installed_api_healthy_freshness_preserved"
+}

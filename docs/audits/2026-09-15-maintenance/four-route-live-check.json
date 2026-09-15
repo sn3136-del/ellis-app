@@ -1,0 +1,204 @@
+{
+  "at": "2026-09-15T20:25:19.758923+00:00",
+  "readonly": true,
+  "paid_calls": 0,
+  "routes": {
+    "IND|IND|JPN|tourism|default|unknown|v6": {
+      "status": "KIMI_PRIMARY",
+      "detail_pending": null,
+      "manual_publication": false,
+      "active_disputed_fields": [],
+      "customer": {
+        "held": false,
+        "review_required": false,
+        "disposition": "VISA_REQUIRED"
+      },
+      "rows": [
+        {
+          "type": "Single-entry Temporary Visitor / JAPAN eVISA (tourism)",
+          "held": false,
+          "publication_state": "published",
+          "grade": "Medium",
+          "evidence_low": false,
+          "disputed": [],
+          "fee": 500,
+          "entry_quotes": []
+        },
+        {
+          "type": "Multiple-entry Temporary Visitor (tourism), eligible Indian ordinary-passport applicants",
+          "held": false,
+          "publication_state": "published",
+          "grade": "Medium",
+          "evidence_low": false,
+          "disputed": [],
+          "fee": 500,
+          "entry_quotes": []
+        }
+      ]
+    },
+    "IND|IND|ESP|tourism|default|unknown|v6": {
+      "status": "KIMI_UNCERTAIN",
+      "detail_pending": null,
+      "manual_publication": false,
+      "active_disputed_fields": [],
+      "customer": {
+        "held": false,
+        "review_required": false,
+        "disposition": "VISA_REQUIRED"
+      },
+      "rows": [
+        {
+          "type": "Single-entry tourist",
+          "held": false,
+          "publication_state": "published",
+          "grade": "Medium",
+          "evidence_low": false,
+          "disputed": [],
+          "fee": 90,
+          "entry_quotes": [
+            {
+              "quote": "The applicant shall present a valid travel document satisfying the following criteria:\n(a)\nits validity shall extend at least three months after the intended date of departure from the territory of the Member States or, in the case of several visits, after the last intended date of departure from the territory of the Member States. However, in a justified case of emergency, this obligation may be waived;\n(b)\nit shall contain at least two blank pages;\n(c)\nit shall have been issued within the previous 10 years.",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02009R0810-20240628",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            },
+            {
+              "quote": "The passport must be valid for at least 6 months beyond the planned departure date from the Schengen territory. It must also contain at least 2 blank pages. Passports issued more than 10 years ago will not be accepted.\n\nThis Consular Office is competent to accept visa applications from third-country nationals residing in the consular district who are travelling to Spain as their only or main destination.",
+              "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            }
+          ]
+        },
+        {
+          "type": "Double-entry tourist",
+          "held": false,
+          "publication_state": "published",
+          "grade": "Medium",
+          "evidence_low": false,
+          "disputed": [],
+          "fee": 90,
+          "entry_quotes": [
+            {
+              "quote": "The applicant shall present a valid travel document satisfying the following criteria:\n(a)\nits validity shall extend at least three months after the intended date of departure from the territory of the Member States or, in the case of several visits, after the last intended date of departure from the territory of the Member States. However, in a justified case of emergency, this obligation may be waived;\n(b)\nit shall contain at least two blank pages;\n(c)\nit shall have been issued within the previous 10 years.",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02009R0810-20240628",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            },
+            {
+              "quote": "The passport must be valid for at least 6 months beyond the planned departure date from the Schengen territory. It must also contain at least 2 blank pages. Passports issued more than 10 years ago will not be accepted.\n\nThis Consular Office is competent to accept visa applications from third-country nationals residing in the consular district who are travelling to Spain as their only or main destination.",
+              "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            }
+          ]
+        },
+        {
+          "type": "Multiple-entry tourist",
+          "held": false,
+          "publication_state": "published",
+          "grade": "Medium",
+          "evidence_low": false,
+          "disputed": [],
+          "fee": 90,
+          "entry_quotes": [
+            {
+              "quote": "The applicant shall present a valid travel document satisfying the following criteria:\n(a)\nits validity shall extend at least three months after the intended date of departure from the territory of the Member States or, in the case of several visits, after the last intended date of departure from the territory of the Member States. However, in a justified case of emergency, this obligation may be waived;\n(b)\nit shall contain at least two blank pages;\n(c)\nit shall have been issued within the previous 10 years.",
+              "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02009R0810-20240628",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            },
+            {
+              "quote": "The passport must be valid for at least 6 months beyond the planned departure date from the Schengen territory. It must also contain at least 2 blank pages. Passports issued more than 10 years ago will not be accepted.\n\nThis Consular Office is competent to accept visa applications from third-country nationals residing in the consular district who are travelling to Spain as their only or main destination.",
+              "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            }
+          ]
+        }
+      ]
+    },
+    "USA|USA|PAK|tourism|default|unknown|v6": {
+      "status": "KIMI_PRIMARY",
+      "detail_pending": false,
+      "manual_publication": false,
+      "active_disputed_fields": [],
+      "customer": {
+        "held": false,
+        "review_required": false,
+        "disposition": "VISA_REQUIRED"
+      },
+      "rows": [
+        {
+          "type": "Tourist e-Visa",
+          "held": false,
+          "publication_state": "published",
+          "grade": "Medium",
+          "evidence_low": false,
+          "disputed": [],
+          "fee": 60,
+          "entry_quotes": []
+        }
+      ]
+    },
+    "CAN|CAN|VNM|tourism|default|unknown|v6": {
+      "status": "KIMI_UNCERTAIN",
+      "detail_pending": null,
+      "manual_publication": false,
+      "active_disputed_fields": [],
+      "customer": {
+        "held": false,
+        "review_required": false,
+        "disposition": "VISA_REQUIRED"
+      },
+      "rows": [
+        {
+          "type": "Single-entry tourist e-Visa",
+          "held": false,
+          "publication_state": "published",
+          "grade": "Medium",
+          "evidence_low": false,
+          "disputed": [],
+          "fee": 25,
+          "entry_quotes": [
+            {
+              "quote": "Your Passport needs to be valid for at least 6 months upon your arrival in Vietnam.",
+              "source_url": "https://vietnamembassy.ca/consular-services/visa-application/",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            },
+            {
+              "quote": "Your passport must be valid at least 6 months beyond the date you expect to leave Vietnam.",
+              "source_url": "https://travel.gc.ca/destinations/vietnam",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            }
+          ]
+        },
+        {
+          "type": "Multiple-entry tourist e-Visa",
+          "held": false,
+          "publication_state": "published",
+          "grade": "Medium",
+          "evidence_low": false,
+          "disputed": [],
+          "fee": 50,
+          "entry_quotes": [
+            {
+              "quote": "Your Passport needs to be valid for at least 6 months upon your arrival in Vietnam.",
+              "source_url": "https://vietnamembassy.ca/consular-services/visa-application/",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            },
+            {
+              "quote": "Your passport must be valid at least 6 months beyond the date you expect to leave Vietnam.",
+              "source_url": "https://travel.gc.ca/destinations/vietnam",
+              "kind": "source_review",
+              "verified_at": "2026-09-15"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

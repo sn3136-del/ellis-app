@@ -1,0 +1,26 @@
+{
+  "state": "committed",
+  "started_at": "2026-09-15T20:32:59.449555+00:00",
+  "manifest_sha256": "4d8c0866fd2b04878ce6fb60d9053ebca0cdc30a2efed932dcba3751c8fc658a",
+  "packet_sha256": "8dc5463690854dbbf91c30390298f19059ff7f1983e4048ed79383a45a37b9f7",
+  "service_signals_sent": 0,
+  "issue_changes": 0,
+  "verification_changes": 0,
+  "operator_backup": "/root/ellis-quotes-20260915b/frozen-preview-receipt-operator-before.json",
+  "finished_at": "2026-09-15T20:33:04.428522+00:00",
+  "change_log_ids": [
+    "002c25f3ef9c4bb2b7c8fee87d8f7384",
+    "cfb4e56456d74f7dbff255019f58bded",
+    "4ab8ed3f13a647fdac3f220e4c11c9bd",
+    "a4f603cfc3ba40ddab7564fd3b8de483",
+    "80db09d4c5824e67ac458bc913baa43a",
+    "c7499ec8949a4afd925cf8669a4295a4",
+    "c25311de9b6f4cd3bf4ee108cc6d8db2",
+    "a36ff2786e36486d9d5c53088107c36d",
+    "929f5cada4434ab9a99456527cad0f8f",
+    "8b5e6dda10a64adbaf7ef943d7ebaa04",
+    "f34fd65cb9e945bdac700960d908cdbd"
+  ],
+  "operator_after_sha256": "2c5a62187a9d7d95ffb55916fdf16514a528b66ebe1c9697e814c4866faa10aa",
+  "sweep_status_unchanged": true
+}

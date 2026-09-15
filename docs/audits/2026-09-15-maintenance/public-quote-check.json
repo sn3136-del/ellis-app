@@ -1,0 +1,1177 @@
+{
+  "at": "2026-09-15T20:34:55.972184+00:00",
+  "routes": [
+    {
+      "origin": "USA",
+      "destination": "JPN",
+      "products": [
+        {
+          "row": {
+            "travel_document_type": "ordinary_passport",
+            "travel_document_country": "USA",
+            "destination_country": "JPN",
+            "travel_purpose": "tourism",
+            "visa_requirement": "Visa-free",
+            "visa_requirement_detail": "Unconditional Visa-free",
+            "visa_type_name": "No visa needed",
+            "validity_duration": null,
+            "validity_unit": null,
+            "max_stay_duration": 90,
+            "max_stay_unit": "Day",
+            "entries": null,
+            "processing_min_days": null,
+            "processing_unit": null,
+            "visa_fee_amount": 0,
+            "visa_fee_currency": "USD",
+            "application_method": null,
+            "required_documents": "Valid US ordinary passport, Return or onward ticket, Proof of sufficient funds for the stay, Proof of accommodation in Japan, Immigration/customs declaration via Visit Japan Web or paper disembarkation card",
+            "consulate_district": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application",
+            "entry_requirements": "No visa. You must still file the Disembarkation card and customs declaration, Submit at immigration and customs on arrival. Visit Japan Web is the recommended online option, paper forms remain accepted.. Passport: Valid for duration of stay. Onward travel: Required (return/onward ticket). Accommodation: Recommended. Funds: Recommended",
+            "special_conditions": "Extension beyond 90 days is available only to nationals of countries with bilateral 6-month arrangements (MOFA Note 8), the United States is not among them",
+            "data_source": "AI official-source quote review",
+            "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+            "collected_at": "2026-09-15",
+            "info_validity": null,
+            "confidence_level": "High",
+            "corroborating_sources": [
+              {
+                "url": "https://www.moj.go.jp/isa/immigration/procedures/translation.html?hl=ja",
+                "quote": "紙媒体の「外国人入国記録」を提出してください。",
+                "checked_at": "2026-09-09"
+              },
+              {
+                "url": "https://www.customs.go.jp/english/passenger/declaration/declaration_app.html",
+                "quote": "The existing paper version of the Customs Declaration Form can still be used",
+                "checked_at": "2026-09-09"
+              }
+            ],
+            "cache_key": "USA|USA|JPN|tourism|default|unknown|v6",
+            "product_index": null,
+            "evidence_revision": "dc6ed9162d1a556d9ea46a3851ad38e902e70cbe09f795613bb291a2d5eb843a",
+            "status": "KIMI_PRIMARY",
+            "contradictions": [],
+            "source_check": "ai-quote",
+            "visa_fee_qualifier": null,
+            "max_stay_text": "90 days granted upon landing permission",
+            "validity_text": null,
+            "processing_text": null,
+            "freshness_valid_until": "2026-09-21T18:27:17.936365",
+            "operator_released": false,
+            "held": false,
+            "route_held": false,
+            "publication_state": "published",
+            "publication_reason": null,
+            "review_required": false,
+            "field_status": {
+              "travel_document_type": "filled",
+              "travel_document_country": "filled",
+              "destination_country": "filled",
+              "travel_purpose": "filled",
+              "visa_requirement": "filled",
+              "visa_requirement_detail": "filled",
+              "visa_type_name": "filled",
+              "validity_duration": "not-applicable",
+              "validity_unit": "not-applicable",
+              "max_stay_duration": "filled",
+              "max_stay_unit": "filled",
+              "entries": "not-applicable",
+              "processing_min_days": "not-applicable",
+              "processing_unit": "not-applicable",
+              "visa_fee_amount": "filled",
+              "visa_fee_currency": "filled",
+              "application_method": "not-applicable",
+              "required_documents": "filled",
+              "consulate_district": "filled",
+              "entry_requirements": "filled",
+              "special_conditions": "filled",
+              "data_source": "filled",
+              "source_url": "filled",
+              "collected_at": "filled",
+              "info_validity": "not-published",
+              "confidence_level": "filled"
+            },
+            "completeness": 1.0,
+            "absence": {
+              "travel_document_type": "value",
+              "travel_document_country": "value",
+              "destination_country": "value",
+              "travel_purpose": "value",
+              "visa_requirement": "value",
+              "visa_type_name": "value",
+              "validity_duration": "not_applicable",
+              "validity_unit": "not_applicable",
+              "max_stay_duration": "value",
+              "max_stay_unit": "value",
+              "entries": "not_applicable",
+              "processing_min_days": "not_applicable",
+              "processing_unit": "not_applicable",
+              "visa_fee_amount": "value",
+              "visa_fee_currency": "value",
+              "application_method": "not_applicable",
+              "required_documents": "value",
+              "consulate_district": "value",
+              "entry_requirements": "value",
+              "special_conditions": "value",
+              "data_source": "value",
+              "source_url": "value",
+              "collected_at": "value",
+              "info_validity": "documented_absence",
+              "confidence_level": "value"
+            },
+            "completeness_strict": 1.0
+          },
+          "evidence": {
+            "cache_key": "USA|USA|JPN|tourism|default|unknown|v6",
+            "product_index": null,
+            "revision": "dc6ed9162d1a556d9ea46a3851ad38e902e70cbe09f795613bb291a2d5eb843a",
+            "visa_type_name": "No visa needed",
+            "field_evidence": {
+              "travel_document_type": [],
+              "travel_document_country": [],
+              "destination_country": [],
+              "travel_purpose": [],
+              "visa_requirement": [
+                {
+                  "quote": "Japan has reciprocal visa exemption arrangements with 74 countries and regions listed in the table below.",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "United States",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "The period of stay granted upon landing permission will be \"15 days\" for Indonesia and Thailand, “30 days” for Brunei and Qatar, and \"90 days\" for other countries and regions.",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "visa_requirement_detail": [
+                {
+                  "quote": "Japan has reciprocal visa exemption arrangements with 74 countries and regions listed in the table below.",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "United States",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "The period of stay granted upon landing permission will be \"15 days\" for Indonesia and Thailand, “30 days” for Brunei and Qatar, and \"90 days\" for other countries and regions.",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "visa_type_name": [
+                {
+                  "quote": "Japan has reciprocal visa exemption arrangements with 74 countries and regions listed in the table below.",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "United States",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "The period of stay granted upon landing permission will be \"15 days\" for Indonesia and Thailand, “30 days” for Brunei and Qatar, and \"90 days\" for other countries and regions.",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "validity_duration": [],
+              "validity_unit": [],
+              "max_stay_duration": [
+                {
+                  "quote": "The period of stay granted upon landing permission will be \"15 days\" for Indonesia and Thailand, “30 days” for Brunei and Qatar, and \"90 days\" for other countries and regions.",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "United States",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "max_stay_unit": [
+                {
+                  "quote": "The period of stay granted upon landing permission will be \"15 days\" for Indonesia and Thailand, “30 days” for Brunei and Qatar, and \"90 days\" for other countries and regions.",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "United States",
+                  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "entries": [],
+              "processing_min_days": [],
+              "processing_unit": [],
+              "visa_fee_amount": [],
+              "visa_fee_currency": [],
+              "application_method": [],
+              "required_documents": [],
+              "consulate_district": [],
+              "entry_requirements": [],
+              "special_conditions": [],
+              "data_source": [],
+              "source_url": [],
+              "collected_at": [],
+              "info_validity": [],
+              "confidence_level": []
+            }
+          },
+          "quote_fields": 5
+        }
+      ]
+    },
+    {
+      "origin": "CAN",
+      "destination": "TWN",
+      "products": [
+        {
+          "row": {
+            "travel_document_type": "ordinary_passport",
+            "travel_document_country": "CAN",
+            "destination_country": "TWN",
+            "travel_purpose": "tourism",
+            "visa_requirement": "Visa-free",
+            "visa_requirement_detail": "Unconditional Visa-free",
+            "visa_type_name": "No visa needed",
+            "validity_duration": null,
+            "validity_unit": null,
+            "max_stay_duration": 90,
+            "max_stay_unit": "Day",
+            "entries": null,
+            "processing_min_days": null,
+            "processing_unit": null,
+            "visa_fee_amount": 0,
+            "visa_fee_currency": "USD",
+            "application_method": null,
+            "required_documents": "Passport valid for at least 6 months from date of entry, A confirmed return air/sea ticket or air/sea ticket and a visa for the next destination, and a confirmed seat reservation for departure flight",
+            "consulate_district": null,
+            "entry_requirements": "No visa. You must still file the Online immigration arrival card, Within seven days prior to arrival. Passport: 6 months beyond arrival. Onward travel: A confirmed return air/sea ticket or air/sea ticket and a visa for the next destination, and a confirmed seat reservation for departure flight. Accommodation: Hotel reservation or host address recommended. Funds: Bank statements or payment cards may be requested",
+            "special_conditions": "Canadian (and UK) passport holders may apply to extend the 90-day visa-exempt stay up to a total of 180 days",
+            "data_source": "AI source review (guard_review)",
+            "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+            "collected_at": "2026-09-15",
+            "info_validity": null,
+            "confidence_level": "High",
+            "corroborating_sources": [],
+            "cache_key": "CAN|CAN|TWN|tourism|default|unknown|v6",
+            "product_index": null,
+            "evidence_revision": "51a429bb9fb9312a970dc0f85726341ebdc1fe9b8e295c3b94318de128c87694",
+            "status": "KIMI_PRIMARY",
+            "contradictions": [],
+            "source_check": "ai-quote",
+            "visa_fee_qualifier": null,
+            "max_stay_text": "Up to 90 days, for Canadian passport holders extendable up to 180 days",
+            "validity_text": null,
+            "processing_text": null,
+            "freshness_valid_until": "2026-09-23T06:53:51.354072",
+            "operator_released": false,
+            "held": false,
+            "route_held": false,
+            "publication_state": "published",
+            "publication_reason": null,
+            "review_required": false,
+            "field_status": {
+              "travel_document_type": "filled",
+              "travel_document_country": "filled",
+              "destination_country": "filled",
+              "travel_purpose": "filled",
+              "visa_requirement": "filled",
+              "visa_requirement_detail": "filled",
+              "visa_type_name": "filled",
+              "validity_duration": "not-applicable",
+              "validity_unit": "not-applicable",
+              "max_stay_duration": "filled",
+              "max_stay_unit": "filled",
+              "entries": "not-applicable",
+              "processing_min_days": "not-applicable",
+              "processing_unit": "not-applicable",
+              "visa_fee_amount": "filled",
+              "visa_fee_currency": "filled",
+              "application_method": "not-applicable",
+              "required_documents": "filled",
+              "consulate_district": "not-applicable",
+              "entry_requirements": "filled",
+              "special_conditions": "filled",
+              "data_source": "filled",
+              "source_url": "filled",
+              "collected_at": "filled",
+              "info_validity": "not-published",
+              "confidence_level": "filled"
+            },
+            "completeness": 1.0,
+            "absence": {
+              "travel_document_type": "value",
+              "travel_document_country": "value",
+              "destination_country": "value",
+              "travel_purpose": "value",
+              "visa_requirement": "value",
+              "visa_type_name": "value",
+              "validity_duration": "not_applicable",
+              "validity_unit": "not_applicable",
+              "max_stay_duration": "value",
+              "max_stay_unit": "value",
+              "entries": "not_applicable",
+              "processing_min_days": "not_applicable",
+              "processing_unit": "not_applicable",
+              "visa_fee_amount": "value",
+              "visa_fee_currency": "value",
+              "application_method": "not_applicable",
+              "required_documents": "value",
+              "consulate_district": "not_applicable",
+              "entry_requirements": "value",
+              "special_conditions": "value",
+              "data_source": "value",
+              "source_url": "value",
+              "collected_at": "value",
+              "info_validity": "documented_absence",
+              "confidence_level": "value"
+            },
+            "completeness_strict": 1.0
+          },
+          "evidence": {
+            "cache_key": "CAN|CAN|TWN|tourism|default|unknown|v6",
+            "product_index": null,
+            "revision": "51a429bb9fb9312a970dc0f85726341ebdc1fe9b8e295c3b94318de128c87694",
+            "visa_type_name": "No visa needed",
+            "field_evidence": {
+              "travel_document_type": [],
+              "travel_document_country": [],
+              "destination_country": [],
+              "travel_purpose": [],
+              "visa_requirement": [
+                {
+                  "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*.",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "Visa-exempt entry only applies to foreign visitors holding formal passports (i.e., ordinary, official/service and diplomatic passports). Those holding emergency, temporary, or other informal passports or travel documents are ineligible, with the exception of those holding a Brunei Certificate of Identity.",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "visa_requirement_detail": [
+                {
+                  "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*.",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "Visa-exempt entry only applies to foreign visitors holding formal passports (i.e., ordinary, official/service and diplomatic passports). Those holding emergency, temporary, or other informal passports or travel documents are ineligible, with the exception of those holding a Brunei Certificate of Identity.",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "visa_type_name": [],
+              "validity_duration": [],
+              "validity_unit": [],
+              "max_stay_duration": [
+                {
+                  "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*.",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "Canadian and UK passport holders are eligible for the visa-exemption program with a duration of stay of 90 days which is extendable up to 180 days",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "max_stay_unit": [
+                {
+                  "quote": "Nationals of the following countries are eligible for the visa-exemption program, with a duration of stay of up to 90 days: Albania, Andorra, Australia, Austria, Belgium, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Eswatini*, Finland, France, Germany, Greece, Guatemala, Holy See, Hungary, Iceland, Ireland, Israel, Italy, Japan*, Kosovo, Republic of Korea, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Marshall Islands*, Monaco, Netherlands, New Zealand, North Macedonia*(effective until March 31, 2030), Norway, Palau, Paraguay, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Tuvalu*, United Kingdom*, and United States of America*.",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "Canadian and UK passport holders are eligible for the visa-exemption program with a duration of stay of 90 days which is extendable up to 180 days",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "entries": [],
+              "processing_min_days": [],
+              "processing_unit": [],
+              "visa_fee_amount": [],
+              "visa_fee_currency": [],
+              "application_method": [],
+              "required_documents": [
+                {
+                  "quote": "A passport with remaining validity of at least six months as of the date of entry",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "A confirmed return air/sea ticket or air/sea ticket and a visa for the next destination, and a confirmed seat reservation for departure flight.",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "consulate_district": [],
+              "entry_requirements": [
+                {
+                  "quote": "A passport with remaining validity of at least six months as of the date of entry",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "Within seven days prior to arriving in Taiwan (ROC), please complete an online immigration arrival card",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "A confirmed return air/sea ticket or air/sea ticket and a visa for the next destination, and a confirmed seat reservation for departure flight.",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "special_conditions": [
+                {
+                  "quote": "Canadian and UK passport holders are eligible for the visa-exemption program with a duration of stay of 90 days which is extendable up to 180 days",
+                  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "data_source": [],
+              "source_url": [],
+              "collected_at": [],
+              "info_validity": [],
+              "confidence_level": []
+            }
+          },
+          "quote_fields": 7
+        }
+      ]
+    },
+    {
+      "origin": "IND",
+      "destination": "ESP",
+      "products": [
+        {
+          "row": {
+            "travel_document_type": "ordinary_passport",
+            "travel_document_country": "IND",
+            "destination_country": "ESP",
+            "travel_purpose": "tourism",
+            "visa_requirement": "Visa Required in Advance",
+            "visa_requirement_detail": "Paper Visa",
+            "visa_type_name": "Single-entry tourist",
+            "validity_duration": null,
+            "validity_unit": null,
+            "max_stay_duration": 90,
+            "max_stay_unit": "Day",
+            "entries": "Single",
+            "processing_min_days": null,
+            "processing_unit": null,
+            "visa_fee_amount": 90,
+            "visa_fee_currency": "EUR",
+            "application_method": "Agency Service",
+            "required_documents": "Passport, recent photo, Schengen visa application form, cover letter, travel itinerary, accommodation proof, financial proof, travel insurance",
+            "consulate_district": null,
+            "entry_requirements": "Passport: EU Visa Code: issued within the previous ten years, with at least two blank pages and at least three months of validity after intended departure from Schengen (after the last intended departure for several visits). For an application handled by the Spanish Embassy in New Delhi, its checklist requires at least six months beyond the planned departure date, this is a consular-district filing requirement, not a replacement for the general EU minimum. Follow the checklist of the consular office competent for your residence. Onward travel: Confirmed return or onward travel reservation matching the requested visa validity. Accommodation: Hotel booking(s) for the entire stay, or a notarised Spanish invitation letter ('carta de invitación'). Funds: Original bank statements for the last 3–6 months, ITR/Form 16, salary slips or sponsorship letter, sufficient means are generally assessed around €95–€110 per person per day, often reduced by 50% if accommodation is prepaid, based on the current SMI/IPREM rate. Travel insurance required. Biometrics collected. Health: Schengen travel medical insurance (minimum €30,000 coverage, valid throughout the Schengen area)",
+            "special_conditions": "Children under six are exempt from the visa fee, children aged six to under twelve pay EUR45.. Applicants whose fingerprints were captured for a Schengen visa within the last 59 months may not need to provide biometrics again. Family members of EU/EEA/Swiss nationals may follow a facilitated, fee-exempt procedure with different documents. Diplomatic/official/service passport holders are subject to separate bilateral exemption rules. A valid Schengen visa issued by another member state generally permits short-stay entry to Spain. Processing time (as stated): Normally 15 calendar days from the day after submission; may extend to 45 calendar days if an interview or further documents are required.",
+            "data_source": "AI review",
+            "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+            "collected_at": "2026-09-12",
+            "info_validity": null,
+            "confidence_level": "Medium",
+            "corroborating_sources": [],
+            "cache_key": "IND|IND|ESP|tourism|default|unknown|v6",
+            "product_index": 0,
+            "evidence_revision": "417895d0feb2334cca3510ffbb80770a5837174dc350e34b524ddd2ac2bf78c6",
+            "status": "KIMI_UNCERTAIN",
+            "contradictions": [],
+            "source_check": "ai-quote",
+            "visa_fee_qualifier": null,
+            "max_stay_text": "Up to 90 days in any 180-day period across the Schengen area",
+            "validity_text": null,
+            "processing_text": "Normally 15 calendar days from the day after submission; may extend to 45 calendar days if an interview or further documents are required.",
+            "freshness_valid_until": "2026-09-19T13:29:41.469584",
+            "operator_released": true,
+            "held": false,
+            "route_held": false,
+            "publication_state": "published",
+            "publication_reason": null,
+            "review_required": false,
+            "field_status": {
+              "travel_document_type": "filled",
+              "travel_document_country": "filled",
+              "destination_country": "filled",
+              "travel_purpose": "filled",
+              "visa_requirement": "filled",
+              "visa_requirement_detail": "filled",
+              "visa_type_name": "filled",
+              "validity_duration": "missing",
+              "validity_unit": "missing",
+              "max_stay_duration": "filled",
+              "max_stay_unit": "filled",
+              "entries": "filled",
+              "processing_min_days": "optional-empty",
+              "processing_unit": "optional-empty",
+              "visa_fee_amount": "filled",
+              "visa_fee_currency": "filled",
+              "application_method": "filled",
+              "required_documents": "filled",
+              "consulate_district": "optional-empty",
+              "entry_requirements": "filled",
+              "special_conditions": "filled",
+              "data_source": "filled",
+              "source_url": "filled",
+              "collected_at": "filled",
+              "info_validity": "not-published",
+              "confidence_level": "filled"
+            },
+            "completeness": 0.8947,
+            "absence": {
+              "travel_document_type": "value",
+              "travel_document_country": "value",
+              "destination_country": "value",
+              "travel_purpose": "value",
+              "visa_requirement": "value",
+              "visa_type_name": "value",
+              "validity_duration": "undocumented_gap",
+              "validity_unit": "undocumented_gap",
+              "max_stay_duration": "value",
+              "max_stay_unit": "value",
+              "entries": "value",
+              "processing_min_days": "undocumented_gap",
+              "processing_unit": "undocumented_gap",
+              "visa_fee_amount": "value",
+              "visa_fee_currency": "value",
+              "application_method": "value",
+              "required_documents": "value",
+              "consulate_district": "undocumented_gap",
+              "entry_requirements": "value",
+              "special_conditions": "value",
+              "data_source": "value",
+              "source_url": "value",
+              "collected_at": "value",
+              "info_validity": "documented_absence",
+              "confidence_level": "value"
+            },
+            "completeness_strict": 0.8947
+          },
+          "evidence": {
+            "cache_key": "IND|IND|ESP|tourism|default|unknown|v6",
+            "product_index": 0,
+            "revision": "417895d0feb2334cca3510ffbb80770a5837174dc350e34b524ddd2ac2bf78c6",
+            "visa_type_name": "Single-entry tourist",
+            "field_evidence": {
+              "travel_document_type": [],
+              "travel_document_country": [],
+              "destination_country": [],
+              "travel_purpose": [],
+              "visa_requirement": [
+                {
+                  "quote": "issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806 . This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                },
+                {
+                  "quote": "ANNEX I LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE REQUIRED TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES 1. STATES Afghanistan Armenia Angola Azerbaijan Bangladesh Burkina Faso Bahrain Burundi Benin Bolivia Bhutan Botswana Belarus Belize Democratic Republic of the Congo Central African Republic Congo Côte d'Ivoire Cameroon China Cuba Cape Verde Djibouti Dominican Republic Algeria Ecuador Egypt Eritrea Eswatini Ethiopia Fiji Gabon Ghana The Gambia Guinea Equatorial Guinea Guinea-Bissau Guyana Haiti Indonesia India",
+                  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A02018R1806-20250203",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "visa_requirement_detail": [
+                {
+                  "quote": "issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806 . This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "visa_type_name": [],
+              "validity_duration": [],
+              "validity_unit": [],
+              "max_stay_duration": [
+                {
+                  "quote": "This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "max_stay_unit": [
+                {
+                  "quote": "This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "entries": [],
+              "processing_min_days": [
+                {
+                  "quote": "The legal period for reaching a decision is of 15 calendar days as of the day after the application submission date, but this period may be extended to 45 calendar days if an interview or additional documents are requested.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "processing_unit": [
+                {
+                  "quote": "The legal period for reaching a decision is of 15 calendar days as of the day after the application submission date, but this period may be extended to 45 calendar days if an interview or additional documents are requested.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "visa_fee_amount": [],
+              "visa_fee_currency": [],
+              "application_method": [
+                {
+                  "quote": "This Consular Office is competent to accept visa applications from third-country nationals residing in the consular district who are travelling to Spain as their only or main destination. Who can apply for a visa: Applications must be submitted in person. If the applicant is a minor, the application must be submitted by their legal representatives. ​Place of submission : Applications must be submitted through any BLS VAC with prior appointment through the following link .",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "required_documents": [],
+              "consulate_district": [],
+              "entry_requirements": [
+                {
+                  "quote": "The applicant shall present a valid travel document satisfying the following criteria:\n(a)\nits validity shall extend at least three months after the intended date of departure from the territory of the Member States or, in the case of several visits, after the last intended date of departure from the territory of the Member States. However, in a justified case of emergency, this obligation may be waived;\n(b)\nit shall contain at least two blank pages;\n(c)\nit shall have been issued within the previous 10 years.",
+                  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02009R0810-20240628",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "The passport must be valid for at least 6 months beyond the planned departure date from the Schengen territory. It must also contain at least 2 blank pages. Passports issued more than 10 years ago will not be accepted.\n\nThis Consular Office is competent to accept visa applications from third-country nationals residing in the consular district who are travelling to Spain as their only or main destination.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "special_conditions": [
+                {
+                  "quote": "The legal period for reaching a decision is of 15 calendar days as of the day after the application submission date, but this period may be extended to 45 calendar days if an interview or additional documents are requested.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "data_source": [],
+              "source_url": [],
+              "collected_at": [],
+              "info_validity": [],
+              "confidence_level": []
+            }
+          },
+          "quote_fields": 9
+        },
+        {
+          "row": {
+            "travel_document_type": "ordinary_passport",
+            "travel_document_country": "IND",
+            "destination_country": "ESP",
+            "travel_purpose": "tourism",
+            "visa_requirement": "Visa Required in Advance",
+            "visa_requirement_detail": "Paper Visa",
+            "visa_type_name": "Double-entry tourist",
+            "validity_duration": null,
+            "validity_unit": null,
+            "max_stay_duration": 90,
+            "max_stay_unit": "Day",
+            "entries": "Multiple",
+            "processing_min_days": null,
+            "processing_unit": null,
+            "visa_fee_amount": 90,
+            "visa_fee_currency": "EUR",
+            "application_method": "Agency Service",
+            "required_documents": "Passport, recent photo, Schengen visa application form, cover letter, travel itinerary, accommodation proof, financial proof, travel insurance",
+            "consulate_district": null,
+            "entry_requirements": "Passport: EU Visa Code: issued within the previous ten years, with at least two blank pages and at least three months of validity after intended departure from Schengen (after the last intended departure for several visits). For an application handled by the Spanish Embassy in New Delhi, its checklist requires at least six months beyond the planned departure date, this is a consular-district filing requirement, not a replacement for the general EU minimum. Follow the checklist of the consular office competent for your residence. Onward travel: Confirmed return or onward travel reservation matching the requested visa validity. Accommodation: Hotel booking(s) for the entire stay, or a notarised Spanish invitation letter ('carta de invitación'). Funds: Original bank statements for the last 3–6 months, ITR/Form 16, salary slips or sponsorship letter, sufficient means are generally assessed around €95–€110 per person per day, often reduced by 50% if accommodation is prepaid, based on the current SMI/IPREM rate. Travel insurance required. Biometrics collected. Health: Schengen travel medical insurance (minimum €30,000 coverage, valid throughout the Schengen area)",
+            "special_conditions": "Children under six are exempt from the visa fee, children aged six to under twelve pay EUR45.. Applicants whose fingerprints were captured for a Schengen visa within the last 59 months may not need to provide biometrics again. Family members of EU/EEA/Swiss nationals may follow a facilitated, fee-exempt procedure with different documents. Diplomatic/official/service passport holders are subject to separate bilateral exemption rules. A valid Schengen visa issued by another member state generally permits short-stay entry to Spain. Processing time (as stated): Normally 15 calendar days from the day after submission; may extend to 45 calendar days if an interview or further documents are required.",
+            "data_source": "AI review",
+            "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+            "collected_at": "2026-09-12",
+            "info_validity": null,
+            "confidence_level": "Medium",
+            "corroborating_sources": [],
+            "cache_key": "IND|IND|ESP|tourism|default|unknown|v6",
+            "product_index": 1,
+            "evidence_revision": "21658d786205ab616477c626a1bc37730511a7e6485380c040d610dc42df49af",
+            "status": "KIMI_UNCERTAIN",
+            "contradictions": [],
+            "source_check": "ai-quote",
+            "visa_fee_qualifier": null,
+            "max_stay_text": "Up to 90 days in any 180-day period across the Schengen area",
+            "validity_text": null,
+            "processing_text": "Normally 15 calendar days from the day after submission; may extend to 45 calendar days if an interview or further documents are required.",
+            "freshness_valid_until": "2026-09-19T13:29:41.469584",
+            "operator_released": true,
+            "held": false,
+            "route_held": false,
+            "publication_state": "published",
+            "publication_reason": null,
+            "review_required": false,
+            "field_status": {
+              "travel_document_type": "filled",
+              "travel_document_country": "filled",
+              "destination_country": "filled",
+              "travel_purpose": "filled",
+              "visa_requirement": "filled",
+              "visa_requirement_detail": "filled",
+              "visa_type_name": "filled",
+              "validity_duration": "missing",
+              "validity_unit": "missing",
+              "max_stay_duration": "filled",
+              "max_stay_unit": "filled",
+              "entries": "filled",
+              "processing_min_days": "optional-empty",
+              "processing_unit": "optional-empty",
+              "visa_fee_amount": "filled",
+              "visa_fee_currency": "filled",
+              "application_method": "filled",
+              "required_documents": "filled",
+              "consulate_district": "optional-empty",
+              "entry_requirements": "filled",
+              "special_conditions": "filled",
+              "data_source": "filled",
+              "source_url": "filled",
+              "collected_at": "filled",
+              "info_validity": "not-published",
+              "confidence_level": "filled"
+            },
+            "completeness": 0.8947,
+            "absence": {
+              "travel_document_type": "value",
+              "travel_document_country": "value",
+              "destination_country": "value",
+              "travel_purpose": "value",
+              "visa_requirement": "value",
+              "visa_type_name": "value",
+              "validity_duration": "undocumented_gap",
+              "validity_unit": "undocumented_gap",
+              "max_stay_duration": "value",
+              "max_stay_unit": "value",
+              "entries": "value",
+              "processing_min_days": "undocumented_gap",
+              "processing_unit": "undocumented_gap",
+              "visa_fee_amount": "value",
+              "visa_fee_currency": "value",
+              "application_method": "value",
+              "required_documents": "value",
+              "consulate_district": "undocumented_gap",
+              "entry_requirements": "value",
+              "special_conditions": "value",
+              "data_source": "value",
+              "source_url": "value",
+              "collected_at": "value",
+              "info_validity": "documented_absence",
+              "confidence_level": "value"
+            },
+            "completeness_strict": 0.8947
+          },
+          "evidence": {
+            "cache_key": "IND|IND|ESP|tourism|default|unknown|v6",
+            "product_index": 1,
+            "revision": "21658d786205ab616477c626a1bc37730511a7e6485380c040d610dc42df49af",
+            "visa_type_name": "Double-entry tourist",
+            "field_evidence": {
+              "travel_document_type": [],
+              "travel_document_country": [],
+              "destination_country": [],
+              "travel_purpose": [],
+              "visa_requirement": [
+                {
+                  "quote": "issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806 . This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                },
+                {
+                  "quote": "ANNEX I LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE REQUIRED TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES 1. STATES Afghanistan Armenia Angola Azerbaijan Bangladesh Burkina Faso Bahrain Burundi Benin Bolivia Bhutan Botswana Belarus Belize Democratic Republic of the Congo Central African Republic Congo Côte d'Ivoire Cameroon China Cuba Cape Verde Djibouti Dominican Republic Algeria Ecuador Egypt Eritrea Eswatini Ethiopia Fiji Gabon Ghana The Gambia Guinea Equatorial Guinea Guinea-Bissau Guyana Haiti Indonesia India",
+                  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A02018R1806-20250203",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "visa_requirement_detail": [
+                {
+                  "quote": "issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806 . This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "visa_type_name": [],
+              "validity_duration": [],
+              "validity_unit": [],
+              "max_stay_duration": [
+                {
+                  "quote": "This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "max_stay_unit": [
+                {
+                  "quote": "This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "entries": [],
+              "processing_min_days": [
+                {
+                  "quote": "The legal period for reaching a decision is of 15 calendar days as of the day after the application submission date, but this period may be extended to 45 calendar days if an interview or additional documents are requested.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "processing_unit": [
+                {
+                  "quote": "The legal period for reaching a decision is of 15 calendar days as of the day after the application submission date, but this period may be extended to 45 calendar days if an interview or additional documents are requested.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "visa_fee_amount": [],
+              "visa_fee_currency": [],
+              "application_method": [
+                {
+                  "quote": "This Consular Office is competent to accept visa applications from third-country nationals residing in the consular district who are travelling to Spain as their only or main destination. Who can apply for a visa: Applications must be submitted in person. If the applicant is a minor, the application must be submitted by their legal representatives. ​Place of submission : Applications must be submitted through any BLS VAC with prior appointment through the following link .",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "required_documents": [],
+              "consulate_district": [],
+              "entry_requirements": [
+                {
+                  "quote": "The applicant shall present a valid travel document satisfying the following criteria:\n(a)\nits validity shall extend at least three months after the intended date of departure from the territory of the Member States or, in the case of several visits, after the last intended date of departure from the territory of the Member States. However, in a justified case of emergency, this obligation may be waived;\n(b)\nit shall contain at least two blank pages;\n(c)\nit shall have been issued within the previous 10 years.",
+                  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02009R0810-20240628",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "The passport must be valid for at least 6 months beyond the planned departure date from the Schengen territory. It must also contain at least 2 blank pages. Passports issued more than 10 years ago will not be accepted.\n\nThis Consular Office is competent to accept visa applications from third-country nationals residing in the consular district who are travelling to Spain as their only or main destination.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "special_conditions": [
+                {
+                  "quote": "The legal period for reaching a decision is of 15 calendar days as of the day after the application submission date, but this period may be extended to 45 calendar days if an interview or additional documents are requested.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "data_source": [],
+              "source_url": [],
+              "collected_at": [],
+              "info_validity": [],
+              "confidence_level": []
+            }
+          },
+          "quote_fields": 9
+        },
+        {
+          "row": {
+            "travel_document_type": "ordinary_passport",
+            "travel_document_country": "IND",
+            "destination_country": "ESP",
+            "travel_purpose": "tourism",
+            "visa_requirement": "Visa Required in Advance",
+            "visa_requirement_detail": "Paper Visa",
+            "visa_type_name": "Multiple-entry tourist",
+            "validity_duration": null,
+            "validity_unit": null,
+            "max_stay_duration": 90,
+            "max_stay_unit": "Day",
+            "entries": "Multiple",
+            "processing_min_days": null,
+            "processing_unit": null,
+            "visa_fee_amount": 90,
+            "visa_fee_currency": "EUR",
+            "application_method": "Agency Service",
+            "required_documents": "Passport, recent photo, Schengen visa application form, cover letter, travel itinerary, accommodation proof, financial proof, travel insurance",
+            "consulate_district": null,
+            "entry_requirements": "Passport: EU Visa Code: issued within the previous ten years, with at least two blank pages and at least three months of validity after intended departure from Schengen (after the last intended departure for several visits). For an application handled by the Spanish Embassy in New Delhi, its checklist requires at least six months beyond the planned departure date, this is a consular-district filing requirement, not a replacement for the general EU minimum. Follow the checklist of the consular office competent for your residence. Onward travel: Confirmed return or onward travel reservation matching the requested visa validity. Accommodation: Hotel booking(s) for the entire stay, or a notarised Spanish invitation letter ('carta de invitación'). Funds: Original bank statements for the last 3–6 months, ITR/Form 16, salary slips or sponsorship letter, sufficient means are generally assessed around €95–€110 per person per day, often reduced by 50% if accommodation is prepaid, based on the current SMI/IPREM rate. Travel insurance required. Biometrics collected. Health: Schengen travel medical insurance (minimum €30,000 coverage, valid throughout the Schengen area)",
+            "special_conditions": "Children under six are exempt from the visa fee, children aged six to under twelve pay EUR45.. Applicants whose fingerprints were captured for a Schengen visa within the last 59 months may not need to provide biometrics again. Family members of EU/EEA/Swiss nationals may follow a facilitated, fee-exempt procedure with different documents. Diplomatic/official/service passport holders are subject to separate bilateral exemption rules. A valid Schengen visa issued by another member state generally permits short-stay entry to Spain. Processing time (as stated): Normally 15 calendar days from the day after submission; may extend to 45 calendar days if an interview or further documents are required.",
+            "data_source": "AI review",
+            "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+            "collected_at": "2026-09-12",
+            "info_validity": null,
+            "confidence_level": "Medium",
+            "corroborating_sources": [],
+            "cache_key": "IND|IND|ESP|tourism|default|unknown|v6",
+            "product_index": 2,
+            "evidence_revision": "54c0b159bb6db6617696fff60419df4e2a385ed9af53d02a8bbfc20af8717597",
+            "status": "KIMI_UNCERTAIN",
+            "contradictions": [],
+            "source_check": "ai-quote",
+            "visa_fee_qualifier": null,
+            "max_stay_text": "Up to 90 days in any 180-day period across the Schengen area",
+            "validity_text": null,
+            "processing_text": "Normally 15 calendar days from the day after submission; may extend to 45 calendar days if an interview or further documents are required.",
+            "freshness_valid_until": "2026-09-19T13:29:41.469584",
+            "operator_released": true,
+            "held": false,
+            "route_held": false,
+            "publication_state": "published",
+            "publication_reason": null,
+            "review_required": false,
+            "field_status": {
+              "travel_document_type": "filled",
+              "travel_document_country": "filled",
+              "destination_country": "filled",
+              "travel_purpose": "filled",
+              "visa_requirement": "filled",
+              "visa_requirement_detail": "filled",
+              "visa_type_name": "filled",
+              "validity_duration": "missing",
+              "validity_unit": "missing",
+              "max_stay_duration": "filled",
+              "max_stay_unit": "filled",
+              "entries": "filled",
+              "processing_min_days": "optional-empty",
+              "processing_unit": "optional-empty",
+              "visa_fee_amount": "filled",
+              "visa_fee_currency": "filled",
+              "application_method": "filled",
+              "required_documents": "filled",
+              "consulate_district": "optional-empty",
+              "entry_requirements": "filled",
+              "special_conditions": "filled",
+              "data_source": "filled",
+              "source_url": "filled",
+              "collected_at": "filled",
+              "info_validity": "not-published",
+              "confidence_level": "filled"
+            },
+            "completeness": 0.8947,
+            "absence": {
+              "travel_document_type": "value",
+              "travel_document_country": "value",
+              "destination_country": "value",
+              "travel_purpose": "value",
+              "visa_requirement": "value",
+              "visa_type_name": "value",
+              "validity_duration": "undocumented_gap",
+              "validity_unit": "undocumented_gap",
+              "max_stay_duration": "value",
+              "max_stay_unit": "value",
+              "entries": "value",
+              "processing_min_days": "undocumented_gap",
+              "processing_unit": "undocumented_gap",
+              "visa_fee_amount": "value",
+              "visa_fee_currency": "value",
+              "application_method": "value",
+              "required_documents": "value",
+              "consulate_district": "undocumented_gap",
+              "entry_requirements": "value",
+              "special_conditions": "value",
+              "data_source": "value",
+              "source_url": "value",
+              "collected_at": "value",
+              "info_validity": "documented_absence",
+              "confidence_level": "value"
+            },
+            "completeness_strict": 0.8947
+          },
+          "evidence": {
+            "cache_key": "IND|IND|ESP|tourism|default|unknown|v6",
+            "product_index": 2,
+            "revision": "54c0b159bb6db6617696fff60419df4e2a385ed9af53d02a8bbfc20af8717597",
+            "visa_type_name": "Multiple-entry tourist",
+            "field_evidence": {
+              "travel_document_type": [],
+              "travel_document_country": [],
+              "destination_country": [],
+              "travel_purpose": [],
+              "visa_requirement": [
+                {
+                  "quote": "issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806 . This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                },
+                {
+                  "quote": "ANNEX I LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE REQUIRED TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES 1. STATES Afghanistan Armenia Angola Azerbaijan Bangladesh Burkina Faso Bahrain Burundi Benin Bolivia Bhutan Botswana Belarus Belize Democratic Republic of the Congo Central African Republic Congo Côte d'Ivoire Cameroon China Cuba Cape Verde Djibouti Dominican Republic Algeria Ecuador Egypt Eritrea Eswatini Ethiopia Fiji Gabon Ghana The Gambia Guinea Equatorial Guinea Guinea-Bissau Guyana Haiti Indonesia India",
+                  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A02018R1806-20250203",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "visa_requirement_detail": [
+                {
+                  "quote": "issued to third-country nationals listed in Annex I of Regulation (EU) 2018/1806 . This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities. It also allows transit through the territory and airports.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "visa_type_name": [],
+              "validity_duration": [],
+              "validity_unit": [],
+              "max_stay_duration": [
+                {
+                  "quote": "This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "max_stay_unit": [
+                {
+                  "quote": "This visa allows the holder to stay in the Schengen area for up to 90 days (in any 180-day period) for the purposes of tourism, business, visiting family, medical treatment, studies, training placements or volunteer activities that last under 3 months, or for other non-gainful activities.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "entries": [],
+              "processing_min_days": [
+                {
+                  "quote": "The legal period for reaching a decision is of 15 calendar days as of the day after the application submission date, but this period may be extended to 45 calendar days if an interview or additional documents are requested.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "processing_unit": [
+                {
+                  "quote": "The legal period for reaching a decision is of 15 calendar days as of the day after the application submission date, but this period may be extended to 45 calendar days if an interview or additional documents are requested.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "visa_fee_amount": [],
+              "visa_fee_currency": [],
+              "application_method": [
+                {
+                  "quote": "This Consular Office is competent to accept visa applications from third-country nationals residing in the consular district who are travelling to Spain as their only or main destination. Who can apply for a visa: Applications must be submitted in person. If the applicant is a minor, the application must be submitted by their legal representatives. ​Place of submission : Applications must be submitted through any BLS VAC with prior appointment through the following link .",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "required_documents": [],
+              "consulate_district": [],
+              "entry_requirements": [
+                {
+                  "quote": "The applicant shall present a valid travel document satisfying the following criteria:\n(a)\nits validity shall extend at least three months after the intended date of departure from the territory of the Member States or, in the case of several visits, after the last intended date of departure from the territory of the Member States. However, in a justified case of emergency, this obligation may be waived;\n(b)\nit shall contain at least two blank pages;\n(c)\nit shall have been issued within the previous 10 years.",
+                  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02009R0810-20240628",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                },
+                {
+                  "quote": "The passport must be valid for at least 6 months beyond the planned departure date from the Schengen territory. It must also contain at least 2 blank pages. Passports issued more than 10 years ago will not be accepted.\n\nThis Consular Office is competent to accept visa applications from third-country nationals residing in the consular district who are travelling to Spain as their only or main destination.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-15"
+                }
+              ],
+              "special_conditions": [
+                {
+                  "quote": "The legal period for reaching a decision is of 15 calendar days as of the day after the application submission date, but this period may be extended to 45 calendar days if an interview or additional documents are requested.",
+                  "source_url": "https://www.exteriores.gob.es/Embajadas/nuevadelhi/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+                  "kind": "source_review",
+                  "verified_at": "2026-09-12"
+                }
+              ],
+              "data_source": [],
+              "source_url": [],
+              "collected_at": [],
+              "info_validity": [],
+              "confidence_level": []
+            }
+          },
+          "quote_fields": 9
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "url": "https://ellis-visa.com/api/database/records?nationality=USA&destination=JPN&purpose=tourism&document=ordinary_passport",
+      "ms": 423
+    },
+    {
+      "method": "GET",
+      "url": "https://ellis-visa.com/api/database/records?nationality=CAN&destination=TWN&purpose=tourism&document=ordinary_passport",
+      "ms": 484
+    },
+    {
+      "method": "GET",
+      "url": "https://ellis-visa.com/api/database/records?nationality=IND&destination=ESP&purpose=tourism&document=ordinary_passport",
+      "ms": 687
+    },
+    {
+      "method": "GET",
+      "url": "https://ellis-visa.com/api/database/record-evidence?cache_key=USA%7CUSA%7CJPN%7Ctourism%7Cdefault%7Cunknown%7Cv6&revision=dc6ed9162d1a556d9ea46a3851ad38e902e70cbe09f795613bb291a2d5eb843a",
+      "ms": 383
+    },
+    {
+      "method": "GET",
+      "url": "https://ellis-visa.com/api/database/record-evidence?cache_key=CAN%7CCAN%7CTWN%7Ctourism%7Cdefault%7Cunknown%7Cv6&revision=51a429bb9fb9312a970dc0f85726341ebdc1fe9b8e295c3b94318de128c87694",
+      "ms": 381
+    },
+    {
+      "method": "GET",
+      "url": "https://ellis-visa.com/api/database/record-evidence?cache_key=IND%7CIND%7CESP%7Ctourism%7Cdefault%7Cunknown%7Cv6&revision=417895d0feb2334cca3510ffbb80770a5837174dc350e34b524ddd2ac2bf78c6&product_index=0",
+      "ms": 451
+    },
+    {
+      "method": "GET",
+      "url": "https://ellis-visa.com/api/database/record-evidence?cache_key=IND%7CIND%7CESP%7Ctourism%7Cdefault%7Cunknown%7Cv6&revision=21658d786205ab616477c626a1bc37730511a7e6485380c040d610dc42df49af&product_index=1",
+      "ms": 467
+    },
+    {
+      "method": "GET",
+      "url": "https://ellis-visa.com/api/database/record-evidence?cache_key=IND%7CIND%7CESP%7Ctourism%7Cdefault%7Cunknown%7Cv6&revision=54c0b159bb6db6617696fff60419df4e2a385ed9af53d02a8bbfc20af8717597&product_index=2",
+      "ms": 501
+    }
+  ],
+  "mutations": 0,
+  "passed": true
+}

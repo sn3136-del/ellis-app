@@ -1,0 +1,111 @@
+{
+  "state": "completed",
+  "at": "2026-09-15T20:33:46.675595+00:00",
+  "actor": "AI independent source review (guard_review)",
+  "packet_sha256": "8dc5463690854dbbf91c30390298f19059ff7f1983e4048ed79383a45a37b9f7",
+  "manifest_sha256": "4d8c0866fd2b04878ce6fb60d9053ebca0cdc30a2efed932dcba3751c8fc658a",
+  "transitions": [
+    {
+      "id": "1c93bac700e34875b823e8ae6ce238e9",
+      "from": "corrected",
+      "to": "reviewed",
+      "payload": {
+        "status": "reviewed",
+        "expected_issue_sha256": "6c6ef52f62518d7e04e7dd58ce5608269089f83863bdb437fe4d627bc8c4308d",
+        "resolution": "Independently checked the already corrected Canadian ordinary-passport tourism record against current BOCA instructions: the online arrival card is due within seven days before arrival, and the document list includes the confirmed return/onward ticket, next-destination visa when travelling onward, and confirmed departure seat reservation. The current exact quotes are retained with their official link. This review covers those corrected fields only.",
+        "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html"
+      },
+      "response": {
+        "ok": true,
+        "id": "1c93bac700e34875b823e8ae6ce238e9",
+        "status": "reviewed",
+        "resolution": "Independently checked the already corrected Canadian ordinary-passport tourism record against current BOCA instructions: the online arrival card is due within seven days before arrival, and the document list includes the confirmed return/onward ticket, next-destination visa when travelling onward, and confirmed departure seat reservation. The current exact quotes are retained with their official link. This review covers those corrected fields only."
+      }
+    },
+    {
+      "id": "1c93bac700e34875b823e8ae6ce238e9",
+      "from": "reviewed",
+      "to": "published",
+      "payload": {
+        "status": "published",
+        "expected_issue_sha256": "aabc6bd13b0c93f70dbb5fcb2f35a798abb044fd8edc7670565b1353d22ebef5",
+        "resolution": "Independently checked the already corrected Canadian ordinary-passport tourism record against current BOCA instructions: the online arrival card is due within seven days before arrival, and the document list includes the confirmed return/onward ticket, next-destination visa when travelling onward, and confirmed departure seat reservation. The current exact quotes are retained with their official link. This review covers those corrected fields only.",
+        "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html"
+      },
+      "response": {
+        "ok": true,
+        "id": "1c93bac700e34875b823e8ae6ce238e9",
+        "status": "published",
+        "resolution": "Independently checked the already corrected Canadian ordinary-passport tourism record against current BOCA instructions: the online arrival card is due within seven days before arrival, and the document list includes the confirmed return/onward ticket, next-destination visa when travelling onward, and confirmed departure seat reservation. The current exact quotes are retained with their official link. This review covers those corrected fields only."
+      }
+    },
+    {
+      "id": "f331fc1ae8f94c9cb22cc180bccc8bf8",
+      "from": "corrected",
+      "to": "reviewed",
+      "payload": {
+        "status": "reviewed",
+        "expected_issue_sha256": "23b13ec317e1dd4a4de583617022e74a74905c69b5c6aa089137e70f58cf5b68",
+        "resolution": "Independently checked the already corrected arrival-card name/window and the visa-product note against current BOCA text: Canadian and UK passport holders both have the 90-day visa-exempt stay extendable up to 180 days. The obsolete claim that extension is unique to Canadians is absent. This review covers the changed note and arrival-card fields only; it does not certify unchanged fee or multiple-entry labels.",
+        "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html"
+      },
+      "response": {
+        "ok": true,
+        "id": "f331fc1ae8f94c9cb22cc180bccc8bf8",
+        "status": "reviewed",
+        "resolution": "Independently checked the already corrected arrival-card name/window and the visa-product note against current BOCA text: Canadian and UK passport holders both have the 90-day visa-exempt stay extendable up to 180 days. The obsolete claim that extension is unique to Canadians is absent. This review covers the changed note and arrival-card fields only; it does not certify unchanged fee or multiple-entry labels."
+      }
+    },
+    {
+      "id": "f331fc1ae8f94c9cb22cc180bccc8bf8",
+      "from": "reviewed",
+      "to": "published",
+      "payload": {
+        "status": "published",
+        "expected_issue_sha256": "e75d5f1fb01b043ad355faa3b3e7266ff1323eb9b337577cc30c21a987008df0",
+        "resolution": "Independently checked the already corrected arrival-card name/window and the visa-product note against current BOCA text: Canadian and UK passport holders both have the 90-day visa-exempt stay extendable up to 180 days. The obsolete claim that extension is unique to Canadians is absent. This review covers the changed note and arrival-card fields only; it does not certify unchanged fee or multiple-entry labels.",
+        "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html"
+      },
+      "response": {
+        "ok": true,
+        "id": "f331fc1ae8f94c9cb22cc180bccc8bf8",
+        "status": "published",
+        "resolution": "Independently checked the already corrected arrival-card name/window and the visa-product note against current BOCA text: Canadian and UK passport holders both have the 90-day visa-exempt stay extendable up to 180 days. The obsolete claim that extension is unique to Canadians is absent. This review covers the changed note and arrival-card fields only; it does not certify unchanged fee or multiple-entry labels."
+      }
+    },
+    {
+      "id": "15e1d0c86d2f423d9bb0bbe63a83e113",
+      "from": "corrected",
+      "to": "reviewed",
+      "payload": {
+        "status": "reviewed",
+        "expected_issue_sha256": "082dbb63c0bcec8485740b1d2a69defc8e0a763a583ad304d22cbf4283344c12",
+        "resolution": "Independently checked the already corrected onward-travel condition against current BOCA text: confirmed return air/sea ticket, or onward ticket plus next-destination visa, together with a confirmed departure seat reservation. The complete condition is currently saved and quoted. This review covers that corrected field only.",
+        "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html"
+      },
+      "response": {
+        "ok": true,
+        "id": "15e1d0c86d2f423d9bb0bbe63a83e113",
+        "status": "reviewed",
+        "resolution": "Independently checked the already corrected onward-travel condition against current BOCA text: confirmed return air/sea ticket, or onward ticket plus next-destination visa, together with a confirmed departure seat reservation. The complete condition is currently saved and quoted. This review covers that corrected field only."
+      }
+    },
+    {
+      "id": "15e1d0c86d2f423d9bb0bbe63a83e113",
+      "from": "reviewed",
+      "to": "published",
+      "payload": {
+        "status": "published",
+        "expected_issue_sha256": "680789a6b919357ba829e2d79adfcef5eb6318ac30beddac5f8163ae2ba97055",
+        "resolution": "Independently checked the already corrected onward-travel condition against current BOCA text: confirmed return air/sea ticket, or onward ticket plus next-destination visa, together with a confirmed departure seat reservation. The complete condition is currently saved and quoted. This review covers that corrected field only.",
+        "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html"
+      },
+      "response": {
+        "ok": true,
+        "id": "15e1d0c86d2f423d9bb0bbe63a83e113",
+        "status": "published",
+        "resolution": "Independently checked the already corrected onward-travel condition against current BOCA text: confirmed return air/sea ticket, or onward ticket plus next-destination visa, together with a confirmed departure seat reservation. The complete condition is currently saved and quoted. This review covers that corrected field only."
+      }
+    }
+  ]
+}

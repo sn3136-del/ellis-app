@@ -1,0 +1,210 @@
+{
+  "state": "completed",
+  "at": "2026-09-15T20:07:45.055492+00:00",
+  "data_receipt": "/root/ellis-held-routes-20260915a/live-manifest-receipt.json",
+  "baseline_manifest": "/root/ellis-held-routes-20260915a/live-manifest.json",
+  "initial_revisions": {
+    "c508aa9f560040009bac6ed5a17ab62f": "f9e8e2102e3a511ac938aac25d17f098f53c1fc839a0f07277c346b8f344a59c",
+    "c19073705a5b42d1b6fe16dbc53aca2b": "979b4bdac6bf679ad8ce039af5e91a26a91a7d6745f0eb46e174cc7273112d5b",
+    "a10926789eb34ade9888fa57ba50d9dc": "38a6955a314fb4b35544a9e9955458faa7f08dfdee1cd992b8e40b6596fefe71",
+    "fda4b3c5513b45ba83d82e0cd7ef4289": "dee4a4be19e976250cca4485ababe77ec568378dced10d301411731f85af5540",
+    "eb8008c164714945a7ebe07bd81b3c9f": "0ab3575edd15d3f7e50c1758d1e2f7a8153ddcae0a7b492597d55d08d9b4c917"
+  },
+  "transitions": [
+    {
+      "id": "fda4b3c5513b45ba83d82e0cd7ef4289",
+      "from": "open",
+      "to": "acknowledged",
+      "actor": "AI source review (guard_review)",
+      "payload": {
+        "resolution": "Official-source correction prepared and applied by AI source review.",
+        "status": "acknowledged",
+        "expected_issue_sha256": "dee4a4be19e976250cca4485ababe77ec568378dced10d301411731f85af5540"
+      },
+      "response": {
+        "ok": true,
+        "id": "fda4b3c5513b45ba83d82e0cd7ef4289",
+        "status": "acknowledged",
+        "resolution": "Official-source correction prepared and applied by AI source review."
+      }
+    },
+    {
+      "id": "fda4b3c5513b45ba83d82e0cd7ef4289",
+      "from": "acknowledged",
+      "to": "corrected",
+      "actor": "AI source review (guard_review)",
+      "payload": {
+        "resolution": "Published official visa fee INR500 for Indian nationals applying in India from 1 July 2026, for single and multiple visas. Separate VFS service charges are excluded. Exact product fee proof and residence scope retained.",
+        "source_url": "https://www.in.emb-japan.go.jp/itpr_en/Visa.html",
+        "status": "corrected",
+        "expected_issue_sha256": "f712cd2c6b62c6921705f5e76aaaca86b1ae3d1a6869cb06cbb83eec82c6ca14"
+      },
+      "response": {
+        "ok": true,
+        "id": "fda4b3c5513b45ba83d82e0cd7ef4289",
+        "status": "corrected",
+        "resolution": "Published official visa fee INR500 for Indian nationals applying in India from 1 July 2026, for single and multiple visas. Separate VFS service charges are excluded. Exact product fee proof and residence scope retained."
+      }
+    },
+    {
+      "id": "fda4b3c5513b45ba83d82e0cd7ef4289",
+      "from": "corrected",
+      "to": "reviewed",
+      "actor": "AI independent source review",
+      "payload": {
+        "resolution": "Published official visa fee INR500 for Indian nationals applying in India from 1 July 2026, for single and multiple visas. Separate VFS service charges are excluded. Exact product fee proof and residence scope retained. Independently checked against the saved current official-source captures and installed field diffs.",
+        "status": "reviewed",
+        "expected_issue_sha256": "c89ca52d8163bff5fc4bfa950bbe91ebb0d6f7147c81f3fa9a5677cbd992cb18"
+      },
+      "response": {
+        "ok": true,
+        "id": "fda4b3c5513b45ba83d82e0cd7ef4289",
+        "status": "reviewed",
+        "resolution": "Published official visa fee INR500 for Indian nationals applying in India from 1 July 2026, for single and multiple visas. Separate VFS service charges are excluded. Exact product fee proof and residence scope retained. Independently checked against the saved current official-source captures and installed field diffs."
+      }
+    },
+    {
+      "id": "fda4b3c5513b45ba83d82e0cd7ef4289",
+      "from": "reviewed",
+      "to": "published",
+      "actor": "AI independent source review",
+      "payload": {
+        "resolution": "Published official visa fee INR500 for Indian nationals applying in India from 1 July 2026, for single and multiple visas. Separate VFS service charges are excluded. Exact product fee proof and residence scope retained.",
+        "status": "published",
+        "expected_issue_sha256": "cde72c229f270f6fa29e408a8bdf24c0d48620c9802f94b5dbde1fcf025181c5"
+      },
+      "response": {
+        "ok": true,
+        "id": "fda4b3c5513b45ba83d82e0cd7ef4289",
+        "status": "published",
+        "resolution": "Published official visa fee INR500 for Indian nationals applying in India from 1 July 2026, for single and multiple visas. Separate VFS service charges are excluded. Exact product fee proof and residence scope retained."
+      }
+    },
+    {
+      "id": "a10926789eb34ade9888fa57ba50d9dc",
+      "from": "open",
+      "to": "dismissed",
+      "actor": "AI independent source review",
+      "payload": {
+        "resolution": "The appointment portion reported false versus false and requires no change: the official page says no prior appointment is needed. The genuine missing-fee portion was corrected and independently reviewed under fda4b3c5513b45ba83d82e0cd7ef4289. This overlapping report is superseded; the correct appointment value is retained.",
+        "source_url": "https://www.in.emb-japan.go.jp/itpr_en/Visa.html",
+        "source_excerpt": "Submit your application through VFS. (No prior appointment is needed.)\nFor Indian Nationals\nSingle or Multiple visa: 500 INR",
+        "status": "dismissed",
+        "expected_issue_sha256": "38a6955a314fb4b35544a9e9955458faa7f08dfdee1cd992b8e40b6596fefe71"
+      },
+      "response": {
+        "ok": true,
+        "id": "a10926789eb34ade9888fa57ba50d9dc",
+        "status": "dismissed",
+        "resolution": "The appointment portion reported false versus false and requires no change: the official page says no prior appointment is needed. The genuine missing-fee portion was corrected and independently reviewed under fda4b3c5513b45ba83d82e0cd7ef4289. This overlapping report is superseded; the correct appointment value is retained."
+      }
+    },
+    {
+      "id": "c19073705a5b42d1b6fe16dbc53aca2b",
+      "from": "open",
+      "to": "dismissed",
+      "actor": "AI independent source review",
+      "payload": {
+        "resolution": "The general EU Visa Code minimum remains three months after intended departure. The New Delhi embassy six-month checklist is a distinct consular-district filing condition, now explicitly described with its official citation and jurisdiction qualification. The report incorrectly proposed replacing the general structured rule with one local condition; neither official statement has been deleted.",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02009R0810-20240628",
+        "source_excerpt": "its validity shall extend at least three months after the intended date of departure from the territory of the Member States",
+        "status": "dismissed",
+        "expected_issue_sha256": "979b4bdac6bf679ad8ce039af5e91a26a91a7d6745f0eb46e174cc7273112d5b"
+      },
+      "response": {
+        "ok": true,
+        "id": "c19073705a5b42d1b6fe16dbc53aca2b",
+        "status": "dismissed",
+        "resolution": "The general EU Visa Code minimum remains three months after intended departure. The New Delhi embassy six-month checklist is a distinct consular-district filing condition, now explicitly described with its official citation and jurisdiction qualification. The report incorrectly proposed replacing the general structured rule with one local condition; neither official statement has been deleted."
+      }
+    },
+    {
+      "id": "c508aa9f560040009bac6ed5a17ab62f",
+      "from": "open",
+      "to": "dismissed",
+      "actor": "AI independent source review",
+      "payload": {
+        "resolution": "The passport-validity description now explicitly presents both current official statements: Vietnam’s Embassy in Canada says six months on arrival; Canada’s advisory for regular Canadian passports says six months after expected departure. Canadians are advised to plan for the longer period and confirm with their carrier/authorities. The arrival-based structured destination note is retained; the stricter Canadian advice is no longer omitted. This qualified representation does not claim that either source withdrew its wording.",
+        "source_url": "https://vietnamembassy.ca/consular-services/visa-application/",
+        "source_excerpt": "Your Passport needs to be valid for at least 6 months upon your arrival in Vietnam.",
+        "status": "dismissed",
+        "expected_issue_sha256": "f9e8e2102e3a511ac938aac25d17f098f53c1fc839a0f07277c346b8f344a59c"
+      },
+      "response": {
+        "ok": true,
+        "id": "c508aa9f560040009bac6ed5a17ab62f",
+        "status": "dismissed",
+        "resolution": "The passport-validity description now explicitly presents both current official statements: Vietnam’s Embassy in Canada says six months on arrival; Canada’s advisory for regular Canadian passports says six months after expected departure. Canadians are advised to plan for the longer period and confirm with their carrier/authorities. The arrival-based structured destination note is retained; the stricter Canadian advice is no longer omitted. This qualified representation does not claim that either source withdrew its wording."
+      }
+    },
+    {
+      "id": "eb8008c164714945a7ebe07bd81b3c9f",
+      "from": "open",
+      "to": "acknowledged",
+      "actor": "AI source review (guard_review)",
+      "payload": {
+        "resolution": "Official-source correction prepared and applied by AI source review.",
+        "status": "acknowledged",
+        "expected_issue_sha256": "0ab3575edd15d3f7e50c1758d1e2f7a8153ddcae0a7b492597d55d08d9b4c917"
+      },
+      "response": {
+        "ok": true,
+        "id": "eb8008c164714945a7ebe07bd81b3c9f",
+        "status": "acknowledged",
+        "resolution": "Official-source correction prepared and applied by AI source review."
+      }
+    },
+    {
+      "id": "eb8008c164714945a7ebe07bd81b3c9f",
+      "from": "acknowledged",
+      "to": "corrected",
+      "actor": "AI source review (guard_review)",
+      "payload": {
+        "resolution": "Replaced the unqualified generic document list with current Pakistani mission instructions: passport/photo, Washington hotel-or-host option and residence evidence, and separately qualified Los Angeles financial/employment checklist. The national short checklist does not eliminate extra local consular requirements; every named district retains its source.",
+        "source_url": "https://mofa.gov.pk/washington-visa",
+        "status": "corrected",
+        "expected_issue_sha256": "e2ad49ce0483040a1c5c043d172c1ca02cc2b8ea152da91b9196b819d28621b4"
+      },
+      "response": {
+        "ok": true,
+        "id": "eb8008c164714945a7ebe07bd81b3c9f",
+        "status": "corrected",
+        "resolution": "Replaced the unqualified generic document list with current Pakistani mission instructions: passport/photo, Washington hotel-or-host option and residence evidence, and separately qualified Los Angeles financial/employment checklist. The national short checklist does not eliminate extra local consular requirements; every named district retains its source."
+      }
+    },
+    {
+      "id": "eb8008c164714945a7ebe07bd81b3c9f",
+      "from": "corrected",
+      "to": "reviewed",
+      "actor": "AI independent source review",
+      "payload": {
+        "resolution": "Replaced the unqualified generic document list with current Pakistani mission instructions: passport/photo, Washington hotel-or-host option and residence evidence, and separately qualified Los Angeles financial/employment checklist. The national short checklist does not eliminate extra local consular requirements; every named district retains its source. Independently checked against the saved current official-source captures and installed field diffs.",
+        "status": "reviewed",
+        "expected_issue_sha256": "2d905cd0a66ea50197937919b4149adf7cfcc2f3f1d9a0b0574113493ab96062"
+      },
+      "response": {
+        "ok": true,
+        "id": "eb8008c164714945a7ebe07bd81b3c9f",
+        "status": "reviewed",
+        "resolution": "Replaced the unqualified generic document list with current Pakistani mission instructions: passport/photo, Washington hotel-or-host option and residence evidence, and separately qualified Los Angeles financial/employment checklist. The national short checklist does not eliminate extra local consular requirements; every named district retains its source. Independently checked against the saved current official-source captures and installed field diffs."
+      }
+    },
+    {
+      "id": "eb8008c164714945a7ebe07bd81b3c9f",
+      "from": "reviewed",
+      "to": "published",
+      "actor": "AI independent source review",
+      "payload": {
+        "resolution": "Replaced the unqualified generic document list with current Pakistani mission instructions: passport/photo, Washington hotel-or-host option and residence evidence, and separately qualified Los Angeles financial/employment checklist. The national short checklist does not eliminate extra local consular requirements; every named district retains its source.",
+        "status": "published",
+        "expected_issue_sha256": "c0c7827b781723bf0b9251bcfe03637715e7924e108b794d8e6b42282d42041f"
+      },
+      "response": {
+        "ok": true,
+        "id": "eb8008c164714945a7ebe07bd81b3c9f",
+        "status": "published",
+        "resolution": "Replaced the unqualified generic document list with current Pakistani mission instructions: passport/photo, Washington hotel-or-host option and residence evidence, and separately qualified Los Angeles financial/employment checklist. The national short checklist does not eliminate extra local consular requirements; every named district retains its source."
+      }
+    }
+  ]
+}

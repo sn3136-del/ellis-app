@@ -1,0 +1,127 @@
+[
+  {
+    "cache_key": "CAN|CAN|THA|tourism|default|unknown|v6",
+    "product_index": null,
+    "travel_document_country": "CAN",
+    "destination_country": "THA",
+    "travel_purpose": "tourism",
+    "travel_document_type": "ordinary_passport",
+    "visa_type_name": "Visa exemption",
+    "confidence_level": "Low",
+    "held": true,
+    "publication_reason": null,
+    "contradictions": [
+      "scheduled_policy has unresolved policy or entry-condition conflicts"
+    ]
+  },
+  {
+    "cache_key": "TWN|TWN|THA|tourism|default|unknown|v6",
+    "product_index": null,
+    "travel_document_country": "TWN",
+    "destination_country": "THA",
+    "travel_purpose": "tourism",
+    "travel_document_type": "ordinary_passport",
+    "visa_type_name": "Visa exemption",
+    "confidence_level": "Low",
+    "held": true,
+    "publication_reason": null,
+    "contradictions": [
+      "scheduled_policy has unresolved policy or entry-condition conflicts"
+    ]
+  },
+  {
+    "cache_key": "JPN|JPN|THA|tourism|default|unknown|v6",
+    "product_index": null,
+    "travel_document_country": "JPN",
+    "destination_country": "THA",
+    "travel_purpose": "tourism",
+    "travel_document_type": "ordinary_passport",
+    "visa_type_name": "Visa exemption",
+    "confidence_level": "Low",
+    "held": true,
+    "publication_reason": null,
+    "contradictions": [
+      "scheduled_policy has unresolved policy or entry-condition conflicts"
+    ]
+  },
+  {
+    "cache_key": "HKG|HKG|MYS|business|default|unknown|v6",
+    "product_index": null,
+    "travel_document_country": "HKG",
+    "destination_country": "MYS",
+    "travel_purpose": "business",
+    "travel_document_type": "ordinary_passport",
+    "visa_type_name": "No visa needed",
+    "confidence_level": "Low",
+    "held": true,
+    "publication_reason": null,
+    "contradictions": []
+  },
+  {
+    "cache_key": "RUS|RUS|THA|tourism|default|unknown|v6",
+    "product_index": null,
+    "travel_document_country": "RUS",
+    "destination_country": "THA",
+    "travel_purpose": "tourism",
+    "travel_document_type": "ordinary_passport",
+    "visa_type_name": "Visa exemption",
+    "confidence_level": "Low",
+    "held": true,
+    "publication_reason": null,
+    "contradictions": [
+      "scheduled_policy has unresolved policy or entry-condition conflicts"
+    ]
+  },
+  {
+    "cache_key": "IDN|IDN|THA|tourism|default|unknown|v6",
+    "product_index": null,
+    "travel_document_country": "IDN",
+    "destination_country": "THA",
+    "travel_purpose": "tourism",
+    "travel_document_type": "ordinary_passport",
+    "visa_type_name": "No visa needed",
+    "confidence_level": "Low",
+    "held": true,
+    "publication_reason": null,
+    "contradictions": []
+  },
+  {
+    "cache_key": "VNM|VNM|THA|tourism|default|unknown|v6",
+    "product_index": null,
+    "travel_document_country": "VNM",
+    "destination_country": "THA",
+    "travel_purpose": "tourism",
+    "travel_document_type": "ordinary_passport",
+    "visa_type_name": "No visa needed",
+    "confidence_level": "Low",
+    "held": true,
+    "publication_reason": null,
+    "contradictions": []
+  },
+  {
+    "cache_key": "IND|IND|THA|tourism|default|unknown|v6",
+    "product_index": null,
+    "travel_document_country": "IND",
+    "destination_country": "THA",
+    "travel_purpose": "tourism",
+    "travel_document_type": "ordinary_passport",
+    "visa_type_name": "No visa needed",
+    "confidence_level": "Low",
+    "held": true,
+    "publication_reason": null,
+    "contradictions": []
+  },
+  {
+    "cache_key": "IDN|IDN|KOR|study|default|unknown|v6",
+    "product_index": null,
+    "travel_document_country": "IDN",
+    "destination_country": "KOR",
+    "travel_purpose": "study",
+    "travel_document_type": "ordinary_passport",
+    "visa_type_name": "D-2 Student (D-4 for language training)",
+    "confidence_level": "Medium",
+    "held": true,
+    "publication_reason": null,
+    "contradictions": []
+  }
+]

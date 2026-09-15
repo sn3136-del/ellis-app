@@ -1,0 +1,190 @@
+{
+  "at": "2026-09-15T20:08:44.165Z",
+  "tabs": [
+    {
+      "tab": "records",
+      "ms": 1586.284,
+      "nodes": 1200
+    },
+    {
+      "tab": "issues",
+      "ms": 823.828,
+      "nodes": 1790
+    },
+    {
+      "tab": "changes",
+      "ms": 716.9529999999995,
+      "nodes": 1766
+    },
+    {
+      "tab": "asks",
+      "ms": 240.90058399999998,
+      "nodes": 543
+    },
+    {
+      "tab": "freshness",
+      "ms": 210.06516700000066,
+      "nodes": 42
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "path": "/api/snapshot/registries",
+      "method": "GET",
+      "conditional": false
+    },
+    {
+      "path": "/api/database/records",
+      "method": "GET",
+      "conditional": false
+    },
+    {
+      "path": "/api/capabilities",
+      "method": "GET",
+      "conditional": false
+    },
+    {
+      "path": "/api/database/issues",
+      "method": "GET",
+      "conditional": false
+    },
+    {
+      "path": "/api/database/records",
+      "method": "GET",
+      "conditional": true
+    },
+    {
+      "path": "/api/database/changes?limit=300",
+      "method": "GET",
+      "conditional": false
+    },
+    {
+      "path": "/api/database/asks?limit=300",
+      "method": "GET",
+      "conditional": false
+    },
+    {
+      "path": "/api/database/freshness?schedule_only=true",
+      "method": "GET",
+      "conditional": false
+    },
+    {
+      "path": "/api/database/records",
+      "method": "GET",
+      "conditional": true
+    }
+  ],
+  "blockedMutations": [],
+  "networkTimings": [
+    {
+      "path": "/api/capabilities",
+      "timing": {
+        "startTime": 1789502926300.3108,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 0.124,
+        "responseStart": 132.336,
+        "responseEnd": 136.697
+      }
+    },
+    {
+      "path": "/api/snapshot/registries",
+      "timing": {
+        "startTime": 1789502926300.7002,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 0.15,
+        "responseStart": 134.39,
+        "responseEnd": 142.412
+      }
+    },
+    {
+      "path": "/api/database/records",
+      "timing": {
+        "startTime": 1789502926299.5671,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 0.674,
+        "responseStart": 205.061,
+        "responseEnd": 337.424
+      }
+    },
+    {
+      "path": "/api/database/issues",
+      "timing": {
+        "startTime": 1789502926928.5989,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 0.144,
+        "responseStart": 528.61,
+        "responseEnd": 653.386
+      }
+    },
+    {
+      "path": "/api/database/changes",
+      "timing": {
+        "startTime": 1789502927892.813,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 0.16,
+        "responseStart": 367.077,
+        "responseEnd": 492.513
+      }
+    },
+    {
+      "path": "/api/database/asks",
+      "timing": {
+        "startTime": 1789502928675.014,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 0.128,
+        "responseStart": 168.179,
+        "responseEnd": 172.543
+      }
+    },
+    {
+      "path": "/api/database/freshness",
+      "timing": {
+        "startTime": 1789502929306.567,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 0.227,
+        "responseStart": 142.941,
+        "responseEnd": 145.329
+      }
+    }
+  ],
+  "resolvedHistoryOpened": true,
+  "clock": {
+    "before": "NEXT SCHEDULED REFRESH\nAutomatic refresh paused",
+    "after": "NEXT SCHEDULED REFRESH\nAutomatic refresh paused"
+  },
+  "revisitedRecords": {
+    "status": 304,
+    "conditional": true,
+    "ms": 212.23133299999972
+  },
+  "passed": true
+}

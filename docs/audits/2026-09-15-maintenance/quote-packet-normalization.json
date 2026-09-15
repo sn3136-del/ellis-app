@@ -1,0 +1,137 @@
+{
+  "source_file_sha256": "9747ac78ea3a1a32a02a6aa686897c61450549e244efd68ae2a970219039841c",
+  "normalized_file_sha256": "398ea2bdaf12e12b7bd50b9f1bf6d378259c1768a551a2250dece42cc5ad3242",
+  "normalized_canonical_sha256": "8dc5463690854dbbf91c30390298f19059ff7f1983e4048ed79383a45a37b9f7",
+  "policy_fact_changes": 0,
+  "explicit_null_fee_shape_preserved": [
+    [
+      "FRA|FRA|RUS|tourism|default|unknown|v6",
+      1
+    ],
+    [
+      "FRA|FRA|RUS|tourism|default|unknown|v6",
+      2
+    ],
+    [
+      "IND|IND|RUS|tourism|default|unknown|v6",
+      0
+    ],
+    [
+      "IND|IND|RUS|tourism|default|unknown|v6",
+      1
+    ],
+    [
+      "IND|IND|RUS|tourism|default|unknown|v6",
+      2
+    ],
+    [
+      "TWN|TWN|RUS|tourism|default|unknown|v6",
+      1
+    ],
+    [
+      "TWN|TWN|RUS|tourism|default|unknown|v6",
+      2
+    ],
+    [
+      "JPN|JPN|RUS|tourism|default|unknown|v6",
+      0
+    ],
+    [
+      "JPN|JPN|RUS|tourism|default|unknown|v6",
+      1
+    ],
+    [
+      "SGP|SGP|RUS|tourism|default|unknown|v6",
+      0
+    ],
+    [
+      "IDN|IDN|RUS|tourism|default|unknown|v6",
+      0
+    ],
+    [
+      "VNM|VNM|RUS|tourism|default|unknown|v6",
+      0
+    ],
+    [
+      "ESP|ESP|RUS|tourism|default|unknown|v6",
+      0
+    ]
+  ],
+  "routes": [
+    {
+      "cache_key": "FRA|FRA|RUS|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "c62629d05340fa720c447cce796140e4c2d5bb0be196ec2a7619b80efc6b6901"
+    },
+    {
+      "cache_key": "IND|IND|RUS|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "203ad207d347333b36a1fd0395044811a80e25dde2e85edb4d914fdacdd386cd"
+    },
+    {
+      "cache_key": "PHL|PHL|RUS|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "7dd8884cc64f5d6df53a497c2285ffa0d6205b7632a95f16c2c18de357123509"
+    },
+    {
+      "cache_key": "TWN|TWN|RUS|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "ecf6c49123406556e1fe03cb6f2de225f7ce8daaeef6e6ce6f7b2023a0d5dae1"
+    },
+    {
+      "cache_key": "JPN|JPN|RUS|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "a163ed28c83aa573ffe3a4e3a28e29536cb49b0ad03fac17cc8ddfe6d1e97acf"
+    },
+    {
+      "cache_key": "SGP|SGP|RUS|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "49d4c0cee4a18fa0dbd5c3800820c448218edcce225624cdf3a32d543809b6dc"
+    },
+    {
+      "cache_key": "IDN|IDN|RUS|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "a1c98bd9a4cf51b4469126fad8e2cd0ed248f394cf7052efa08897260dfcabf4"
+    },
+    {
+      "cache_key": "VNM|VNM|RUS|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "cc101dab764f288a2e025db065df3b45d954ad8b326ce56961b4705f680b808d"
+    },
+    {
+      "cache_key": "ESP|ESP|RUS|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "033d9aac4f254769f0914b7a65970829e89bef1777867fc535f4375c12dc4690"
+    },
+    {
+      "cache_key": "USA|USA|JPN|tourism|default|unknown|v6",
+      "metadata_delta_fields": [],
+      "operator_entry_sha256": "a640b5d291bdc34db0f740de213624c98758f0316b03b6a78f92a6f6fd5ae8ed"
+    },
+    {
+      "cache_key": "CAN|CAN|TWN|tourism|default|unknown|v6",
+      "metadata_delta_fields": [
+        "visa_products"
+      ],
+      "operator_entry_sha256": "be7cfaae0de65e74a1ee21141f2f6aa9de65b1ab0ba4e1b45fe83d68ca190dd9"
+    }
+  ]
+}
