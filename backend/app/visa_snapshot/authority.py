@@ -24,6 +24,12 @@ from urllib.parse import urlparse
 # nationality selector links directly to visa.visitsaudi.com (read 2026-09-10).
 # Admit these exact hosts only, not the .us/.com suffix or other subdomains.
 EXACT_OFFICIAL_HOSTS = frozenset({
+    # Vietnam's mission in Ottawa: Canada's official diplomatic directory
+    # lists this exact domain for the Embassy of Vietnam, checked 2026-09-15:
+    # https://w05.international.gc.ca/protocol-protocole/Heads-Chefs.aspx
+    # The mission's warning-private-websites page confirms its sole website.
+    # This does not authorize lookalike domains or arbitrary subdomains.
+    "vietnamembassy.ca",
     # Exact mission websites listed in Thailand MFA's AITC directory:
     # https://image.mfa.go.th/mfa/0/GH2PYnujXi/AITC/AITC_List_of_Eligible_Countries_as_of_June__2025.pdf
     # Read 2026-09-12, pages 2, 5 and 6; no parent/sibling host trust.
