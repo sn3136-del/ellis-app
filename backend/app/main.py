@@ -1303,7 +1303,7 @@ def travel_database_issue_accept_proposal(issue_id: str,
 
 
 @app.get("/database/freshness")
-def travel_database_freshness(db=Depends(get_session),
+def travel_database_freshness(schedule_only: bool = False, db=Depends(get_session),
                               p: Principal = Depends(get_principal)):
     """The operator's answer to "is all of it still correct and current?" —
     one row per cached answer: when it was generated, when its freshness
@@ -1315,6 +1315,13 @@ def travel_database_freshness(db=Depends(get_session),
     from .visa_snapshot import verified_overrides, tstation, kimi_primary
     from .visa_snapshot.models import KimiRouteGuidanceCache
     require_quality_control(p)
+    # The visible Freshness tab is a clock. Do not rebuild every policy's
+    # audit/provenance merely to read systemd's next scheduled run. The full
+    # endpoint remains available to audit consumers with its existing shape.
+    if schedule_only:
+        timer = _sweep_timer_status()
+        return {"summary": {"next_sweep_at": timer.get("next_sweep_at"),
+                            "scheduler": timer}}
     now = datetime.now(timezone.utc)
     from .visa_snapshot import freshness as _fresh
     with verified_overrides.pinned_table(), _fresh.disputed_fields_snapshot(db):
@@ -1739,7 +1746,8 @@ def travel_database_issues(db=Depends(get_session),
     # Every stage of the loop is reported, not just the current label. A
     # closure nobody can attribute is not traceable, which is the whole point
     # of the requirement.
-    return {"issues": [{"id": r.id, "route": r.route, "field": r.field,
+    from fastapi.responses import JSONResponse
+    return JSONResponse({"issues": [{"id": r.id, "route": r.route, "field": r.field,
                         "revision_sha256": revision_sha256(snapshot(r)),
                         "note": r.note, "status": r.status,
                         "resolution": r.resolution,
@@ -1754,7 +1762,7 @@ def travel_database_issues(db=Depends(get_session),
                         "published_at": _iso(r.published_at),
                         "proposal": _listed_proposal(r.proposal),
                         "fingerprint": r.fingerprint or None,
-                        "created_at": _iso(r.created_at)} for r in rows]}
+                        "created_at": _iso(r.created_at)} for r in rows]})
 
 
 # The QC record browser rebuilds every 25-field record from the cache on
@@ -2268,7 +2276,7 @@ def _with_pending(status: dict, disputed) -> dict:
 # JSON preparation is part of the record snapshot. Reuse only the exact
 # immutable row-list object returned by the generation-aware cache above.
 # A correction forces a new row list before a later reader reaches here.
-_RECORDS_JSON_CACHE = {"rows": None, "body": None}
+_RECORDS_JSON_CACHE = {"rows": None, "body": None, "etag": None}
 _RECORDS_JSON_LOCK = threading.Lock()
 
 
@@ -2310,6 +2318,7 @@ def travel_database_records(nationality: str = "", destination: str = "",
                             purpose: str = "", document: str = "",
                             requirement: str = "", confidence: str = "",
                             visa_type: str = "", field_missing: str = "",
+                            if_none_match: str | None = Header(default=None),
                             db=Depends(get_session),
                             p: Principal = Depends(get_principal)):
     """The quality-control backend's record browser: T-Station 25-field
@@ -2318,13 +2327,23 @@ def travel_database_records(nationality: str = "", destination: str = "",
     from .visa_snapshot import tstation
     require_quality_control(p)
     from fastapi.responses import Response
+    import hashlib
+    def respond(body, etag):
+        # Validators are checked only AFTER canonical source observation and
+        # any required rebuild. No browser/proxy may serve unchecked policy.
+        if if_none_match == etag:
+            return Response(status_code=304, headers={"ETag": etag})
+        return Response(body, media_type="application/json", headers={"ETag": etag})
     snapshot_rows = _all_tstation_rows(db)
     unfiltered = not any((nationality, destination, purpose, document,
                           requirement, confidence, visa_type, field_missing))
     if unfiltered:
         with _RECORDS_JSON_LOCK:
             if _RECORDS_JSON_CACHE["rows"] is snapshot_rows:
-                return Response(_RECORDS_JSON_CACHE["body"], media_type="application/json")
+                body = _RECORDS_JSON_CACHE["body"]
+                etag = _RECORDS_JSON_CACHE.get("etag") or '"' + hashlib.sha256(body).hexdigest() + '"'
+                _RECORDS_JSON_CACHE["etag"] = etag
+                return respond(body, etag)
     rows = _tstation_rows(db, nationality=nationality, destination=destination,
                           purpose=purpose, document=document,
                           requirement=requirement, confidence=confidence,
@@ -2354,10 +2373,11 @@ def travel_database_records(nationality: str = "", destination: str = "",
 
     body = json.dumps(payload, ensure_ascii=False, allow_nan=False,
                       separators=(",", ":")).encode("utf-8")
+    etag = '"' + hashlib.sha256(body).hexdigest() + '"'
     if unfiltered:
         with _RECORDS_JSON_LOCK:
-            _RECORDS_JSON_CACHE.update(rows=snapshot_rows, body=body)
-    return Response(body, media_type="application/json")
+            _RECORDS_JSON_CACHE.update(rows=snapshot_rows, body=body, etag=etag)
+    return respond(body, etag)
 
 
 def _change_source(db, row) -> dict:
@@ -2417,6 +2437,11 @@ def _change_source(db, row) -> dict:
 def travel_database_changes(q: str = "", limit: int = 200,
                             db=Depends(get_session),
                             p: Principal = Depends(get_principal)):
+    from fastapi.responses import JSONResponse
+    return JSONResponse(_database_changes_data(q=q, limit=limit, db=db, p=p))
+
+
+def _database_changes_data(q, limit, db, p):
     """The change log: what changed in served answers, newest first —
     add / modify / delete with a field-level diff, searchable."""
     from sqlalchemy import String as _String
@@ -2485,7 +2510,7 @@ def travel_database_changes_export(q: str = "", limit: int = 1000,
             return json.dumps(value, ensure_ascii=False, sort_keys=True)
         return str(value)
 
-    data = travel_database_changes(q=q, limit=limit, db=db, p=p)
+    data = _database_changes_data(q=q, limit=limit, db=db, p=p)
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(["time_utc", "action", "origin", "nationality", "destination",
@@ -2649,14 +2674,15 @@ def travel_database_asks(limit: int = 200, unreviewed: bool = False,
         stmt = stmt.where(DatabaseAskLog.verdict == "")
     rows = db.execute(stmt.order_by(DatabaseAskLog.created_at.desc())
                       .limit(max(1, min(limit, 2000)))).scalars().all()
-    return {"asks": [{"id": r.id, "question": r.question, "language": r.language,
+    from fastapi.responses import JSONResponse
+    return JSONResponse({"asks": [{"id": r.id, "question": r.question, "language": r.language,
                       "understood": r.understood, "route": r.route,
                       "answer": r.answer, "source_url": r.source_url,
                       "held": r.held, "confidence": r.confidence,
                       "verdict": r.verdict, "reviewed_by": r.reviewed_by,
                       "at": r.created_at.isoformat() if r.created_at else None}
                      for r in rows],
-            "unreviewed": sum(1 for r in rows if not r.verdict)}
+            "unreviewed": sum(1 for r in rows if not r.verdict)})
 
 
 class DatabaseRecordEditIn(BaseModel):

@@ -2395,6 +2395,28 @@ function MicroStack({ segs, height = 10, legend = true }) {
 
 const PAGE = 50
 
+// Large histories stay fully available, but only visible pages are mounted.
+// This also avoids translating hundreds of cards that nobody has opened.
+export function QualityPage({ items, children, t, pageSize = PAGE }) {
+  const [shown, setShown] = useState(pageSize)
+  return <>
+    {children(items.slice(0, shown))}
+    {items.length > shown && <button className="btn btn--ghost"
+      data-testid="ops-history-more" style={{ borderRadius: 999, justifySelf: 'center' }}
+      onClick={() => setShown(n => n + pageSize)}>
+      {t('ops.showMore').replace('{n}', String(items.length - shown))} ({items.length - shown})
+    </button>}
+  </>
+}
+
+export function DeferredDetails({ summary, children }) {
+  const [open, setOpen] = useState(false)
+  return <details onToggle={event => setOpen(event.currentTarget.open)} style={{ marginTop: 6 }}>
+    <summary style={{ fontSize: 12.5, color: GRAY, cursor: 'pointer', fontWeight: 700 }}>{summary}</summary>
+    {open && <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>{children()}</div>}
+  </details>
+}
+
 function useTypeNames(client, data, lang) {
   const [map, setMap] = useState({ lang, values: {} })
   useEffect(() => {
@@ -2516,7 +2538,6 @@ function QualityWorkspace() {
   const [changes, setChanges] = useState(null)
   const [issues, setIssues] = useState(null)
   const [freshness, setFreshness] = useState(null)
-  const [uptime, setUptime] = useState(null)
   const [asks, setAsks] = useState(null)
   const [askFilter, setAskFilter] = useState(false)
   const [error, setError] = useState('')
@@ -2612,7 +2633,7 @@ function QualityWorkspace() {
   const qs = useCallback(() => qualityFilterQuery(filters), [filters])
 
   const loader = useMemo(() => createLatestLoader(
-    (which) => readQualityTab(client, which), {
+    (which, options) => readQualityTab(client, which, options), {
       onStart: () => { setBusy(true); setError('') },
       onData: (next) => {
         if ('data' in next) setData(next.data)
@@ -2620,7 +2641,6 @@ function QualityWorkspace() {
         if ('issues' in next) setIssues(next.issues)
         if ('asks' in next) setAsks(next.asks)
         if ('freshness' in next) setFreshness(next.freshness)
-        if ('uptime' in next) setUptime(next.uptime)
         if (next.resetShown) setShown(PAGE)
       },
       onError: (error) => {
@@ -3474,20 +3494,15 @@ function QualityWorkspace() {
                 <div style={{ ...card, padding: 22, color: GRAY, fontSize: 13.5,
                               textAlign: 'center' }}>{t('ops.noReports')}</div>
               )}
-              {human.map((it) => <Card key={it.id} it={it} active />)}
-              {groups.map((g) => (
-                <Card key={g.rep.id} it={g.rep} active group={g} />
-              ))}
+              <QualityPage items={[...human.map(it => ({ it })), ...groups.map(group => ({ it: group.rep, group }))]} t={t}>
+                {visible => visible.map(({ it, group }) => <Card key={it.id} it={it} active group={group} />)}
+              </QualityPage>
               {closed.length > 0 && (
-                <details style={{ marginTop: 6 }}>
-                  <summary style={{ fontSize: 12.5, color: GRAY, cursor: 'pointer',
-                                    fontWeight: 700 }}>
-                    {t('ops.issues.resolved')} ({closed.length})
-                  </summary>
-                  <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
-                    {closed.map((it) => <Card key={it.id} it={it} active={false} />)}
-                  </div>
-                </details>
+                <DeferredDetails summary={`${t('ops.issues.resolved')} (${closed.length})`}>
+                  {() => <QualityPage items={closed} t={t}>
+                    {visible => visible.map(it => <Card key={it.id} it={it} active={false} />)}
+                  </QualityPage>}
+                </DeferredDetails>
               )}
             </div>
           )
@@ -3516,9 +3531,9 @@ function QualityWorkspace() {
                 <div style={{ fontSize: 13, color: GRAY }}>{t('ops.askEmpty')}</div>
               )}
               <div style={{ display: 'grid', gap: 10 }}>
-                {shownRows.map((a) => (
-                  <AskCard key={a.id} ask={a} onReview={reviewAsk} t={t} />
-                ))}
+                <QualityPage key={String(askFilter)} items={shownRows} t={t}>
+                  {visible => visible.map(a => <AskCard key={a.id} ask={a} onReview={reviewAsk} t={t} />)}
+                </QualityPage>
               </div>
             </div>
           )
@@ -3546,13 +3561,16 @@ function QualityWorkspace() {
           const counts = { '': all.length }
           for (const c of all) counts[c.action] = (counts[c.action] || 0) + 1
           const list = all.filter((c) => !changeFilter || c.action === changeFilter)
-          const byDay = []
-          for (const c of list) {
+          const byDay = (items) => {
+            const days = []
+            for (const c of items) {
             const d = localDate(c.at)
             const day = d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : (c.at || '').slice(0, 10)
-            const g = byDay[byDay.length - 1]
-            if (g && g.day === day) g.items.push(c)
-            else byDay.push({ day, items: [c] })
+              const g = days[days.length - 1]
+              if (g && g.day === day) g.items.push(c)
+              else days.push({ day, items: [c] })
+            }
+            return days
           }
           const ValueChip = ({ v, kind, field }) => (
             <span title={typeof v === 'string' ? v : undefined}
@@ -3624,7 +3642,8 @@ function QualityWorkspace() {
                   {t('ops.noChanges')}
                 </div>
               )}
-              {byDay.map((g) => (
+              <QualityPage key={changeFilter} items={list} t={t}>
+              {visible => byDay(visible).map((g) => (
                 <div key={g.day} style={{ display: 'grid', gap: 8 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span title={g.day}
@@ -3762,16 +3781,9 @@ function QualityWorkspace() {
                           return [
                             ...entries.slice(0, cap).map(Row),
                             entries.length > cap && (
-                              <details key="more" style={{ marginTop: 2 }}>
-                                <summary style={{ fontSize: 11.5, color: BLUE,
-                                      fontWeight: 700, cursor: 'pointer' }}>
-                                  {t('ops.showMore').replace('{n}', entries.length - cap)}
-                                </summary>
-                                <div style={{ display: 'grid', gap: 5,
-                                      marginTop: 6 }}>
-                                  {entries.slice(cap).map(Row)}
-                                </div>
-                              </details>
+                              <DeferredDetails key="more" summary={t('ops.showMore').replace('{n}', entries.length - cap)}>
+                                {() => entries.slice(cap).map(Row)}
+                              </DeferredDetails>
                             ),
                           ]
                         })()}
@@ -3780,6 +3792,7 @@ function QualityWorkspace() {
                   ))}
                 </div>
               ))}
+              </QualityPage>
             </div>
           )
         })()}

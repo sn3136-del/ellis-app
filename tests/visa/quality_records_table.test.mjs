@@ -12,7 +12,7 @@ import { formatChangeValue, changeDisplayEntries, changeOriginKind, translateCha
 // The records list is the operator's first screen. It renders a real
 // component, so a helper that is not in scope there crashes every row.
 const compiled = await build({
-  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown, QualityFilterField, CountryFilter } from './src/renderer/src/screens/QualityConsole.jsx'",
+  stdin: { contents: "export { RecordsTable, unitNameOf, NoteCell, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown, QualityFilterField, CountryFilter, QualityPage, DeferredDetails } from './src/renderer/src/screens/QualityConsole.jsx'",
     resolveDir: resolve('.'), sourcefile: 'quality-records-table-entry.jsx' },
   bundle: true, write: false, platform: 'node', format: 'cjs', jsx: 'automatic',
   external: ['react', 'react/jsx-runtime'], logLevel: 'silent',
@@ -20,7 +20,7 @@ const compiled = await build({
 const module = { exports: {} }
 new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(
   createRequire(import.meta.url), module, module.exports)
-const { RecordsTable, unitNameOf, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown, QualityFilterField, CountryFilter } = module.exports
+const { RecordsTable, unitNameOf, sortQualityRecords, PublicationFilter, matchesPublicationFilter, qualityFilterQuery, NextSweepCountdown, QualityFilterField, CountryFilter, QualityPage, DeferredDetails } = module.exports
 
 const t = (key, vars) => translate('en', key, vars)
 
@@ -380,4 +380,30 @@ test('the final change chip translation path leaves literal evidence wording unc
   assert.equal(translateChangeValue('quote', 'Codex in literal evidence', transform), 'Codex in literal evidence')
   assert.equal(translateChangeValue('source_url', 'https://example.gov/Codex', transform), 'https://example.gov/Codex')
   assert.equal(translateChangeValue('note', 'Checked by Codex', transform), 'Checked by AI')
+})
+
+
+test('large QC histories render one page and retain every record through Show more', () => {
+  const items=Array.from({length:121},(_,i)=>i);let renderer
+  try{
+    act(()=>{renderer=create(createElement(QualityPage,{items,t},visible=>visible.map(i=>createElement('article',{key:i},String(i)))))})
+    assert.equal(renderer.root.findAllByType('article').length,50)
+    act(()=>renderer.root.findByProps({'data-testid':'ops-history-more'}).props.onClick())
+    assert.equal(renderer.root.findAllByType('article').length,100)
+    act(()=>renderer.root.findByProps({'data-testid':'ops-history-more'}).props.onClick())
+    assert.deepEqual(renderer.root.findAllByType('article').map(x=>Number(x.children[0])),items)
+    assert.equal(renderer.root.findAllByProps({'data-testid':'ops-history-more'}).length,0)
+  }finally{if(renderer)act(()=>renderer.unmount())}
+})
+
+test('closed QC histories and hidden change fields do no rendering until opened', () => {
+  let calls=0,renderer
+  try{
+    act(()=>{renderer=create(createElement(DeferredDetails,{summary:'Resolved (500)'},()=>{calls++;return createElement('article',{},'Complete history')}))})
+    assert.equal(calls,0);assert.equal(renderer.root.findAllByType('article').length,0)
+    act(()=>renderer.root.findByType('details').props.onToggle({currentTarget:{open:true}}))
+    assert.equal(calls,1);assert.equal(renderer.root.findByType('article').children[0],'Complete history')
+    act(()=>renderer.root.findByType('details').props.onToggle({currentTarget:{open:false}}))
+    assert.equal(renderer.root.findAllByType('article').length,0)
+  }finally{if(renderer)act(()=>renderer.unmount())}
 })

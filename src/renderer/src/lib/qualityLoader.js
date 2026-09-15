@@ -4,18 +4,22 @@ export function createLatestLoader(read, { onStart, onData, onError, onFinish,
   wait = (ms) => new Promise(resolve => setTimeout(resolve, ms)) }) {
   let generation = 0
   let active = false
+  let controller = null
   return {
-    invalidate() { generation++; active = false },
+    invalidate() { generation++; active = false; controller?.abort() },
     async run(input, { quiet = false } = {}) {
       if (quiet && active) return { status: 'skipped' }
       const mine = ++generation
+      controller?.abort()
+      const requestController = new AbortController()
+      controller = requestController
       const current = () => mine === generation
       active = true
       if (!quiet) onStart()
       try {
         for (let attempt = 0; attempt < 2 && current(); attempt++) {
           try {
-            const result = await read(input)
+            const result = await read(input, { signal: requestController.signal })
             if (current()) {
               onData(result)
               return { status: 'loaded' }
@@ -93,28 +97,21 @@ export function qualityRefreshOutcome(research) {
   return { kind: 'noRead', tone: 'warning', changed }
 }
 
-export async function readQualityTab(client, tab) {
+export async function readQualityTab(client, tab, options = {}) {
+  const get = path => client.get(path, options)
   if (tab === 'records' || tab === 'records-poll') return {
-    data: await client.get('/database/records'), resetShown: tab === 'records',
+    data: await get('/database/records'), resetShown: tab === 'records',
   }
-  if (tab === 'changes' || tab === 'issues') {
-    const path = tab === 'changes' ? '/database/changes?limit=300' : '/database/issues'
-    const [value, data] = await Promise.all([client.get(path), client.get('/database/records')])
-    return { [tab]: value, data }
+  if (tab === 'changes') return { changes: await get('/database/changes?limit=300') }
+  if (tab === 'issues') {
+    // Current canonical records are required for the side-by-side dispute
+    // comparison. Other tabs must not wait for this unrelated large dataset.
+    const [issues, data] = await Promise.all([get('/database/issues'), get('/database/records')])
+    return { issues, data }
   }
-  if (tab === 'asks') return { asks: await client.get('/database/asks?limit=300') }
-  if (tab === 'freshness-poll') return { freshness: await client.get('/database/freshness') }
-  if (tab === 'freshness') {
-    const [fresh, issues, uptime] = await Promise.allSettled([
-      client.get('/database/freshness'),
-      client.get('/database/issues', { timeoutMs: 5000 }),
-      client.get('/health/uptime', { timeoutMs: 5000 }),
-    ])
-    if (fresh.status === 'rejected') throw fresh.reason
-    return { freshness: fresh.value,
-      ...(issues.status === 'fulfilled' ? { issues: issues.value } : {}),
-      ...(uptime.status === 'fulfilled' ? { uptime: uptime.value } : {}),
-    }
+  if (tab === 'asks') return { asks: await get('/database/asks?limit=300') }
+  if (tab === 'freshness' || tab === 'freshness-poll') return {
+    freshness: await get('/database/freshness?schedule_only=true'),
   }
   throw new Error('Unknown Quality Control tab')
 }

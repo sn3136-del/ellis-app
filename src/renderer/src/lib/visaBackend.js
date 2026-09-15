@@ -63,22 +63,29 @@ async function call(method, path, session, body, options = {}) {
   // served from a server-side cache since 11 September 2026; the first cold
   // read after a restart can still take longer than 30 seconds.
   const timeoutMs = qualityRead ? (options.timeoutMs ?? (path.startsWith('/database/records') ? 120000 : 30000)) : 0
-  const controller = timeoutMs > 0 ? new AbortController() : null
+  const controller = timeoutMs > 0 || options.signal ? new AbortController() : null
+  const cancel = () => controller?.abort()
+  if (options.signal?.aborted) cancel()
+  else options.signal?.addEventListener('abort', cancel, { once: true })
   let timer
-  const deadline = controller ? new Promise((_, reject) => {
+  const deadline = timeoutMs > 0 ? new Promise((_, reject) => {
     timer = setTimeout(() => {
       reject(new Error('The Quality Control read timed out. Please refresh to try again.'))
       controller.abort()
     }, timeoutMs)
   }) : null
   const request = async () => {
+    const cached = options.recordsCache?.current
     const res = await fetch(`${BASE}${path}`, {
       method,
       ...(path.startsWith('/database/') ? { cache: 'no-store' } : {}),
       ...(controller ? { signal: controller.signal } : {}),
-      headers: authHeaders(session),
+      headers: { ...authHeaders(session), ...(cached?.etag ? { 'if-none-match': cached.etag } : {}) },
       body: body === undefined ? undefined : JSON.stringify(body)
     })
+    // A 304 is fresh server validation, never a locally timed cache hit.
+    // Reuse the same parsed object so unchanged polls do not rebuild the UI.
+    if (res.status === 304 && cached) return cached.data
     const text = await res.text()
     const data = text ? JSON.parse(text) : {}
     if (!res.ok) {
@@ -88,10 +95,17 @@ async function call(method, path, session, body, options = {}) {
       err.detail = detail // structured payloads (e.g. resolve 422 {missing_fields})
       throw err
     }
+    if (options.recordsCache) {
+      const etag = res.headers?.get('etag')
+      options.recordsCache.current = etag ? { etag, data } : null
+    }
     return data
   }
   try { return await (deadline ? Promise.race([request(), deadline]) : request()) }
-  finally { if (timer) clearTimeout(timer) }
+  finally {
+    if (timer) clearTimeout(timer)
+    options.signal?.removeEventListener('abort', cancel)
+  }
 }
 
 // Runtime-mode probe. GET {base}/capabilities and return its "runtime_mode"
@@ -118,11 +132,15 @@ export async function fetchRuntimeMode(baseUrl) {
 }
 
 export function createVisaClient(session) {
+  // One unfiltered record snapshot, scoped to this client/session only.
+  // Every reuse still makes a conditional GET against current source state.
+  const recordsCache = { current: null }
   return {
     base: BASE,
     baseUrl: BASE,
     // Generic GET for the ops quality console (records, changes, freshness).
-    get: (path, options) => call('GET', path, session, undefined, options),
+    get: (path, options) => call('GET', path, session, undefined,
+      path === '/database/records' ? { ...options, recordsCache } : options),
     post: (path, payload = {}) => call('POST', path, session, payload),
     capabilities: () => call('GET', '/capabilities', session),
     listAdapters: () => call('GET', '/adapters', session),

@@ -121,12 +121,15 @@ test('unmount or tab cleanup invalidates a queued response', async () => {
   assert.equal(state.data,null)
 })
 
-test('Freshness remains readable when its optional tiles fail', async () => {
+test('Freshness loads only its schedule, so unrelated slow audit reads cannot gate the clock', async () => {
+  const paths=[]
   const result=await readQualityTab({get:async path => {
-    if(path==='/database/freshness') return { attempted:4, verified:1 }
-    throw new Error('optional service unavailable')
+    paths.push(path)
+    assert.equal(path,'/database/freshness?schedule_only=true')
+    return { summary:{ next_sweep_at:'2026-09-15T12:20:00Z' } }
   }},'freshness')
-  assert.deepEqual(result,{freshness:{attempted:4,verified:1}})
+  assert.equal(paths.length,1)
+  assert.equal(result.freshness.summary.next_sweep_at,'2026-09-15T12:20:00Z')
 })
 
 test('record polling preserves pagination while reading the canonical list', async () => {
@@ -147,21 +150,54 @@ test('database client bypasses a previously stored browser response', async () =
   } finally {globalThis.fetch=original}
 })
 
-test('a stalled optional response body cannot indefinitely hide completed Freshness data', async () => {
-  const original=globalThis.fetch; let stalledSignal
-  globalThis.fetch=async (url, init) => {
-    if(url.endsWith('/health/uptime')) {
-      stalledSignal=init.signal
-      return {ok:true,text:()=>new Promise(()=>{})}
-    }
-    return {ok:true,text:async()=>url.endsWith('/database/freshness') ? '{"verified":4}' : '[]'}
+test('Changes and AI Q&A never wait for the unrelated canonical record list', async () => {
+  for(const [tab,path] of [['changes','/database/changes?limit=300'],['asks','/database/asks?limit=300']]) {
+    const paths=[]
+    const result=await readQualityTab({get:async p=>{ paths.push(p);return {items:[]} }},tab)
+    assert.deepEqual(paths,[path]);assert.deepEqual(result[tab],{items:[]})
   }
-  try {
-    const real=createVisaClient({token:'public-quality-control'})
-    const client={get:(path,options)=>real.get(path, options ? {timeoutMs:5} : undefined)}
-    assert.deepEqual(await readQualityTab(client,'freshness'), {freshness:{verified:4},issues:[]})
-    assert.equal(stalledSignal.aborted,true)
-  } finally {globalThis.fetch=original}
+})
+
+test('Correction queue still waits for canonical values needed by its comparison', async () => {
+  const records=deferred(), paths=[]
+  let complete=false
+  const pending=readQualityTab({get:path=>{
+    paths.push(path);return path==='/database/records' ? records.promise : Promise.resolve({issues:[{id:1}]})
+  }},'issues').then(value=>{complete=true;return value})
+  await Promise.resolve();assert.equal(complete,false)
+  records.resolve({records:[{visa_requirement:'Visa Required in Advance'}]})
+  assert.deepEqual((await pending).data,{records:[{visa_requirement:'Visa Required in Advance'}]})
+  assert.deepEqual(paths,['/database/issues','/database/records'])
+})
+
+test('tab changes and unmount abort the obsolete read without cancelling the new one', async () => {
+  const signals=[], waits=[deferred(),deferred()]
+  const {loader,state}=harness((input,options)=>{signals.push(options.signal);return waits[input].promise})
+  const old=loader.run(0), next=loader.run(1)
+  assert.equal(signals[0].aborted,true);assert.equal(signals[1].aborted,false)
+  waits[1].resolve('current');await next
+  waits[0].resolve('stale');await old
+  assert.equal(state.data,'current')
+  loader.invalidate();assert.equal(signals[1].aborted,true)
+})
+
+test('unchanged record reads reuse data only after server 304 validation; edits replace it', async () => {
+  const original=globalThis.fetch, headers=[];let count=0
+  const a={records:[{fee:25}]},b={records:[{fee:50}]}
+  globalThis.fetch=async(_url,init)=>{
+    headers.push(init.headers);count++
+    if(count===2)return {status:304,ok:false,text:()=>{throw Error('304 must not parse a body')}}
+    return {ok:true,status:200,headers:{get:()=>count===1?'"a"':'"b"'},text:async()=>JSON.stringify(count===1?a:b)}
+  }
+  try{
+    const client=createVisaClient({token:'public-quality-control'})
+    const first=await client.get('/database/records'),unchanged=await client.get('/database/records'),changed=await client.get('/database/records')
+    assert.ok(first===unchanged);assert.deepEqual(changed,b)
+    assert.equal(headers[0]['if-none-match'],undefined)
+    assert.equal(headers[1]['if-none-match'],'"a"');assert.equal(headers[2]['if-none-match'],'"a"')
+    await createVisaClient({token:'another-session'}).get('/database/records')
+    assert.equal(headers[3]['if-none-match'],undefined,'validators cannot cross sessions')
+  }finally{globalThis.fetch=original}
 })
 
 test('a stalled primary QC read exits loading with an error and permits a later refresh', async () => {
