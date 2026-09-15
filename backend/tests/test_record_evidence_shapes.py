@@ -151,7 +151,7 @@ def test_actual_loader_field_binding_recovers_recorded_route_and_table_quotes():
     result=evidence.for_record(row,ROUTE,g,p,{},active_override=active)
     assert result['processing_min_days'][0]['quote'].startswith('Within 03 working days')
     assert result['visa_fee_amount'][0]['quote']=='US$ 25/single-entry electronic visa'
-    assert result['validity_duration'][0]['quote']=='Single entry US$25; multiple entry US$50.'
+    assert result['validity_duration']==[], 'A recovered fee quotation cannot support visa validity'
     assert (row,g,p,active)==before
 
 
@@ -167,3 +167,37 @@ def test_actual_loader_binding_rejects_current_value_or_proof_drift():
     row,g,p,active=loaded_review_case()
     active['fields']['visa_products'][0]['validity']='180 days'
     assert not evidence.for_record(row,ROUTE,g,p,{},active_override=active)['validity_duration']
+
+
+def test_bound_product_container_cannot_borrow_a_siblings_validity_quote():
+    _,g,_=case()
+    g['visa_products']=[{'type':'Single-entry eVisa','entry':'single','validity':'3 months'},
+                       {'type':'Multiple-entry visa','entry':'multiple','validity':'5 years'}]
+    p={'field_provenance':{'visa_products':proof('Multiple-entry visa validity: 5 years.',
+        reviewed_value=deepcopy(g['visa_products']))}}
+    rows=tstation.records_for_route(ROUTE,g)
+    first=evidence.for_record(rows[0],ROUTE,g,p,{})
+    assert first['visa_type_name']==[] and first['validity_duration']==[] and first['validity_unit']==[]
+    assert evidence.for_record(rows[1],ROUTE,g,p,{})['validity_duration']
+
+
+def test_table_quote_value_must_belong_to_named_product_in_same_statement():
+    _,g,_=case()
+    g['visa_products']=[{'type':'Single entry','fee':{'amount':50,'currency':'USD'}},
+                       {'type':'Multiple entry','fee':{'amount':25,'currency':'USD'}}]
+    p={'field_provenance':{'visa_products':proof('Single entry US$25; multiple entry US$50.',
+        reviewed_value=deepcopy(g['visa_products']))}}
+    rows=tstation.records_for_route(ROUTE,g)
+    assert all(not evidence.for_record(r,ROUTE,g,p,{})['visa_fee_amount'] for r in rows)
+
+
+def test_container_qualifying_quote_keeps_its_own_url_and_verbatim_currency():
+    _,g,_=case()
+    g['visa_products']=[{'type':'Single entry','fee':{'amount':25,'currency':'USD'}},
+                       {'type':'Multiple entry','fee':{'amount':50,'currency':'USD'}}]
+    p={'field_provenance':{'visa_products':proof('Multiple entry US$50.',
+        reviewed_value=deepcopy(g['visa_products']),
+        supporting_evidence=[{'source_url':URL+'/single','quote':'Single entry US$25.'}])}}
+    rows=tstation.records_for_route(ROUTE,g)
+    result=evidence.for_record(rows[0],ROUTE,g,p,{})['visa_fee_amount']
+    assert [(item['source_url'],item['quote'])for item in result]==[(URL+'/single','Single entry US$25.')]

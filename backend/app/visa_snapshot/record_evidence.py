@@ -315,11 +315,32 @@ def for_record(row: dict, route: dict, guidance: dict, provenance: dict | None,
             return _owned(sources.get(field), route, None, field, value, checked=True)
         return []
 
-    def table_quotes():
+    def table_quotes(field, value):
         proof = parents.get('visa_products')
         if not isinstance(proof, dict) or 'reviewed_value' not in proof:
             return []
-        return _owned(proof, route, None, 'visa_products', guidance.get('visa_products'))
+        candidates = _owned(proof, route, None, 'visa_products', guidance.get('visa_products'))
+        # A review of the container establishes its version, not a quotation
+        # for every cell inside it. A fee-only excerpt cannot support validity;
+        # a sibling's five-year visa cannot support this product's three months.
+        # Field-owned proofs above retain their exact reviewed-value contract.
+        supported = []
+        for quote in candidates:
+            for statement in re.split(r'[\n;；]+|(?<=[.!?。！？])\s+', quote['quote']):
+                # Normalize a currency alias only for matching; always return
+                # the original verbatim passage and URL to the reviewer.
+                text = re.sub(r'\bUS\s*\$', 'USD ', statement)
+                explicit = {'quote': text}
+                if not _value_supported(field, value, explicit):
+                    continue
+                # Multiple products need a name in the same statement as the
+                # value. Otherwise "single 25; multiple 50" can certify the
+                # wrong sibling merely because 25 occurs somewhere in a table.
+                if len(products) > 1 and not _value_supported('type', product.get('type'), explicit):
+                    continue
+                supported.append(quote)
+                break
+        return supported
 
     for cell, (own_fields, parent_fields) in FIELDS.items():
         if cell == 'special_conditions':
@@ -358,7 +379,7 @@ def for_record(row: dict, route: dict, guidance: dict, provenance: dict | None,
                         if not matched and product.get('source_quote'):
                             legacy = {k: product[k] for k in ('source_url', 'source_quote', 'verified_at', 'verifier') if k in product}
                             matched = _owned(legacy, route, product, field, product[field])
-                        candidates.extend(matched or table_quotes())
+                        candidates.extend(matched or table_quotes(field, product[field]))
             elif not row.get('_separate_permission') and not any(field in own for field in own_fields):
                 candidates = [quote for field in parent_fields for quote in parent(field)]
         for quote in candidates:
