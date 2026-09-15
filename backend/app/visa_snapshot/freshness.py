@@ -936,7 +936,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
     all_sources = candidate_sources(guidance, source_override, limit=None)
     route_budget = ROUTE_BUDGET_SECONDS if budget_seconds is None else max(0.0, min(ROUTE_BUDGET_SECONDS, budget_seconds))
     deadline = time.monotonic() + route_budget
-    model_counts = {'model_comparisons': 0, 'model_comparisons_reused': 0}
+    model_counts = {'model_comparisons': 0, 'model_comparisons_reused': 0, 'model_comparisons_deferred': 0}
     all_sources, discovery = _discover_supplemental_sources(
         row, route, guidance, all_sources, deadline, should_stop)
     if discovery is not None:
@@ -979,6 +979,14 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
                 model_counts['model_comparisons'] += 1
                 answer = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False, sort_keys=True), timeout_seconds=remaining)
         except Exception as e:
+            from ..providers.refresh_budget import RefreshBudgetExceeded
+            if isinstance(e, RefreshBudgetExceeded):
+                model_counts['model_comparisons_deferred'] += 1
+                model_counts['model_comparisons'] -= 1
+                source_checks.append({'source_url': fr.final_url, 'outcome': 'cost_budget_exhausted',
+                    'at': when, 'source_read_at': fr.retrieved_at or when,
+                    'comparison_reused': False, 'provider_diagnostic': {'technical': 'refresh_cost_budget_exhausted'}})
+                return
             source_checks.append({'source_url': fr.final_url, 'outcome': 'provider_error', 'at': when,
                 'source_read_at': fr.retrieved_at or when, 'model_compared_at': compared_at,
                 'comparison_reused': False, 'provider_diagnostic': _provider_diagnostic(e)})
@@ -1154,7 +1162,8 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         elif time.monotonic() >= deadline:
             outcome = "budget_exhausted"
         else:
-            outcome = ("provider_error" if any(s["outcome"] == "provider_error" for s in source_checks)
+            outcome = ("cost_budget_exhausted" if model_counts["model_comparisons_deferred"] else
+                       "provider_error" if any(s["outcome"] == "provider_error" for s in source_checks)
                        else "validation_error" if any(s.get('validation_errors') for s in source_checks)
                        else "page_not_relevant" if tried else "fetch_failed")
         entry = {"at": when, "outcome": outcome, "sources": sources,
@@ -1365,7 +1374,7 @@ def recheck_row(db, row, *, today: str | None = None, budget_seconds: float | No
         check["verified_fields"] = [key for key in check.get("verified_fields", []) if key not in adjudicated]
     unverified_fields = sorted(substantive - verified_fields)
     unchecked_sources = [u for u in all_sources if u not in visited]
-    failed_sources = any(c["outcome"] in {"fetch_failed", "provider_error", "validation_error"} for c in source_checks)
+    failed_sources = any(c["outcome"] in {"fetch_failed", "provider_error", "validation_error", "cost_budget_exhausted"} for c in source_checks)
     missing_for_renewal = row.missing_fields
     from . import detail_jobs
     if detail_jobs.active_lease() is not None:

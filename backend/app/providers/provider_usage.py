@@ -221,6 +221,9 @@ def post(post_fn, url, *, headers, json: dict, timeout, operation="chat"):
     The caller keeps its original response/error handling. Retries each create
     an event because each is a separate provider attempt, possibly billable.
     """
+    from . import refresh_budget
+    budget = refresh_budget.active()
+    reservation = budget.reserve(json) if budget is not None else None
     started = time.monotonic()
     secrets = ()
     event = {
@@ -262,6 +265,9 @@ def post(post_fn, url, *, headers, json: dict, timeout, operation="chat"):
     finally:
         try:
             event["duration_ms"] = round((time.monotonic() - started) * 1000, 2)
+            if budget is not None:
+                event["refresh_budget_cycle"] = budget.cycle_id
+                budget.settle(reservation, event.get("usage"), event.get("response_model"))
             _emit(event)
         except Exception:
             pass  # Audit infrastructure must never replace the HTTP result/error.

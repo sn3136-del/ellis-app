@@ -32,7 +32,7 @@ _COUNTS = ("attempted", "read", "verified", "renewed", "partial", "corrected", "
            "unreadable", "skipped_pending", "deferred", "errors", "insufficient_evidence",
            "provider_failed", "no_official_source", "source_reads", "source_fetch_failures",
            "model_comparisons", "model_comparisons_reused", "provider_suspended",
-           "provider_rate_limited")
+           "provider_rate_limited", "model_comparisons_deferred")
 
 
 def _utc():
@@ -74,7 +74,7 @@ def _continuation(previous, now):
     finished_with_backlog = (state in {'complete', 'complete_with_errors'}
                              and _positive_backlog(previous))
     if state not in {'running', 'interrupted', 'failed', 'budget_exhausted', 'provider_suspended',
-                     'rate_limited'} \
+                     'rate_limited', 'cost_budget_exhausted'} \
             and not finished_with_backlog:
         return None
     if previous.get('schema_version') not in (2, 3):
@@ -119,7 +119,8 @@ def _remaining_cycle_rows(rows, cycle_started_at, now):
         check = check if isinstance(check, dict) else {}
         at = _timestamp(check.get('at'))
         if (at is None or at > now or at < cutoff or
-                (check.get('outcome') == 'cancelled' and at >= start)):
+                ((check.get('outcome') in {'cancelled', 'cost_budget_exhausted'} or
+                  check.get('model_comparisons_deferred', 0)) and at >= start)):
             remaining.append(row)
     return remaining
 
@@ -169,14 +170,14 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
         outcome = report.get("outcome")
         # Reading an official page and proving a route are distinct events.
         # Even an interrupted comparison can have completed real source reads.
-        for counter in ("source_reads", "source_fetch_failures", "model_comparisons", "model_comparisons_reused"):
+        for counter in ("source_reads", "source_fetch_failures", "model_comparisons", "model_comparisons_reused", "model_comparisons_deferred"):
             value = report.get(counter)
             delta[counter] = value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else 0
         delta["read"] = int(delta["source_reads"] > 0 or outcome == "checked")
         if outcome in ("detail_pending", "noncanonical"):
             delta["attempted"] = 0
             delta["skipped_pending"] = 1
-        elif outcome in ("cancelled", "budget_exhausted", "concurrent_change"):
+        elif outcome in ("cancelled", "budget_exhausted", "cost_budget_exhausted", "concurrent_change"):
             delta["deferred"] = 1
         elif outcome == "checked":
             check = freshness.effective_check(row.verification)
@@ -209,6 +210,8 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
             delta["provider_rate_limited"] = 1
             delta["provider_notice"] = ("AI provider rate limit persisted at the "
                                         f"{int(kimi_primary.RATE_GATE_MAX_SECONDS)} second cap")
+        if delta["model_comparisons_deferred"]:
+            delta["deferred"] = 1
         delta["corrected"] = int(bool(report.get("changed")))
         delta["disputed"] = int(bool(report.get("disputed") or report.get("generic_skipped")))
     except Exception as exc:
@@ -223,7 +226,13 @@ def _check_route(key: str, deadline: float, stop: threading.Event) -> dict:
     return delta
 
 
-def _run_workers(keys: list[str], deadline: float, stop: threading.Event, status: dict, save) -> set[str]:
+def _budgeted_check(key, deadline, stop, budget):
+    from app.providers.refresh_budget import bind
+    with bind(budget):
+        return _check_route(key, deadline, stop)
+
+
+def _run_workers(keys: list[str], deadline: float, stop: threading.Event, status: dict, save, budget=None) -> set[str]:
     """Bound both concurrency and submitted work; coordinator alone writes stats."""
     pending = {}
     cursor = 0
@@ -242,7 +251,7 @@ def _run_workers(keys: list[str], deadline: float, stop: threading.Event, status
             accepting = not stop.is_set()
             if accepting and cursor < len(keys) and len(pending) < WORKERS and now >= next_dispatch:
                 key = keys[cursor]
-                pending[executor.submit(_check_route, key, deadline, stop)] = key
+                pending[executor.submit(_budgeted_check, key, deadline, stop, budget)] = key
                 cursor += 1
                 status["scheduled"] = cursor
                 status["in_flight"] = len(pending)
@@ -281,7 +290,7 @@ def _run_workers(keys: list[str], deadline: float, stop: threading.Event, status
                     status["provider_suspended_at"] = _utc()
                     log.warning("sweep stopped: %s", status["provider_notice"])
                     stop.set()
-                if delta.get("attempted"):
+                if delta.get("attempted") and not delta.get("model_comparisons_deferred"):
                     attempted_keys.add(key)
                 if delta.get("last_error"):
                     status["last_error"] = delta["last_error"]
@@ -345,6 +354,14 @@ def main() -> int:
             "prior_cycle_scheduled": 0, "cycle_scheduled": 0}
         status.update({k:v for k,v in continuation.items() if k != 'remaining_seconds'} if continuation else {
             'cycle_started_at': status['started_at'], 'cycle_time_budget_seconds': MAX_SECONDS})
+        from app.providers import refresh_budget
+        try:
+            cost_budget = refresh_budget.open_cycle(path.with_suffix('.budget.sqlite3'),
+                prior_cycle=((previous or {}).get('cost_budget') or {}).get('cycle_id'),
+                legacy_started_at=(previous or {}).get('cycle_started_at') or (previous or {}).get('started_at'))
+        except Exception:
+            log.exception('cannot initialize durable refresh cost budget; no work dispatched')
+            return 1
         result = 0
         attempted_keys = set()
         checkpoint_failed = False
@@ -354,9 +371,10 @@ def main() -> int:
             status["cycle_scheduled"] = status["prior_cycle_scheduled"] + status["scheduled"]
             status["elapsed_seconds"] = round(time.monotonic() - started, 3)
             try:
+                status["cost_budget"] = cost_budget.snapshot()
                 _write_status(path, status)
                 return True
-            except OSError:
+            except (OSError, refresh_budget.RefreshBudgetExceeded, refresh_budget.sqlite3.Error):
                 checkpoint_failed = True
                 stop.set()
                 status['state'] = 'failed'
@@ -401,9 +419,10 @@ def main() -> int:
                 log.info('continuing cycle from %s with %.1f seconds of original budget remaining (%s)',
                          status['cycle_started_at'], budget,
                          continuation.get('continuation_reason') or 'stopped cycle')
-            attempted_keys = _run_workers(keys, deadline, stop, status, save)
+            attempted_keys = _run_workers(keys, deadline, stop, status, save, cost_budget)
             if status["state"] == "running":
                 status["state"] = ("interrupted" if stop.is_set() else
+                    "cost_budget_exhausted" if status["model_comparisons_deferred"] else
                     "complete_with_errors" if status["errors"] else "complete")
             if status["errors"] or status["state"] in {"failed", "interrupted", "provider_suspended", "rate_limited"}:
                 # A suspended provider exits non-zero on purpose: systemd

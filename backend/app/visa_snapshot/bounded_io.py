@@ -1,4 +1,5 @@
 """Hard deadlines for read-only I/O, with a fixed cap on unfinished calls."""
+from contextvars import copy_context
 from queue import Empty, Queue
 import threading
 import time
@@ -23,7 +24,8 @@ def call(fn, timeout_seconds: float, slots: threading.BoundedSemaphore):
             result.put((False, exc))
         finally:
             slots.release()
-    thread = threading.Thread(target=run, name='freshness-bounded-io', daemon=True)
+    context = copy_context()
+    thread = threading.Thread(target=lambda: context.run(run), name='freshness-bounded-io', daemon=True)
     try:
         thread.start()
     except BaseException:
