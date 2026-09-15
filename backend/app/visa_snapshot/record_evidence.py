@@ -156,6 +156,77 @@ def _owned(proof, route, product, field, value, *, checked=False):
     return quotes
 
 
+
+def _scheduled_policy_quotes(guidance, provenance, route):
+    """Adapt the validated policy's named excerpts to its exact current fields.
+
+    The schedule stores `stay`/`exemption`, not arbitrary field-name quotes.
+    Resolve its active registry row before attributing those excerpts; never
+    treat the policy's zero fee, filing aliases or retained conditions as
+    independently quoted facts.
+    """
+    from . import scheduled_policies as policies
+    metadata = guidance.get('scheduled_policy')
+    if not isinstance(metadata, dict) or provenance.get('scheduled_policy') != metadata:
+        return {}
+    selected = policies._date(route.get('arrival_date')) or policies._today()
+    identity = (route.get('passport_nationality'), route.get('destination_country'),
+                route.get('travel_purpose') or 'tourism',
+                route.get('travel_document_type') or 'ordinary_passport')
+    try:
+        candidates = [p for p in policies._load() if policies._key(p['route']) == identity
+                      and p['id'] == metadata.get('id')]
+    except policies.PolicyStoreUnavailable:
+        return {}
+    if len(candidates) != 1:
+        return {}
+    policy = candidates[0]
+    if any(not _same_value(guidance.get(field), policy['fields'][field])
+           for field in ('disposition', 'requirement_detail', 'visa_products')):
+        return {}
+    if metadata != policies._metadata(policy, selected):
+        return {}
+    start, end = policies._date(policy['effective_from']), policies._date(policy.get('effective_to'))
+    if selected < start or (end and selected > end):
+        return {}
+    proof_fields = provenance.get('field_provenance') or {}
+    evidence = policy['evidence']
+    keys = ['exemption', 'stay', 'nationality', 'document', 'effective_from']
+    if policy.get('effective_to'):
+        keys.append('effective_to')
+    quotes = [evidence['quotes'][key] for key in keys]
+    out = {}
+    for field in ('disposition', 'requirement_detail', 'visa_category',
+                  'permitted_stay', 'permitted_stay_days'):
+        proof = proof_fields.get(field)
+        if not isinstance(proof, dict) or not _same_value(guidance.get(field), policy['fields'][field]):
+            continue
+        if proof.get('status') not in (None, 'reviewed', 'verified') or any(
+                key in proof for key in ('verified_elements', 'retained_unverified_elements')):
+            continue
+        if 'reviewed_value' in proof and not _same_value(proof['reviewed_value'], guidance[field]):
+            continue
+        subject = proof.get('subject')
+        if subject is not None and (not isinstance(subject, dict)
+                or any(route.get(key) != value for key, value in subject.items())):
+            continue
+        expected = {'source_url': policy['source_url'], 'evidence_url': evidence['source_url'],
+                    'quotes': evidence['quotes'], 'verified_at': policy['verified_at'],
+                    'verifier': policy['verifier'], 'effective_from': policy['effective_from'],
+                    'effective_to': policy.get('effective_to')}
+        if any(proof.get(key) != value for key, value in expected.items()):
+            continue
+        # Only these fields were established by this validated exemption row.
+        # Each displayed excerpt links to the image/page it actually came from.
+        owned = dict(proof, source_url=evidence['source_url'], quote=quotes[0],
+                     quotes=quotes[1:], note='', status='reviewed',
+                     reviewed_value=guidance[field], subject={
+                         'passport_nationality': identity[0], 'destination_country': identity[1],
+                         'travel_purpose': identity[2], 'travel_document_type': identity[3]})
+        out[field] = _owned(owned, route, None, field, guidance[field])
+    return out
+
+
 def for_record(row: dict, route: dict, guidance: dict, provenance: dict | None,
                check: dict | None, *, active_override: dict | None = None) -> dict:
     """All contract fields are present; unrecorded provenance remains empty."""
@@ -189,6 +260,7 @@ def for_record(row: dict, route: dict, guidance: dict, provenance: dict | None,
                 and field in active_fields and active_proofs.get(field) == proof
                 and _same_value(active_fields[field], guidance.get(field))):
             parents[field] = dict(proof, reviewed_value=active_fields[field])
+    scheduled_quotes = _scheduled_policy_quotes(guidance, prov, route)
     checked = set(check.get('verified_fields') or []) - set(check.get('disputed_fields') or [])
     sources = check.get('field_sources') or {}
     sources = sources if isinstance(sources, dict) else {}
@@ -233,6 +305,7 @@ def for_record(row: dict, route: dict, guidance: dict, provenance: dict | None,
             return []
         if field in parents:
             return (_owned(parents[field], route, None, field, value)
+                    or scheduled_quotes.get(field, [])
                     or checked_after_empty_parent(parents[field], field))
         if field in (prov.get('fields') or []):
             quotes = _owned(prov, route, None, field, value)
